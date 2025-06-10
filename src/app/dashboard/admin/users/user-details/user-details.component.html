@@ -1,0 +1,112 @@
+<div class="bg-white border-b">
+  <div class="px-4 py-2">
+    <div class="flex items-center text-sm text-gray-500 mb-2">
+      <span class="cursor-pointer hover:text-gray-700" (click)="goBack()">Users</span>
+      <mat-icon class="mx-1 text-sm">chevron_right</mat-icon>
+      <span class="text-gray-700">User Details</span>
+    </div>
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-semibold">User Details</h1>
+      <button mat-stroked-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Users
+      </button>
+    </div>
+  </div>
+</div>
+
+@if (user.isLoading()) {
+  <div class="flex justify-center items-center min-h-[400px]">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+} @else if (user.hasValue()) {
+  <div class="p-4">
+    <div class="grid ">
+      <!-- User Details Card -->
+      <mat-card class="mat-elevation-z2 !bg-white">
+
+        <mat-card-content class="p-4">
+            
+         <h2 class="mb-3 text-2xl">User Information</h2>
+          <div class="flex flex-col space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="pb-2">
+                    <p class="text-sm text-gray-500">Full Name</p>
+                    <p class="font-medium">{{user.value()!.name}}</p>
+                  </div>
+                  <div class="pb-2">
+                    <p class="text-sm text-gray-500">Email</p>
+                    <p class="font-medium">{{user.value()!.email}}</p>
+                  </div>
+              <div class="pb-2">
+                <p class="text-sm text-gray-500">Role</p>
+                <p class="font-medium">{{user.value()!.role?.name}}</p>
+              </div>
+              <div class="pb-2">
+                <p class="text-sm text-gray-500">Company</p>
+                <p class="font-medium">{{user.value()!.company?.name}}</p>
+              </div>
+              <div class="pb-2">
+                <p class="text-sm text-gray-500">Department</p>
+                <p class="font-medium">{{user.value()!.department}}</p>
+              </div>
+              <div class="pb-2">
+                <p class="text-sm text-gray-500">Office</p>
+                <p class="font-medium">{{user.value()!.office}}</p>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Password Update Card -->
+      <!-- <mat-card class="mat-elevation-z2 !bg-white">
+        
+        <mat-card-content class="p-4">
+              <h2 class="mb-3 text-2xl">Update Password</h2>
+          <form [formGroup]="passwordForm" (ngSubmit)="updatePassword()" class="flex flex-col space-y-4">
+            <mat-form-field appearance="outline">
+              <mat-label>Current Password</mat-label>
+              <input matInput type="password" formControlName="currentPassword">
+              <mat-error *ngIf="passwordForm.get('currentPassword')?.hasError('required')">
+                Current password is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>New Password</mat-label>
+              <input matInput type="password" formControlName="newPassword">
+              <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('required')">
+                New password is required
+              </mat-error>
+              <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('minlength')">
+                Password must be at least 6 characters
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Confirm Password</mat-label>
+              <input matInput type="password" formControlName="confirmPassword">
+              <mat-error *ngIf="passwordForm.get('confirmPassword')?.hasError('required')">
+                Confirm password is required
+              </mat-error>
+              <mat-error *ngIf="passwordForm.hasError('mismatch')">
+                Passwords do not match
+              </mat-error>
+            </mat-form-field>
+
+            <button mat-flat-button color="primary" type="submit" [disabled]="!passwordForm.valid">
+              Update Password
+            </button>
+          </form>
+        </mat-card-content>
+      </mat-card> -->
+    </div>
+  </div>
+} @else if (user.error()) {
+  <div class="flex flex-col items-center justify-center min-h-[400px]">
+    <mat-icon class="text-6xl text-gray-500 mb-4">error_outline</mat-icon>
+    <p class="text-gray-500 mb-4">Failed to load user details. Please try again.</p>
+    <button mat-flat-button color="primary" (click)="user.reload()">Reload</button>
+  </div>
+}

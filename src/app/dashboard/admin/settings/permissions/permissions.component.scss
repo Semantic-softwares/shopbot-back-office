@@ -1,0 +1,30 @@
+.group-detail {
+  overflow: hidden;
+}
+
+.group-row {
+  cursor: pointer;
+  &:hover {
+    background: whitesmoke;
+  }
+}
+
+.detail-row {
+  height: 0;
+}
+
+.inner-table {
+  margin: 1rem;
+}
+
+tr.detail-row {
+  height: 0;
+}
+
+tr.group-row:not(.expanded-row):hover {
+  background: whitesmoke;
+}
+
+tr.group-row:not(.expanded-row):active {
+  background: #efefef;
+}

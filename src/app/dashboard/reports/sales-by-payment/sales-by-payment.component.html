@@ -1,0 +1,75 @@
+<div class="p-4 bg-gray-50 min-h-screen">
+  <!-- Header Section -->
+   <div class="bg-white p-4 rounded-lg shadow-sm mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+      <date-range-selector />
+      <div class="flex gap-4">
+        <app-employee-selector />
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-sm">
+    <div class="p-6 flex justify-between items-center border-b">
+      <h2 class="text-lg font-medium">Sales by Payment Type</h2>
+      <button mat-flat-button color="primary" (click)="exportData()">
+        <mat-icon class="mr-2">file_download</mat-icon>
+        Export Data
+      </button>
+    </div>
+    
+    @if (dataSource.hasValue()) {
+      <div class="p-6">
+        <mat-table [dataSource]="dataSource.value()" class="w-full !bg-white">
+          <ng-container matColumnDef="paymentType">
+            <mat-header-cell *matHeaderCellDef>Payment Type</mat-header-cell>
+            <mat-cell *matCellDef="let element">{{element.paymentType}}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="paymentTransactions">
+            <mat-header-cell *matHeaderCellDef>Payment Transactions</mat-header-cell>
+            <mat-cell *matCellDef="let element">{{element.paymentTransactions}}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="paymentAmount">
+            <mat-header-cell *matHeaderCellDef>Payment Amount</mat-header-cell>
+            <mat-cell *matCellDef="let element">{{element.paymentAmount | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="refundTransactions">
+            <mat-header-cell *matHeaderCellDef>Refund Transactions</mat-header-cell>
+            <mat-cell *matCellDef="let element">{{element.refundTransactions}}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="refundAmount">
+            <mat-header-cell *matHeaderCellDef>Refund Amount</mat-header-cell>
+            <mat-cell *matCellDef="let element">{{element.refundAmount | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="netAmount">
+            <mat-header-cell *matHeaderCellDef>Net Amount</mat-header-cell>
+            <mat-cell *matCellDef="let element">{{element.netAmount | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+        </mat-table>
+
+        <mat-paginator class="!bg-white"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="pageSizeOptions"
+          showFirstLastButtons
+          aria-label="Select page">
+        </mat-paginator>
+      </div>
+    } @else if (dataSource.isLoading()) {
+        <div class="flex items-center justify-center min-h-[300px]">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        }  @else {
+        <app-no-record icon="inventory_2" title="No Employee Data Found"
+            message="There are no employee sales data to display for the selected period.">
+        </app-no-record>
+        } 
+  </div>
+</div>

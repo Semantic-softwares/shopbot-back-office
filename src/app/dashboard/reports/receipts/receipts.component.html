@@ -1,0 +1,100 @@
+<div class="p-4 bg-gray-50 min-h-screen">
+  <!-- Header Section -->
+   <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-lg shadow-sm">
+        <date-range-selector />
+
+        <app-employee-selector />
+    </div>
+
+  <div class="bg-white rounded-lg shadow-sm">
+    <!-- Tabs Section -->
+    @if (dataSource.hasValue()) {
+        <nav mat-tab-nav-bar class="grid grid-cols-3" [tabPanel]="tabPanel">
+          @for (tab of tabStats ; track tab.value) {
+            <a mat-tab-link
+              (click)="onTabChange(tab.value)"
+              [active]="activeTab === tab.value"
+              class="!h-auto !min-h-[100px] !px-4 !py-4 border-b">
+              <div class="text-center">
+                <h3 class="text-gray-600 font-medium mb-1">{{tab.label}}</h3>
+                <p class="text-2xl font-semibold">{{tab.count}}</p>
+              </div>
+            </a>
+          }
+        </nav>
+        <mat-tab-nav-panel #tabPanel>
+
+          <!-- Search and Export Section -->
+          <div class="p-6 flex justify-between items-center border-b">
+            <!-- <mat-form-field appearance="outline" class="w-80">
+              <mat-label>Search receipts</mat-label>
+              <input matInput [formControl]="searchText" placeholder="Search by receipt number, customer...">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field> -->
+
+            <button mat-flat-button color="primary" (click)="exportData()">
+              <mat-icon class="mr-2">file_download</mat-icon>
+              Export Data
+            </button>
+          </div>
+      
+          
+     
+            <div class="p-6">
+              <mat-table [dataSource]="dataSource.value().orders" class="w-full !bg-white">
+                <ng-container matColumnDef="receiptNo">
+                  <mat-header-cell *matHeaderCellDef>Receipt no.</mat-header-cell>
+                  <mat-cell *matCellDef="let element">{{element.receiptNo}}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="date">
+                  <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+                  <mat-cell *matCellDef="let element">{{element.date}}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="orderedBy">
+                  <mat-header-cell *matHeaderCellDef>Ordered by</mat-header-cell>
+                  <mat-cell *matCellDef="let element">{{element.orderedBy.name}}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="category">
+                  <mat-header-cell *matHeaderCellDef>Customer</mat-header-cell>
+                  <mat-cell *matCellDef="let element">{{element.category}}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="type">
+                  <mat-header-cell *matHeaderCellDef>Payment Type</mat-header-cell>
+                  <mat-cell *matCellDef="let element">{{element.type}}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="ordertype">
+                  <mat-header-cell *matHeaderCellDef>Order Type</mat-header-cell>
+                  <mat-cell *matCellDef="let element">{{element.ordertype | titlecase}}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="total">
+                  <mat-header-cell *matHeaderCellDef>Total</mat-header-cell>
+                  <mat-cell *matCellDef="let element">{{element.total  | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+              </mat-table>
+
+              <mat-paginator class="!bg-white"
+                [pageSize]="pageSize"
+                [pageSizeOptions]="pageSizeOptions"
+                showFirstLastButtons
+                aria-label="Select page">
+              </mat-paginator>
+            </div>
+      
+        </mat-tab-nav-panel>
+    }  @else {
+       <div class="flex items-center justify-center min-h-[300px]">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+    } 
+      
+  </div>
+</div>

@@ -1,0 +1,65 @@
+<div class="p-4 bg-gray-50 min-h-screen">
+    <!-- Header Section -->
+    <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-lg shadow-sm">
+        <date-range-selector />
+
+        <app-employee-selector />
+    </div>
+
+
+    <div class="bg-white rounded-lg shadow-sm">
+        <div class="p-6 flex justify-between items-center border-b">
+            <h2 class="text-lg font-medium">Sales by Category</h2>
+            <button mat-flat-button color="primary" (click)="exportData()">
+                <mat-icon class="mr-2">file_download</mat-icon>
+                Export Data
+            </button>
+        </div>
+        @if (dataSource.hasValue()) {
+        <div class="p-6">
+            <mat-table [dataSource]="dataSource.value()!" class="w-full !bg-white">
+                <ng-container matColumnDef="category">
+                    <mat-header-cell *matHeaderCellDef>Category</mat-header-cell>
+                    <mat-cell *matCellDef="let element">{{element.category}}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="itemsSold">
+                    <mat-header-cell *matHeaderCellDef>Items Sold</mat-header-cell>
+                    <mat-cell *matCellDef="let element">{{element.itemsSold  }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="netSales">
+                    <mat-header-cell *matHeaderCellDef>Net Sales</mat-header-cell>
+                    <mat-cell *matCellDef="let element">{{element.netSales | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="costOfGoods">
+                    <mat-header-cell *matHeaderCellDef>Cost of Goods</mat-header-cell>
+                    <mat-cell *matCellDef="let element">{{element.costOfGoods | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="grossProfit">
+                    <mat-header-cell *matHeaderCellDef>Gross Profit</mat-header-cell>
+                    <mat-cell *matCellDef="let element">{{element.grossProfit | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+            </mat-table>
+
+            <mat-paginator class="!bg-white" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
+                showFirstLastButtons aria-label="Select page">
+            </mat-paginator>
+        </div>
+        } @else if (dataSource.isLoading()) {
+        <div class="flex items-center justify-center min-h-[300px]">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        }  @else {
+        <app-no-record icon="inventory_2" title="No Category Found"
+            message="There are no category to display for the selected period.">
+        </app-no-record>
+        } 
+    </div>
+
+</div>

@@ -1,0 +1,91 @@
+<mat-card class="mat-elevation-z2 !px-2 !bg-white">
+    <div class="p-4 flex justify-between items-center gap-4">
+      <mat-form-field appearance="outline" class="w-80">
+        <mat-label>Search surveys</mat-label>
+        <input matInput (input)="onSearch($event)" [value]="searchTerm()" placeholder="Search by name or description">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+  
+      <button mat-flat-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        Add Survey
+      </button>
+    </div>
+  
+    @if (surveys.isLoading()) {
+      <div class="flex justify-center items-center p-8">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    } @else if (surveys.hasValue()) {
+      <table mat-table [dataSource]="filteredSurveys()" class="w-full !bg-white">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let survey">{{survey.name}}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <td mat-cell *matCellDef="let survey">{{survey.description}}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="feedbackType">
+          <th mat-header-cell *matHeaderCellDef>Feedback Type</th>
+          <td mat-cell *matCellDef="let survey">{{survey.feedbackType}}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="touchPoint">
+          <th mat-header-cell *matHeaderCellDef>Touch Point</th>
+          <td mat-cell *matCellDef="let survey">{{survey.touchPoint.name}}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="channel">
+          <th mat-header-cell *matHeaderCellDef>Channel</th>
+          <td mat-cell *matCellDef="let survey">{{survey.channel.name}}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let survey">
+            <mat-slide-toggle
+              [checked]="survey.status"
+              (change)="onStatusToggle(survey, $event)"
+              [color]="'primary'">
+            </mat-slide-toggle>
+          </td>
+        </ng-container>
+  
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="w-20">Actions</th>
+          <td mat-cell *matCellDef="let survey">
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Survey actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="goToSurveyDetails(survey._id)" *hasPermission="'delete_survey'">
+                    <mat-icon>info</mat-icon>
+                    <span>Details</span>
+                  </button>
+              <button mat-menu-item (click)="editSurvey(survey)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item (click)="deleteSurvey(survey._id)" *hasPermission="'delete_survey'">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+  
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    } @else if (surveys.error()) {
+      <div class="flex flex-col items-center justify-center p-8">
+        <mat-icon class="text-6xl text-gray-500 mb-4">error_outline</mat-icon>
+        <p class="text-gray-500 mb-4">Failed to load surveys. Please try again.</p>
+        <button mat-flat-button color="primary" (click)="surveys.reload()">Reload</button>
+      </div>
+    }
+  </mat-card>
+  

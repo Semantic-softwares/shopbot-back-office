@@ -1,0 +1,42 @@
+<div class="min-h-screen bg-gray-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8 text-center" @fadeInUp>
+    <!-- Success Icon -->
+    <!-- <div class="success-animation mb-8">
+      <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+        <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+        <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+      </svg>
+    </div> -->
+
+    <!-- Success Message -->
+    <div class="space-y-4">
+      <h2 class="text-4xl font-extrabold text-gray-900">
+        Thank You!
+      </h2>
+      <p class="text-xl text-gray-600">
+        Your survey response has been successfully submitted.
+      </p>
+      <p class="text-gray-500">
+        Your feedback is valuable and helps us improve our services.
+      </p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="mt-8 space-y-4 sm:space-y-0 sm:space-x-4 flex flex-col sm:flex-row justify-center">
+      <button mat-raised-button
+              color="primary"
+              class="w-full sm:w-auto px-8 py-3"
+              (click)="startNewSurvey()">
+        <mat-icon>assignment</mat-icon>
+        <span class="ml-2">Take Another Survey</span>
+      </button>
+      
+      <button mat-stroked-button
+              class="w-full sm:w-auto px-8 py-3"
+              (click)="navigateHome()">
+        <mat-icon>home</mat-icon>
+        <span class="ml-2">Return Home</span>
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,12 @@
+:host {
+  display: block;
+}
+
+.mat-mdc-dialog-content {
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+mat-form-field {
+  width: 100%;
+}

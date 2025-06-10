@@ -1,0 +1,36 @@
+<h2 mat-dialog-title>Link to Corrective Action</h2>
+<mat-dialog-content>
+  @if (correctiveActions.isLoading()) {
+    <div class="spinner-container">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  }
+
+  <form [formGroup]="form">
+    @if (correctiveActions.value(); as actions) {
+      <mat-selection-list
+        #actionList
+        [formControl]="linkedCorrectiveControl"
+        [multiple]="false"
+      >
+        @for (action of actions; track action._id) {
+          <mat-list-option [value]="action._id">
+            {{action.title}}
+          </mat-list-option>
+        }
+      </mat-selection-list>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    [disabled]="!linkedCorrectiveControl.value"
+    (click)="linkAction(linkedCorrectiveControl.value)"
+  >
+    Link Action
+  </button>
+</mat-dialog-actions>

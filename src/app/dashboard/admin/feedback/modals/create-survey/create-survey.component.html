@@ -1,0 +1,70 @@
+<h2 mat-dialog-title>@if (data) {Edit} @else {Create} Survey</h2>
+<form [formGroup]="surveyForm" (ngSubmit)="onSubmit()">
+  <mat-dialog-content>
+    <mat-form-field class="w-full" appearance="outline">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name">
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="outline">
+      <mat-label>Touch Point</mat-label>
+      <mat-select formControlName="touchPoint">
+        @for (tp of touchPoints.value(); track tp._id) {
+          <mat-option [value]="tp._id">
+            {{tp.name}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="outline">
+      <mat-label>Channel</mat-label>
+      <mat-select formControlName="channel">
+        @for (ch of channels.value(); track ch._id) {
+          <mat-option [value]="ch._id">
+            {{ch.name}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="outline">
+      <mat-label>Feedback Types</mat-label>
+      <mat-select formControlName="feedbackType">
+        @for (item of feedback_types; track $index) {
+          <mat-option [value]="item">
+            {{item}}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="outline">
+      <mat-label>Start Date</mat-label>
+      <input matInput [matDatepicker]="startPicker" formControlName="startDate">
+      <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+      <mat-datepicker #startPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="outline">
+      <mat-label>End Date</mat-label>
+      <input matInput [matDatepicker]="endPicker" formControlName="endDate">
+      <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+      <mat-datepicker #endPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-slide-toggle formControlName="status">Enable or disable this survey</mat-slide-toggle>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="surveyForm.invalid">
+      @if (data) {Update} @else {Create}
+    </button>
+  </mat-dialog-actions>
+</form>

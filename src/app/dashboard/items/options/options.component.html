@@ -1,0 +1,86 @@
+<mat-card class="options-container !bg-white">
+  <mat-card-content class="!bg-white">
+    <div class="flex items-center space-x-4 p-4">
+      <div class="w-80">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Search</mat-label>
+          <input matInput (keyup)="applyFilter($event)" [(ngModel)]="searchText" placeholder="Search options">
+        </mat-form-field>
+      </div>
+
+      <div class="flex-shrink-0 ml-auto">
+        <button mat-raised-button color="primary" class="h-[48px] px-6 font-medium" (click)="openDialog()">
+          <mat-icon>add</mat-icon> ADD OPTION
+        </button>
+      </div>
+    </div>
+
+    @if (options.isLoading()) {
+      <div class="flex items-center justify-center min-h-[300px]">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    } @else if (options.error()) {
+      <app-no-record 
+        icon="error" 
+        title="Error" 
+        message="An error occurred while fetching options. Please try again later.">
+      </app-no-record>
+    } @else if (options.hasValue() && dataSource.data.length === 0) {
+      <app-no-record 
+        icon="list" 
+        title="No Options" 
+        message="No options found matching your criteria.">
+      </app-no-record>
+    } @else if (options.hasValue()) {
+      <div class="table-container !bg-white">
+        <table mat-table [dataSource]="dataSource" matSort class="!bg-white">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let element">{{element.name}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Price</th>
+          <td mat-cell *matCellDef="let element">{{element.price | currency: storeStore.selectedStore()?.currency}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="inStock">
+          <th mat-header-cell *matHeaderCellDef>In Stock</th>
+          <td mat-cell *matCellDef="let element">
+            <mat-slide-toggle
+              [checked]="element.inStock"
+              (change)="toggleInStock(element)"
+              color="primary">
+            </mat-slide-toggle>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="w-20">Actions</th>
+          <td mat-cell *matCellDef="let option">
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Option actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="editOption(option)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item (click)="deleteOption(option)">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of options" class="!bg-white">
+      </mat-paginator>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

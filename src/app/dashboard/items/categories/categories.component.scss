@@ -1,0 +1,32 @@
+.categories-container {
+  margin: 20px;
+  
+  .actions-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .filters {
+      display: flex;
+      gap: 16px;
+    }
+  }
+
+  .table-container {
+    width: 100%;
+    overflow: auto;
+    
+    table {
+      width: 100%;
+    }
+  }
+
+  .color-preview {
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    color: white;
+    text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  }
+}

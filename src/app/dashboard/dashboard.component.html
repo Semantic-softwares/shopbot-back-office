@@ -1,0 +1,72 @@
+<div class="dashboard-container">
+  <mat-toolbar class="flex justify-between mat-elevation-z8 shadow-md" color="primary">
+    <button mat-icon-button (click)="toggleSidenav()">
+      <mat-icon>menu</mat-icon>
+    </button>
+
+    <div>
+      <button mat-button [matMenuTriggerFor]="userMenu" class="flex items-center gap-2">
+        <mat-icon>arrow_drop_down</mat-icon>
+        <span>{{currentUser()?.name}}</span>
+      </button>
+      <mat-menu #userMenu="matMenu">
+        <button mat-menu-item (click)="goToProfile()">
+          <mat-icon>person</mat-icon>
+          <span>Profile</span>
+        </button>
+        <!-- <button mat-menu-item>
+          <mat-icon>settings</mat-icon>
+          <span>Settings</span>
+        </button> -->
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>Logout</span>
+        </button>
+      </mat-menu>
+    </div>
+  </mat-toolbar>
+
+  <mat-sidenav-container>
+    <mat-sidenav [mode]="isMobile() ? 'over' : 'side'" [opened]="opened()" class="!w-[20em] !rounded-[0px] px-2">
+      <div class="p-4 !rounded-none flex items-center gap-2">
+        <mat-icon class="text-blue-500">play_arrow</mat-icon>
+        <span class="text-xl font-semibold">Shopbot</span>
+      </div>
+      
+      <mat-nav-list>
+        <mat-accordion multi>
+          @for (link of navItems; track $index) {
+            <!-- link.name === 'Reports' -->
+            <mat-expansion-panel class="mat-elevation-z0" [expanded]="true">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <span class="flex items-center">
+                    {{link?.name}}
+                  </span>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              @for (item of link.children; track $index) {
+                <a mat-list-item 
+                   [routerLink]="item.link"
+                   routerLinkActive="active-link"
+                   #rla="routerLinkActive"
+                   [activated]="rla.isActive">
+                  <!-- *hasPermission="item.permission!" -->
+                  <mat-icon matListItemIcon class="material-icons-outlined">{{item.icon}}</mat-icon>
+                  <span matListItemTitle>{{item.label}}</span>
+                </a>
+              }
+            </mat-expansion-panel>
+          }
+        </mat-accordion>
+      </mat-nav-list>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <div class="p-4 bg-[#F9FAFB] h-screen">
+        <router-outlet></router-outlet>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

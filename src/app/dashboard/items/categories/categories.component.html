@@ -1,0 +1,83 @@
+<mat-card class="categories-container !bg-white">
+  <mat-card-content class="!bg-white">
+    <div class="actions-row">
+      <div class="filters">
+        <mat-form-field appearance="outline">
+          <mat-label>Search</mat-label>
+          <input matInput (keyup)="applyFilter($event)" [(ngModel)]="searchText" placeholder="Search categories">
+        </mat-form-field>
+      </div>
+
+      <div class="buttons">
+        <button mat-raised-button color="primary" (click)="addCategory()">+ ADD CATEGORY</button>
+      </div>
+    </div>
+    @if (categories.isLoading()) {
+      <div class="flex items-center justify-center min-h-[300px]">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    
+    } @else if (categories.hasValue() && categories.value().length === 0) {
+      <app-no-record 
+        icon="category" 
+        title="No Categories" 
+        message="No categories found matching your criteria.">
+      </app-no-record>
+    } @else if (categories.hasValue()) {
+      <div class="table-container !bg-white">
+        <table mat-table [dataSource]="dataSource" matSort class="!bg-white">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let element">{{element.name}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="color">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Color</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="color-preview" [style.background-color]="element.color">
+              {{element.color}}
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="icon">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Icon</th>
+          <td mat-cell *matCellDef="let element">
+            <mat-icon>{{element?.icon}}</mat-icon>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="items">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Items</th>
+          <td mat-cell *matCellDef="let element">{{element.items}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="w-20">Actions</th>
+          <td mat-cell *matCellDef="let category">
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Category actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="onEditCategory(category)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item (click)="deleteCategory(category)">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of categories" class="!bg-white">
+      </mat-paginator>
+    </div>
+  }
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,48 @@
+:host {
+  display: block;
+}
+
+::ng-deep {
+  .mat-mdc-tab-nav-bar {
+    height: auto !important;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .mat-mdc-tab-link {
+    height: auto !important;
+    min-height: 140px;
+    opacity: 1 !important;
+    border-right: 1px solid #e5e7eb;
+
+    &:last-child {
+      border-right: none;
+    }
+
+    &.mdc-tab--active {
+      background-color: #f8f9fa;
+    }
+  }
+
+  .mdc-tab-indicator {
+    display: none;
+  }
+
+  .mat-mdc-table {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .mat-mdc-row:last-child {
+    border-bottom: none;
+  }
+
+  .mat-mdc-header-row {
+    background-color: #f8f9fa;
+  }
+
+  .mat-mdc-paginator {
+    border-top: 1px solid #e5e7eb;
+    margin-top: 1rem;
+  }
+}

@@ -1,0 +1,57 @@
+<div class="p-6 max-w-2xl">
+  <h2 mat-dialog-title class="text-xl font-semibold mb-4">{{data ? 'Edit' : 'New'}} Corrective Action</h2>
+  
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="space-y-4">
+      <!-- Title -->
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Title</mat-label>
+        <input matInput formControlName="title">
+      </mat-form-field>
+
+      <!-- Details -->
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Details</mat-label>
+        <textarea matInput formControlName="details" rows="4"></textarea>
+      </mat-form-field>
+
+      <!-- Owner -->
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Owner</mat-label>
+        <mat-select formControlName="owner">
+          <mat-option *ngFor="let user of users.value()" [value]="user._id">
+             {{user.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- ETA -->
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>ETA</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="eta">
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Status -->
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status">
+          <mat-option value="Open">Open</mat-option>
+          <mat-option value="In Progress">In Progress</mat-option>
+          <mat-option value="Closed">Closed</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+      <button type="button" mat-button (click)="onCancel()">Cancel</button>
+      <button type="submit" 
+              mat-raised-button 
+              color="primary" 
+              [disabled]="form.invalid || isSubmitting()">
+        {{ isSubmitting() ? 'Submitting...' : 'Submit' }}
+      </button>
+    </div>
+  </form>
+</div>

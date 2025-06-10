@@ -1,0 +1,151 @@
+<div class="p-4 bg-gray-50 min-h-screen">
+  <!-- Header Section -->
+ <div class="bg-white p-4 rounded-lg shadow-sm mb-6">
+    <div class="flex justify-between items-center">
+      <date-range-selector />
+      <div class="flex gap-4">
+        <period-range-selector />
+        <app-employee-selector />
+      </div>
+    </div>
+  </div>
+
+  <!-- Skeleton Loading -->
+
+
+    <div class="bg-white rounded-lg shadow-sm">
+      @if (summaryData.isLoading()) {
+        <div class="bg-white rounded-lg shadow-sm">
+    <div class="grid grid-cols-5">
+      @for (item of [1,2,3,4,5]; track $index) {
+        <div class="!h-auto !min-h-[140px] !px-4 !py-6 border-b animate-pulse">
+          <div class="text-center">
+            <div class="h-4 bg-gray-200 rounded w-20 mx-auto mb-4"></div>
+            <div class="h-8 bg-gray-200 rounded w-28 mx-auto mb-2"></div>
+            <div class="h-3 bg-gray-200 rounded w-16 mx-auto"></div>
+          </div>
+        </div>
+      }
+    </div>
+  
+  </div>
+      } @else if (summaryData.hasValue()) {
+    <nav mat-tab-nav-bar class="grid grid-cols-5" [tabPanel]="tabPanel">
+      <a mat-tab-link *ngFor="let item of summaryItems"
+         (click)="onTabChange(item)"
+         [active]="activeLink === item"
+         class="!h-auto !min-h-[140px] !px-4 !py-6 border-b">
+        <div class="text-center">
+          <h3 class="text-gray-600 font-medium mb-2">{{item | titlecase}}</h3>
+          <p class="text-2xl font-semibold mb-1">{{summaryData.value()[item].value | currency: storeStore.selectedStore()?.currency}}</p>
+          <p class="text-sm text-gray-500">{{summaryData.value()[item].percentage | percent }}</p>
+        </div>
+      </a>
+    </nav>
+  }
+    <mat-tab-nav-panel #tabPanel>
+      <!-- Chart Section -->
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-medium">{{activeLink | titlecase}}</h3>
+        </div>
+        <div class="h-[300px]">
+          <canvas #salesChart></canvas>
+        </div>
+      </div>
+    </mat-tab-nav-panel>
+  </div>
+
+  
+@if (dataSource.isLoading()) {
+  <!-- Table Section - Skeleton Loading -->
+  <div class="bg-white rounded-lg shadow-sm mt-6">
+    <div class="p-6 flex justify-between items-center border-b">
+      <div class="h-6 bg-gray-200 rounded w-40 animate-pulse"></div>
+      <div class="h-9 bg-gray-200 rounded w-32 animate-pulse"></div>
+    </div>
+    
+    <div class="p-6">
+      <!-- Table Header Skeleton -->
+      <div class="flex border-b py-4">
+        @for (col of [1,2,3,4,5]; track $index) {
+          <div class="flex-1 h-5 bg-gray-200 rounded mx-2 animate-pulse"></div>
+        }
+      </div>
+      
+      <!-- Table Rows Skeleton -->
+      @for (row of [1,2,3,4,5]; track $index) {
+        <div class="flex py-4 border-b">
+          @for (col of [1,2,3,4,5]; track $index) {
+            <div class="flex-1 h-4 bg-gray-100 rounded mx-2 animate-pulse"></div>
+          }
+        </div>
+      }
+      
+      <!-- Paginator Skeleton -->
+      <div class="flex justify-end items-center mt-4">
+        <div class="h-8 bg-gray-200 rounded w-64 animate-pulse"></div>
+      </div>
+    </div>
+  </div>
+} @else if (dataSource.hasValue()) {
+  <div class="bg-white rounded-lg shadow-sm mt-6">
+    <div class="p-6 flex justify-between items-center border-b">
+      <h2 class="text-lg font-medium">Transaction Details</h2>
+      <button mat-flat-button color="primary" (click)="exportData()">
+        <mat-icon class="mr-2">file_download</mat-icon>
+        Export Data
+      </button>
+    </div>
+    
+    <div class="p-6">
+      <mat-table [dataSource]="dataSource.value()" class="w-full !bg-white">
+        <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
+          <mat-header-cell *matHeaderCellDef>{{column | titlecase}}</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            @switch (column) {
+              @case ('grossSales') {
+                {{element[column] | currency: storeStore.selectedStore()?.currency}}
+              }
+              @case ('refunds') {
+                {{element[column] | currency: storeStore.selectedStore()?.currency}}
+              }
+              @case ('discounts') {
+                {{element[column] | currency: storeStore.selectedStore()?.currency}}
+              }
+              @case ('taxes') {
+                {{element[column] | currency: storeStore.selectedStore()?.currency}}
+              }
+              @case ('costOfGoods') {
+                {{element[column] | currency: storeStore.selectedStore()?.currency}}
+              }
+              @case ('netSales') {
+                {{element[column] | currency: storeStore.selectedStore()?.currency}}
+              }
+              @case ('grossProfit') {
+                {{element[column] | currency: storeStore.selectedStore()?.currency}}
+              }
+              @case ('margin') {
+                {{element[column] | percent:'1.0-2'}}
+              }
+              @default {
+                {{element[column]}}
+              }
+            }
+          </mat-cell>
+        </ng-container>
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      </mat-table>
+
+      <mat-paginator class="!bg-white"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        showFirstLastButtons
+        aria-label="Select page">
+      </mat-paginator>
+    </div>
+  </div>
+}
+</div>
+

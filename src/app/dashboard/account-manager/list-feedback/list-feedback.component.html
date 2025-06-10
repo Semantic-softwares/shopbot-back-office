@@ -1,0 +1,141 @@
+<mat-card class="mat-elevation-z2 !px-2 !bg-white">
+    <div class="p-4 flex justify-between items-center gap-4">
+      <mat-form-field appearance="outline" class="w-80">
+        <mat-label>Search Feedback</mat-label>
+        <input matInput (input)="onSearch($event)" [value]="searchTerm()" placeholder="Search Feedback">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+  
+      <button mat-flat-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        Request Feedback
+      </button>
+    </div>
+  
+    @if (feedbacks.isLoading()) {
+      <div class="flex justify-center items-center p-8">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    } @else if (feedbacks.hasValue()) {
+      <table mat-table [dataSource]="filteredPreferences()" class="w-full !bg-white">
+
+        <ng-container matColumnDef="user">
+            <th mat-header-cell *matHeaderCellDef>Company</th>
+            <td mat-cell *matCellDef="let feedback">{{feedback?.user?.name}}</td>
+          </ng-container>
+
+        <ng-container matColumnDef="company">
+          <th mat-header-cell *matHeaderCellDef>Company</th>
+          <td mat-cell *matCellDef="let feedback">{{feedback?.company?.name}}</td>
+        </ng-container>
+
+  
+        
+        <ng-container matColumnDef="touchPoint">
+          <th mat-header-cell *matHeaderCellDef>Touch Point</th>
+          <td mat-cell *matCellDef="let feedback">{{feedback?.touchPoint?.name}}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="touchPointReference">
+          <th mat-header-cell *matHeaderCellDef>Touch Point Reference</th>
+          <td mat-cell *matCellDef="let feedback">{{feedback.touchPointReference}}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="survey">
+          <th mat-header-cell *matHeaderCellDef> Survey </th>
+          <td mat-cell *matCellDef="let feedback">{{feedback?.survey?.name ?? 'N/A'}}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="sent">
+          <th mat-header-cell *matHeaderCellDef>Sent</th>
+          <td mat-cell *matCellDef="let feedback">
+            <mat-chip-set>
+              <mat-chip [matTooltip]="!feedback.sent && feedback.reason ? feedback.reason : ''"
+                        [ngClass]="{
+                          'bg-green-100 !text-green-800': feedback.sent,
+                          'bg-red-100 !text-red-800': !feedback.sent
+                        }">
+               
+                {{feedback.sent ? 'Sent' : 'Not Sent'}}
+              </mat-chip>
+            </mat-chip-set>
+          
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let feedback">
+              <mat-chip-set>
+                <mat-chip >
+                 
+                  {{feedback.status | titlecase}}
+                </mat-chip>
+              </mat-chip-set>
+            
+            </td>
+          </ng-container>
+  
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="w-20">Actions</th>
+          <td mat-cell *matCellDef="let feedback">
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Preference actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+                @if (feedback.survey ) {
+                    <button mat-menu-item [disabled]="feedback.status === 'PENDING'" [routerLink]="['../feedback', 'survey', feedback.survey._id, 'user', feedback.user._id]">
+                        <mat-icon>visibility</mat-icon>
+                        <span>View Responses</span>
+                    </button>
+                }
+
+              @if (feedback.status === 'RESPONDED') {
+                <button mat-menu-item (click)="reviewFeedback(feedback._id)">
+                  <mat-icon>rate_review</mat-icon>
+                  <span>Review Feedback</span>
+                </button>
+              }
+
+              @if (feedback.status === 'REVIEWED') {
+                <button mat-menu-item (click)="createCorrectiveAction(feedback._id)">
+                  <mat-icon>add_task</mat-icon>
+                  <span>Create Corrective Action</span>
+                </button>
+
+                <button mat-menu-item (click)="linkToCorrectiveAction(feedback._id)">
+                  <mat-icon>link</mat-icon>
+                  <span>Link to Corrective Action</span>
+                </button>
+
+                <button mat-menu-item (click)="archiveFeedback(feedback._id)">
+                  <mat-icon>archive</mat-icon>
+                  <span>Archive Feedback</span>
+                </button>
+              }
+              @if (feedback.status === 'CA COMPLETED' || feedback.status === 'CA Completed') {
+                <button mat-menu-item (click)="archiveFeedback(feedback._id)">
+                  <mat-icon>archive</mat-icon>
+                  <span>Archive Feedback</span>
+                </button>
+              }
+              
+              <button mat-menu-item (click)="deletePreference(feedback._id)" *hasPermission="'delete_feedback'">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+  
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    } @else if (feedbacks.error()) {
+      <div class="flex flex-col items-center justify-center p-8">
+        <mat-icon class="text-6xl text-gray-500 mb-4">error_outline</mat-icon>
+        <p class="text-gray-500 mb-4">Failed to load feedbacks. Please try again.</p>
+        <button mat-flat-button color="primary" (click)="feedbacks.reload()">Reload</button>
+      </div>
+    }
+  </mat-card>

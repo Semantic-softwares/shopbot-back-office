@@ -1,0 +1,88 @@
+<div class="p-6">
+  <h2 mat-dialog-title class="text-xl font-bold mb-4">
+    {{ isEdit ? 'Edit Employee' : 'Create New Employee' }}
+  </h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="space-y-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" placeholder="Enter employee name">
+        <mat-error *ngIf="form.get('name')?.hasError('required')">
+          Name is required
+        </mat-error>
+      </mat-form-field>
+
+      <div class="grid grid-cols-2 gap-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Gender</mat-label>
+          <mat-select formControlName="gender">
+            @for (gender of genders; track gender) {
+              <mat-option [value]="gender">{{gender}}</mat-option>
+            }
+          </mat-select>
+          <mat-error *ngIf="form.get('gender')?.hasError('required')">
+            Gender is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Role</mat-label>
+          <mat-select formControlName="role" >
+            @for (role of roles; track role) {
+              <mat-option [value]="role">{{role}}</mat-option>
+            }
+          </mat-select>
+          <mat-error *ngIf="form.get('role')?.hasError('required')">
+            Role is required
+          </mat-error>
+          @if (isRoleDisabled()) {
+            <mat-hint>Role cannot be changed for owners</mat-hint>
+          }
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email" placeholder="Enter email address">
+        <mat-error *ngIf="form.get('email')?.hasError('required')">
+          Email is required
+        </mat-error>
+        <mat-error *ngIf="form.get('email')?.hasError('email')">
+          Please enter a valid email address
+        </mat-error>
+      </mat-form-field>
+
+      <div class="grid grid-cols-2 gap-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Phone Number</mat-label>
+          <input matInput formControlName="phoneNumber" placeholder="Enter phone number">
+          <mat-error *ngIf="form.get('phoneNumber')?.hasError('required')">
+            Phone number is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>PIN</mat-label>
+          <input matInput formControlName="pin" type="password" maxlength="4" placeholder="Enter 4-digit PIN">
+          <mat-error *ngIf="form.get('pin')?.hasError('required')">
+            PIN is required
+          </mat-error>
+          <mat-error *ngIf="form.get('pin')?.hasError('minlength') || form.get('pin')?.hasError('maxlength')">
+            PIN must be exactly 4 digits
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="flex justify-end space-x-2 mt-6 pt-4 border-t border-gray-200">
+      <button mat-button type="button" [disabled]="isSubmitting()" (click)="onCancel()">Cancel</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="!form.valid || isSubmitting()">
+        @if (isSubmitting()) {
+          <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+        }
+        {{isEdit ? 'Update' : 'Create'}}
+      </button>
+    </div>
+  </form>
+</div>

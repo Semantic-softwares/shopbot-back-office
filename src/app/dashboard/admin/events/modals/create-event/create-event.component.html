@@ -1,0 +1,43 @@
+<h2 mat-dialog-title>{{data.event ? 'Edit' : 'Add'}} Event</h2>
+<mat-dialog-content>
+  <form [formGroup]="eventForm" class="flex flex-col gap-4">
+    <mat-form-field appearance="outline">
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" placeholder="Enter event title">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Date</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="date">
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="type">
+        <mat-option value="Meeting">Meeting</mat-option>
+        <mat-option value="Call">Call</mat-option>
+        <mat-option value="Workshop">Workshop</mat-option>
+        <mat-option value="Review">Review</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Client</mat-label>
+      <input matInput formControlName="client" placeholder="Enter client name">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Company</mat-label>
+      <input matInput formControlName="company" placeholder="Enter company name">
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="!eventForm.valid">
+    {{data.event ? 'Update' : 'Create'}}
+  </button>
+</mat-dialog-actions>

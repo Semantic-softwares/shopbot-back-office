@@ -1,0 +1,81 @@
+<div class="p-6">
+  <h2 mat-dialog-title class="text-xl font-semibold mb-4">{{modalTitle}}</h2>
+
+  <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+    <div mat-dialog-content class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Name Field -->
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" placeholder="Enter name">
+        <mat-error>{{getErrorMessage('name')}}</mat-error>
+      </mat-form-field>
+
+      <!-- Email Field -->
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" placeholder="Enter email">
+        <mat-error>{{getErrorMessage('email')}}</mat-error>
+      </mat-form-field>
+
+      <!-- Role Field -->
+      
+        <mat-form-field appearance="outline">
+          <mat-label>Role</mat-label>
+          <mat-select formControlName="role">
+            @for (role of roles.value(); track $index) {
+              <mat-option [value]="role._id">{{role.name}}</mat-option>
+            }
+          </mat-select>
+          <mat-error>{{getErrorMessage('role')}}</mat-error>
+        </mat-form-field>
+       
+    
+
+      <!-- Company Field -->
+      <mat-form-field appearance="outline">
+        <mat-label>Company</mat-label>
+        <mat-select formControlName="company">
+          @for (company of companies.value(); track $index) {
+            <mat-option [value]="company._id">{{company.name}}</mat-option>
+          }
+        </mat-select>
+        <mat-error>{{getErrorMessage('company')}}</mat-error>
+      </mat-form-field>
+
+      <!-- Department Field -->
+      <mat-form-field appearance="outline">
+        <mat-label>Department</mat-label>
+        <input matInput formControlName="department" placeholder="Enter department">
+        <mat-error>{{getErrorMessage('department')}}</mat-error>
+      </mat-form-field>
+
+      <!-- Office Field -->
+      <mat-form-field appearance="outline">
+        <mat-label>Office</mat-label>
+        <input matInput formControlName="office" placeholder="Enter office">
+        <mat-error>{{getErrorMessage('office')}}</mat-error>
+      </mat-form-field>
+
+      @if (!isEditMode()) {
+        <!-- Password Field -->
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" placeholder="Enter password" type="password">
+          <mat-error>{{getErrorMessage('password')}}</mat-error>
+        </mat-form-field>
+      }
+
+      
+    
+    </div>
+
+    <div mat-dialog-actions class="flex justify-end gap-2">
+      <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="isLoading()">
+        {{isLoading() ? 'Saving...' : (isEditMode() ? 'Update' : 'Create')}}
+      </button>
+    </div>
+ 
+   
+  </form>
+</div>

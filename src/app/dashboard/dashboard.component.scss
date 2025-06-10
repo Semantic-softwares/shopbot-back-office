@@ -1,0 +1,51 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+mat-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+mat-sidenav-container {
+  flex: 1;
+  height: 100%;
+}
+
+mat-sidenav {
+  box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+}
+
+.mat-expansion-panel-spacing {
+  margin: 0px 0px;
+}
+
+.mat-expansion-panel-body {
+  padding: 0 24px 0px;
+}
+
+.mat-sidenav-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+}
+
+.active-link {
+  background: rgba(0, 0, 0, 0.04);
+  color: #1976d2;
+  
+  mat-icon {
+    color: #1976d2;
+  }
+}

@@ -1,0 +1,91 @@
+<mat-card class="employees-container !bg-white">
+  <mat-card-content class="!bg-white">
+    <div class="flex flex-col md:flex-row justify-between gap-4 p-4">
+      <div class="flex flex-col sm:flex-row gap-4 flex-grow">
+        <mat-form-field appearance="outline" class="w-full sm:w-48 md:w-72 lg:w-96">
+          <mat-label>Search</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput (keyup)="applyFilter($event)" [(ngModel)]="searchText" placeholder="Search employees">
+        </mat-form-field>
+      </div>
+
+      <div class="flex gap-3 justify-end">
+        <button mat-raised-button color="primary" (click)="openDialog()">
+          <mat-icon>add</mat-icon> ADD EMPLOYEE
+        </button>
+      </div>
+    </div>
+
+    @if (employees.isLoading()) {
+      <div class="flex items-center justify-center min-h-[300px]">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    } @else if (employees.hasValue() && dataSource.data.length === 0) {
+      <app-no-record 
+        icon="people" 
+        title="No Employees"
+        message="No employees found matching your criteria.">
+      </app-no-record>
+    } @else if (employees.error()) {
+      <app-no-record 
+        icon="error" 
+        title="Error"
+        message="An error occurred while fetching employees. Please try again later.">
+      </app-no-record>
+    } @else if (employees.hasValue()) {
+      <div class="table-container !bg-white">
+        <table mat-table [dataSource]="dataSource" matSort class="!bg-white">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+            <td mat-cell *matCellDef="let element">{{element.name}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="gender">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Gender</th>
+            <td mat-cell *matCellDef="let element">{{element.gender}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+            <td mat-cell *matCellDef="let element">{{element.email}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="phoneNumber">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Phone</th>
+            <td mat-cell *matCellDef="let element">{{element.phoneNumber}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="role">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
+            <td mat-cell *matCellDef="let element">{{element.role}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let element">
+              <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Employee actions">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="editEmployee(element)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                <button mat-menu-item (click)="deleteEmployee(element)">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of employees" class="!bg-white">
+        </mat-paginator>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

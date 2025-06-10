@@ -1,0 +1,60 @@
+<div class="p-6 max-w-2xl">
+  <h2 mat-dialog-title class="text-xl font-semibold mb-4">Create New Feedback</h2>
+  
+  <form [formGroup]="feedbackForm" (ngSubmit)="onSubmit()">
+    <div class="space-y-4">
+      <!-- Company Selection -->
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Company</mat-label>
+        <mat-select formControlName="company" (selectionChange)="onCompanyChange($event.value)">
+          @for (company of companies(); track company._id) {
+            <mat-option [value]="company._id">{{company.name}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <!-- User Selection -->
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>User</mat-label>
+        <mat-select formControlName="user">
+          @for (user of users.value(); track user._id) {
+            <mat-option [value]="user._id">{{user.name}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Touch Point Selection -->
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Touch Point</mat-label>
+        <mat-select formControlName="touchPoint">
+          @for (touchPoint of touchPoints(); track touchPoint._id) {
+            <mat-option [value]="touchPoint._id">{{touchPoint.name}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Touch Point Reference -->
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Touch Point Reference</mat-label>
+        <input matInput formControlName="touchPointReference">
+      </mat-form-field>
+
+      <!-- Touch Point Details -->
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Touch Point Details</mat-label>
+        <textarea matInput formControlName="touchPointDetails" rows="3"></textarea>
+      </mat-form-field>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+      <button type="button" mat-button (click)="onCancel()">Cancel</button>
+      <button type="submit" 
+              mat-raised-button 
+              color="primary" 
+              [disabled]="feedbackForm.invalid || isSubmitting()">
+        {{ isSubmitting() ? 'Submitting...' : 'Submit' }}
+      </button>
+    </div>
+
+  </form>
+</div>

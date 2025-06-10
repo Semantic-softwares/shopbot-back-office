@@ -1,0 +1,43 @@
+<div class="flex flex-col items-center space-y-6 p-4">
+  <div class="flex space-x-2">
+    @for (star of [].constructor(question.ratingScale); track $index) {
+      <button 
+        type="button"
+        (click)="handleRating($index + 1)"
+        (mouseenter)="hoverRating = $index + 1"
+        (mouseleave)="hoverRating = control.value || 0"
+        class="transform transition-all duration-200 hover:scale-110 focus:outline-none">
+        <svg 
+          class="w-14 h-14" 
+          [ngClass]="{
+            'text-yellow-400 fill-current': ($index < (hoverRating || control.value!)),
+            'text-gray-300': ($index >= (hoverRating || control.value!))
+          }"
+          xmlns="http://www.w3.org/2000/svg" 
+          viewBox="0 0 24 24">
+          <path 
+            class="transition-all duration-200"
+            [ngClass]="{
+              'filter drop-shadow-lg': $index < (hoverRating || control.value!)
+            }"
+            d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" 
+          />
+        </svg>
+      </button>
+    }
+  </div>
+  <div class="text-lg font-medium" 
+       [ngClass]="{
+         'text-yellow-500': control.value! > 0,
+         'text-gray-500': !control.value
+       }">
+    @switch (control.value) {
+      @case (0) { Select your rating }
+      @case (1) { Poor }
+      @case (2) { Fair }
+      @case (3) { Good }
+      @case (4) { Very Good }
+      @case (5) { Excellent }
+    }
+  </div>
+</div>

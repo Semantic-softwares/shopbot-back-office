@@ -1,0 +1,69 @@
+<div class="p-6">
+  <h1 mat-dialog-title class="text-xl font-semibold mb-4">Create New Permission</h1>
+  
+  <div mat-dialog-content>
+    <form [formGroup]="form" class="grid gap-4">
+      <!-- Name field in its own row -->
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" placeholder="Enter permission name">
+        @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+          <mat-error>Name is required</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Category selection and button in their own row -->
+      <div class="space-y-2">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Category</mat-label>
+          <mat-select formControlName="categoryId">
+            @for (category of categories.value(); track category._id) {
+              <mat-option [value]="category._id">{{ category.name }}</mat-option>
+            }
+          </mat-select>
+          @if (form.get('categoryId')?.hasError('required') && form.get('categoryId')?.touched) {
+            <mat-error>Category is required</mat-error>
+          }
+        </mat-form-field>
+        <button mat-button color="primary" type="button" (click)="onCreateCategory()">
+          <mat-icon>add</mat-icon> Create New Category
+        </button>
+      </div>
+
+      <!-- Description field -->
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="3" placeholder="Enter description"></textarea>
+      </mat-form-field>
+
+      <!-- Action and Resource fields -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Action</mat-label>
+          <input matInput formControlName="action" placeholder="Enter action">
+          @if (form.get('action')?.hasError('required') && form.get('action')?.touched) {
+            <mat-error>Action is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Resource</mat-label>
+          <input matInput formControlName="resource" placeholder="Enter resource">
+          @if (form.get('resource')?.hasError('required') && form.get('resource')?.touched) {
+            <mat-error>Resource is required</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </form>
+  </div>
+
+  <div mat-dialog-actions class="flex justify-end gap-2 mt-4">
+    <button mat-stroked-button (click)="onCancel()">Cancel</button>
+    <button mat-flat-button 
+            color="primary" 
+            (click)="onSave()" 
+            [disabled]="form.invalid || isLoading()">
+      {{isLoading() ? 'Loading...' : 'Save'}}
+    </button>
+  </div>
+</div>
