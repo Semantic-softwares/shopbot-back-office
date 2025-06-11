@@ -23,7 +23,7 @@ import { QueryParamService } from '../../services/query-param.service';
     FormsModule,
   ],
   template: `
-    <mat-form-field appearance="outline" class="w-32">
+    <mat-form-field appearance="outline" class="w-full">
       <mat-label>Period</mat-label>
       <mat-select [(value)]="selectedPeriod" (selectionChange)="onSelectionChange($event.value)">
         <mat-option *ngFor="let period of periods" [value]="period">

@@ -7,7 +7,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
-import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { Router } from '@angular/router';
 import { MatMenuModule } from '@angular/material/menu';
@@ -15,7 +14,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { tap } from 'rxjs';
 import { ProductService } from '../../../shared/services/product.service';
 import { StoreStore } from '../../../shared/stores/store.store';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -24,8 +22,6 @@ import { Product } from '../../../shared/models';
 import { CategoryService } from '../../../shared/services/category.service';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
-
 
 @Component({
   selector: 'app-products',
@@ -72,19 +68,20 @@ export class ProductsComponent {
   ];
 
   public dataSource = rxResource({
-    request: () => ({
+    params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
     }),
-    loader: ({ request }) =>
-      this.productService.getStoreProducts(request.storeId!)
+    stream: ({ params }) =>
+      this.productService.getStoreProducts(params.storeId!)
   });
 
-    public categories = rxResource({
-    request: () => ({
+ 
+  public categories = rxResource({
+    params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
     }),
-    loader: ({ request }) =>
-      this.categoryService.getStoreMenus(request.storeId!)
+    stream: ({ params }) =>
+      this.categoryService.getStoreMenus(params.storeId!)
   });
 
     public filteredProducts = computed(() => {

@@ -12,13 +12,31 @@
   <div class="bg-white rounded-lg shadow-sm">
     <div class="p-6 flex justify-between items-center border-b">
       <h2 class="text-lg font-medium">Sales by Payment Type</h2>
-      <button mat-flat-button color="primary" (click)="exportData()">
+      <button mat-flat-button color="primary" [matMenuTriggerFor]="exportMenu">
         <mat-icon class="mr-2">file_download</mat-icon>
         Export Data
       </button>
+      <mat-menu #exportMenu="matMenu">
+        <button mat-menu-item (click)="exportData('pdf')">
+          <mat-icon>picture_as_pdf</mat-icon>
+          <span>Export as PDF</span>
+        </button>
+        <button mat-menu-item (click)="exportData('csv')">
+          <mat-icon>description</mat-icon>
+          <span>Export as CSV</span>
+        </button>
+        <button mat-menu-item (click)="exportData('excel')">
+          <mat-icon>table_chart</mat-icon>
+          <span>Export as Excel</span>
+        </button>
+      </mat-menu>
     </div>
     
-    @if (dataSource.hasValue()) {
+    @if (dataSource.isLoading()) {
+      <div class="flex items-center justify-center min-h-[300px]">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    } @else if (dataSource.hasValue()) {
       <div class="p-6">
         <mat-table [dataSource]="dataSource.value()" class="w-full !bg-white">
           <ng-container matColumnDef="paymentType">
@@ -54,19 +72,8 @@
           <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
           <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
         </mat-table>
-
-        <mat-paginator class="!bg-white"
-          [pageSize]="pageSize"
-          [pageSizeOptions]="pageSizeOptions"
-          showFirstLastButtons
-          aria-label="Select page">
-        </mat-paginator>
       </div>
-    } @else if (dataSource.isLoading()) {
-        <div class="flex items-center justify-center min-h-[300px]">
-          <mat-spinner diameter="40"></mat-spinner>
-        </div>
-        }  @else {
+    } @else {
         <app-no-record icon="inventory_2" title="No Employee Data Found"
             message="There are no employee sales data to display for the selected period.">
         </app-no-record>

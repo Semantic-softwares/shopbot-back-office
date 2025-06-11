@@ -10,15 +10,15 @@
         <span>{{currentUser()?.name}}</span>
       </button>
       <mat-menu #userMenu="matMenu">
-        <button mat-menu-item (click)="goToProfile()">
+        <!-- <button mat-menu-item (click)="goToProfile()">
           <mat-icon>person</mat-icon>
           <span>Profile</span>
-        </button>
+        </button> -->
         <!-- <button mat-menu-item>
           <mat-icon>settings</mat-icon>
           <span>Settings</span>
         </button> -->
-        <mat-divider></mat-divider>
+        <!-- <mat-divider></mat-divider> -->
         <button mat-menu-item (click)="logout()">
           <mat-icon>logout</mat-icon>
           <span>Logout</span>
@@ -29,35 +29,55 @@
 
   <mat-sidenav-container>
     <mat-sidenav [mode]="isMobile() ? 'over' : 'side'" [opened]="opened()" class="!w-[20em] !rounded-[0px] px-2">
-      <div class="p-4 !rounded-none flex items-center gap-2">
-        <mat-icon class="text-blue-500">play_arrow</mat-icon>
-        <span class="text-xl font-semibold">Shopbot</span>
-      </div>
-      
+      <mat-list>
+        <mat-list-item>
+          @if (storeStore.selectedStore()?.logo) {
+            <a matListItemIcon class="block !mr-6" [routerLink]="['store-settings']">
+            <img [routerLink]="['store-settings']" [src]="storeStore.selectedStore()?.logo" class="!w-full !min-w-10 !mr-5 !max-w-100 h-10 rounded-full object-cover">
+            </a>
+          } @else {
+            <a matListItemIcon class="block">
+              <mat-icon>store</mat-icon>
+            </a>
+          }
+            
+          <h2 matListItemTitle [routerLink]="['store-settings']">{{currentUser()?.role }}</h2>
+          <div matListItemLine [routerLink]="['store-settings']">{{storeStore.selectedStore()?.name}}</div>
+          <a matListItemMeta mat-icon-button class="block" [matMenuTriggerFor]="menu">
+            <mat-icon>keyboard_arrow_down</mat-icon>
+          </a>
+         
+        </mat-list-item>
+        <mat-divider></mat-divider>
+      </mat-list>
+      <mat-menu #menu="matMenu">
+        @for (store of storeStore.stores(); track $index) {
+          <button mat-menu-item (click)="selectStore(store)" [disabled]="store._id === storeStore.selectedStore()?._id"> {{store.name}}</button>
+        }
+        <!-- <button mat-menu-item><mat-icon>add</mat-icon> Add a new Store</button> -->
+      </mat-menu>
+
       <mat-nav-list>
         <mat-accordion multi>
           @for (link of navItems; track $index) {
-            <!-- link.name === 'Reports' -->
-            <mat-expansion-panel class="mat-elevation-z0" [expanded]="true">
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  <span class="flex items-center">
-                    {{link?.name}}
-                  </span>
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-              @for (item of link.children; track $index) {
-                <a mat-list-item 
-                   [routerLink]="item.link"
-                   routerLinkActive="active-link"
-                   #rla="routerLinkActive"
-                   [activated]="rla.isActive">
-                  <!-- *hasPermission="item.permission!" -->
-                  <mat-icon matListItemIcon class="material-icons-outlined">{{item.icon}}</mat-icon>
-                  <span matListItemTitle>{{item.label}}</span>
-                </a>
-              }
-            </mat-expansion-panel>
+          <!-- link.name === 'Reports' -->
+          <mat-expansion-panel class="mat-elevation-z0" [expanded]="true">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <span class="flex items-center">
+                  {{link?.name}}
+                </span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            @for (item of link.children; track $index) {
+            <a mat-list-item [routerLink]="item.link" routerLinkActive="active-link" #rla="routerLinkActive"
+              [activated]="rla.isActive">
+              <!-- *hasPermission="item.permission!" -->
+              <mat-icon matListItemIcon class="material-icons-outlined">{{item.icon}}</mat-icon>
+              <span matListItemTitle>{{item.label}}</span>
+            </a>
+            }
+          </mat-expansion-panel>
           }
         </mat-accordion>
       </mat-nav-list>

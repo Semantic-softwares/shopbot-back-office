@@ -1,4 +1,4 @@
-import { Component, ViewChild, OnInit, inject } from '@angular/core';
+import { Component, ViewChild, OnInit, inject, resource } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
@@ -57,11 +57,9 @@ export class EmployeeListComponent {
   @ViewChild(MatSort) sort!: MatSort;
 
   public employees = rxResource({
-    request: () => ({
-      storeId: this.storeStore.selectedStore()?._id,
-    }),
-    loader: ({ request }) =>
-      this.userService.getStoreMerchants(request.storeId!).pipe(
+    params: () => ({ storeId: this.storeStore.selectedStore()?._id }),
+    stream: ({ params }) =>
+      this.userService.getStoreMerchants(params.storeId!).pipe(
         tap((employees) => {
           this.dataSource = new MatTableDataSource(employees);
           this.dataSource.paginator = this.paginator;
@@ -70,8 +68,6 @@ export class EmployeeListComponent {
       ),
   });
 
-
- 
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;

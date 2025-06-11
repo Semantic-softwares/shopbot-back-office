@@ -22,6 +22,12 @@ export class StoreService {
     return this._httpClient.get<any[]>(`${this.hostServer}/categories`);
   }
 
+  deliveryZones(): Observable<any[]> {
+    return this._httpClient.get<any[]>(`${this.hostServer}/delivery-zones`);
+  }
+
+  
+
   getMerchantStore(merchantId: string): Observable<Store> {
     return this._httpClient.get<Store>(
       `${this.hostServer}/stores/merchant/${merchantId}`
@@ -93,22 +99,12 @@ export class StoreService {
    * @param formData
    * @returns {Promise<any>}
    */
-   uploadLogo(formData: any, id?: string): Observable<any> {
-    return this._httpClient.post(`${this.hostServer}/stores/upload/${id}/logo`, formData, {
-      reportProgress: true,
-      observe: 'events'
-    })
+   uploadLogo(formData: any, storeId?: string): Observable<any> {
+    return this._httpClient.post(`${this.hostServer}/stores/upload/${storeId}/logo`, formData)
   }
 
-  uploadBanner(formData: any, id?: string): Observable<any> {
-    return this._httpClient.post(`${this.hostServer}/stores/upload/${id}/banner`, formData, {
-      reportProgress: true,
-      observe: 'events'
-    }).pipe(
-      tap((data) => {
-       
-        // this.saveStoreLocally(id)
-      }))
+  uploadBanner(formData: any, storeId?: string): Observable<any> {
+    return this._httpClient.post(`${this.hostServer}/stores/upload/${storeId}/banner`, formData)
   }
 
   getOrderStat(date:any) {

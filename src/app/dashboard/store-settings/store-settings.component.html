@@ -1,0 +1,151 @@
+<div class="p-4 bg-gray-50 min-h-screen">
+    <div class="bg-white rounded-lg shadow-sm">
+        <div class="p-4 sm:p-6">
+            <h1 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Store Settings</h1>
+
+            <form [formGroup]="storeForm" (ngSubmit)="onSubmit()" class="w-full max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                     <div class="col-span-full grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <!-- Logo Upload -->
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 relative min-h-[200px] flex items-center justify-center">
+                  <input type="file" (change)="onLogoSelected($event)" accept="image/*" class="hidden" #logoInput id="logoInput">
+                  @if (!logoPreview && !storeForm.get('logo')?.value) {
+                    <div class="text-center cursor-pointer transition-all hover:opacity-75" (click)="logoInput.click()">
+                      <mat-icon class="text-4xl sm:text-5xl text-gray-400">add_photo_alternate</mat-icon>
+                      <p class="mt-2 text-sm sm:text-base text-gray-600">Click to upload store logo</p>
+                    </div>
+                  } @else {
+                    <div class="relative w-full h-full">
+                      <img [src]="logoPreview || storeForm.get('logo')?.value" class="w-full h-40 sm:h-48 object-cover rounded">
+                      <a mat-icon-button color="warn" class="absolute top-2 right-2" (click)="removeLogo()">
+                        <mat-icon>delete</mat-icon>
+                      </a>
+                    </div>
+                  }
+                </div>
+
+                <!-- Banner Upload -->
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 relative min-h-[200px] flex items-center justify-center">
+                  <input type="file" (change)="onBannerSelected($event)" accept="image/*" class="hidden" #bannerInput id="bannerInput">
+                  @if (!bannerPreview && !storeForm.get('bannerImage')?.value) {
+                    <div class="text-center cursor-pointer transition-all hover:opacity-75" (click)="bannerInput.click()">
+                      <mat-icon class="text-4xl sm:text-5xl text-gray-400">add_photo_alternate</mat-icon>
+                      <p class="mt-2 text-sm sm:text-base text-gray-600">Click to upload store banner</p>
+                    </div>
+                  } @else {
+                    <div class="relative w-full h-full">
+                      <img [src]="bannerPreview || storeForm.get('bannerImage')?.value" class="w-full h-40 sm:h-48 object-cover rounded">
+                      <a mat-icon-button color="warn" class="absolute top-2 right-2" (click)="removeBanner()">
+                        <mat-icon>delete</mat-icon>
+                      </a>
+                    </div>
+                  }
+                </div>
+              </div>
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Store Name</mat-label>
+                        <input matInput formControlName="name">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Description</mat-label>
+                        <textarea matInput formControlName="description" rows="3"></textarea>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Currency</mat-label>
+                        <input matInput formControlName="currency">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Currency Code</mat-label>
+                        <input matInput formControlName="currencyCode">
+                    </mat-form-field> <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Tax (%)</mat-label>
+                        <input matInput type="number" formControlName="tax">
+                    </mat-form-field>
+
+
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Category</mat-label>
+                        <mat-select formControlName="category">
+                            @if (categories.hasValue()) {
+                            @for (category of categories.value(); track category._id) {
+                            <mat-option [value]="category._id">{{category.name}}</mat-option>
+                            }
+                            }
+                        </mat-select>
+                    </mat-form-field>
+
+                    <div class="col-span-full mt-6">
+                        <h3 class="text-lg font-semibold mb-4">Contact Information</h3>
+                        <div formGroupName="contactInfo" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                            <mat-form-field appearance="outline" class="w-full">
+                                <mat-label>Country</mat-label>
+                                <mat-select formControlName="country">
+
+                                    @for (deliveryZone of deliveryZones.value(); track $index) {
+                                    <mat-option [value]="deliveryZone.country">{{deliveryZone.country}}</mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="w-full">
+                                <mat-label>State</mat-label>
+                                <mat-select formControlName="state">
+
+                                    @for (state of states(); track state) {
+                                    <mat-option [value]="state.name">{{state.name}}</mat-option>
+
+                                    }
+                                </mat-select>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="w-full">
+                                <mat-label>City</mat-label>
+                                <mat-select formControlName="city">
+
+                                    @for (city of localities(); track $index) {
+                                    <mat-option [value]="city.name">{{city.name}}</mat-option>
+
+                                    }
+                                </mat-select>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="w-full">
+                                <mat-label>Address</mat-label>
+                                <input matInput formControlName="placeName">
+                            </mat-form-field>
+
+
+
+                            <mat-form-field appearance="outline" class="w-full">
+                                <mat-label>Email</mat-label>
+                                <input matInput formControlName="email" type="email">
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="w-full">
+                                <mat-label>Phone</mat-label>
+                                <input matInput formControlName="phone">
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end mt-6 sm:mt-8">
+                    <button mat-flat-button color="primary" type="submit"
+                        [disabled]="storeForm.invalid || isSubmitting" 
+                        class="w-full sm:w-auto px-6">
+                        @if (isSubmitting) {
+                          <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+                          Updating...
+                        } @else {
+                          Update Store
+                        }
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

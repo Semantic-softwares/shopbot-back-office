@@ -56,11 +56,11 @@ export class CategoriesComponent {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   public categories = rxResource({
-    request: () => ({
+    params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
     }),
-    loader: ({ request }) =>
-      this.categoryService.getStoreMenus(request.storeId!).pipe(
+    stream: ({ params }) =>
+      this.categoryService.getStoreMenus(params.storeId!).pipe(
         tap((categories) => {
           this.dataSource = new MatTableDataSource(categories);
           this.dataSource.paginator = this.paginator;

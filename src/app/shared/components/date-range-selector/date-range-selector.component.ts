@@ -32,7 +32,7 @@ import { QueryParamService } from '../../services/query-param.service';
   ],
 
   template: `
-    <mat-form-field appearance="outline" class="w-80">
+    <mat-form-field appearance="outline" class="w-full">
       <mat-label>Date Range</mat-label>
       <mat-date-range-input
         [formGroup]="dateRange"

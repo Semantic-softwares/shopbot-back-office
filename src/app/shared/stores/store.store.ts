@@ -225,7 +225,7 @@ export const StoreStore = signalStore(
       const storedStores = storeService.getStoresLocally;
         const selectedStore = storeService.getStoreLocally;
         if (storedStores && storedStores.length > 0) {
-          patchState(store, {  selectedStore: selectedStore });
+          patchState(store, {  stores: storedStores });
         }
         if (selectedStore) {
           patchState(store, { selectedStore });

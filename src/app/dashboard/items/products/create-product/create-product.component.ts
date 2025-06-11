@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -66,19 +67,19 @@ export class CreateProductComponent implements OnInit {
   private dialog = inject(MatDialog);
   public isSubmitting = signal(false);
   public categories = rxResource({
-    request: () => ({
+    params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
     }),
-    loader: ({ request }) =>
-      this.categoryService.getStoreMenus(request.storeId!),
+    stream: ({ params }) =>
+      this.categoryService.getStoreMenus(params.storeId!),
   });
 
   public stations = rxResource({
-    request: () => ({
+    params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
     }),
-    loader: ({ request }) =>
-      this.stationService.getStations(request.storeId!),
+    stream: ({ params }) =>
+      this.stationService.getStations(params.storeId!),
   });
   productForm: FormGroup;
   newCategory: string = '';
@@ -278,51 +279,45 @@ export class CreateProductComponent implements OnInit {
     if (this.productForm.valid) {
       this.isSubmitting.set(true);
       const formValue = this.productForm.getRawValue();
+      const productId = this.productId();
 
       try {
-        const response = this.isEditMode()
-          ? await this.productService.saveProduct(formValue, this.productId()!).toPromise()
-          : await this.productService.addProduct(formValue).toPromise();
+        // Save product data
+        const savedProduct = await firstValueFrom(
+          this.isEditMode()
+            ? this.productService.saveProduct(formValue, productId!)
+            : this.productService.addProduct(formValue)
+        );
 
-        if (this.selectedImages.length > 0) {
+        // Upload images if any
+        const newImages = this.selectedImages.filter(img => img.file);
+        if (newImages.length > 0) {
           const formData = new FormData();
-          this.selectedImages.forEach((image) => {
-            if (image.file) {
-              // Only append new files
-              formData.append('files', image.file);
-            }
+          newImages.forEach(image => {
+            formData.append('files', image.file);
           });
 
-          if (formData.has('files')) {
-            try {
-              await this.productService
-                .uploadPhoto(formData, this.isEditMode() ? this.productId() : response._id)
-                .toPromise();
-              this.showSuccessMessage();
-            } catch (error) {
-              this.snackBar.open('Error uploading images', 'Close', {
-                duration: 3000,
-                horizontalPosition: 'end',
-                verticalPosition: 'top',
-              });
-              this.isSubmitting.set(false);
-            }
-          } else {
-            this.showSuccessMessage();
-          }
-        } else {
-          this.showSuccessMessage();
+          await firstValueFrom(
+            this.productService.uploadPhoto(
+              formData, 
+              this.isEditMode() ? productId! : savedProduct._id
+            )
+          );
         }
+
+        this.showSuccessMessage();
       } catch (error) {
+        console.error('Error saving product:', error);
         this.snackBar.open(
           `Error ${this.isEditMode() ? 'updating' : 'creating'} product`,
           'Close',
           {
             duration: 3000,
             horizontalPosition: 'end',
-            verticalPosition: 'top',
+            verticalPosition: 'top'
           }
         );
+      } finally {
         this.isSubmitting.set(false);
       }
     }

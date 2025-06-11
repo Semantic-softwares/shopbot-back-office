@@ -8,7 +8,9 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartOptions, ChartType } from 'chart.js';
@@ -19,6 +21,7 @@ import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { OrderService } from '../../../shared/services/orders.service';
 import { StoreStore } from '../../../shared/stores/store.store';
 import { QueryParamService } from '../../../shared/services/query-param.service';
+import { ExportService } from '../../../shared/services/export.service';
 
 @Component({
   selector: 'sales-by-item',
@@ -33,7 +36,9 @@ import { QueryParamService } from '../../../shared/services/query-param.service'
     MatButtonModule,
     MatIconModule,
     MatListModule,
+    MatMenuModule,
     MatProgressSpinnerModule,
+    MatButtonToggleModule,
     ReactiveFormsModule,
     BaseChartDirective,
     NoRecordComponent,
@@ -47,6 +52,11 @@ export class SalesByItemComponent {
   private orderService = inject(OrderService);
   public storeStore = inject(StoreStore);
   private queryParamsService = inject(QueryParamService);
+  public isGridView = window.innerWidth < 768; // Default to grid on mobile
+
+  toggleView(event: any) {
+    this.isGridView = event.value;
+  }
   // Chart configurations
   selectedChartType: ChartType = 'bar';
 
@@ -80,12 +90,12 @@ export class SalesByItemComponent {
   private query = toSignal(this.queryParamsService.getAllParams$);
 
   public products = rxResource({
-    request: () => ({
+    params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
       query: this.query(),
     }),
-    loader: ({ request }) =>
-      this.orderService.getTopSellingProducts(request.storeId!, request.query),
+    stream: ({ params }) =>
+      this.orderService.getTopSellingProducts(params.storeId!, params.query),
   });
 
 
@@ -122,5 +132,23 @@ export class SalesByItemComponent {
 
 
 
-  exportData() {}
+  private exportService = inject(ExportService);
+
+  exportData(format: 'pdf' | 'csv' | 'excel'): void {
+    if (!this.products.value()) return;
+    
+    const data = this.products.value() || [];
+    const filename = 'item-sales';
+    switch (format) {
+      case 'pdf':
+        this.exportService.exportItemDataToPdf(data, filename, {from: this.query()!['start'], to: this.query()!['end']});
+        break;
+      case 'csv':
+        this.exportService.exportToCSV(data, filename);
+        break;
+      case 'excel':
+        this.exportService.exportToExcel(data, filename);
+        break;
+    }
+  }
 }

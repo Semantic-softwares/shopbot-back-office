@@ -10,7 +10,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTabsModule } from '@angular/material/tabs';
 import {  ReactiveFormsModule } from '@angular/forms';
 import { EmployeeSelectorComponent } from '../../../shared/components/employee-selector/employee-selector.component';
-import { NoRecordComponent } from '../../../shared/components/no-record/no-record.component';
 import { DateRangeSelectorComponent } from '../../../shared/components/date-range-selector/date-range-selector.component';
 import { toSignal, rxResource } from '@angular/core/rxjs-interop';
 import { OrderService } from '../../../shared/services/orders.service';
@@ -18,15 +17,19 @@ import { QueryParamService } from '../../../shared/services/query-param.service'
 import { StoreStore } from '../../../shared/stores/store.store';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { tap } from 'rxjs';
+import { MatMenuModule } from '@angular/material/menu';
+import { ExportService } from '../../../shared/services/export.service';
 
 @Component({
   selector: 'app-receipts',
   templateUrl: './receipts.component.html',
   standalone: true,
+  // providers: [DatePipe],
   imports: [
     CommonModule,
     MatTableModule,
     MatPaginatorModule,
+    MatMenuModule,
     MatButtonModule,
     MatIconModule,
     MatDatepickerModule,
@@ -58,12 +61,12 @@ export class ReceiptsComponent {
   public activeTab = 'all';
   public tabStats: any;
   public dataSource = rxResource({
-    request: () => ({
+    params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
       query: this.query(),
     }),
-    loader: ({ request }) =>
-      this.orderService.getSalesReceipts(request.storeId!, request.query).pipe(
+    stream: ({ params }) =>
+      this.orderService.getSalesReceipts(params.storeId!, params.query).pipe(
         tap((res) => {
           const data = res.data;
 
@@ -90,12 +93,28 @@ export class ReceiptsComponent {
   pageSize = 10;
   pageSizeOptions = [5, 10, 25, 50];
 
-  exportData(): void {
-    // Implement export functionality
+  private exportService = inject(ExportService);
+  // private datePipe = inject(DatePipe);
+
+  exportData(format: 'pdf' | 'csv' | 'excel'): void {
+    if (!this.dataSource.value()) return;
+    
+    const data = this.dataSource.value().orders;
+    const filename = 'receipts';
+    switch (format) {
+      case 'pdf':
+        this.exportService.exportToPdf(data, filename, {from: this.query()!['start'], to: this.query()!['end']});
+        break;
+      case 'csv':
+        this.exportService.exportToCSV(data, filename);
+        break;
+      case 'excel':
+        this.exportService.exportToExcel(data, filename);
+        break;
+    }
   }
 
   onTabChange(val: any) {
-    console.log((this.activeTab = val), this.activeTab, val);
     this.activeTab = val;
     this.queryParams.add({ type: val });
   }

@@ -9,8 +9,10 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../shared/services/auth.service';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { HasPermissionDirective } from '../shared/directives/has-permission.directive';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
+import { MatDividerModule } from '@angular/material/divider';
+import { StoreStore } from '../shared/stores/store.store';
+import { Store } from '../shared/models';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,7 +27,7 @@ import { HasPermissionDirective } from '../shared/directives/has-permission.dire
     MatMenuModule,
     RouterModule,
     MatExpansionModule,
-    // HasPermissionDirective
+    MatDividerModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
@@ -34,6 +36,7 @@ export class DashboardComponent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
+  public storeStore = inject(StoreStore);
   public isMobile = signal(window.innerWidth < 768);
   public opened = signal(true);
   public currentUser = toSignal(this.authService.currentUser, { initialValue: null });
@@ -104,5 +107,11 @@ export class DashboardComponent {
   logout() {
     this.authService.logout();
     this.router.navigate(['/auth']);
+  }
+
+  public selectStore(store: Store) {
+    console.log('Selected store:', store);
+    this.storeStore.setSelectedStore(store);
+    window.location.reload();
   }
 }

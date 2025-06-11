@@ -16,6 +16,8 @@ import { StoreStore } from '../../../shared/stores/store.store';
 import { DateRangeSelectorComponent } from "../../../shared/components/date-range-selector/date-range-selector.component";
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { EmployeeSelectorComponent } from "../../../shared/components/employee-selector/employee-selector.component";
+import { ExportService } from '../../../shared/services/export.service';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-sales-by-payment',
@@ -34,7 +36,8 @@ import { EmployeeSelectorComponent } from "../../../shared/components/employee-s
     NoRecordComponent,
     DateRangeSelectorComponent,
     MatProgressSpinnerModule,
-    EmployeeSelectorComponent
+    EmployeeSelectorComponent,
+    MatMenuModule
 ]
 })
 export class SalesByPaymentComponent  {
@@ -53,12 +56,12 @@ export class SalesByPaymentComponent  {
   ];
 
   public dataSource = rxResource({
-    request: () => ({
+    params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
       query: this.query(),
     }),
-    loader: ({ request }) =>
-      this.orderService.getSalesByPaymentType(request.storeId!, request.query),
+    stream: ({ params }) =>
+      this.orderService.getSalesByPaymentType(params.storeId!, params.query),
   });
   
   
@@ -67,8 +70,24 @@ export class SalesByPaymentComponent  {
   pageSizeOptions = [5, 10, 25, 50];
 
 
-  exportData(): void {
-    // Implement export functionality
+  private exportService = inject(ExportService);
+
+  exportData(format: 'pdf' | 'csv' | 'excel'): void {
+    if (!this.dataSource.value()) return;
+    
+    const data = this.dataSource.value() || [];
+    const filename = 'payment-report';
+    switch (format) {
+      case 'pdf':
+        this.exportService.exportPaymentDataToPdf(data, filename, {from: this.query()!['start'], to: this.query()!['end']});
+        break;
+      case 'csv':
+        this.exportService.exportToCSV(data, filename);
+        break;
+      case 'excel':
+        this.exportService.exportToExcel(data, filename);
+        break;
+    }
   }
 }
 

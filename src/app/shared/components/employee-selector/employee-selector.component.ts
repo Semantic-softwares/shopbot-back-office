@@ -21,7 +21,7 @@ import { FormGroup, FormControl } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, MatFormFieldModule, MatSelectModule],
   template: `
-    <mat-form-field appearance="outline">
+    <mat-form-field appearance="outline" class="w-full">
       <mat-label>All employees</mat-label>
       <mat-select
         [(value)]="selectedEmployee"

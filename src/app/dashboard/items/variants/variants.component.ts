@@ -1,4 +1,4 @@
-import { Component, inject, ViewChild } from '@angular/core';
+import { Component, inject, resource, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
@@ -13,7 +13,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormsModule } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
-import { rxResource } from '@angular/core/rxjs-interop';
 import { tap } from 'rxjs';
 import { ProductService } from '../../../shared/services/product.service';
 import { StoreStore } from '../../../shared/stores/store.store';
@@ -23,6 +22,7 @@ import { VariantDialogComponent } from './variant-dialog/variant-dialog.componen
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Option } from '../../../shared/models';
+import { rxResource } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-variants',
@@ -59,11 +59,11 @@ export class VariantsComponent {
   @ViewChild(MatSort) sort!: MatSort;
 
   public variants = rxResource({
-    request: () => ({
+    params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
     }),
-    loader: ({ request }) =>
-      this.productService.getStoreGroupOption(request.storeId!).pipe(
+    stream: ({ params }) =>
+      this.productService.getStoreGroupOption(params.storeId!).pipe(
         tap((variants) => {
           this.dataSource = new MatTableDataSource(variants);
           this.dataSource.paginator = this.paginator;

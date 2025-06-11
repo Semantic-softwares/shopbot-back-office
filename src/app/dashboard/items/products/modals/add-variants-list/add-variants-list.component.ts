@@ -78,11 +78,11 @@ export class AddVariantsListComponent {
   private storeStore = inject(StoreStore);
   
   public variants = rxResource({
-    request: () => ({
+    params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
     }),
-    loader: ({ request }) =>
-      this.productService.getStoreGroupOption(request.storeId!)
+    stream: ({ params }) =>
+      this.productService.getStoreGroupOption(params.storeId!)
   });
 
   constructor(

@@ -8,6 +8,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatMenuModule } from '@angular/material/menu';
 import { EmployeeSelectorComponent } from '../../../shared/components/employee-selector/employee-selector.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NoRecordComponent } from '../../../shared/components/no-record/no-record.component';
@@ -16,6 +17,7 @@ import { OrderService } from '../../../shared/services/orders.service';
 import { QueryParamService } from '../../../shared/services/query-param.service';
 import { StoreStore } from '../../../shared/stores/store.store';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { ExportService } from '../../../shared/services/export.service';
 import { DateRangeSelectorComponent } from "../../../shared/components/date-range-selector/date-range-selector.component";
 
 @Component({
@@ -34,7 +36,8 @@ import { DateRangeSelectorComponent } from "../../../shared/components/date-rang
     ReactiveFormsModule,
     NoRecordComponent,
     MatProgressSpinner,
-    DateRangeSelectorComponent
+    DateRangeSelectorComponent,
+    MatMenuModule
 ]
 })
 export class SalesByEmployeeComponent  {
@@ -54,12 +57,12 @@ export class SalesByEmployeeComponent  {
   ];
 
   public dataSource = rxResource({
-    request: () => ({
+    params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
       query: this.query(),
     }),
-    loader: ({ request }) =>
-      this.orderService.getSalesByEmployees(request.storeId!, request.query),
+    stream: ({ params }) =>
+      this.orderService.getSalesByEmployees(params.storeId!, params.query),
   });
   
   
@@ -68,8 +71,24 @@ export class SalesByEmployeeComponent  {
   pageSizeOptions = [5, 10, 25, 50];
 
 
-  exportData(): void {
-    // Implement export functionality
+  private exportService = inject(ExportService);
+
+  exportData(format: 'pdf' | 'csv' | 'excel'): void {
+    if (!this.dataSource.value()) return;
+    
+    const data = this.dataSource.value() || [];
+    const filename = 'employee-sales';
+    switch (format) {
+      case 'pdf':
+        this.exportService.exportEmployeeDataToPdf(data, filename, {from: this.query()!['start'], to: this.query()!['end']});
+        break;
+      case 'csv':
+        this.exportService.exportToCSV(data, filename);
+        break;
+      case 'excel':
+        this.exportService.exportToExcel(data, filename);
+        break;
+    }
   }
 }
 

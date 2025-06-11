@@ -4,7 +4,6 @@ import {
   ViewChild,
   inject,
   DestroyRef,
-  AfterViewInit,
   ElementRef,
   effect,
 } from '@angular/core';
@@ -18,6 +17,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { Chart, registerables } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -33,6 +34,7 @@ import {
 import { QueryParamService } from '../../../shared/services/query-param.service';
 import { OrderService } from '../../../shared/services/orders.service';
 import { StoreStore } from '../../../shared/stores/store.store';
+import { ExportService } from '../../../shared/services/export.service';
 
 @Component({
   selector: 'shopbot-summary',
@@ -49,6 +51,8 @@ import { StoreStore } from '../../../shared/stores/store.store';
     MatPaginatorModule,
     MatButtonModule,
     MatIconModule,
+    MatMenuModule,
+    MatButtonToggleModule,
     ReactiveFormsModule,
     EmployeeSelectorComponent,
     DateRangeSelectorComponent,
@@ -58,6 +62,11 @@ import { StoreStore } from '../../../shared/stores/store.store';
   styleUrl: './summary.component.scss',
 })
 export class SummaryComponent implements OnInit {
+  public isGridView = window.innerWidth < 768;
+
+  toggleView(event: any) {
+    this.isGridView = event.value;
+  }
   private destroyRef = inject(DestroyRef);
   private queryParams = inject(QueryParamService);
   private orderService = inject(OrderService);
@@ -66,21 +75,21 @@ export class SummaryComponent implements OnInit {
 
  
   public summaryData = rxResource({
-    request: () => ({
+    params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
       query: this.query(),
     }),
-    loader: ({ request }) =>
-      this.orderService.getSalesSummary(request.storeId!, request.query),
+    stream: ({ params }) =>
+      this.orderService.getSalesSummary(params.storeId!, params.query),
   });
 
   public dataSource = rxResource({
-    request: () => ({
+    params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
       query: this.query(),
     }),
-    loader: ({ request }) =>
-      this.orderService.getSalesSummaryByDate(request.storeId!, request.query),
+    stream: ({ params }) =>
+      this.orderService.getSalesSummaryByDate(params.storeId!, params.query),
   });
 
   valu = effect(() => {
@@ -141,9 +150,24 @@ export class SummaryComponent implements OnInit {
       });
   }
 
-  exportData() {
-    // Implement export logic here
-    console.log('Exporting data...');
+  private exportService = inject(ExportService);
+
+  exportData(format: 'pdf' | 'csv' | 'excel'): void {
+    if (!this.dataSource.value()) return;
+    
+    const data = this.dataSource.value();
+    const filename = 'sales-summary';
+    switch (format) {
+      case 'pdf':
+        this.exportService.exportSummaryToPdf(data, filename, {from: this.query()!['start'], to: this.query()!['end']});
+        break;
+      case 'csv':
+        this.exportService.exportToCSV(data, filename);
+        break;
+      case 'excel':
+        this.exportService.exportToExcel(data, filename);
+        break;
+    }
   }
 
   onTabChange(tabName: string) {
@@ -164,13 +188,27 @@ export class SummaryComponent implements OnInit {
     console.log(data)
     const sortedData = [...data].sort((a, b) => a.period.localeCompare(b.period));
     
-    const formatPeriod = (period: string) => {
-      const date = new Date(period + '-01'); // Add day for valid date parsing
-      return date.toLocaleString('default', { month: 'short', year: 'numeric' });
+    const formatPeriod = (datePeriod: string, selectedPeriod: string) => {
+      // Check if it's a weekly period (YYYY-WW format) and period is weekly
+      if (datePeriod.match(/^\d{4}-\d{2}$/) && selectedPeriod === 'weekly') {
+        const [year, week] = datePeriod.split('-');
+        return `Week ${week}, ${year}`;
+      }
+      // For daily periods (YYYY-MM-DD format)
+      if (datePeriod.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const date = new Date(datePeriod);
+        return date.toLocaleString('default', { day: 'numeric', month: 'short' });
+      }
+      // For monthly periods (YYYY-MM format) or any YYYY-MM pattern when period is monthly
+      if (datePeriod.match(/^\d{4}-\d{2}$/) && selectedPeriod === 'monthly') {
+        const date = new Date(datePeriod + '-01');
+        return date.toLocaleString('default', { month: 'short', year: 'numeric' });
+      }
+      // Default case - just return the period as is
+      return datePeriod;
     };
-    console.log(sortedData.map(item => formatPeriod(item.period)))
     return {
-      labels: sortedData.map(item => formatPeriod(item.period)),
+      labels: sortedData.map(item => formatPeriod(item.period, period)),
       data: sortedData.map(item => item[this.activeLink] || 0)
     };
   }

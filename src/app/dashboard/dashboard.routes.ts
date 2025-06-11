@@ -22,6 +22,10 @@ export const DASHBOARD_ROUTES: Routes = [
             {
                 path: 'employees',
                 loadChildren: () => import('../authentication/employees/employees.routes').then(m => m.DASHBOARD_EMPLOYEES_ROUTES)
+            },
+            {
+                path: 'store-settings',
+                loadComponent: () => import('./store-settings/store-settings.component').then(m => m.StoreSettingsComponent)
             }
         ]
     }

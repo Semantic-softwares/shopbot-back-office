@@ -1,16 +1,22 @@
-<div class="p-4 bg-gray-50 min-h-screen">
+
+  <!-- Sales Analysis Card -->
+ 
+
+
+  <div class="p-4 bg-gray-50 min-h-screen">
   <!-- Header Card -->
-  <div class="bg-white p-4 rounded-lg shadow-sm mb-6">
-    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-      <date-range-selector />
-      <div class="flex gap-4">
-        <app-employee-selector />
+  <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm mb-6">
+    <div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center space-y-4 lg:space-y-0 lg:gap-4">
+      <div class="w-full lg:max-w-xs">
+        <date-range-selector></date-range-selector>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-4 flex-end sm:flex-1">
+        <app-employee-selector class="w-full sm:w-auto"></app-employee-selector>
       </div>
     </div>
   </div>
 
-  <!-- Sales Analysis Card -->
-  <div class="bg-white rounded-lg shadow-sm mb-6">
+   <div class="bg-white rounded-lg shadow-sm mb-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
 
       <!-- Top 5 Items -->
@@ -70,12 +76,11 @@
         <div class="!h-full w-full min-h-[300px]">
           @if (products.hasValue()) {
 
-            @if ( products.value().length < 1) { 
-            <div class="flex items-center justify-center min-h-[300px]">
-              <app-no-record icon="inventory_2" title="No Products Found"
-                message="There are no products to display for the selected period.">
-              </app-no-record>
-           </div>
+          @if ( products.value().length < 1) { <div class="flex items-center justify-center min-h-[300px]">
+            <app-no-record icon="inventory_2" title="No Products Found"
+              message="There are no products to display for the selected period.">
+            </app-no-record>
+        </div>
 
         } @else {
         <canvas baseChart [type]="selectedChartType" [data]="getChartData()" [options]="chartOptions">
@@ -92,77 +97,159 @@
 
   <!-- Table Card -->
   <div class="bg-white rounded-lg shadow-sm">
-    <div class="p-6 flex justify-between items-center border-b">
+    <div class="p-4 sm:p-6 flex flex-wrap gap-4 justify-between items-center border-b">
       <h2 class="text-lg font-medium">All Products</h2>
-      <button mat-flat-button color="primary" (click)="exportData()">
-        <mat-icon class="mr-2">file_download</mat-icon>
-        Export Data
-      </button>
+      <div class="flex items-center gap-2 sm:gap-4">
+        <mat-button-toggle-group class="hidden md:block" [value]="isGridView" (change)="toggleView($event)">
+          <mat-button-toggle [value]="true" aria-label="Grid view">
+            <mat-icon class="!h-5 !w-5 text-sm">grid_view</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle [value]="false" aria-label="List view">
+            <mat-icon class="!h-5 !w-5 text-sm">list</mat-icon>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+        <button mat-flat-button color="primary" [matMenuTriggerFor]="exportMenu">
+          <mat-icon class="mr-2">file_download</mat-icon>
+          <span class="hidden sm:inline">Export Data</span>
+          <span class="sm:hidden">Export</span>
+        </button>
+        <mat-menu #exportMenu="matMenu">
+          <button mat-menu-item (click)="exportData('pdf')">
+            <mat-icon>picture_as_pdf</mat-icon>
+            <span>Export as PDF</span>
+          </button>
+          <button mat-menu-item (click)="exportData('csv')">
+            <mat-icon>description</mat-icon>
+            <span>Export as CSV</span>
+          </button>
+          <button mat-menu-item (click)="exportData('excel')">
+            <mat-icon>table_chart</mat-icon>
+            <span>Export as Excel</span>
+          </button>
+        </mat-menu>
+      </div>
     </div>
 
     <div class="p-6">
-      @if (products.hasValue()) {
+      <!-- Loading Skeleton -->
+      @if (products.isLoading()) {
+      <div class="animate-pulse">
+        @if (!isGridView) {
+        <!-- Table Loading Skeleton -->
+        <div class="hidden md:block">
+          <div class="h-16 bg-gray-100 rounded-lg mb-4"></div>
+          @for (item of [1,2,3,4,5]; track $index) {
+          <div class="h-16 bg-gray-50 rounded-lg mb-4"></div>
+          }
+        </div>
+        } @else {
+        <!-- Grid Loading Skeleton -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (item of [1,2,3,4,5,6]; track $index) {
+          <div class="bg-white rounded-lg p-4 border animate-pulse">
+            <div class="flex items-start gap-4 mb-4">
+              <div class="h-16 w-16 bg-gray-200 rounded-lg"></div>
+              <div class="flex-1">
+                <div class="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            </div>
+            <div class="space-y-3">
+              @for (row of [1,2,3,4]; track $index) {
+              <div class="flex justify-between items-center py-2">
+                <div class="h-4 bg-gray-200 rounded w-24"></div>
+                <div class="h-4 bg-gray-200 rounded w-20"></div>
+              </div>
+              }
+            </div>
+          </div>
+          }
+        </div>
+        }
+      </div>
+      }
+
+      <!-- No Products Found -->
+      @else if (!products.hasValue() || products.value().length === 0) {
+      <div class="flex items-center justify-center min-h-[300px]">
+        <app-no-record icon="inventory_2" title="No Products Found"
+          message="There are no products to display for the selected period.">
+        </app-no-record>
+      </div>
+      }
+
+      <!-- Table View -->
+      @else if (!isGridView) {
       <div class="overflow-x-auto">
-        @if ( products.value().length > 0) { 
         <mat-table [dataSource]="products.value()" class="w-full !bg-white">
           <ng-container matColumnDef="name">
             <mat-header-cell *matHeaderCellDef>Product</mat-header-cell>
             <mat-cell *matCellDef="let element">{{element.name}}</mat-cell>
           </ng-container>
-
           <ng-container matColumnDef="totalQuantitySold">
             <mat-header-cell *matHeaderCellDef>Quantity Sold</mat-header-cell>
             <mat-cell *matCellDef="let element">{{element.totalQuantitySold}}</mat-cell>
           </ng-container>
-
-          <ng-container matColumnDef="totalRevenue">
-            <mat-header-cell *matHeaderCellDef>Total Revenue</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.totalRevenue | currency:
-              storeStore.selectedStore()?.currency}}</mat-cell>
-          </ng-container>
-
           <ng-container matColumnDef="grossSales">
             <mat-header-cell *matHeaderCellDef>Gross Sales</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.grossSales | currency:
-              storeStore.selectedStore()?.currency}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{element.grossSales | currency: storeStore.selectedStore()?.currency}}</mat-cell>
           </ng-container>
-
-          <ng-container matColumnDef="totalTax">
-            <mat-header-cell *matHeaderCellDef>Total Tax</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.totalTax | currency:
-              storeStore.selectedStore()?.currency}}</mat-cell>
-          </ng-container>
-
           <ng-container matColumnDef="netSales">
             <mat-header-cell *matHeaderCellDef>Net Sales</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.netSales | currency:
-              storeStore.selectedStore()?.currency}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{element.netSales | currency: storeStore.selectedStore()?.currency}}</mat-cell>
           </ng-container>
-
-          <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
-          <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+          <ng-container matColumnDef="totalTax">
+            <mat-header-cell *matHeaderCellDef>Total Tax</mat-header-cell>
+            <mat-cell *matCellDef="let element">{{element.totalTax | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="totalRevenue">
+            <mat-header-cell *matHeaderCellDef>Total Revenue</mat-header-cell>
+            <mat-cell *matCellDef="let element">{{element.totalRevenue | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+          </ng-container>
+          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
         </mat-table>
-         <mat-paginator [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
-          aria-label="Select page" class="!bg-white">
-        </mat-paginator>
-      } @else {
-        <div class="flex items-center justify-center min-h-[300px]">
-            <app-no-record icon="inventory_2" title="No Products Found"
-              message="There are no products to display for the selected period.">
-            </app-no-record>
-          </div>
+      </div>
       }
-        
 
-       
+      <!-- Grid View -->
+      @else {
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (item of products.value(); track $index) {
+        <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-4 sm:p-5 border">
+          <div class="flex items-start gap-4 mb-4">
+            <img [src]="item.photos[0] || 'assets/images/placeholder.png'" class="h-16 w-16 rounded-lg object-cover"
+              [alt]="item.name">
+            <div class="flex-1">
+              <h3 class="font-medium text-gray-900 mb-1">{{item.name}}</h3>
+              <p class="text-sm text-gray-500">{{item.totalQuantitySold}} items sold</p>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center pb-2 border-b">
+              <span class="text-gray-600">Gross Sales</span>
+              <span class="font-medium">{{item.grossSales | currency: storeStore.selectedStore()?.currency}}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Net Sales</span>
+              <span class="font-medium">{{item.netSales | currency: storeStore.selectedStore()?.currency}}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Total Tax</span>
+              <span class="font-medium">{{item.totalTax | currency: storeStore.selectedStore()?.currency}}</span>
+            </div>
+            <div class="flex justify-between items-center pt-2 border-t">
+              <span class="text-gray-600">Total Revenue</span>
+              <span class="font-medium text-primary">{{item.totalRevenue | currency: storeStore.selectedStore()?.currency}}</span>
+            </div>
+          </div>
+        </div>
+        }
       </div>
-      } @else if (products.isLoading()) {
-       <div class="flex items-center justify-center min-h-[300px]">
-        <mat-spinner diameter="40"></mat-spinner>
-      </div>
-      } 
-
-
-
+      }
     </div>
   </div>
+</div>
+
+
+  

@@ -59,11 +59,11 @@ export class OptionsComponent {
   @ViewChild(MatSort) sort!: MatSort;
 
   public options = rxResource({
-    request: () => ({
+    params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
     }),
-    loader: ({ request }) =>
-      this.productService.getStoreOptions(request.storeId!).pipe(
+    stream: ({ params }) =>
+      this.productService.getStoreOptions(params.storeId!).pipe(
         tap((options) => {
           this.dataSource = new MatTableDataSource(options);
           this.dataSource.paginator = this.paginator;

@@ -75,7 +75,7 @@ export class SessionStorageService {
         localStorage.setItem('stores', JSON.stringify(stores));
     }
 
-    getStores<T = Store[]>(): T[] | null {
+    getStores(): Store[] | null {
         const storesStr = localStorage.getItem('stores');
         return storesStr ? JSON.parse(storesStr) : null;
     }

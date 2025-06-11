@@ -32,10 +32,24 @@
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field> -->
 
-            <button mat-flat-button color="primary" (click)="exportData()">
+            <button mat-flat-button color="primary" [matMenuTriggerFor]="exportMenu">
               <mat-icon class="mr-2">file_download</mat-icon>
               Export Data
             </button>
+            <mat-menu #exportMenu="matMenu">
+              <button mat-menu-item (click)="exportData('pdf')">
+                <mat-icon>picture_as_pdf</mat-icon>
+                <span>Export as PDF</span>
+              </button>
+              <button mat-menu-item (click)="exportData('csv')">
+                <mat-icon>description</mat-icon>
+                <span>Export as CSV</span>
+              </button>
+              <button mat-menu-item (click)="exportData('excel')">
+                <mat-icon>table_chart</mat-icon>
+                <span>Export as Excel</span>
+              </button>
+            </mat-menu>
           </div>
       
           
@@ -58,7 +72,7 @@
                 </ng-container>
 
                 <ng-container matColumnDef="category">
-                  <mat-header-cell *matHeaderCellDef>Customer</mat-header-cell>
+                  <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
                   <mat-cell *matCellDef="let element">{{element.category}}</mat-cell>
                 </ng-container>
 

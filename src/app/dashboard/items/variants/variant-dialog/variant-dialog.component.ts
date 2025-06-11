@@ -56,11 +56,11 @@ export class VariantDialogComponent {
   variantForm: FormGroup;
 
   public existingOptions = rxResource({
-    request: () => ({
+    params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
     }),
-    loader: ({ request }) =>
-      this.productService.getStoreOptions(request.storeId!),
+    stream: ({ params }) =>
+      this.productService.getStoreOptions(params.storeId!),
   });
 
   selectedOptions: any[] = [];
