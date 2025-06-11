@@ -1,0 +1,1 @@
+import"./chunk-EQDQRRRY.js";var o=[{path:"",loadComponent:()=>import("./chunk-7UJBTWZ3.js").then(t=>t.EmployeesComponent),children:[{path:"",redirectTo:"list",pathMatch:"full"},{path:"list",loadComponent:()=>import("./chunk-L4VQX4IP.js").then(t=>t.EmployeeListComponent)}]}];export{o as DASHBOARD_EMPLOYEES_ROUTES};
