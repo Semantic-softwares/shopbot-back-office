@@ -1,0 +1,151 @@
+<div *ngIf="orderResource.hasValue(); else loading" class="max-w-4xl mx-auto my-10 p-0 md:p-6 bg-white rounded-xl shadow-lg border border-gray-100">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center gap-4 border-b pb-6 px-6 pt-6">
+    <!-- <img [src]="orderResource.value().store.logo" alt="Store Logo" class="w-20 h-20 rounded-full object-cover border shadow" /> -->
+    <!-- <div class="flex-1">
+      <h2 class="text-2xl md:text-3xl font-bold mb-1">{{ orderResource.value().store.name }}</h2>
+      <div class="text-gray-500 text-sm">{{ orderResource.value().store.contactInfo?.placeName }}</div>
+    </div> -->
+    <span class="px-4 py-1 rounded-full text-xs font-semibold shadow"
+      [ngClass]="{
+        'bg-green-100 text-green-800': orderResource.value().category === 'Complete',
+        'bg-yellow-100 text-yellow-800': orderResource.value().category === 'Pending',
+        'bg-red-100 text-red-800': orderResource.value().category === 'Cancel'
+      }">
+      {{ orderResource.value().category }}
+    </span>
+  </div>
+
+  <!-- Info Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-6 py-6">
+    <mat-card class="!shadow-none !border !border-gray-200 !rounded-lg">
+      <mat-card-title class="!text-base !font-semibold mb-2">Order Info</mat-card-title>
+      <mat-card-content>
+        <div class="space-y-2 text-sm">
+          <div><span class="font-semibold">Order Ref:</span> {{ orderResource.value().reference }}</div>
+          <div><span class="font-semibold">Order Date:</span> {{ orderResource.value().createdAt | date:'medium' }}</div>
+          <div><span class="font-semibold">Payment:</span> {{ orderResource.value().payment }}</div>
+          <div><span class="font-semibold">Payment Status:</span> {{ orderResource.value().paymentStatus }}</div>
+          <div><span class="font-semibold">Order Type:</span> {{ orderResource.value().orderType }}</div>
+          <div><span class="font-semibold">Delivery Type:</span> {{ orderResource.value().deliveryType }}</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="!shadow-none !border !border-gray-200 !rounded-lg">
+      <mat-card-title class="!text-base !font-semibold mb-2">Customer Info</mat-card-title>
+      <mat-card-content>
+        <div class="space-y-2 text-sm">
+          <div><span class="font-semibold">Name:</span> {{ orderResource.value().user.name }}</div>
+          <div><span class="font-semibold">Phone:</span> {{ orderResource.value().user.phoneNumber }}</div>
+          <div><span class="font-semibold">Email:</span> {{ orderResource.value().user.email }}</div>
+          <div><span class="font-semibold">Address:</span> {{ orderResource.value().shipping?.name }}</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Status Timeline -->
+  <div class="px-6">
+    <mat-card class="mb-6 !shadow-none !border !border-gray-200 !rounded-lg">
+      <mat-card-title class="!text-base !font-semibold mb-2">Order Status Timeline</mat-card-title>
+      <mat-card-content>
+        <div class="flex flex-col gap-3">
+          @for (status of orderResource.value().status; track status._id) {
+            <div class="flex items-center gap-3">
+              <mat-icon class="text-lg !text-base" [ngClass]="status.color">{{ status.icon }}</mat-icon>
+              <span class="font-semibold">{{ status.name }}</span>
+              <span class="text-xs text-gray-500">{{ status.updatedOn | date:'short' }}</span>
+              <span class="ml-2 text-xs text-gray-400">{{ status.title }}</span>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Order Items Table -->
+  <div class="px-6">
+    <mat-card class="mb-6 !shadow-none !border !border-gray-200 !rounded-lg">
+      <mat-card-title class="!text-base !font-semibold mb-2">Order Items</mat-card-title>
+      <mat-card-content>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Photo</th>
+                <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Options</th>
+                <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
+                <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of orderResource.value().cart.products; track item.productId) {
+                <tr class="hover:bg-gray-50 transition">
+                  <td class="px-2 py-2">
+                    <img [src]="item.photos[0]" alt="product" class="w-14 h-14 object-cover rounded shadow border" />
+                  </td>
+                  <td class="px-2 py-2 font-semibold">{{ item.name }}</td>
+                  <td class="px-2 py-2">
+                    @if (item.options?.length > 0) {
+                      @for (opt of item.options; track opt._id) {
+                        <div class="text-xs">
+                          {{ opt.name }} <span *ngIf="opt.price">({{ opt.price | currency:orderResource.value().store.currency }})</span> x{{ opt.quantity }}
+                        </div>
+                      }
+                    } @else {
+                      <span class="text-gray-400 text-xs">-</span>
+                    }
+                  </td>
+                  <td class="px-2 py-2">{{ item.quantity }}</td>
+                  <td class="px-2 py-2">{{ item.price | currency:orderResource.value().store.currency }}</td>
+                  <td class="px-2 py-2 font-semibold">
+                    {{ getProductSubtotal(item, orderResource.value().store.currency) }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Order Summary -->
+  <div class="px-6 pb-6">
+    <mat-card class="!shadow-none !border !border-gray-200 !rounded-lg">
+      <mat-card-title class="!text-base !font-semibold mb-2">Order Summary</mat-card-title>
+      <mat-card-content>
+        <div class="flex flex-col gap-2 text-sm">
+          <div class="flex justify-between">
+            <span>Subtotal</span>
+            <span>{{ orderResource.value().subTotal | currency:orderResource.value().store.currency }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Service Fee</span>
+            <span>{{ orderResource.value().serviceFee | currency:orderResource.value().store.currency }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Shipping Fee</span>
+            <span>{{ orderResource.value().shippingFee | currency:orderResource.value().store.currency }}</span>
+          </div>
+          <div class="flex justify-between" *ngIf="orderResource.value().discount">
+            <span>Discount</span>
+            <span>-{{ orderResource.value().discount | currency:orderResource.value().store.currency }}</span>
+          </div>
+          <div class="flex justify-between font-bold text-lg mt-2">
+            <span>Total</span>
+            <span>{{ orderResource.value().total | currency:orderResource.value().store.currency }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="flex items-center justify-center min-h-[300px]">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+</ng-template>

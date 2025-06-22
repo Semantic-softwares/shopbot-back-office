@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "publish": "ng build  --base-href 'https://office.shopbot.africa' && npx ngh --dir=dist/shopbot-back-office/browser --no-silent"
   },
   "private": true,
   "dependencies": {
@@ -24,6 +25,7 @@
     "@ngrx/operators": "^19.2.1",
     "@ngrx/signals": "^19.2.1",
     "@tailwindcss/postcss": "^4.1.7",
+    "angular-cli-ghpages": "^2.0.3",
     "chart.js": "^4.3.0",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",

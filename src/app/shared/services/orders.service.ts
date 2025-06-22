@@ -45,6 +45,15 @@ export class OrderService {
     return this.http.get<any>(`${environment.apiUrl}/orders/store/${storeId}/receipts/selling?${params}`);
   }
 
+  public deleteOrder(orderId: string): Observable<any> {
+    return this.http.delete<any>(`${environment.apiUrl}/orders/${orderId}`);
+  }
+
+  public getOrder(orderId: string): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/orders/${orderId}`);
+  }
+
+
   
 
 }

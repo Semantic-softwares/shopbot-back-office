@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:3000',
-  socketUrl: 'http://localhost:3000',
+  apiUrl: 'https://shopbot-server.herokuapp.com',
+  socketUrl: 'https://shopbot-server.herokuapp.com',
 };

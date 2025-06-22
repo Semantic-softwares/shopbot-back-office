@@ -37,8 +37,8 @@ export const DASHBOARD_REPORTS_ROUTES: Routes = [
       },
       {
         path: 'receipts',
-        loadComponent: () =>
-          import('./receipts/receipts.component').then((m) => m.ReceiptsComponent),
+        loadChildren: () =>
+          import('./receipts/receipts.routing').then((m) => m.DASHBOARD_RECEIPTS_ROUTES),
       },
     ],
   },

@@ -289,6 +289,19 @@ export class CreateProductComponent implements OnInit {
             : this.productService.addProduct(formValue)
         );
 
+        // Add productId to each variant/option
+        if (formValue.options && formValue.options.length > 0) {
+          await Promise.all(
+            formValue.options.map((_id: string) =>
+              firstValueFrom(
+                this.productService.addProductIdToVariant(_id, {
+                  productId: this.isEditMode() ? productId! : savedProduct._id,
+                })
+              )
+            )
+          );
+        }
+
         // Upload images if any
         const newImages = this.selectedImages.filter(img => img.file);
         if (newImages.length > 0) {

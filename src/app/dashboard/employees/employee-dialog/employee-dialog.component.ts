@@ -74,7 +74,26 @@ export class EmployeeDialogComponent {
         : this.userService.createMerchant(formData as Partial<Employee>);
 
       request.subscribe({
-        next: () => {
+        next: (res:any) => {
+          // Handle server validation error in success response
+          if (
+            res?.err?.code === 11000 &&
+            res?.err?.keyPattern
+          ) {
+            let message = 'Error creating/updating employee';
+            if (res.err.keyPattern.email) {
+              message = 'Email already exists';
+            } else if (res.err.keyPattern.phoneNumber) {
+              message = 'Phone number already exists';
+            }
+            this.snackBar.open(
+              message,
+              'Close',
+              { duration: 3000 }
+            );
+            this.isSubmitting.set(false);
+            return;
+          }
           this.snackBar.open(
             `Employee ${this.isEdit ? 'updated' : 'created'} successfully`,
             'Close',
@@ -82,7 +101,7 @@ export class EmployeeDialogComponent {
           );
           this.dialogRef.close(true);
         },
-        error: () => {
+        error: (err) => {
           this.snackBar.open(
             `Error ${this.isEdit ? 'updating' : 'creating'} employee`,
             'Close',
