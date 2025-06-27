@@ -27,10 +27,10 @@ import { Store } from '../shared/models';
     MatMenuModule,
     RouterModule,
     MatExpansionModule,
-    MatDividerModule
+    MatDividerModule,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent {
   private router = inject(Router);
@@ -39,37 +39,89 @@ export class DashboardComponent {
   public storeStore = inject(StoreStore);
   public isMobile = signal(window.innerWidth < 768);
   public opened = signal(true);
-  public currentUser = toSignal(this.authService.currentUser, { initialValue: null });
+  public currentUser = toSignal(this.authService.currentUser, {
+    initialValue: null,
+  });
 
   hasAllRequiredPermissions = this.authService.hasAnyPermission([
     'manage_users',
     'manage_events',
     'manage_companies',
     'manage_dashboard',
-    'manage_settings'
+    'manage_settings',
   ]);
 
   public navItems = [
     {
-      name:  'Reports',
+      name: 'Reports',
       children: [
-        { icon: 'leaderboard', label: 'Sales summary', link: './reports/summary', permission: 'view_company' },
-        { icon: 'shop', label: 'Sales by item', link: './reports/sales-by-item', permission: 'view_timeline' },
-        { icon: 'category', label: 'Sales by category', link: './reports/sales-by-category', permission: 'view_company' },
-        { icon: 'diversity_1', label: 'Sales by employee', link: './reports/sales-by-employee', permission: 'manage_home' },
-        { icon: 'payments', label: 'Sales by payment type', link: './reports/sales-by-payment-type', permission: 'manage_home' },
-        { icon: 'description', label: 'Receipts', link: './reports/receipts', permission: 'manage_home' },
-      ]
+        {
+          icon: 'leaderboard',
+          label: 'Sales summary',
+          link: './reports/summary',
+          permission: 'view_company',
+        },
+        {
+          icon: 'shop',
+          label: 'Sales by item',
+          link: './reports/sales-by-item',
+          permission: 'view_timeline',
+        },
+        {
+          icon: 'category',
+          label: 'Sales by category',
+          link: './reports/sales-by-category',
+          permission: 'view_company',
+        },
+        {
+          icon: 'diversity_1',
+          label: 'Sales by employee',
+          link: './reports/sales-by-employee',
+          permission: 'manage_home',
+        },
+        {
+          icon: 'payments',
+          label: 'Sales by payment type',
+          link: './reports/sales-by-payment-type',
+          permission: 'manage_home',
+        },
+        {
+          icon: 'description',
+          label: 'Receipts',
+          link: './reports/receipts',
+          permission: 'manage_home',
+        },
+      ],
     },
     {
-      name:  'Items',
+      name: 'Items',
       children: [
-        { icon: 'local_mall', label: 'Products', link: './items/products', permission: 'view_company' },
-        { icon: 'category_search', label: 'Categories', link: './items/categories', permission: 'view_timeline' },
-        { icon: 'palette', label: 'Modifiers', link: './items/variants', permission: 'view_company' },
-        { icon: 'check_box', label: 'Options', link: './items/options', permission: 'view_company' },
+        {
+          icon: 'local_mall',
+          label: 'Products',
+          link: './items/products',
+          permission: 'view_company',
+        },
+        {
+          icon: 'category_search',
+          label: 'Categories',
+          link: './items/categories',
+          permission: 'view_timeline',
+        },
+        {
+          icon: 'palette',
+          label: 'Modifiers',
+          link: './items/variants',
+          permission: 'view_company',
+        },
+        {
+          icon: 'check_box',
+          label: 'Options',
+          link: './items/options',
+          permission: 'view_company',
+        },
         // { icon: 'loyalty', label: 'Discount', link: './items/options', permission: 'view_company' },
-      ]
+      ],
     },
     // {
     //   name:  'Inventory',
@@ -78,11 +130,28 @@ export class DashboardComponent {
     //   ]
     // },
     {
-      name:  'Employees',
+      name: 'Employees',
       children: [
-        { icon: 'groups', label: 'Employees', link: './employees/list', permission: 'view_company' },
+        {
+          icon: 'assignment_ind',
+          label: 'Employees',
+          link: './employees/list',
+          permission: 'view_company',
+        },
         // { icon: 'security', label: 'Access Rights', link: './items/categories', permission: 'view_timeline' },
-      ]
+      ],
+    },
+    {
+      name: 'Customers',
+      children: [
+        {
+          icon: 'groups',
+          label: 'Customers',
+          link: './customers/list',
+          permission: 'view_company',
+        },
+        // { icon: 'security', label: 'Access Rights', link: './items/categories', permission: 'view_timeline' },
+      ],
     },
     // {
     //   name:  'Application Settings',
@@ -92,7 +161,7 @@ export class DashboardComponent {
     // },
   ];
 
-  public openLink(link: string): void { 
+  public openLink(link: string): void {
     this.router.navigate([link], { relativeTo: this.route });
   }
 

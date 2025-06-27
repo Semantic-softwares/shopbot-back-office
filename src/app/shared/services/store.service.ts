@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Store } from '../models';
+import { DeliveryZone, Store } from '../models';
 import { SessionStorageService } from './session-storage.service';
 
 
@@ -114,5 +114,9 @@ export class StoreService {
 
   getIncompleteData(storeId:string) {
     return this._httpClient.get(`${this.hostServer}/stores/in-complete-data/${storeId}`);
+  }
+
+   getDeliveryZonesFromServer():Observable<DeliveryZone[]> {
+    return this._httpClient.get<DeliveryZone[]>(`${this.hostServer}/delivery-zones`);
   }
 }
