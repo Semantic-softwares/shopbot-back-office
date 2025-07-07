@@ -1,1 +1,0 @@
-import"./chunk-EQDQRRRY.js";var o=[{path:"",loadComponent:()=>import("./chunk-ALXRUWXP.js").then(t=>t.CustomersComponent),children:[{path:"",redirectTo:"list",pathMatch:"full"},{path:"list",loadComponent:()=>import("./chunk-TZP7XLFG.js").then(t=>t.CustomerListComponent)}]}];export{o as DASHBOARD_CUSTOMERS_ROUTES};
