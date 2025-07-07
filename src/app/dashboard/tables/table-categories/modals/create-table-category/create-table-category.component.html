@@ -1,0 +1,42 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title class="text-xl font-semibold text-gray-900 mb-4">
+    {{ isEdit ? 'Edit Table Category' : 'Create New Table Category' }}
+  </h2>
+
+  <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" class="space-y-4">
+    <mat-dialog-content class="space-y-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Category Name</mat-label>
+        <input matInput formControlName="name" placeholder="Enter category name">
+        <mat-error *ngIf="categoryForm.get('name')?.hasError('required')">
+          Category name is required
+        </mat-error>
+        <mat-error *ngIf="categoryForm.get('name')?.hasError('minlength')">
+          Category name must be at least 2 characters
+        </mat-error>
+      </mat-form-field>
+
+      <div class="flex items-center gap-3">
+        <mat-slide-toggle formControlName="active" color="primary">
+          Active
+        </mat-slide-toggle>
+        <span class="text-sm text-gray-600">
+          {{ categoryForm.get('active')?.value ? 'Category is active' : 'Category is inactive' }}
+        </span>
+      </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="flex justify-end gap-3 pt-4">
+      <button mat-button type="button" (click)="onCancel()" [disabled]="isLoading">
+        Cancel
+      </button>
+      <button 
+        mat-raised-button 
+        color="primary" 
+        type="submit" 
+        [disabled]="categoryForm.invalid || isLoading">
+        {{ isLoading ? 'Saving...' : (isEdit ? 'Update Category' : 'Create Category') }}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</div>

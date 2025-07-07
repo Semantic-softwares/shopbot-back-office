@@ -1,0 +1,19 @@
+.dialog-container {
+  min-width: 400px;
+  
+  .mat-mdc-form-field {
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+  }
+
+  .mat-mdc-dialog-content {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .mat-mdc-slide-toggle {
+    --mdc-switch-selected-track-color: #1976d2;
+    --mdc-switch-selected-handle-color: #1976d2;
+  }
+}

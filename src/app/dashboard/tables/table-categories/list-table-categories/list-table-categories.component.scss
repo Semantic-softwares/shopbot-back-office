@@ -1,0 +1,27 @@
+.table-categories-container {
+  .table-container {
+    .mat-mdc-table {
+      border-radius: 8px;
+      
+      .mat-mdc-header-cell {
+        font-weight: 600;
+        color: #374151;
+        background-color: #f9fafb;
+      }
+      
+      .mat-mdc-row:hover {
+        background-color: #f9fafb;
+      }
+    }
+  }
+}
+
+.mat-mdc-form-field {
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+}
+
+.mat-mdc-card {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}

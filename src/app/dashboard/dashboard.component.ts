@@ -123,6 +123,23 @@ export class DashboardComponent {
         // { icon: 'loyalty', label: 'Discount', link: './items/options', permission: 'view_company' },
       ],
     },
+    {
+      name: 'Tables',
+      children: [
+        {
+          icon: 'table_restaurant',
+          label: 'Tables',
+          link: './tables/list',
+          permission: 'view_company',
+        },
+        {
+          icon: 'category',
+          label: 'Table Categories',
+          link: './tables/categories/list',
+          permission: 'view_company',
+        },
+      ],
+    },
     // {
     //   name:  'Inventory',
     //   children: [
@@ -136,6 +153,12 @@ export class DashboardComponent {
           icon: 'assignment_ind',
           label: 'Employees',
           link: './employees/list',
+          permission: 'view_company',
+        },
+        {
+          icon: 'access_time',
+          label: 'Timecards',
+          link: './employees/timecards/list',
           permission: 'view_company',
         },
         // { icon: 'security', label: 'Access Rights', link: './items/categories', permission: 'view_timeline' },

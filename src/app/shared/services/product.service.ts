@@ -92,11 +92,8 @@ export class ProductService  {
    * @param formData
    * @returns {Promise<any>}
    */
-  uploadPhoto(formData: any, id?: string): Observable<any> {
-    return this._httpClient.post(`${this.hostServer}/foods/upload/${id}`, formData, {
-      reportProgress: true,
-      observe: 'events'
-    })
+  uploadPhoto(formData: FormData, id?: string): Observable<any> {
+    return this._httpClient.post(`${this.hostServer}/foods/upload/${id}`, formData)
   }
 
   /**

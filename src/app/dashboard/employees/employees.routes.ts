@@ -14,6 +14,10 @@ export const DASHBOARD_EMPLOYEES_ROUTES: Routes = [
       {
         path: 'list',
         loadComponent: () => import('./list/list.component').then(m => m.EmployeeListComponent)
+      },
+      {
+        path: 'timecards',
+        loadChildren: () => import('./timecards/timecards.routes').then(m => m.TIMECARDS_ROUTES)
       }
     ],
   },

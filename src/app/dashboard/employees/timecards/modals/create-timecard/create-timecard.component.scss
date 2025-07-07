@@ -1,0 +1,144 @@
+.create-timecard-modal {
+  .mat-mdc-dialog-content {
+    padding: 0 24px;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 16px 24px;
+    margin: 0;
+  }
+
+  mat-card {
+    border-radius: 8px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  }
+
+  mat-card-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 1rem;
+  }
+
+  .mat-mdc-form-field {
+    width: 100%;
+  }
+
+  .break-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1rem;
+    background-color: #f9fafb;
+
+    &:hover {
+      background-color: #f3f4f6;
+    }
+  }
+
+  .break-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+
+    h5 {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+    }
+  }
+
+  .no-breaks {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+
+    mat-icon {
+      font-size: 3rem;
+      width: 3rem;
+      height: 3rem;
+      color: #d1d5db;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .location-section {
+    h4 {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .mat-mdc-raised-button {
+    border-radius: 6px;
+  }
+
+  .mat-mdc-icon-button {
+    &.mat-warn {
+      color: #ef4444;
+    }
+  }
+
+  .grid {
+    display: grid;
+    gap: 1rem;
+
+    &.grid-cols-1 {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+
+    &.grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &.grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 768px) {
+    .grid {
+      &.md\\:grid-cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      &.md\\:grid-cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+  }
+
+  .space-y-4 > * + * {
+    margin-top: 1rem;
+  }
+
+  .space-y-6 > * + * {
+    margin-top: 1.5rem;
+  }
+}
+
+// Loading state
+.mat-mdc-dialog-content {
+  &.loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+// Error states
+.mat-mdc-form-field.mat-form-field-invalid {
+  .mat-mdc-text-field-wrapper {
+    border-color: #ef4444;
+  }
+}
+
+// Success states
+.location-captured {
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      border-color: #10b981;
+    }
+  }
+}

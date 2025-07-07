@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { firstValueFrom } from 'rxjs';
+import { Observable, of, forkJoin, EMPTY } from 'rxjs';
+import { switchMap, catchError, tap, finalize } from 'rxjs/operators';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -26,6 +27,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { CategoryDialogComponent } from '../../categories/category-dialog/category-dialog.component';
 import { AddVariantsListComponent } from '../modals/add-variants-list/add-variants-list.component';
 import { NoRecordComponent } from '../../../../shared/components/no-record/no-record.component';
+import { environment } from '../../../../../environments/environment';
 
 interface ProductUnit {
   value: string;
@@ -121,7 +123,7 @@ export class CreateProductComponent implements OnInit {
       barcode: [''],
       stockLevelAlert: [false],
       inStock: [''],
-      images: [[]],
+      photos: [[]],
       profit: [0],
       active: [true], // Add active field with default true
       options: [[]], // Add variants form control
@@ -189,7 +191,11 @@ export class CreateProductComponent implements OnInit {
       const maxFiles = 5;
 
       if (this.selectedImages.length + files.length > maxFiles) {
-        alert(`You can only upload up to ${maxFiles} images`);
+        this.snackBar.open(`You can only upload up to ${maxFiles} images`, 'Close', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top'
+        });
         return;
       }
 
@@ -204,9 +210,22 @@ export class CreateProductComponent implements OnInit {
             });
           };
           reader.readAsDataURL(file);
+        } else {
+          this.snackBar.open(
+            `File ${file.name} is too large or not an image`,
+            'Close',
+            {
+              duration: 3000,
+              horizontalPosition: 'end',
+              verticalPosition: 'top'
+            }
+          );
         }
       });
     }
+    
+    // Reset the input value so the same file can be selected again
+    input.value = '';
   }
 
   removeImage(index: number) {
@@ -249,6 +268,7 @@ export class CreateProductComponent implements OnInit {
           barcode: product.barcode,
           stockLevelAlert: product.stockLevelAlert,
           inStock: product.activate,
+          photos: product.photos || [],
         });
 
         if (product.photos?.length) {
@@ -275,52 +295,46 @@ export class CreateProductComponent implements OnInit {
     });
   }
 
-  public async onSubmit() {
-    if (this.productForm.valid) {
-      this.isSubmitting.set(true);
-      const formValue = this.productForm.getRawValue();
-      const productId = this.productId();
+  public onSubmit() {
+    if (!this.productForm.valid) {
+      return;
+    }
 
-      try {
-        // Save product data
-        const savedProduct = await firstValueFrom(
-          this.isEditMode()
-            ? this.productService.saveProduct(formValue, productId!)
-            : this.productService.addProduct(formValue)
-        );
+    this.isSubmitting.set(true);
+    const formValue = this.productForm.getRawValue();
+    const productId = this.productId();
 
-        // Add productId to each variant/option
-        if (formValue.options && formValue.options.length > 0) {
-          await Promise.all(
-            formValue.options.map((_id: string) =>
-              firstValueFrom(
-                this.productService.addProductIdToVariant(_id, {
-                  productId: this.isEditMode() ? productId! : savedProduct._id,
-                })
-              )
-            )
-          );
-        }
+    // Step 1: Save/Update product
+    const saveProduct$ = this.isEditMode()
+      ? this.productService.saveProduct(formValue, productId!)
+      : this.productService.addProduct(formValue);
 
-        // Upload images if any
-        const newImages = this.selectedImages.filter(img => img.file);
-        if (newImages.length > 0) {
-          const formData = new FormData();
-          newImages.forEach(image => {
-            formData.append('files', image.file);
-          });
-
-          await firstValueFrom(
-            this.productService.uploadPhoto(
-              formData, 
-              this.isEditMode() ? productId! : savedProduct._id
-            )
-          );
-        }
-
+    saveProduct$.pipe(
+      tap(savedProduct => {
+        console.log('Product saved:', savedProduct);
+      }),
+      switchMap(savedProduct => {
+        const finalProductId = this.isEditMode() ? productId! : savedProduct._id;
+        
+        // Step 2: Handle variants/options if any
+        const variantOperations$ = this.handleVariantOperations(formValue, finalProductId);
+        
+        // Step 3: Handle image upload if any
+        const imageUpload$ = this.handleImageUpload(finalProductId);
+        
+        // Run variants and images in parallel
+        return forkJoin({
+          variants: variantOperations$,
+          photos: imageUpload$,
+          product: of(savedProduct)
+        });
+      }),
+      tap(result => {
+        console.log('All operations completed:', result);
         this.showSuccessMessage();
-      } catch (error) {
-        console.error('Error saving product:', error);
+      }),
+      catchError(error => {
+        console.error('Error in product submission:', error);
         this.snackBar.open(
           `Error ${this.isEditMode() ? 'updating' : 'creating'} product`,
           'Close',
@@ -330,10 +344,92 @@ export class CreateProductComponent implements OnInit {
             verticalPosition: 'top'
           }
         );
-      } finally {
+        return EMPTY;
+      }),
+      finalize(() => {
         this.isSubmitting.set(false);
-      }
+      })
+    ).subscribe();
+  }
+
+  private handleVariantOperations(formValue: any, productId: string): Observable<any> {
+    if (!formValue.options || formValue.options.length === 0) {
+      return of(null);
     }
+
+    const variantUpdates$ = formValue.options.map((_id: string) =>
+      this.productService.addProductIdToVariant(_id, { productId })
+    );
+
+    return forkJoin(variantUpdates$).pipe(
+      tap(results => {
+        console.log('Variant operations completed:', results);
+      }),
+      catchError(error => {
+        console.error('Error updating variants:', error);
+        // Don't fail the entire operation for variant errors
+        return of(null);
+      })
+    );
+  }
+
+  private handleImageUpload(productId: string): Observable<any> {
+    const newImages = this.selectedImages.filter(img => img.file && img.file instanceof File);
+    console.log('Selected images:', this.selectedImages);
+    console.log('New images to upload:', newImages);
+    
+    if (newImages.length === 0) {
+      return of(null);
+    }
+
+    const formData = new FormData();
+    newImages.forEach((image, index) => {
+      if (image.file && image.file instanceof File) {
+        console.log(`Appending file ${index}:`, {
+          name: image.file.name,
+          size: image.file.size,
+          type: image.file.type
+        });
+        formData.append('files', image.file, image.file.name);
+      }
+    });
+
+    // Debug FormData contents
+    console.log('FormData entries:');
+    for (let pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+
+    console.log('Starting image upload for product:', productId);
+    console.log('Upload URL:', `${environment.apiUrl}/foods/upload/${productId}`);
+
+    return this.productService.uploadPhoto(formData, productId).pipe(
+      tap(uploadResult => {
+        console.log('Image upload completed successfully:', uploadResult);
+      }),
+      catchError(uploadError => {
+        console.error('Error uploading images:', uploadError);
+        console.error('Upload error details:', {
+          message: uploadError instanceof Error ? uploadError.message : uploadError,
+          status: (uploadError as any)?.status,
+          statusText: (uploadError as any)?.statusText,
+          error: (uploadError as any)?.error
+        });
+        
+        // Show error but don't fail the entire operation
+        this.snackBar.open(
+          'Product saved but some images failed to upload',
+          'Close',
+          {
+            duration: 3000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top'
+          }
+        );
+        
+        return of(null); // Return null instead of failing
+      })
+    );
   }
 
   private showSuccessMessage() {
@@ -351,13 +447,14 @@ export class CreateProductComponent implements OnInit {
     } else {
       this.router.navigate(['/dashboard/items/products']);
     }
-    this.isSubmitting.set(false);
   }
 
   private resetForm() {
     this.productForm.reset({
       store: this.storeStore.selectedStore()?._id,
       stockLevelAlert: false,
+      active: true,
+      options: [],
       images: [],
     });
     this.selectedImages = [];

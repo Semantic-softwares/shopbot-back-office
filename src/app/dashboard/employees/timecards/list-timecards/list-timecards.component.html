@@ -1,0 +1,167 @@
+<mat-card class="timecards-container !bg-white !rounded-xl !shadow-lg border border-gray-100">
+  <mat-card-content class="!bg-white">
+    
+    <!-- Header with Actions -->
+    <div class="header-section flex justify-between items-center mb-6 p-4 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-900">Timecards</h2>
+      
+      <div class="actions-group flex gap-3">
+        <button mat-button [matMenuTriggerFor]="exportMenu" class="flex items-center gap-2">
+          <mat-icon>download</mat-icon>
+          EXPORT
+        </button>
+        <mat-menu #exportMenu="matMenu">
+          <button mat-menu-item (click)="exportTimecards('csv')">
+            <mat-icon>table_chart</mat-icon>
+            <span>Export as CSV</span>
+          </button>
+          <button mat-menu-item (click)="exportTimecards('excel')">
+            <mat-icon>grid_on</mat-icon>
+            <span>Export as Excel</span>
+          </button>
+        </mat-menu>
+        
+        <button mat-raised-button color="primary" (click)="createTimecard()" class="flex items-center gap-2">
+          <mat-icon>add</mat-icon>
+          CREATE TIMECARD
+        </button>
+      </div>
+    </div>
+
+
+    
+    @if (dataSource.isLoading()) {
+      <div class="flex items-center justify-center min-h-[300px]">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    } @else if (dataSource.hasValue() && dataSource.value().length === 0) {
+      <app-no-record icon="schedule" title="No Timecards"
+        message="No timecards found matching your criteria.">
+      </app-no-record>
+    } @else if (dataSource.hasValue() && dataSource.value().length > 0) {
+      <div class="table-container rounded-lg overflow-x-auto">
+        <table mat-table [dataSource]="dataSource.value()" matSort class="!bg-white min-w-full rounded-lg">
+          
+          <ng-container matColumnDef="employee">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50">Employee</th>
+            <td mat-cell *matCellDef="let element" class="font-semibold">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span class="text-xs font-medium text-blue-600">
+                    {{(typeof element.employee === 'object' ? element.employee.name : 'Unknown')[0]}}
+                  </span>
+                </div>
+                <span>{{typeof element.employee === 'object' ? element.employee.name : 'Unknown Employee'}}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50">Date</th>
+            <td mat-cell *matCellDef="let element">
+              {{element.clockInTime | date:'MMM dd, yyyy'}}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="clockIn">
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Clock In</th>
+            <td mat-cell *matCellDef="let element">
+              {{element.clockInTime | date:'shortTime'}}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="clockOut">
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Clock Out</th>
+            <td mat-cell *matCellDef="let element">
+              @if (element.clockOutTime) {
+                {{element.clockOutTime | date:'shortTime'}}
+              } @else {
+                <span class="text-orange-600 font-medium">Still Active</span>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="totalHours">
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Total Hours</th>
+            <td mat-cell *matCellDef="let element">
+              @if (element.totalHours) {
+                {{formatDuration(element.totalHours)}}
+              } @else {
+                <span class="text-gray-400">-</span>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="breaks">
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Breaks</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="flex gap-1">
+                @for (break of element.breaks; track $index) {
+                  <mat-chip class="!text-xs">
+                    {{break.breakType}}: {{formatDuration(break.breakDuration || 0)}}
+                  </mat-chip>
+                }
+                @if (element.breaks.length === 0) {
+                  <span class="text-gray-400">No breaks</span>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="overtime">
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Overtime</th>
+            <td mat-cell *matCellDef="let element">
+              @if (element.overtime && element.overtime > 0) {
+                <span class="text-orange-600 font-medium">{{formatDuration(element.overtime)}}</span>
+              } @else {
+                <span class="text-gray-400">-</span>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Status</th>
+            <td mat-cell *matCellDef="let element">
+              <span class="px-2 py-1 rounded-full text-xs font-medium {{getStatusColor(element.status)}}">
+                {{element.status | titlecase}}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Actions</th>
+            <td mat-cell *matCellDef="let timesheet">
+              <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Timecard actions">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="editTimecard(timesheet)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                @if (timesheet.status === 'completed') {
+                  <button mat-menu-item (click)="approveTimecard(timesheet)">
+                    <mat-icon>check_circle</mat-icon>
+                    <span>Approve</span>
+                  </button>
+                }
+                <button mat-menu-item (click)="deleteTimecard(timesheet)" class="text-red-600">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-gray-50"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50 transition"></tr>
+        </table>
+        <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of timecards" class="!bg-white"></mat-paginator>
+      </div>
+    } @else if (dataSource.error()) {
+      <app-no-record icon="error" title="Error"
+        message="An error occurred while fetching the data. Please try again later.">
+      </app-no-record>
+    }
+  </mat-card-content>
+</mat-card>

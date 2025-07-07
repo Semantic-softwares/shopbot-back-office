@@ -1,0 +1,155 @@
+<div class="create-timecard-modal">
+  <h2 mat-dialog-title class="text-xl font-semibold text-gray-900 mb-4">
+    {{ isEdit ? 'Edit Timecard' : 'Create New Timecard' }}
+  </h2>
+
+  <form [formGroup]="timecardForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <mat-dialog-content class="max-h-[70vh] overflow-y-auto">
+      <!-- Employee Selection -->
+      <div class="grid grid-cols-1 gap-4">
+        <mat-form-field appearance="outline">
+          <mat-label>Employee</mat-label>
+          <mat-select formControlName="staff" [disabled]="isEdit">
+            @if (employees.value(); as employeeList) {
+              @for (employee of employeeList; track employee._id) {
+                <mat-option [value]="employee._id">
+                  {{ employee.name }}
+                </mat-option>
+              }
+            }
+          </mat-select>
+          @if (timecardForm.get('staff')?.invalid && timecardForm.get('staff')?.touched) {
+            <mat-error>{{ getFieldError('staff') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Time Information -->
+      <mat-card class="p-4">
+        <mat-card-title class="text-base font-medium mb-3">Time Information</mat-card-title>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Clock In Time</mat-label>
+            <input matInput type="datetime-local" formControlName="clockInTime" required>
+            @if (timecardForm.get('clockInTime')?.invalid && timecardForm.get('clockInTime')?.touched) {
+              <mat-error>{{ getFieldError('clockInTime') }}</mat-error>
+            }
+            @if (timecardForm.hasError('invalidTimeRange') && timecardForm.get('clockInTime')?.touched) {
+              <mat-error>Clock-in time must be before clock-out time</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Clock Out Time</mat-label>
+            <input matInput type="datetime-local" formControlName="clockOutTime">
+            @if (timecardForm.hasError('invalidTimeRange') && timecardForm.get('clockOutTime')?.touched) {
+              <mat-error>Clock-out time must be after clock-in time</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </mat-card>
+
+      <!-- Breaks Section -->
+      <mat-card class="p-4">
+        <mat-card-title class="text-base font-medium mb-3 flex items-center justify-between">
+          <span>Breaks</span>
+          <button type="button" mat-raised-button color="primary" (click)="addBreak()">
+            <mat-icon>add</mat-icon>
+            Add Break
+          </button>
+        </mat-card-title>
+
+        <div formArrayName="breaks" class="space-y-4">
+          @for (break of breaksArray.controls; track $index; let i = $index) {
+            <div [formGroupName]="i" class="border border-gray-200 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <h5 class="text-sm font-medium">Break {{ i + 1 }}</h5>
+                <button type="button" mat-icon-button color="warn" (click)="removeBreak(i)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <mat-form-field appearance="outline">
+                  <mat-label>Break Type</mat-label>
+                  <mat-select formControlName="breakType">
+                    @for (type of breakTypes; track type.value) {
+                      <mat-option [value]="type.value">{{ type.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Start Time</mat-label>
+                  <input matInput type="datetime-local" formControlName="breakStart">
+                  @if (breaksArray.at(i).hasError('invalidBreakTimeRange') && breaksArray.at(i).get('breakStart')?.touched) {
+                    <mat-error>Start time must be before end time</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>End Time</mat-label>
+                  <input matInput type="datetime-local" formControlName="breakEnd">
+                  @if (breaksArray.at(i).hasError('invalidBreakTimeRange') && breaksArray.at(i).get('breakEnd')?.touched) {
+                    <mat-error>End time must be after start time</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Notes</mat-label>
+                <textarea matInput formControlName="notes" rows="2"></textarea>
+              </mat-form-field>
+            </div>
+          }
+        </div>
+
+        @if (breaksArray.length === 0) {
+          <div class="text-center py-8 text-gray-500">
+            <mat-icon class="text-gray-400 mb-2">schedule</mat-icon>
+            <p>No breaks added yet</p>
+          </div>
+        }
+      </mat-card>
+
+      <!-- Status and Notes -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            @for (status of statusOptions; track status.value) {
+              <mat-option [value]="status.value">{{ status.label }}</mat-option>
+            }
+          </mat-select>
+          @if (timecardForm.get('status')?.invalid && timecardForm.get('status')?.touched) {
+            <mat-error>{{ getFieldError('status') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Notes</mat-label>
+          <textarea matInput formControlName="notes" rows="3"></textarea>
+        </mat-form-field>
+      </div>
+
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end" class="border-t pt-4 mt-6">
+      <button mat-button type="button" (click)="onCancel()" [disabled]="isLoading()">
+        Cancel
+      </button>
+      <button 
+        mat-raised-button 
+        color="primary" 
+        type="submit" 
+        [disabled]="timecardForm.invalid || isLoading()">
+        @if (isLoading()) {
+          <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+        }
+        {{ isEdit ? 'Update' : 'Create' }} Timecard
+      </button>
+
+    </mat-dialog-actions>
+  </form>
+
+</div>
