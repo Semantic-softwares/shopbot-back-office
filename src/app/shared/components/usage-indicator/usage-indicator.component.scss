@@ -1,0 +1,21 @@
+.usage-card {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+::ng-deep .mat-mdc-progress-bar .mdc-linear-progress__bar-inner {
+  border-radius: 4px;
+}
+
+.error-message, .warning-message {
+  display: flex;
+  align-items: center;
+}
+
+.unlimited-plan {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 8px;
+}

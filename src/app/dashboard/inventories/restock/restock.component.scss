@@ -1,0 +1,78 @@
+.restock-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.product-card {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.restock-table {
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      height: 40px;
+    }
+  }
+}
+
+.price-summary-card {
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    
+    &.total-row {
+      border-top: 1px solid #e5e7eb;
+      font-weight: 600;
+      font-size: 1.1rem;
+      padding-top: 1rem;
+      margin-top: 1rem;
+    }
+  }
+}
+
+::ng-deep {
+  .success-snackbar {
+    background-color: #10b981;
+    color: white;
+  }
+
+  .warn-snackbar {
+    background-color: #f59e0b;
+    color: white;
+  }
+
+  .mat-mdc-form-field-appearance-outline .mat-mdc-form-field-outline-thick {
+    color: rgba(0, 0, 0, 0.12);
+  }
+
+  .mat-mdc-checkbox {
+    margin-right: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .restock-table {
+    .mat-table {
+      font-size: 0.875rem;
+    }
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}

@@ -32,6 +32,10 @@ export const DASHBOARD_ROUTES: Routes = [
                 loadChildren: () => import('./customers/customers.routes').then(m => m.DASHBOARD_CUSTOMERS_ROUTES)
             },
             {
+                path: 'inventory',
+                loadChildren: () => import('./inventories/inventories.routes').then(m => m.DASHBOARD_INVENTORIES_ROUTES)
+            },
+            {
                 path: 'store-settings',
                 loadComponent: () => import('./store-settings/store-settings.component').then(m => m.StoreSettingsComponent)
             }

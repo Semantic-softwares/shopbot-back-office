@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -114,5 +114,41 @@ export class ProductService  {
    */
   addProduct(product: any): Observable<Product> {
     return this._httpClient.post<Product>(`${this.hostServer}/foods`, product)
+  }
+
+  /**
+   * Bulk restock products
+   *
+   * @param restockData
+   * @returns {Observable<any>}
+   */
+  bulkRestock(restockData: Array<{
+    productId: string;
+    quantity: number;
+    costPrice: number;
+    sellingPrice: number;
+    expiryDate?: Date;
+  }>): Observable<any> {
+    return this._httpClient.post(`${this.hostServer}/foods/restock/bulk`, { items: restockData })
+  }
+
+  /**
+   * Search products for autocomplete with exclusions
+   *
+   * @param storeId
+   * @param query
+   * @param excludeIds
+   * @returns {Observable<Product[]>}
+   */
+  searchForAutocomplete(storeId: string, query: string, excludeIds: string[] = []): Observable<Product[]> {
+    let params = new HttpParams()
+      .set('storeId', storeId)
+      .set('query', query);
+    
+    if (excludeIds.length > 0) {
+      params = params.set('excludeIds', excludeIds.join(','));
+    }
+
+    return this._httpClient.get<Product[]>(`${this.hostServer}/foods/search/autocomplete`, { params });
   }
 }

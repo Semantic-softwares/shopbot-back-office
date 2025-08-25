@@ -1,0 +1,77 @@
+<div class="upgrade-dialog">
+  <div mat-dialog-title class="text-center pb-4">
+    <h2 class="text-2xl font-bold text-gray-800">Choose Your Plan</h2>
+    <p class="text-gray-600 mt-2">Upgrade to get more storage and features</p>
+  </div>
+
+  <div mat-dialog-content class="px-6 pb-6">
+    @if (subscriptionService.subscriptionPlans(); as plans) {
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        @for (plan of getPlansArray(plans); track plan.key) {
+          <mat-card 
+            class="plan-card cursor-pointer transition-all duration-200 hover:shadow-lg"
+            [class.selected]="selectedPlan === plan.key"
+            [class.current]="isCurrentPlan(plan.key)"
+            (click)="selectPlan(plan.key)">
+            
+            <mat-card-header class="pb-4">
+              <div class="flex justify-between items-start w-full">
+                <div>
+                  <mat-card-title class="text-lg font-semibold">
+                    {{ plan.value.name }}
+                  </mat-card-title>
+                  <mat-card-subtitle class="text-2xl font-bold text-primary">
+                    {{ formatPrice(plan.value.price) }}
+                  </mat-card-subtitle>
+                </div>
+                @if (isCurrentPlan(plan.key)) {
+                  <mat-chip color="accent" class="text-xs">Current</mat-chip>
+                }
+              </div>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="storage-info mb-4 p-3 bg-gray-50 rounded">
+                <div class="flex items-center mb-2">
+                  <mat-icon class="text-blue-500 mr-2">storage</mat-icon>
+                  <span class="font-medium">
+                    {{ subscriptionService.formatBytes(plan.value.allowedBytes) }} Storage
+                  </span>
+                </div>
+              </div>
+
+              <div class="features">
+                <h4 class="font-medium mb-2 text-gray-700">Features:</h4>
+                <ul class="space-y-1">
+                  @for (feature of plan.value.features; track feature) {
+                    <li class="flex items-center text-sm text-gray-600">
+                      <mat-icon class="text-green-500 mr-2" style="font-size: 16px; height: 16px; width: 16px;">
+                        check_circle
+                      </mat-icon>
+                      {{ feature }}
+                    </li>
+                  }
+                </ul>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    }
+  </div>
+
+  <div mat-dialog-actions class="flex justify-end gap-2 px-6 pb-4">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button 
+      mat-raised-button 
+      color="primary"
+      [disabled]="!selectedPlan || isCurrentPlan(selectedPlan)"
+      (click)="onUpgrade()">
+      @if (selectedPlan && !isCurrentPlan(selectedPlan)) {
+        Upgrade to {{ getSelectedPlanName() }}
+      } @else {
+        Select a Plan
+      }
+    </button>
+  </div>
+</div>

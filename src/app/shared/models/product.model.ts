@@ -33,6 +33,7 @@ export interface Product {
   stockLevelAlert?: boolean;
   qty?: number;
   station?: Station | string | any;
+  expiryDate?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -13,6 +13,7 @@ import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { MatDividerModule } from '@angular/material/divider';
 import { StoreStore } from '../shared/stores/store.store';
 import { Store } from '../shared/models';
+import { UsageIndicatorComponent } from '../shared/components/usage-indicator/usage-indicator.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -28,9 +29,10 @@ import { Store } from '../shared/models';
     RouterModule,
     MatExpansionModule,
     MatDividerModule,
+    UsageIndicatorComponent,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss',
+  styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent {
   private router = inject(Router);
@@ -140,12 +142,15 @@ export class DashboardComponent {
         },
       ],
     },
-    // {
-    //   name:  'Inventory',
-    //   children: [
-    //     { icon: 'warehouse', label: 'Inventory Management', link: './inventory/products', permission: 'view_company' },
-    //   ]
-    // },
+    {
+      name:  'Inventory',
+      children: [
+        { icon: 'warehouse', label: 'Suppliers', link: './inventory/suppliers', permission: 'view_company' },
+        { icon: 'inventory_2', label: 'Restock', link: './inventory/restock', permission: 'view_company' },
+        { icon: 'calculate', label: 'Reconciliations', link: './inventory/reconciliations', permission: 'view_company' },
+
+      ]
+    },
     {
       name: 'Employees',
       children: [

@@ -1,0 +1,266 @@
+ <div class="p-6 max-w-4xl mx-auto">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">
+            {{ isEditMode() ? 'Edit Stock Entry' : 'Add Stock' }}
+          </h1>
+          <p class="text-gray-600 mt-1">
+            {{ isEditMode() ? 'Update existing inventory record' : 'Record new inventory received from suppliers' }}
+          </p>
+        </div>
+        <button mat-button (click)="goToRestock()" class="text-gray-600">
+          <mat-icon>arrow_back</mat-icon>
+          Back to List
+        </button>
+      </div>
+
+      <form [formGroup]="restockForm" (ngSubmit)="onSubmit()">
+        <!-- Header Information -->
+        <mat-card class="mb-6">
+          <mat-card-header>
+            <mat-card-title>Restock Information</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <mat-form-field appearance="outline">
+                <mat-label>Supplier *</mat-label>
+                <mat-select formControlName="supplier" required>
+                  @for (supplier of suppliers.value(); track supplier._id) {
+                    <mat-option [value]="supplier._id">{{ supplier.name }}</mat-option>
+                  }
+                </mat-select>
+                @if (restockForm.get('supplier')?.invalid && restockForm.get('supplier')?.touched) {
+                  <mat-error>Supplier is required</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Invoice Number *</mat-label>
+                <input matInput formControlName="invoiceNumber" required>
+                @if (restockForm.get('invoiceNumber')?.invalid && restockForm.get('invoiceNumber')?.touched) {
+                  <mat-error>Invoice number is required</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Order Number</mat-label>
+                <input matInput formControlName="orderNumber">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Invoice Date *</mat-label>
+                <input matInput [matDatepicker]="datePicker" formControlName="invoiceDate" required>
+                <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
+                <mat-datepicker #datePicker></mat-datepicker>
+              </mat-form-field>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Products Section -->
+        <mat-card class="mb-6">
+          <mat-card-header>
+            <mat-card-title>Products</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="p-6">
+            <!-- Add Product Search -->
+            <div class="mb-4">
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Search and add product</mat-label>
+                <input
+                  matInput
+                  #searchInput
+                  [matAutocomplete]="auto"
+                  placeholder="Search by product name or barcode"
+                  (input)="onSearchInputChange($event)"
+                >
+                <mat-autocomplete 
+                  #auto="matAutocomplete" 
+                  [displayWith]="displayProduct"
+                  (optionSelected)="addProductToRestock($event.option.value)"
+                >
+                  @for (product of filteredProducts$ | async; track product._id) {
+                    <mat-option [value]="product">
+                      <div class="flex items-center space-x-3">
+                        @if (product.photos?.length > 0) {
+                          <img [src]="product.photos[0]" [alt]="product.name" class="w-8 h-8 rounded object-cover">
+                        } @else {
+                          <div class="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">
+                            <mat-icon class="text-gray-400 text-sm">image</mat-icon>
+                          </div>
+                        }
+                        <div>
+                          <div class="font-medium">{{ product.name }}</div>
+                          <div class="text-sm text-gray-500">
+                            Current Qty: {{ product.qty || 0 }} | Cost: {{ product.costPrice | currency:currency():'symbol':'1.2-2' }}
+                          </div>
+                        </div>
+                      </div>
+                    </mat-option>
+                  }
+                </mat-autocomplete>
+              </mat-form-field>
+            </div>
+
+            <!-- Products Table -->
+            <div formArrayName="items">
+              @if (itemsArray.length === 0) {
+                <div class="text-center py-8 text-gray-500">
+                  <mat-icon class="text-4xl mb-2">search</mat-icon>
+                  <p>Search and add products to restock</p>
+                </div>
+              } @else {
+                <div class="overflow-x-auto">
+                  <table class="w-full">
+                    <thead>
+                      <tr class="border-b border-gray-200">
+                        <th class="text-left py-2">Product</th>
+                        <th class="text-left py-2">Quantity</th>
+                        <th class="text-left py-2">Cost Price</th>
+                        <th class="text-left py-2">Selling Price</th>
+                        <th class="text-left py-2">Expiry Date</th>
+                        <th class="text-left py-2">Total</th>
+                        <th class="text-left py-2">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (item of itemsArray.controls; track $index) {
+                        <tr [formGroupName]="$index" class="border-b border-gray-100">
+                          <td class="py-3">
+                            <div class="flex items-center space-x-2">
+                              @if (item.value.product?.photos?.length > 0) {
+                                <img [src]="item.value.product.photos[0]" [alt]="item.value.product.name" class="w-10 h-10 rounded object-cover">
+                              }
+                              <div>
+                                <div class="font-medium">{{ item.value.product?.name }}</div>
+                                <div class="text-sm text-gray-500">{{ item.value.product?.sku }}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td class="py-3">
+                            <mat-form-field appearance="outline" class="w-20">
+                              <input matInput type="number" formControlName="quantity" min="1">
+                            </mat-form-field>
+                          </td>
+                          <td class="py-3">
+                            <mat-form-field appearance="outline" class="w-24">
+                              <input matInput type="number" formControlName="costPrice" min="0" step="0.01">
+                            </mat-form-field>
+                          </td>
+                          <td class="py-3">
+                            <mat-form-field appearance="outline" class="w-24">
+                              <input matInput type="number" formControlName="sellingPrice" min="0" step="0.01">
+                            </mat-form-field>
+                          </td>
+                          <td class="py-3">
+                            <mat-form-field appearance="outline" class="w-32">
+                              <input matInput [matDatepicker]="expiryPicker" formControlName="expiryDate">
+                              <mat-datepicker-toggle matIconSuffix [for]="expiryPicker"></mat-datepicker-toggle>
+                              <mat-datepicker #expiryPicker></mat-datepicker>
+                            </mat-form-field>
+                          </td>
+                          <td class="py-3">
+                            <span class="font-medium">
+                              {{ (item.value.quantity || 0) * (item.value.costPrice || 0) | currency:currency():'symbol':'1.2-2' }}
+                            </span>
+                          </td>
+                          <td class="py-3">
+                            <button
+                              type="button"
+                              mat-icon-button
+                              color="warn"
+                              (click)="removeItem($index)"
+                            >
+                              <mat-icon>delete</mat-icon>
+                            </button>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Summary Section -->
+        @if (itemsArray.length > 0) {
+          <mat-card class="mb-6">
+            <mat-card-header>
+              <mat-card-title>Summary</mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <mat-form-field appearance="outline">
+                  <mat-label>Discount (%)</mat-label>
+                  <input matInput type="number" formControlName="discount" min="0" max="100" step="0.01">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>VAT (%)</mat-label>
+                  <input matInput type="number" formControlName="vat" min="0" max="100" step="0.01">
+                </mat-form-field>
+
+                <div class="flex flex-col space-y-2 justify-end">
+                  <div class="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span class="font-medium">{{ subtotal() | currency:currency():'symbol':'1.2-2' }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span>Discount:</span>
+                    <span class="font-medium">{{ discountAmount() | currency:currency():'symbol':'1.2-2' }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span>VAT:</span>
+                    <span class="font-medium">{{ vatAmount() | currency:currency():'symbol':'1.2-2' }}</span>
+                  </div>
+                  <div class="flex justify-between text-lg font-bold border-t pt-2">
+                    <span>Total:</span>
+                    <span>{{ total() | currency:currency():'symbol':'1.2-2' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <mat-form-field appearance="outline">
+                  <mat-label>Amount Paid</mat-label>
+                  <input matInput type="number" formControlName="amountPaid" min="0" step="0.01">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Payment Method</mat-label>
+                  <mat-select formControlName="paymentMethod">
+                    <mat-option value="cash">Cash</mat-option>
+                    <mat-option value="bank_transfer">Bank Transfer</mat-option>
+                    <mat-option value="check">Check</mat-option>
+                    <mat-option value="credit">Credit</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <mat-form-field appearance="outline" class="w-full mt-4">
+                <mat-label>Notes</mat-label>
+                <textarea matInput formControlName="notes" rows="3"></textarea>
+              </mat-form-field>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end space-x-4">
+          <button type="button" mat-button [routerLink]="['..']">Cancel</button>
+          <button
+            type="submit"
+            mat-raised-button
+            color="primary"
+            [disabled]="restockForm.invalid || isSubmitting()"
+          >
+            @if (isSubmitting()) {
+              <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+            }
+            {{ isEditMode() ? 'Update Restock' : 'Save Restock' }}
+          </button>
+        </div>
+      </form>
+    </div>

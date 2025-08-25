@@ -1,0 +1,281 @@
+    <div class="p-6 max-w-7xl mx-auto">
+      <h1 class="text-3xl font-bold text-gray-900 mb-6">Inventory Reconciliation</h1>
+      
+      <div class="flex justify-end mb-6">
+        <button mat-raised-button color="primary" [routerLink]="['start']">
+          <mat-icon>add_circle</mat-icon>
+          Start Reconciliation
+        </button>
+      </div>
+
+      <mat-card>
+        <div class="overflow-x-auto">
+          <table mat-table [dataSource]="reconciliations.value()?.data || []" class="w-full">
+            
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Name</th>
+              <td mat-cell *matCellDef="let reconciliation" class="py-3">
+                <div class="font-medium">{{ reconciliation.name }}</div>
+                <div class="text-sm text-gray-500">{{ reconciliation.description }}</div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let reconciliation" class="py-3">
+                <mat-chip-set>
+                  <mat-chip [class]="getStatusClass(reconciliation.status)">
+                    {{ getStatusLabel(reconciliation.status) }}
+                  </mat-chip>
+                </mat-chip-set>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let reconciliation" class="py-3">
+                <button mat-icon-button [matMenuTriggerFor]="menu">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                  <button mat-menu-item [routerLink]="[reconciliation._id, 'details']">
+                    <mat-icon>visibility</mat-icon>
+                    <span>View Details</span>
+                  </button>
+                </mat-menu>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+      </mat-card>
+    </div>
+
+      <!-- Statistics Cards -->
+      @if (stats.value(); as statsData) {
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <mat-card class="p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600">Total Reconciliations</p>
+                <p class="text-2xl font-bold text-gray-900">{{ statsData.overview.totalReconciliations }}</p>
+              </div>
+              <mat-icon class="text-blue-500">inventory</mat-icon>
+            </div>
+          </mat-card>
+
+          <mat-card class="p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600">Completed</p>
+                <p class="text-2xl font-bold text-green-600">{{ statsData.overview.completedReconciliations }}</p>
+              </div>
+              <mat-icon class="text-green-500">check_circle</mat-icon>
+            </div>
+          </mat-card>
+
+          <mat-card class="p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600">Total Variance</p>
+                <p class="text-2xl font-bold" 
+                   [class.text-red-600]="statsData.overview.totalVarianceValue < 0"
+                   [class.text-green-600]="statsData.overview.totalVarianceValue > 0">
+                  {{ statsData.overview.totalVarianceValue | currency:currency():'symbol':'1.2-2' }}
+                </p>
+              </div>
+              <mat-icon class="text-orange-500">trending_up</mat-icon>
+            </div>
+          </mat-card>
+
+          <mat-card class="p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600">Avg Variance</p>
+                <p class="text-2xl font-bold text-gray-900">
+                  {{ statsData.overview.avgVarianceValue | currency:currency():'symbol':'1.2-2' }}
+                </p>
+              </div>
+              <mat-icon class="text-purple-500">analytics</mat-icon>
+            </div>
+          </mat-card>
+        </div>
+      }
+
+      <!-- Filters -->
+      <mat-card class="mb-6">
+        <mat-card-content class="p-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <mat-form-field appearance="outline">
+              <mat-label>Status</mat-label>
+              <mat-select [(value)]="filters.status" (selectionChange)="onFilterChange()">
+                <mat-option value="">All Statuses</mat-option>
+                <mat-option value="in_progress">In Progress</mat-option>
+                <mat-option value="completed">Completed</mat-option>
+                <mat-option value="cancelled">Cancelled</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Type</mat-label>
+              <mat-select [(value)]="filters.type" (selectionChange)="onFilterChange()">
+                <mat-option value="">All Types</mat-option>
+                <mat-option value="full_inventory">Full Inventory</mat-option>
+                <mat-option value="partial">Partial</mat-option>
+                <mat-option value="cycle_count">Cycle Count</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>From Date</mat-label>
+              <input matInput [matDatepicker]="fromPicker" [(ngModel)]="filters.dateFrom" (dateChange)="onFilterChange()">
+              <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fromPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>To Date</mat-label>
+              <input matInput [matDatepicker]="toPicker" [(ngModel)]="filters.dateTo" (dateChange)="onFilterChange()">
+              <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
+              <mat-datepicker #toPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Reconciliations Table -->
+      <mat-card>
+        <div class="overflow-x-auto">
+          <table mat-table [dataSource]="reconciliations.value()?.data || []" class="w-full">
+            
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Name</th>
+              <td mat-cell *matCellDef="let reconciliation" class="py-3">
+                <div>
+                  <div class="font-medium">{{ reconciliation.name }}</div>
+                  <div class="text-sm text-gray-500">{{ reconciliation.description }}</div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Date Column -->
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Start Date</th>
+              <td mat-cell *matCellDef="let reconciliation" class="py-3">
+                <div>
+                  <div>{{ reconciliation.startDate | date:'mediumDate' }}</div>
+                  <div class="text-sm text-gray-500">
+                    @if (reconciliation.completedDate) {
+                      Completed: {{ reconciliation.completedDate | date:'mediumDate' }}
+                    }
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Type Column -->
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>Type</th>
+              <td mat-cell *matCellDef="let reconciliation" class="py-3">
+                <mat-chip-set>
+                  <mat-chip [class]="getTypeClass(reconciliation.type)">
+                    {{ getTypeLabel(reconciliation.type) }}
+                  </mat-chip>
+                </mat-chip-set>
+              </td>
+            </ng-container>
+
+            <!-- Progress Column -->
+            <ng-container matColumnDef="progress">
+              <th mat-header-cell *matHeaderCellDef>Progress</th>
+              <td mat-cell *matCellDef="let reconciliation" class="py-3">
+                <div>
+                  <div class="text-sm">
+                    {{ reconciliation.countedProducts }} / {{ reconciliation.totalProducts }} items
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                    <div 
+                      class="bg-blue-500 h-2 rounded-full" 
+                      [style.width.%]="getProgressPercentage(reconciliation)"
+                    ></div>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Discrepancies Column -->
+            <ng-container matColumnDef="discrepancies">
+              <th mat-header-cell *matHeaderCellDef>Discrepancies</th>
+              <td mat-cell *matCellDef="let reconciliation" class="py-3">
+                <div>
+                  <div class="font-medium">{{ reconciliation.discrepancyCount }}</div>
+                  <div class="text-sm" 
+                       [class.text-red-600]="reconciliation.totalVarianceValue < 0"
+                       [class.text-green-600]="reconciliation.totalVarianceValue > 0">
+                    {{ reconciliation.totalVarianceValue | currency:currency():'symbol':'1.2-2' }}
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let reconciliation" class="py-3">
+                <mat-chip-set>
+                  <mat-chip [class]="getStatusClass(reconciliation.status)">
+                    {{ getStatusLabel(reconciliation.status) }}
+                  </mat-chip>
+                </mat-chip-set>
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let reconciliation" class="py-3">
+                <button mat-icon-button [matMenuTriggerFor]="menu">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                  <button mat-menu-item [routerLink]="[reconciliation._id, 'details']">
+                    <mat-icon>visibility</mat-icon>
+                    <span>View Details</span>
+                  </button>
+                  @if (reconciliation.status === 'in_progress') {
+                    <button mat-menu-item [routerLink]="[reconciliation._id, 'count']">
+                      <mat-icon>edit</mat-icon>
+                      <span>Continue Counting</span>
+                    </button>
+                    <button mat-menu-item [routerLink]="[reconciliation._id, 'review']">
+                      <mat-icon>preview</mat-icon>
+                      <span>Review & Approve</span>
+                    </button>
+                  }
+                  <button mat-menu-item (click)="deleteReconciliation(reconciliation._id)" class="text-red-600">
+                    <mat-icon>delete</mat-icon>
+                    <span>Delete</span>
+                  </button>
+                </mat-menu>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (reconciliations.value()?.pagination; as pagination) {
+          <mat-paginator
+            [length]="pagination.total"
+            [pageSize]="pagination.limit"
+            [pageIndex]="pagination.page - 1"
+            [pageSizeOptions]="[10, 25, 50, 100]"
+            (page)="onPageChange($event)"
+          ></mat-paginator>
+        }
+      </mat-card>

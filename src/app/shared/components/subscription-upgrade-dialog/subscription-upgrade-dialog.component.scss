@@ -1,0 +1,31 @@
+.upgrade-dialog {
+  width: 100%;
+  max-width: 900px;
+}
+
+.plan-card {
+  border: 2px solid transparent;
+  position: relative;
+  
+  &.selected {
+    border-color: #3f51b5;
+  }
+  
+  &.current {
+    border-color: #ff9800;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+::ng-deep .mat-mdc-card-header {
+  padding-bottom: 16px;
+}
+
+.features ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}

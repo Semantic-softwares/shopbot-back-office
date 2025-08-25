@@ -1,0 +1,269 @@
+<div class="p-6 max-w-6xl mx-auto">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center space-x-4">
+      <button
+        (click)="goBack()"
+        class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Restock Products</h1>
+        <p class="text-gray-600 mt-1">Update product quantities, prices, and expiry dates in bulk</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="flex justify-center items-center py-12">
+    <mat-progress-bar mode="indeterminate" class="w-64"></mat-progress-bar>
+  </div>
+
+  <!-- Main Form -->
+  <form [formGroup]="restockForm" (ngSubmit)="onSubmit()" *ngIf="!loading()">
+    <!-- Restock Information Card -->
+    <mat-card class="mb-6">
+      <mat-card-header>
+        <mat-card-title class="text-lg font-semibold">Restock Information</mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content class="pt-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Supplier Selection -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Supplier Name</mat-label>
+            <mat-select formControlName="supplierId" placeholder="Select supplier">
+              <mat-option value="">None</mat-option>
+              <mat-option *ngFor="let supplier of suppliers()" [value]="supplier._id">
+                {{ supplier.name }}
+              </mat-option>
+            </mat-select>
+            <mat-hint>* Add Supplier if not listed</mat-hint>
+          </mat-form-field>
+
+          <!-- Invoice/Receipt Date -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Invoice/Receipt Date</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="invoiceReceiptDate" required>
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+
+          <!-- Invoice/Receipt Number -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Invoice/Receipt Number</mat-label>
+            <input matInput formControlName="invoiceReceiptNumber">
+          </mat-form-field>
+
+          <!-- Order Number -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Order Number</mat-label>
+            <input matInput formControlName="orderNumber">
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Product Search and Selection -->
+    <mat-card class="mb-6">
+      <mat-card-header>
+        <mat-card-title class="text-lg font-semibold">Add Products</mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content class="pt-4">
+        <!-- Search Bar with Autocomplete -->
+        <mat-form-field appearance="outline" class="w-full mb-4">
+          <mat-label>Search by Barcode Scanning or Product Name, ID & SKU</mat-label>
+          <input matInput 
+                 [formControl]="searchControl"
+                 [matAutocomplete]="auto"
+                 placeholder="Start typing to search products...">
+          <mat-autocomplete #auto="matAutocomplete" 
+                           [displayWith]="displayFn"
+                           (optionSelected)="onProductSelected($event.option.value)">
+            <mat-option *ngFor="let product of filteredProducts$ | async" [value]="product">
+              <div class="flex justify-between items-center w-full">
+                <div class="flex flex-col">
+                  <span class="font-medium">{{ product.name }}</span>
+                  <span class="text-sm text-gray-500">
+                    Stock: {{ product.qty || 0 }}
+                    <span *ngIf="product.sku"> | SKU: {{ product.sku }}</span>
+                    <span *ngIf="product.barcode"> | Barcode: {{ product.barcode }}</span>
+                  </span>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs text-gray-400">
+                    {{ product.price | currency:currency():'symbol':'1.0-0' }}
+                  </span>
+                </div>
+              </div>
+            </mat-option>
+          </mat-autocomplete>
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <!-- Info message -->
+        <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div class="flex items-start">
+            <mat-icon class="text-blue-600 mt-0.5 mr-2 text-sm">info</mat-icon>
+            <p class="text-sm text-blue-800">
+              Search for products by typing at least 2 characters. Products already added to restock will not appear in search results.
+            </p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Selected Products Table -->
+    <mat-card *ngIf="itemsFormArray.length > 0" class="mb-6">
+      <mat-card-header>
+        <mat-card-title class="text-lg font-semibold">Products to Restock</mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content class="pt-4">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b">
+                <th class="text-left py-3 px-2 font-medium">Product Name</th>
+                <th class="text-left py-3 px-2 font-medium w-24">Quantity</th>
+                <th class="text-left py-3 px-2 font-medium w-32">Cost Price (NGN)</th>
+                <th class="text-left py-3 px-2 font-medium w-32">Selling Price (NGN)</th>
+                <th class="text-left py-3 px-2 font-medium w-32">Expiry Date</th>
+                <th class="text-left py-3 px-2 font-medium w-40">Use prices across other stores?</th>
+                <th class="text-left py-3 px-2 font-medium w-20">Actions</th>
+              </tr>
+            </thead>
+            <tbody formArrayName="items">
+              <tr *ngFor="let item of itemsFormArray.controls; let i = index" [formGroupName]="i" class="border-b">
+                <td class="py-3 px-2">
+                  <div class="flex items-center space-x-2">
+                    <mat-icon class="text-gray-400">inventory</mat-icon>
+                    <span class="font-medium">{{ item.get('productName')?.value }}</span>
+                  </div>
+                </td>
+                <td class="py-3 px-2">
+                  <mat-form-field appearance="outline" class="w-20">
+                    <input matInput type="number" formControlName="quantity" min="1" required>
+                  </mat-form-field>
+                </td>
+                <td class="py-3 px-2">
+                  <mat-form-field appearance="outline" class="w-28">
+                    <input matInput type="number" formControlName="costPrice" min="0" step="0.01" required>
+                  </mat-form-field>
+                </td>
+                <td class="py-3 px-2">
+                  <mat-form-field appearance="outline" class="w-28">
+                    <input matInput type="number" formControlName="sellingPrice" min="0" step="0.01" required>
+                  </mat-form-field>
+                </td>
+                <td class="py-3 px-2">
+                  <mat-form-field appearance="outline" class="w-28">
+                    <input matInput [matDatepicker]="expiryPicker" formControlName="expiryDate">
+                    <mat-datepicker-toggle matSuffix [for]="expiryPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #expiryPicker></mat-datepicker>
+                  </mat-form-field>
+                </td>
+                <td class="py-3 px-2 text-center">
+                  <mat-checkbox formControlName="usesPricesAcrossStores">
+                    <span class="text-sm">Yes</span>
+                  </mat-checkbox>
+                </td>
+                <td class="py-3 px-2">
+                  <button type="button" mat-icon-button color="warn" (click)="removeRestockItem(i)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Price Summary Card (placeholder for future) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Price Summary -->
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title class="text-lg font-semibold">Price Summary</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-4">
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span>Subtotal:</span>
+              <span class="font-medium">₦0.00</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Discount:</span>
+              <mat-form-field appearance="outline" class="w-32">
+                <input matInput placeholder="Discount amount (NGN)">
+              </mat-form-field>
+            </div>
+            <div class="flex justify-between">
+              <span>VAT (%):</span>
+              <mat-form-field appearance="outline" class="w-20">
+                <input matInput placeholder="VAT (%)">
+              </mat-form-field>
+            </div>
+            <div class="flex justify-between pt-3 border-t font-semibold text-lg">
+              <span>Total:</span>
+              <span class="text-blue-600">₦0.00</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Payment Summary -->
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title class="text-lg font-semibold">Payment Summary</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-4">
+          <div class="space-y-4">
+            <div class="flex justify-between">
+              <span>Amount paid to supplier:</span>
+              <mat-form-field appearance="outline" class="w-32">
+                <input matInput placeholder="Amount paid (NGN)">
+              </mat-form-field>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium mb-2">Payment Method:</label>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-select placeholder="Select payment">
+                  <mat-option value="cash">Cash</mat-option>
+                  <mat-option value="transfer">Bank Transfer</mat-option>
+                  <mat-option value="card">Card</mat-option>
+                  <mat-option value="credit">Store Credit</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            
+            <div class="flex justify-between pt-3 border-t font-semibold">
+              <span>Outstanding Balance:</span>
+              <span class="text-red-600">₦0.00</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="flex justify-end space-x-4">
+      <button type="button" mat-stroked-button (click)="goBack()">
+        Cancel
+      </button>
+      <button 
+        type="submit" 
+        mat-raised-button 
+        color="primary" 
+        [disabled]="restockForm.invalid || itemsFormArray.length === 0 || submitting()"
+      >
+        <mat-icon *ngIf="submitting()">refresh</mat-icon>
+        {{ submitting() ? 'Processing...' : 'Complete Restock' }}
+      </button>
+    </div>
+  </form>
+</div>

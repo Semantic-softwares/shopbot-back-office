@@ -1,0 +1,62 @@
+<div class="usage-card p-4 mb-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+  @if (!subscriptionService.isUnlimited()) {
+    <div class="usage-header flex justify-between items-center mb-3">
+      <div>
+        <h4 class="text-sm font-medium text-gray-700">Storage Usage</h4>
+        @if (subscriptionService.currentSubscription(); as subscription) {
+          <span class="text-xs text-gray-500">{{ subscription.tierInfo.name }} Plan</span>
+        }
+      </div>
+      @if (subscriptionService.usageData(); as usage) {
+        <span class="text-xs font-mono text-gray-600">
+          {{ usage.formattedUsage }} / {{ usage.formattedLimit }}
+        </span>
+      }
+    </div>
+    
+    @if (subscriptionService.usageData(); as usage) {
+      <div class="progress-container mb-3">
+        <mat-progress-bar
+          [value]="Math.min(usage.percentageUsed, 100)"
+          [color]="subscriptionService.getProgressBarColor(usage.percentageUsed)"
+          class="h-2 rounded-full">
+        </mat-progress-bar>
+        <div class="text-xs text-gray-500 mt-1 text-center">
+          {{ usage.percentageUsed.toFixed(1) }}% used
+        </div>
+      </div>
+      
+      @if (subscriptionService.shouldShowUsageError()) {
+        <div class="error-message p-2 mb-2 bg-red-50 border border-red-200 rounded text-xs text-red-600">
+          <mat-icon class="text-red-500 mr-1" style="font-size: 14px; height: 14px; width: 14px;">warning</mat-icon>
+          Storage limit exceeded!
+        </div>
+      } @else if (subscriptionService.shouldShowUsageWarning()) {
+        <div class="warning-message p-2 mb-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-600">
+          <mat-icon class="text-orange-500 mr-1" style="font-size: 14px; height: 14px; width: 14px;">info</mat-icon>
+          Nearly at storage limit
+        </div>
+      }
+    }
+    
+    <button 
+      mat-stroked-button 
+      class="w-full text-xs"
+      (click)="showUpgradeDialog()"
+      [color]="subscriptionService.shouldShowUsageError() ? 'warn' : 'primary'">
+      @if (subscriptionService.shouldShowUsageError()) {
+        Upgrade Now
+      } @else {
+        Upgrade Plan
+      }
+    </button>
+  } @else {
+    <div class="unlimited-plan text-center p-4">
+      <mat-icon class="text-green-500 mb-2" style="font-size: 32px; height: 32px; width: 32px;">
+        all_inclusive
+      </mat-icon>
+      <h4 class="text-sm font-medium text-gray-700 mb-1">Unlimited Plan</h4>
+      <p class="text-xs text-gray-500">Unlimited storage</p>
+    </div>
+  }
+</div>
