@@ -1,1 +1,0 @@
-import"./chunk-EQDQRRRY.js";var t=[{path:"",loadComponent:()=>import("./chunk-W3SSKBG2.js").then(o=>o.ListRestockComponent)},{path:"add",loadComponent:()=>import("./chunk-W3J4DRRK.js").then(o=>o.RestockComponent)},{path:"edit/:id",loadComponent:()=>import("./chunk-W3J4DRRK.js").then(o=>o.RestockComponent)}];export{t as RESTOCK_ROUTES};
