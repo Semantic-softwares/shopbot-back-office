@@ -1,0 +1,184 @@
+// Check-In Check-Out Details Component Styles
+
+// Status classes matching reservation details design
+.status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-confirmed {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.status-checked_in {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-checked_out {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.status-cancelled {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.status-no_show {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+// Room status classes
+.room-available {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.room-occupied {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.room-cleaning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.room-maintenance {
+  background-color: #fed7aa;
+  color: #9a3412;
+}
+
+// Housekeeping status classes
+.housekeeping-clean {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.housekeeping-dirty {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.housekeeping-inspected {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.housekeeping-maintenance {
+  background-color: #fed7aa;
+  color: #9a3412;
+}
+
+// Card hover effects
+.bg-white {
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.bg-white:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+// Action button styles
+button[mat-raised-button] {
+  transition: all 0.2s ease-in-out;
+}
+
+button[mat-raised-button]:hover {
+  transform: translateY(-1px);
+}
+
+// Responsive design adjustments
+@media (max-width: 768px) {
+  .grid-cols-1.lg\\:grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+  
+  .grid-cols-2.md\\:grid-cols-4 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+// Status indicator animations
+.inline-flex.items-center.px-3.py-1.rounded-full {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Border accent styles for different sections
+.border-l-4.border-green-500 {
+  border-left-width: 4px;
+  border-left-color: #10b981;
+}
+
+.border-l-4.border-red-500 {
+  border-left-width: 4px;
+  border-left-color: #ef4444;
+}
+
+// Warning and success message styles
+.bg-red-50 {
+  background-color: #fef2f2;
+}
+
+.bg-yellow-50 {
+  background-color: #fffbeb;
+}
+
+.bg-blue-50 {
+  background-color: #eff6ff;
+}
+
+// Special spacing for content sections
+.space-y-6 > * + * {
+  margin-top: 1.5rem;
+}
+
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+.space-y-3 > * + * {
+  margin-top: 0.75rem;
+}
+
+// Icon alignment and spacing
+mat-icon {
+  vertical-align: middle;
+}
+
+.flex.items-center mat-icon {
+  margin-right: 0.25rem;
+}
+
+// Custom scrollbar for overflow content
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

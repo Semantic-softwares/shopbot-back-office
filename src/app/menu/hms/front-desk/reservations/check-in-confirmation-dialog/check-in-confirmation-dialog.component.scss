@@ -1,0 +1,24 @@
+// Custom styles for the check-in confirmation dialog
+.check-in-dialog {
+  .mat-mdc-checkbox {
+    .mdc-checkbox {
+      margin-right: 8px;
+    }
+  }
+
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      background-color: #fafafa;
+    }
+  }
+}
+
+// Animation for the loading spinner
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}

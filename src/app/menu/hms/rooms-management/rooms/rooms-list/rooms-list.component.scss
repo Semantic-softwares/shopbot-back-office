@@ -1,0 +1,35 @@
+// Minimal component-specific styles
+// Most styling is handled by Tailwind CSS classes
+
+// Custom styles for Material form fields to work with Tailwind
+.mat-mdc-form-field {
+  &.w-full {
+    width: 100%;
+  }
+}
+
+// Ensure proper spacing for mat-icon in buttons
+mat-icon {
+  vertical-align: middle;
+}
+
+// Custom loading spinner for Tailwind
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Print styles
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

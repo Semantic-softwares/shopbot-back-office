@@ -79,6 +79,12 @@ export class ExportService {
       case 'item-sales':
         csvData = this.convertItemDataToCSV(data);
         break;
+      case 'revenue-report':
+        csvData = this.convertRevenueDataToCSV(data);
+        break;
+      case 'guest-report':
+        csvData = this.convertGuestDataToCSV(data);
+        break;
       default:
         csvData = this.convertToCSV(data);
     }
@@ -377,6 +383,115 @@ export class ExportService {
     doc.save(`${filename}-${new Date().toISOString()}.pdf`);
   }
 
+  exportRevenueDataToPdf(data: any[], filename: string = 'revenue-report', dateRange?: { from: string; to: string }) {
+    const doc = new jsPDF();
+    const storeName = this.storeStore.selectedStore()?.name || 'Store';
+    const tableColumn = ["Date", "Total Revenue", "Room Revenue", "Service Revenue", "Other Revenue", "Transactions", "Avg Transaction"];
+    const tableRows: any[] = [];
+
+    // Add store name and date range
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text(storeName, doc.internal.pageSize.width / 2, 15, { align: 'center' });
+    
+    if (dateRange) {
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      const dateText = `Revenue Report from ${new Date(dateRange.from).toLocaleDateString()} - ${new Date(dateRange.to).toLocaleDateString()}`;
+      doc.text(dateText, doc.internal.pageSize.width / 2, 25, { align: 'center' });
+    }
+
+    data.forEach(item => {
+      const rowData = [
+        new Date(item.date).toLocaleDateString(),
+        (item.totalRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }),
+        (item.roomRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }),
+        (item.serviceRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }),
+        (item.otherRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }),
+        item.transactions || 0,
+        (item.averageTransaction || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })
+      ];
+      tableRows.push(rowData);
+    });
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: dateRange ? 35 : 25,
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+        overflow: 'linebreak'
+      },
+      headStyles: {
+        fillColor: [63, 81, 181],
+        textColor: 255
+      },
+      didDrawPage: (data) => {
+        doc.setFontSize(10);
+        doc.setTextColor(128);
+        doc.text('Powered by Shopbot POS', doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+      }
+    });
+
+    doc.save(`${filename}-${new Date().toISOString()}.pdf`);
+  }
+
+  exportGuestDataToPdf(data: any[], filename: string = 'guest-report', dateRange?: { from: string; to: string }) {
+    const doc = new jsPDF();
+    const storeName = this.storeStore.selectedStore()?.name || 'Store';
+    const tableColumn = ["Date", "Total Guests", "New Guests", "Returning Guests", "Check-ins", "Check-outs", "Avg Stay", "Occupancy"];
+    const tableRows: any[] = [];
+
+    // Add store name and date range
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text(storeName, doc.internal.pageSize.width / 2, 15, { align: 'center' });
+    
+    if (dateRange) {
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      const dateText = `Guest Report from ${new Date(dateRange.from).toLocaleDateString()} - ${new Date(dateRange.to).toLocaleDateString()}`;
+      doc.text(dateText, doc.internal.pageSize.width / 2, 25, { align: 'center' });
+    }
+
+    data.forEach(item => {
+      const rowData = [
+        new Date(item.date).toLocaleDateString(),
+        (item.totalGuests || 0).toLocaleString(),
+        (item.newGuests || 0).toLocaleString(),
+        (item.returningGuests || 0).toLocaleString(),
+        (item.checkIns || 0).toLocaleString(),
+        (item.checkOuts || 0).toLocaleString(),
+        `${(item.averageStayDuration || 0).toFixed(1)} days`,
+        `${(item.occupancyRate || 0).toFixed(1)}%`
+      ];
+      tableRows.push(rowData);
+    });
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: dateRange ? 35 : 25,
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+        overflow: 'linebreak'
+      },
+      headStyles: {
+        fillColor: [63, 81, 181],
+        textColor: 255
+      },
+      didDrawPage: (data) => {
+        doc.setFontSize(10);
+        doc.setTextColor(128);
+        doc.text('Powered by Shopbot POS', doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+      }
+    });
+
+    doc.save(`${filename}-${new Date().toISOString()}.pdf`);
+  }
+
   private convertToCSV(data: any[]): string {
     const headers = ["Receipt No", "Date", "Category", "Total", "Ordered By", "Type"];
     const rows = data.map(item => [
@@ -484,6 +599,43 @@ export class ExportService {
       item.grossSales.toLocaleString('en-US', { minimumFractionDigits: 2 }),
       item.totalTax.toLocaleString('en-US', { minimumFractionDigits: 2 }),
       item.netSales.toLocaleString('en-US', { minimumFractionDigits: 2 })
+    ]);
+    
+    return [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+  }
+
+  private convertRevenueDataToCSV(data: any[]): string {
+    const headers = ["Date", "Total Revenue", "Room Revenue", "Service Revenue", "Other Revenue", "Transactions", "Average Transaction"];
+    const rows = data.map(item => [
+      new Date(item.date).toLocaleDateString(),
+      (item.totalRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }),
+      (item.roomRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }),
+      (item.serviceRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }),
+      (item.otherRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }),
+      item.transactions || 0,
+      (item.averageTransaction || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })
+    ]);
+    
+    return [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+  }
+
+  private convertGuestDataToCSV(data: any[]): string {
+    const headers = ["Date", "Total Guests", "New Guests", "Returning Guests", "Check-ins", "Check-outs", "Average Stay Duration", "Occupancy Rate"];
+    const rows = data.map(item => [
+      new Date(item.date).toLocaleDateString(),
+      (item.totalGuests || 0).toLocaleString(),
+      (item.newGuests || 0).toLocaleString(),
+      (item.returningGuests || 0).toLocaleString(),
+      (item.checkIns || 0).toLocaleString(),
+      (item.checkOuts || 0).toLocaleString(),
+      `${(item.averageStayDuration || 0).toFixed(1)} days`,
+      `${(item.occupancyRate || 0).toFixed(1)}%`
     ]);
     
     return [

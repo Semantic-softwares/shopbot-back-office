@@ -1,0 +1,41 @@
+<mat-toolbar class="flex justify-between mat-elevation-z12 shadow-lg border-b border-gray-200"  color="primary">
+      <div class="flex items-center gap-2">
+        @if (showMenuButton()) {
+          <button mat-icon-button (click)="menuToggle.emit()">
+            <mat-icon>menu</mat-icon>
+          </button>
+        }
+        
+        @if (showBackButton()) {
+          <button mat-icon-button (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+        }
+        
+        @if (title()) {
+          <span class="text-lg font-medium">{{ title() }}</span>
+        }
+      </div>
+
+      <div>
+        <button mat-button [matMenuTriggerFor]="userMenu" class="flex items-center gap-2">
+          <mat-icon>arrow_drop_down</mat-icon>
+          <span>{{currentUser()?.name}}</span>
+        </button>
+        <mat-menu #userMenu="matMenu">
+          <button mat-menu-item (click)="goToProfile()">
+            <mat-icon>menu</mat-icon>
+            <span>Menu</span>
+          </button>
+          <!-- <button mat-menu-item (click)="goToSettings()">
+            <mat-icon>settings</mat-icon>
+            <span>Settings</span>
+          </button> -->
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Logout</span>
+          </button>
+        </mat-menu>
+      </div>
+    </mat-toolbar>

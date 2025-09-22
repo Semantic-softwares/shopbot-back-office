@@ -1,0 +1,95 @@
+/* Reservation Form Styling */
+
+.mat-mdc-card {
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  
+  .mat-mdc-card-header {
+    background-color: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .mat-mdc-card-title {
+    color: #111827;
+    font-weight: 600;
+  }
+  
+  .mat-mdc-card-subtitle {
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
+}
+
+.pricing-summary {
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  
+  .pricing-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    
+    &.total {
+      border-top: 1px solid #d1d5db;
+      padding-top: 0.75rem;
+      margin-top: 0.5rem;
+      font-weight: 600;
+      font-size: 1.125rem;
+    }
+  }
+}
+
+.additional-guest-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+  
+  .guest-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    
+    h4 {
+      font-weight: 500;
+      color: #111827;
+      margin: 0;
+    }
+  }
+}
+
+.room-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background-color: white;
+  
+  .room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    
+    h4 {
+      font-weight: 500;
+      color: #111827;
+      margin: 0;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+  
+  .pricing-summary {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+}

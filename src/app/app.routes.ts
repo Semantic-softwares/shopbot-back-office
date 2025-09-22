@@ -15,11 +15,8 @@ export const routes: Routes = [
         canActivate: [noAuthGuard]
     },
     {
-        path: 'dashboard',
-        loadChildren: () => import('./dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES),
-        canActivate: [authGuard],
-        // resolve: {
-        //     role: roleResolver
-        // },
+        path: 'menu',
+        loadChildren: () => import('./menu/menu.route').then(m => m.MENU_ROUTES),
+        canActivate: [authGuard]
     },
 ];

@@ -1,0 +1,436 @@
+:host {
+  display: block;
+}
+
+// Stats card animations
+.stats-card {
+  transition: all 0.3s ease;
+  border: none;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  mat-card-content {
+    padding: 0 !important;
+  }
+}
+
+// Chart containers
+.chart-container {
+  position: relative;
+  height: 320px;
+  width: 100%;
+}
+
+// Room status grid
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+  
+  .room-card {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 2px solid;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    &.occupied {
+      background-color: #fee2e2;
+      border-color: #fecaca;
+      color: #dc2626;
+    }
+    
+    &.available {
+      background-color: #d1fae5;
+      border-color: #a7f3d0;
+      color: #059669;
+    }
+    
+    &.out-of-order {
+      background-color: #f3f4f6;
+      border-color: #e5e7eb;
+      color: #6b7280;
+    }
+    
+    &.maintenance {
+      background-color: #fef3c7;
+      border-color: #fde68a;
+      color: #d97706;
+    }
+    
+    .room-number {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    
+    .room-type {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+    
+    .status-icon {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      font-size: 14px;
+    }
+  }
+}
+
+// Table styling
+.mat-mdc-table {
+  box-shadow: none;
+  border-radius: 8px;
+  overflow: hidden;
+  
+  .mat-mdc-header-row {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    
+    .mat-mdc-header-cell {
+      font-weight: 600;
+      color: #475569;
+      border-bottom: 2px solid #e2e8f0;
+    }
+  }
+  
+  .mat-mdc-row {
+    transition: background-color 0.2s ease;
+    
+    &:hover {
+      background-color: rgba(139, 92, 246, 0.05) !important;
+    }
+    
+    .mat-mdc-cell {
+      border-bottom: 1px solid #f1f5f9;
+      padding: 16px;
+    }
+  }
+}
+
+// Form field customizations
+::ng-deep {
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      background-color: #fafbfc;
+      border-radius: 8px;
+    }
+    
+    &.mat-focused .mat-mdc-form-field-focus-overlay {
+      background-color: rgba(139, 92, 246, 0.05);
+    }
+    
+    .mat-mdc-form-field-outline-thick {
+      color: #8b5cf6;
+    }
+    
+    .mat-mdc-floating-label.mdc-floating-label--float-above {
+      color: #8b5cf6;
+    }
+  }
+  
+  // Card header styling
+  .mat-mdc-card-header {
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 16px;
+    
+    .mat-mdc-card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+    
+    .mat-mdc-card-subtitle {
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+  }
+  
+  // Button styling
+  .mat-mdc-raised-button {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    font-weight: 500;
+    text-transform: none;
+    
+    &:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    &.mat-primary {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      
+      &:hover {
+        background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+      }
+    }
+  }
+  
+  .mat-mdc-menu-panel {
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e2e8f0;
+    
+    .mat-mdc-menu-item {
+      border-radius: 4px;
+      margin: 4px 8px;
+      transition: background-color 0.2s ease;
+      
+      &:hover {
+        background-color: rgba(139, 92, 246, 0.1);
+      }
+      
+      .mat-icon {
+        color: #6b7280;
+        margin-right: 12px;
+      }
+    }
+  }
+  
+  // Spinner styling
+  .mat-mdc-progress-spinner {
+    circle {
+      stroke: #8b5cf6;
+    }
+  }
+  
+  // Tooltip styling
+  .mat-mdc-tooltip {
+    background-color: #1f2937;
+    color: #ffffff;
+    font-size: 0.75rem;
+    border-radius: 6px;
+    padding: 8px 12px;
+    white-space: pre-line;
+  }
+}
+
+// Occupancy rate badges
+.occupancy-badge {
+  &.high {
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+  
+  &.medium {
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+  }
+  
+  &.low {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+}
+
+// Export button group
+.export-buttons {
+  .mat-mdc-button {
+    margin-left: 8px;
+    border: 1px solid #d1d5db;
+    color: #6b7280;
+    
+    &:hover {
+      background-color: #f9fafb;
+      border-color: #9ca3af;
+    }
+  }
+}
+
+// Chart legend customization
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: #6b7280;
+    
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+  }
+}
+
+// Responsive breakpoints
+@media (max-width: 1024px) {
+  .room-grid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 6px;
+  }
+  
+  .stats-card {
+    .stats-content {
+      padding: 12px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .room-grid {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 4px;
+    
+    .room-card {
+      .room-number {
+        font-size: 1rem;
+      }
+      
+      .room-type {
+        font-size: 0.625rem;
+      }
+    }
+  }
+  
+  .chart-container {
+    height: 250px;
+  }
+  
+  // Mobile table adjustments
+  .mat-mdc-table {
+    font-size: 0.875rem;
+    
+    .mat-mdc-cell,
+    .mat-mdc-header-cell {
+      padding: 8px 12px;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .filter-form {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .export-buttons {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    
+    .mat-mdc-button {
+      margin: 0;
+      width: 100%;
+    }
+  }
+}
+
+// Error state styling
+.error-state {
+  .error-content {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: #dc2626;
+    
+    .mat-icon {
+      margin-right: 12px;
+      font-size: 24px;
+    }
+    
+    .error-text {
+      flex: 1;
+      
+      h3 {
+        margin: 0 0 4px 0;
+        font-size: 1.125rem;
+        font-weight: 600;
+      }
+      
+      p {
+        margin: 0;
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+// Loading state
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  color: #6b7280;
+  
+  .mat-mdc-progress-spinner {
+    margin-bottom: 16px;
+  }
+  
+  .loading-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+}
+
+// Animation keyframes
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// Print styles
+@media print {
+  .export-buttons,
+  .filter-form,
+  mat-card-header {
+    display: none !important;
+  }
+  
+  .room-grid {
+    grid-template-columns: repeat(10, 1fr);
+    gap: 2px;
+  }
+  
+  .mat-mdc-card {
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb;
+  }
+}

@@ -1,0 +1,59 @@
+.status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-confirmed {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.status-checked_in {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-checked_out {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.room-available {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.room-occupied {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.room-cleaning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.room-maintenance {
+  background-color: #fed7aa;
+  color: #9a3412;
+}
+
+.housekeeping-clean {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.housekeeping-dirty {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.housekeeping-inspected {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+// Table styles
+.table-row-hover:hover {
+  background-color: #f9fafb;
+}

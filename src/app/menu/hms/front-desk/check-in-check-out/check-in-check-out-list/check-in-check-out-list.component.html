@@ -1,0 +1,341 @@
+<div class="p-6 bg-gray-50 min-h-screen">
+  <!-- Header Section -->
+  <div class="mb-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Check-In / Check-Out Operations</h1>
+        <p class="text-gray-600 mt-1">Manage arrivals, departures, and in-house guests</p>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button 
+          mat-raised-button 
+          color="primary"
+          (click)="refreshData()"
+          [disabled]="loading()"
+          class="flex items-center">
+          <mat-icon class="mr-2">refresh</mat-icon>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+      <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <mat-icon class="text-blue-600 text-lg">flight_land</mat-icon>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Today's Arrivals</p>
+            <p class="text-2xl font-bold text-gray-900">{{ checkInToday().length }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+              <mat-icon class="text-orange-600 text-lg">flight_takeoff</mat-icon>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Today's Departures</p>
+            <p class="text-2xl font-bold text-gray-900">{{ checkOutToday().length }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+              <mat-icon class="text-green-600 text-lg">hotel</mat-icon>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">In-House Guests</p>
+            <p class="text-2xl font-bold text-gray-900">{{ inHouseGuests().length }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+              <mat-icon class="text-purple-600 text-lg">schedule</mat-icon>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Pending Actions</p>
+            <p class="text-2xl font-bold text-gray-900">{{ pendingCheckIns().length }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="flex justify-center items-center h-64 bg-white rounded-lg border border-gray-200">
+    <div class="text-center">
+      <mat-spinner class="mx-auto mb-4"></mat-spinner>
+      <p class="text-gray-600">Loading check-in/check-out data...</p>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && reservations().length === 0" class="bg-white rounded-lg border border-gray-200 p-12 text-center">
+    <mat-icon class="text-gray-400 text-6xl mb-4">hotel</mat-icon>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">No Reservations Found</h3>
+    <p class="text-gray-500 mb-4">There are no check-in or check-out operations for today.</p>
+    <button mat-raised-button color="primary" (click)="refreshData()">
+      <mat-icon class="mr-2">refresh</mat-icon>
+      Refresh Data
+    </button>
+  </div>
+
+  <!-- Reservations Table -->
+  <div *ngIf="!loading() && reservations().length > 0" class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-medium text-gray-900">All Reservations</h2>
+      <p class="text-sm text-gray-600 mt-1">Today's arrivals, departures, and in-house guests</p>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Guest
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Confirmation
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Room(s)
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Check-In / Check-Out
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Status
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Balance
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let reservation of reservations(); trackBy: trackByReservationId" 
+              class="hover:bg-gray-50 transition-colors duration-200">
+            
+            <!-- Guest Column -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10">
+                  <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <mat-icon class="text-blue-600">person</mat-icon>
+                  </div>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900 flex items-center">
+                    {{ reservation.guest.firstName }} {{ reservation.guest.lastName }}
+                    <span *ngIf="reservation.guest.vipStatus" 
+                          class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      <mat-icon class="text-yellow-600 text-xs mr-1">star</mat-icon>
+                      VIP
+                    </span>
+                  </div>
+                  <div class="text-sm text-gray-500">{{ reservation.guest.email }}</div>
+                  <div class="text-sm text-gray-500">{{ reservation.guest.phone }}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Confirmation Column -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">{{ reservation.confirmationNumber }}</div>
+              <div class="text-sm text-gray-500">
+                {{ reservation.guestDetails.totalAdults }} Adults
+                <span *ngIf="reservation.guestDetails.totalChildren > 0">
+                  , {{ reservation.guestDetails.totalChildren }} Children
+                </span>
+              </div>
+            </td>
+
+            <!-- Room(s) Column -->
+            <td class="px-6 py-4">
+              <div class="space-y-1">
+                <div *ngFor="let roomRes of reservation.rooms" 
+                     class="flex items-center justify-between text-sm">
+                  <span class="font-medium text-gray-900">Room {{ roomRes.room.number }}</span>
+                  <div class="flex space-x-1">
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                          [ngClass]="getRoomStatusClass(roomRes.room.status)">
+                      {{ roomRes.room.status | titlecase }}
+                    </span>
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                          [ngClass]="getHousekeepingStatusClass(roomRes.room.housekeepingStatus)">
+                      {{ roomRes.room.housekeepingStatus | titlecase }}
+                    </span>
+                  </div>
+                </div>
+                <div *ngFor="let roomRes of reservation.rooms" class="text-xs text-gray-500">
+                  {{ roomRes.room.roomType.name }} • Floor {{ roomRes.room.floor }}
+                </div>
+              </div>
+            </td>
+
+            <!-- Check-In/Check-Out Column -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">
+                <div class="flex items-center mb-1">
+                  <mat-icon class="text-green-600 text-sm mr-1">login</mat-icon>
+                  {{ reservation.checkInDate | date:'MMM d, y' }}
+                  <span class="text-gray-500 ml-1">({{ reservation.expectedCheckInTime }})</span>
+                </div>
+                <div class="flex items-center">
+                  <mat-icon class="text-red-600 text-sm mr-1">logout</mat-icon>
+                  {{ reservation.checkOutDate | date:'MMM d, y' }}
+                  <span class="text-gray-500 ml-1">({{ reservation.expectedCheckOutTime }})</span>
+                </div>
+              </div>
+              <div *ngIf="reservation.actualCheckInDate" class="text-xs text-gray-500 mt-1">
+                Checked in: {{ reservation.actualCheckInDate | date:'short' }}
+              </div>
+              <div *ngIf="reservation.actualCheckOutDate" class="text-xs text-gray-500 mt-1">
+                Checked out: {{ reservation.actualCheckOutDate | date:'short' }}
+              </div>
+            </td>
+
+            <!-- Status Column -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                    [ngClass]="getStatusClass(reservation.status)">
+                {{ reservation.status | titlecase }}
+              </span>
+              <div *ngIf="reservation.bookingSource" class="text-xs text-gray-500 mt-1">
+                via {{ reservation.bookingSource | titlecase }}
+              </div>
+            </td>
+
+            <!-- Balance Column -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium"
+                   [ngClass]="reservation.pricing.balance > 0 ? 'text-red-600' : 'text-green-600'">
+                {{ reservation.pricing.balance | currency:(selectedStore()?.currency || 'USD'):'symbol':'1.2-2' }}
+              </div>
+              <div class="text-xs text-gray-500">
+                Total: {{ reservation.pricing.total | currency:(selectedStore()?.currency || 'USD'):'symbol':'1.2-2' }}
+              </div>
+            </td>
+
+            <!-- Actions Column -->
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <div class="flex items-center justify-end space-x-2">
+                <!-- View Details Button -->
+                <button mat-icon-button 
+                        matTooltip="View Details"
+                        (click)="viewReservation(reservation._id)"
+                        class="text-gray-400 hover:text-gray-600">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+
+                <!-- Check-In Button -->
+                <button *ngIf="reservation.status === 'confirmed' && isToday(reservation.checkInDate)" 
+                        mat-raised-button 
+                        color="primary"
+                        size="small"
+                        (click)="performCheckIn(reservation)"
+                        class="text-xs">
+                  <mat-icon class="mr-1 text-sm">login</mat-icon>
+                  Check In
+                </button>
+
+                <!-- Check-Out Button -->
+                <button *ngIf="reservation.status === 'checked_in' && (isToday(reservation.checkOutDate) || isPastDue(reservation.checkOutDate))" 
+                        mat-raised-button 
+                        color="warn"
+                        size="small"
+                        (click)="performCheckOut(reservation)"
+                        class="text-xs">
+                  <mat-icon class="mr-1 text-sm">logout</mat-icon>
+                  Check Out
+                </button>
+
+                <!-- More Actions Menu -->
+                <button mat-icon-button [matMenuTriggerFor]="actionsMenu" class="text-gray-400 hover:text-gray-600">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #actionsMenu="matMenu">
+                  <!-- Early/Late Requests -->
+                  <button *ngIf="reservation.status === 'confirmed'" 
+                          mat-menu-item 
+                          (click)="requestEarlyCheckIn(reservation)">
+                    <mat-icon>schedule</mat-icon>
+                    Request Early Check-in
+                  </button>
+                  <button *ngIf="reservation.status === 'checked_in'" 
+                          mat-menu-item 
+                          (click)="requestLateCheckOut(reservation)">
+                    <mat-icon>schedule</mat-icon>
+                    Request Late Check-out
+                  </button>
+                  
+                  <!-- Room Management -->
+                  <button mat-menu-item (click)="changeRoom(reservation)">
+                    <mat-icon>swap_horiz</mat-icon>
+                    Change Room
+                  </button>
+                  <button *ngIf="reservation.status === 'checked_in'" 
+                          mat-menu-item 
+                          (click)="housekeepingRequest(reservation)">
+                    <mat-icon>cleaning_services</mat-icon>
+                    Housekeeping Request
+                  </button>
+                  
+                  <!-- Financial -->
+                  <button *ngIf="reservation.pricing.balance > 0" 
+                          mat-menu-item 
+                          (click)="processPayment(reservation)">
+                    <mat-icon>payment</mat-icon>
+                    Process Payment
+                  </button>
+                  <button mat-menu-item (click)="printFolio(reservation)">
+                    <mat-icon>print</mat-icon>
+                    Print Folio
+                  </button>
+                  
+                  <!-- Guest Services -->
+                  <button *ngIf="reservation.status === 'checked_in'" 
+                          mat-menu-item 
+                          (click)="extendStay(reservation)">
+                    <mat-icon>event</mat-icon>
+                    Extend Stay
+                  </button>
+                  <button *ngIf="reservation.status === 'checked_in'" 
+                          mat-menu-item 
+                          (click)="addCharges(reservation)">
+                    <mat-icon>add_shopping_cart</mat-icon>
+                    Add Charges
+                  </button>
+                  <button mat-menu-item (click)="addNotes(reservation)">
+                    <mat-icon>note</mat-icon>
+                    Add Notes
+                  </button>
+                </mat-menu>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

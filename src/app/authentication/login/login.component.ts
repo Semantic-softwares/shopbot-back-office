@@ -63,7 +63,7 @@ export class LoginComponent {
               this.storeStore.setSelectedStores(stores);
               this.storeStore.setSelectedStore(stores[0]);
               setTimeout(() => {
-                this.router.navigate(['/dashboard']);
+                this.router.navigate(['/menu/menu']);
               }, 2000);
               this.loading.set(false);
               return of(null);

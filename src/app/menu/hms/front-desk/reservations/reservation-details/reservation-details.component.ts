@@ -1,0 +1,1007 @@
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
+import { Router, ActivatedRoute } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTableModule } from '@angular/material/table';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+
+import { ReservationService } from '../../../../../shared/services/reservation.service';
+import { BluetoothPrinterService } from '../../../../../shared/services/bluetooth-printer.service';
+import { Reservation } from '../../../../../shared/models/reservation.model';
+import { StoreStore } from '../../../../../shared/stores/store.store';
+import { CheckInConfirmationDialogComponent, CheckInDialogData } from '../check-in-confirmation-dialog/check-in-confirmation-dialog.component';
+import { PaymentUpdateDialogComponent, PaymentUpdateDialogData } from '../payment-update-dialog/payment-update-dialog.component';
+
+@Component({
+  selector: 'app-reservation-details',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatTabsModule,
+    MatTableModule,
+    MatMenuModule,
+    MatProgressSpinnerModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatDialogModule
+  ],
+  templateUrl: './reservation-details.component.html',
+  styleUrls: ['./reservation-details.component.scss']
+})
+export class ReservationDetailsComponent implements OnInit {
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private location = inject(Location);
+  private reservationService = inject(ReservationService);
+  private bluetoothPrinterService = inject(BluetoothPrinterService);
+  public storeStore = inject(StoreStore);
+  private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
+
+  // State signals
+  reservation = signal<Reservation | null>(null);
+  loading = signal(false);
+  error = signal<string | null>(null);
+  statusUpdating = signal(false);
+  printerConnected = signal(false);
+  printing = signal(false);
+  exportingPDF = signal(false);
+
+  // Available status options
+  statusOptions = [
+    { value: 'pending', label: 'Pending', icon: 'schedule', color: '#f59e0b' },
+    { value: 'confirmed', label: 'Confirmed', icon: 'check_circle', color: '#10b981' },
+    { value: 'checked_in', label: 'Checked In', icon: 'login', color: '#3b82f6' },
+    { value: 'checked_out', label: 'Checked Out', icon: 'logout', color: '#6b7280' },
+    { value: 'cancelled', label: 'Cancelled', icon: 'cancel', color: '#ef4444' },
+    { value: 'no_show', label: 'No Show', icon: 'person_off', color: '#f97316' }
+  ];
+
+  // Computed properties for display
+  roomDetails = computed(() => {
+    const res = this.reservation();
+    if (!res || !res.rooms) return [];
+
+    return res.rooms.map((room: any) => {
+      const roomData = typeof room.room === 'string' ? 
+        { roomNumber: room.room, roomType: 'Unknown' } : 
+        room.room;
+      return {
+        name: roomData.name || 'N/A',
+        roomNumber: roomData.roomNumber || 'Unknown',
+        roomType: typeof roomData.roomType === 'object' ? (roomData.roomType as any)?.name || 'Unknown' : 'Unknown',
+        adults: room.guests?.adults || 0,
+        children: room.guests?.children || 0,
+        rate: roomData.priceOverride || 0
+      };
+    });
+  });
+
+  transactionHistory = computed(() => {
+    const res = this.reservation();
+    if (!res || !res.paymentInfo?.transactions) return [];
+    return res.paymentInfo.transactions;
+  });
+
+  // Guest information computed properties
+  guestName = computed(() => {
+    const res = this.reservation();
+    if (!res || !res.guestDetails?.primaryGuest) return 'Unknown Guest';
+    const guest = res.guestDetails.primaryGuest;
+    return `${guest.firstName || ''} ${guest.lastName || ''}`.trim() || 'Unknown Guest';
+  });
+
+  guestEmail = computed(() => {
+    const res = this.reservation();
+    return res?.guestDetails?.primaryGuest?.email || 'No email provided';
+  });
+
+  guestPhone = computed(() => {
+    const res = this.reservation();
+    return res?.guestDetails?.primaryGuest?.phone || 'No phone provided';
+  });
+
+  hasAdditionalGuests = computed(() => {
+    const res = this.reservation();
+    return res?.guestDetails?.additionalGuests && res.guestDetails.additionalGuests.length > 0;
+  });
+
+  hasCancellation = computed(() => {
+    const res = this.reservation();
+    return res?.cancellation?.isCancelled;
+  });
+
+  hasRefundAmount = computed(() => {
+    const res = this.reservation();
+    return res?.cancellation?.refundAmount && res.cancellation.refundAmount > 0;
+  });
+
+  hasCancellationFee = computed(() => {
+    const res = this.reservation();
+    return res?.cancellation?.cancellationFee && res.cancellation.cancellationFee > 0;
+  });
+
+  getRefundAmount = computed(() => {
+    const res = this.reservation();
+    return res?.cancellation?.refundAmount || 0;
+  });
+
+  getCancellationFee = computed(() => {
+    const res = this.reservation();
+    return res?.cancellation?.cancellationFee || 0;
+  });
+
+  // Payment status options
+  paymentStatusOptions = [
+    { value: 'pending', label: 'Pending', icon: 'schedule', color: '#f59e0b' },
+    { value: 'paid', label: 'Paid', icon: 'check_circle', color: '#10b981' },
+    { value: 'partial', label: 'Partial', icon: 'donut_small', color: '#3b82f6' },
+    { value: 'refunded', label: 'Refunded', icon: 'undo', color: '#6b7280' }
+  ];
+
+  getAvailablePaymentStatusOptions = computed(() => {
+    const reservation = this.reservation();
+    if (!reservation) return [];
+    
+    const currentStatus = reservation.paymentInfo?.status || 'pending';
+    return this.paymentStatusOptions.filter(option => option.value !== currentStatus);
+  });
+
+  ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.loadReservation(id);
+    } else {
+      this.error.set('No reservation ID provided');
+    }
+
+    // Check if printer is already connected
+    this.printerConnected.set(this.bluetoothPrinterService.isConnected());
+  }
+
+  private async loadReservation(id: string): Promise<void> {
+    this.loading.set(true);
+    this.error.set(null);
+
+    try {
+      const storeId = (this.storeStore.selectedStore() as any)?._id;
+      if (!storeId) {
+        throw new Error('No store selected');
+      }
+
+      this.reservationService.getReservationById(id).subscribe({
+        next: (reservation) => {
+          this.reservation.set(reservation);
+          this.loading.set(false);
+        },
+        error: (error) => {
+          console.error('Error loading reservation:', error);
+          this.error.set('Failed to load reservation details');
+          this.loading.set(false);
+        }
+      });
+    } catch (error) {
+      console.error('Error loading reservation:', error);
+      this.error.set('Failed to load reservation details');
+      this.loading.set(false);
+    }
+  }
+
+  // Navigation methods
+  goBack(): void {
+    this.location.back();
+  }
+
+  editReservation(): void {
+    if (this.reservation()) {
+      this.router.navigate(['/menu/hms/front-desk/reservations/edit', this.reservation()!._id]);
+    }
+  }
+
+  // Status check methods
+  canEdit(): boolean {
+    const reservation = this.reservation();
+    return reservation?.status !== 'cancelled' && 
+           reservation?.status !== 'checked_out' && 
+           reservation?.status !== 'no_show' &&
+           reservation?.status !== 'checked_in' &&
+           !reservation?.actualCheckInDate;
+  }
+
+  canCheckIn(): boolean {
+    const reservation = this.reservation();
+    // Only allow check-in if reservation is confirmed
+    return reservation?.status === 'confirmed';
+  }
+
+  canCheckOut(): boolean {
+    const reservation = this.reservation();
+    // Only allow check-out if guest is already checked in
+    return reservation?.status === 'checked_in';
+  }
+
+  canCancel(): boolean {
+    const reservation = this.reservation();
+    // Can cancel if not already in final status
+    return reservation?.status !== 'cancelled' && 
+           reservation?.status !== 'checked_out' && 
+           reservation?.status !== 'no_show';
+  }
+
+  // Action methods
+  async checkInReservation(): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    if (!this.canCheckIn()) {
+      this.snackBar.open('Guests can only be checked in when reservation status is "Confirmed"', 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    try {
+      // Call the status update method which will handle the API call
+      await this.updateReservationStatus('checked_in');
+    } catch (error) {
+      console.error('Error checking in reservation:', error);
+      this.snackBar.open('Failed to check in reservation', 'Close', { duration: 3000 });
+    }
+  }
+
+  async checkOutReservation(): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    if (!this.canCheckOut()) {
+      this.snackBar.open('Guests can only be checked out when reservation status is "Checked In"', 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    try {
+      // Call the status update method which will handle the API call
+      await this.updateReservationStatus('checked_out');
+    } catch (error) {
+      console.error('Error checking out reservation:', error);
+      this.snackBar.open('Failed to check out reservation', 'Close', { duration: 3000 });
+    }
+  }
+
+  async cancelReservation(): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation || !this.canCancel()) return;
+
+    try {
+      // TODO: Implement cancellation API call
+      this.snackBar.open('Cancellation functionality coming soon', 'Close', { duration: 3000 });
+    } catch (error) {
+      console.error('Error cancelling reservation:', error);
+      this.snackBar.open('Failed to cancel reservation', 'Close', { duration: 3000 });
+    }
+  }
+
+  // Update reservation status
+  async updateReservationStatus(newStatus: string): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation || reservation.status === newStatus) return;
+
+    // Special handling for check-in - show room readiness dialog
+    if (newStatus === 'checked_in') {
+      this.showCheckInDialog(reservation);
+      return;
+    }
+
+    // Special handling for check-out - use enhanced check-out
+    if (newStatus === 'checked_out') {
+      this.performCheckOut();
+      return;
+    }
+
+    // Validate business rules for status transitions
+    if (!this.isValidStatusTransition(reservation.status, newStatus)) {
+      this.snackBar.open(this.getStatusTransitionError(reservation.status, newStatus), 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    // Confirm status change for critical statuses
+    if (newStatus === 'cancelled' || newStatus === 'no_show') {
+      const confirmed = confirm(`Are you sure you want to change the status to ${newStatus}?`);
+      if (!confirmed) return;
+    }
+
+    await this.performStatusUpdate(newStatus);
+  }
+
+  // Payment management methods
+  updatePaymentStatus(newStatus: string): void {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    if (newStatus === 'paid') {
+      this.showPaymentDialog(reservation);
+    } else {
+      // For other status changes, update directly
+      this.performPaymentStatusUpdate(newStatus);
+    }
+  }
+
+  private showPaymentDialog(reservation: Reservation): void {
+    const dialogData: PaymentUpdateDialogData = { 
+      reservation,
+      isCheckoutFlow: false // Regular payment update, not checkout flow
+    };
+    
+    const dialogRef = this.dialog.open(PaymentUpdateDialogComponent, {
+      data: dialogData,
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.confirmed && result.paymentData) {
+        this.processPayment(result.paymentData);
+      }
+    });
+  }
+
+  private async processPayment(paymentData: {
+    amount: number;
+    method: string;
+    reference?: string;
+    notes?: string;
+  }): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    this.statusUpdating.set(true);
+
+    try {
+      // Process the payment through the service
+      await this.reservationService.processPayment(reservation._id, {
+        amount: paymentData.amount,
+        method: paymentData.method,
+        reference: paymentData.reference || `PAY-${Date.now()}`
+      }).toPromise();
+
+      // Reload the reservation to get updated payment info
+      const updatedReservation = await this.reservationService.getReservationById(reservation._id).toPromise();
+      if (updatedReservation) {
+        this.reservation.set(updatedReservation);
+      }
+
+      this.snackBar.open(
+        `Payment of ${this.formatCurrency(paymentData.amount)} recorded successfully`, 
+        'Close', 
+        { duration: 5000 }
+      );
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process payment';
+      this.snackBar.open(errorMessage, 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+    } finally {
+      this.statusUpdating.set(false);
+    }
+  }
+
+  private async performPaymentStatusUpdate(newStatus: string): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    this.statusUpdating.set(true);
+
+    try {
+      // Update payment status through the service
+      const updatedReservation = await this.reservationService.updateReservation(
+        reservation._id, 
+        { 
+          paymentInfo: {
+            ...reservation.paymentInfo,
+            status: newStatus as any
+          }
+        }
+      ).toPromise();
+
+      if (updatedReservation) {
+        this.reservation.set(updatedReservation);
+        this.snackBar.open(`Payment status updated to ${newStatus}`, 'Close', { duration: 3000 });
+      }
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update payment status';
+      this.snackBar.open(errorMessage, 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+    } finally {
+      this.statusUpdating.set(false);
+    }
+  }
+
+  // Show check-in confirmation dialog
+  private showCheckInDialog(reservation: Reservation): void {
+    const dialogData: CheckInDialogData = { reservation };
+    
+    const dialogRef = this.dialog.open(CheckInConfirmationDialogComponent, {
+      data: dialogData,
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.confirmed) {
+        this.performCheckIn(result);
+      }
+    });
+  }
+
+  // Perform the actual check-in process
+  private async performCheckIn(checkInData: any): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    this.statusUpdating.set(true);
+
+    try {
+      // Use the enhanced check-in method that handles room status
+      const updatedReservation = await this.reservationService.checkInReservationWithRooms(
+        reservation._id
+      ).toPromise();
+
+      if (updatedReservation) {
+        this.reservation.set(updatedReservation);
+        this.snackBar.open(
+          'Guest checked in successfully! Room status updated to occupied.', 
+          'Close', 
+          { duration: 5000 }
+        );
+      }
+    } catch (error) {
+      console.error('Error during check-in:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Failed to check in guest';
+      this.snackBar.open(errorMessage, 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+    } finally {
+      this.statusUpdating.set(false);
+    }
+  }
+
+  // Perform the actual check-out process
+  private async performCheckOut(): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    // Check if payment is required before checkout
+    if (this.requiresPaymentBeforeCheckout(reservation)) {
+      this.showPaymentRequiredDialog(reservation);
+      return;
+    }
+
+    this.statusUpdating.set(true);
+
+    try {
+      // Use the enhanced check-out method that handles room status
+      const updatedReservation = await this.reservationService.checkOutReservationWithRooms(
+        reservation._id
+      ).toPromise();
+
+      if (updatedReservation) {
+        this.reservation.set(updatedReservation);
+        this.snackBar.open(
+          'Guest checked out successfully! Room status updated to cleaning.', 
+          'Close', 
+          { duration: 5000 }
+        );
+      }
+    } catch (error) {
+      console.error('Error during check-out:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Failed to check out guest';
+      this.snackBar.open(errorMessage, 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+    } finally {
+      this.statusUpdating.set(false);
+    }
+  }
+
+  // Check if payment is required before checkout
+  private requiresPaymentBeforeCheckout(reservation: Reservation): boolean {
+    const hasOutstandingBalance = reservation.pricing.balance > 0;
+    const paymentNotPaid = reservation.paymentInfo?.status !== 'paid';
+    
+    return hasOutstandingBalance && paymentNotPaid;
+  }
+
+  // Show payment required dialog before checkout
+  private showPaymentRequiredDialog(reservation: Reservation): void {
+    const dialogData: PaymentUpdateDialogData = { 
+      reservation,
+      isCheckoutFlow: true // Add this flag to indicate checkout flow
+    };
+    
+    const dialogRef = this.dialog.open(PaymentUpdateDialogComponent, {
+      data: dialogData,
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.confirmed && result.paymentData) {
+        this.processPaymentAndCheckout(result.paymentData);
+      }
+    });
+  }
+
+  // Process payment and then proceed with checkout
+  private async processPaymentAndCheckout(paymentData: {
+    amount: number;
+    method: string;
+    reference?: string;
+    notes?: string;
+  }): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    this.statusUpdating.set(true);
+
+    try {
+      // First, process the payment
+      await this.reservationService.processPayment(reservation._id, {
+        amount: paymentData.amount,
+        method: paymentData.method,
+        reference: paymentData.reference || `PAY-${Date.now()}`
+      }).toPromise();
+
+      // Reload the reservation to get updated payment info
+      const updatedReservation = await this.reservationService.getReservationById(reservation._id).toPromise();
+      if (updatedReservation) {
+        this.reservation.set(updatedReservation);
+        
+        this.snackBar.open(
+          `Payment of ${this.formatCurrency(paymentData.amount)} recorded successfully`, 
+          'Close', 
+          { duration: 3000 }
+        );
+
+        // Check if payment clears the balance, then proceed with checkout
+        if (updatedReservation.pricing.balance <= 0 || updatedReservation.paymentInfo?.status === 'paid') {
+          // Wait a moment for user to see payment success message
+          setTimeout(() => {
+            this.proceedWithCheckout();
+          }, 1500);
+        } else {
+          this.snackBar.open(
+            'Payment recorded, but outstanding balance remains. Please complete payment before checkout.', 
+            'Close', 
+            { duration: 5000, panelClass: ['warning-snackbar'] }
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error processing payment for checkout:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process payment';
+      this.snackBar.open(errorMessage, 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+    } finally {
+      this.statusUpdating.set(false);
+    }
+  }
+
+  // Proceed with actual checkout after payment is cleared
+  private async proceedWithCheckout(): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    this.statusUpdating.set(true);
+
+    try {
+      // Use the enhanced check-out method that handles room status
+      const updatedReservation = await this.reservationService.checkOutReservationWithRooms(
+        reservation._id
+      ).toPromise();
+
+      if (updatedReservation) {
+        this.reservation.set(updatedReservation);
+        this.snackBar.open(
+          'Guest checked out successfully! Room status updated to cleaning.', 
+          'Close', 
+          { duration: 5000 }
+        );
+      }
+    } catch (error) {
+      console.error('Error during checkout after payment:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Failed to complete checkout';
+      this.snackBar.open(errorMessage, 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+    } finally {
+      this.statusUpdating.set(false);
+    }
+  }
+
+  // Perform regular status updates (non-check-in)
+  private async performStatusUpdate(newStatus: string): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    this.statusUpdating.set(true);
+
+    try {
+      const updatedReservation = await this.reservationService.updateReservationStatus(
+        reservation._id, 
+        newStatus
+      ).toPromise();
+
+      if (updatedReservation) {
+        this.reservation.set(updatedReservation);
+        this.snackBar.open(`Status updated to ${newStatus}`, 'Close', { duration: 3000 });
+      }
+    } catch (error) {
+      console.error('Error updating reservation status:', error);
+      
+      // Show specific error message from backend or fallback to generic message
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update status';
+      this.snackBar.open(errorMessage, 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+    } finally {
+      this.statusUpdating.set(false);
+    }
+  }
+
+  // Get available status options for current reservation
+  getAvailableStatusOptions() {
+    const currentStatus = this.reservation()?.status;
+    return this.statusOptions.filter(option => 
+      option.value !== currentStatus && 
+      this.isValidStatusTransition(currentStatus || '', option.value)
+    );
+  }
+
+  // Business rule validation for status transitions
+  private isValidStatusTransition(currentStatus: string, newStatus: string): boolean {
+    const validTransitions: Record<string, string[]> = {
+      'pending': ['confirmed', 'cancelled', 'no_show'],
+      'confirmed': ['checked_in', 'cancelled', 'no_show'],
+      'checked_in': ['checked_out'],
+      'checked_out': [], // Final status - no transitions allowed
+      'cancelled': [], // Final status - no transitions allowed
+      'no_show': [] // Final status - no transitions allowed
+    };
+
+    return validTransitions[currentStatus]?.includes(newStatus) || false;
+  }
+
+  // Get error message for invalid status transitions
+  private getStatusTransitionError(currentStatus: string, newStatus: string): string {
+    switch (newStatus) {
+      case 'checked_in':
+        return 'Guests can only be checked in when reservation status is "Confirmed"';
+      case 'checked_out':
+        return 'Guests can only be checked out when reservation status is "Checked In"';
+      case 'confirmed':
+        return currentStatus === 'checked_in' ? 'Cannot change back to confirmed after check-in' : 
+               currentStatus === 'checked_out' ? 'Cannot change back to confirmed after check-out' :
+               'Invalid status transition';
+      default:
+        return `Cannot change status from "${currentStatus}" to "${newStatus}"`;
+    }
+  }
+
+  // Utility methods for display
+  getStatusColor(status: string): string {
+    const statusColors: Record<string, string> = {
+      'pending': '#f59e0b',
+      'confirmed': '#10b981',
+      'checked_in': '#3b82f6',
+      'checked_out': '#6b7280',
+      'cancelled': '#ef4444',
+      'no_show': '#f97316'
+    };
+    return statusColors[status] || '#6b7280';
+  }
+
+  getStatusIcon(status: string): string {
+    const statusIcons: Record<string, string> = {
+      'pending': 'schedule',
+      'confirmed': 'check_circle',
+      'checked_in': 'login',
+      'checked_out': 'logout',
+      'cancelled': 'cancel',
+      'no_show': 'person_off'
+    };
+    return statusIcons[status] || 'help';
+  }
+
+  formatDate(date: string | Date): string {
+    if (!date) return 'N/A';
+    const d = new Date(date);
+    return d.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
+  formatDateTime(date: string | Date | undefined): string {
+    if (!date) return 'N/A';
+    const d = new Date(date);
+    return d.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  // Email functionality
+  async sendReservationEmail(emailType: 'details' | 'confirmation' | 'checkin' = 'details'): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    // Check if guest has email
+    const guestEmail = this.guestEmail();
+    if (!guestEmail || guestEmail === 'No email provided') {
+      this.snackBar.open('No email address available for this guest', 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    this.statusUpdating.set(true);
+
+    try {
+      const result = await this.reservationService.sendReservationEmail(reservation._id, {
+        emailType: emailType
+      }).toPromise();
+
+      if (result?.success) {
+        this.snackBar.open(
+          result.message || `${emailType.charAt(0).toUpperCase() + emailType.slice(1)} email sent successfully to ${guestEmail}`, 
+          'Close', 
+          { duration: 5000 }
+        );
+      } else {
+        throw new Error('Email sending failed');
+      }
+    } catch (error) {
+      console.error('Error sending reservation email:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send reservation email';
+      this.snackBar.open(errorMessage, 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+    } finally {
+      this.statusUpdating.set(false);
+    }
+  }
+
+  // Bluetooth printing functionality
+  async connectToPrinter(): Promise<void> {
+    if (!this.bluetoothPrinterService.isBluetoothSupported()) {
+      this.snackBar.open('Web Bluetooth is not supported in this browser', 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    try {
+      this.statusUpdating.set(true);
+      await this.bluetoothPrinterService.connectToPrinter();
+      this.printerConnected.set(true);
+      
+      const deviceInfo = this.bluetoothPrinterService.getConnectedDeviceInfo();
+      this.snackBar.open(
+        `Connected to printer: ${deviceInfo?.name || 'Unknown Printer'}`, 
+        'Close', 
+        { duration: 3000 }
+      );
+    } catch (error) {
+      console.error('Error connecting to printer:', error);
+      this.printerConnected.set(false);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Failed to connect to printer';
+      this.snackBar.open(errorMessage, 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+    } finally {
+      this.statusUpdating.set(false);
+    }
+  }
+
+  async disconnectFromPrinter(): Promise<void> {
+    try {
+      await this.bluetoothPrinterService.disconnectPrinter();
+      this.printerConnected.set(false);
+      this.snackBar.open('Disconnected from printer', 'Close', { duration: 3000 });
+    } catch (error) {
+      console.error('Error disconnecting from printer:', error);
+      this.snackBar.open('Failed to disconnect from printer', 'Close', { 
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+    }
+  }
+
+  async printReservation(): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    // Check if printer is connected
+    if (!this.bluetoothPrinterService.isConnected()) {
+      // Ask user if they want to connect
+      const connectFirst = confirm('Printer not connected. Would you like to connect to a printer first?');
+      if (connectFirst) {
+        try {
+          await this.connectToPrinter();
+          if (!this.bluetoothPrinterService.isConnected()) {
+            return; // User cancelled or connection failed
+          }
+        } catch (error) {
+          return; // Connection failed
+        }
+      } else {
+        return; // User chose not to connect
+      }
+    }
+
+    this.printing.set(true);
+
+    try {
+      const store = this.storeStore.selectedStore();
+      await this.bluetoothPrinterService.printReservation(reservation, store);
+      
+      this.snackBar.open('Reservation printed successfully', 'Close', { 
+        duration: 3000 
+      });
+    } catch (error) {
+      console.error('Error printing reservation:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Failed to print reservation';
+      this.snackBar.open(errorMessage, 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+      
+      // If printing failed due to connection issue, update connection status
+      if (errorMessage.includes('not connected')) {
+        this.printerConnected.set(false);
+      }
+    } finally {
+      this.printing.set(false);
+    }
+  }
+
+  async testPrint(): Promise<void> {
+    if (!this.bluetoothPrinterService.isConnected()) {
+      this.snackBar.open('Please connect to a printer first', 'Close', { 
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    this.printing.set(true);
+
+    try {
+      await this.bluetoothPrinterService.testPrint();
+      this.snackBar.open('Test print completed successfully', 'Close', { 
+        duration: 3000 
+      });
+    } catch (error) {
+      console.error('Error during test print:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Test print failed';
+      this.snackBar.open(errorMessage, 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+    } finally {
+      this.printing.set(false);
+    }
+  }
+
+  // PDF Export functionality
+  async exportReservationToPDF(): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    this.exportingPDF.set(true);
+
+    try {
+      const pdfBlob = await this.reservationService.exportReservationToPDF(reservation._id).toPromise();
+      
+      if (pdfBlob) {
+        // Create download link for PDF
+        const url = window.URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `reservation-${reservation.confirmationNumber}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        this.snackBar.open(
+          `Reservation details exported to PDF successfully!`, 
+          'Close', 
+          { duration: 3000 }
+        );
+      }
+    } catch (error) {
+      console.error('Error exporting reservation to PDF:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Failed to export reservation to PDF';
+      this.snackBar.open(errorMessage, 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+    } finally {
+      this.exportingPDF.set(false);
+    }
+  }
+
+  formatCurrency(amount: number | undefined): string {
+    if (!amount && amount !== 0) return 'N/A';
+    const store = this.storeStore.selectedStore() as any;
+    const currency = store?.currencyCode || store?.currency || 'USD';
+    
+    try {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency
+      }).format(amount);
+    } catch (error) {
+      // Fallback to USD if currency code is invalid
+      console.warn(`Invalid currency code: ${currency}, falling back to USD`);
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      }).format(amount);
+    }
+  }
+}

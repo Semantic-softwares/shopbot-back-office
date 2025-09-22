@@ -1,0 +1,384 @@
+<!-- Header Section -->
+<div class="bg-white shadow-sm border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <button
+          type="button"
+          (click)="onCancel()"
+          class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
+          <mat-icon class="text-gray-600">arrow_back</mat-icon>
+        </button>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">{{ pageTitle() }}</h1>
+          <p class="text-sm text-gray-600 mt-1">Fill in the guest information below</p>
+        </div>
+      </div>
+      @if (isEditMode() && guest()) {
+        <div class="flex items-center gap-2 text-sm text-gray-600">
+          <mat-icon class="text-lg">schedule</mat-icon>
+          <span>Last updated: {{ guest()?.updatedAt | date:'medium' }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+@if (isLoading()) {
+  <div class="flex justify-center items-center py-16">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+}
+
+<!-- Form Section -->
+@if (!isLoading()) {
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <form [formGroup]="guestForm" (ngSubmit)="onSubmit()" class="space-y-8">
+      
+      <!-- Personal Information Section -->
+      <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <mat-icon class="text-purple-600">person</mat-icon>
+            Personal Information
+          </h2>
+        </div>
+        <div class="p-6 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>First Name *</mat-label>
+                <input matInput formControlName="firstName" placeholder="Enter first name">
+                @if (getFieldError('firstName')) {
+                  <mat-error>{{ getFieldError('firstName') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Last Name *</mat-label>
+                <input matInput formControlName="lastName" placeholder="Enter last name">
+                @if (getFieldError('lastName')) {
+                  <mat-error>{{ getFieldError('lastName') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Email Address *</mat-label>
+                <input matInput type="email" formControlName="email" placeholder="Enter email address">
+                <mat-icon matPrefix class="text-gray-400">email</mat-icon>
+                @if (getFieldError('email')) {
+                  <mat-error>{{ getFieldError('email') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Phone Number *</mat-label>
+                <input matInput formControlName="phone" placeholder="Enter phone number">
+                <mat-icon matPrefix class="text-gray-400">phone</mat-icon>
+                @if (getFieldError('phone')) {
+                  <mat-error>{{ getFieldError('phone') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Date of Birth</mat-label>
+                <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth">
+                <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
+                <mat-datepicker #dobPicker></mat-datepicker>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Nationality</mat-label>
+                <mat-select formControlName="nationality">
+                  <mat-option value="">Select Nationality</mat-option>
+                  @for (country of countryOptions; track country.code) {
+                    <mat-option [value]="country.code">{{ country.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ID Document Section -->
+      <div class="bg-white rounded-lg border border-gray-200 shadow-sm" formGroupName="idDocument">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <mat-icon class="text-purple-600">badge</mat-icon>
+            Identification Document
+          </h2>
+        </div>
+        <div class="p-6 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Document Type</mat-label>
+                <mat-select formControlName="type">
+                  <mat-option value="passport">Passport</mat-option>
+                  <mat-option value="national_id">National ID</mat-option>
+                  <mat-option value="drivers_license">Driver's License</mat-option>
+                  <mat-option value="other">Other</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Document Number</mat-label>
+                <input matInput formControlName="number" placeholder="Enter document number">
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Expiry Date</mat-label>
+                <input matInput [matDatepicker]="expiryPicker" formControlName="expiryDate">
+                <mat-datepicker-toggle matIconSuffix [for]="expiryPicker"></mat-datepicker-toggle>
+                <mat-datepicker #expiryPicker></mat-datepicker>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Issuing Country</mat-label>
+                <mat-select formControlName="issuingCountry">
+                  <mat-option value="">Select Country</mat-option>
+                  @for (country of countryOptions; track country.code) {
+                    <mat-option [value]="country.code">{{ country.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Address Section -->
+      <div class="bg-white rounded-lg border border-gray-200 shadow-sm" formGroupName="address">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <mat-icon class="text-purple-600">location_on</mat-icon>
+            Address Information
+          </h2>
+        </div>
+        <div class="p-6 space-y-6">
+          <div>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Street Address</mat-label>
+              <input matInput formControlName="street" placeholder="Enter street address">
+            </mat-form-field>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>City</mat-label>
+                <input matInput formControlName="city" placeholder="Enter city">
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>State/Province</mat-label>
+                <input matInput formControlName="state" placeholder="Enter state/province">
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Postal Code</mat-label>
+                <input matInput formControlName="postalCode" placeholder="Enter postal code">
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Country</mat-label>
+              <mat-select formControlName="country">
+                <mat-option value="">Select Country</mat-option>
+                @for (country of countryOptions; track country.code) {
+                  <mat-option [value]="country.code">{{ country.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preferences Section -->
+      <div class="bg-white rounded-lg border border-gray-200 shadow-sm" formGroupName="preferences">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <mat-icon class="text-purple-600">tune</mat-icon>
+            Preferences
+          </h2>
+        </div>
+        <div class="p-6 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Room Type</mat-label>
+                <mat-select formControlName="roomType">
+                  <mat-option value="">No Preference</mat-option>
+                  <mat-option value="standard">Standard</mat-option>
+                  <mat-option value="deluxe">Deluxe</mat-option>
+                  <mat-option value="suite">Suite</mat-option>
+                  <mat-option value="executive">Executive</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Smoking Preference</mat-label>
+                <mat-select formControlName="smokingPreference">
+                  <mat-option value="non_smoking">Non-Smoking</mat-option>
+                  <mat-option value="smoking">Smoking</mat-option>
+                  <mat-option value="no_preference">No Preference</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Bed Preference</mat-label>
+                <mat-select formControlName="bedPreference">
+                  <mat-option value="no_preference">No Preference</mat-option>
+                  <mat-option value="single">Single</mat-option>
+                  <mat-option value="double">Double</mat-option>
+                  <mat-option value="queen">Queen</mat-option>
+                  <mat-option value="king">King</mat-option>
+                  <mat-option value="twin">Twin</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Floor Preference</mat-label>
+              <mat-select formControlName="floorPreference">
+                <mat-option value="no_preference">No Preference</mat-option>
+                <mat-option value="low">Low Floor</mat-option>
+                <mat-option value="middle">Middle Floor</mat-option>
+                <mat-option value="high">High Floor</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Contact Section -->
+      <div class="bg-white rounded-lg border border-gray-200 shadow-sm" formGroupName="emergencyContact">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <mat-icon class="text-purple-600">contact_emergency</mat-icon>
+            Emergency Contact
+          </h2>
+        </div>
+        <div class="p-6 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Contact Name</mat-label>
+                <input matInput formControlName="name" placeholder="Enter contact name">
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Relationship</mat-label>
+                <input matInput formControlName="relationship" placeholder="e.g., Parent, Spouse, Friend">
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Phone Number</mat-label>
+                <input matInput formControlName="phone" placeholder="Enter phone number">
+                <mat-icon matPrefix class="text-gray-400">phone</mat-icon>
+              </mat-form-field>
+            </div>
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Email Address</mat-label>
+                <input matInput type="email" formControlName="email" placeholder="Enter email address">
+                <mat-icon matPrefix class="text-gray-400">email</mat-icon>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status & Notes Section -->
+      <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <mat-icon class="text-purple-600">notes</mat-icon>
+            Status & Additional Information
+          </h2>
+        </div>
+        <div class="p-6 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <div>
+                <mat-checkbox formControlName="isVip" class="text-purple-600">
+                  VIP Guest
+                </mat-checkbox>
+                <p class="text-sm text-gray-500 mt-1">Mark as VIP for special treatment and privileges</p>
+              </div>
+              <div>
+                <mat-checkbox formControlName="blacklisted" class="text-red-600">
+                  Blacklisted
+                </mat-checkbox>
+                <p class="text-sm text-gray-500 mt-1">Restrict future bookings and services</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Notes</mat-label>
+              <textarea 
+                matInput 
+                formControlName="notes" 
+                rows="4" 
+                placeholder="Add any additional notes about the guest...">
+              </textarea>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
+        <button
+          type="button"
+          (click)="onCancel()"
+          class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="guestForm.invalid || isSaving()"
+          class="px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 border border-transparent rounded-lg shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+          @if (isSaving()) {
+            <mat-spinner diameter="20" class="text-white"></mat-spinner>
+          }
+          {{ submitButtonText() }}
+        </button>
+      </div>
+    </form>
+  </div>
+}

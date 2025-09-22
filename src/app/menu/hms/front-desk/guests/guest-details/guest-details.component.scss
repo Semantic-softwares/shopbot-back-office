@@ -1,0 +1,395 @@
+// Component-specific SCSS for guest details
+.guest-details-tabs {
+  // Override Material tab styling for modern appearance
+  ::ng-deep {
+    .mat-mdc-tab-group {
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+      border: 1px solid #e5e7eb;
+    }
+
+    .mat-mdc-tab-header {
+      background-color: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .mat-mdc-tab-labels {
+      padding: 0 1rem;
+    }
+
+    .mat-mdc-tab {
+      min-width: 120px;
+      padding: 0 1.5rem;
+      height: 48px;
+      font-weight: 500;
+      color: #6b7280;
+      transition: all 0.2s ease;
+
+      &.mdc-tab--active {
+        color: #7c3aed;
+        background-color: white;
+        
+        .mdc-tab__text-label {
+          font-weight: 600;
+        }
+      }
+
+      &:hover:not(.mdc-tab--active) {
+        background-color: #f3f4f6;
+        color: #374151;
+      }
+
+      .mdc-tab__text-label {
+        font-size: 0.875rem;
+        text-transform: none;
+        letter-spacing: normal;
+      }
+
+      .mdc-tab-indicator {
+        .mdc-tab-indicator__content--underline {
+          border-color: #7c3aed;
+          border-top-width: 3px;
+          border-radius: 2px 2px 0 0;
+        }
+      }
+    }
+
+    .mat-mdc-tab-body-wrapper {
+      background-color: white;
+    }
+
+    .mat-mdc-tab-body-content {
+      overflow: visible;
+    }
+  }
+}
+
+// Loading animation enhancements
+.mat-mdc-progress-spinner {
+  margin: 0 auto;
+  
+  circle {
+    stroke: #7c3aed;
+  }
+}
+
+// Status badge animations
+.status-badge {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px 0 rgb(0 0 0 / 0.15);
+  }
+}
+
+// Card hover effects
+.info-card {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
+  }
+}
+
+// Avatar enhancement
+.guest-avatar {
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: rotate(45deg);
+    transition: all 0.5s;
+    opacity: 0;
+  }
+  
+  &:hover::before {
+    animation: shimmer 1.5s infinite;
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+}
+
+// Stats cards enhancement
+.stats-card {
+  transition: all 0.3s ease-in-out;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+  
+  &:hover {
+    transform: translateY(-2px) scale(1.02);
+    
+    &::before {
+      left: 100%;
+    }
+  }
+  
+  .stats-value {
+    font-weight: 700;
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, currentColor, currentColor);
+    background-clip: text;
+    -webkit-background-clip: text;
+  }
+}
+
+// Action button enhancements
+.action-btn {
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(124, 58, 237, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+  }
+  
+  &:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+  
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// Information grid enhancements
+.info-grid {
+  .info-item {
+    transition: all 0.2s ease-in-out;
+    padding: 0.75rem;
+    border-radius: 6px;
+    
+    &:hover {
+      background-color: #f8fafc;
+      transform: translateX(4px);
+    }
+    
+    label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #6b7280;
+      margin-bottom: 0.25rem;
+      display: block;
+    }
+    
+    p {
+      color: #111827;
+      font-weight: 500;
+      margin: 0;
+    }
+  }
+}
+
+// Section header styling
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  
+  mat-icon {
+    color: #7c3aed;
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+// Empty state styling
+.empty-state {
+  .empty-icon {
+    background-color: #f9fafb;
+    border-radius: 50%;
+    width: 6rem;
+    height: 6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    
+    mat-icon {
+      color: #9ca3af;
+      font-size: 3rem;
+      width: 3rem;
+      height: 3rem;
+    }
+  }
+}
+
+// Special requests tags
+.special-request-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.15);
+  }
+}
+
+// Notes section styling
+.notes-section {
+  .notes-content {
+    background-color: #f9fafb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    
+    p {
+      color: #111827;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      margin: 0;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .guest-details-header {
+    .header-actions {
+      flex-direction: column;
+      gap: 0.5rem;
+      
+      button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+  
+  .guest-overview {
+    .overview-content {
+      flex-direction: column;
+      text-align: center;
+      
+      .guest-avatar {
+        margin: 0 auto;
+      }
+    }
+    
+    .stats-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+  }
+  
+  .info-grid-responsive {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+// Dark mode support (if enabled)
+@media (prefers-color-scheme: dark) {
+  .guest-details-tabs {
+    ::ng-deep {
+      .mat-mdc-tab-header {
+        background-color: #1f2937;
+        border-bottom-color: #374151;
+      }
+      
+      .mat-mdc-tab {
+        color: #9ca3af;
+        
+        &.mdc-tab--active {
+          color: #a78bfa;
+          background-color: #111827;
+        }
+        
+        &:hover:not(.mdc-tab--active) {
+          background-color: #374151;
+          color: #d1d5db;
+        }
+      }
+      
+      .mat-mdc-tab-body-wrapper {
+        background-color: #111827;
+      }
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .guest-details-header {
+    .header-actions {
+      display: none;
+    }
+  }
+  
+  .guest-details-tabs {
+    ::ng-deep {
+      .mat-mdc-tab-header {
+        display: none;
+      }
+      
+      .mat-mdc-tab-body-wrapper {
+        .mat-mdc-tab-body {
+          &:not(.mat-mdc-tab-body-active) {
+            display: block !important;
+            
+            .mat-mdc-tab-body-content {
+              transform: none !important;
+              visibility: visible !important;
+              height: auto !important;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  .action-btn, 
+  .mat-mdc-menu-trigger {
+    display: none;
+  }
+}

@@ -1,0 +1,498 @@
+<!-- Header Section -->
+<div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center py-6">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-1">Reservations</h1>
+        <p class="text-sm text-gray-600">Manage hotel reservations and guest bookings</p>
+      </div>
+      <button 
+        mat-raised-button 
+        color="primary"
+        (click)="createReservation()"
+        class="!bg-gradient-to-r !from-blue-600 !to-blue-700 hover:!from-blue-700 hover:!to-blue-800 !text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+        <mat-icon class="mr-2">add</mat-icon>
+        New Reservation
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="bg-white shadow-sm border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 p-4 shadow-sm hover:shadow-md transition-all duration-200">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+            <mat-icon class="text-white text-xl">hotel</mat-icon>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-gray-900">{{ reservations().length }}</div>
+            <div class="text-sm font-medium text-gray-600">Total</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 p-4 shadow-sm hover:shadow-md transition-all duration-200">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+            <mat-icon class="text-white text-xl">check_circle</mat-icon>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-gray-900">{{ confirmedCount() }}</div>
+            <div class="text-sm font-medium text-gray-600">Confirmed</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 p-4 shadow-sm hover:shadow-md transition-all duration-200">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+            <mat-icon class="text-white text-xl">person</mat-icon>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-gray-900">{{ checkedInCount() }}</div>
+            <div class="text-sm font-medium text-gray-600">Checked In</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200 p-4 shadow-sm hover:shadow-md transition-all duration-200">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
+            <mat-icon class="text-white text-xl">schedule</mat-icon>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-gray-900">{{ pendingCount() }}</div>
+            <div class="text-sm font-medium text-gray-600">Pending</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200 p-4 shadow-sm hover:shadow-md transition-all duration-200">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-lg">
+            <mat-icon class="text-white text-xl">cancel</mat-icon>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-gray-900">{{ cancelledCount() }}</div>
+            <div class="text-sm font-medium text-gray-600">Cancelled</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl border border-cyan-200 p-4 shadow-sm hover:shadow-md transition-all duration-200">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-full flex items-center justify-center shadow-lg">
+            <mat-icon class="text-white text-xl">attach_money</mat-icon>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-gray-900">{{ currency }}{{ totalRevenue() | number:'1.2-2' }}</div>
+            <div class="text-sm font-medium text-gray-600">Revenue</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters Section -->
+<div class="bg-white shadow-sm border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <form [formGroup]="filterForm">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-4">
+        <!-- Search Input -->
+        <div class="lg:col-span-2">
+          <mat-form-field appearance="outline" class="w-full [&_.mdc-text-field--outlined]:!bg-gray-50 [&_.mdc-text-field--outlined]:!border-gray-200 hover:[&_.mdc-text-field--outlined]:!border-blue-300 [&_.mdc-text-field--focused_.mdc-text-field--outlined]:!border-blue-500">
+            <mat-label>Search reservations...</mat-label>
+            <mat-icon matPrefix class="text-gray-400">search</mat-icon>
+            <input matInput 
+                   placeholder="Guest name or confirmation #" 
+                   formControlName="search"
+                   class="!bg-gray-50">
+          </mat-form-field>
+        </div>
+
+        <!-- Status Filter -->
+        <div>
+          <mat-form-field appearance="outline" class="w-full [&_.mdc-text-field--outlined]:!bg-gray-50 [&_.mdc-text-field--outlined]:!border-gray-200 hover:[&_.mdc-text-field--outlined]:!border-blue-300 [&_.mdc-text-field--focused_.mdc-text-field--outlined]:!border-blue-500">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              @for (status of statusOptions; track status.value) {
+                <mat-option [value]="status.value">
+                  <span class="flex items-center">
+                    <span class="w-3 h-3 rounded-full mr-3 ring-2"
+                          [ngClass]="'bg-' + status.color + '-500 ring-' + status.color + '-200'"></span>
+                    {{ status.label }}
+                  </span>
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Date From -->
+        <div>
+          <mat-form-field appearance="outline" class="w-full [&_.mdc-text-field--outlined]:!bg-gray-50 [&_.mdc-text-field--outlined]:!border-gray-200 hover:[&_.mdc-text-field--outlined]:!border-blue-300 [&_.mdc-text-field--focused_.mdc-text-field--outlined]:!border-blue-500">
+            <mat-label>Check-in from</mat-label>
+            <input matInput 
+                   [matDatepicker]="dateFromPicker" 
+                   formControlName="dateFrom"
+                   class="!bg-gray-50">
+            <mat-datepicker-toggle matSuffix [for]="dateFromPicker" class="text-gray-400"></mat-datepicker-toggle>
+            <mat-datepicker #dateFromPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <!-- Date To -->
+        <div>
+          <mat-form-field appearance="outline" class="w-full [&_.mdc-text-field--outlined]:!bg-gray-50 [&_.mdc-text-field--outlined]:!border-gray-200 hover:[&_.mdc-text-field--outlined]:!border-blue-300 [&_.mdc-text-field--focused_.mdc-text-field--outlined]:!border-blue-500">
+            <mat-label>Check-in to</mat-label>
+            <input matInput 
+                   [matDatepicker]="dateToPicker" 
+                   formControlName="dateTo"
+                   class="!bg-gray-50">
+            <mat-datepicker-toggle matSuffix [for]="dateToPicker" class="text-gray-400"></mat-datepicker-toggle>
+            <mat-datepicker #dateToPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <!-- Sort Options -->
+        <div>
+          <mat-form-field appearance="outline" class="w-full [&_.mdc-text-field--outlined]:!bg-gray-50 [&_.mdc-text-field--outlined]:!border-gray-200 hover:[&_.mdc-text-field--outlined]:!border-blue-300 [&_.mdc-text-field--focused_.mdc-text-field--outlined]:!border-blue-500">
+            <mat-label>Sort by</mat-label>
+            <mat-select formControlName="sortBy">
+              <mat-option value="createdAt">Created Date</mat-option>
+              <mat-option value="checkInDate">Check-in Date</mat-option>
+              <mat-option value="checkOutDate">Check-out Date</mat-option>
+              <mat-option value="total">Total Amount</mat-option>
+              <mat-option value="guestName">Guest Name</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <button 
+            type="button"
+            (click)="clearFilters()"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center gap-2">
+            <mat-icon class="text-lg">clear</mat-icon>
+            Clear Filters
+          </button>
+          <button 
+            type="button"
+            (click)="refreshReservations()"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center gap-2">
+            <mat-icon class="text-lg">refresh</mat-icon>
+            Refresh
+          </button>
+          <button 
+            type="button"
+            (click)="exportReservations()"
+            [disabled]="reservations().length === 0 || loading()"
+            class="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-green-600 rounded-lg hover:bg-green-700 hover:border-green-700 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600">
+            <mat-icon class="text-lg">download</mat-icon>
+            Export CSV
+          </button>
+        </div>
+        <div class="flex items-center text-sm text-gray-600">
+          <span>Showing {{ reservations().length }} reservations</span>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Loading State -->
+@if (loading()) {
+  <div class="flex justify-center items-center py-12 bg-white">
+    <mat-spinner diameter="40" class="!text-blue-600"></mat-spinner>
+    <span class="ml-3 text-gray-600">Loading reservations...</span>
+  </div>
+}
+
+<!-- Error State -->
+@if (error() && !loading()) {
+  <div class="bg-red-50 border border-red-200 rounded-lg p-4 m-4">
+    <div class="flex">
+      <mat-icon class="text-red-500 mr-2">error</mat-icon>
+      <div>
+        <h3 class="text-red-800 font-medium">Error loading reservations</h3>
+        <p class="text-red-700 text-sm mt-1">{{ error() }}</p>
+        <div class="mt-3 flex space-x-3">
+          <button mat-button color="warn" (click)="refreshReservations()" class="!text-red-600">
+            <mat-icon class="mr-1">refresh</mat-icon>
+            Retry
+          </button>
+          <button mat-button (click)="clearError()" class="!text-gray-600">Dismiss</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Main Content -->
+@if (!loading() && !error()) {
+  <div class="py-6">
+
+    
+    <!-- Empty State -->
+    @if (!loading() && reservations().length === 0) {
+      <div class="py-20 bg-gradient-to-br from-gray-50 to-white text-center">
+        <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+          <mat-icon class="text-4xl text-gray-400">hotel</mat-icon>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">No reservations found</h3>
+        <p class="text-gray-500 mb-6">
+          {{ filterForm.get('search')?.value || filterForm.get('status')?.value 
+            ? 'Try adjusting your filters or search terms to find matching reservations.' 
+            : 'Get started by creating your first reservation to begin managing your hotel bookings.' }}
+        </p>
+        <button 
+          class="!bg-gradient-to-r !from-blue-600 !to-blue-700 hover:!from-blue-700 hover:!to-blue-800 !text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 inline-flex items-center gap-2"
+          (click)="createReservation()">
+          <mat-icon class="text-lg">add</mat-icon>
+          Create New Reservation
+        </button>
+      </div>
+    }
+
+      <!-- Table Container -->
+      @if (!loading() && reservations().length > 0) {
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+                <tr>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
+                    Confirmation #
+                  </th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
+                    Guest Information
+                  </th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
+                    Room Details
+                  </th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
+                    Check-in
+                  </th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
+                    Check-out
+                  </th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
+                    Status
+                  </th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
+                    Total Amount
+                  </th>
+                  <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-100">
+                @for (reservation of reservations(); track reservation._id) {
+                  <tr class="hover:bg-gray-50 transition-colors duration-200 cursor-pointer" (click)="viewReservation(reservation)">
+                    <td class="px-6 py-4 whitespace-nowrap border-b border-gray-100">
+                      <div class="text-sm font-bold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors bg-blue-50 px-3 py-1 rounded-full border border-blue-200" 
+                           (click)="$event.stopPropagation(); viewReservation(reservation)">
+                        {{ reservation.confirmationNumber }}
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap border-b border-gray-100">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-12 w-12">
+                          <div class="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-md ring-2 ring-blue-200">
+                            <span>{{ getGuestName(reservation).charAt(0).toUpperCase() || 'G' }}</span>
+                          </div>
+                        </div>
+                        <div class="ml-4">
+                          <div class="text-sm font-semibold text-gray-900">
+                            {{ getGuestName(reservation) }}
+                          </div>
+                          <div class="text-sm text-gray-600">
+                            {{ reservation.guestDetails.primaryGuest.email || 'No email' }}
+                          </div>
+                          <div class="text-xs text-gray-500 font-medium">
+                            {{ reservation.guestDetails.primaryGuest.phone || 'No phone' }}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap border-b border-gray-100">
+                      <div class="flex items-center space-x-2">
+                        <mat-icon class="text-purple-600 text-lg">hotel</mat-icon>
+                        <div>
+                          <div class="text-sm font-medium text-gray-900">
+                            {{ getRoomNumbers(reservation) }}
+                          </div>
+                          <div class="text-sm text-gray-600">
+                            {{ reservation.rooms.length }} room{{ reservation.rooms.length !== 1 ? 's' : '' }}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap border-b border-gray-100">
+                      <div class="flex items-center space-x-2">
+                        <mat-icon class="text-green-600 text-lg">login</mat-icon>
+                        <div>
+                          <div class="text-sm font-medium text-gray-900">
+                            {{ reservation.checkInDate | date:'MMM dd, yyyy' }}
+                          </div>
+                          <div class="text-sm text-gray-600">
+                            {{ reservation.expectedCheckInTime || '15:00' }}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap border-b border-gray-100">
+                      <div class="flex items-center space-x-2">
+                        <mat-icon class="text-red-600 text-lg">logout</mat-icon>
+                        <div>
+                          <div class="text-sm font-medium text-gray-900">
+                            {{ reservation.checkOutDate | date:'MMM dd, yyyy' }}
+                          </div>
+                          <div class="text-sm text-gray-600">
+                            {{ reservation.expectedCheckOutTime || '11:00' }}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap border-b border-gray-100">
+                      <!-- Status Dropdown Button -->
+                      <div class="relative">
+                        <button 
+                          [matMenuTriggerFor]="statusMenu"
+                          [matMenuTriggerData]="{ reservation: reservation }"
+                          [disabled]="isStatusUpdating(reservation._id)"
+                          [style.background-color]="getStatusColorHex(reservation.status) + '20'"
+                          [style.color]="getStatusColorHex(reservation.status)"
+                          [style.border-color]="getStatusColorHex(reservation.status) + '40'"
+                          class="inline-flex items-center px-3 py-2 text-xs font-bold rounded-full shadow-sm ring-2 hover:opacity-80 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2"
+                          [style.focus:ring-color]="getStatusColorHex(reservation.status) + '60'"
+                          (click)="$event.stopPropagation()">
+                          @if (isStatusUpdating(reservation._id)) {
+                            <mat-icon class="w-2 h-2 mr-2 animate-spin text-xs">refresh</mat-icon>
+                          } @else {
+                            <span class="w-2 h-2 rounded-full mr-2"
+                                  [style.background-color]="getStatusColorHex(reservation.status)"></span>
+                          }
+                          {{ reservation.status | titlecase }}
+                          @if (!isStatusUpdating(reservation._id) && getAvailableStatusOptions(reservation).length > 0) {
+                            <mat-icon class="ml-1 text-xs opacity-60">expand_more</mat-icon>
+                          }
+                        </button>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap border-b border-gray-100">
+                      <div class="text-lg font-bold text-gray-900">
+                        {{ currency }}{{ reservation.pricing.total | number:'1.2-2' }}
+                      </div>
+                      <div class="text-sm text-gray-600">
+                        {{ reservation.numberOfNights }} night{{ reservation.numberOfNights !== 1 ? 's' : '' }}
+                      </div>
+                      <div class="text-xs text-gray-500">
+                        {{ currency }}{{ (reservation.pricing.total || 0) / (reservation.numberOfNights || 1) | number:'1.2-2' }}/night
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium border-b border-gray-100">
+                      <div class="flex items-center justify-end">
+                        <div class="relative inline-block text-left">
+                          <button class="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-all duration-200" 
+                                  [matMenuTriggerFor]="actionMenu" 
+                                  (click)="$event.stopPropagation()" title="More Actions">
+                            <mat-icon class="text-lg">more_vert</mat-icon>
+                          </button>
+                          
+                          <mat-menu #actionMenu="matMenu" class="[&_.mat-mdc-menu-panel]:!shadow-xl [&_.mat-mdc-menu-panel]:!border [&_.mat-mdc-menu-panel]:!border-gray-200 [&_.mat-mdc-menu-panel]:!rounded-lg">
+                            <button mat-menu-item (click)="viewReservation(reservation)" class="!text-gray-700 hover:!bg-blue-50 hover:!text-blue-700 !transition-colors">
+                              <mat-icon class="mr-3 !text-blue-600">visibility</mat-icon>
+                              <span>View Details</span>
+                            </button>
+                            @if (canEdit(reservation)) {
+                              <button mat-menu-item (click)="editReservation(reservation)" class="!text-gray-700 hover:!bg-green-50 hover:!text-green-700 !transition-colors">
+                                <mat-icon class="mr-3 !text-green-600">edit</mat-icon>
+                                <span>Edit</span>
+                              </button>
+                            }
+                            
+                          </mat-menu>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (reservations().length === 0 && !loading()) {
+            <div class="py-20 bg-gradient-to-br from-gray-50 to-white text-center">
+              <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                <mat-icon class="text-4xl text-gray-400">hotel</mat-icon>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">No reservations found</h3>
+              <p class="text-gray-500 mb-6">Try adjusting your filters or create a new reservation.</p>
+              <button class="!bg-gradient-to-r !from-blue-600 !to-blue-700 hover:!from-blue-700 hover:!to-blue-800 !text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 inline-flex items-center gap-2" 
+                      (click)="createReservation()">
+                <mat-icon class="text-lg">add</mat-icon>
+                New Reservation
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Pagination -->
+        <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6 rounded-b-lg">
+          <mat-paginator 
+            [length]="totalReservations()"
+            [pageSize]="pageSize()"
+            [pageSizeOptions]="[5, 10, 25, 50, 100]"
+            [pageIndex]="currentPage() - 1"
+            (page)="onPageChange($event)"
+            showFirstLastButtons
+            class="!border-0 !bg-white [&_.mat-mdc-paginator-range-label]:!text-gray-600">
+          </mat-paginator>
+        </div>
+      }
+  </div>
+}
+
+<!-- Status Change Menu -->
+<mat-menu #statusMenu="matMenu" class="!shadow-xl !border !border-gray-200 !rounded-lg">
+  <ng-template matMenuContent let-reservation="reservation">
+    <div class="px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
+      Change Status
+    </div>
+    @if (getAvailableStatusOptions(reservation).length === 0) {
+      <div class="px-3 py-2 text-xs text-gray-400 italic">
+        No status changes available
+      </div>
+    }
+    @for (status of getAvailableStatusOptions(reservation); track status.value) {
+      <button 
+        mat-menu-item 
+        (click)="updateReservationStatus(reservation, status.value)"
+        class="!text-gray-700 hover:!bg-gray-50 !transition-colors">
+        <mat-icon 
+          class="mr-3 !text-base" 
+          [style.color]="status.color">{{ status.icon }}</mat-icon>
+        <span>{{ status.label }}</span>
+      </button>
+    }
+    @if (reservation.status === 'pending') {
+      <div class="px-3 py-2 text-xs text-amber-600 bg-amber-50 border-t border-amber-100 mt-1">
+        💡 Confirm reservation before check-in
+      </div>
+    }
+    @if (reservation.status === 'confirmed') {
+      <div class="px-3 py-2 text-xs text-blue-600 bg-blue-50 border-t border-blue-100 mt-1">
+        💡 Ready for check-in
+      </div>
+    }
+  </ng-template>
+</mat-menu>

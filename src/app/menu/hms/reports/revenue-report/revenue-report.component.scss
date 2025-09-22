@@ -1,0 +1,58 @@
+// Revenue Report Component Styles
+// Using Tailwind CSS for styling, minimal custom SCSS needed
+
+// Chart container adjustments
+.chart-container {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+// Loading spinner styles
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// Custom hover effects for table rows
+.revenue-table-row {
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: rgba(249, 250, 251, 0.8);
+  }
+}
+
+// Export button loading state
+.export-button {
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Custom scrollbar for tables
+.revenue-table-container {
+  &::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+    
+    &:hover {
+      background: #a0aec0;
+    }
+  }
+}

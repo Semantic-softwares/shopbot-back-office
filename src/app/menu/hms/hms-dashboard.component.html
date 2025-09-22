@@ -1,0 +1,67 @@
+<div class="hms-dashboard-container">
+  <app-toolbar 
+    [title]="'Hotel Management System'"
+    (menuToggle)="toggleSidenav()">
+  </app-toolbar>
+
+  <mat-sidenav-container>
+    <mat-sidenav [mode]="isMobile() ? 'over' : 'side'" [opened]="opened()" class="!w-[20em] !rounded-[0px] px-2">
+      <mat-list>
+        <mat-list-item>
+          @if (storeStore.selectedStore()?.logo) {
+            <a matListItemIcon class="block !mr-6" [routerLink]="['../settings']">
+            <img [routerLink]="['../settings']" [src]="storeStore.selectedStore()?.logo" class="!w-full !min-w-10 !mr-5 !max-w-100 h-10 rounded-full object-cover">
+            </a>
+          } @else {
+            <a matListItemIcon class="block">
+              <mat-icon>hotel</mat-icon>
+            </a>
+          }
+            
+          <h2 matListItemTitle [routerLink]="['../settings']">{{currentUser()?.role }}</h2>
+          <div matListItemLine [routerLink]="['../settings']">{{storeStore.selectedStore()?.name}} - Hotel</div>
+          <a matListItemMeta mat-icon-button class="block" [matMenuTriggerFor]="menu">
+            <mat-icon>keyboard_arrow_down</mat-icon>
+          </a>
+         
+        </mat-list-item>
+        <mat-divider></mat-divider>
+      </mat-list>
+      <mat-menu #menu="matMenu">
+        @for (store of storeStore.stores(); track $index) {
+          <button mat-menu-item (click)="selectStore(store)" [disabled]="store._id === storeStore.selectedStore()?._id"> {{store.name}}</button>
+        }
+      </mat-menu>
+
+      <mat-nav-list>
+        <app-usage-indicator [storeId]="storeStore.selectedStore()?._id"></app-usage-indicator>
+        <mat-accordion multi>
+          @for (link of navItems; track $index) {
+          <mat-expansion-panel class="mat-elevation-z0" [expanded]="true">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <span class="flex items-center">
+                  {{link?.name}}
+                </span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            @for (item of link.children; track $index) {
+            <a mat-list-item [routerLink]="item.link" routerLinkActive="active-link" #rla="routerLinkActive"
+              [activated]="rla.isActive">
+              <mat-icon matListItemIcon class="material-icons-outlined">{{item.icon}}</mat-icon>
+              <span matListItemTitle>{{item.label}}</span>
+            </a>
+            }
+          </mat-expansion-panel>
+          }
+        </mat-accordion>
+      </mat-nav-list>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <div class="p-4 bg-[#F9FAFB] h-screen">
+        <router-outlet></router-outlet>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

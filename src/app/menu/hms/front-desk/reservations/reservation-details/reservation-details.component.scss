@@ -1,0 +1,413 @@
+.reservation-details-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .error-card {
+    margin: 24px auto;
+    max-width: 400px;
+    
+    .error-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: #f44336;
+    }
+  }
+
+  .header-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+
+    mat-card-header {
+      padding: 24px 24px 0 24px;
+    }
+
+    mat-card-content {
+      padding: 16px 24px;
+    }
+
+    mat-card-actions {
+      background-color: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+      margin: 0;
+    }
+
+    .status-chip {
+      font-weight: 500;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  mat-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+
+    mat-card-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    mat-card-subtitle {
+      font-size: 14px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+  }
+
+  // Tab styling
+  ::ng-deep .mat-mdc-tab-group {
+    .mat-mdc-tab-header {
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .mat-mdc-tab {
+      &.mdc-tab--active {
+        .mdc-tab__text-label {
+          color: #3b82f6;
+          font-weight: 600;
+        }
+      }
+    }
+
+    .mat-mdc-tab-body-content {
+      padding: 0;
+    }
+  }
+
+  // Table styling
+  ::ng-deep .mat-mdc-table {
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+
+    .mat-mdc-header-row {
+      background-color: #f8f9fa;
+    }
+
+    .mat-mdc-header-cell {
+      font-weight: 600;
+      color: #374151;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    .mat-mdc-cell {
+      color: #1f2937;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 14px;
+    }
+
+    .mat-mdc-row:hover {
+      background-color: #f9fafb;
+    }
+
+    .mat-mdc-row:last-child .mat-mdc-cell {
+      border-bottom: none;
+    }
+  }
+
+  // Chip styling
+  ::ng-deep .mat-mdc-chip {
+    font-size: 11px;
+    font-weight: 500;
+    height: 24px;
+    border-radius: 12px;
+
+    &.status-chip {
+      border: none;
+    }
+  }
+
+  // Button styling
+  ::ng-deep .mat-mdc-raised-button {
+    border-radius: 8px;
+    font-weight: 500;
+    text-transform: none;
+
+    &.mat-primary {
+      background-color: #3b82f6;
+      color: white;
+
+      &:hover {
+        background-color: #2563eb;
+      }
+    }
+  }
+
+  ::ng-deep .mat-mdc-button {
+    border-radius: 8px;
+    font-weight: 500;
+    text-transform: none;
+  }
+
+  // Menu styling
+  ::ng-deep .mat-mdc-menu-panel {
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  // Grid and spacing utilities
+  .grid {
+    display: grid;
+  }
+
+  .grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  .grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .gap-2 {
+    gap: 0.5rem;
+  }
+
+  .gap-4 {
+    gap: 1rem;
+  }
+
+  .gap-6 {
+    gap: 1.5rem;
+  }
+
+  .space-y-1 > * + * {
+    margin-top: 0.25rem;
+  }
+
+  .space-y-2 > * + * {
+    margin-top: 0.5rem;
+  }
+
+  .space-y-6 > * + * {
+    margin-top: 1.5rem;
+  }
+
+  // Responsive design
+  @media (min-width: 768px) {
+    .md\\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .md\\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  // Utility classes
+  .flex {
+    display: flex;
+  }
+
+  .items-center {
+    align-items: center;
+  }
+
+  .items-start {
+    align-items: flex-start;
+  }
+
+  .justify-center {
+    justify-content: center;
+  }
+
+  .justify-between {
+    justify-content: space-between;
+  }
+
+  .w-full {
+    width: 100%;
+  }
+
+  .mb-2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .mb-4 {
+    margin-bottom: 1rem;
+  }
+
+  .mb-6 {
+    margin-bottom: 1.5rem;
+  }
+
+  .ml-2 {
+    margin-left: 0.5rem;
+  }
+
+  .p-3 {
+    padding: 0.75rem;
+  }
+
+  .p-4 {
+    padding: 1rem;
+  }
+
+  .py-8 {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  .pb-4 {
+    padding-bottom: 1rem;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+
+  .text-4xl {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+
+  .font-medium {
+    font-weight: 500;
+  }
+
+  .font-semibold {
+    font-weight: 600;
+  }
+
+  .rounded-lg {
+    border-radius: 0.5rem;
+  }
+
+  .border {
+    border-width: 1px;
+  }
+
+  .border-t {
+    border-top-width: 1px;
+  }
+
+  .overflow-x-auto {
+    overflow-x: auto;
+  }
+
+  // Color utilities
+  .text-gray-500 {
+    color: #6b7280;
+  }
+
+  .text-gray-900 {
+    color: #111827;
+  }
+
+  .text-blue-600 {
+    color: #2563eb;
+  }
+
+  .text-green-600 {
+    color: #059669;
+  }
+
+  .text-purple-600 {
+    color: #9333ea;
+  }
+
+  .text-orange-600 {
+    color: #ea580c;
+  }
+
+  .text-red-600 {
+    color: #dc2626;
+  }
+
+  .bg-gray-50 {
+    background-color: #f9fafb;
+  }
+
+  .bg-red-50 {
+    background-color: #fef2f2;
+  }
+
+  .border-red-200 {
+    border-color: #fecaca;
+  }
+
+  // Loading state
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+  }
+
+  // Empty state
+  .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+
+    mat-icon {
+      opacity: 0.5;
+    }
+  }
+
+  // Accessibility improvements
+  button {
+    &:focus {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+  }
+
+  // Print styles
+  @media print {
+    .header-card mat-card-actions,
+    button,
+    .mat-mdc-menu-trigger {
+      display: none !important;
+    }
+
+    mat-card {
+      box-shadow: none;
+      border: 1px solid #ccc;
+    }
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .reservation-details-container {
+    mat-card {
+      background-color: #374151;
+      color: #f9fafb;
+    }
+
+    .text-gray-900 {
+      color: #f9fafb;
+    }
+
+    .text-gray-500 {
+      color: #9ca3af;
+    }
+
+    .bg-gray-50 {
+      background-color: #4b5563;
+    }
+  }
+}

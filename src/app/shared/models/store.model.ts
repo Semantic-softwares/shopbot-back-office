@@ -29,6 +29,7 @@ export interface Store {
     staffs: Employee[];
     tax?: number;
     useBarcodeScanner: boolean;
+    hotelSettings?: HotelSettings;
   };
   
   export interface DeliverySettings {
@@ -110,5 +111,43 @@ export interface BusinessHours {
 export interface Location {
     type: 'Point'
     coordinates: number[];
+}
+
+export interface HotelSettings {
+  operationalSettings: {
+    timezone: string;
+    checkInTime: string;
+    checkOutTime: string;
+  };
+  printerConfiguration: {
+    paperSize: string;
+    printQuality: string;
+    autocut: boolean;
+    headerText: string;
+    footerText: string;
+    includeLogo: boolean;
+    fontSize: number;
+    lineSpacing: number;
+  };
+  emailSettings: {
+    smtpHost: string;
+    smtpPort: number;
+    smtpUsername: string;
+    smtpPassword: string;
+    smtpSecure: boolean;
+    senderName: string;
+    senderEmail: string;
+    replyToEmail: string;
+  };
+  notifications: {
+    reservationConfirmation: boolean;
+    checkInReminder: boolean;
+    checkOutReminder: boolean;
+    paymentConfirmation: boolean;
+    cancellationNotice: boolean;
+    guestFeedbackRequest: boolean;
+    smsNotifications: boolean;
+    pushNotifications: boolean;
+  };
 }
   

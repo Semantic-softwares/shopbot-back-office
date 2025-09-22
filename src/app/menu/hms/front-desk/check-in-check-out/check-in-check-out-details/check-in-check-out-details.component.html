@@ -1,0 +1,391 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <!-- Header Section -->
+  <div class="mb-6">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <button 
+          mat-icon-button 
+          (click)="goBack()"
+          class="text-gray-600 hover:text-gray-900">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Check-In / Check-Out Details</h1>
+          @if (reservation(); as res) {
+            <p class="text-gray-600 mt-1">{{ res.confirmationNumber }}</p>
+          }
+        </div>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="flex items-center space-x-3">
+        @if (reservation(); as res) {
+          <!-- Check-In Button -->
+          @if (canCheckIn()) {
+            <button 
+              mat-raised-button 
+              color="primary"
+              (click)="performCheckIn()"
+              class="flex items-center">
+              <mat-icon class="mr-2">login</mat-icon>
+              Check In
+            </button>
+          }
+          
+          <!-- Check-Out Button -->
+          @if (canCheckOut()) {
+            <button 
+              mat-raised-button 
+              color="accent"
+              (click)="performCheckOut()"
+              [disabled]="hasOutstandingBalance()"
+              class="flex items-center">
+              <mat-icon class="mr-2">logout</mat-icon>
+              Check Out
+            </button>
+          }
+          
+          <!-- More Actions Menu -->
+          <button mat-icon-button [matMenuTriggerFor]="actionsMenu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #actionsMenu="matMenu">
+            @if (res.status === 'confirmed') {
+              <button mat-menu-item (click)="requestEarlyCheckIn()">
+                <mat-icon>schedule</mat-icon>
+                <span>Request Early Check-in</span>
+              </button>
+            }
+            @if (res.status === 'checked_in') {
+              <button mat-menu-item (click)="requestLateCheckOut()">
+                <mat-icon>schedule</mat-icon>
+                <span>Request Late Check-out</span>
+              </button>
+            }
+            <mat-divider></mat-divider>
+            @if (hasOutstandingBalance()) {
+              <button mat-menu-item (click)="processPayment()">
+                <mat-icon>payment</mat-icon>
+                <span>Process Payment</span>
+              </button>
+            }
+            <button mat-menu-item (click)="printFolio()">
+              <mat-icon>print</mat-icon>
+              <span>Print Folio</span>
+            </button>
+            <button mat-menu-item (click)="editReservation()">
+              <mat-icon>edit</mat-icon>
+              <span>Edit Reservation</span>
+            </button>
+          </mat-menu>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex justify-center items-center h-64">
+      <mat-spinner></mat-spinner>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!loading() && reservation(); as res) {
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Left Column - Guest & Reservation Info -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Guest Information Card -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-900 flex items-center">
+              <mat-icon class="mr-2 text-blue-600">person</mat-icon>
+              Guest Information
+            </h2>
+          </div>
+          <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              @if (typeof res.guest !== 'string') {
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <div class="flex items-center">
+                    <p class="text-gray-900">{{ res.guest.firstName }} {{ res.guest.lastName }}</p>
+                    @if (res.guest.isVip) {
+                      <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        <mat-icon class="text-yellow-600 text-xs mr-1">star</mat-icon>
+                        VIP
+                      </span>
+                    }
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <p class="text-gray-900">{{ res.guest.email }}</p>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <p class="text-gray-900">{{ res.guest.phone }}</p>
+                </div>
+                
+                @if (res.guest.nationality) {
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                    <p class="text-gray-900">{{ res.guest.nationality }}</p>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Room Information Card -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-900 flex items-center">
+              <mat-icon class="mr-2 text-green-600">hotel</mat-icon>
+              Room Information
+            </h2>
+          </div>
+          <div class="p-6">
+            @for (roomRes of res.rooms; track $index) {
+              @if (typeof roomRes.room !== 'string') {
+                <div class="border border-gray-200 rounded-lg p-4 mb-4 last:mb-0">
+                  <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-medium text-gray-900">Room {{ roomRes.room.roomNumber }}</h3>
+                    <div class="flex space-x-2">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                            [ngClass]="getRoomStatusClass(roomRes.room.status)">
+                        {{ roomRes.room.status | titlecase }}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <span class="text-gray-500">Type:</span>
+                      <p class="font-medium">{{ getRoomTypeName(roomRes.room) }}</p>
+                    </div>
+                    <div>
+                      <span class="text-gray-500">Floor:</span>
+                      <p class="font-medium">{{ roomRes.room.floor }}</p>
+                    </div>
+                    <div>
+                      <span class="text-gray-500">Adults:</span>
+                      <p class="font-medium">{{ roomRes.guests.adults }}</p>
+                    </div>
+                    <div>
+                      <span class="text-gray-500">Children:</span>
+                      <p class="font-medium">{{ roomRes.guests.children }}</p>
+                    </div>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+
+        <!-- Special Requests & Notes -->
+        @if (res.specialRequests || res.internalNotes) {
+          <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h2 class="text-lg font-medium text-gray-900 flex items-center">
+                <mat-icon class="mr-2 text-purple-600">note</mat-icon>
+                Notes & Requests
+              </h2>
+            </div>
+            <div class="p-6 space-y-4">
+              @if (res.specialRequests) {
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Special Requests</label>
+                  <p class="text-gray-900 bg-yellow-50 p-3 rounded-md border border-yellow-200">
+                    {{ res.specialRequests }}
+                  </p>
+                </div>
+              }
+              @if (res.internalNotes) {
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Internal Notes</label>
+                  <p class="text-gray-900 bg-blue-50 p-3 rounded-md border border-blue-200">
+                    {{ res.internalNotes }}
+                  </p>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Right Column - Status & Timing -->
+      <div class="space-y-6">
+        
+        <!-- Status Overview -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-900">Status Overview</h2>
+          </div>
+          <div class="p-6 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-gray-700">Current Status</span>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                    [ngClass]="getStatusClass(res.status)">
+                {{ res.status | titlecase }}
+              </span>
+            </div>
+            
+            @if (res.bookingSource) {
+              <div class="flex items-center justify-between">
+                <span class="text-gray-700">Booking Source</span>
+                <span class="text-gray-900 font-medium">{{ res.bookingSource | titlecase }}</span>
+              </div>
+            }
+            
+            <div class="flex items-center justify-between">
+              <span class="text-gray-700">Nights</span>
+              <span class="text-gray-900 font-medium">{{ res.numberOfNights }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Check-In/Out Times -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-900">Check-In / Check-Out</h2>
+          </div>
+          <div class="p-6 space-y-4">
+            <!-- Check-In Information -->
+            <div class="border-l-4 border-green-500 pl-4">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-medium text-gray-900 flex items-center">
+                  <mat-icon class="mr-1 text-green-600 text-sm">login</mat-icon>
+                  Check-In
+                </h3>
+                @if (isCheckInToday()) {
+                  <span class="text-green-600 text-sm font-medium">Today</span>
+                }
+              </div>
+              <p class="text-gray-700">{{ res.checkInDate | date:'fullDate' }}</p>
+              @if (res.expectedCheckInTime) {
+                <p class="text-gray-500 text-sm">Expected: {{ res.expectedCheckInTime }}</p>
+              }
+              @if (res.actualCheckInDate) {
+                <p class="text-green-600 text-sm font-medium">
+                  ✓ Checked in: {{ res.actualCheckInDate | date:'short' }}
+                </p>
+              }
+            </div>
+
+            <!-- Check-Out Information -->
+            <div class="border-l-4 border-red-500 pl-4">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-medium text-gray-900 flex items-center">
+                  <mat-icon class="mr-1 text-red-600 text-sm">logout</mat-icon>
+                  Check-Out
+                </h3>
+                @if (isCheckOutToday()) {
+                  <span class="text-red-600 text-sm font-medium">Today</span>
+                } @else if (isPastDueCheckOut()) {
+                  <span class="text-red-600 text-sm font-medium">Overdue</span>
+                }
+              </div>
+              <p class="text-gray-700">{{ res.checkOutDate | date:'fullDate' }}</p>
+              @if (res.expectedCheckOutTime) {
+                <p class="text-gray-500 text-sm">Expected: {{ res.expectedCheckOutTime }}</p>
+              }
+              @if (res.actualCheckOutDate) {
+                <p class="text-green-600 text-sm font-medium">
+                  ✓ Checked out: {{ res.actualCheckOutDate | date:'short' }}
+                </p>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Financial Summary -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-900 flex items-center">
+              <mat-icon class="mr-2 text-yellow-600">account_balance_wallet</mat-icon>
+              Financial Summary
+            </h2>
+          </div>
+          <div class="p-6 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-gray-700">Total Amount</span>
+              <span class="text-gray-900 font-medium">
+                {{ res.pricing.total | currency:(selectedStore()?.currency || 'USD'):'symbol':'1.2-2' }}
+              </span>
+            </div>
+            
+            @if (res.pricing.paid) {
+              <div class="flex items-center justify-between">
+                <span class="text-gray-700">Paid</span>
+                <span class="text-green-600 font-medium">
+                  {{ res.pricing.paid | currency:(selectedStore()?.currency || 'USD'):'symbol':'1.2-2' }}
+                </span>
+              </div>
+            }
+            
+            <div class="border-t border-gray-200 pt-3">
+              <div class="flex items-center justify-between">
+                <span class="text-gray-900 font-medium">Outstanding Balance</span>
+                <span class="font-bold"
+                      [class]="res.pricing.balance > 0 ? 'text-red-600' : 'text-green-600'">
+                  {{ res.pricing.balance | currency:(selectedStore()?.currency || 'USD'):'symbol':'1.2-2' }}
+                </span>
+              </div>
+            </div>
+
+            @if (hasOutstandingBalance()) {
+              <div class="bg-red-50 border border-red-200 rounded-md p-3 mt-3">
+                <p class="text-red-800 text-sm">
+                  <mat-icon class="text-red-600 text-sm mr-1">warning</mat-icon>
+                  Payment required before check-out
+                </p>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Guest Details -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-900">Guest Details</h2>
+          </div>
+          <div class="p-6 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-gray-700">Adults</span>
+              <span class="text-gray-900 font-medium">{{ res.guestDetails.totalAdults }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-700">Children</span>
+              <span class="text-gray-900 font-medium">{{ res.guestDetails.totalChildren }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-700">Total Guests</span>
+              <span class="text-gray-900 font-medium">
+                {{ res.guestDetails.totalAdults + res.guestDetails.totalChildren }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (!loading() && !reservation()) {
+    <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
+      <mat-icon class="text-gray-400 text-6xl mb-4">error_outline</mat-icon>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Reservation Not Found</h3>
+      <p class="text-gray-500 mb-4">The requested reservation could not be found.</p>
+      <button mat-raised-button color="primary" (click)="goBack()">
+        <mat-icon class="mr-2">arrow_back</mat-icon>
+        Go Back
+      </button>
+    </div>
+  }
+</div>

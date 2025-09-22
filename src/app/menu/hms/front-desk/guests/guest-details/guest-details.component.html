@@ -1,0 +1,609 @@
+<!-- Header Section -->
+<div class="bg-white shadow-sm border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <button
+          type="button"
+          (click)="goBack()"
+          class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
+          <mat-icon class="text-gray-600">arrow_back</mat-icon>
+        </button>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Guest Details</h1>
+          <p class="text-sm text-gray-600 mt-1">View and manage guest information</p>
+        </div>
+      </div>
+      
+      @if (!isLoading() && guest()) {
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            (click)="onEdit()"
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm">
+            <mat-icon class="text-lg">edit</mat-icon>
+            Edit Guest
+          </button>
+          <button
+            type="button"
+            [matMenuTriggerFor]="actionsMenu"
+            [disabled]="isUpdating()"
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+            @if (isUpdating()) {
+              <div class="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-gray-600"></div>
+            } @else {
+              <mat-icon class="text-lg">more_vert</mat-icon>
+            }
+            {{ isUpdating() ? 'Processing...' : 'Actions' }}
+          </button>
+          <mat-menu #actionsMenu="matMenu">
+            <button mat-menu-item (click)="toggleVipStatus()" [disabled]="isUpdating()">
+              <mat-icon>{{ guest()?.isVip ? 'star_border' : 'star' }}</mat-icon>
+              <span>{{ guest()?.isVip ? 'Remove VIP Status' : 'Make VIP' }}</span>
+            </button>
+            <button mat-menu-item (click)="toggleBlacklistStatus()" [disabled]="isUpdating()">
+              <mat-icon>{{ guest()?.blacklisted ? 'check_circle' : 'block' }}</mat-icon>
+              <span>{{ guest()?.blacklisted ? 'Remove from Blacklist' : 'Add to Blacklist' }}</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="onDelete()" [disabled]="isUpdating()" class="text-red-600 disabled:text-red-300">
+              <mat-icon>delete</mat-icon>
+              <span>Delete Guest</span>
+            </button>
+          </mat-menu>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+@if (isLoading()) {
+  <div class="flex justify-center items-center py-16">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+}
+
+<!-- Guest Details Content -->
+@if (!isLoading() && guest()) {
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Guest Overview Card -->
+    <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-8">
+      <div class="p-6">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-6">
+            <!-- Avatar -->
+            <div class="flex-shrink-0">
+              <div class="h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg ring-4 ring-purple-100">
+                {{ guest()!.firstName.charAt(0).toUpperCase() }}{{ guest()!.lastName.charAt(0).toUpperCase() }}
+              </div>
+            </div>
+            
+            <!-- Basic Info -->
+            <div>
+              <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ guestFullName() }}</h2>
+              <div class="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                <div class="flex items-center gap-1">
+                  <mat-icon class="text-lg">email</mat-icon>
+                  <span>{{ guest()!.email }}</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <mat-icon class="text-lg">phone</mat-icon>
+                  <span>{{ guest()!.phone }}</span>
+                </div>
+                @if (guest()?.nationality) {
+                  <div class="flex items-center gap-1">
+                    <mat-icon class="text-lg">public</mat-icon>
+                    <span>{{ getCountryName(guest()?.nationality) }}</span>
+                  </div>
+                }
+              </div>
+              
+              <!-- Status Badges -->
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border"
+                      [ngClass]="guestStatusClass()">
+                  @if (guestStatus() === 'vip') {
+                    <mat-icon class="text-xs mr-1">star</mat-icon>
+                  }
+                  @if (guestStatus() === 'blacklisted') {
+                    <mat-icon class="text-xs mr-1">block</mat-icon>
+                  }
+                  @if (guestStatus() === 'returning') {
+                    <mat-icon class="text-xs mr-1">repeat</mat-icon>
+                  }
+                  @if (guestStatus() === 'new') {
+                    <mat-icon class="text-xs mr-1">star_border</mat-icon>
+                  }
+                  {{ guestStatus() | titlecase }} Guest
+                </span>
+                
+                @if (guest()?.loyaltyProgram?.tier) {
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                    <mat-icon class="text-xs mr-1">workspace_premium</mat-icon>
+                    {{ guest()?.loyaltyProgram?.tier | titlecase }} Member
+                  </span>
+                }
+
+                @if (isUpdating()) {
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                    <div class="animate-spin rounded-full h-3 w-3 border border-blue-600 border-t-transparent mr-1"></div>
+                    Updating...
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+          
+          <!-- Stats -->
+          <div class="grid grid-cols-3 gap-6 text-center">
+            <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+              <div class="text-2xl font-bold text-blue-600">{{ guest()?.totalStays || 0 }}</div>
+              <div class="text-sm text-blue-700 font-medium">Total Stays</div>
+            </div>
+            <div class="bg-green-50 rounded-lg p-4 border border-green-100">
+              <div class="text-2xl font-bold text-green-600">{{ (guest()?.totalSpent || 0) | currency:(selectedStore()?.currency || 'USD'):'symbol':'1.0-0' }}</div>
+              <div class="text-sm text-green-700 font-medium">Total Spent</div>
+            </div>
+            <div class="bg-purple-50 rounded-lg p-4 border border-purple-100">
+              <div class="text-2xl font-bold text-purple-600">{{ guest()?.loyaltyProgram?.points || 0 }}</div>
+              <div class="text-sm text-purple-700 font-medium">Loyalty Points</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIP Welcome Section -->
+    @if (guest()?.isVip && !guest()?.blacklisted) {
+      <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-8">
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <mat-icon class="text-purple-600 text-xl">star</mat-icon>
+          </div>
+          <div class="ml-3 flex-1">
+            <h3 class="text-sm font-medium text-purple-800">
+              VIP Guest
+            </h3>
+            <div class="mt-2 text-sm text-purple-700">
+              <p>This guest has VIP status and should receive premium service and privileges.</p>
+              @if (guest()?.vipSince) {
+                <div class="mt-1 text-xs text-purple-600">
+                  VIP member since {{ formatDate(guest()?.vipSince) }}
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Blacklist Warning Section -->
+    @if (guest()?.blacklisted) {
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <mat-icon class="text-red-600 text-xl">warning</mat-icon>
+          </div>
+          <div class="ml-3 flex-1">
+            <h3 class="text-sm font-medium text-red-800">
+              This guest is blacklisted
+            </h3>
+            <div class="mt-2 text-sm text-red-700">
+              <p>This guest has been flagged and cannot make new reservations without manager approval.</p>
+              @if (guest()?.blacklistReason) {
+                <div class="mt-2">
+                  <span class="font-medium">Reason:</span> {{ guest()?.blacklistReason }}
+                </div>
+              }
+              @if (guest()?.blacklistedAt) {
+                <div class="mt-1 text-xs text-red-600">
+                  Blacklisted on {{ formatDate(guest()?.blacklistedAt) }}
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Custom Tailwind Tabbed Content -->
+    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+      <!-- Tab Navigation -->
+      <div class="border-b border-gray-200">
+        <nav class="flex space-x-8 px-6" aria-label="Tabs">
+          <button
+            type="button"
+            (click)="setActiveTab('personal')"
+            [class]="activeTab() === 'personal' 
+              ? 'border-purple-500 text-purple-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm' 
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'">
+            Personal Information
+          </button>
+          <button
+            type="button"
+            (click)="setActiveTab('documents')"
+            [class]="activeTab() === 'documents' 
+              ? 'border-purple-500 text-purple-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm' 
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'">
+            Documents & Preferences
+          </button>
+          <button
+            type="button"
+            (click)="setActiveTab('emergency')"
+            [class]="activeTab() === 'emergency' 
+              ? 'border-purple-500 text-purple-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm' 
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'">
+            Emergency Contact
+          </button>
+          <button
+            type="button"
+            (click)="setActiveTab('notes')"
+            [class]="activeTab() === 'notes' 
+              ? 'border-purple-500 text-purple-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm' 
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'">
+            Notes
+          </button>
+        </nav>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="p-6">
+        <!-- Personal Information Tab Content -->
+        @if (activeTab() === 'personal') {
+          <div class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              
+              <!-- Personal Details -->
+              <div class="bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200 bg-white rounded-t-lg">
+                  <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <mat-icon class="text-purple-600">person</mat-icon>
+                    Personal Details
+                  </h3>
+                </div>
+                <div class="p-6 space-y-4">
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="text-sm font-medium text-gray-500">First Name</label>
+                      <p class="text-gray-900 mt-1">{{ guest()?.firstName || 'Not specified' }}</p>
+                    </div>
+                    <div>
+                      <label class="text-sm font-medium text-gray-500">Last Name</label>
+                      <p class="text-gray-900 mt-1">{{ guest()?.lastName || 'Not specified' }}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="text-sm font-medium text-gray-500">Email</label>
+                    <p class="text-gray-900 mt-1">{{ guest()?.email || 'Not specified' }}</p>
+                  </div>
+                  <div>
+                    <label class="text-sm font-medium text-gray-500">Phone</label>
+                    <p class="text-gray-900 mt-1">{{ guest()?.phone || 'Not specified' }}</p>
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="text-sm font-medium text-gray-500">Date of Birth</label>
+                      <p class="text-gray-900 mt-1">{{ formatDate(guest()?.dateOfBirth) }}</p>
+                    </div>
+                    <div>
+                      <label class="text-sm font-medium text-gray-500">Nationality</label>
+                      <p class="text-gray-900 mt-1">{{ getCountryName(guest()?.nationality) }}</p>
+                    </div>
+                  </div>
+                  @if (guest()?.lastStayDate) {
+                    <div>
+                      <label class="text-sm font-medium text-gray-500">Last Stay</label>
+                      <p class="text-gray-900 mt-1">{{ formatDate(guest()?.lastStayDate) }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Contact & Address -->
+              <div class="bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200 bg-white rounded-t-lg">
+                  <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <mat-icon class="text-purple-600">location_on</mat-icon>
+                    Address Information
+                  </h3>
+                </div>
+                <div class="p-6 space-y-4">
+                  @if (guest()?.address) {
+                    <div>
+                      <label class="text-sm font-medium text-gray-500">Street Address</label>
+                      <p class="text-gray-900 mt-1">{{ guest()?.address?.street || 'Not specified' }}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">City</label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.address?.city || 'Not specified' }}</p>
+                      </div>
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">State/Province</label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.address?.state || 'Not specified' }}</p>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">Postal Code</label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.address?.postalCode || 'Not specified' }}</p>
+                      </div>
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">Country</label>
+                        <p class="text-gray-900 mt-1">{{ getCountryName(guest()?.address?.country) }}</p>
+                      </div>
+                    </div>
+                  } @else {
+                    <p class="text-gray-500 italic">No address information provided</p>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Documents & Preferences Tab Content -->
+        @if (activeTab() === 'documents') {
+          <div class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              
+              <!-- ID Document -->
+              <div class="bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200 bg-white rounded-t-lg">
+                  <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <mat-icon class="text-purple-600">badge</mat-icon>
+                    ID Document
+                  </h3>
+                </div>
+                <div class="p-6 space-y-4">
+                  @if (guest()?.idDocument) {
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">Document Type</label>
+                        <p class="text-gray-900 mt-1">{{ (guest()?.idDocument?.type || 'Not specified') | titlecase  }}</p>
+                      </div>
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">Document Number</label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.idDocument?.number || 'Not specified' }}</p>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">Expiry Date</label>
+                        <p class="text-gray-900 mt-1">{{ formatDate(guest()?.idDocument?.expiryDate) }}</p>
+                      </div>
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">Issuing Country</label>
+                        <p class="text-gray-900 mt-1">{{ getCountryName(guest()?.idDocument?.issuingCountry) }}</p>
+                      </div>
+                    </div>
+                  } @else {
+                    <p class="text-gray-500 italic">No ID document information provided</p>
+                  }
+                </div>
+              </div>
+
+              <!-- Preferences -->
+              <div class="bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200 bg-white rounded-t-lg">
+                  <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <mat-icon class="text-purple-600">tune</mat-icon>
+                    Preferences
+                  </h3>
+                </div>
+                <div class="p-6 space-y-4">
+                  @if (guest()?.preferences) {
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">Room Type</label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.preferences?.roomType || 'No preference' | titlecase  }}</p>
+                      </div>
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">Smoking</label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.preferences?.smokingPreference?.replace('_', ' ') || 'No preference' | titlecase }}</p>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">Bed Preference</label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.preferences?.bedPreference?.replace('_', ' ') || 'No preference' | titlecase }}</p>
+                      </div>
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">Floor Preference</label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.preferences?.floorPreference || 'No preference' | titlecase }}</p>
+                      </div>
+                    </div>
+                    @if (guest()?.preferences?.specialRequests && guest()?.preferences?.specialRequests!.length > 0) {
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">Special Requests</label>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                          @for (request of guest()?.preferences?.specialRequests; track request) {
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                              {{ request }}
+                            </span>
+                          }
+                        </div>
+                      </div>
+                    }
+                  } @else {
+                    <p class="text-gray-500 italic">No preferences specified</p>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Emergency Contact Tab Content -->
+        @if (activeTab() === 'emergency') {
+          <div class="space-y-6">
+            <div class="max-w-2xl">
+              <div class="bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200 bg-white rounded-t-lg">
+                  <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <mat-icon class="text-purple-600">contact_emergency</mat-icon>
+                    Emergency Contact Information
+                  </h3>
+                </div>
+                <div class="p-6 space-y-4">
+                  @if (guest()?.emergencyContact) {
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">Contact Name</label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.emergencyContact?.name || 'Not specified' }}</p>
+                      </div>
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">Relationship</label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.emergencyContact?.relationship || 'Not specified' }}</p>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">Phone Number</label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.emergencyContact?.phone || 'Not specified' }}</p>
+                      </div>
+                      <div>
+                        <label class="text-sm font-medium text-gray-500">Email Address</label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.emergencyContact?.email || 'Not specified' }}</p>
+                      </div>
+                    </div>
+                  } @else {
+                    <p class="text-gray-500 italic">No emergency contact information provided</p>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Notes Tab Content -->
+        @if (activeTab() === 'notes') {
+          <div class="space-y-6">
+            
+            <!-- VIP Information Section -->
+            @if (guest()?.isVip) {
+              <div class="max-w-4xl">
+                <div class="bg-purple-50 rounded-lg border border-purple-200 shadow-sm">
+                  <div class="px-6 py-4 border-b border-purple-200 bg-purple-100 rounded-t-lg">
+                    <h3 class="text-lg font-semibold text-purple-900 flex items-center gap-2">
+                      <mat-icon class="text-purple-600">star</mat-icon>
+                      VIP Guest Information
+                    </h3>
+                  </div>
+                  <div class="p-6 space-y-4">
+                    @if (guest()?.vipSince) {
+                      <div>
+                        <label class="text-sm font-medium text-purple-700">VIP Since</label>
+                        <p class="text-purple-900 mt-1">{{ formatDate(guest()?.vipSince) }}</p>
+                      </div>
+                    }
+                    <div class="bg-purple-100 rounded-lg p-4 border border-purple-200">
+                      <div class="flex items-start">
+                        <mat-icon class="text-purple-600 text-sm mr-2 mt-0.5">workspace_premium</mat-icon>
+                        <div class="text-sm text-purple-800">
+                          <p class="font-medium">VIP Benefits & Privileges:</p>
+                          <ul class="mt-2 space-y-1 text-purple-700">
+                            <li>• Priority reservations and check-in</li>
+                            <li>• Complimentary room upgrades (when available)</li>
+                            <li>• Late checkout privileges</li>
+                            <li>• Access to exclusive amenities</li>
+                            <li>• Dedicated customer service</li>
+                            <li>• Special welcome gifts and services</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+            
+            <!-- Blacklist Information Section -->
+            @if (guest()?.blacklisted) {
+              <div class="max-w-4xl">
+                <div class="bg-red-50 rounded-lg border border-red-200 shadow-sm">
+                  <div class="px-6 py-4 border-b border-red-200 bg-red-100 rounded-t-lg">
+                    <h3 class="text-lg font-semibold text-red-900 flex items-center gap-2">
+                      <mat-icon class="text-red-600">block</mat-icon>
+                      Blacklist Information
+                    </h3>
+                  </div>
+                  <div class="p-6 space-y-4">
+                    @if (guest()?.blacklistReason) {
+                      <div>
+                        <label class="text-sm font-medium text-red-700">Blacklist Reason</label>
+                        <div class="mt-1 bg-white rounded-lg p-3 border border-red-200">
+                          <p class="text-red-900">{{ guest()?.blacklistReason }}</p>
+                        </div>
+                      </div>
+                    }
+                    @if (guest()?.blacklistedAt) {
+                      <div>
+                        <label class="text-sm font-medium text-red-700">Date Blacklisted</label>
+                        <p class="text-red-900 mt-1">{{ formatDate(guest()?.blacklistedAt) }}</p>
+                      </div>
+                    }
+                    <div class="bg-red-100 rounded-lg p-3 border border-red-200">
+                      <div class="flex items-start">
+                        <mat-icon class="text-red-600 text-sm mr-2 mt-0.5">info</mat-icon>
+                        <div class="text-sm text-red-800">
+                          <p class="font-medium">Blacklist Effects:</p>
+                          <ul class="mt-1 space-y-1 text-red-700">
+                            <li>• Cannot make new reservations without manager approval</li>
+                            <li>• Account is flagged in the system</li>
+                            <li>• Special authorization required for any bookings</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Guest Notes Section -->
+            <div class="max-w-4xl">
+              <div class="bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-6 py-4 border-b border-gray-200 bg-white rounded-t-lg">
+                  <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <mat-icon class="text-purple-600">notes</mat-icon>
+                    Guest Notes
+                  </h3>
+                </div>
+                <div class="p-6">
+                  @if (guest()?.notes) {
+                    <div class="bg-white rounded-lg p-4 border border-gray-200">
+                      <p class="text-gray-900 whitespace-pre-wrap">{{ guest()?.notes }}</p>
+                    </div>
+                  } @else {
+                    <p class="text-gray-500 italic">No notes available for this guest</p>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Error/Empty State -->
+@if (!isLoading() && !guest()) {
+  <div class="text-center py-16">
+    <div class="bg-gray-50 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
+      <mat-icon class="text-gray-400 text-4xl">person_off</mat-icon>
+    </div>
+    <h3 class="text-lg font-semibold text-gray-900 mb-2">Guest not found</h3>
+    <p class="text-gray-600 mb-6">The guest you're looking for doesn't exist or has been removed.</p>
+    <button 
+      type="button"
+      (click)="goBack()"
+      class="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm">
+      <mat-icon class="text-lg">arrow_back</mat-icon>
+      Back to Guests List
+    </button>
+  </div>
+}
