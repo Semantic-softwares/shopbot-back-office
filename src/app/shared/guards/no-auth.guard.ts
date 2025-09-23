@@ -17,7 +17,7 @@ export const noAuthGuard = () => {
           horizontalPosition: 'end',
           verticalPosition: 'top'
         });
-        router.navigate(['/dashboard']);
+        router.navigate(['/menu/menu']);
         return false;
       }
       return true;

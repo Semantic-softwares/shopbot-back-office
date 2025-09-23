@@ -232,8 +232,30 @@ export class ReservationFormComponent implements OnInit, OnDestroy {
     pricingControls.forEach(controlPath => {
       this.reservationForm.get(controlPath)?.valueChanges
         .pipe(takeUntil(this.destroy$))
-        .subscribe(() => this.calculateTotal());
+        .subscribe((value) => {
+          // 🔍 DEBUG: Log when discount amount changes
+          if (controlPath === 'pricing.discounts.amount') {
+            console.log('💰 DISCOUNT INPUT CHANGED:', {
+              path: controlPath,
+              newValue: value,
+              typeOf: typeof value,
+              rawFormValue: this.reservationForm.get('pricing.discounts.amount')?.value
+            });
+          }
+          this.calculateTotal();
+        });
     });
+
+    // 🔍 ADDITIONAL DEBUG: Watch the entire discount object for any changes
+    this.reservationForm.get('pricing.discounts')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((discountObj) => {
+        console.log('🎯 ENTIRE DISCOUNT OBJECT CHANGED:', {
+          discountObject: discountObj,
+          amount: discountObj?.amount,
+          amountType: typeof discountObj?.amount
+        });
+      });
 
     // Watch for room selection changes to update capacity and pricing
     this.rooms.valueChanges
@@ -445,26 +467,64 @@ export class ReservationFormComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // 🔍 DETAILED DEBUG: Track discount value at every step
+    const directDiscountControl = this.reservationForm.get('pricing.discounts.amount');
+    const directValue = directDiscountControl?.value;
+    const pricingDiscountValue = pricing.discounts?.amount;
+    
+    console.log('🔍 DISCOUNT VALUE INVESTIGATION:', {
+      'Step 1 - Direct control value': directValue,
+      'Step 2 - Pricing object discount': pricingDiscountValue,
+      'Step 3 - Values match': directValue === pricingDiscountValue,
+      'Step 4 - Control path exists': !!directDiscountControl,
+      'Step 5 - Pricing object exists': !!pricing.discounts,
+      'Step 6 - Full pricing.discounts': pricing.discounts
+    });
+
     const subtotal = pricing.subtotal || 0;
     const taxes = pricing.taxes || 0;
     const serviceFee = pricing.fees?.serviceFee || 0;
     const cleaningFee = pricing.fees?.cleaningFee || 0;
     const resortFee = pricing.fees?.resortFee || 0;
     const otherFees = pricing.fees?.other || 0;
-    const discounts = pricing.discounts?.amount || 0;
+    
+    // 🔧 FIX: Read discount directly from form control instead of pricing object
+    const discounts = this.reservationForm.get('pricing.discounts.amount')?.value || 0;
+    
+    console.log('🔧 FIXED DISCOUNT READING:', {
+      'OLD way (pricing.discounts?.amount)': pricing.discounts?.amount,
+      'NEW way (direct form control)': discounts,
+      'Fix applied': true
+    });
+
+    // 🔍 DEBUG: Log raw form values and discount details
+    console.log('🧮 RAW PRICING VALUES:', {
+      'Raw discount input': pricing.discounts?.amount,
+      'Type of discount': typeof pricing.discounts?.amount,
+      'Full discount object': pricing.discounts,
+      'Full pricing object': pricing
+    });
 
     const totalFees = serviceFee + cleaningFee + resortFee + otherFees;
     const total = subtotal + taxes + totalFees - discounts;
     const balance = total - (pricing.paid || 0);
 
-    console.log('Pricing calculation:', {
-      subtotal,
-      taxes,
-      totalFees,
-      discounts,
-      total,
-      balance,
-      paid: pricing.paid || 0
+    // ✅ ENHANCED DEBUGGING - This will help identify the pricing issue
+    console.log('🔍 DETAILED PRICING CALCULATION:', {
+      subtotal: `₦${subtotal.toLocaleString()}`,
+      taxes: `₦${taxes.toLocaleString()}`,
+      fees: {
+        serviceFee: `₦${serviceFee.toLocaleString()}`,
+        cleaningFee: `₦${cleaningFee.toLocaleString()}`,
+        resortFee: `₦${resortFee.toLocaleString()}`,
+        otherFees: `₦${otherFees.toLocaleString()}`,
+        totalFees: `₦${totalFees.toLocaleString()}`
+      },
+      discounts: `₦${discounts.toLocaleString()}`,
+      calculation: `₦${subtotal.toLocaleString()} + ₦${taxes.toLocaleString()} + ₦${totalFees.toLocaleString()} - ₦${discounts.toLocaleString()} = ₦${total.toLocaleString()}`,
+      total: `₦${total.toLocaleString()}`,
+      balance: `₦${balance.toLocaleString()}`,
+      paid: `₦${(pricing.paid || 0).toLocaleString()}`
     });
 
     this.taxAmount.set(taxes);
@@ -579,9 +639,15 @@ export class ReservationFormComponent implements OnInit, OnDestroy {
   }
 
   private calculatePricingFromRooms() {
+    console.log('🏨 calculatePricingFromRooms() CALLED - checking if this corrupts discount...');
+    
     const selectedRooms = this.rooms.value;
     const availableRooms = this.availableRooms();
     const nights = this.numberOfNights();
+    
+    // 🔍 DEBUG: Check discount value BEFORE any changes
+    const discountBefore = this.reservationForm.get('pricing.discounts.amount')?.value;
+    console.log('💰 DISCOUNT VALUE BEFORE ROOM PRICING:', discountBefore);
     
     console.log('calculatePricingFromRooms called:', {
       selectedRooms,
@@ -636,12 +702,31 @@ export class ReservationFormComponent implements OnInit, OnDestroy {
 
     console.log('Tax calculation:', { storeTax: store?.tax, taxRate, taxes });
 
-    // Update pricing form
+    // 🔧 FIX: Preserve existing pricing values when updating from rooms
+    const currentPricing = this.reservationForm.get('pricing')?.value || {};
+    
+    // Update pricing form - PRESERVE existing discounts, fees, and other values
     this.reservationForm.patchValue({
       pricing: {
-        subtotal: subtotal,
-        taxes: taxes
+        ...currentPricing,  // Preserve all existing pricing values
+        subtotal: subtotal, // Only update subtotal
+        taxes: taxes        // Only update taxes  
       }
+    });
+
+    console.log('🔧 PRESERVED PRICING VALUES:', {
+      preserved: currentPricing,
+      newSubtotal: subtotal,
+      newTaxes: taxes,
+      preservedDiscount: currentPricing.discounts?.amount
+    });
+
+    // 🔍 DEBUG: Check discount value AFTER patchValue
+    const discountAfter = this.reservationForm.get('pricing.discounts.amount')?.value;
+    console.log('💰 DISCOUNT VALUE AFTER ROOM PRICING:', {
+      before: currentPricing.discounts?.amount,
+      after: discountAfter,
+      changed: currentPricing.discounts?.amount !== discountAfter
     });
 
     // Trigger total calculation and change detection
