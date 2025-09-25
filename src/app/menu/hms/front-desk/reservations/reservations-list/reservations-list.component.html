@@ -419,6 +419,13 @@
                                 <span>Edit</span>
                               </button>
                             }
+                            @if (canDelete(reservation)) {
+                              <mat-divider class="!border-gray-200 my-1"></mat-divider>
+                              <button mat-menu-item (click)="deleteReservation(reservation)" class="!text-gray-700 hover:!bg-red-50 hover:!text-red-700 !transition-colors">
+                                <mat-icon class="mr-3 !text-red-600">delete</mat-icon>
+                                <span>Delete Reservation</span>
+                              </button>
+                            }
                             
                           </mat-menu>
                         </div>

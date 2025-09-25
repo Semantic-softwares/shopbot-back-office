@@ -48,6 +48,7 @@ export interface Guest {
   totalStays?: number;
   totalSpent?: number;
   lastStayDate?: Date;
+  stores?: string[]; // Array of store IDs this guest is associated with
   updatedAt: Date
 }
 

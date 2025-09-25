@@ -12,6 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ReservationService } from '../../../../../shared/services/reservation.service';
@@ -20,6 +21,7 @@ import { Reservation } from '../../../../../shared/models/reservation.model';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { CheckInConfirmationDialogComponent, CheckInDialogData } from '../check-in-confirmation-dialog/check-in-confirmation-dialog.component';
 import { PaymentUpdateDialogComponent, PaymentUpdateDialogData } from '../payment-update-dialog/payment-update-dialog.component';
+import { PinAuthorizationDialogComponent, PinAuthorizationDialogData, PinAuthorizationDialogResult } from '../pin-authorization-dialog/pin-authorization-dialog.component';
 
 @Component({
   selector: 'app-reservation-details',
@@ -36,7 +38,8 @@ import { PaymentUpdateDialogComponent, PaymentUpdateDialogData } from '../paymen
     MatProgressSpinnerModule,
     MatSelectModule,
     MatFormFieldModule,
-    MatDialogModule
+    MatDialogModule,
+    MatDividerModule
   ],
   templateUrl: './reservation-details.component.html',
   styleUrls: ['./reservation-details.component.scss']
@@ -219,6 +222,71 @@ export class ReservationDetailsComponent implements OnInit {
            reservation?.status !== 'no_show' &&
            reservation?.status !== 'checked_in' &&
            !reservation?.actualCheckInDate;
+  }
+
+  canDelete(): boolean {
+    const reservation = this.reservation();
+    // Allow deletion only for pending, cancelled, or no_show reservations
+    // Don't allow deletion for confirmed, checked_in, or checked_out reservations
+    return reservation ? ['pending', 'cancelled', 'no_show'].includes(reservation.status) : false;
+  }
+
+  deleteReservation() {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    const selectedStore = this.storeStore.selectedStore();
+    if (!selectedStore?._id) {
+      this.snackBar.open('No store selected', 'Close', { duration: 3000 });
+      return;
+    }
+
+    const dialogData: PinAuthorizationDialogData = {
+      storeId: selectedStore._id,
+      actionDescription: `delete reservation ${reservation.confirmationNumber}`,
+      reservationId: reservation._id
+    };
+
+    const dialogRef = this.dialog.open(PinAuthorizationDialogComponent, {
+      data: dialogData,
+      width: '500px',
+      maxWidth: '90vw',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe((result: PinAuthorizationDialogResult) => {
+      if (result?.authorized && result.pin) {
+        this.performReservationDeletion(reservation, result.pin);
+      }
+    });
+  }
+
+  private performReservationDeletion(reservation: any, pin: string) {
+    this.statusUpdating.set(true);
+
+    this.reservationService.deleteReservationWithPin(reservation._id, pin).subscribe({
+      next: (response) => {
+        this.snackBar.open(
+          `Reservation ${reservation.confirmationNumber} deleted successfully`, 
+          'Close', 
+          { duration: 5000 }
+        );
+        
+        // Navigate back to reservations list
+        this.router.navigate(['/dashboard/hms/front-desk/reservations']);
+      },
+      error: (error) => {
+        console.error('Error deleting reservation:', error);
+        this.snackBar.open(
+          error.message || 'Failed to delete reservation', 
+          'Close', 
+          { duration: 5000, panelClass: ['error-snackbar'] }
+        );
+      },
+      complete: () => {
+        this.statusUpdating.set(false);
+      }
+    });
   }
 
   canCheckIn(): boolean {

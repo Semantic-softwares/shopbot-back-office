@@ -15,7 +15,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDivider } from "@angular/material/divider";
+import { MatDividerModule } from "@angular/material/divider";
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
@@ -24,6 +24,7 @@ import { Reservation, ReservationStatus } from '../../../../../shared/models/res
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { CheckInConfirmationDialogComponent, CheckInDialogData } from '../check-in-confirmation-dialog/check-in-confirmation-dialog.component';
 import { PaymentUpdateDialogComponent, PaymentUpdateDialogData } from '../payment-update-dialog/payment-update-dialog.component';
+import { PinAuthorizationDialogComponent, PinAuthorizationDialogData, PinAuthorizationDialogResult } from '../pin-authorization-dialog/pin-authorization-dialog.component';
 
 @Component({
   selector: 'app-reservations-list',
@@ -43,7 +44,8 @@ import { PaymentUpdateDialogComponent, PaymentUpdateDialogData } from '../paymen
     MatMenuModule,
     MatTooltipModule,
     MatDatepickerModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDividerModule
   ],
   templateUrl: './reservations-list.component.html'
 })
@@ -341,6 +343,78 @@ export class ReservationsListComponent {
            reservation.status !== 'no_show' &&
            reservation.status !== 'checked_in' &&
            !reservation.actualCheckInDate;
+  }
+
+  canDelete(reservation: Reservation): boolean {
+    // Allow deletion only for pending, cancelled, or no_show reservations
+    // Don't allow deletion for confirmed, checked_in, or checked_out reservations
+    return ['pending', 'cancelled', 'no_show'].includes(reservation.status);
+  }
+
+  deleteReservation(reservation: Reservation) {
+    const selectedStore = this.storeStore.selectedStore();
+    if (!selectedStore?._id) {
+      this.snackBar.open('No store selected', 'Close', { duration: 3000 });
+      return;
+    }
+
+    const dialogData: PinAuthorizationDialogData = {
+      storeId: selectedStore._id,
+      actionDescription: `delete reservation ${reservation.confirmationNumber}`,
+      reservationId: reservation._id
+    };
+
+    const dialogRef = this.dialog.open(PinAuthorizationDialogComponent, {
+      data: dialogData,
+      width: '500px',
+      maxWidth: '90vw',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe((result: PinAuthorizationDialogResult) => {
+      if (result?.authorized && result.pin) {
+        this.performReservationDeletion(reservation, result.pin);
+      }
+    });
+  }
+
+  private performReservationDeletion(reservation: Reservation, pin: string) {
+    // Add to updating set to show loading state
+    const updatingSet = new Set(this.statusUpdating());
+    updatingSet.add(reservation._id);
+    this.statusUpdating.set(updatingSet);
+
+    this.reservationService.deleteReservationWithPin(reservation._id, pin).subscribe({
+      next: (response) => {
+        // Remove from local list
+        const currentReservations = this.reservations();
+        const updatedReservations = currentReservations.filter(r => r._id !== reservation._id);
+        this.reservations.set(updatedReservations);
+        
+        // Update total count
+        this.totalReservations.set(this.totalReservations() - 1);
+        
+        this.snackBar.open(
+          `Reservation ${reservation.confirmationNumber} deleted successfully`, 
+          'Close', 
+          { duration: 5000 }
+        );
+      },
+      error: (error) => {
+        console.error('Error deleting reservation:', error);
+        this.snackBar.open(
+          error.message || 'Failed to delete reservation', 
+          'Close', 
+          { duration: 5000, panelClass: ['error-snackbar'] }
+        );
+      },
+      complete: () => {
+        // Remove from updating set
+        const updatingSet = new Set(this.statusUpdating());
+        updatingSet.delete(reservation._id);
+        this.statusUpdating.set(updatingSet);
+      }
+    });
   }
 
   // Status management methods (similar to reservation details)

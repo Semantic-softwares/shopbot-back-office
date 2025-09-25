@@ -1,0 +1,113 @@
+.pin-authorization-dialog {
+  padding: 24px;
+  max-width: 450px;
+  min-width: 400px;
+}
+
+.dialog-header {
+  text-align: center;
+}
+
+.dialog-content {
+  .mat-mdc-form-field {
+    .mdc-text-field--outlined {
+      background-color: #f9fafb;
+      border-color: #e5e7eb;
+      
+      &:hover {
+        border-color: #3b82f6;
+      }
+      
+      &.mdc-text-field--focused {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+    }
+  }
+}
+
+.dialog-actions {
+  .mat-mdc-raised-button {
+    &:disabled {
+      box-shadow: none;
+      
+      &:hover {
+        transform: none;
+      }
+    }
+    
+    &:not(:disabled) {
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+    }
+  }
+}
+
+// Security-themed animations
+@keyframes pulse-security {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.dialog-header .mat-icon {
+  animation: pulse-security 2s infinite;
+}
+
+// PIN input specific styling
+.mat-mdc-form-field input[type="password"],
+.mat-mdc-form-field input[type="text"] {
+  font-size: 18px;
+  letter-spacing: 0.2em;
+  
+  &::placeholder {
+    font-size: 14px;
+    letter-spacing: normal;
+  }
+}
+
+// Error and info boxes
+.bg-red-50, .bg-blue-50 {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Loading state
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsive design for smaller screens
+@media (max-width: 480px) {
+  .pin-authorization-dialog {
+    padding: 16px;
+    min-width: 320px;
+    max-width: 95vw;
+  }
+  
+  .dialog-actions {
+    flex-direction: column-reverse;
+    
+    button {
+      width: 100%;
+      margin: 4px 0;
+    }
+  }
+}

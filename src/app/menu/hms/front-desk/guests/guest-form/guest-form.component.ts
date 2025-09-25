@@ -234,6 +234,8 @@ export class GuestFormComponent implements OnInit, OnDestroy {
   }
 
   private prepareGuestData(formValue: any): Partial<Guest> {
+    const currentStoreId = this.storeStore.selectedStore()?._id;
+    
     return {
       firstName: formValue.firstName,
       lastName: formValue.lastName,
@@ -247,7 +249,8 @@ export class GuestFormComponent implements OnInit, OnDestroy {
       emergencyContact: formValue.emergencyContact,
       isVip: formValue.isVip,
       blacklisted: formValue.blacklisted,
-      notes: formValue.notes
+      notes: formValue.notes,
+      stores: currentStoreId ? [currentStoreId] : [] // Add current store to stores array
     };
   }
 

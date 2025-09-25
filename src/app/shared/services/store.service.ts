@@ -119,4 +119,14 @@ export class StoreService {
    getDeliveryZonesFromServer():Observable<DeliveryZone[]> {
     return this._httpClient.get<DeliveryZone[]>(`${this.hostServer}/delivery-zones`);
   }
+
+  /**
+   * Validate store owner PIN for authorization
+   */
+  validateStoreOwnerPin(storeId: string, pin: string): Observable<boolean> {
+    return this._httpClient.post<boolean>(
+      `${this.hostServer}/stores/${storeId}/validate-pin`,
+      { pin }
+    );
+  }
 }

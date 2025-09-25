@@ -1,0 +1,110 @@
+<div class="pin-authorization-dialog">
+  <!-- Header -->
+  <div class="dialog-header">
+    <h2 class="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-3">
+      <div class="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-lg">
+        <mat-icon class="text-white text-lg">security</mat-icon>
+      </div>
+      Store Owner Authorization Required
+    </h2>
+    <p class="text-gray-600 text-sm">
+      Enter the store owner PIN to authorize and {{ actionDescription }}.
+    </p>
+  </div>
+
+  <!-- PIN Input Form -->
+  <div class="dialog-content mt-6">
+    <form [formGroup]="pinForm" (ngSubmit)="verifyPin()">
+      <div class="space-y-4">
+        <!-- PIN Input Field -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Store Owner PIN</mat-label>
+          <input 
+            matInput 
+            formControlName="pin"
+            [type]="showPin() ? 'text' : 'password'"
+            placeholder="Enter 4-6 digit PIN"
+            maxlength="6"
+            autocomplete="off"
+            (keypress)="onPinKeyPress($event)"
+            (input)="onPinInput()"
+            class="text-center text-lg tracking-wider font-mono">
+          <button 
+            type="button"
+            matSuffix 
+            mat-icon-button 
+            (click)="togglePinVisibility()"
+            [attr.aria-label]="'Toggle PIN visibility'"
+            class="text-gray-500 hover:text-gray-700">
+            <mat-icon>{{ showPin() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          
+          <!-- Error Messages -->
+          @if (pinForm.get('pin')?.hasError('required') && pinForm.get('pin')?.touched) {
+            <mat-error>PIN is required</mat-error>
+          }
+          @if (pinForm.get('pin')?.hasError('minlength') && pinForm.get('pin')?.touched) {
+            <mat-error>PIN must be at least 4 digits</mat-error>
+          }
+          @if (pinForm.get('pin')?.hasError('maxlength') && pinForm.get('pin')?.touched) {
+            <mat-error>PIN cannot exceed 6 digits</mat-error>
+          }
+          @if (pinForm.get('pin')?.hasError('invalid') && pinForm.get('pin')?.touched) {
+            <mat-error>Invalid PIN entered</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- General Error Message -->
+        @if (error()) {
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+            <mat-icon class="text-red-500 mt-0.5 flex-shrink-0">error</mat-icon>
+            <div>
+              <h4 class="text-red-800 font-medium text-sm">Authorization Failed</h4>
+              <p class="text-red-700 text-sm mt-1">{{ error() }}</p>
+            </div>
+          </div>
+        }
+
+        <!-- Security Notice -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+          <mat-icon class="text-blue-500 mt-0.5 flex-shrink-0">info</mat-icon>
+          <div>
+            <h4 class="text-blue-800 font-medium text-sm">Security Notice</h4>
+            <p class="text-blue-700 text-sm mt-1">
+              Only the store owner should have access to this PIN. This authorization ensures that important actions are performed with proper approval.
+            </p>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="dialog-actions mt-8 flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+    <button 
+      type="button"
+      mat-button 
+      (click)="cancel()"
+      [disabled]="verifying()"
+      class="!text-gray-600 hover:!text-gray-800 hover:!bg-gray-50 !transition-colors !px-6 !py-2">
+      Cancel
+    </button>
+    
+    <button 
+      type="button"
+      mat-raised-button 
+      color="primary"
+      (click)="verifyPin()"
+      [disabled]="pinForm.invalid || verifying()"
+      class="!bg-gradient-to-r !from-blue-600 !to-blue-700 hover:!from-blue-700 hover:!to-blue-800 !text-white !px-8 !py-2 !rounded-lg !font-medium !transition-all !duration-200 !shadow-lg hover:!shadow-xl disabled:!opacity-50 disabled:!cursor-not-allowed">
+      
+      @if (verifying()) {
+        <mat-icon class="!text-sm mr-2 animate-spin">sync</mat-icon>
+        Verifying...
+      } @else {
+        <mat-icon class="!text-sm mr-2">security</mat-icon>
+        Authorize
+      }
+    </button>
+  </div>
+</div>

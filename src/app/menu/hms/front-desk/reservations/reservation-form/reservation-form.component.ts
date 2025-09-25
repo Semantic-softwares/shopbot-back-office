@@ -1014,11 +1014,13 @@ export class ReservationFormComponent implements OnInit, OnDestroy {
     } else {
       // No guest selected - create new guest first
       console.log('Creating new guest first');
+      const currentStoreId = this.storeStore.selectedStore()?._id;
       const guestData = {
         firstName: formData.guestDetails.primaryGuest.firstName,
         lastName: formData.guestDetails.primaryGuest.lastName,
         email: formData.guestDetails.primaryGuest.email,
-        phone: formData.guestDetails.primaryGuest.phone
+        phone: formData.guestDetails.primaryGuest.phone,
+        stores: currentStoreId ? [currentStoreId] : [] // Add current store ID if it exists
       };
       
       this.loading.set(true);
@@ -1285,7 +1287,8 @@ export class ReservationFormComponent implements OnInit, OnDestroy {
           }
           
           this.guestSearchLoading.set(true);
-          return this.guestService.searchGuests(searchTerm, 1, 10);
+          const storeId = this.storeStore.selectedStore()?._id;
+          return this.guestService.searchGuests(searchTerm, 1, 10, storeId);
         }),
         takeUntil(this.destroy$)
       )

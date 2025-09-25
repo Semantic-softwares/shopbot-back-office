@@ -595,6 +595,44 @@ export class ReservationService {
     );
   }
 
+  /**
+   * Delete reservation with store owner PIN authorization
+   */
+  deleteReservationWithPin(reservationId: string, pin: string): Observable<{ message: string, reservation?: Reservation }> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    return this.http.delete<{ message: string, reservation?: Reservation }>(
+      `${this.baseUrl}/${reservationId}/secure`,
+      { body: { pin } }
+    ).pipe(
+      map(response => {
+        this.loadingSubject.next(false);
+        return response;
+      }),
+      catchError(error => {
+        this.loadingSubject.next(false);
+        let errorMessage = 'Failed to delete reservation. Please try again.';
+        
+        if (error.status === 403) {
+          errorMessage = 'Invalid store owner PIN. Please check with the store owner for the correct PIN.';
+        } else if (error.status === 404) {
+          errorMessage = 'Reservation not found.';
+        } else if (error.error?.message) {
+          errorMessage = error.error.message;
+        } else if (error.error?.error) {
+          errorMessage = error.error.error;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        this.errorSubject.next(errorMessage);
+        console.error('Error deleting reservation with PIN:', error);
+        throw new Error(errorMessage);
+      })
+    );
+  }
+
   // Private mock data for development
   
 }
