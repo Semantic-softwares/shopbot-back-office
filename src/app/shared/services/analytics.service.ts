@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface DashboardStats {
   totalRooms: number;
@@ -43,7 +44,7 @@ export interface RecentActivity {
 })
 export class AnalyticsService {
   private http = inject(HttpClient);
-  private baseUrl = 'http://localhost:3000/analytics'; // Update with your backend URL
+  private baseUrl = environment.apiUrl + '/analytics'; // Update with your backend URL
 
   private dashboardStatsSubject = new BehaviorSubject<DashboardStats | null>(null);
   public dashboardStats$ = this.dashboardStatsSubject.asObservable();
@@ -57,11 +58,11 @@ export class AnalyticsService {
   private errorSubject = new BehaviorSubject<string | null>(null);
   public error$ = this.errorSubject.asObservable();
 
-  getDashboardStats(): Observable<DashboardStats> {
+  getDashboardStats(storeId: string): Observable<DashboardStats> {
     this.loadingSubject.next(true);
     this.errorSubject.next(null);
 
-    return this.http.get<DashboardStats>(`${this.baseUrl}/dashboard`).pipe(
+    return this.http.get<DashboardStats>(`${this.baseUrl}/dashboard/${storeId}`).pipe(
       map(stats => {
         this.dashboardStatsSubject.next(stats);
         this.loadingSubject.next(false);
@@ -90,8 +91,8 @@ export class AnalyticsService {
     );
   }
 
-  getOccupancyTrend(days: number = 7): Observable<OccupancyTrend[]> {
-    return this.http.get<OccupancyTrend[]>(`${this.baseUrl}/occupancy-trend?days=${days}`).pipe(
+  getOccupancyTrend(storeId: string, days: number = 7): Observable<OccupancyTrend[]> {
+    return this.http.get<OccupancyTrend[]>(`${this.baseUrl}/occupancy-trend/${storeId}?days=${days}`).pipe(
       catchError(error => {
         console.error('Error fetching occupancy trend:', error);
         
@@ -111,8 +112,8 @@ export class AnalyticsService {
     );
   }
 
-  getRevenueTrend(days: number = 7): Observable<RevenueTrend[]> {
-    return this.http.get<RevenueTrend[]>(`${this.baseUrl}/revenue-trend?days=${days}`).pipe(
+  getRevenueTrend(storeId: string, days: number = 7): Observable<RevenueTrend[]> {
+    return this.http.get<RevenueTrend[]>(`${this.baseUrl}/revenue-trend/${storeId}?days=${days}`).pipe(
       catchError(error => {
         console.error('Error fetching revenue trend:', error);
         
@@ -131,8 +132,8 @@ export class AnalyticsService {
     );
   }
 
-  getRecentActivities(limit: number = 10): Observable<RecentActivity[]> {
-    return this.http.get<RecentActivity[]>(`${this.baseUrl}/recent-activities?limit=${limit}`).pipe(
+  getRecentActivities(storeId: string, limit: number = 10): Observable<RecentActivity[]> {
+    return this.http.get<RecentActivity[]>(`${this.baseUrl}/recent-activities/${storeId}?limit=${limit}`).pipe(
       map(activities => {
         this.recentActivitiesSubject.next(activities);
         return activities;
@@ -189,9 +190,9 @@ export class AnalyticsService {
     );
   }
 
-  refreshData(): void {
-    this.getDashboardStats().subscribe();
-    this.getRecentActivities().subscribe();
+  refreshData(storeId: string): void {
+    this.getDashboardStats(storeId).subscribe();
+    this.getRecentActivities(storeId).subscribe();
   }
 
   clearError(): void {

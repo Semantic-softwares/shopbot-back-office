@@ -22,11 +22,15 @@ export class GuestService {
   /**
    * Search guests by email, phone, or name
    */
-  searchGuests(searchTerm: string, page: number = 1, limit: number = 10): Observable<GuestSearchResponse> {
-    const params = new HttpParams()
+  searchGuests(searchTerm: string, page: number = 1, limit: number = 10, storeId?: string): Observable<GuestSearchResponse> {
+    let params = new HttpParams()
       .set('search', searchTerm)
       .set('page', page.toString())
       .set('limit', limit.toString());
+    
+    if (storeId) {
+      params = params.set('storeId', storeId);
+    }
 
     return this.http.get<GuestSearchResponse>(this.apiUrl, { params });
   }
@@ -34,8 +38,13 @@ export class GuestService {
   /**
    * Search guest by phone number
    */
-  searchGuestByPhone(phone: string): Observable<Guest | null> {
-    return this.http.get<Guest>(`${this.apiUrl}/search/phone/${phone}`).pipe(
+  searchGuestByPhone(phone: string, storeId?: string): Observable<Guest | null> {
+    let params = new HttpParams();
+    if (storeId) {
+      params = params.set('storeId', storeId);
+    }
+    
+    return this.http.get<Guest>(`${this.apiUrl}/search/phone/${phone}`, { params }).pipe(
       catchError(() => of(null))
     );
   }
@@ -43,8 +52,13 @@ export class GuestService {
   /**
    * Search guest by email
    */
-  searchGuestByEmail(email: string): Observable<Guest | null> {
-    return this.http.get<Guest>(`${this.apiUrl}/search/email/${email}`).pipe(
+  searchGuestByEmail(email: string, storeId?: string): Observable<Guest | null> {
+    let params = new HttpParams();
+    if (storeId) {
+      params = params.set('storeId', storeId);
+    }
+    
+    return this.http.get<Guest>(`${this.apiUrl}/search/email/${email}`, { params }).pipe(
       catchError(() => of(null))
     );
   }

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -52,6 +52,16 @@ export class OverviewComponent implements OnInit, OnDestroy {
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
   lastUpdated = signal<Date>(new Date());
+
+  // Watch for store changes using effect - must be in injection context
+  private storeChangeEffect = effect(() => {
+    const store = this.storeStore.selectedStore();
+    if (store?._id) {
+      console.log('Store changed in overview component:', store.name, store._id);
+      this.refreshData();
+      this.loadChartData();
+    }
+  });
 
   // Chart configurations
   occupancyChartData = signal<ChartData<'line'>>({
@@ -147,15 +157,17 @@ export class OverviewComponent implements OnInit, OnDestroy {
       .subscribe(error => {
         this.error.set(error);
       });
-
-    // Load initial data
-    this.refreshData();
-    this.loadChartData();
   }
 
   private loadChartData() {
+    const currentStore = this.storeStore.selectedStore();
+    if (!currentStore?._id) {
+      console.log('No store selected, skipping chart data load');
+      return;
+    }
+
     // Load occupancy trend
-    this.analyticsService.getOccupancyTrend(7)
+    this.analyticsService.getOccupancyTrend(currentStore._id, 7)
       .pipe(takeUntil(this.destroy$))
       .subscribe(trends => {
         this.occupancyChartData.set({
@@ -173,7 +185,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
       });
 
     // Load revenue trend
-    this.analyticsService.getRevenueTrend(7)
+    this.analyticsService.getRevenueTrend(currentStore._id, 7)
       .pipe(takeUntil(this.destroy$))
       .subscribe(trends => {
         this.revenueChartData.set({
@@ -195,7 +207,13 @@ export class OverviewComponent implements OnInit, OnDestroy {
   }
 
   refreshData() {
-    this.analyticsService.refreshData();
+    const currentStore = this.storeStore.selectedStore();
+    if (!currentStore?._id) {
+      console.log('No store selected, skipping data refresh');
+      return;
+    }
+    
+    this.analyticsService.refreshData(currentStore._id);
     this.loadChartData();
   }
 

@@ -57,12 +57,12 @@ export class HmsDashboardComponent {
           link: './overview',
           permission: 'view_hotel_dashboard',
         },
-        {
-          icon: 'analytics',
-          label: 'Analytics',
-          link: './analytics',
-          permission: 'view_hotel_analytics',
-        },
+        // {
+        //   icon: 'analytics',
+        //   label: 'Analytics',
+        //   link: './analytics',
+        //   permission: 'view_hotel_analytics',
+        // },
       ],
     },
     {
@@ -143,12 +143,12 @@ export class HmsDashboardComponent {
           link: './settings/hotel-settings',
           permission: 'manage_hotel_settings',
         },
-        {
-          icon: 'attach_money',
-          label: 'Pricing',
-          link: './pricing',
-          permission: 'manage_pricing',
-        },
+        // {
+        //   icon: 'attach_money',
+        //   label: 'Pricing',
+        //   link: './pricing',
+        //   permission: 'manage_pricing',
+        // },
       ],
     },
   ];

@@ -103,6 +103,16 @@ export class ListGuestsComponent implements OnInit {
       }
     });
 
+    // Store change effect - reload guests when store changes
+    effect(() => {
+      const store = this.selectedStore();
+      if (store?._id) {
+        console.log('Store changed in guest list:', store.name, store._id);
+        this.loadGuests();
+        this.loadGuestStats();
+      }
+    });
+
     // Auto-search effect
     this.searchForm.get('search')?.valueChanges.pipe(
       debounceTime(300),
@@ -114,17 +124,33 @@ export class ListGuestsComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.loadGuests();
-    this.loadGuestStats();
+    // Initial data loading is handled by the store change effect
+    // If store is already selected, the effect will trigger automatically
+    const currentStore = this.selectedStore();
+    if (currentStore?._id) {
+      this.loadGuests();
+      this.loadGuestStats();
+    }
   }
 
   async loadGuests() {
+    const currentStore = this.selectedStore();
+    if (!currentStore?._id) {
+      console.log('No store selected, skipping guest load');
+      this.guests.set([]);
+      this.totalGuests.set(0);
+      this.totalPages.set(0);
+      return;
+    }
+
     this.loading.set(true);
     try {
+      console.log('Loading guests for store:', currentStore.name, currentStore._id);
       const response = await this.guestService.searchGuests(
         this.searchTerm(), 
         this.currentPage(), 
-        20
+        20,
+        currentStore._id
       ).toPromise() as GuestSearchResponse;
       
       this.guests.set(response.guests || []);
