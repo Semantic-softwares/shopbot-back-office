@@ -1,1 +1,0 @@
-import"./chunk-EQDQRRRY.js";var o=[{path:"",redirectTo:"menu",pathMatch:"full"},{path:"erp",loadChildren:()=>import("./chunk-I3ULDHQU.js").then(t=>t.DASHBOARD_ROUTES)},{path:"hms",loadChildren:()=>import("./chunk-CPCLGIIT.js").then(t=>t.DASHBOARD_HMS_ROUTES)},{path:"menu",loadComponent:()=>import("./chunk-AZPA6HOA.js").then(t=>t.MenuComponent)}];export{o as MENU_ROUTES};
