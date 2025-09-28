@@ -19,6 +19,8 @@ export interface Reservation {
   internalNotes?: string;
   cancellation?: CancellationInfo;
   modification?: ModificationInfo;
+  extensions?: ReservationExtension[];
+  currentExtension?: CurrentExtension;
   confirmationNumber: string;
   createdBy?: string;
   lastModifiedBy?: string;
@@ -150,6 +152,40 @@ export interface ModificationInfo {
   modificationNotes?: string;
 }
 
+export interface ReservationExtension {
+  _id?: string;
+  requestedBy: string;
+  requestedAt: Date;
+  originalCheckOutDate: Date;
+  newCheckOutDate: Date;
+  additionalNights: number;
+  additionalCost: number;
+  status: ExtensionStatus;
+  approvedBy?: string;
+  approvedAt?: Date;
+  rejectedBy?: string;
+  rejectedAt?: Date;
+  rejectionReason?: string;
+  notes?: string;
+  isProcessed?: boolean;
+  processedAt?: Date;
+  // Payment information
+  paymentInfo?: {
+    status: 'paid' | 'pending' | 'partial';
+    method: string;
+    amount: number;
+    transactionReference?: string;
+    notes?: string;
+  };
+}
+
+export interface CurrentExtension {
+  isActive: boolean;
+  extensionId?: string;
+  totalExtensionCost?: number;
+  totalExtensionNights?: number;
+}
+
 export interface Address {
   street?: string;
   city?: string;
@@ -235,6 +271,11 @@ export type PaymentStatus =
   | 'partial' 
   | 'paid' 
   | 'refunded';
+
+export type ExtensionStatus = 
+  | 'pending' 
+  | 'approved' 
+  | 'rejected';
 
 // DTOs for API operations
 export interface CreateReservationDto {

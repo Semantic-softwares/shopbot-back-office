@@ -354,10 +354,18 @@
                         <mat-icon class="text-red-600 text-lg">logout</mat-icon>
                         <div>
                           <div class="text-sm font-medium text-gray-900">
-                            {{ reservation.checkOutDate | date:'MMM dd, yyyy' }}
+                            {{ getEffectiveCheckOutDate(reservation) | date:'MMM dd, yyyy' }}
+                            @if (hasApprovedExtensions(reservation)) {
+                              <span class="ml-2 px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
+                                Extended
+                              </span>
+                            }
                           </div>
                           <div class="text-sm text-gray-600">
                             {{ reservation.expectedCheckOutTime || '11:00' }}
+                            @if (hasApprovedExtensions(reservation)) {
+                              <span class="text-xs text-orange-600 ml-1">({{ getExtensionNights(reservation) }} extra nights)</span>
+                            }
                           </div>
                         </div>
                       </div>
@@ -390,13 +398,16 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap border-b border-gray-100">
                       <div class="text-lg font-bold text-gray-900">
-                        {{ currency }}{{ reservation.pricing.total | number:'1.2-2' }}
+                        {{ currency }}{{ getEffectiveTotal(reservation) | number:'1.2-2' }}
                       </div>
                       <div class="text-sm text-gray-600">
-                        {{ reservation.numberOfNights }} night{{ reservation.numberOfNights !== 1 ? 's' : '' }}
+                        {{ reservation.numberOfNights + getExtensionNights(reservation) }} night{{ (reservation.numberOfNights + getExtensionNights(reservation)) !== 1 ? 's' : '' }}
+                        @if (hasApprovedExtensions(reservation)) {
+                          <span class="text-orange-600 ml-1">(+{{ getExtensionNights(reservation) }} ext.)</span>
+                        }
                       </div>
                       <div class="text-xs text-gray-500">
-                        {{ currency }}{{ (reservation.pricing.total || 0) / (reservation.numberOfNights || 1) | number:'1.2-2' }}/night
+                        {{ currency }}{{ getEffectiveTotal(reservation) / (reservation.numberOfNights + getExtensionNights(reservation) || 1) | number:'1.2-2' }}/night
                       </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium border-b border-gray-100">

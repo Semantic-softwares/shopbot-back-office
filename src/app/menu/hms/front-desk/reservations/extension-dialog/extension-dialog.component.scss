@@ -1,0 +1,47 @@
+// Extension Dialog Component Styles - Using Tailwind CSS
+
+// Override Material Dialog defaults for better spacing and colors
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-color: white;
+  --mdc-dialog-supporting-text-color: #374151;
+}
+
+// Custom radio button styling for better integration with Tailwind
+.mat-mdc-radio-button {
+  &.mat-mdc-radio-checked {
+    .mdc-radio__native-control:enabled:checked + .mdc-radio__background .mdc-radio__outer-circle {
+      border-color: #2563eb;
+    }
+    
+    .mdc-radio__background .mdc-radio__inner-circle {
+      border-color: #2563eb;
+      background-color: #2563eb;
+    }
+  }
+  
+  &:hover .mdc-radio__native-control:enabled:not(:checked) + .mdc-radio__background .mdc-radio__outer-circle {
+    border-color: #3b82f6;
+  }
+}
+
+// Form field enhancements for consistent padding
+.mat-mdc-form-field {
+  &.mat-form-field-appearance-outline {
+    .mat-mdc-text-field-wrapper {
+      .mat-mdc-form-field-flex {
+        .mat-mdc-form-field-infix {
+          padding: 12px 0;
+        }
+      }
+    }
+  }
+}
+
+// Mobile responsive adjustments
+@media (max-width: 640px) {
+  .mat-mdc-dialog-container {
+    margin: 16px;
+    width: calc(100vw - 32px);
+    max-width: none;
+  }
+}

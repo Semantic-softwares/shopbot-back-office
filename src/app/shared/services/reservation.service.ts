@@ -500,6 +500,21 @@ export class ReservationService {
     );
   }
 
+  // Update payment information (status, method, reference, notes)
+  updatePaymentInfo(reservationId: string, paymentInfoData: {
+    status: 'pending' | 'partial' | 'paid';
+    method: string;
+    reference?: string;
+    notes?: string;
+  }): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${reservationId}/payment-info`, paymentInfoData).pipe(
+      catchError(error => {
+        this.errorSubject.next('Failed to update payment information');
+        throw error;
+      })
+    );
+  }
+
   // Print folio
   printFolio(reservationId: string): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/${reservationId}/folio`, {
@@ -629,6 +644,192 @@ export class ReservationService {
         this.errorSubject.next(errorMessage);
         console.error('Error deleting reservation with PIN:', error);
         throw new Error(errorMessage);
+      })
+    );
+  }
+
+  /**
+   * Request extension for a reservation
+   */
+  requestExtension(reservationId: string, extensionData: {
+    newCheckOutDate: string;
+    additionalNights: number;
+    notes?: string;
+  }): Observable<{ success: boolean; extension: any; message: string }> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    return this.http.post<{ success: boolean; extension: any; message: string }>(
+      `${this.baseUrl}/${reservationId}/extension/request`,
+      extensionData
+    ).pipe(
+      map(response => {
+        this.loadingSubject.next(false);
+        return response;
+      }),
+      catchError(error => {
+        this.loadingSubject.next(false);
+        let errorMessage = 'Failed to request extension. Please try again.';
+        
+        if (error.status === 400) {
+          errorMessage = error.error?.error || 'Invalid extension request.';
+        } else if (error.status === 404) {
+          errorMessage = 'Reservation not found.';
+        } else if (error.status === 409) {
+          errorMessage = error.error?.error || 'Extension not available for the selected dates.';
+        } else if (error.error?.error) {
+          errorMessage = error.error.error;
+        } else if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+        
+        this.errorSubject.next(errorMessage);
+        console.error('Error requesting extension:', error);
+        throw new Error(errorMessage);
+      })
+    );
+  }
+
+  /**
+   * Check extension availability with enhanced pricing breakdown
+   */
+  checkExtensionAvailability(reservationId: string, newCheckOutDate: string): Observable<{
+    isAvailable: boolean;
+    availableUntil?: Date;
+    conflictingReservations?: any[];
+    estimatedCost?: number;
+    maxExtensionNights?: number;
+    extensionDays?: number;
+    roomAvailability?: any[];
+    pricingBreakdown?: {
+      baseRatePerNight: number;
+      finalRatePerNight: number;
+      totalCost: number;
+      strategy: string;
+      appliedModifiers: {
+        name: string;
+        type: string;
+        value: number;
+        originalRate: number;
+        modifiedRate: number;
+        description?: string;
+      }[];
+    };
+    message?: string;
+  }> {
+    return this.http.get<any>(
+      `${this.baseUrl}/${reservationId}/extension/availability`,
+      { params: { newCheckOutDate } }
+    ).pipe(
+      catchError(error => {
+        console.error('Error checking extension availability:', error);
+        // Return unavailable if there's an error
+        return of({
+          isAvailable: false,
+          conflictingReservations: [],
+          estimatedCost: 0,
+          maxExtensionNights: 0,
+          extensionDays: 0,
+          roomAvailability: [],
+          message: 'Failed to check availability'
+        });
+      })
+    );
+  }
+
+  /**
+   * Approve extension request
+   */
+  approveExtension(reservationId: string, extensionId: string, approvalNotes?: string, paymentInfo?: any): Observable<{
+    success: boolean;
+    reservation: Reservation;
+    message: string;
+  }> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    return this.http.put<{ success: boolean; reservation: Reservation; message: string }>(
+      `${this.baseUrl}/${reservationId}/extension/${extensionId}/approve`,
+      { extensionId, approvalNotes, paymentInfo }
+    ).pipe(
+      map(response => {
+        this.loadingSubject.next(false);
+        return response;
+      }),
+      catchError(error => {
+        this.loadingSubject.next(false);
+        let errorMessage = 'Failed to approve extension. Please try again.';
+        
+        if (error.status === 404) {
+          errorMessage = 'Extension or reservation not found.';
+        } else if (error.status === 409) {
+          errorMessage = error.error?.error || 'Extension has already been processed.';
+        } else if (error.error?.error) {
+          errorMessage = error.error.error;
+        } else if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+        
+        this.errorSubject.next(errorMessage);
+        console.error('Error approving extension:', error);
+        throw new Error(errorMessage);
+      })
+    );
+  }
+
+  /**
+   * Reject extension request
+   */
+  rejectExtension(reservationId: string, extensionId: string, rejectionReason: string, rejectionNotes?: string): Observable<{
+    success: boolean;
+    reservation: Reservation;
+    message: string;
+  }> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    return this.http.put<{ success: boolean; reservation: Reservation; message: string }>(
+      `${this.baseUrl}/${reservationId}/extension/${extensionId}/reject`,
+      { extensionId, rejectionReason, rejectionNotes }
+    ).pipe(
+      map(response => {
+        this.loadingSubject.next(false);
+        return response;
+      }),
+      catchError(error => {
+        this.loadingSubject.next(false);
+        let errorMessage = 'Failed to reject extension. Please try again.';
+        
+        if (error.status === 404) {
+          errorMessage = 'Extension or reservation not found.';
+        } else if (error.status === 409) {
+          errorMessage = error.error?.error || 'Extension has already been processed.';
+        } else if (error.error?.error) {
+          errorMessage = error.error.error;
+        } else if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+        
+        this.errorSubject.next(errorMessage);
+        console.error('Error rejecting extension:', error);
+        throw new Error(errorMessage);
+      })
+    );
+  }
+
+  /**
+   * Get extensions for a reservation
+   */
+  getReservationExtensions(reservationId: string): Observable<{
+    extensions: any[];
+    currentExtension: any;
+  }> {
+    return this.http.get<{ extensions: any[]; currentExtension: any }>(
+      `${this.baseUrl}/${reservationId}/extensions`
+    ).pipe(
+      catchError(error => {
+        console.error('Error fetching reservation extensions:', error);
+        return of({ extensions: [], currentExtension: null });
       })
     );
   }

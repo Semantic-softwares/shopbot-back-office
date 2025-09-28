@@ -13,15 +13,19 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ReservationService } from '../../../../../shared/services/reservation.service';
+import { ExtensionPaymentDialogComponent, ExtensionPaymentData, ExtensionPaymentResult } from '../extension-payment-dialog/extension-payment-dialog.component';
 import { BluetoothPrinterService } from '../../../../../shared/services/bluetooth-printer.service';
 import { Reservation } from '../../../../../shared/models/reservation.model';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { CheckInConfirmationDialogComponent, CheckInDialogData } from '../check-in-confirmation-dialog/check-in-confirmation-dialog.component';
 import { PaymentUpdateDialogComponent, PaymentUpdateDialogData } from '../payment-update-dialog/payment-update-dialog.component';
 import { PinAuthorizationDialogComponent, PinAuthorizationDialogData, PinAuthorizationDialogResult } from '../pin-authorization-dialog/pin-authorization-dialog.component';
+import { ExtensionDialogComponent, ExtensionDialogData, ExtensionDialogResult } from '../extension-dialog/extension-dialog.component';
+import { PricingUpdateDialogComponent, PricingUpdateDialogData, PricingUpdateDialogResult } from '../pricing-update-dialog/pricing-update-dialog.component';
 
 @Component({
   selector: 'app-reservation-details',
@@ -39,7 +43,8 @@ import { PinAuthorizationDialogComponent, PinAuthorizationDialogData, PinAuthori
     MatSelectModule,
     MatFormFieldModule,
     MatDialogModule,
-    MatDividerModule
+    MatDividerModule,
+    MatTooltipModule
   ],
   templateUrl: './reservation-details.component.html',
   styleUrls: ['./reservation-details.component.scss']
@@ -309,6 +314,27 @@ export class ReservationDetailsComponent implements OnInit {
            reservation?.status !== 'no_show';
   }
 
+  canRequestExtension(): boolean {
+    const reservation = this.reservation();
+    // Only allow extension requests for checked-in guests
+    return reservation?.status === 'checked_in';
+  }
+
+  isCheckedOut(): boolean {
+    const reservation = this.reservation();
+    return reservation?.status === 'checked_out';
+  }
+
+  canEditPricing(): boolean {
+    // Disable pricing edits for checked-out reservations
+    return !this.isCheckedOut() && !this.loading();
+  }
+
+  canEditPaymentInfo(): boolean {
+    // Disable payment info edits for checked-out reservations
+    return !this.isCheckedOut() && !this.statusUpdating();
+  }
+
   // Action methods
   async checkInReservation(): Promise<void> {
     const reservation = this.reservation();
@@ -365,6 +391,51 @@ export class ReservationDetailsComponent implements OnInit {
     }
   }
 
+  async requestExtension(): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation || !this.canRequestExtension()) {
+      this.snackBar.open('Extensions can only be requested for checked-in guests', 'Close', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    const dialogData: ExtensionDialogData = {
+      reservation,
+      currentCheckOutDate: new Date(reservation.checkOutDate)
+    };
+
+    const dialogRef = this.dialog.open(ExtensionDialogComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      data: dialogData,
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: ExtensionDialogResult) => {
+      if (result?.success && result.extension) {
+        try {
+          // Reload the reservation to show the new extension request
+          await this.loadReservation(reservation._id);
+          
+          this.snackBar.open(
+            'Extension request submitted successfully. Awaiting approval.', 
+            'Close', 
+            { duration: 5000 }
+          );
+        } catch (error) {
+          console.error('Error reloading reservation after extension request:', error);
+          this.snackBar.open(
+            'Extension request submitted, but failed to refresh data. Please refresh the page.', 
+            'Close', 
+            { duration: 5000 }
+          );
+        }
+      }
+    });
+  }
+
   // Update reservation status
   async updateReservationStatus(newStatus: string): Promise<void> {
     const reservation = this.reservation();
@@ -405,6 +476,15 @@ export class ReservationDetailsComponent implements OnInit {
     const reservation = this.reservation();
     if (!reservation) return;
 
+    // Prevent editing payment info for checked-out reservations
+    if (this.isCheckedOut()) {
+      this.snackBar.open('Cannot update payment status for checked-out reservations', 'Close', { 
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
     if (newStatus === 'paid') {
       this.showPaymentDialog(reservation);
     } else {
@@ -413,7 +493,15 @@ export class ReservationDetailsComponent implements OnInit {
     }
   }
 
-  private showPaymentDialog(reservation: Reservation): void {
+  showPaymentDialog(reservation: Reservation): void {
+    // Prevent editing payment info for checked-out reservations
+    if (this.isCheckedOut()) {
+      this.snackBar.open('Cannot edit payment information for checked-out reservations', 'Close', { 
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
     const dialogData: PaymentUpdateDialogData = { 
       reservation,
       isCheckoutFlow: false // Regular payment update, not checkout flow
@@ -428,13 +516,19 @@ export class ReservationDetailsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result?.confirmed && result.paymentData) {
-        this.processPayment(result.paymentData);
+        if (result.paymentData.amount !== undefined) {
+          // Amount-based payment (checkout flow) - not expected for regular updates
+          console.error('Amount-based payment not supported in regular update flow');
+        } else if (result.paymentData.status) {
+          // Status-based update
+          this.processPayment(result.paymentData as any);
+        }
       }
     });
   }
 
   private async processPayment(paymentData: {
-    amount: number;
+    status: 'pending' | 'partial' | 'paid';
     method: string;
     reference?: string;
     notes?: string;
@@ -445,12 +539,8 @@ export class ReservationDetailsComponent implements OnInit {
     this.statusUpdating.set(true);
 
     try {
-      // Process the payment through the service
-      await this.reservationService.processPayment(reservation._id, {
-        amount: paymentData.amount,
-        method: paymentData.method,
-        reference: paymentData.reference || `PAY-${Date.now()}`
-      }).toPromise();
+      // Update payment info through the service
+      await this.reservationService.updatePaymentInfo(reservation._id, paymentData).toPromise();
 
       // Reload the reservation to get updated payment info
       const updatedReservation = await this.reservationService.getReservationById(reservation._id).toPromise();
@@ -459,14 +549,20 @@ export class ReservationDetailsComponent implements OnInit {
       }
 
       this.snackBar.open(
-        `Payment of ${this.formatCurrency(paymentData.amount)} recorded successfully`, 
+        'Payment information updated successfully', 
         'Close', 
         { duration: 5000 }
       );
-    } catch (error) {
-      console.error('Error processing payment:', error);
+    } catch (error: any) {
+      console.error('Error updating payment info:', error);
       
-      const errorMessage = error instanceof Error ? error.message : 'Failed to process payment';
+      let errorMessage = 'Failed to update payment information';
+      if (error?.error?.error) {
+        errorMessage = error.error.error;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       this.snackBar.open(errorMessage, 'Close', { 
         duration: 5000,
         panelClass: ['error-snackbar']
@@ -627,7 +723,12 @@ export class ReservationDetailsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result?.confirmed && result.paymentData) {
-        this.processPaymentAndCheckout(result.paymentData);
+        if (result.paymentData.amount !== undefined) {
+          // Amount-based payment (checkout flow)
+          this.processPaymentAndCheckout(result.paymentData as any);
+        } else {
+          console.error('Expected amount-based payment data for checkout flow');
+        }
       }
     });
   }
@@ -1053,6 +1154,78 @@ export class ReservationDetailsComponent implements OnInit {
     }
   }
 
+  openPricingUpdateDialog(): void {
+    const currentReservation = this.reservation();
+    if (!currentReservation) return;
+
+    // Prevent editing pricing for checked-out reservations
+    if (this.isCheckedOut()) {
+      this.snackBar.open('Cannot edit pricing for checked-out reservations', 'Close', { 
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    const selectedStore = this.storeStore.selectedStore();
+    if (!selectedStore?._id) {
+      this.snackBar.open('No store selected', 'Close', { duration: 3000 });
+      return;
+    }
+
+    // First, request PIN authorization
+    const pinDialogData: PinAuthorizationDialogData = {
+      storeId: selectedStore._id,
+      actionDescription: `update pricing for reservation ${currentReservation.confirmationNumber}`,
+      reservationId: currentReservation._id
+    };
+
+    const pinDialogRef = this.dialog.open(PinAuthorizationDialogComponent, {
+      data: pinDialogData,
+      width: '500px',
+      maxWidth: '90vw',
+      disableClose: true
+    });
+
+    pinDialogRef.afterClosed().subscribe((pinResult: PinAuthorizationDialogResult) => {
+      if (pinResult?.authorized && pinResult.pin) {
+        // PIN authorized, proceed to open pricing dialog
+        this.proceedWithPricingUpdate(currentReservation);
+      }
+    });
+  }
+
+  private proceedWithPricingUpdate(reservation: Reservation): void {
+    const dialogData: PricingUpdateDialogData = {
+      reservation: reservation
+    };
+
+    const dialogRef = this.dialog.open(PricingUpdateDialogComponent, {
+      data: dialogData,
+      width: '800px',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      disableClose: false,
+      autoFocus: false,
+      panelClass: 'pricing-update-dialog'
+    });
+
+    dialogRef.afterClosed().subscribe((result: PricingUpdateDialogResult) => {
+      if (result?.success && result.updatedReservation) {
+        // Update the local reservation data
+        this.reservation.set(result.updatedReservation);
+        this.snackBar.open(
+          'Pricing updated successfully!', 
+          'Close', 
+          { 
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          }
+        );
+      }
+    });
+  }
+
   formatCurrency(amount: number | undefined): string {
     if (!amount && amount !== 0) return 'N/A';
     const store = this.storeStore.selectedStore() as any;
@@ -1070,6 +1243,177 @@ export class ReservationDetailsComponent implements OnInit {
         style: 'currency',
         currency: 'USD'
       }).format(amount);
+    }
+  }
+
+  // Extension-related methods
+  hasExtensions(): boolean {
+    const reservation = this.reservation();
+    return !!(reservation?.extensions && reservation.extensions.length > 0);
+  }
+
+  getExtensions(): any[] {
+    const reservation = this.reservation();
+    return reservation?.extensions || [];
+  }
+
+  hasActiveExtension(): boolean {
+    const reservation = this.reservation();
+    return !!(reservation?.currentExtension?.isActive);
+  }
+
+  getTotalExtensionCost(): number {
+    const reservation = this.reservation();
+    if (reservation?.currentExtension?.isActive && reservation.currentExtension?.totalExtensionCost) {
+      return reservation.currentExtension.totalExtensionCost;
+    }
+    
+    // Fallback: calculate from approved extensions
+    const approvedExtensions = this.getExtensions().filter(ext => ext.status === 'approved');
+    return approvedExtensions.reduce((total, ext) => total + (ext.additionalCost || 0), 0);
+  }
+
+  getTotalExtensionNights(): number {
+    const reservation = this.reservation();
+    if (reservation?.currentExtension?.isActive && reservation.currentExtension?.totalExtensionNights) {
+      return reservation.currentExtension.totalExtensionNights;
+    }
+    
+    // Fallback: calculate from approved extensions
+    const approvedExtensions = this.getExtensions().filter(ext => ext.status === 'approved');
+    return approvedExtensions.reduce((total, ext) => total + (ext.additionalNights || 0), 0);
+  }
+
+  getFinalTotal(): number {
+    const reservation = this.reservation();
+    // The pricing.total already includes approved extension costs (updated by backend)
+    return reservation?.pricing?.total || 0;
+  }
+
+  formatExtensionDate(dateString: string | Date): string {
+    if (!dateString) return 'N/A';
+    
+    try {
+      const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.warn('Invalid date format:', dateString);
+      return 'Invalid Date';
+    }
+  }
+
+  // Extension processing state
+  processingExtension = signal<string | null>(null);
+  processingAction = signal<'approve' | 'reject' | null>(null);
+
+  // Extension approval/rejection methods
+  async approveExtension(extensionId: string): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    // Find the extension to get details for the payment dialog
+    const extension = reservation.extensions?.find(ext => ext._id === extensionId);
+    if (!extension) {
+      this.snackBar.open('Extension not found', 'Close', { duration: 3000 });
+      return;
+    }
+
+    // Open payment dialog
+    const dialogData: ExtensionPaymentData = {
+      extensionId,
+      reservationId: reservation._id,
+      extensionCost: extension.additionalCost,
+      currency: this.storeStore.selectedStore()?.currency || 'USD',
+      additionalNights: extension.additionalNights
+    };
+
+    const dialogRef = this.dialog.open(ExtensionPaymentDialogComponent, {
+      data: dialogData,
+      width: '500px',
+      disableClose: true
+    });
+
+    const result = await dialogRef.afterClosed().toPromise() as ExtensionPaymentResult | null;
+    if (!result) {
+      return; // User cancelled
+    }
+
+    this.processingExtension.set(extensionId);
+    this.processingAction.set('approve');
+
+    try {
+      const response = await this.reservationService.approveExtension(
+        reservation._id,
+        extensionId,
+        'Extension approved from reservation details',
+        result // Include payment information
+      ).toPromise();
+
+      if (response?.reservation) {
+        this.reservation.set(response.reservation);
+        this.snackBar.open(
+          'Extension approved successfully with payment information!',
+          'Close',
+          { duration: 3000, panelClass: ['success-snackbar'] }
+        );
+      }
+    } catch (error: any) {
+      console.error('Error approving extension:', error);
+      this.snackBar.open(
+        error.message || 'Failed to approve extension',
+        'Close',
+        { duration: 5000, panelClass: ['error-snackbar'] }
+      );
+    } finally {
+      this.processingExtension.set(null);
+      this.processingAction.set(null);
+    }
+  }
+
+  async rejectExtension(extensionId: string): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    // For now, use a simple prompt. In production, you might want a proper dialog
+    const rejectionReason = prompt('Please provide a reason for rejection:');
+    if (!rejectionReason) return;
+
+    this.processingExtension.set(extensionId);
+    this.processingAction.set('reject');
+
+    try {
+      const response = await this.reservationService.rejectExtension(
+        reservation._id,
+        extensionId,
+        rejectionReason,
+        'Extension rejected from reservation details'
+      ).toPromise();
+
+      if (response?.reservation) {
+        this.reservation.set(response.reservation);
+        this.snackBar.open(
+          'Extension rejected successfully!',
+          'Close',
+          { duration: 3000, panelClass: ['success-snackbar'] }
+        );
+      }
+    } catch (error: any) {
+      console.error('Error rejecting extension:', error);
+      this.snackBar.open(
+        error.message || 'Failed to reject extension',
+        'Close',
+        { duration: 5000, panelClass: ['error-snackbar'] }
+      );
+    } finally {
+      this.processingExtension.set(null);
+      this.processingAction.set(null);
     }
   }
 }

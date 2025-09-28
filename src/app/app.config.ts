@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import {  provideRouter } from '@angular/router';
+import {  provideRouter, withHashLocation, withInMemoryScrolling } from '@angular/router';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { routes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -10,7 +10,10 @@ import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
+    provideRouter(routes, withHashLocation(), withInMemoryScrolling({
+        scrollPositionRestoration: 'enabled', // scrolls to top on route change
+        anchorScrolling: 'enabled', // allows scrolling to element IDs (#section)
+      })),
     provideAnimationsAsync(), 
     provideNativeDateAdapter(),
     provideHttpClient(

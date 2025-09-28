@@ -1,0 +1,118 @@
+/* Pricing Update Dialog Styles */
+
+/* Dialog container customization */
+:host {
+  display: block;
+}
+
+.mat-mdc-dialog-container {
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: visible;
+}
+
+/* Dialog title styling */
+.mat-mdc-dialog-title {
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+/* Dialog content styling */
+.mat-mdc-dialog-content {
+  background-color: white;
+}
+
+/* Dialog actions styling */
+.mat-mdc-dialog-actions {
+  border-top: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+/* Form field styling */
+.mat-mdc-form-field {
+  width: 100%;
+  
+  .mat-mdc-form-field-wrapper {
+    padding-bottom: 0;
+  }
+}
+
+.pricing-summary {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    &.total-row {
+      font-weight: 600;
+      font-size: 1.125rem;
+      border-top: 2px solid #cbd5e1;
+      padding-top: 0.75rem;
+      margin-top: 0.75rem;
+    }
+  }
+}
+
+.reference-pricing {
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-size: 0.875rem;
+}
+
+.loading-spinner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+/* Custom button styles */
+.mat-mdc-raised-button.mat-primary {
+  background-color: #7c3aed !important;
+  
+  &:hover {
+    background-color: #6d28d9 !important;
+  }
+  
+  &:disabled {
+    background-color: #9ca3af !important;
+    color: #6b7280 !important;
+  }
+}
+
+/* Form validation styles */
+.mat-mdc-form-field.mat-form-field-invalid .mat-mdc-text-field-wrapper {
+  border-color: #ef4444;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+  
+  .grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+  
+  .mat-mdc-dialog-container {
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+}

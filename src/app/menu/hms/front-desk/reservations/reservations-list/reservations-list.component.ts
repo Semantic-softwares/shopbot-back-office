@@ -103,7 +103,7 @@ export class ReservationsListComponent {
   });
 
   totalRevenue = computed(() => {
-    return this.reservations().reduce((sum, r) => sum + (r.pricing?.total || 0), 0);
+    return this.reservations().reduce((sum, r) => sum + this.getEffectiveTotal(r), 0);
   });
 
   // Create a computed signal for filter parameters
@@ -635,7 +635,12 @@ export class ReservationsListComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result?.confirmed && result.paymentData) {
-        this.processPaymentAndCheckout(reservation, result.paymentData);
+        if (result.paymentData.amount !== undefined) {
+          // Amount-based payment (checkout flow)
+          this.processPaymentAndCheckout(reservation, result.paymentData as any);
+        } else {
+          console.error('Expected amount-based payment data for checkout flow');
+        }
       }
     });
   }
@@ -897,7 +902,7 @@ export class ReservationsListComponent {
         this.escapeCsvField(reservation.guestDetails?.primaryGuest?.phone || ''),
         this.escapeCsvField(this.getRoomNumbers(reservation)),
         this.formatDateForCSV(reservation.checkInDate),
-        this.formatDateForCSV(reservation.checkOutDate),
+        this.formatDateForCSV(this.getEffectiveCheckOutDate(reservation)),
         this.escapeCsvField(reservation.expectedCheckInTime || ''),
         this.escapeCsvField(reservation.expectedCheckOutTime || ''),
         this.escapeCsvField(reservation.status || ''),
@@ -906,7 +911,7 @@ export class ReservationsListComponent {
         reservation.numberOfNights || 0,
         reservation.pricing?.subtotal || 0,
         reservation.pricing?.taxes || 0,
-        reservation.pricing?.total || 0,
+        this.getEffectiveTotal(reservation),
         reservation.pricing?.balance || 0,
         this.escapeCsvField(reservation.paymentInfo?.status || 'pending'),
         this.formatDateForCSV(reservation.createdAt),
@@ -957,5 +962,49 @@ export class ReservationsListComponent {
     }
     
     return `${filename}.csv`;
+  }
+
+  // Extension-related methods
+  hasApprovedExtensions(reservation: Reservation): boolean {
+    return !!(reservation.extensions && 
+              reservation.extensions.some(ext => ext.status === 'approved'));
+  }
+
+  getEffectiveCheckOutDate(reservation: Reservation): string | Date {
+    if (this.hasApprovedExtensions(reservation)) {
+      // Find the latest approved extension checkout date
+      const approvedExtensions = reservation.extensions?.filter(ext => ext.status === 'approved') || [];
+      if (approvedExtensions.length > 0) {
+        // Get the extension with the latest checkout date
+        const latestExtension = approvedExtensions.reduce((latest, current) => {
+          const latestDate = new Date(latest.newCheckOutDate);
+          const currentDate = new Date(current.newCheckOutDate);
+          return currentDate > latestDate ? current : latest;
+        });
+        return latestExtension.newCheckOutDate;
+      }
+    }
+    return reservation.checkOutDate;
+  }
+
+  getExtensionNights(reservation: Reservation): number {
+    if (reservation.extensions) {
+      const approvedExtensions = reservation.extensions.filter(ext => ext.status === 'approved');
+      return approvedExtensions.reduce((total, ext) => total + (ext.additionalNights || 0), 0);
+    }
+    return 0;
+  }
+
+  getApprovedExtensionCost(reservation: Reservation): number {
+    if (reservation.extensions) {
+      const approvedExtensions = reservation.extensions.filter(ext => ext.status === 'approved');
+      return approvedExtensions.reduce((total, ext) => total + (ext.additionalCost || 0), 0);
+    }
+    return 0;
+  }
+
+  getEffectiveTotal(reservation: Reservation): number {
+    // The pricing.total already includes approved extension costs (updated by backend)
+    return reservation.pricing?.total || 0;
   }
 }
