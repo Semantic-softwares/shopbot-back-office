@@ -137,7 +137,7 @@ export class CreateSuppliersComponent implements OnInit {
             horizontalPosition: 'end',
             verticalPosition: 'top'
           });
-          this.router.navigate(['/dashboard/inventory/suppliers']);
+          this.router.navigate(['/menu/erp/inventory/suppliers']);
         },
         error: (error) => {
           this.error.set('Failed to update supplier');
@@ -165,7 +165,7 @@ export class CreateSuppliersComponent implements OnInit {
             horizontalPosition: 'end',
             verticalPosition: 'top'
           });
-          this.router.navigate(['/dashboard/inventory/suppliers']);
+          this.router.navigate(['/menu/erp/inventory/suppliers']);
         },
         error: (error) => {
           this.error.set('Failed to create supplier');
@@ -182,7 +182,7 @@ export class CreateSuppliersComponent implements OnInit {
   }
 
   onCancel() {
-    this.router.navigate(['/dashboard/inventory/suppliers']);
+    this.router.navigate(['/menu/erp/inventory/suppliers']);
   }
 
   private markAllFieldsAsTouched() {

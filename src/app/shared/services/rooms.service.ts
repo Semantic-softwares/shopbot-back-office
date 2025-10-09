@@ -157,16 +157,29 @@ export class RoomsService {
   /**
    * Get available rooms for date range
    */
-  getAvailableRooms(storeId: string, checkIn: string, checkOut: string, roomTypeId?: string): Observable<AvailableRoom[]> {
-    let params = new HttpParams()
-      .set('checkIn', checkIn)
-      .set('checkOut', checkOut);
+  getAvailableRooms(params: {
+    storeId: string; 
+    checkInDate: string; 
+    checkOutDate: string; 
+    roomTypeId?: string;
+    excludeReservationId?: string;
+  }): Observable<any[]> {
+    let httpParams = new HttpParams()
+      .set('checkIn', params.checkInDate)
+      .set('checkOut', params.checkOutDate);
     
-    if (roomTypeId) {
-      params = params.set('roomTypeId', roomTypeId);
+    if (params.roomTypeId) {
+      httpParams = httpParams.set('roomTypeId', params.roomTypeId);
     }
 
-    return this.http.get<AvailableRoom[]>(`${this.baseUrl}/rooms/${storeId}/availability`, { params });
+    if (params.excludeReservationId) {
+      httpParams = httpParams.set('excludeReservationId', params.excludeReservationId);
+    }
+
+    return this.http.get<{success: boolean, data: any[]}>(`${this.baseUrl}/rooms/${params.storeId}/availability`, { params: httpParams })
+      .pipe(
+        map(response => response.data || [])
+      );
   }
 
   /**

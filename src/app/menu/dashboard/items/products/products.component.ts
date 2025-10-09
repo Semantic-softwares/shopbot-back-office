@@ -111,7 +111,7 @@ export class ProductsComponent {
 
 
   addItem() {
-    this.router.navigate(['/dashboard/items/create-product']);
+    this.router.navigate(['/menu/erp/items/create-product']);
   }
 
   editProduct(product: Product) {
@@ -120,7 +120,7 @@ export class ProductsComponent {
   }
 
   onEditProduct(productId: string) {
-    this.router.navigate(['/dashboard/items/edit-product', productId]);
+    this.router.navigate(['/menu/erp/items/edit-product', productId]);
   }
 
   deleteProduct(product: Product) {

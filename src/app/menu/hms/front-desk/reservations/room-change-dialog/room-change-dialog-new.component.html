@@ -1,0 +1,405 @@
+<!-- Dialog Header -->
+<h1 mat-dialog-title>
+  <div class="flex items-center gap-2">
+    <mat-icon>swap_horiz</mat-icon>
+    {{ swapMode() ? 'Swap Rooms' : 'Change Room Selection' }}
+  </div>
+</h1>
+
+<!-- Dialog Content -->
+<div mat-dialog-content class="min-h-[500px]">
+  <form [formGroup]="roomChangeForm" class="space-y-6">
+    
+    <!-- Mode Toggle -->
+    <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+      <mat-checkbox 
+        [checked]="swapMode()"
+        (change)="toggleSwapMode()"
+        color="primary">
+        <span class="font-medium">Swap Specific Rooms</span>
+      </mat-checkbox>
+      <div class="text-sm text-gray-600">
+        {{ swapMode() ? 'Select current rooms and assign replacements one-by-one' : 'Replace all rooms with new selection' }}
+      </div>
+    </div>
+
+    <!-- Swap Mode Interface -->
+    @if (swapMode()) {
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Step 1: Current Rooms Selection -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+            <mat-icon class="text-blue-600">meeting_room</mat-icon>
+            Step 1: Select Rooms to Swap
+          </h3>
+          
+          <div class="space-y-2 max-h-80 overflow-y-auto">
+            @for (currentRoom of data.currentRooms; track currentRoom.room._id) {
+              <mat-card class="!shadow-sm border cursor-pointer transition-all hover:shadow-md"
+                        [class.ring-2]="isCurrentRoomSelected(currentRoom.room._id)"
+                        [class.ring-blue-500]="isCurrentRoomSelected(currentRoom.room._id)"
+                        [class.bg-blue-50]="isCurrentRoomSelected(currentRoom.room._id)"
+                        (click)="toggleCurrentRoomForSwap(currentRoom.room, !isCurrentRoomSelected(currentRoom.room._id))">
+                <mat-card-content class="!p-4">
+                  <div class="flex items-center gap-3">
+                    <mat-checkbox 
+                      [checked]="isCurrentRoomSelected(currentRoom.room._id)"
+                      (click)="$event.stopPropagation()"
+                      color="primary">
+                    </mat-checkbox>
+                    <div class="flex-1">
+                      <div class="font-medium text-gray-900">Room {{ currentRoom.room.roomNumber }}</div>
+                      <div class="text-sm text-gray-600">{{ currentRoom.room.roomType?.name }}</div>
+                      <div class="text-sm text-green-600 font-medium">
+                        {{ data.currency }}{{ getRoomTotalCost(currentRoom.room) | number:'1.2-2' }}
+                        <span class="text-xs text-gray-500">{{ data.numberOfNights }} nights</span>
+                      </div>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        </div>
+
+        <!-- Step 2: Swap Assignments -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+            <mat-icon class="text-green-600">swap_horiz</mat-icon>
+            Step 2: Assign Replacements
+          </h3>
+          
+          @if (swapPairs().length === 0) {
+            <div class="text-center py-12 text-gray-500">
+              <mat-icon class="text-6xl mb-4 text-gray-300">arrow_back</mat-icon>
+              <div class="text-lg font-medium">Select current rooms to swap</div>
+              <div class="text-sm">Choose rooms from Step 1 to create swap pairs</div>
+            </div>
+          } @else {
+            <div class="space-y-4 max-h-80 overflow-y-auto">
+              @for (pair of swapPairs(); track pair.currentRoom._id; let i = $index) {
+                <mat-card class="!shadow-sm border border-gray-200">
+                  <mat-card-content class="!p-4">
+                    <div class="space-y-4">
+                      
+                      <!-- Swap Pair Header -->
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                          <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                            Swap {{ i + 1 }}
+                          </span>
+                        </div>
+                        <button mat-icon-button 
+                                (click)="removeSwapPair(pair.currentRoom._id)" 
+                                color="warn"
+                                class="!w-8 !h-8">
+                          <mat-icon class="!text-lg">close</mat-icon>
+                        </button>
+                      </div>
+
+                      <!-- Current Room -->
+                      <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <div class="flex-1">
+                          <div class="font-medium text-blue-900">Room {{ pair.currentRoom.roomNumber }}</div>
+                          <div class="text-sm text-blue-700">{{ pair.currentRoom.roomType?.name }}</div>
+                        </div>
+                        <div class="text-sm font-medium text-blue-900">
+                          {{ data.currency }}{{ getRoomTotalCost(pair.currentRoom) | number:'1.2-2' }}
+                        </div>
+                      </div>
+
+                      <!-- Arrow -->
+                      <div class="flex justify-center">
+                        <mat-icon class="text-gray-400">arrow_downward</mat-icon>
+                      </div>
+
+                      <!-- Replacement Room Selection -->
+                      <div>
+                        <mat-form-field appearance="outline" class="w-full">
+                          <mat-label>Select Replacement Room</mat-label>
+                          <mat-select 
+                            [value]="pair.replacementRoom?._id" 
+                            (selectionChange)="assignReplacementRoom(pair.currentRoom._id, $event.source.triggerValue)">
+                            @for (room of getAvailableRoomsForSwap(); track room._id) {
+                              <mat-option [value]="room">
+                                <div class="flex justify-between items-center w-full py-1">
+                                  <div>
+                                    <span class="font-medium">Room {{ room.roomNumber }}</span>
+                                    <span class="text-sm text-gray-600 ml-2">{{ room.roomType?.name }}</span>
+                                  </div>
+                                  <span class="text-sm font-medium text-green-600">
+                                    {{ data.currency }}{{ getRoomTotalCost(room) | number:'1.2-2' }}
+                                  </span>
+                                </div>
+                              </mat-option>
+                            }
+                          </mat-select>
+                        </mat-form-field>
+
+                        <!-- Price Difference Display -->
+                        @if (pair.replacementRoom) {
+                          <div class="mt-3 p-3 rounded-lg border"
+                               [class.bg-green-50]="pair.priceDifference <= 0"
+                               [class.bg-red-50]="pair.priceDifference > 0"
+                               [class.border-green-200]="pair.priceDifference <= 0"
+                               [class.border-red-200]="pair.priceDifference > 0">
+                            
+                            <!-- New Room Info -->
+                            <div class="flex items-center gap-3 mb-2">
+                              <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                              <div class="flex-1">
+                                <div class="font-medium text-green-900">Room {{ pair.replacementRoom.roomNumber }}</div>
+                                <div class="text-sm text-green-700">{{ pair.replacementRoom.roomType?.name }}</div>
+                              </div>
+                              <div class="text-sm font-medium text-green-900">
+                                {{ data.currency }}{{ getRoomTotalCost(pair.replacementRoom) | number:'1.2-2' }}
+                              </div>
+                            </div>
+
+                            <!-- Price Impact -->
+                            <div class="text-center py-2 border-t"
+                                 [class.border-green-200]="pair.priceDifference <= 0"
+                                 [class.border-red-200]="pair.priceDifference > 0">
+                              <div class="text-sm font-semibold"
+                                   [class.text-green-700]="pair.priceDifference <= 0"
+                                   [class.text-red-700]="pair.priceDifference > 0">
+                                @if (pair.priceDifference > 0) {
+                                  <mat-icon class="!text-sm mr-1">add</mat-icon>
+                                  {{ data.currency }}{{ pair.priceDifference | number:'1.2-2' }} Additional Payment
+                                } @else if (pair.priceDifference < 0) {
+                                  <mat-icon class="!text-sm mr-1">remove</mat-icon>
+                                  {{ data.currency }}{{ Math.abs(pair.priceDifference) | number:'1.2-2' }} Refund
+                                } @else {
+                                  <mat-icon class="!text-sm mr-1 text-gray-600">check</mat-icon>
+                                  <span class="text-gray-600">Same Price</span>
+                                }
+                              </div>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              }
+            </div>
+          }
+        </div>
+      </div>
+      
+    } @else {
+      <!-- Bulk Mode Interface (Original Design) -->
+      
+      <!-- Current Room Assignment -->
+      <div class="mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <mat-icon class="text-blue-600">bed</mat-icon>
+          Current Room Assignment
+        </h3>
+        <div class="space-y-3">
+          @for (room of data.currentRooms; track room.room._id) {
+            <mat-card class="!shadow-sm border border-gray-200">
+              <mat-card-content class="!p-4">
+                <div class="flex justify-between items-center">
+                  <div>
+                    <div class="font-medium text-gray-900 text-base">
+                      Room {{ room.room.roomNumber }} - {{ room.room.roomType?.name }}
+                    </div>
+                    <div class="text-sm text-gray-600 mt-1">{{ room.room.roomType?.description }}</div>
+                    <div class="flex gap-4 text-xs text-gray-500 mt-2">
+                      <span>Max: {{ room.room.roomType?.capacity?.adults + room.room.roomType?.capacity?.children }} guests</span>
+                      <span>{{ room.room.roomType?.bedConfiguration }}</span>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-lg font-semibold text-gray-900">
+                      {{ data.currency }}{{ getRoomTotalCost(room.room) | number:'1.2-2' }}
+                    </div>
+                    <div class="text-sm text-gray-500">{{ data.numberOfNights }} nights</div>
+                    <div class="text-xs text-gray-400">
+                      {{ data.currency }}{{ getRoomRate(room.room) | number:'1.2-2' }}/night
+                    </div>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </div>
+
+      <!-- Available Rooms Selection -->
+      <div class="mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <mat-icon class="text-green-600">hotel</mat-icon>
+          Select New Rooms
+          @if (loadingRooms()) {
+            <mat-spinner diameter="20" strokeWidth="3"></mat-spinner>
+          }
+        </h3>
+
+        @if (loadingRooms()) {
+          <div class="flex items-center justify-center py-12">
+            <div class="text-center">
+              <mat-spinner diameter="40"></mat-spinner>
+              <p class="mt-4 text-gray-600">Loading available rooms...</p>
+            </div>
+          </div>
+        } @else {
+          @if (availableRooms().length === 0) {
+            <mat-card class="!shadow-sm border border-gray-200">
+              <mat-card-content class="!p-8 text-center">
+                <mat-icon class="text-4xl text-gray-400 mb-2">info</mat-icon>
+                <p class="text-gray-600">No rooms available for the selected dates</p>
+              </mat-card-content>
+            </mat-card>
+          } @else {
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-80 overflow-y-auto">
+              @for (room of availableRooms(); track room._id) {
+                <mat-card class="!shadow-sm border cursor-pointer transition-all hover:shadow-md"
+                          [class.ring-2]="isRoomSelected(room._id)"
+                          [class.ring-green-500]="isRoomSelected(room._id)"
+                          [class.bg-green-50]="isRoomSelected(room._id)"
+                          (click)="toggleRoomSelection(room, !isRoomSelected(room._id))">
+                  <mat-card-content class="!p-4">
+                    <div class="flex items-start gap-3">
+                      <mat-checkbox 
+                        [checked]="isRoomSelected(room._id)"
+                        (click)="$event.stopPropagation()"
+                        color="primary">
+                      </mat-checkbox>
+                      <div class="flex-1">
+                        <div class="flex justify-between items-start mb-2">
+                          <div>
+                            <div class="font-medium text-gray-900">
+                              Room {{ room.roomNumber }} - {{ room.roomType?.name }}
+                            </div>
+                            <div class="text-sm text-gray-600 mt-1">{{ room.roomType?.description }}</div>
+                          </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center mt-3">
+                          <div class="flex gap-4 text-xs text-gray-500">
+                            <span>Max: {{ room.roomType?.capacity?.adults + room.roomType?.capacity?.children }} guests</span>
+                            <span>{{ room.roomType?.bedConfiguration }}</span>
+                          </div>
+                          <div class="text-right">
+                            <div class="text-lg font-semibold text-gray-900">
+                              {{ data.currency }}{{ getRoomTotalCost(room) | number:'1.2-2' }}
+                            </div>
+                            <div class="text-xs text-gray-500">
+                              {{ data.currency }}{{ getRoomRate(room) | number:'1.2-2' }}/night
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              }
+            </div>
+          }
+        }
+      </div>
+    }
+
+    <!-- Pricing Summary -->
+    <mat-card class="!shadow-sm border border-gray-200 bg-gray-50">
+      <mat-card-content class="!p-4">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <mat-icon class="text-purple-600">calculate</mat-icon>
+          Pricing Summary
+        </h3>
+        
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-gray-700">Current Total:</span>
+            <span class="font-semibold text-gray-900">{{ data.currency }}{{ currentTotal() | number:'1.2-2' }}</span>
+          </div>
+          
+          @if (swapMode()) {
+            @if (swapPairs().length > 0) {
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">New Total:</span>
+                <span class="font-semibold text-gray-900">{{ data.currency }}{{ newTotal() | number:'1.2-2' }}</span>
+              </div>
+            }
+          } @else {
+            @if (selectedRooms().length > 0) {
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">New Total:</span>
+                <span class="font-semibold text-gray-900">{{ data.currency }}{{ newTotal() | number:'1.2-2' }}</span>
+              </div>
+            }
+          }
+
+          @if ((swapMode() && swapPairs().some(p => p.replacementRoom)) || (!swapMode() && selectedRooms().length > 0)) {
+            <mat-divider></mat-divider>
+            <div class="flex justify-between items-center text-lg font-bold"
+                 [class.text-red-600]="priceDifference() > 0"
+                 [class.text-green-600]="priceDifference() < 0"
+                 [class.text-gray-700]="priceDifference() === 0">
+              <span>
+                @if (priceDifference() > 0) {
+                  Additional Payment Required:
+                } @else if (priceDifference() < 0) {
+                  Refund Amount:
+                } @else {
+                  No Price Change
+                }
+              </span>
+              @if (priceDifference() !== 0) {
+                <span>
+                  {{ data.currency }}{{ Math.abs(priceDifference()) | number:'1.2-2' }}
+                </span>
+              }
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Reason for Change -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Reason for Room Change</mat-label>
+      <textarea 
+        matInput 
+        formControlName="reason"
+        placeholder="Please provide a reason for changing rooms (minimum 10 characters)"
+        rows="3">
+      </textarea>
+      <mat-error *ngIf="roomChangeForm.get('reason')?.hasError('required')">
+        Reason is required
+      </mat-error>
+      <mat-error *ngIf="roomChangeForm.get('reason')?.hasError('minlength')">
+        Reason must be at least 10 characters long
+      </mat-error>
+    </mat-form-field>
+  </form>
+</div>
+
+<!-- Dialog Actions -->
+<div mat-dialog-actions align="end" class="gap-2 p-4 border-t bg-gray-50">
+  <button mat-button 
+          (click)="onCancel()" 
+          [disabled]="submitting()">
+    Cancel
+  </button>
+  
+  <button mat-raised-button 
+          color="primary"
+          (click)="onSubmit()"
+          [disabled]="!canSubmit()">
+    @if (submitting()) {
+      <mat-spinner diameter="20" strokeWidth="3" class="mr-2"></mat-spinner>
+      Processing...
+    } @else {
+      @if (swapMode()) {
+        Process Room Swaps
+      } @else {
+        Change Rooms
+      }
+    }
+  </button>
+</div>

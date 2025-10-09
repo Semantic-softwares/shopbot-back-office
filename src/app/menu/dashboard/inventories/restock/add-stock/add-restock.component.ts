@@ -100,7 +100,7 @@ export class RestockComponent implements OnInit {
   }
 
   goToRestock() {
-    this.router.navigate(['/dashboard/inventories/restock']);
+    this.router.navigate(['/menu/erp/inventories/restock']);
   }
 
   ngOnInit(): void {
@@ -123,7 +123,7 @@ export class RestockComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading restock:', error);
-        this.router.navigate(['dashboard', 'inventories', 'restock']);
+        this.router.navigate(['/menu/erp/inventories/restock']);
       }
     });
   }

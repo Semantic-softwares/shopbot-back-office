@@ -93,11 +93,11 @@ export class ListSuppliersComponent implements OnInit {
   }
 
   editSupplier(id: string) {
-    this.router.navigate(['/dashboard/inventory/suppliers/edit', id]);
+    this.router.navigate(['/menu/erp/inventory/suppliers/edit', id]);
   }
 
   viewSupplier(id: string) {
-    this.router.navigate(['/dashboard/inventory/suppliers/details', id]);
+    this.router.navigate(['/menu/erp/inventory/suppliers/details', id]);
   }
 
   toggleSupplierStatus(supplier: Supplier) {
@@ -169,6 +169,6 @@ export class ListSuppliersComponent implements OnInit {
   }
 
   createSupplier() {
-    this.router.navigate(['/dashboard/inventory/suppliers/create']);
+    this.router.navigate(['/menu/erp/inventory/suppliers/create']);
   }
 }

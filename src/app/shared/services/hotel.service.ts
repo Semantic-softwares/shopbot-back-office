@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { HotelSettings, Room, RoomType, Guest, Reservation } from '../models/hotel.models';
 
@@ -70,7 +71,10 @@ export class HotelService {
   getAvailableRooms(storeId: string, checkIn: string, checkOut: string, roomTypeId?: string): Observable<Room[]> {
     const params: any = { checkIn, checkOut };
     if (roomTypeId) params.roomTypeId = roomTypeId;
-    return this.http.get<Room[]>(`${this.apiUrl}/rooms/${storeId}/availability`, { params });
+    return this.http.get<{success: boolean, data: Room[]}>(`${this.apiUrl}/rooms/${storeId}/availability`, { params })
+      .pipe(
+        map((response: {success: boolean, data: Room[]}) => response.data || [])
+      );
   }
 
   // Guests

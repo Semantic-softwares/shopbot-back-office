@@ -26,6 +26,7 @@ import { PaymentUpdateDialogComponent, PaymentUpdateDialogData } from '../paymen
 import { PinAuthorizationDialogComponent, PinAuthorizationDialogData, PinAuthorizationDialogResult } from '../pin-authorization-dialog/pin-authorization-dialog.component';
 import { ExtensionDialogComponent, ExtensionDialogData, ExtensionDialogResult } from '../extension-dialog/extension-dialog.component';
 import { PricingUpdateDialogComponent, PricingUpdateDialogData, PricingUpdateDialogResult } from '../pricing-update-dialog/pricing-update-dialog.component';
+import { RoomChangeDialogComponent, RoomChangeDialogData, RoomChangeResult } from '../room-change-dialog/room-change-dialog.component';
 
 @Component({
   selector: 'app-reservation-details',
@@ -440,6 +441,12 @@ export class ReservationDetailsComponent implements OnInit {
   async updateReservationStatus(newStatus: string): Promise<void> {
     const reservation = this.reservation();
     if (!reservation || reservation.status === newStatus) return;
+
+    // Special handling for reopen - requires PIN authorization
+    if (newStatus === 'reopen') {
+      this.reopenReservation();
+      return;
+    }
 
     // Special handling for check-in - show room readiness dialog
     if (newStatus === 'checked_in') {
@@ -856,13 +863,97 @@ export class ReservationDetailsComponent implements OnInit {
     }
   }
 
+  // Reopen cancelled reservation with PIN authorization
+  async reopenReservation(): Promise<void> {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    if (reservation.status !== 'cancelled') {
+      this.snackBar.open('Only cancelled reservations can be reopened', 'Close', {
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    const storeId = this.storeStore.selectedStore()?._id;
+    if (!storeId) {
+      this.snackBar.open('Store information not available', 'Close', {
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    // Open PIN authorization dialog
+    const dialogRef = this.dialog.open(PinAuthorizationDialogComponent, {
+      width: '400px',
+      disableClose: true,
+      data: {
+        storeId: storeId,
+        actionDescription: 'reopen this cancelled reservation',
+        reservationId: reservation._id
+      } as PinAuthorizationDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: PinAuthorizationDialogResult) => {
+      if (result && result.authorized && result.pin) {
+        this.statusUpdating.set(true);
+
+        try {
+          const updatedReservation = await this.reservationService.reopenReservation(
+            reservation._id,
+            result.pin
+          ).toPromise();
+
+          if (updatedReservation) {
+            this.reservation.set(updatedReservation);
+            this.snackBar.open('Reservation reopened successfully', 'Close', { 
+              duration: 3000,
+              panelClass: ['success-snackbar']
+            });
+          }
+        } catch (error) {
+          console.error('Error reopening reservation:', error);
+          
+          // The service already extracts the error message and throws it as error.message
+          let errorMessage = 'Failed to reopen reservation';
+          if (error instanceof Error && error.message) {
+            errorMessage = error.message;
+          } else if (error && typeof error === 'object' && (error as any).message) {
+            errorMessage = (error as any).message;
+          }
+          
+          this.snackBar.open(errorMessage, 'Close', { 
+            duration: 5000,
+            panelClass: ['error-snackbar']
+          });
+        } finally {
+          this.statusUpdating.set(false);
+        }
+      }
+    });
+  }
+
   // Get available status options for current reservation
   getAvailableStatusOptions() {
     const currentStatus = this.reservation()?.status;
-    return this.statusOptions.filter(option => 
+    const standardOptions = this.statusOptions.filter(option => 
       option.value !== currentStatus && 
       this.isValidStatusTransition(currentStatus || '', option.value)
     );
+
+    // Add reopen option for cancelled reservations
+    if (currentStatus === 'cancelled') {
+      standardOptions.push({
+        value: 'reopen',
+        label: 'Reopen Reservation',
+        color: '#10b981',
+        icon: 'refresh'
+      });
+    }
+
+    return standardOptions;
   }
 
   // Business rule validation for status transitions
@@ -1414,6 +1505,87 @@ export class ReservationDetailsComponent implements OnInit {
     } finally {
       this.processingExtension.set(null);
       this.processingAction.set(null);
+    }
+  }
+
+  /**
+   * Open room change dialog
+   */
+  async openRoomChangeDialog() {
+    const reservation = this.reservation();
+    
+    if (!reservation || this.isCheckedOut()) {
+      this.snackBar.open('Cannot change rooms for checked-out reservations', 'Close', { duration: 3000 });
+      return;
+    }
+
+    const dialogRef = this.dialog.open(RoomChangeDialogComponent, {
+      width: '1000px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      disableClose: true,
+      data: {
+        reservationId: reservation._id,
+        currentRooms: reservation.rooms,
+        checkInDate: new Date(reservation.checkInDate).toISOString(),
+        checkOutDate: new Date(reservation.checkOutDate).toISOString(),
+        numberOfNights: reservation.numberOfNights,
+        currency: this.storeStore.selectedStore()?.currency || 'USD'
+      } as RoomChangeDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: RoomChangeResult) => {
+      if (result) {
+        await this.processRoomChange(result);
+      }
+    });
+  }
+
+  /**
+   * Process room change result
+   */
+  private async processRoomChange(changeResult: RoomChangeResult) {
+    const reservation = this.reservation();
+    if (!reservation) return;
+
+    try {
+      this.loading.set(true);
+
+      // If additional payment required, open payment dialog first
+      if (changeResult.pricingAdjustment.requiresPayment) {
+        const currency = this.storeStore.selectedStore()?.currency || 'USD';
+        const paymentDialogRef = this.dialog.open(PaymentUpdateDialogComponent, {
+          width: '500px',
+          disableClose: true,
+          data: {
+            reservation: reservation,
+            amount: changeResult.pricingAdjustment.difference,
+            title: 'Room Change - Additional Payment Required',
+            description: `Additional payment of ${currency}${changeResult.pricingAdjustment.difference.toLocaleString()} required for room upgrade`,
+            isCheckoutFlow: false
+          } as PaymentUpdateDialogData
+        });
+
+        const paymentResult = await paymentDialogRef.afterClosed().toPromise();
+        if (!paymentResult) {
+          this.snackBar.open('Room change cancelled - payment not processed', 'Close', { duration: 3000 });
+          return;
+        }
+      }
+
+      // Process room change
+      const response = await this.reservationService.changeRooms(reservation._id, changeResult).toPromise();
+      
+      if (response.success) {
+        this.reservation.set(response.data);
+        this.snackBar.open('Rooms changed successfully', 'Close', { duration: 3000 });
+        await this.loadReservation(reservation._id); // Reload to get fresh data
+      }
+    } catch (error: any) {
+      console.error('Error processing room change:', error);
+      this.snackBar.open('Failed to change rooms', 'Close', { duration: 3000 });
+    } finally {
+      this.loading.set(false);
     }
   }
 }

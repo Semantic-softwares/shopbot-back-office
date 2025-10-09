@@ -31,7 +31,7 @@ export class SupplierDetailsComponent implements OnInit {
     if (this.supplierId) {
       this.loadSupplier();
     } else {
-      this.router.navigate(['/dashboard/inventory/suppliers']);
+      this.router.navigate(['/menu/erp/inventory/suppliers']);
     }
   }
 
@@ -56,7 +56,7 @@ export class SupplierDetailsComponent implements OnInit {
   }
 
   editSupplier() {
-    this.router.navigate(['/dashboard/inventory/suppliers/edit', this.supplierId]);
+    this.router.navigate(['/menu/erp/inventory/suppliers/edit', this.supplierId]);
   }
 
   toggleSupplierStatus() {
@@ -87,7 +87,7 @@ export class SupplierDetailsComponent implements OnInit {
     if (confirm(`Are you sure you want to delete supplier "${currentSupplier.name}"?`)) {
       this.suppliersService.deleteSupplier(this.supplierId, storeId).subscribe({
         next: () => {
-          this.router.navigate(['/dashboard/inventory/suppliers']);
+          this.router.navigate(['/menu/erp/inventory/suppliers']);
         },
         error: (error) => {
           console.error('Error deleting supplier:', error);
@@ -98,7 +98,7 @@ export class SupplierDetailsComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/dashboard/inventory/suppliers']);
+    this.router.navigate(['/menu/erp/inventory/suppliers']);
   }
 
   hasAddressInfo(): boolean {

@@ -145,6 +145,33 @@ export class ReservationService {
     );
   }
 
+  // Change rooms for a reservation
+  changeRooms(reservationId: string, changeRoomData: any): Observable<any> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    return this.http.put<any>(`${this.baseUrl}/${reservationId}/change-room`, changeRoomData).pipe(
+      map(response => {
+        this.loadingSubject.next(false);
+        // Update local reservations list if needed
+        if (response.data) {
+          const currentReservations = this.reservationsSubject.value;
+          const updatedReservations = currentReservations.map(r => 
+            r._id === reservationId ? response.data : r
+          );
+          this.reservationsSubject.next(updatedReservations);
+        }
+        return response;
+      }),
+      catchError(error => {
+        console.error('Error changing rooms:', error);
+        this.errorSubject.next('Failed to change rooms');
+        this.loadingSubject.next(false);
+        throw error;
+      })
+    );
+  }
+
   // Delete reservation
   deleteReservation(id: string): Observable<boolean> {
     this.loadingSubject.next(true);
@@ -223,6 +250,46 @@ export class ReservationService {
         
         // Extract meaningful error message from backend
         let errorMessage = 'Failed to update reservation status';
+        if (error.error?.error) {
+          errorMessage = error.error.error;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        this.errorSubject.next(errorMessage);
+        throw new Error(errorMessage);
+      })
+    );
+  }
+
+  // Reopen cancelled reservation with PIN authorization
+  reopenReservation(id: string, pin: string, reason?: string): Observable<Reservation> {
+    this.loadingSubject.next(true);
+    this.errorSubject.next(null);
+
+    const requestData = {
+      pin: pin,
+      reason: reason || 'Reopened with owner authorization'
+    };
+
+    return this.http.put<any>(`${this.baseUrl}/${id}/reopen`, requestData).pipe(
+      map(response => {
+        this.loadingSubject.next(false);
+        const reservation = response.reservation || response;
+        
+        // Update local reservations list
+        const currentReservations = this.reservationsSubject.value;
+        const updatedReservations = currentReservations.map(r => r._id === id ? reservation : r);
+        this.reservationsSubject.next(updatedReservations);
+        
+        return reservation;
+      }),
+      catchError(error => {
+        console.error('Error reopening reservation:', error);
+        this.loadingSubject.next(false);
+        
+        // Extract meaningful error message from backend
+        let errorMessage = 'Failed to reopen reservation';
         if (error.error?.error) {
           errorMessage = error.error.error;
         } else if (error.message) {

@@ -750,7 +750,11 @@ export class ReservationFormComponent implements OnInit, OnDestroy {
     const checkInDate = new Date(checkIn).toISOString().split('T')[0];
     const checkOutDate = new Date(checkOut).toISOString().split('T')[0];
     
-    this.roomsService.getAvailableRooms(storeId, checkInDate, checkOutDate)
+    this.roomsService.getAvailableRooms({
+      storeId: storeId,
+      checkInDate: checkInDate,
+      checkOutDate: checkOutDate
+    })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (rooms) => {
@@ -771,7 +775,7 @@ export class ReservationFormComponent implements OnInit, OnDestroy {
               // Additional debugging for room selection
               this.rooms.controls.forEach((control, index) => {
                 const roomId = control.get('roomId')?.value;
-                const room = rooms.find(r => r._id === roomId || r.id === roomId);
+                const room = rooms.find((r: any) => r._id === roomId || r.id === roomId);
                 console.log(`Room ${index}: ID=${roomId}, Found=${!!room}, RoomNumber=${room?.roomNumber}`);
               });
             }, 100);
