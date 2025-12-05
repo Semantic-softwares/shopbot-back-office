@@ -141,11 +141,12 @@ export class ExtensionDialogComponent {
 
   async onDateChange() {
     const newDate = this.extensionForm.get('newCheckOutDate')?.value;
-    if (newDate && newDate > this.currentCheckOutDate) {
-      await this.checkAvailability();
-    } else {
-      this.availability.set(null);
-    }
+    // if (newDate && newDate > this.currentCheckOutDate) {
+    //   await this.checkAvailability();
+    // } else {
+    //   this.availability.set(null);
+    // }
+    await this.checkAvailability();
   }
 
   async checkAvailability() {

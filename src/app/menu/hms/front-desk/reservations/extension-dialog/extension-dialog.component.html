@@ -42,7 +42,7 @@
           matInput 
           [matDatepicker]="picker" 
           formControlName="newCheckOutDate"
-          [min]="minExtensionDate"
+          
           (dateChange)="onDateChange()"
           placeholder="Choose date">
         <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
@@ -52,7 +52,7 @@
         </mat-error>
       </mat-form-field>
     </div>
-
+<!-- [min]="minExtensionDate" -->
     <!-- Availability Check -->
     <div class="space-y-4" *ngIf="extensionForm.get('newCheckOutDate')?.value">
       <!-- Loading State -->
