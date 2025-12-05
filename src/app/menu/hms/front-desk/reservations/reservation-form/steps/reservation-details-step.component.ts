@@ -1,5 +1,5 @@
 import { Component, Input, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
@@ -10,13 +10,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
   selector: 'app-reservation-details-step',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatCardModule,
     MatInputModule,
     MatDatepickerModule,
-    MatFormFieldModule,
-  ],
+    MatFormFieldModule
+],
   template: `
     <div class="space-y-6">
       <mat-card class="shadow-sm">

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,13 +10,12 @@ import { MatToolbarModule } from '@angular/material/toolbar';
   selector: 'app-rooms-management',
   standalone: true,
   imports: [
-    CommonModule,
     RouterOutlet,
     MatTabsModule,
     MatIconModule,
     MatButtonModule,
     MatToolbarModule
-  ],
+],
   templateUrl: './rooms-management.component.html',
   styleUrl: './rooms-management.component.scss',
 })

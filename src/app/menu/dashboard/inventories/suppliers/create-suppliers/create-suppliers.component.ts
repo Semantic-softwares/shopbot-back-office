@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -20,7 +20,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
   selector: 'app-create-suppliers',
   standalone: true,
   imports: [
-    CommonModule, 
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
@@ -30,7 +29,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     MatCheckboxModule,
     MatProgressSpinnerModule,
     MatSnackBarModule
-  ],
+],
   templateUrl: './create-suppliers.component.html',
   styleUrl: './create-suppliers.component.scss'
 })

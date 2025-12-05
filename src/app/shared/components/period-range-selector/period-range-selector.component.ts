@@ -26,12 +26,14 @@ import { QueryParamService } from '../../services/query-param.service';
     <mat-form-field appearance="outline" class="w-full">
       <mat-label>Period</mat-label>
       <mat-select [(value)]="selectedPeriod" (selectionChange)="onSelectionChange($event.value)">
-        <mat-option *ngFor="let period of periods" [value]="period">
-          {{ period | titlecase }}
-        </mat-option>
+        @for (period of periods; track period) {
+          <mat-option [value]="period">
+            {{ period | titlecase }}
+          </mat-option>
+        }
       </mat-select>
     </mat-form-field>
-  `,
+    `,
 })
 export class PeriodSelectorComponent implements OnInit {
   public selectedPeriod = 'daily';

@@ -8,12 +8,16 @@
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Table Name</mat-label>
         <input matInput formControlName="name" placeholder="Enter table name">
-        <mat-error *ngIf="tableForm.get('name')?.hasError('required')">
-          Table name is required
-        </mat-error>
-        <mat-error *ngIf="tableForm.get('name')?.hasError('minlength')">
-          Table name must be at least 2 characters
-        </mat-error>
+        @if (tableForm.get('name')?.hasError('required')) {
+          <mat-error>
+            Table name is required
+          </mat-error>
+        }
+        @if (tableForm.get('name')?.hasError('minlength')) {
+          <mat-error>
+            Table name must be at least 2 characters
+          </mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-full">
@@ -25,23 +29,31 @@
             </mat-option>
           }
         </mat-select>
-        <mat-error *ngIf="tableForm.get('category')?.hasError('required')">
-          Category is required
-        </mat-error>
+        @if (tableForm.get('category')?.hasError('required')) {
+          <mat-error>
+            Category is required
+          </mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Number of Guests</mat-label>
         <input matInput type="number" formControlName="numberOfGuest" placeholder="Maximum number of guests">
-        <mat-error *ngIf="tableForm.get('numberOfGuest')?.hasError('required')">
-          Number of guests is required
-        </mat-error>
-        <mat-error *ngIf="tableForm.get('numberOfGuest')?.hasError('min')">
-          Minimum 1 guest required
-        </mat-error>
-        <mat-error *ngIf="tableForm.get('numberOfGuest')?.hasError('max')">
-          Maximum 20 guests allowed
-        </mat-error>
+        @if (tableForm.get('numberOfGuest')?.hasError('required')) {
+          <mat-error>
+            Number of guests is required
+          </mat-error>
+        }
+        @if (tableForm.get('numberOfGuest')?.hasError('min')) {
+          <mat-error>
+            Minimum 1 guest required
+          </mat-error>
+        }
+        @if (tableForm.get('numberOfGuest')?.hasError('max')) {
+          <mat-error>
+            Maximum 20 guests allowed
+          </mat-error>
+        }
       </mat-form-field>
 
       <div class="flex items-center gap-3">
@@ -58,10 +70,10 @@
       <button mat-button type="button" (click)="onCancel()" [disabled]="isLoading">
         Cancel
       </button>
-      <button 
-        mat-raised-button 
-        color="primary" 
-        type="submit" 
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
         [disabled]="tableForm.invalid || isLoading">
         {{ isLoading ? 'Saving...' : (isEdit ? 'Update Table' : 'Create Table') }}
       </button>

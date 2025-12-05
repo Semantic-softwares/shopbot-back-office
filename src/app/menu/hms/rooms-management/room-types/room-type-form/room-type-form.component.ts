@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -31,7 +31,6 @@ import {
   selector: 'app-room-type-form',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -43,7 +42,7 @@ import {
     MatDividerModule,
     MatChipsModule,
     MatProgressSpinnerModule
-  ],
+],
   templateUrl: './room-type-form.component.html'
 })
 export class RoomTypeFormComponent implements OnInit, OnDestroy {

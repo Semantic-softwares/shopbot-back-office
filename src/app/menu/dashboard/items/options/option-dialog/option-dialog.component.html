@@ -8,20 +8,26 @@
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Name</mat-label>
         <input matInput formControlName="name" placeholder="Enter option name">
-        <mat-error *ngIf="optionForm.get('name')?.hasError('required')">
-          Name is required
-        </mat-error>
+        @if (optionForm.get('name')?.hasError('required')) {
+          <mat-error>
+            Name is required
+          </mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Price</mat-label>
         <input matInput type="number" formControlName="price" min="0">
-        <mat-error *ngIf="optionForm.get('price')?.hasError('required')">
-          Price is required
-        </mat-error>
-        <mat-error *ngIf="optionForm.get('price')?.hasError('min')">
-          Price must be 0 or greater
-        </mat-error>
+        @if (optionForm.get('price')?.hasError('required')) {
+          <mat-error>
+            Price is required
+          </mat-error>
+        }
+        @if (optionForm.get('price')?.hasError('min')) {
+          <mat-error>
+            Price must be 0 or greater
+          </mat-error>
+        }
       </mat-form-field>
 
       <div class="flex items-center p-4 bg-gray-50 rounded-lg">

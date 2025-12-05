@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -27,7 +27,6 @@ export interface CheckInDialogResult {
   selector: 'app-check-in-confirmation-dialog',
   standalone: true,
   imports: [
-    CommonModule,
     MatDialogModule,
     MatButtonModule,
     MatIconModule,
@@ -35,7 +34,7 @@ export interface CheckInDialogResult {
     MatFormFieldModule,
     MatInputModule,
     ReactiveFormsModule
-  ],
+],
   templateUrl: './check-in-confirmation-dialog.component.html',
   styleUrls: ['./check-in-confirmation-dialog.component.scss']
 })

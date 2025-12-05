@@ -1,5 +1,5 @@
 import { Component, inject, Inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -19,7 +19,6 @@ import { AuthService } from '../../../../shared/services/auth.service';
   templateUrl: './employee-dialog.component.html',
   standalone: true,
   imports: [
-    CommonModule,
     MatDialogModule,
     MatButtonModule,
     MatFormFieldModule,
@@ -27,7 +26,7 @@ import { AuthService } from '../../../../shared/services/auth.service';
     MatSelectModule,
     ReactiveFormsModule,
     MatProgressSpinnerModule
-  ]
+]
 })
 export class EmployeeDialogComponent {
   private storeStore = inject(StoreStore);

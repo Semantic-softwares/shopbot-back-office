@@ -5,7 +5,7 @@
       <div class="w-full lg:max-w-xs">
         <date-range-selector  />
       </div>
-      
+
       <div class="flex flex-col sm:flex-row gap-4 flex-end sm:flex-1">
         <period-range-selector  />
         <app-employee-selector  />
@@ -50,16 +50,18 @@
       <!-- Desktop: Tab Navigation with Chart -->
       <div class="hidden md:block">
         <nav mat-tab-nav-bar class="grid grid-cols-5" [tabPanel]="tabPanel">
-          <a mat-tab-link *ngFor="let item of summaryItems"
-             (click)="onTabChange(item)"
-             [active]="activeLink === item"
-             class="!h-auto !min-h-[140px] !px-4 !py-6 border-b">
-            <div class="text-center">
-              <h3 class="text-gray-600 font-medium mb-2">{{item | titlecase}}</h3>
-              <p class="text-2xl font-semibold mb-1">{{summaryData.value()[item].value | currency: storeStore.selectedStore()?.currency}}</p>
-              <p class="text-sm text-gray-500">{{summaryData.value()[item].percentage | percent }}</p>
-            </div>
-          </a>
+          @for (item of summaryItems; track item) {
+            <a mat-tab-link
+              (click)="onTabChange(item)"
+              [active]="activeLink === item"
+              class="!h-auto !min-h-[140px] !px-4 !py-6 border-b">
+              <div class="text-center">
+                <h3 class="text-gray-600 font-medium mb-2">{{item | titlecase}}</h3>
+                <p class="text-2xl font-semibold mb-1">{{summaryData.value()[item].value | currency: storeStore.selectedStore()?.currency}}</p>
+                <p class="text-sm text-gray-500">{{summaryData.value()[item].percentage | percent }}</p>
+              </div>
+            </a>
+          }
         </nav>
 
         <!-- Chart Section (Desktop Only) -->
@@ -77,170 +79,172 @@
     }
   </div>
 
-  
-@if (dataSource.isLoading()) {
-  <!-- Table Section - Skeleton Loading -->
-  <div class="bg-white rounded-lg shadow-sm mt-6">
-    <div class="p-6 flex flex-wrap gap-4 justify-between items-center border-b">
-      <div class="h-6 bg-gray-200 rounded w-40 animate-pulse"></div>
-      <div class="flex items-center gap-4">
-        <div class="h-9 w-9 bg-gray-200 rounded-full animate-pulse"></div>
-        <div class="h-9 w-9 bg-gray-200 rounded-full animate-pulse"></div>
-        <div class="h-9 bg-gray-200 rounded w-32 animate-pulse"></div>
+
+  @if (dataSource.isLoading()) {
+    <!-- Table Section - Skeleton Loading -->
+    <div class="bg-white rounded-lg shadow-sm mt-6">
+      <div class="p-6 flex flex-wrap gap-4 justify-between items-center border-b">
+        <div class="h-6 bg-gray-200 rounded w-40 animate-pulse"></div>
+        <div class="flex items-center gap-4">
+          <div class="h-9 w-9 bg-gray-200 rounded-full animate-pulse"></div>
+          <div class="h-9 w-9 bg-gray-200 rounded-full animate-pulse"></div>
+          <div class="h-9 bg-gray-200 rounded w-32 animate-pulse"></div>
+        </div>
       </div>
-    </div>
-    
-    <div class="p-6">
-      @if (!isGridView) {
-        <!-- Table Header Skeleton -->
-        <div class="hidden md:block">
-          <div class="flex border-b py-4">
-            @for (col of [1,2,3,4,5]; track $index) {
-              <div class="flex-1 h-5 bg-gray-200 rounded mx-2 animate-pulse"></div>
+
+      <div class="p-6">
+        @if (!isGridView) {
+          <!-- Table Header Skeleton -->
+          <div class="hidden md:block">
+            <div class="flex border-b py-4">
+              @for (col of [1,2,3,4,5]; track $index) {
+                <div class="flex-1 h-5 bg-gray-200 rounded mx-2 animate-pulse"></div>
+              }
+            </div>
+          </div>
+        } @else {
+          <!-- Grid Loading Skeleton -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            @for (card of [1,2,3,4,5,6]; track $index) {
+              <div class="bg-white rounded-lg shadow p-4 border animate-pulse">
+                <div class="space-y-3">
+                  @for (row of [1,2,3,4,5]; track $index) {
+                    <div class="flex justify-between items-center">
+                      <div class="h-4 bg-gray-200 rounded w-20"></div>
+                      <div class="h-4 bg-gray-200 rounded w-24"></div>
+                    </div>
+                  }
+                </div>
+              </div>
             }
           </div>
-        </div>
-      } @else {
-        <!-- Grid Loading Skeleton -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          @for (card of [1,2,3,4,5,6]; track $index) {
-            <div class="bg-white rounded-lg shadow p-4 border animate-pulse">
-              <div class="space-y-3">
-                @for (row of [1,2,3,4,5]; track $index) {
-                  <div class="flex justify-between items-center">
-                    <div class="h-4 bg-gray-200 rounded w-20"></div>
-                    <div class="h-4 bg-gray-200 rounded w-24"></div>
-                  </div>
-                }
-              </div>
-            </div>
-          }
-        </div>
-      }
-      
-      <!-- Table Rows Skeleton -->
-      @for (row of [1,2,3,4,5]; track $index) {
-        <div class="flex py-4 border-b">
-          @for (col of [1,2,3,4,5]; track $index) {
-            <div class="flex-1 h-4 bg-gray-100 rounded mx-2 animate-pulse"></div>
-          }
-        </div>
-      }
-      
-      <!-- Paginator Skeleton -->
-      <div class="flex justify-end items-center mt-4">
-        <div class="h-8 bg-gray-200 rounded w-64 animate-pulse"></div>
-      </div>
-    </div>
-  </div>
-} @else if (dataSource.hasValue()) {
-  <div class="bg-white rounded-lg shadow-sm mt-6">
-    <div class="p-4 sm:p-6 flex flex-wrap gap-4 justify-between items-center border-b">
-      <h2 class="text-lg font-medium">Transaction Details</h2>
-      <div class="flex items-center gap-2 sm:gap-4">
-        <mat-button-toggle-group class="hidden md:block" [value]="isGridView" (change)="toggleView($event)">
-          <mat-button-toggle [value]="true" aria-label="Grid view">
-            <mat-icon class="!h-5 !w-5 text-sm">grid_view</mat-icon>
-          </mat-button-toggle>
-          <mat-button-toggle [value]="false" aria-label="List view">
-            <mat-icon class="!h-5 !w-5 text-sm">list</mat-icon>
-          </mat-button-toggle>
-        </mat-button-toggle-group>
-        <button mat-flat-button color="primary" [matMenuTriggerFor]="exportMenu" class="min-w-[120px]">
-          <mat-icon class="mr-2">file_download</mat-icon>
-          <span class="hidden sm:inline">Export Data</span>
-          <span class="sm:hidden">Export</span>
-        </button>
-      </div>
-      <mat-menu #exportMenu="matMenu">
-        <button mat-menu-item (click)="exportData('pdf')">
-          <mat-icon>picture_as_pdf</mat-icon>
-          <span>Export as PDF</span>
-        </button>
-        <button mat-menu-item (click)="exportData('csv')">
-          <mat-icon>description</mat-icon>
-          <span>Export as CSV</span>
-        </button>
-        <button mat-menu-item (click)="exportData('excel')">
-          <mat-icon>table_chart</mat-icon>
-          <span>Export as Excel</span>
-        </button>
-      </mat-menu>
-    </div>
-    
-    <div class="p-6">
-      @if (!isGridView) {
-        <mat-table [dataSource]="dataSource.value()" class="w-full !bg-white hidden md:block">
-          <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
-            <mat-header-cell *matHeaderCellDef>{{column | titlecase}}</mat-header-cell>
-            <mat-cell *matCellDef="let element">
-              @switch (column) {
-                @case ('grossSales') {
-                  {{element[column] | currency: storeStore.selectedStore()?.currency}}
-                }
-                @case ('refunds') {
-                  {{element[column] | currency: storeStore.selectedStore()?.currency}}
-                }
-                @case ('discounts') {
-                  {{element[column] | currency: storeStore.selectedStore()?.currency}}
-                }
-                @case ('taxes') {
-                  {{element[column] | currency: storeStore.selectedStore()?.currency}}
-                }
-                @case ('costOfGoods') {
-                  {{element[column] | currency: storeStore.selectedStore()?.currency}}
-                }
-                @case ('netSales') {
-                  {{element[column] | currency: storeStore.selectedStore()?.currency}}
-                }
-                @case ('grossProfit') {
-                  {{element[column] | currency: storeStore.selectedStore()?.currency}}
-                }
-                @case ('margin') {
-                  {{element[column] | percent:'1.0-2'}}
-                }
-                @default {
-                  {{element[column]}}
-                }
-              }
-            </mat-cell>
-          </ng-container>
-          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-          <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-        </mat-table>
-      } @else {
-        <!-- Grid View -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 transition-all duration-300">
-          @for (item of dataSource.value(); track $index) {
-            <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-4 sm:p-5 border">
-              <div class="space-y-3 sm:space-y-4">
-                <div class="flex justify-between items-center pb-2 border-b">
-                  <span class="font-medium text-gray-600">Period</span>
-                  <span class="text-gray-900">{{item.period}}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="font-medium text-gray-600">Gross Sales</span>
-                  <span class="text-gray-900">{{item.grossSales | currency: storeStore.selectedStore()?.currency}}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="font-medium text-gray-600">Net Sales</span>
-                  <span class="text-gray-900">{{item.netSales | currency: storeStore.selectedStore()?.currency}}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="font-medium text-gray-600">Gross Profit</span>
-                  <span class="text-gray-900">{{item.grossProfit | currency: storeStore.selectedStore()?.currency}}</span>
-                </div>
-                <div class="flex justify-between items-center pt-2 border-t">
-                  <span class="font-medium text-gray-600">Margin</span>
-                  <span class="text-gray-900">{{item.margin | percent:'1.0-2'}}</span>
-                </div>
-              </div>
-            </div>
-          }
-        </div>
-      }
+        }
 
-      <!-- <mat-paginator class="!bg-white"
+        <!-- Table Rows Skeleton -->
+        @for (row of [1,2,3,4,5]; track $index) {
+          <div class="flex py-4 border-b">
+            @for (col of [1,2,3,4,5]; track $index) {
+              <div class="flex-1 h-4 bg-gray-100 rounded mx-2 animate-pulse"></div>
+            }
+          </div>
+        }
+
+        <!-- Paginator Skeleton -->
+        <div class="flex justify-end items-center mt-4">
+          <div class="h-8 bg-gray-200 rounded w-64 animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+  } @else if (dataSource.hasValue()) {
+    <div class="bg-white rounded-lg shadow-sm mt-6">
+      <div class="p-4 sm:p-6 flex flex-wrap gap-4 justify-between items-center border-b">
+        <h2 class="text-lg font-medium">Transaction Details</h2>
+        <div class="flex items-center gap-2 sm:gap-4">
+          <mat-button-toggle-group class="hidden md:block" [value]="isGridView" (change)="toggleView($event)">
+            <mat-button-toggle [value]="true" aria-label="Grid view">
+              <mat-icon class="!h-5 !w-5 text-sm">grid_view</mat-icon>
+            </mat-button-toggle>
+            <mat-button-toggle [value]="false" aria-label="List view">
+              <mat-icon class="!h-5 !w-5 text-sm">list</mat-icon>
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+          <button mat-flat-button color="primary" [matMenuTriggerFor]="exportMenu" class="min-w-[120px]">
+            <mat-icon class="mr-2">file_download</mat-icon>
+            <span class="hidden sm:inline">Export Data</span>
+            <span class="sm:hidden">Export</span>
+          </button>
+        </div>
+        <mat-menu #exportMenu="matMenu">
+          <button mat-menu-item (click)="exportData('pdf')">
+            <mat-icon>picture_as_pdf</mat-icon>
+            <span>Export as PDF</span>
+          </button>
+          <button mat-menu-item (click)="exportData('csv')">
+            <mat-icon>description</mat-icon>
+            <span>Export as CSV</span>
+          </button>
+          <button mat-menu-item (click)="exportData('excel')">
+            <mat-icon>table_chart</mat-icon>
+            <span>Export as Excel</span>
+          </button>
+        </mat-menu>
+      </div>
+
+      <div class="p-6">
+        @if (!isGridView) {
+          <mat-table [dataSource]="dataSource.value()" class="w-full !bg-white hidden md:block">
+            @for (column of displayedColumns; track column) {
+              <ng-container [matColumnDef]="column">
+                <mat-header-cell *matHeaderCellDef>{{column | titlecase}}</mat-header-cell>
+                <mat-cell *matCellDef="let element">
+                  @switch (column) {
+                    @case ('grossSales') {
+                      {{element[column] | currency: storeStore.selectedStore()?.currency}}
+                    }
+                    @case ('refunds') {
+                      {{element[column] | currency: storeStore.selectedStore()?.currency}}
+                    }
+                    @case ('discounts') {
+                      {{element[column] | currency: storeStore.selectedStore()?.currency}}
+                    }
+                    @case ('taxes') {
+                      {{element[column] | currency: storeStore.selectedStore()?.currency}}
+                    }
+                    @case ('costOfGoods') {
+                      {{element[column] | currency: storeStore.selectedStore()?.currency}}
+                    }
+                    @case ('netSales') {
+                      {{element[column] | currency: storeStore.selectedStore()?.currency}}
+                    }
+                    @case ('grossProfit') {
+                      {{element[column] | currency: storeStore.selectedStore()?.currency}}
+                    }
+                    @case ('margin') {
+                      {{element[column] | percent:'1.0-2'}}
+                    }
+                    @default {
+                      {{element[column]}}
+                    }
+                  }
+                </mat-cell>
+              </ng-container>
+            }
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+          </mat-table>
+        } @else {
+          <!-- Grid View -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 transition-all duration-300">
+            @for (item of dataSource.value(); track $index) {
+              <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-4 sm:p-5 border">
+                <div class="space-y-3 sm:space-y-4">
+                  <div class="flex justify-between items-center pb-2 border-b">
+                    <span class="font-medium text-gray-600">Period</span>
+                    <span class="text-gray-900">{{item.period}}</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="font-medium text-gray-600">Gross Sales</span>
+                    <span class="text-gray-900">{{item.grossSales | currency: storeStore.selectedStore()?.currency}}</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="font-medium text-gray-600">Net Sales</span>
+                    <span class="text-gray-900">{{item.netSales | currency: storeStore.selectedStore()?.currency}}</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="font-medium text-gray-600">Gross Profit</span>
+                    <span class="text-gray-900">{{item.grossProfit | currency: storeStore.selectedStore()?.currency}}</span>
+                  </div>
+                  <div class="flex justify-between items-center pt-2 border-t">
+                    <span class="font-medium text-gray-600">Margin</span>
+                    <span class="text-gray-900">{{item.margin | percent:'1.0-2'}}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- <mat-paginator class="!bg-white"
         [pageSize]="pageSize"
         [pageSizeOptions]="pageSizeOptions"
         showFirstLastButtons

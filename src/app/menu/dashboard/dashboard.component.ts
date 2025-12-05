@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
@@ -20,7 +20,6 @@ import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.compon
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    CommonModule,
     MatSidenavModule,
     MatToolbarModule,
     MatListModule,
@@ -31,8 +30,8 @@ import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.compon
     MatExpansionModule,
     MatDividerModule,
     UsageIndicatorComponent,
-    ToolbarComponent,
-  ],
+    ToolbarComponent
+],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })

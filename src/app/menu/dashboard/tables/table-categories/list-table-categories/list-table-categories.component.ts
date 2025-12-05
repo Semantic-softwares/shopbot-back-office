@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatTableModule, MatTable } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
@@ -27,7 +27,6 @@ import { CreateTableCategoryComponent } from '../modals/create-table-category/cr
   styleUrls: ['./list-table-categories.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -40,7 +39,7 @@ import { CreateTableCategoryComponent } from '../modals/create-table-category/cr
     MatProgressSpinnerModule,
     MatSlideToggleModule,
     NoRecordComponent
-  ]
+]
 })
 export class ListTableCategoriesComponent {
   private tableCategoryService = inject(TableCategoryService);

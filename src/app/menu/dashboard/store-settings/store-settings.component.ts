@@ -1,5 +1,5 @@
 import { Component, effect, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { firstValueFrom, from, switchMap } from 'rxjs';
 import {
   FormBuilder,
@@ -24,7 +24,6 @@ import { map } from 'rxjs';
   selector: 'app-store-settings',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -32,8 +31,8 @@ import { map } from 'rxjs';
     MatSelectModule,
     MatCheckboxModule,
     MatIconModule,
-    MatProgressSpinnerModule,
-  ],
+    MatProgressSpinnerModule
+],
   templateUrl: './store-settings.component.html',
 })
 export class StoreSettingsComponent implements OnInit {

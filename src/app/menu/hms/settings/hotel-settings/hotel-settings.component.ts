@@ -1,5 +1,5 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,7 +22,6 @@ import { StoreService } from '../../../../shared/services/store.service';
   selector: 'app-hotel-settings',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
@@ -35,7 +34,7 @@ import { StoreService } from '../../../../shared/services/store.service';
     MatChipsModule,
     MatProgressSpinnerModule,
     MatDialogModule
-  ],
+],
   templateUrl: './hotel-settings.component.html',
   styleUrl: './hotel-settings.component.scss',
 })

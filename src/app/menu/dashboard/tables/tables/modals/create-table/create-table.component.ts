@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,7 +20,6 @@ import { rxResource } from '@angular/core/rxjs-interop';
   styleUrls: ['./create-table.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -28,7 +27,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
     MatSelectModule,
     MatButtonModule,
     MatSlideToggleModule
-  ]
+]
 })
 export class CreateTableComponent implements OnInit {
   private fb = inject(FormBuilder);

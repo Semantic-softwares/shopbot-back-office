@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   MatDialogRef,
   MAT_DIALOG_DATA,
@@ -34,7 +34,6 @@ import { StoreStore } from '../../../../../shared/stores/store.store';
   styleUrls: ['./category-dialog.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     MatDialogModule,
     MatButtonModule,
     MatFormFieldModule,
@@ -45,8 +44,8 @@ import { StoreStore } from '../../../../../shared/stores/store.store';
     MatSlideToggleModule,
     MtxColorpickerModule,
     MtxSelectModule,
-    MatProgressSpinnerModule,
-  ],
+    MatProgressSpinnerModule
+],
 })
 export class CategoryDialogComponent implements OnInit {
   private fb = inject(FormBuilder);

@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, inject, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -27,8 +27,7 @@ import { tap, of } from 'rxjs';
   selector: 'app-list-suppliers',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
+    FormsModule,
     RouterModule,
     MatTableModule,
     MatPaginatorModule,
@@ -44,7 +43,7 @@ import { tap, of } from 'rxjs';
     MatDialogModule,
     MatChipsModule,
     NoRecordComponent
-  ],
+],
   templateUrl: './list-suppliers.component.html',
   styleUrl: './list-suppliers.component.scss'
 })

@@ -1,5 +1,5 @@
 import { Component, ViewChild, OnInit, inject, resource } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
@@ -27,7 +27,6 @@ import { Employee } from '../../../../shared/models/employee.model';
   templateUrl: './list.component.html',
   standalone: true,
   imports: [
-    CommonModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -42,7 +41,7 @@ import { Employee } from '../../../../shared/models/employee.model';
     MatDialogModule,
     MatSnackBarModule,
     FormsModule
-  ]
+]
 })
 export class EmployeeListComponent {
   private dialog = inject(MatDialog);

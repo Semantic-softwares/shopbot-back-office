@@ -5,7 +5,7 @@
       <button
         (click)="goBack()"
         class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-      >
+        >
         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
@@ -15,39 +15,46 @@
         <p class="text-gray-600 mt-1">View and manage supplier information</p>
       </div>
     </div>
-    
-    <div *ngIf="supplier()" class="flex space-x-3">
+
+    @if (supplier()) {
+      <div class="flex space-x-3">
         <button
           (click)="editSupplier()"
           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-        >
+          >
           Edit Supplier
         </button>
       </div>
-    </div>
+    }
   </div>
+</div>
 
-  <!-- Loading State -->
-  <div *ngIf="loading()" class="flex justify-center items-center py-12">
+<!-- Loading State -->
+@if (loading()) {
+  <div class="flex justify-center items-center py-12">
     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
   </div>
+}
 
-  <!-- Error State -->
-  <div *ngIf="error()" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        <div class="ml-3">
-          <p class="text-sm text-red-800">{{ error() }}</p>
-        </div>
+<!-- Error State -->
+@if (error()) {
+  <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-red-800">{{ error() }}</p>
       </div>
     </div>
+  </div>
+}
 
-  <!-- Supplier Details -->
-  <div *ngIf="supplier() && !loading()" class="space-y-6">
+<!-- Supplier Details -->
+@if (supplier() && !loading()) {
+  <div class="space-y-6">
     <!-- Status and Basic Info Card -->
     <div class="bg-white shadow-sm rounded-lg overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
@@ -60,17 +67,19 @@
             </div>
             <div>
               <h2 class="text-xl font-semibold text-gray-900">{{ supplier()!.name }}</h2>
-              <p class="text-gray-500" *ngIf="supplier()!.description">{{ supplier()!.description }}</p>
+              @if (supplier()!.description) {
+                <p class="text-gray-500">{{ supplier()!.description }}</p>
+              }
             </div>
           </div>
           <div class="flex items-center space-x-3">
-            <span 
+            <span
               class="inline-flex px-3 py-1 text-sm font-semibold rounded-full"
               [ngClass]="{
                 'bg-green-100 text-green-800': supplier()!.active,
                 'bg-red-100 text-red-800': !supplier()!.active
               }"
-            >
+              >
               {{ supplier()!.active ? 'Active' : 'Inactive' }}
             </span>
             <button
@@ -80,13 +89,12 @@
                 'border-red-300 text-red-700 hover:bg-red-50': supplier()!.active,
                 'border-green-300 text-green-700 hover:bg-green-50': !supplier()!.active
               }"
-            >
+              >
               {{ supplier()!.active ? 'Deactivate' : 'Activate' }}
             </button>
           </div>
         </div>
       </div>
-
       <div class="px-6 py-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Contact Information -->
@@ -97,77 +105,99 @@
                 <label class="block text-sm font-medium text-gray-700">Email</label>
                 <p class="mt-1 text-sm text-gray-900">{{ supplier()!.email }}</p>
               </div>
-              <div *ngIf="supplier()!.phone">
-                <label class="block text-sm font-medium text-gray-700">Phone</label>
-                <p class="mt-1 text-sm text-gray-900">{{ supplier()!.phone }}</p>
-              </div>
-              <div *ngIf="supplier()!.contactPerson">
-                <label class="block text-sm font-medium text-gray-700">Contact Person</label>
-                <p class="mt-1 text-sm text-gray-900">{{ supplier()!.contactPerson }}</p>
-              </div>
-              <div *ngIf="supplier()!.website">
-                <label class="block text-sm font-medium text-gray-700">Website</label>
-                <a 
-                  [href]="supplier()!.website" 
-                  target="_blank"
-                  class="mt-1 text-sm text-blue-600 hover:text-blue-800 underline"
-                >
-                  {{ supplier()!.website }}
-                </a>
-              </div>
+              @if (supplier()!.phone) {
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Phone</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ supplier()!.phone }}</p>
+                </div>
+              }
+              @if (supplier()!.contactPerson) {
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Contact Person</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ supplier()!.contactPerson }}</p>
+                </div>
+              }
+              @if (supplier()!.website) {
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Website</label>
+                  <a
+                    [href]="supplier()!.website"
+                    target="_blank"
+                    class="mt-1 text-sm text-blue-600 hover:text-blue-800 underline"
+                    >
+                    {{ supplier()!.website }}
+                  </a>
+                </div>
+              }
             </div>
           </div>
-
           <!-- Business Information -->
           <div>
             <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">Business Information</h3>
             <div class="space-y-3">
-              <div *ngIf="supplier()!.taxId">
-                <label class="block text-sm font-medium text-gray-700">Tax ID</label>
-                <p class="mt-1 text-sm text-gray-900">{{ supplier()!.taxId }}</p>
-              </div>
-              <div *ngIf="supplier()!.paymentTerms">
-                <label class="block text-sm font-medium text-gray-700">Payment Terms</label>
-                <p class="mt-1 text-sm text-gray-900">{{ supplier()!.paymentTerms }}</p>
-              </div>
-              <div *ngIf="supplier()!.creditLimit">
-                <label class="block text-sm font-medium text-gray-700">Credit Limit</label>
-                <p class="mt-1 text-sm text-gray-900">${{ supplier()!.creditLimit | number:'1.2-2' }}</p>
-              </div>
+              @if (supplier()!.taxId) {
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Tax ID</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ supplier()!.taxId }}</p>
+                </div>
+              }
+              @if (supplier()!.paymentTerms) {
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Payment Terms</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ supplier()!.paymentTerms }}</p>
+                </div>
+              }
+              @if (supplier()!.creditLimit) {
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Credit Limit</label>
+                  <p class="mt-1 text-sm text-gray-900">${{ supplier()!.creditLimit | number:'1.2-2' }}</p>
+                </div>
+              }
             </div>
           </div>
         </div>
       </div>
     </div>
-
     <!-- Address Information -->
-    <div *ngIf="supplier()!.address && hasAddressInfo()" class="bg-white shadow-sm rounded-lg">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">Address Information</h3>
-      </div>
-      <div class="px-6 py-4">
-        <div class="text-sm text-gray-900">
-          <div *ngIf="supplier()!.address!.street" class="mb-1">{{ supplier()!.address!.street }}</div>
-          <div class="flex space-x-2">
-            <span *ngIf="supplier()!.address!.city">{{ supplier()!.address!.city }}</span>
-            <span *ngIf="supplier()!.address!.state">, {{ supplier()!.address!.state }}</span>
-            <span *ngIf="supplier()!.address!.postalCode">{{ supplier()!.address!.postalCode }}</span>
+    @if (supplier()!.address && hasAddressInfo()) {
+      <div class="bg-white shadow-sm rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-medium text-gray-900">Address Information</h3>
+        </div>
+        <div class="px-6 py-4">
+          <div class="text-sm text-gray-900">
+            @if (supplier()!.address!.street) {
+              <div class="mb-1">{{ supplier()!.address!.street }}</div>
+            }
+            <div class="flex space-x-2">
+              @if (supplier()!.address!.city) {
+                <span>{{ supplier()!.address!.city }}</span>
+              }
+              @if (supplier()!.address!.state) {
+                <span>, {{ supplier()!.address!.state }}</span>
+              }
+              @if (supplier()!.address!.postalCode) {
+                <span>{{ supplier()!.address!.postalCode }}</span>
+              }
+            </div>
+            @if (supplier()!.address!.country) {
+              <div class="mt-1">{{ supplier()!.address!.country }}</div>
+            }
           </div>
-          <div *ngIf="supplier()!.address!.country" class="mt-1">{{ supplier()!.address!.country }}</div>
         </div>
       </div>
-    </div>
-
+    }
     <!-- Notes -->
-    <div *ngIf="supplier()!.notes" class="bg-white shadow-sm rounded-lg">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">Notes</h3>
+    @if (supplier()!.notes) {
+      <div class="bg-white shadow-sm rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-medium text-gray-900">Notes</h3>
+        </div>
+        <div class="px-6 py-4">
+          <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ supplier()!.notes }}</p>
+        </div>
       </div>
-      <div class="px-6 py-4">
-        <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ supplier()!.notes }}</p>
-      </div>
-    </div>
-
+    }
     <!-- Metadata -->
     <div class="bg-white shadow-sm rounded-lg">
       <div class="px-6 py-4 border-b border-gray-200">
@@ -175,48 +205,52 @@
       </div>
       <div class="px-6 py-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div *ngIf="supplier()!.createdAt">
-            <label class="block text-sm font-medium text-gray-700">Created At</label>
-            <p class="mt-1 text-sm text-gray-900">{{ supplier()!.createdAt | date:'medium' }}</p>
-          </div>
-          <div *ngIf="supplier()!.updatedAt">
-            <label class="block text-sm font-medium text-gray-700">Last Updated</label>
-            <p class="mt-1 text-sm text-gray-900">{{ supplier()!.updatedAt | date:'medium' }}</p>
-          </div>
+          @if (supplier()!.createdAt) {
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Created At</label>
+              <p class="mt-1 text-sm text-gray-900">{{ supplier()!.createdAt | date:'medium' }}</p>
+            </div>
+          }
+          @if (supplier()!.updatedAt) {
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Last Updated</label>
+              <p class="mt-1 text-sm text-gray-900">{{ supplier()!.updatedAt | date:'medium' }}</p>
+            </div>
+          }
         </div>
       </div>
     </div>
-
     <!-- Action Buttons -->
     <div class="flex justify-between items-center pt-6">
       <button
         (click)="deleteSupplier()"
         class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-      >
+        >
         Delete Supplier
       </button>
-      
       <div class="flex space-x-3">
         <button
           (click)="goBack()"
           class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 font-medium transition-colors"
-        >
+          >
           Back to List
         </button>
         <button
           (click)="editSupplier()"
           class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-        >
+          >
           Edit Supplier
         </button>
       </div>
     </div>
-
-  <div *ngIf="!supplier() && !loading()" class="text-center py-12">
-    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2M4 13h2m13-8l-4 4m0 0l-4-4m4 4V3" />
-    </svg>
-    <h3 class="mt-2 text-sm font-medium text-gray-900">Supplier Not Found</h3>
-    <p class="mt-1 text-sm text-gray-500">The requested supplier could not be found.</p>
+    @if (!supplier() && !loading()) {
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2M4 13h2m13-8l-4 4m0 0l-4-4m4 4V3" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">Supplier Not Found</h3>
+        <p class="mt-1 text-sm text-gray-500">The requested supplier could not be found.</p>
+      </div>
+    }
   </div>
-</div>
+}

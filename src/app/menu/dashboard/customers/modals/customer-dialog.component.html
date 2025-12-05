@@ -8,37 +8,51 @@
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Name</mat-label>
         <input matInput formControlName="name" placeholder="Enter customer name">
-        <mat-error *ngIf="form.get('name')?.hasError('required')">
-          Name is required
-        </mat-error>
-        <mat-error *ngIf="form.get('name')?.hasError('minlength')">
-          Name must be at least 2 characters
-        </mat-error>
+        @if (form.get('name')?.hasError('required')) {
+          <mat-error>
+            Name is required
+          </mat-error>
+        }
+        @if (form.get('name')?.hasError('minlength')) {
+          <mat-error>
+            Name must be at least 2 characters
+          </mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Email</mat-label>
         <input matInput formControlName="email" type="email" placeholder="Enter email address">
-        <mat-error *ngIf="form.get('email')?.hasError('required')">
-          Email is required
-        </mat-error>
-        <mat-error *ngIf="form.get('email')?.hasError('email')">
-          Please enter a valid email address
-        </mat-error>
-        <mat-error *ngIf="form.get('email')?.hasError('lowercase')">
-          Email must be lowercase
-        </mat-error>
+        @if (form.get('email')?.hasError('required')) {
+          <mat-error>
+            Email is required
+          </mat-error>
+        }
+        @if (form.get('email')?.hasError('email')) {
+          <mat-error>
+            Please enter a valid email address
+          </mat-error>
+        }
+        @if (form.get('email')?.hasError('lowercase')) {
+          <mat-error>
+            Email must be lowercase
+          </mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Phone Number</mat-label>
         <input matInput formControlName="phoneNumber" placeholder="Enter phone number">
-        <mat-error *ngIf="form.get('phoneNumber')?.hasError('required')">
-          Phone number is required
-        </mat-error>
-        <mat-error *ngIf="form.get('phoneNumber')?.hasError('minlength')">
-          Phone number must be at least 6 digits
-        </mat-error>
+        @if (form.get('phoneNumber')?.hasError('required')) {
+          <mat-error>
+            Phone number is required
+          </mat-error>
+        }
+        @if (form.get('phoneNumber')?.hasError('minlength')) {
+          <mat-error>
+            Phone number must be at least 6 digits
+          </mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-full">
@@ -50,19 +64,21 @@
             </mat-option>
           }
         </mat-select>
-        <mat-error *ngIf="form.get('country')?.hasError('required')">
-          Country is required
-        </mat-error>
+        @if (form.get('country')?.hasError('required')) {
+          <mat-error>
+            Country is required
+          </mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Notes</mat-label>
         <textarea matInput formControlName="notes" placeholder="Enter any additional notes"></textarea>
-       
-        
+
+
       </mat-form-field>
 
-       
+
     </div>
 
     <div class="flex justify-end space-x-2 mt-6 pt-4 border-t border-gray-200">

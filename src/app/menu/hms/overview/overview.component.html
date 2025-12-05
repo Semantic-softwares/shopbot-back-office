@@ -1,33 +1,35 @@
 <!-- Modern Hotel Management Dashboard -->
 <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-6 lg:p-8">
   <div class="max-w-7xl mx-auto space-y-6">
-    
+
     <!-- Header Section with Refresh Button -->
     <div class="text-center space-y-2">
       <div class="flex items-center justify-center space-x-4">
         <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Hotel Management Dashboard</h1>
-        <button 
-          mat-icon-button 
-          (click)="refreshData()" 
+        <button
+          mat-icon-button
+          (click)="refreshData()"
           [disabled]="loading()"
           class="!text-blue-600 hover:!bg-blue-50">
           <mat-icon [class.animate-spin]="loading()">refresh</mat-icon>
         </button>
       </div>
       <p class="text-gray-600 text-lg">Welcome back! Here's what's happening at your hotel today.</p>
-      
+
       <!-- Error Alert -->
-      <div *ngIf="error()" class="bg-red-50 border border-red-200 rounded-lg p-4 max-w-2xl mx-auto">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <mat-icon class="text-red-600">error</mat-icon>
-            <span class="text-red-800">{{error()}}</span>
+      @if (error()) {
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 max-w-2xl mx-auto">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <mat-icon class="text-red-600">error</mat-icon>
+              <span class="text-red-800">{{error()}}</span>
+            </div>
+            <button mat-icon-button (click)="clearError()" class="!text-red-600">
+              <mat-icon>close</mat-icon>
+            </button>
           </div>
-          <button mat-icon-button (click)="clearError()" class="!text-red-600">
-            <mat-icon>close</mat-icon>
-          </button>
         </div>
-      </div>
+      }
     </div>
 
     <!-- Key Statistics Cards -->
@@ -117,7 +119,7 @@
           </div>
         </div>
         <div class="h-64 relative">
-          <canvas 
+          <canvas
             baseChart
             [data]="occupancyChartData()"
             [options]="occupancyChartOptions"
@@ -137,7 +139,7 @@
           </div>
         </div>
         <div class="h-64 relative">
-          <canvas 
+          <canvas
             baseChart
             [data]="revenueChartData()"
             [options]="revenueChartOptions"
@@ -152,32 +154,32 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
       <h3 class="text-lg font-semibold text-gray-800 mb-6">Quick Actions</h3>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <button 
-          mat-stroked-button 
+        <button
+          mat-stroked-button
           (click)="navigateTo('./reservations')"
           class="!h-20 !flex !flex-col !items-center !justify-center !space-y-2 !border-blue-200 hover:!bg-blue-50 hover:!border-blue-300 !transition-all !duration-200">
           <mat-icon class="!text-blue-600">book_online</mat-icon>
           <span class="!text-sm !font-medium !text-gray-700">New Reservation</span>
         </button>
-        
-        <button 
-          mat-stroked-button 
+
+        <button
+          mat-stroked-button
           (click)="navigateTo('./checkin-checkout')"
           class="!h-20 !flex !flex-col !items-center !justify-center !space-y-2 !border-emerald-200 hover:!bg-emerald-50 hover:!border-emerald-300 !transition-all !duration-200">
           <mat-icon class="!text-emerald-600">how_to_reg</mat-icon>
           <span class="!text-sm !font-medium !text-gray-700">Check-In / Out</span>
         </button>
-        
-        <button 
-          mat-stroked-button 
+
+        <button
+          mat-stroked-button
           (click)="navigateTo('./guests')"
           class="!h-20 !flex !flex-col !items-center !justify-center !space-y-2 !border-purple-200 hover:!bg-purple-50 hover:!border-purple-300 !transition-all !duration-200">
           <mat-icon class="!text-purple-600">person_add</mat-icon>
           <span class="!text-sm !font-medium !text-gray-700">Manage Guests</span>
         </button>
-        
-        <button 
-          mat-stroked-button 
+
+        <button
+          mat-stroked-button
           (click)="navigateTo('./rooms')"
           class="!h-20 !flex !flex-col !items-center !justify-center !space-y-2 !border-amber-200 hover:!bg-amber-50 hover:!border-amber-300 !transition-all !duration-200">
           <mat-icon class="!text-amber-600">hotel</mat-icon>
@@ -192,24 +194,28 @@
         <h3 class="text-lg font-semibold text-gray-800">Recent Activity</h3>
         <button mat-button class="!text-blue-600 !text-sm">View All</button>
       </div>
-      
+
       <div class="space-y-4">
-        <div class="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg" *ngFor="let activity of recentActivities(); let i = index">
-          <div class="p-2 bg-blue-100 rounded-lg">
-            <mat-icon class="!text-blue-600 !text-lg">{{activity.icon}}</mat-icon>
+        @for (activity of recentActivities(); track activity; let i = $index) {
+          <div class="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
+            <div class="p-2 bg-blue-100 rounded-lg">
+              <mat-icon class="!text-blue-600 !text-lg">{{activity.icon}}</mat-icon>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-gray-900">{{activity.title}}</p>
+              <p class="text-xs text-gray-500">{{activity.time}}</p>
+            </div>
+            <div class="text-xs text-gray-400">{{activity.type}}</div>
           </div>
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-900">{{activity.title}}</p>
-            <p class="text-xs text-gray-500">{{activity.time}}</p>
-          </div>
-          <div class="text-xs text-gray-400">{{activity.type}}</div>
-        </div>
-        
+        }
+
         <!-- Placeholder when no data -->
-        <div *ngIf="!recentActivities() || recentActivities().length === 0" class="text-center py-8 text-gray-500">
-          <mat-icon class="!text-3xl mb-2">history</mat-icon>
-          <p>Recent activity will appear here</p>
-        </div>
+        @if (!recentActivities() || recentActivities().length === 0) {
+          <div class="text-center py-8 text-gray-500">
+            <mat-icon class="!text-3xl mb-2">history</mat-icon>
+            <p>Recent activity will appear here</p>
+          </div>
+        }
       </div>
     </div>
 

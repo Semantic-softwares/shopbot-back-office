@@ -30,12 +30,16 @@
             <mat-label>Supplier Name *</mat-label>
             <input matInput formControlName="name" placeholder="Enter supplier name">
             <mat-icon matSuffix>business</mat-icon>
-            <mat-error *ngIf="supplierForm.get('name')?.hasError('required')">
-              Supplier name is required
-            </mat-error>
-            <mat-error *ngIf="supplierForm.get('name')?.hasError('minlength')">
-              Supplier name must be at least 2 characters
-            </mat-error>
+            @if (supplierForm.get('name')?.hasError('required')) {
+              <mat-error>
+                Supplier name is required
+              </mat-error>
+            }
+            @if (supplierForm.get('name')?.hasError('minlength')) {
+              <mat-error>
+                Supplier name must be at least 2 characters
+              </mat-error>
+            }
           </mat-form-field>
 
           <!-- Contact Person -->
@@ -50,12 +54,16 @@
             <mat-label>Email Address *</mat-label>
             <input matInput type="email" formControlName="email" placeholder="Enter email address">
             <mat-icon matSuffix>email</mat-icon>
-            <mat-error *ngIf="supplierForm.get('email')?.hasError('required')">
-              Email is required
-            </mat-error>
-            <mat-error *ngIf="supplierForm.get('email')?.hasError('email')">
-              Please enter a valid email address
-            </mat-error>
+            @if (supplierForm.get('email')?.hasError('required')) {
+              <mat-error>
+                Email is required
+              </mat-error>
+            }
+            @if (supplierForm.get('email')?.hasError('email')) {
+              <mat-error>
+                Please enter a valid email address
+              </mat-error>
+            }
           </mat-form-field>
 
           <!-- Phone -->

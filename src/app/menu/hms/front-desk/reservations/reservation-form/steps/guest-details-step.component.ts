@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormGroup, FormArray, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -12,15 +12,14 @@ import { MatListModule } from '@angular/material/list';
   selector: 'app-guest-details-step',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatListModule,
-  ],
+    MatListModule
+],
   template: `
     <div class="space-y-6">
       <!-- Primary Guest -->

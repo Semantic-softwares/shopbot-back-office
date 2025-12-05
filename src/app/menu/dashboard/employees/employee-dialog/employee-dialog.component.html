@@ -8,9 +8,11 @@
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Name</mat-label>
         <input matInput formControlName="name" placeholder="Enter employee name">
-        <mat-error *ngIf="form.get('name')?.hasError('required')">
-          Name is required
-        </mat-error>
+        @if (form.get('name')?.hasError('required')) {
+          <mat-error>
+            Name is required
+          </mat-error>
+        }
       </mat-form-field>
 
       <div class="grid grid-cols-2 gap-4">
@@ -21,9 +23,11 @@
               <mat-option [value]="gender">{{gender}}</mat-option>
             }
           </mat-select>
-          <mat-error *ngIf="form.get('gender')?.hasError('required')">
-            Gender is required
-          </mat-error>
+          @if (form.get('gender')?.hasError('required')) {
+            <mat-error>
+              Gender is required
+            </mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
@@ -33,9 +37,11 @@
               <mat-option [value]="role">{{role}}</mat-option>
             }
           </mat-select>
-          <mat-error *ngIf="form.get('role')?.hasError('required')">
-            Role is required
-          </mat-error>
+          @if (form.get('role')?.hasError('required')) {
+            <mat-error>
+              Role is required
+            </mat-error>
+          }
           @if (isRoleDisabled()) {
             <mat-hint>Role cannot be changed for owners</mat-hint>
           }
@@ -45,32 +51,42 @@
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Email</mat-label>
         <input matInput formControlName="email" type="email" placeholder="Enter email address">
-        <mat-error *ngIf="form.get('email')?.hasError('required')">
-          Email is required
-        </mat-error>
-        <mat-error *ngIf="form.get('email')?.hasError('email')">
-          Please enter a valid email address
-        </mat-error>
+        @if (form.get('email')?.hasError('required')) {
+          <mat-error>
+            Email is required
+          </mat-error>
+        }
+        @if (form.get('email')?.hasError('email')) {
+          <mat-error>
+            Please enter a valid email address
+          </mat-error>
+        }
       </mat-form-field>
 
       <div class="grid grid-cols-2 gap-4">
         <mat-form-field appearance="outline" class="w-full">
           <mat-label>Phone Number</mat-label>
           <input matInput formControlName="phoneNumber" placeholder="Enter phone number">
-          <mat-error *ngIf="form.get('phoneNumber')?.hasError('required')">
-            Phone number is required
-          </mat-error>
+          @if (form.get('phoneNumber')?.hasError('required')) {
+            <mat-error>
+              Phone number is required
+            </mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
           <mat-label>PIN</mat-label>
           <input matInput formControlName="pin" type="password" maxlength="4" placeholder="Enter 4-digit PIN">
-          <mat-error *ngIf="form.get('pin')?.hasError('required')">
-            PIN is required
-          </mat-error>
-          <mat-error *ngIf="form.get('pin')?.hasError('minlength') || form.get('pin')?.hasError('maxlength')">
-            PIN must be exactly 4 digits
-          </mat-error>
+          @if (form.get('pin')?.hasError('required')) {
+            <mat-error>
+              PIN is required
+            </mat-error>
+          }
+          @if (form.get('pin')?.hasError('minlength') || form.get('pin')?.hasError('maxlength')) {
+            <mat-error>
+              PIN must be exactly 4 digits
+            </mat-error>
+          }
         </mat-form-field>
       </div>
     </div>

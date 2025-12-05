@@ -8,32 +8,42 @@
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Name</mat-label>
         <input matInput formControlName="name" placeholder="Enter variant name">
-        <mat-error *ngIf="variantForm.get('name')?.hasError('required')">
-          Name is required
-        </mat-error>
+        @if (variantForm.get('name')?.hasError('required')) {
+          <mat-error>
+            Name is required
+          </mat-error>
+        }
       </mat-form-field>
 
       <div class="grid grid-cols-2 gap-4">
         <mat-form-field appearance="outline" class="w-full">
           <mat-label>At Least</mat-label>
           <input matInput type="number" formControlName="atLeast" min="0">
-          <mat-error *ngIf="variantForm.get('atLeast')?.hasError('required')">
-            At Least value is required
-          </mat-error>
-          <mat-error *ngIf="variantForm.get('atLeast')?.hasError('min')">
-            Value must be 0 or greater
-          </mat-error>
+          @if (variantForm.get('atLeast')?.hasError('required')) {
+            <mat-error>
+              At Least value is required
+            </mat-error>
+          }
+          @if (variantForm.get('atLeast')?.hasError('min')) {
+            <mat-error>
+              Value must be 0 or greater
+            </mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
           <mat-label>At Most</mat-label>
           <input matInput type="number" formControlName="atMost" min="0">
-          <mat-error *ngIf="variantForm.get('atMost')?.hasError('required')">
-            At Most value is required
-          </mat-error>
-          <mat-error *ngIf="variantForm.get('atMost')?.hasError('min')">
-            Value must be 0 or greater
-          </mat-error>
+          @if (variantForm.get('atMost')?.hasError('required')) {
+            <mat-error>
+              At Most value is required
+            </mat-error>
+          }
+          @if (variantForm.get('atMost')?.hasError('min')) {
+            <mat-error>
+              Value must be 0 or greater
+            </mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -61,12 +71,12 @@
               In Stock
             </mat-slide-toggle>
 
-            <a mat-stroked-button color="primary" type="button" 
-                    [disabled]="!newOptionForm.valid"
-                    (click)="addNewOption()">
+            <a mat-stroked-button color="primary" type="button"
+              [disabled]="!newOptionForm.valid"
+              (click)="addNewOption()">
               <mat-icon class="mr-2">add</mat-icon>
               Add Option
-          </a>
+            </a>
           </div>
         </form>
 

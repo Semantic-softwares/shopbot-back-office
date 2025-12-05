@@ -1,5 +1,5 @@
 import { Component, Inject, inject, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule, MatSelectionList } from '@angular/material/list';
@@ -15,14 +15,13 @@ import { VariantDialogComponent } from '../../../variants/variant-dialog/variant
   selector: 'app-add-variants-list',
   standalone: true,
   imports: [
-    CommonModule,
     MatDialogModule,
     MatButtonModule,
     MatListModule,
     MatProgressSpinnerModule,
     MatIconModule,
     NoRecordComponent
-  ],
+],
   template: `
     <div class="p-6">
       <div class="flex items-center justify-between mb-4">

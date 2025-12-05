@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,13 +13,12 @@ import { SubscriptionUpgradeDialogComponent } from '../subscription-upgrade-dial
   selector: 'app-usage-indicator',
   standalone: true,
   imports: [
-    CommonModule,
     MatProgressBarModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
     MatTooltipModule
-  ],
+],
   templateUrl: './usage-indicator.component.html',
   styleUrls: ['./usage-indicator.component.scss']
 })

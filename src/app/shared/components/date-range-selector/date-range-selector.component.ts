@@ -38,35 +38,36 @@ import { QueryParamService } from '../../services/query-param.service';
         [formGroup]="dateRange"
         [max]="maxDate()"
         [rangePicker]="picker"
-      >
+        >
         <input
           matStartDate
           formControlName="start"
           placeholder="Start date"
           required
-        />
+          />
         <input
           matEndDate
           formControlName="end"
           placeholder="End date"
           required
-        />
+          />
       </mat-date-range-input>
       <mat-datepicker-toggle
         matIconSuffix
         [for]="picker"
       ></mat-datepicker-toggle>
       <mat-date-range-picker #picker></mat-date-range-picker>
-      <mat-error
-        *ngIf="
-          dateRange.get('start')?.hasError('required') ||
-          dateRange.get('end')?.hasError('required')
-        "
-      >
-        Both dates are required
-      </mat-error>
+      @if (
+        dateRange.get('start')?.hasError('required') ||
+        dateRange.get('end')?.hasError('required')
+        ) {
+        <mat-error
+          >
+          Both dates are required
+        </mat-error>
+      }
     </mat-form-field>
-  `,
+    `,
 })
 export class DateRangeSelectorComponent implements OnInit {
   public queryParamsService = inject(QueryParamService);

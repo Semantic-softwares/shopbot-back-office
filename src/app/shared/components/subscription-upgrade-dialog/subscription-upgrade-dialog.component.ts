@@ -1,5 +1,5 @@
 import { Component, inject, Inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -11,13 +11,12 @@ import { SubscriptionService, SubscriptionPlan } from '../../../services/subscri
   selector: 'app-subscription-upgrade-dialog',
   standalone: true,
   imports: [
-    CommonModule,
     MatDialogModule,
     MatButtonModule,
     MatCardModule,
     MatIconModule,
     MatChipsModule
-  ],
+],
   templateUrl: './subscription-upgrade-dialog.component.html',
   styleUrls: ['./subscription-upgrade-dialog.component.scss']
 })

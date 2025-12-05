@@ -8,12 +8,16 @@
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Category Name</mat-label>
         <input matInput formControlName="name" placeholder="Enter category name">
-        <mat-error *ngIf="categoryForm.get('name')?.hasError('required')">
-          Category name is required
-        </mat-error>
-        <mat-error *ngIf="categoryForm.get('name')?.hasError('minlength')">
-          Category name must be at least 2 characters
-        </mat-error>
+        @if (categoryForm.get('name')?.hasError('required')) {
+          <mat-error>
+            Category name is required
+          </mat-error>
+        }
+        @if (categoryForm.get('name')?.hasError('minlength')) {
+          <mat-error>
+            Category name must be at least 2 characters
+          </mat-error>
+        }
       </mat-form-field>
 
       <div class="flex items-center gap-3">
@@ -30,10 +34,10 @@
       <button mat-button type="button" (click)="onCancel()" [disabled]="isLoading">
         Cancel
       </button>
-      <button 
-        mat-raised-button 
-        color="primary" 
-        type="submit" 
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
         [disabled]="categoryForm.invalid || isLoading">
         {{ isLoading ? 'Saving...' : (isEdit ? 'Update Category' : 'Create Category') }}
       </button>

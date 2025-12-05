@@ -9,7 +9,7 @@ import {
   inject,
   OnInit,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { StoreStore } from '../../stores/store.store';
@@ -19,24 +19,25 @@ import { FormGroup, FormControl } from '@angular/forms';
 @Component({
   selector: 'app-employee-selector',
   standalone: true,
-  imports: [CommonModule, MatFormFieldModule, MatSelectModule],
+  imports: [MatFormFieldModule, MatSelectModule],
   template: `
     <mat-form-field appearance="outline" class="w-full">
       <mat-label>All employees</mat-label>
       <mat-select
         [(value)]="selectedEmployee"
         (selectionChange)="onSelectionChange($event.value)"
-      >
-        <mat-option value="all">All employees</mat-option>
-        <mat-option
-          *ngFor="let emp of storeStore.selectedStore()?.staffs"
-          [value]="emp._id"
         >
-          {{ emp.name }}
-        </mat-option>
+        <mat-option value="all">All employees</mat-option>
+        @for (emp of storeStore.selectedStore()?.staffs; track emp) {
+          <mat-option
+            [value]="emp._id"
+            >
+            {{ emp.name }}
+          </mat-option>
+        }
       </mat-select>
     </mat-form-field>
-  `,
+    `,
 })
 export class EmployeeSelectorComponent implements OnInit {
   public queryParamsService = inject(QueryParamService);

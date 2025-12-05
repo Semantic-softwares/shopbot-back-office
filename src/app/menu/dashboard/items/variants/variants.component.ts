@@ -1,5 +1,5 @@
 import { Component, inject, resource, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
@@ -29,7 +29,6 @@ import { rxResource } from '@angular/core/rxjs-interop';
   templateUrl: './variants.component.html',
   standalone: true,
   imports: [
-    CommonModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -43,7 +42,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
     NoRecordComponent,
     FormsModule,
     MatSlideToggleModule
-  ]
+]
 })
 export class VariantsComponent {
   displayedColumns: string[] = ['name', 'atLeast', 'atMost', 'published', 'actions'];

@@ -38,230 +38,242 @@
       <label class="text-sm font-medium text-gray-700">New Check-out Date</label>
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Select new check-out date</mat-label>
-        <input 
-          matInput 
-          [matDatepicker]="picker" 
+        <input
+          matInput
+          [matDatepicker]="picker"
           formControlName="newCheckOutDate"
-          
+
           (dateChange)="onDateChange()"
           placeholder="Choose date">
         <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
-        <mat-error *ngIf="extensionForm.get('newCheckOutDate')?.hasError('required')">
-          New check-out date is required
-        </mat-error>
+        @if (extensionForm.get('newCheckOutDate')?.hasError('required')) {
+          <mat-error>
+            New check-out date is required
+          </mat-error>
+        }
       </mat-form-field>
     </div>
-<!-- [min]="minExtensionDate" -->
+    <!-- [min]="minExtensionDate" -->
     <!-- Availability Check -->
-    <div class="space-y-4" *ngIf="extensionForm.get('newCheckOutDate')?.value">
-      <!-- Loading State -->
-      <div class="flex items-center justify-center gap-3 py-8" *ngIf="availabilityChecking()">
-        <mat-spinner diameter="24"></mat-spinner>
-        <span class="text-sm text-gray-600">Checking availability...</span>
+    @if (extensionForm.get('newCheckOutDate')?.value) {
+      <div class="space-y-4">
+        <!-- Loading State -->
+        @if (availabilityChecking()) {
+          <div class="flex items-center justify-center gap-3 py-8">
+            <mat-spinner diameter="24"></mat-spinner>
+            <span class="text-sm text-gray-600">Checking availability...</span>
+          </div>
+        }
+        <!-- Availability Results -->
+        @if (availability() && !availabilityChecking()) {
+          <div class="border rounded-lg p-4"
+            [class]="availability()?.isAvailable ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'">
+            <!-- Availability Status -->
+            <div class="flex items-center gap-3 mb-4">
+              <mat-icon [class]="availability()?.isAvailable ? 'text-green-600' : 'text-red-600'">
+                {{ availability()?.isAvailable ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+              <h4 class="text-base font-medium"
+                [class]="availability()?.isAvailable ? 'text-green-800' : 'text-red-800'">
+                {{ availability()?.isAvailable ? 'Extension Available' : 'Extension Unavailable' }}
+              </h4>
+            </div>
+            <!-- Available Extension Details -->
+            @if (availability()?.isAvailable) {
+              <div class="space-y-4">
+                <!-- Basic Info -->
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                  <div class="space-y-1">
+                    <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Additional Nights</div>
+                    <div class="text-gray-900 font-semibold">{{ availability()?.maxExtensionNights }}</div>
+                  </div>
+                  <div class="space-y-1">
+                    <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Extension Days</div>
+                    <div class="text-gray-900 font-semibold">{{ availability()?.extensionDays }}</div>
+                  </div>
+                </div>
+                <!-- Rate Selection Section -->
+                @if (availability()?.pricingBreakdown?.originalRate) {
+                  <div class="space-y-4 border-t pt-4">
+                    <div class="flex items-center justify-between">
+                      <label class="text-sm font-medium text-gray-700">Choose Rate Option:</label>
+                      <div class="text-xs text-gray-500">2 options available</div>
+                    </div>
+                    <!-- Pricing Strategy Options -->
+                    <mat-radio-group class="space-y-3" formControlName="selectedPricingStrategy">
+                      <!-- Same Rate Option -->
+                      <div class="relative">
+                        <mat-radio-button
+                          value="same_rate"
+                          class="w-full block p-4 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                          <div class="absolute top-2 right-2 px-2 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800">
+                            ORIGINAL
+                          </div>
+                          <div class="flex items-start justify-between mt-1">
+                            <div class="flex-1 min-w-0 pr-4">
+                              <div class="text-sm font-semibold text-blue-900">Same Rate</div>
+                              <div class="text-xs mt-1 text-blue-700">Continue with the original room rate</div>
+                            </div>
+                            <div class="text-right">
+                              <div class="text-lg font-bold text-blue-600">
+                                {{ formatCurrency(availability()?.pricingBreakdown?.originalRate || 0) }}
+                              </div>
+                              <div class="text-xs text-gray-500">per night</div>
+                            </div>
+                          </div>
+                        </mat-radio-button>
+                      </div>
+                      <!-- Discounted Rate Option -->
+                      <div class="relative">
+                        <mat-radio-button
+                          value="discounted_rate"
+                          class="w-full block p-4 border border-green-200 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                          <div class="flex items-start justify-between mt-1">
+                            <div class="flex-1 min-w-0 pr-4">
+                              <div class="text-sm font-semibold text-green-900">Discounted Rate</div>
+                              <div class="text-xs mt-1 text-green-700">Apply a custom discount to the original rate</div>
+                              <!-- Savings indicator -->
+                              @if (getDiscountAmount() > 0) {
+                                <div
+                                  class="inline-flex items-center mt-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                                  <mat-icon class="!text-xs mr-1">savings</mat-icon>
+                                  Save {{ formatCurrency(getDiscountAmount()) }} per night
+                                </div>
+                              }
+                            </div>
+                            <div class="text-right">
+                              <div class="text-lg font-bold text-green-600">
+                                {{ formatCurrency(getSelectedRate()) }}
+                              </div>
+                              <div class="text-xs text-gray-500">per night</div>
+                            </div>
+                          </div>
+                        </mat-radio-button>
+                      </div>
+                    </mat-radio-group>
+                    <!-- Discount Rate Input -->
+                    @if (extensionForm.get('selectedPricingStrategy')?.value === 'discounted_rate') {
+                      <div class="mt-4">
+                        <mat-form-field appearance="outline" class="w-full">
+                          <mat-label>Discounted Rate per Night</mat-label>
+                          <input
+                            matInput
+                            type="number"
+                            min="1"
+                            [max]="availability()?.pricingBreakdown?.originalRate"
+                            step="0.01"
+                            formControlName="discountedRate"
+                            placeholder="Enter discounted rate">
+                          <span matTextPrefix>{{ storeStore.selectedStore()?.currency || '$' }}&nbsp;</span>
+                          <mat-hint>Rate must be less than or equal to {{ formatCurrency(availability()?.pricingBreakdown?.originalRate || 0) }}</mat-hint>
+                          @if (extensionForm.get('discountedRate')?.hasError('required')) {
+                            <mat-error>
+                              Discounted rate is required
+                            </mat-error>
+                          }
+                          @if (extensionForm.get('discountedRate')?.hasError('min')) {
+                            <mat-error>
+                              Rate must be greater than 0
+                            </mat-error>
+                          }
+                          @if (!validateDiscountedRate()) {
+                            <mat-error>
+                              Rate cannot be higher than the original rate
+                            </mat-error>
+                          }
+                        </mat-form-field>
+                      </div>
+                    }
+                    <!-- Total Cost Display -->
+                    <div class="bg-gray-100 rounded-lg p-4 mt-4">
+                      <div class="flex justify-between items-center">
+                        <div>
+                          <div class="text-sm font-medium text-gray-700">Total Extension Cost</div>
+                          <div class="text-xs text-gray-500">
+                            {{ availability()?.extensionDays }} nights × {{ formatCurrency(getSelectedRate()) }}
+                          </div>
+                          @if (getDiscountAmount() > 0) {
+                            <div class="text-xs text-green-600 font-medium mt-1">
+                              Total Savings: {{ formatCurrency(getDiscountAmount() * (availability()?.extensionDays || 0)) }}
+                            </div>
+                          }
+                        </div>
+                        <div class="text-xl font-bold text-blue-600">
+                          {{ formatCurrency(getTotalCost()) }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+                <!-- Pricing Breakdown -->
+                @if (availability()?.pricingBreakdown) {
+                  <div class="bg-white rounded-md p-4 border border-gray-200">
+                    <h5 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                      <mat-icon class="!text-base text-blue-600">receipt</mat-icon>
+                      Pricing Breakdown
+                    </h5>
+                    <div class="space-y-2 text-sm">
+                      <div class="flex justify-between">
+                        <span class="text-gray-600">Base Rate per Night:</span>
+                        <span class="font-medium">{{ formatCurrency(availability()?.pricingBreakdown?.baseRatePerNight || 0) }}</span>
+                      </div>
+                      <!-- Applied Modifiers -->
+                      @if (availability()?.pricingBreakdown?.appliedModifiers?.length) {
+                        <div class="space-y-1">
+                          <div class="text-xs font-medium text-gray-500 mt-2 mb-1">ADJUSTMENTS:</div>
+                          @for (modifier of availability()?.pricingBreakdown?.appliedModifiers; track modifier) {
+                            <div class="flex justify-between text-xs"
+                              >
+                              <span class="text-gray-600">{{ getModifierDisplayName(modifier) }}:</span>
+                              <span [class]="getModifierValueClass(modifier)"
+                                class="font-medium">
+                                {{ getModifierValueDisplay(modifier) }}
+                              </span>
+                            </div>
+                          }
+                        </div>
+                      }
+                      <div class="border-t pt-2 mt-3">
+                        <div class="flex justify-between font-semibold">
+                          <span>Final Rate per Night:</span>
+                          <span class="text-blue-600">{{ formatCurrency(availability()?.pricingBreakdown?.finalRatePerNight || 0) }}</span>
+                        </div>
+                      </div>
+                      <div class="bg-blue-50 rounded p-2 mt-3">
+                        <div class="flex justify-between items-center">
+                          <span class="font-semibold text-blue-900">Total Extension Cost:</span>
+                          <span class="text-lg font-bold text-blue-700">{{ formatCurrency(availability()?.estimatedCost || 0) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+            <!-- Unavailable - Conflicts -->
+            @if (!availability()?.isAvailable && availability()?.conflictingReservations?.length) {
+              <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-md"
+                >
+                <mat-icon class="text-amber-600 !text-base mt-0.5">warning</mat-icon>
+                <div class="text-sm text-amber-800">
+                  <div class="font-medium">Room conflicts prevent extension beyond this date</div>
+                  <div class="text-xs mt-1">Please choose an earlier date or check with front desk for alternative options.</div>
+                </div>
+              </div>
+            }
+          </div>
+        }
       </div>
-
-      <!-- Availability Results -->
-      <div class="border rounded-lg p-4" *ngIf="availability() && !availabilityChecking()"
-           [class]="availability()?.isAvailable ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'">
-        
-        <!-- Availability Status -->
-        <div class="flex items-center gap-3 mb-4">
-          <mat-icon [class]="availability()?.isAvailable ? 'text-green-600' : 'text-red-600'">
-            {{ availability()?.isAvailable ? 'check_circle' : 'cancel' }}
-          </mat-icon>
-          <h4 class="text-base font-medium" 
-              [class]="availability()?.isAvailable ? 'text-green-800' : 'text-red-800'">
-            {{ availability()?.isAvailable ? 'Extension Available' : 'Extension Unavailable' }}
-          </h4>
-        </div>
-
-        <!-- Available Extension Details -->
-        <div class="space-y-4" *ngIf="availability()?.isAvailable">
-          <!-- Basic Info -->
-          <div class="grid grid-cols-2 gap-4 text-sm">
-            <div class="space-y-1">
-              <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Additional Nights</div>
-              <div class="text-gray-900 font-semibold">{{ availability()?.maxExtensionNights }}</div>
-            </div>
-            <div class="space-y-1">
-              <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Extension Days</div>
-              <div class="text-gray-900 font-semibold">{{ availability()?.extensionDays }}</div>
-            </div>
-          </div>
-
-          <!-- Rate Selection Section -->
-          <div class="space-y-4 border-t pt-4" *ngIf="availability()?.pricingBreakdown?.originalRate">
-            <div class="flex items-center justify-between">
-              <label class="text-sm font-medium text-gray-700">Choose Rate Option:</label>
-              <div class="text-xs text-gray-500">2 options available</div>
-            </div>
-            
-            <!-- Pricing Strategy Options -->
-            <mat-radio-group class="space-y-3" formControlName="selectedPricingStrategy">
-              <!-- Same Rate Option -->
-              <div class="relative">
-                <mat-radio-button 
-                  value="same_rate"
-                  class="w-full block p-4 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                  
-                  <div class="absolute top-2 right-2 px-2 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800">
-                    ORIGINAL
-                  </div>
-
-                  <div class="flex items-start justify-between mt-1">
-                    <div class="flex-1 min-w-0 pr-4">
-                      <div class="text-sm font-semibold text-blue-900">Same Rate</div>
-                      <div class="text-xs mt-1 text-blue-700">Continue with the original room rate</div>
-                    </div>
-                    
-                    <div class="text-right">
-                      <div class="text-lg font-bold text-blue-600">
-                        {{ formatCurrency(availability()?.pricingBreakdown?.originalRate || 0) }}
-                      </div>
-                      <div class="text-xs text-gray-500">per night</div>
-                    </div>
-                  </div>
-                </mat-radio-button>
-              </div>
-
-              <!-- Discounted Rate Option -->
-              <div class="relative">
-                <mat-radio-button 
-                  value="discounted_rate"
-                  class="w-full block p-4 border border-green-200 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-
-                  <div class="flex items-start justify-between mt-1">
-                    <div class="flex-1 min-w-0 pr-4">
-                      <div class="text-sm font-semibold text-green-900">Discounted Rate</div>
-                      <div class="text-xs mt-1 text-green-700">Apply a custom discount to the original rate</div>
-                      
-                      <!-- Savings indicator -->
-                      <div *ngIf="getDiscountAmount() > 0" 
-                           class="inline-flex items-center mt-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                        <mat-icon class="!text-xs mr-1">savings</mat-icon>
-                        Save {{ formatCurrency(getDiscountAmount()) }} per night
-                      </div>
-                    </div>
-                    
-                    <div class="text-right">
-                      <div class="text-lg font-bold text-green-600">
-                        {{ formatCurrency(getSelectedRate()) }}
-                      </div>
-                      <div class="text-xs text-gray-500">per night</div>
-                    </div>
-                  </div>
-                </mat-radio-button>
-              </div>
-            </mat-radio-group>
-
-            <!-- Discount Rate Input -->
-            <div class="mt-4" *ngIf="extensionForm.get('selectedPricingStrategy')?.value === 'discounted_rate'">
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Discounted Rate per Night</mat-label>
-                <input 
-                  matInput 
-                  type="number" 
-                  min="1"
-                  [max]="availability()?.pricingBreakdown?.originalRate"
-                  step="0.01"
-                  formControlName="discountedRate"
-                  placeholder="Enter discounted rate">
-                <span matTextPrefix>{{ storeStore.selectedStore()?.currency || '$' }}&nbsp;</span>
-                <mat-hint>Rate must be less than or equal to {{ formatCurrency(availability()?.pricingBreakdown?.originalRate || 0) }}</mat-hint>
-                <mat-error *ngIf="extensionForm.get('discountedRate')?.hasError('required')">
-                  Discounted rate is required
-                </mat-error>
-                <mat-error *ngIf="extensionForm.get('discountedRate')?.hasError('min')">
-                  Rate must be greater than 0
-                </mat-error>
-                <mat-error *ngIf="!validateDiscountedRate()">
-                  Rate cannot be higher than the original rate
-                </mat-error>
-              </mat-form-field>
-            </div>
-
-            <!-- Total Cost Display -->
-            <div class="bg-gray-100 rounded-lg p-4 mt-4">
-              <div class="flex justify-between items-center">
-                <div>
-                  <div class="text-sm font-medium text-gray-700">Total Extension Cost</div>
-                  <div class="text-xs text-gray-500">
-                    {{ availability()?.extensionDays }} nights × {{ formatCurrency(getSelectedRate()) }}
-                  </div>
-                  <div *ngIf="getDiscountAmount() > 0" class="text-xs text-green-600 font-medium mt-1">
-                    Total Savings: {{ formatCurrency(getDiscountAmount() * (availability()?.extensionDays || 0)) }}
-                  </div>
-                </div>
-                <div class="text-xl font-bold text-blue-600">
-                  {{ formatCurrency(getTotalCost()) }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Pricing Breakdown -->
-          <div class="bg-white rounded-md p-4 border border-gray-200" *ngIf="availability()?.pricingBreakdown">
-            <h5 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
-              <mat-icon class="!text-base text-blue-600">receipt</mat-icon>
-              Pricing Breakdown
-            </h5>
-            
-            <div class="space-y-2 text-sm">
-              <div class="flex justify-between">
-                <span class="text-gray-600">Base Rate per Night:</span>
-                <span class="font-medium">{{ formatCurrency(availability()?.pricingBreakdown?.baseRatePerNight || 0) }}</span>
-              </div>
-              
-              <!-- Applied Modifiers -->
-              <div class="space-y-1" *ngIf="availability()?.pricingBreakdown?.appliedModifiers?.length">
-                <div class="text-xs font-medium text-gray-500 mt-2 mb-1">ADJUSTMENTS:</div>
-                <div class="flex justify-between text-xs" 
-                     *ngFor="let modifier of availability()?.pricingBreakdown?.appliedModifiers">
-                  <span class="text-gray-600">{{ getModifierDisplayName(modifier) }}:</span>
-                  <span [class]="getModifierValueClass(modifier)"
-                        class="font-medium">
-                    {{ getModifierValueDisplay(modifier) }}
-                  </span>
-                </div>
-              </div>
-              
-              <div class="border-t pt-2 mt-3">
-                <div class="flex justify-between font-semibold">
-                  <span>Final Rate per Night:</span>
-                  <span class="text-blue-600">{{ formatCurrency(availability()?.pricingBreakdown?.finalRatePerNight || 0) }}</span>
-                </div>
-              </div>
-              
-              <div class="bg-blue-50 rounded p-2 mt-3">
-                <div class="flex justify-between items-center">
-                  <span class="font-semibold text-blue-900">Total Extension Cost:</span>
-                  <span class="text-lg font-bold text-blue-700">{{ formatCurrency(availability()?.estimatedCost || 0) }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Unavailable - Conflicts -->
-        <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-md" 
-             *ngIf="!availability()?.isAvailable && availability()?.conflictingReservations?.length">
-          <mat-icon class="text-amber-600 !text-base mt-0.5">warning</mat-icon>
-          <div class="text-sm text-amber-800">
-            <div class="font-medium">Room conflicts prevent extension beyond this date</div>
-            <div class="text-xs mt-1">Please choose an earlier date or check with front desk for alternative options.</div>
-          </div>
-        </div>
-      </div>
-    </div>
+    }
 
     <!-- Notes -->
     <div class="space-y-2">
       <label class="text-sm font-medium text-gray-700">Notes (Optional)</label>
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Special requests or notes</mat-label>
-        <textarea 
-          matInput 
+        <textarea
+          matInput
           formControlName="notes"
           rows="3"
           placeholder="Add any special requests or notes for the extension">
@@ -270,37 +282,45 @@
     </div>
 
     <!-- Error Message -->
-    <div class="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-md" *ngIf="errorMessage()">
-      <mat-icon class="text-red-600 !text-base mt-0.5">error</mat-icon>
-      <div class="text-sm text-red-800">
-        <div class="font-medium">Extension Request Failed</div>
-        <div>{{ errorMessage() }}</div>
+    @if (errorMessage()) {
+      <div class="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-md">
+        <mat-icon class="text-red-600 !text-base mt-0.5">error</mat-icon>
+        <div class="text-sm text-red-800">
+          <div class="font-medium">Extension Request Failed</div>
+          <div>{{ errorMessage() }}</div>
+        </div>
       </div>
-    </div>
+    }
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions class="flex justify-end gap-3 pt-6 border-t border-gray-200 mt-6">
-  <button 
-    mat-button 
+  <button
+    mat-button
     type="button"
     (click)="onCancel()"
     [disabled]="isLoading()"
     class="px-4 py-2">
     Cancel
   </button>
-  
-  <button 
-    mat-raised-button 
+
+  <button
+    mat-raised-button
     color="primary"
     type="button"
     (click)="submitExtension()"
     [disabled]="!extensionForm.valid || !availability()?.isAvailable || isLoading()"
     class="px-6 py-2 min-w-[140px]">
     <div class="flex items-center justify-center gap-2">
-      <mat-spinner diameter="16" *ngIf="isLoading()"></mat-spinner>
-      <span *ngIf="!isLoading()">Request Extension</span>
-      <span *ngIf="isLoading()">Processing...</span>
+      @if (isLoading()) {
+        <mat-spinner diameter="16"></mat-spinner>
+      }
+      @if (!isLoading()) {
+        <span>Request Extension</span>
+      }
+      @if (isLoading()) {
+        <span>Processing...</span>
+      }
     </div>
   </button>
 </mat-dialog-actions>

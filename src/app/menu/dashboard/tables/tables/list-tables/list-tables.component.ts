@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatTableModule, MatTable } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
@@ -30,7 +30,6 @@ import { CreateTableComponent } from '../modals/create-table/create-table.compon
   styleUrls: ['./list-tables.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -44,7 +43,7 @@ import { CreateTableComponent } from '../modals/create-table/create-table.compon
     MatProgressSpinnerModule,
     MatSlideToggleModule,
     NoRecordComponent
-  ],
+],
 })
 export class ListTablesComponent {
   private tableService = inject(TableService);

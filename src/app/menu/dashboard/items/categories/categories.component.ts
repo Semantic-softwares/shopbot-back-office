@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatTableModule, MatTable } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
@@ -30,7 +30,6 @@ import { NoRecordComponent } from '../../../../shared/components/no-record/no-re
   styleUrls: ['./categories.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -43,7 +42,7 @@ import { NoRecordComponent } from '../../../../shared/components/no-record/no-re
     MatProgressSpinnerModule,
     NoRecordComponent,
     FormsModule
-  ]
+]
 })
 export class CategoriesComponent {
   displayedColumns: string[] = ['name', 'color', 'icon', 'items', 'actions'];

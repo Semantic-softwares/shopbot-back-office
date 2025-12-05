@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,7 +20,6 @@ import { AuthService } from '../../../../../shared/services/auth.service';
   selector: 'app-start-reconciliation',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
@@ -31,8 +30,8 @@ import { AuthService } from '../../../../../shared/services/auth.service';
     MatDatepickerModule,
     MatNativeDateModule,
     MatProgressSpinnerModule,
-    RouterModule,
-  ],
+    RouterModule
+],
   template: `
     <div class="p-6 max-w-2xl mx-auto">
       <div class="flex items-center justify-between mb-6">

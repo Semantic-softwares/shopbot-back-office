@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray, AbstractControl, ValidatorFn } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -73,7 +73,6 @@ function breakTimeValidator(): ValidatorFn {
   styleUrls: ['./create-timecard.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -86,7 +85,7 @@ function breakTimeValidator(): ValidatorFn {
     MatProgressSpinnerModule,
     MatCardModule,
     MatDividerModule
-  ]
+]
 })
 export class CreateTimecardComponent implements OnInit {
   private fb = inject(FormBuilder);
