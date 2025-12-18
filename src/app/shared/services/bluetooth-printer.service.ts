@@ -613,8 +613,8 @@ export class BluetoothPrinterService {
       receipt += `Phone: ${guest.phone}\n`;
     }
     
-    const totalAdults = reservation.guestDetails?.totalAdults || 1;
-    const totalChildren = reservation.guestDetails?.totalChildren || 0;
+    const totalAdults = reservation.additionalGuests?.length || 1;
+    const totalChildren =  0;
     receipt += this.justifyLine('Occupancy:', `${totalAdults} Adults, ${totalChildren} Children`, config) + '\n';
     receipt += '\n';
     
@@ -685,8 +685,8 @@ export class BluetoothPrinterService {
           }
         });
       }
-      if (reservation.pricing.discounts?.amount) {
-        receipt += this.justifyLine('Discount:', '-' + this.formatCurrency(reservation.pricing.discounts.amount, store?.currency), config) + '\n';
+      if (reservation.pricing.discounts) {
+        receipt += this.justifyLine('Discount:', '-' + this.formatCurrency(reservation.pricing.discounts, store?.currency), config) + '\n';
       }
       
       receipt += this.getSeparatorLine(config, '-') + '\n';

@@ -240,12 +240,16 @@
                     <div class="flex items-center">
                       <div class="flex-shrink-0 h-12 w-12">
                         <div class="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-md ring-2 ring-purple-200">
-                          <span>{{ guest.firstName.charAt(0).toUpperCase() }}{{ guest.lastName.charAt(0).toUpperCase() }}</span>
+                          <span>{{ (guest.firstName?.charAt(0) || guest.companyName?.charAt(0) || '?').toUpperCase() }}{{ (guest.lastName?.charAt(0) || guest.companyName?.charAt(1) || '?').toUpperCase() }}</span>
                         </div>
                       </div>
                       <div class="ml-4">
                         <div class="text-sm font-semibold text-gray-900">
-                          {{ guest.firstName }} {{ guest.lastName }}
+                          @if (guest.guestType === 'individual') {
+                            {{ guest.firstName }} {{ guest.lastName }}
+                          } @else {
+                            {{ guest.companyName }}
+                          }
                         </div>
                         @if (guest.nationality) {
                           <div class="text-xs text-gray-500 font-medium">

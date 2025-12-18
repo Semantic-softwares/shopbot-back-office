@@ -78,11 +78,11 @@ export class PricingUpdateDialogComponent {
         resortFee: [{value: pricing.fees?.resortFee || 0, disabled: true}], // Read-only
         other: [{value: pricing.fees?.other || 0, disabled: true}] // Read-only
       }),
-      discounts: this.fb.group({
-        amount: [pricing.discounts?.amount || 0, [Validators.min(0)]], // Editable
-        reason: [pricing.discounts?.reason || ''], // Editable
-        code: [pricing.discounts?.code || ''] // Editable
-      }),
+      // discounts: this.fb.group({
+      //   amount: [pricing.discounts?.amount || 0, [Validators.min(0)]], // Editable
+      //   reason: [pricing.discounts?.reason || ''], // Editable
+      //   code: [pricing.discounts?.code || ''] // Editable
+      // }),
       paid: [pricing.paid || 0, [Validators.min(0)]] // Editable - Amount Paid
     });
 
@@ -183,28 +183,28 @@ export class PricingUpdateDialogComponent {
       balance: this.currentBalance
     };
 
-    this.reservationService.updateReservation(this.data.reservation._id, { pricing: updatedPricing })
-      .subscribe({
-        next: (updatedReservation: Reservation) => {
-          this.loading.set(false);
-          this.snackBar.open('Pricing updated successfully', 'Close', {
-            duration: 3000,
-            panelClass: ['success-snackbar']
-          });
-          this.dialogRef.close({ success: true, updatedReservation });
-        },
-        error: (error: any) => {
-          this.loading.set(false);
-          console.error('Error updating pricing:', error);
-          this.snackBar.open(
-            error.message || 'Failed to update pricing', 
-            'Close', 
-            {
-              duration: 5000,
-              panelClass: ['error-snackbar']
-            }
-          );
-        }
-      });
+    // this.reservationService.updateReservation(this.data.reservation._id, { pricing: updatedPricing })
+    //   .subscribe({
+    //     next: (updatedReservation: Reservation) => {
+    //       this.loading.set(false);
+    //       this.snackBar.open('Pricing updated successfully', 'Close', {
+    //         duration: 3000,
+    //         panelClass: ['success-snackbar']
+    //       });
+    //       this.dialogRef.close({ success: true, updatedReservation });
+    //     },
+    //     error: (error: any) => {
+    //       this.loading.set(false);
+    //       console.error('Error updating pricing:', error);
+    //       this.snackBar.open(
+    //         error.message || 'Failed to update pricing', 
+    //         'Close', 
+    //         {
+    //           duration: 5000,
+    //           panelClass: ['error-snackbar']
+    //         }
+    //       );
+    //     }
+    //   });
   }
 }

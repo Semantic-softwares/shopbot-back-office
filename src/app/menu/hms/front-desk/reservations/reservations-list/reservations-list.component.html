@@ -315,10 +315,10 @@
                             {{ getGuestName(reservation) }}
                           </div>
                           <div class="text-sm text-gray-600">
-                            {{ reservation.guestDetails.primaryGuest.email || 'No email' }}
+                            {{ reservation.guest.email || 'No email' }}
                           </div>
                           <div class="text-xs text-gray-500 font-medium">
-                            {{ reservation.guestDetails.primaryGuest.phone || 'No phone' }}
+                            {{ reservation.guest.phone || 'No phone' }}
                           </div>
                         </div>
                       </div>

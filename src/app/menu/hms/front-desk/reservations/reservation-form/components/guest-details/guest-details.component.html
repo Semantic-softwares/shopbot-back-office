@@ -1,0 +1,139 @@
+<mat-card appearance="outlined">
+    <mat-card-header>
+        <mat-card-title>
+            {{bookingType() === 'single' ? 'Guest Details' : 'Booking Owner Details'}}
+
+        </mat-card-title>
+        <!-- <mat-card-subtitle>Primary guest and contact information</mat-card-subtitle> -->
+    </mat-card-header>
+    <mat-card-content >
+        <!-- No Guest Selected State -->
+        @if (!guest()) {
+        <div class="space-y-4">
+            <!-- Empty State Icon -->
+            <div class="text-center py-4">
+                <mat-icon class="text-gray-300 text-6xl mb-4 inline-block">person_outline</mat-icon>
+                <p class="text-gray-500 text-sm mb-4">No guest selected</p>
+            </div>
+
+            <!-- Guest Search Component -->
+            <app-guest-search placeholder="Search for existing guest..." label="Select Guest"
+                [guestType]="bookingType() === 'group' ? 'group' : 'single'"
+                (guestSelected)="onGuestSearchSelected($event)"></app-guest-search>
+        </div>
+        }
+
+        <!-- Guest Selected State -->
+        @if (guest()) {
+        <div class="space-y-4">
+            <!-- Guest Header List Item -->
+            <mat-list>
+                @if (bookingType() === 'single') {
+                <mat-list-item>
+
+                    <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">account_circle</mat-icon>
+                    <div matListItemTitle class="text-xl font-semibold text-gray-900">
+                        {{ guest()?.firstName }} {{ guest()?.lastName }}
+                    </div>
+                    @if (guest()?.nationality) {
+                    <div matListItemLine class="text-sm text-gray-600">
+                        {{ guest()?.nationality }}
+                    </div>
+                    }
+                </mat-list-item>
+                } @else {
+                <mat-list-item>
+                    <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">apartment</mat-icon>
+                    <div matListItemTitle class="text-sm text-gray-600!">Company</div>
+                    <div matListItemLine class="text-gray-900 font-medium">{{guest()?.companyName}}</div>
+                    <div matListItemLine class="text-gray-900 font-medium">{{ guest()?.contactPersonFirstName }} {{
+                        guest()?.contactPersonLastName }}</div>
+                </mat-list-item>
+
+                }
+
+
+
+                <!-- Email -->
+                @if (guest()?.email) {
+                <mat-list-item>
+                    <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">mail_outline</mat-icon>
+                    <div matListItemTitle class="text-sm text-gray-600!">Email</div>
+                    <div matListItemLine class="text-gray-900 font-medium">{{ guest()?.email }}</div>
+                </mat-list-item>
+                }
+
+                <!-- Phone -->
+                @if (guest()?.phone) {
+                <mat-list-item>
+                    <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">phone_outline</mat-icon>
+                    <div matListItemTitle class="text-sm text-gray-600!">Phone</div>
+                    <div matListItemLine class="text-gray-900 font-medium">{{ guest()?.phone }}</div>
+                </mat-list-item>
+                }
+
+                <!-- Date of Birth (Individual only) -->
+                @if (bookingType() === 'single' && guest()?.dateOfBirth) {
+                <mat-list-item>
+                    <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">cake_outline</mat-icon>
+                    <div matListItemTitle class="text-sm text-gray-600!">Date of Birth</div>
+                    <div matListItemLine class="text-gray-900 font-medium">
+                        {{ guest()?.dateOfBirth | date: 'MMM dd, yyyy' }}
+                    </div>
+                </mat-list-item>
+                }
+
+                <!-- Company Registration (Corporate only) -->
+                @if (bookingType() === 'group' && guest()?.companyRegistrationNumber) {
+                <mat-list-item>
+                    <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">verified_outline</mat-icon>
+                    <div matListItemTitle class="text-sm text-gray-600!">Registration Number</div>
+                    <div matListItemLine class="text-gray-900 font-medium">
+                        {{ guest()?.companyRegistrationNumber }}
+                    </div>
+                </mat-list-item>
+                }
+
+                <!-- Address -->
+                @if (guest()?.address) {
+                <mat-list-item>
+                    <mat-icon matListItemIcon
+                        class="text-gray-600! material-icons-outlined">location_on_outline</mat-icon>
+                    <div matListItemTitle class="text-sm text-gray-600!">Address</div>
+                    <div matListItemLine class="text-gray-900 font-medium">
+                        @if (guest()?.address?.street) {
+                        <span>{{ guest()?.address?.street }}, </span>
+                        }
+                        @if (guest()?.address?.city) {
+                        <span>{{ guest()?.address?.city }}, </span>
+                        }
+                        @if (guest()?.address?.country) {
+                        <span>{{ guest()?.address?.country }}</span>
+                        }
+                    </div>
+                </mat-list-item>
+                }
+            </mat-list>
+        </div>
+        }
+    </mat-card-content>
+
+    <!-- Card Actions Footer -->
+    <mat-card-actions class="border-t border-gray-200 pt-4 flex justify-end gap-2">
+        @if (!guest()) {
+        <button type="button" matButton="filled" color="primary" (click)="onAddGuest()">
+            <mat-icon class="mr-2">person_add_outline</mat-icon>
+            Add Guest
+        </button>
+        } @else {
+        <button type="button" mat-button (click)="onEditGuest()" color="primary">
+            <mat-icon class="mr-2">edit_outline</mat-icon>
+            Edit
+        </button>
+        <button type="button"  mat-button (click)="onDeleteGuest()" color="warn">
+            <mat-icon class="mr-2">delete_outline</mat-icon>
+            Delete
+        </button>
+        }
+    </mat-card-actions>
+</mat-card>

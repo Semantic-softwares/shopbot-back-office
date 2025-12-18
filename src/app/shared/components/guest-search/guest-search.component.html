@@ -1,0 +1,26 @@
+<div class="w-full">
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>{{ label() }}</mat-label>
+    <mat-icon matPrefix class="text-gray-500 material-icons-outlined">search</mat-icon>
+    <input
+      matInput
+      [formControl]="guestSearchControl"
+      [placeholder]="placeholder()"
+      [matAutocomplete]="guestAutoComplete"
+    />
+    @if (isLoading()) {
+      <span>Searching...</span>
+    }
+    <mat-autocomplete #guestAutoComplete="matAutocomplete" (optionSelected)="onGuestSelected($event.option.value)">
+      @for (guest of filteredGuests(); track guest._id) {
+        <mat-option [value]="guest">
+          <span class="font-medium">{{ guest?.firstName || guest?.companyName }} {{ guest?.lastName }}</span>
+          <span class="text-sm text-gray-500 ml-2">{{ guest?.email }}</span>
+        </mat-option>
+      }
+      @if (filteredGuests().length === 0 && !isLoading()) {
+        <mat-option disabled>No guests found</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+</div>

@@ -21,8 +21,19 @@ export class GuestService {
 
   /**
    * Search guests by email, phone, or name
+   * @param searchTerm - Search term
+   * @param page - Page number (default: 1)
+   * @param limit - Results per page (default: 10)
+   * @param storeId - Store ID to filter by (optional)
+   * @param guestType - Guest type: 'single' (individual), 'group' (corporate), or undefined/null (all)
    */
-  searchGuests(searchTerm: string, page: number = 1, limit: number = 10, storeId?: string): Observable<GuestSearchResponse> {
+  searchGuests(
+    searchTerm: string,
+    page: number = 1,
+    limit: number = 10,
+    storeId?: string,
+    guestType?: 'single' | 'group' | null
+  ): Observable<GuestSearchResponse> {
     let params = new HttpParams()
       .set('search', searchTerm)
       .set('page', page.toString())
@@ -30,6 +41,10 @@ export class GuestService {
     
     if (storeId) {
       params = params.set('storeId', storeId);
+    }
+    
+    if (guestType) {
+      params = params.set('guestType', guestType);
     }
 
     return this.http.get<GuestSearchResponse>(this.apiUrl, { params });

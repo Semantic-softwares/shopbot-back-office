@@ -1,0 +1,118 @@
+<div class="mt-6" [formGroup]="reservationForm()!">
+    <h3 class="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+        Price Breakdown
+    </h3>
+
+    <!-- Summary List -->
+    <mat-list formGroupName="pricing">
+        <!-- Total Nights -->
+        <mat-list-item>
+            <span matListItemTitle>Total Nights</span>
+            <span matListItemMeta class="font-semibold">
+                {{ totalNumberOfNights() }} night(s)
+            </span>
+        </mat-list-item>
+
+        <!-- Base Total -->
+        <mat-list-item>
+            <span matListItemTitle>Base Total (all rooms)</span>
+            <span matListItemMeta>
+                {{ breakdownSubtotal() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+            </span>
+        </mat-list-item>
+
+        <!-- Service Fee -->
+        <mat-list-item>
+            <span matListItemTitle>Service Fee</span>
+            <span matListItemMeta>
+                {{ breakdownServiceFee() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+            </span>
+        </mat-list-item>
+
+        <!-- Cleaning Fee -->
+        <mat-list-item>
+            <span matListItemTitle>Cleaning Fee</span>
+            <span matListItemMeta>
+                {{ breakdownCleaningFee() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+            </span>
+        </mat-list-item>
+
+        <!-- Resort Fee -->
+        <mat-list-item>
+            <span matListItemTitle>Resort Fee</span>
+            <span matListItemMeta>
+                {{ breakdownResortFee() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+            </span>
+        </mat-list-item>
+
+        <!-- Other Fees -->
+        <mat-list-item>
+            <span matListItemTitle>Other Fees</span>
+            <span matListItemMeta>
+                {{ breakdownOtherFees() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+            </span>
+        </mat-list-item>
+
+        <!-- Divider -->
+        <mat-divider></mat-divider>
+
+        <!-- Total Fees -->
+        <mat-list-item>
+            <span matListItemTitle class="font-semibold">Total Fees</span>
+            <span matListItemMeta class="font-semibold">
+                {{ breakdownTotalFees() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+            </span>
+        </mat-list-item>
+
+        <!-- Divider -->
+        <mat-divider></mat-divider>
+
+        <!-- Taxes -->
+        <mat-list-item>
+            <span matListItemTitle>Taxes</span>
+            <span matListItemMeta>
+                {{ breakdownTaxes() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+            </span>
+        </mat-list-item>
+
+        <!-- Discount -->
+        <mat-list-item>
+            <span matListItemTitle>Discount</span>
+            <span matListItemMeta>
+                {{ breakdownDiscount() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+            </span>
+        </mat-list-item>
+
+        <!-- Divider -->
+        <mat-divider></mat-divider>
+
+        <!-- Grand Total -->
+        <mat-list-item class="py-4">
+            <span matListItemTitle class="text-base font-bold">Grand Total</span>
+            <span matListItemMeta class="text-base font-bold text-blue-700">
+                {{ breakdownGrandTotal() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+            </span>
+        </mat-list-item>
+
+        <!-- Paid Amount -->
+        <mat-list-item class="py-4">
+            <span matListItemTitle class="text-base font-bold">Paid</span>
+            <span matListItemMeta class="text-base font-bold text-blue-700">
+                <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Paid</mat-label>
+                    <input matInput formControlName="paid" placeholder="Amount Paid" class="text-xs" currencyMask
+                        [options]="{ prefix: storeStore.selectedStore()?.currency }" >
+                </mat-form-field>
+            </span>
+        </mat-list-item>
+
+        <!-- Balance -->
+        <mat-list-item class="py-4">
+            <span matListItemTitle class="text-base font-bold">Balance</span>
+            <span matListItemMeta class="text-base font-bold text-blue-700">
+                {{ breakdownBalance() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}
+            </span>
+        </mat-list-item>
+    </mat-list>
+
+</div>

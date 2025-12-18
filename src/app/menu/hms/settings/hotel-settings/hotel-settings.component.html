@@ -659,11 +659,15 @@
                     [disabled]="saving()"
                     class="w-full">
                     @if (saving()) {
-                      <mat-icon class="animate-spin mr-2">refresh</mat-icon>
-                      Saving...
+                      <ng-container>
+                        <mat-icon class="animate-spin mr-2">refresh</mat-icon>
+                        Saving...
+                      </ng-container>
                     } @else {
-                      <mat-icon class="mr-2">save</mat-icon>
-                      Save Notification Settings
+                      <ng-container>
+                        <mat-icon class="mr-2">save</mat-icon>
+                        Save Notification Settings
+                      </ng-container>
                     }
                   </button>
                 </div>

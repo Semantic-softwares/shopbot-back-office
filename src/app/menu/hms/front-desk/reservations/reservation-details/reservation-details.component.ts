@@ -108,25 +108,31 @@ export class ReservationDetailsComponent implements OnInit {
   // Guest information computed properties
   guestName = computed(() => {
     const res = this.reservation();
-    if (!res || !res.guestDetails?.primaryGuest) return 'Unknown Guest';
-    const guest = res.guestDetails.primaryGuest;
+    if (!res || !res.guest) return 'Unknown Guest';
+    const guest = res.guest as any;
     return `${guest.firstName || ''} ${guest.lastName || ''}`.trim() || 'Unknown Guest';
   });
 
   guestEmail = computed(() => {
     const res = this.reservation();
-    return res?.guestDetails?.primaryGuest?.email || 'No email provided';
+    return (res?.guest as any)?.email || 'No email provided';
   });
 
   guestPhone = computed(() => {
     const res = this.reservation();
-    return res?.guestDetails?.primaryGuest?.phone || 'No phone provided';
+    return (res?.guest as any)?.phone || 'No phone provided';
   });
 
   hasAdditionalGuests = computed(() => {
     const res = this.reservation();
-    return res?.guestDetails?.additionalGuests && res.guestDetails.additionalGuests.length > 0;
+    return res?.additionalGuests && res.additionalGuests.length > 0;
   });
+
+  // Helper method to get guest name from guest object
+  getGuestName(guest: any): string {
+    if (!guest) return 'Unknown Guest';
+    return `${guest.firstName || ''} ${guest.lastName || ''}`.trim() || 'Unknown Guest';
+  }
 
   hasCancellation = computed(() => {
     const res = this.reservation();

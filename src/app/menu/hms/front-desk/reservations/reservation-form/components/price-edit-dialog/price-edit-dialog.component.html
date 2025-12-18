@@ -1,0 +1,166 @@
+ <h2 mat-dialog-title>Edit Room Pricing ({{numberOfNights()}}) night(s)</h2>
+<mat-dialog-content>
+  <form [formGroup]="pricingForm" class="space-y-4">
+    <!-- Base Price Section -->
+    <div class="space-y-3">
+      <div class="text-sm font-semibold text-gray-700">Base Price (Before Discount)</div>
+      <div class="grid grid-cols-2 gap-2">
+        <!-- Price Per Night (Read-only) -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Price/Night</mat-label>
+          <input matInput
+            currencyMask
+            [options]="{ prefix: storeStore.selectedStore()?.currency }"
+            formControlName="pricePerNight" 
+            readonly />
+          <mat-icon matPrefix>{{storeStore.selectedStore()?.currency}}</mat-icon>
+        </mat-form-field>
+
+        <!-- Subtotal (Read-only) - BEFORE any adjustments -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Subtotal</mat-label>
+          <input matInput 
+            currencyMask 
+            [options]="{ prefix: storeStore.selectedStore()?.currency }"
+            formControlName="subtotal" 
+            readonly>
+          <mat-icon matPrefix>{{storeStore.selectedStore()?.currency}}</mat-icon>
+          <mat-hint>{{ pricePerNight() | currency:storeStore.selectedStore()?.currency }} × {{ numberOfNights() }} nights</mat-hint>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Discount Section -->
+    <div class="space-y-3">
+      <div class="text-sm font-semibold text-gray-700">Discount</div>
+      <div class="grid grid-cols-2 gap-2">
+        <!-- Discount Type Select -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Discount Type</mat-label>
+          <mat-select formControlName="discountType">
+            @for (option of discountTypeOptions; track option.value) {
+              <mat-option [value]="option.value">
+                {{ option.label }}
+              </mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix>local_offer</mat-icon>
+        </mat-form-field>
+
+        <!-- Discount Value -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Discount Value</mat-label>
+          <input matInput 
+            type="number" 
+            formControlName="discount" 
+            placeholder="0">
+          <mat-icon matPrefix>money_off</mat-icon>
+          @if (pricingForm.get('discountType')?.value === 'percentage') {
+            <mat-hint>
+              % of subtotal (= {{ (subtotal() * discount() / 100).toFixed(2) | currency:storeStore.selectedStore()?.currency}})
+            </mat-hint>
+          }
+          @if (pricingForm.get('discountType')?.value === 'amount') {
+            <mat-hint>
+              Fixed amount
+            </mat-hint>
+          }
+        </mat-form-field>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Taxes Section -->
+    <div class="space-y-3">
+      <div class="text-sm font-semibold text-gray-700">Taxes & Fees</div>
+      
+      <!-- Taxes -->
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Taxes</mat-label>
+        <input matInput 
+          currencyMask 
+          [options]="{ prefix: storeStore.selectedStore()?.currency }"
+          formControlName="taxes" 
+          placeholder="0.00">
+        <mat-icon matPrefix>receipt</mat-icon>
+      </mat-form-field>
+
+      <div formGroupName="fees" class="space-y-3">
+        <!-- Service Fee -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Service Fee</mat-label>
+          <input matInput 
+            currencyMask 
+            [options]="{ prefix: storeStore.selectedStore()?.currency }"
+            formControlName="serviceFee" 
+            placeholder="0.00">
+          <mat-icon matPrefix>room_service</mat-icon>
+        </mat-form-field>
+
+        <!-- Cleaning Fee -->
+        <mat-form-field appearance="outline" class="w-full" >
+          <mat-label>Cleaning Fee</mat-label>
+          <input matInput 
+            currencyMask 
+            [options]="{ prefix: storeStore.selectedStore()?.currency }"
+            formControlName="cleaningFee" 
+            placeholder="0.00">
+          <mat-icon matPrefix>cleaning_services</mat-icon>
+        </mat-form-field>
+
+        <!-- Resort Fee -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Resort Fee</mat-label>
+          <input matInput 
+            currencyMask 
+            [options]="{ prefix: storeStore.selectedStore()?.currency }"
+            formControlName="resortFee" 
+            placeholder="0.00">
+          <mat-icon matPrefix>villa</mat-icon>
+        </mat-form-field>
+
+        <!-- Other Fee -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Other Fee</mat-label>
+          <input matInput 
+            currencyMask 
+            [options]="{ prefix: storeStore.selectedStore()?.currency }"
+            formControlName="other" 
+            placeholder="0.00">
+          <mat-icon matPrefix>add_circle_outline</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Total Price (Read-only calculated) -->
+    <div class="space-y-3">
+      <div class="text-sm font-semibold text-gray-700">Total Price (After Discount)</div>
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Total</mat-label>
+        <input matInput 
+          currencyMask 
+          [options]="{ prefix: storeStore.selectedStore()?.currency }"
+          formControlName="total" 
+          readonly
+          class="text-lg font-bold">
+        <mat-icon matPrefix>{{storeStore.selectedStore()?.currency}}</mat-icon>
+        <mat-hint>Subtotal - Discount + Taxes + Fees</mat-hint>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<!-- Dialog Actions -->
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="onCancel()">
+    Cancel
+  </button>
+  <button mat-raised-button color="primary" (click)="onSave()" [disabled]="!pricingForm.valid">
+    Save Changes
+  </button>
+</mat-dialog-actions>

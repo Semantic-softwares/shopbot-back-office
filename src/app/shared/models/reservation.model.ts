@@ -1,8 +1,13 @@
 export interface Reservation {
   _id: string;
   store?: string;
-  guest: Guest | string;
-  rooms: ReservationRoom[];
+  bookingType: BookingType;
+  numberOfAdults: number;
+  numberOfChildren: number;
+  groupOwnerType?: GroupOwnerType; // Required if bookingType === 'group'
+  guest: Guest; // Primary guest (owner for group, individual for single)
+  sharers?: Sharer[]; // Only for single bookings
+  rooms: ReservationRoom[] | any[];
   checkInDate: Date;
   checkOutDate: Date;
   actualCheckInDate?: Date;
@@ -14,7 +19,7 @@ export interface Reservation {
   bookingSource?: BookingSource;
   pricing: ReservationPricing;
   paymentInfo?: PaymentInfo;
-  guestDetails: GuestDetails;
+  additionalGuests?: AdditionalGuest[]; // Array of additional guest references
   specialRequests?: string;
   internalNotes?: string;
   cancellation?: CancellationInfo;
@@ -28,13 +33,34 @@ export interface Reservation {
   updatedAt: Date;
 }
 
+export type BookingType = 'single' | 'group';
+export type GroupOwnerType = 'corporate' | 'travel_agent';
+
+export interface Sharer {
+  guest: Guest | string;
+  checkInDate: Date;
+  checkOutDate: Date;
+}
+
 export interface Guest {
   _id: string;
-  firstName: string;
-  lastName: string;
+  guestType: GuestType;
+
+  // Individual Fields
+  firstName?: string;
+  lastName?: string;
+  dateOfBirth?: Date;
+
+  // Corporate/Agent Fields
+  companyName?: string;
+  companyRegistrationNumber?: string;
+  contactPersonFirstName?: string;
+  contactPersonLastName?: string;
+  contactPersonTitle?: string;
+
+  // Common Fields
   email: string;
   phone: string;
-  dateOfBirth?: Date;
   nationality?: string;
   address?: Address;
   idDocument?: IdDocument;
@@ -54,10 +80,13 @@ export interface Guest {
   updatedAt: Date
 }
 
+export type GuestType = 'individual' | 'corporate' | 'travel_agent';
+
 export interface Room {
   _id: string;
+  name: string;
   roomNumber: string;
-  roomType: string;
+  roomType: any; // Reference to RoomType or string ID
   floor?: number;
   status: RoomStatus;
   features?: RoomFeatures;
@@ -66,10 +95,22 @@ export interface Room {
 
 export interface ReservationRoom {
   room: Room | string;
+  assignedGuest?: Guest | string; // Required for group bookings
   guests: {
     adults: number;
     children: number;
   };
+  stayPeriod?: {
+    from: Date;
+    to: Date;
+    numberOfNights: number;
+  };
+  pricing?: {
+    pricePerNight: number;
+    totalPrice: number;
+    discount?: number;
+  };
+  notes?: string;
 }
 
 export interface ReservationPricing {
@@ -77,11 +118,13 @@ export interface ReservationPricing {
   subtotal: number;
   taxes: number;
   fees?: Fees;
-  discounts?: Discounts;
+  discounts?: number;
   total: number;
   paid: number;
   balance: number;
 }
+
+
 
 export interface RoomRate {
   date: Date;
@@ -116,23 +159,10 @@ export interface Transaction {
   status: string;
 }
 
-export interface GuestDetails {
-  primaryGuest: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-  };
-  additionalGuests?: AdditionalGuest[];
+export interface AdditionalGuest {
+  guest: Guest | string; // Reference to Guest document
   totalAdults: number;
   totalChildren: number;
-}
-
-export interface AdditionalGuest {
-  firstName?: string;
-  lastName?: string;
-  age?: number;
-  relationship?: string;
 }
 
 export interface CancellationInfo {
@@ -257,7 +287,9 @@ export type BookingSource =
   | 'walk_in' 
   | 'booking_com' 
   | 'expedia' 
-  | 'airbnb';
+  | 'airbnb'
+  | 'travel_agent'
+  | 'corporate';
 
 export type PaymentMethod = 
   | 'cash' 
@@ -280,8 +312,12 @@ export type ExtensionStatus =
 // DTOs for API operations
 export interface CreateReservationDto {
   store: string; // Required by schema
-  guest: string; // Required ObjectId - must be created first if new
-  guestDetails: GuestDetails; // Required by schema - missing from payload!
+  guest: string; // Required ObjectId - primary guest
+  additionalGuests?: {
+    guest: string; // Guest ObjectId reference
+    totalAdults: number;
+    totalChildren: number;
+  }[];
   rooms: {
     room: string; // Schema expects 'room' not 'roomId'
     guests: { adults: number; children: number };
@@ -292,11 +328,10 @@ export interface CreateReservationDto {
   expectedCheckInTime?: string;
   expectedCheckOutTime?: string;
   bookingSource?: BookingSource;
-  pricing: Omit<ReservationPricing, 'balance'>;
+  pricing: ReservationPricing;
   paymentInfo?: {
-    method?: PaymentMethod;
-    status?: PaymentStatus;
-    transactions?: Transaction[]; // Required by schema - missing from payload!
+    method?: PaymentMethod | any;
+    status?: PaymentStatus | any;
   };
   specialRequests?: string;
   internalNotes?: string;
@@ -305,7 +340,11 @@ export interface CreateReservationDto {
 
 export interface UpdateReservationDto {
   guest?: string;
-  guestDetails?: GuestDetails; // Include guestDetails for updates too
+  additionalGuests?: {
+    guest: string; // Guest ObjectId reference
+    totalAdults: number;
+    totalChildren: number;
+  }[];
   rooms?: {
     room: string; // Updated to match schema
     guests: { adults: number; children: number };

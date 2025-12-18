@@ -227,14 +227,15 @@ export class SummaryComponent implements OnInit {
     
     const chartData = this.getChartData(period);
 
-    this.currentChart = new Chart(ctx, {
-      type: 'line',
+    this.currentChart = new Chart(ctx as CanvasRenderingContext2D, {
+      type: 'line' as const,
       data: {
         labels: chartData.labels,
         datasets: [
           {
+            type: 'line' as const,
             label: this.activeLink,
-            data: chartData.data,
+            data: chartData.data as number[],
             borderColor: '#4CAF50',
             borderWidth: 2,
             fill: false,

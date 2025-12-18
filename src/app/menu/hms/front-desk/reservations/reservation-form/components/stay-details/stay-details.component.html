@@ -1,0 +1,74 @@
+<mat-card appearance="outlined">
+  <mat-card-header >
+    <mat-card-title>
+      Stay Details
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    @if (reservationForm()) {
+      <form [formGroup]="reservationForm()!">
+        <div class="space-y-4 py-3">
+          <!-- Check-in and Check-out Date Range -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Stay Dates</mat-label>
+            <mat-date-range-input [rangePicker]="stayPicker">
+              <input
+                matStartDate
+                formControlName="checkInDate"
+                placeholder="Check-in date"
+                (change)="onDateChange()"
+              />
+              <input
+                matEndDate
+                formControlName="checkOutDate"
+                placeholder="Check-out date"
+                (change)="onDateChange()"
+              />
+            </mat-date-range-input>
+            <mat-datepicker-toggle matSuffix [for]="stayPicker"></mat-datepicker-toggle>
+            <mat-hint>{{ numberOfNights() }} night(s)</mat-hint>
+            <mat-date-range-picker #stayPicker></mat-date-range-picker>
+          </mat-form-field>
+
+          <!-- Sales Person (Read-only) -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Sales Person</mat-label>
+            <input
+              
+              matInput
+              [value]="salesPersonName()"
+              readonly
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Number of Nights</mat-label>
+            <input
+            formControlName="numberOfNights"
+              matInput
+              
+              readonly
+            />
+          </mat-form-field>
+
+          <!-- Booking Source -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Booking Source</mat-label>
+            <mat-select formControlName="bookingSource">
+              <mat-option value="">-- Select Source --</mat-option>
+              <mat-option value="direct">Direct</mat-option>
+              <mat-option value="phone">Phone</mat-option>
+              <mat-option value="online">Online</mat-option>
+              <mat-option value="walk_in">Walk-in</mat-option>
+              <mat-option value="booking_com">Booking.com</mat-option>
+              <mat-option value="expedia">Expedia</mat-option>
+              <mat-option value="airbnb">Airbnb</mat-option>
+              <mat-option value="travel_agent">Travel Agent</mat-option>
+              <mat-option value="corporate">Corporate</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </form>
+    }
+  </mat-card-content>
+</mat-card>

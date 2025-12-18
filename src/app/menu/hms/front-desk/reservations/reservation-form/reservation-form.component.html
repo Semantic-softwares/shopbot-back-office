@@ -1,197 +1,158 @@
 <!-- Header Section -->
-<div class="bg-white shadow-sm border-b border-gray-200">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+  <div class="max-w-12xl  px-4 ">
     <div class="flex justify-between items-center py-4">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">
-          {{ isEditing() ? 'Edit Reservation' : 'New Reservation' }}
-        </h1>
-        <p class="text-sm text-gray-600 mt-1">
-          {{ isEditing() ? 'Update reservation details' : 'Create a new guest reservation' }}
-        </p>
+        @if (isEditing()) {
+          <!-- Edit Mode Header -->
+          <h1 class="text-2xl font-bold text-gray-900">
+            Edit Reservation
+          </h1>
+          <p class="text-sm text-gray-600 mt-1">
+            Confirmation: <span class="font-mono font-semibold text-gray-900">{{ reservation.value()?.confirmationNumber }}</span>
+          </p>
+        } @else {
+          <!-- Create Mode Header -->
+          <h1 class="text-2xl font-bold text-gray-900">
+            Create New {{ bookingType() === 'group' ? 'Group' : 'Single' }} Reservation
+          </h1>
+          <p class="text-sm text-gray-600 mt-1">
+            Create a new guest reservation
+          </p>
+        }
       </div>
       <div class="flex space-x-3">
-        <button 
-          mat-stroked-button 
-          (click)="onCancel()"
-          class="border-gray-300 text-gray-700 hover:bg-gray-50">
-          <mat-icon>arrow_back</mat-icon>
+        <button matButton="tonal"  (click)="onCancel()" class="border-gray-300 text-gray-700 hover:bg-gray-50">
+          <mat-icon>cancel</mat-icon>
           Cancel
         </button>
-        <button 
-          mat-raised-button 
-          color="primary"
-          (click)="onSubmit()"
-          [disabled]="loading() || reservationForm.invalid"
-          class="bg-blue-600 hover:bg-blue-700 text-white">
-          @if (loading()) {
-            <mat-icon class="animate-spin mr-2">refresh</mat-icon>
-          } @else {
-            <mat-icon class="mr-2">save</mat-icon>
-          }
-          {{ isEditing() ? 'Update Reservation' : 'Create Reservation' }}
-        </button>
+        @if (isEditing()) {
+          <!-- Edit Mode Actions -->
+          <button mat-stroked-button class="border-gray-300 text-gray-700 hover:bg-gray-50">
+            <mat-icon>check_circle_outline</mat-icon>
+            Check-in
+          </button>
+          <button mat-stroked-button class="border-gray-300 text-gray-700 hover:bg-gray-50">
+            <mat-icon>payment</mat-icon>
+            Payment
+          </button>
+          <button matButton="filled" color="primary" type="submit" (click)="onSubmit()">
+            <mat-icon>save</mat-icon>
+            Save
+          </button>
+        } @else {
+          <!-- Create Mode Actions -->
+          <button mat-stroked-button class="border-gray-300 text-gray-700 hover:bg-gray-50">
+            <mat-icon>event</mat-icon>
+            Reserve
+          </button>
+          <button mat-stroked-button class="border-gray-300 text-gray-700 hover:bg-gray-50">
+            <mat-icon>check_circle_outline</mat-icon>
+            Check-in
+          </button>
+          <button mat-stroked-button class="border-gray-300 text-gray-700 hover:bg-gray-50">
+            <mat-icon>payment</mat-icon>
+            Payment
+          </button>
+        }
+        
+        
       </div>
     </div>
   </div>
-</div>
+
 
 <!-- Loading State -->
-@if (loading()) {
-  <div class="flex justify-center items-center py-12">
-    <mat-spinner diameter="40"></mat-spinner>
-    <span class="ml-3 text-gray-600">
-      {{ isEditing() ? 'Loading reservation...' : 'Creating reservation...' }}
-    </span>
-  </div>
+@if (isEditing() && reservation.isLoading()) {
+<div class="flex justify-center items-center py-12">
+  <mat-spinner diameter="40"></mat-spinner>
+  <span class="ml-3 text-gray-600">
+    {{ isEditing() ? 'Loading reservation...' : 'Creating reservation...' }}
+  </span>
+</div>
 }
 
 <!-- Main Form Content -->
-@if (!loading()) {
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <!-- Error State -->
-    @if (error()) {
-      <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-        <div class="flex">
-          <mat-icon class="text-red-500 mr-3">error</mat-icon>
-          <div class="flex-1">
-            <h3 class="text-red-800 font-medium">Error</h3>
-            <p class="text-red-700 text-sm mt-1">{{ error() }}</p>
-            <button mat-button (click)="clearError()" class="mt-2">Dismiss</button>
-          </div>
-        </div>
+@if (reservation.hasValue()) {
+<div class="max-w-12xl px-4">
+  <!-- Error State -->
+  @if (reservation.error()) {
+  <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+    <div class="flex">
+      <mat-icon class="text-red-500 mr-3">error</mat-icon>
+      <div class="flex-1">
+        <h3 class="text-red-800 font-medium">Error</h3>
+        <p class="text-red-700 text-sm mt-1">{{ reservation.error() }}</p>
+        <button mat-button (click)="clearError()" class="mt-2">Dismiss</button>
       </div>
-    }
-
-    <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
-      <mat-stepper #stepper orientation="horizontal" linear="true">
-        
-        <!-- Step 1: Reservation Details -->
-        <mat-step [stepControl]="getReservationDetailsGroup()" label="Dates & Rooms">
-          <app-reservation-details-step
-            [reservationForm]="reservationForm"
-            [numberOfNights]="numberOfNights">
-          </app-reservation-details-step>
-
-          <!-- <app-room-selection-step
-            [reservationForm]="reservationForm"
-            [availableRooms]="availableRoomsResource.value() || []"
-            [numberOfNights]="numberOfNights"
-            (roomToggled)="onRoomToggled($event)"
-            (roomRemoved)="onRoomRemoved($event)">
-          </app-room-selection-step> -->
-
-          <!-- Step Navigation -->
-          <div class="flex justify-between pt-6">
-            <button mat-button type="button" disabled>Back</button>
-            <button 
-              mat-raised-button 
-              color="primary"
-              [disabled]="!getReservationDetailsGroup().valid"
-              (click)="stepper.next()">
-              Next
-            </button>
-          </div>
-        </mat-step>
-
-        <!-- Step 2: Guest Information -->
-        <mat-step [stepControl]="getGuestDetailsGroup()" label="Guest Information">
-          <!-- <app-guest-details-step
-            [guestDetailsForm]="getGuestDetailsGroup()"
-            (guestAdded)="onAddGuest()"
-            (guestRemoved)="onRemoveGuest($event)">
-          </app-guest-details-step> -->
-
-          <!-- Step Navigation -->
-          <div class="flex justify-between pt-6">
-            <button mat-button type="button" (click)="stepper.previous()">Back</button>
-            <button 
-              mat-raised-button 
-              color="primary"
-              [disabled]="!getGuestDetailsGroup().valid"
-              (click)="stepper.next()">
-              Next
-            </button>
-          </div>
-        </mat-step>
-
-        <!-- Step 3: Pricing Summary -->
-        <mat-step label="Pricing Summary">
-          <!-- <app-pricing-summary-step
-            [reservationForm]="reservationForm">
-          </app-pricing-summary-step> -->
-
-          <!-- Step Navigation -->
-          <div class="flex justify-between pt-6">
-            <button mat-button type="button" (click)="stepper.previous()">Back</button>
-            <button 
-              mat-raised-button 
-              color="primary"
-              (click)="stepper.next()">
-              Review & Complete
-            </button>
-          </div>
-        </mat-step>
-
-        <!-- Step 4: Review -->
-        <mat-step label="Review & Confirm">
-          <mat-card class="mb-6">
-            <mat-card-header>
-              <mat-card-title>Review Your Reservation</mat-card-title>
-              <mat-card-subtitle>Please verify all information before submitting</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <div class="space-y-4 text-sm">
-                <div class="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded">
-                  <div>
-                    <p class="text-gray-600">Check-in</p>
-                    <p class="font-semibold">
-                      {{ reservationForm.get('checkInDate')?.value | date: 'MMM d, y' }}
-                    </p>
-                  </div>
-                  <div>
-                    <p class="text-gray-600">Check-out</p>
-                    <p class="font-semibold">
-                      {{ reservationForm.get('checkOutDate')?.value | date: 'MMM d, y' }}
-                    </p>
-                  </div>
-                  <div>
-                    <p class="text-gray-600">Guest</p>
-                    <p class="font-semibold">
-                      {{ reservationForm.get('guestDetails.primaryGuest.firstName')?.value }}
-                      {{ reservationForm.get('guestDetails.primaryGuest.lastName')?.value }}
-                    </p>
-                  </div>
-                  <div>
-                    <p class="text-gray-600">Total</p>
-                    <p class="font-bold text-blue-600">
-                      {{ reservationForm.get('pricing.total')?.value | currency }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </mat-card-content>
-          </mat-card>
-
-          <!-- Step Navigation -->
-          <div class="flex justify-between pt-6">
-            <button mat-button type="button" (click)="stepper.previous()">Back</button>
-            <button 
-              mat-raised-button 
-              color="primary"
-              type="submit"
-              [disabled]="reservationForm.invalid || loading()">
-              @if (loading()) {
-                <mat-icon class="animate-spin mr-2">refresh</mat-icon>
-              } @else {
-                <mat-icon class="mr-2">check_circle</mat-icon>
-              }
-              {{ isEditing() ? 'Update Reservation' : 'Create Reservation' }}
-            </button>
-          </div>
-        </mat-step>
-
-      </mat-stepper>
-    </form>
+    </div>
   </div>
+  }
+
+  <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
+    <!-- Main Grid Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      
+      <!-- Row 1: Guest Details (2 cols) + Stay Details (1 col) + Payment Details (1 col) -->
+      
+      <!-- Guest Details Component - Top Row Left -->
+      <app-guest-details
+        class="lg:col-span-2"
+        [guest]="selectedGuest()"
+        (guestAdded)="onAddGuest()"
+        (guestEdited)="onEditGuest()"
+        (guestDeleted)="onDeleteGuest()"
+        (guestSelected)="onGuestSelected($event)"
+      ></app-guest-details>
+
+      <!-- Stay Details Component - Top Row Center -->
+      <app-stay-details
+        [quickReservation]="quickReservation()"
+        [isEditing]="isEditing()"
+      ></app-stay-details>
+
+      <!-- Payment Details Component - Top Row Right -->
+       <payment-info [reservationForm]="reservationForm"/>
+     
+
+      @if (isSingleBooking()) {
+        <!-- Row 2: Room Sharers Component - Only for Single Reservation -->
+      <app-room-sharers
+        class="lg:col-span-4"
+        [quickReservation]="quickReservation()"
+        [(selectedGuest)]="selectedGuest"
+        (selectedGuestChange)="onSelectedGuestChange($event)"
+        [isEditing]="isEditing()"
+        (sharerAdded)="onAddSharer()"
+        (sharerEdited)="onEditSharer($event)"
+        (sharerDeleted)="onDeleteSharer($event)"
+      ></app-room-sharers>
+      } @else {
+        <!-- Row 2: Room Details Component - Only for Group Reservation -->
+      <app-room-details class="lg:col-span-4" [selectedRoomIds]="selectedRoomIds()" />
+      }
+
+      <!-- Row 3: Special Requests & Notes - Full Width -->
+      <app-special-requests
+        class="lg:col-span-4"
+        [reservationForm]="reservationForm"
+      
+        
+      ></app-special-requests>
+<!-- <pre>{{reservationForm.value | json}}</pre> -->
+    </div>
+
+    <!-- Form Actions -->
+    <div class="mt-8 flex justify-between">
+      <button mat-stroked-button type="button" (click)="onCancel()">
+        <mat-icon class="mr-2">close</mat-icon>
+        Cancel
+      </button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="reservationForm.invalid">
+        <mat-icon class="mr-2">save</mat-icon>
+        {{ isEditing() ? 'Update Reservation' : 'Create Reservation' }}
+      </button>
+    </div>
+  </form>
+</div>
 }

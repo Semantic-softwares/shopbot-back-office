@@ -1,0 +1,434 @@
+  @if (isEditing()) {
+    @if (isChildGuest()) {
+      <h2 mat-dialog-title class="text-xl font-bold mb-4">Edit Child Guest</h2>
+    } @else if (guestType() === 'individual') {
+      <h2 mat-dialog-title class="text-xl font-bold mb-4">Edit Individual Guest</h2>
+    } @else {
+      <h2 mat-dialog-title class="text-xl font-bold mb-4">Edit Company Guest</h2>
+    }
+  } @else {
+    @if (isChildGuest()) {
+      <h2 mat-dialog-title class="text-xl font-bold mb-4">Create Child Guest</h2>
+    } @else if (guestType() === 'individual') {
+      <h2 mat-dialog-title class="text-xl font-bold mb-4">Create Individual Guest</h2>
+    } @else {
+      <h2 mat-dialog-title class="text-xl font-bold mb-4">Create Company Guest</h2>
+    }
+  }
+  
+  <mat-dialog-content class="max-h-[70vh] overflow-y-auto">
+    <!-- Guest Search Section -->
+    @if (!isEditing()) {
+      <div class="mb-6 pb-6 border-b border-gray-200">
+        <h4 class="font-semibold text-sm text-gray-700 mb-3">Search Existing Guest</h4>
+        <p class="text-xs text-gray-500 mb-3">Search and select an existing guest to auto-fill the form</p>
+        <app-guest-search
+          label="Select Guest"
+          placeholder="Search by name or email..."
+          (guestSelected)="onSelectExistingGuest($event)"
+        ></app-guest-search>
+      </div>
+    }
+    
+    <form [formGroup]="guestForm" class="space-y-6">
+      <!-- Basic Information -->
+      <div>
+        @if (guestType() === 'individual') {
+          <h4 class="font-semibold text-sm text-gray-700 mb-3">Individual Information</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- First Name -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>First Name</mat-label>
+              <input 
+                matInput 
+                formControlName="firstName" 
+                placeholder="Enter first name"
+                required
+              />
+              @if (guestForm.get('firstName')?.hasError('required') && guestForm.get('firstName')?.touched) {
+                <mat-error>First name is required</mat-error>
+              }
+              @if (guestForm.get('firstName')?.hasError('minlength') && guestForm.get('firstName')?.touched) {
+                <mat-error>First name must be at least 2 characters</mat-error>
+              }
+            </mat-form-field>
+
+            <!-- Last Name -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Last Name</mat-label>
+              <input 
+                matInput 
+                formControlName="lastName" 
+                placeholder="Enter last name"
+                required
+              />
+              @if (guestForm.get('lastName')?.hasError('required') && guestForm.get('lastName')?.touched) {
+                <mat-error>Last name is required</mat-error>
+              }
+              @if (guestForm.get('lastName')?.hasError('minlength') && guestForm.get('lastName')?.touched) {
+                <mat-error>Last name must be at least 2 characters</mat-error>
+              }
+            </mat-form-field>
+
+            <!-- Date of Birth -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Date of Birth</mat-label>
+              <input 
+                matInput 
+                formControlName="dateOfBirth" 
+                [matDatepicker]="dateOfBirthPicker"
+                placeholder="Select date of birth"
+                readonly
+              />
+              <mat-datepicker-toggle matIconSuffix [for]="dateOfBirthPicker"></mat-datepicker-toggle>
+              <mat-datepicker #dateOfBirthPicker></mat-datepicker>
+            </mat-form-field>
+
+            <!-- Nationality -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Nationality</mat-label>
+              <mat-select formControlName="nationality" placeholder="Select nationality">
+                @for (nat of nationalities(); track nat.code) {
+                  <mat-option [value]="nat.name">{{ nat.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        } @else {
+          <h4 class="font-semibold text-sm text-gray-700 mb-3">Company Information</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Company Name -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Company Name</mat-label>
+              <input 
+                matInput 
+                formControlName="companyName" 
+                placeholder="Enter company name"
+                required
+              />
+              @if (guestForm.get('companyName')?.hasError('required') && guestForm.get('companyName')?.touched) {
+                <mat-error>Company name is required</mat-error>
+              }
+              @if (guestForm.get('companyName')?.hasError('minlength') && guestForm.get('companyName')?.touched) {
+                <mat-error>Company name must be at least 2 characters</mat-error>
+              }
+            </mat-form-field>
+
+            <!-- Company Registration Number -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Registration Number</mat-label>
+              <input 
+                matInput 
+                formControlName="companyRegistrationNumber" 
+                placeholder="Enter registration number"
+              />
+            </mat-form-field>
+
+            <!-- Contact Person First Name -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Contact Person First Name</mat-label>
+              <input 
+                matInput 
+                formControlName="contactPersonFirstName" 
+                placeholder="Enter first name"
+                required
+              />
+              @if (guestForm.get('contactPersonFirstName')?.hasError('required') && guestForm.get('contactPersonFirstName')?.touched) {
+                <mat-error>First name is required</mat-error>
+              }
+              @if (guestForm.get('contactPersonFirstName')?.hasError('minlength') && guestForm.get('contactPersonFirstName')?.touched) {
+                <mat-error>First name must be at least 2 characters</mat-error>
+              }
+            </mat-form-field>
+
+            <!-- Contact Person Last Name -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Contact Person Last Name</mat-label>
+              <input 
+                matInput 
+                formControlName="contactPersonLastName" 
+                placeholder="Enter last name"
+                required
+              />
+              @if (guestForm.get('contactPersonLastName')?.hasError('required') && guestForm.get('contactPersonLastName')?.touched) {
+                <mat-error>Last name is required</mat-error>
+              }
+              @if (guestForm.get('contactPersonLastName')?.hasError('minlength') && guestForm.get('contactPersonLastName')?.touched) {
+                <mat-error>Last name must be at least 2 characters</mat-error>
+              }
+            </mat-form-field>
+
+            <!-- Contact Person Title -->
+            <mat-form-field appearance="outline" class="w-full md:col-span-2">
+              <mat-label>Contact Person Title</mat-label>
+              <input 
+                matInput 
+                formControlName="contactPersonTitle" 
+                placeholder="e.g. Manager, Director"
+              />
+            </mat-form-field>
+          </div>
+        }
+      </div>
+
+      <!-- Contact Information -->
+      @if (!isChildGuest()) {
+        <div>
+          <h4 class="font-semibold text-sm text-gray-700 mb-3">Contact Information</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Email -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Email</mat-label>
+              <input 
+                matInput 
+                formControlName="email" 
+                placeholder="Enter email address"
+                type="email"
+                required
+              />
+              @if (guestForm.get('email')?.hasError('required') && guestForm.get('email')?.touched) {
+                <mat-error>Email is required</mat-error>
+              }
+              @if (guestForm.get('email')?.hasError('email') && guestForm.get('email')?.touched) {
+                <mat-error>Please enter a valid email</mat-error>
+              }
+            </mat-form-field>
+
+            <!-- Phone -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Phone</mat-label>
+              <input 
+                matInput 
+                formControlName="phone" 
+                placeholder="Enter phone number"
+              />
+            </mat-form-field>
+          </div>
+        </div>
+      }
+
+      <!-- Additional Details -->
+      @if (!isChildGuest()) {
+        <div>
+          <h4 class="font-semibold text-sm text-gray-700 mb-3">Additional Details</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Nationality -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Nationality</mat-label>
+              <mat-select formControlName="nationality">
+                <mat-option value="">-- Select Nationality --</mat-option>
+                @for (nationality of nationalities(); track nationality.code) {
+                  <mat-option [value]="nationality.name">
+                    {{ nationality.name }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      }
+
+      <!-- ID Document Information -->
+      @if (!isChildGuest()) {
+        <div [formGroup]="idDocumentForm">
+          <h4 class="font-semibold text-sm text-gray-700 mb-3">ID Document</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Document Type -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Document Type</mat-label>
+            <mat-select formControlName="type">
+              <mat-option value="passport">Passport</mat-option>
+              <mat-option value="national_id">National ID</mat-option>
+              <mat-option value="drivers_license">Driver's License</mat-option>
+              <mat-option value="other">Other</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Document Number -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Document Number</mat-label>
+            <input 
+              matInput 
+              formControlName="number" 
+              placeholder="Enter document number"
+            />
+          </mat-form-field>
+
+          <!-- Expiry Date -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Expiry Date</mat-label>
+            <input 
+              matInput 
+              formControlName="expiryDate" 
+              [matDatepicker]="expiryDatePicker"
+              placeholder="Select expiry date"
+              readonly
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="expiryDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #expiryDatePicker></mat-datepicker>
+          </mat-form-field>
+
+          <!-- Issuing Country -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Issuing Country</mat-label>
+            <mat-select formControlName="issuingCountry">
+              <mat-option value="">-- Select Country --</mat-option>
+              @for (country of countries(); track country.code) {
+                <mat-option [value]="country.name">
+                  {{ country.name }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+      }
+
+      <!-- Address Information -->
+      @if (!isChildGuest()) {
+        <div [formGroup]="addressForm">
+          <h4 class="font-semibold text-sm text-gray-700 mb-3">Address</h4>
+        <div class="space-y-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Street</mat-label>
+            <input 
+              matInput 
+              formControlName="street" 
+              placeholder="Enter street address"
+            />
+          </mat-form-field>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>City</mat-label>
+              <input 
+                matInput 
+                formControlName="city" 
+                placeholder="Enter city"
+              />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>State/Province</mat-label>
+              <input 
+                matInput 
+                formControlName="state" 
+                placeholder="Enter state/province"
+              />
+            </mat-form-field>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Country</mat-label>
+              <mat-select formControlName="country">
+                <mat-option value="">-- Select Country --</mat-option>
+                @for (country of countries(); track country.code) {
+                  <mat-option [value]="country.name">
+                    {{ country.name }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Postal Code</mat-label>
+              <input 
+                matInput 
+                formControlName="postalCode" 
+                placeholder="Enter postal code"
+              />
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- Emergency Contact Information -->
+      @if (!isChildGuest()) {
+        <div [formGroup]="emergencyContactForm">
+          <h4 class="font-semibold text-sm text-gray-700 mb-3">Emergency Contact</h4>
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Name</mat-label>
+                <input 
+                  matInput 
+                  formControlName="name" 
+                  placeholder="Emergency contact name"
+                />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Relationship</mat-label>
+                <input 
+                  matInput 
+                  formControlName="relationship" 
+                  placeholder="e.g., Family, Friend"
+                />
+              </mat-form-field>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Phone</mat-label>
+                <input 
+                  matInput 
+                  formControlName="phone" 
+                  placeholder="Emergency contact phone"
+                />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Email</mat-label>
+                <input 
+                  matInput 
+                  formControlName="email" 
+                  placeholder="Emergency contact email"
+                  type="email"
+                />
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Notes -->
+      @if (!isChildGuest()) {
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Notes</mat-label>
+          <textarea 
+            matInput 
+            formControlName="notes" 
+            placeholder="Add any additional notes about the guest"
+            rows="3"
+          ></textarea>
+        </mat-form-field>
+      }
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="pt-4">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button 
+      mat-raised-button 
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="isSaving() || guestForm.invalid"
+    >
+      @if (isSaving()) {
+        <mat-icon class="animate-spin mr-2">refresh</mat-icon>
+      } @else {
+        @if (isEditing()) {
+          <mat-icon class="mr-2">edit_outline</mat-icon>
+        } @else {
+          <mat-icon class="mr-2">person_add</mat-icon>
+        }
+      }
+      @if (isEditing()) {
+        Update Guest
+      } @else {
+        Create Guest
+      }
+    </button>
+  </mat-dialog-actions>

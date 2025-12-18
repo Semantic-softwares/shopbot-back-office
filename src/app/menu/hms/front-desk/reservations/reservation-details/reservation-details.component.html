@@ -55,9 +55,9 @@
                 <button 
                   mat-menu-item 
                   (click)="updateReservationStatus(status.value)"
-                  class="!text-gray-700 hover:!bg-gray-50 !transition-colors">
+                  >
                   <mat-icon 
-                    class="mr-3 !text-base" 
+                    class="mr-3 text-base" 
                     [style.color]="status.color">{{ status.icon }}</mat-icon>
                   <span>{{ status.label }}</span>
                 </button>
@@ -166,7 +166,15 @@
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Occupancy</label>
-                <div class="text-sm text-gray-600">{{ reservation()!.guestDetails.totalAdults }} Adults, {{ reservation()!.guestDetails.totalChildren }} Children</div>
+                <div class="text-sm text-gray-600">
+                  @if (hasAdditionalGuests()) {
+                    @for (guest of reservation()!.additionalGuests; track $index) {
+                      <div>{{ getGuestName(guest.guest) }}: {{ guest.totalAdults }} Adults, {{ guest.totalChildren }} Children</div>
+                    }
+                  } @else {
+                    <div>No additional guests</div>
+                  }
+                </div>
               </div>
             </div>
           </div>
@@ -680,14 +688,18 @@
           </div>
           <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              @for (guest of reservation()!.guestDetails.additionalGuests; track $index) {
+              @for (additionalGuest of reservation()!.additionalGuests; track $index) {
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <div class="font-medium text-gray-900">{{ guest.firstName }} {{ guest.lastName }}</div>
-                  @if (guest.age) {
-                    <div class="text-sm text-gray-600">Age: {{ guest.age }}</div>
-                  }
-                  @if (guest.relationship) {
-                    <div class="text-sm text-gray-600">{{ guest.relationship }}</div>
+                  @if (additionalGuest.guest) {
+                    <div class="font-medium text-gray-900">{{ getGuestName(additionalGuest.guest) }}</div>
+                    @if (additionalGuest.totalAdults) {
+                      <div class="text-sm text-gray-600">Adults: {{ additionalGuest.totalAdults }}</div>
+                    }
+                    @if (additionalGuest.totalChildren) {
+                      <div class="text-sm text-gray-600">Children: {{ additionalGuest.totalChildren }}</div>
+                    }
+                  } @else {
+                    <div class="text-sm text-gray-600">Unknown Guest</div>
                   }
                 </div>
               }

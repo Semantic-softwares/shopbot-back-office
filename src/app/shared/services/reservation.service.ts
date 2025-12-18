@@ -121,7 +121,7 @@ export class ReservationService {
   }
 
   // Update reservation
-  updateReservation(id: string, reservationData: UpdateReservationDto): Observable<Reservation> {
+  updateReservation(id: string, reservationData: any): Observable<Reservation> {
     this.loadingSubject.next(true);
     this.errorSubject.next(null);
 

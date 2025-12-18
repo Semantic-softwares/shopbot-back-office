@@ -1,0 +1,181 @@
+<!-- Room Details Card - Only for Group Reservation -->
+<mat-card appearance="outlined">
+    <mat-card-header>
+        <mat-card-title>
+            Selected Rooms
+        </mat-card-title>
+        <mat-card-subtitle>
+            {{ totalRooms() }} room(s) - Total Capacity: {{ totalCapacity() }} guest(s)
+        </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+        <!-- Loading State -->
+        @if (isLoading()) {
+        <div class="flex justify-center items-center py-8">
+            <mat-spinner diameter="40"></mat-spinner>
+            <span class="ml-3 text-gray-600">Loading room details...</span>
+        </div>
+        }
+
+        <!-- Error State -->
+        @if (error()) {
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <div class="flex">
+                <mat-icon class="text-red-500 mr-3">error</mat-icon>
+                <div>
+                    <h3 class="text-red-800 font-medium">Error</h3>
+                    <p class="text-red-700 text-sm mt-1">{{ error() }}</p>
+                </div>
+            </div>
+        </div>
+        }
+
+        <!-- Room List with Breakdown Summary -->
+        @if (!isLoading() && !error() && getRoomsFormArray()?.length! > 0) {
+        <div [formGroup]="reservationForm()!">
+        <div class="overflow-x-auto">
+            <div formArrayName="rooms">
+
+
+                <!-- Room Rows -->
+                @for (room of getRoomsFormArray()?.controls || []; let i = $index; track i) {
+                <div [formGroupName]="i"
+                    class="grid gap-3 p-3 border-b border-gray-200 items-center text-xs hover:bg-gray-50"
+                    style="grid-template-columns: 1.2fr 1fr 1.2fr 1fr 1fr 1.2fr 0.8fr;">
+
+                    <!-- Room Type Select -->
+                    <div>
+                        <mat-form-field class="w-full" appearance="outline">
+                            <mat-label>Room Type</mat-label>
+                            <mat-select formControlName="roomType" class="text-xs"
+                                (selectionChange)="onRoomTypeChange(i, $event.value)">
+                                @for (type of roomTypes(); track type._id || type.id) {
+                                <mat-option [value]="type._id || type.id">
+                                    {{ type.name }}
+                                </mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Room Select -->
+                    <div>
+                        <mat-form-field class="w-full" appearance="outline">
+                            <mat-label>Room</mat-label>
+                            <mat-select formControlName="room" class="text-xs"
+                                (selectionChange)="onRoomChange(i, $event.value)">
+                                <mat-option value="">-- Select Room --</mat-option>
+                                @for (r of filterRoomsByType(getRoomsFormArray()?.at(i)?.get('roomType')?.value, i);
+                                track r._id) {
+                                <mat-option [value]="r._id">
+                                    {{ r.roomNumber }}
+                                </mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Guest -->
+                    <div>
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Assigned Guest</mat-label>
+                            <input matInput
+                                [value]="getRoomsFormArray()?.at(i)?.get('assignedGuestName')?.value || 'Select a guest'"
+                                placeholder="Select or create guest" class="text-xs" readonly>
+                            <button mat-icon-button matPrefix color="primary" (click)="onAddOrChangeGuest(i)"
+                                type="button" matTooltip="Add or change guest">
+                                <mat-icon class="text-sm">person_add</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Adults/Children -->
+                    <div formGroupName="guests" class="flex gap-2">
+                        <mat-form-field appearance="outline" class="flex-1">
+                            <mat-label>Adults</mat-label>
+                            <input matInput type="number" formControlName="adults" min="1" class="text-xs">
+                            <mat-icon matPrefix class="text-sm">person</mat-icon>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="flex-1">
+                            <mat-label>Children</mat-label>
+                            <input matInput type="number" formControlName="children" min="0" class="text-xs">
+                            <mat-icon matPrefix class="text-sm">child_care</mat-icon>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Check-in / Check-out Date Range -->
+                    <div formGroupName="stayPeriod">
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Stay Period</mat-label>
+                            <mat-date-range-input [rangePicker]="dateRangePicker" 
+                                [min]="getMinDate()" 
+                                [max]="getMaxDate()">
+                                <input matStartDate formControlName="from" placeholder="Start date" (dateChange)="onStayPeriodChange(i)" class="text-xs">
+                                <input matEndDate formControlName="to" placeholder="End date" (dateChange)="onStayPeriodChange(i)" class="text-xs">
+                            </mat-date-range-input>
+                            <mat-datepicker-toggle matIconSuffix [for]="dateRangePicker"></mat-datepicker-toggle>
+                            <mat-date-range-picker #dateRangePicker></mat-date-range-picker>
+                            <mat-hint>
+                                {{ getRoomsFormArray()?.at(i)?.get('stayPeriod')?.get('numberOfNights')?.value || 0 }} night(s)
+                            </mat-hint>
+                            @if (getRoomsFormArray()?.at(i)?.get('stayPeriod')?.get('from')?.hasError('required')) {
+                            <mat-error>Check-in date is required</mat-error>
+                            }
+                            @if (getRoomsFormArray()?.at(i)?.get('stayPeriod')?.get('to')?.hasError('required')) {
+                            <mat-error>Check-out date is required</mat-error>
+                            }
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Price -->
+                    <div formGroupName="pricing">
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Price</mat-label>
+                            <input matInput currencyMask [options]="{ prefix: storeStore!.selectedStore()?.currency }"
+                                formControlName="totalPrice" placeholder="0.00"
+                                class="text-xs text-right font-semibold" readonly>
+                            <span matPrefix class="text-gray-600"> {{storeStore!.selectedStore()?.currency}}</span>
+                            <button mat-icon-button matSuffix color="primary" (click)="onEditPrice(i)"
+                                type="button" matTooltip="Edit price">
+                                <mat-icon class="text-sm">edit</mat-icon>
+                            </button>
+                            <mat-hint>
+                                Total: {{ price(i)  | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                            </mat-hint>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Delete Action -->
+                    <div class="flex justify-center">
+                        <button type="button" mat-icon-button color="warn" (click)="removeRoom(i)"
+                            matTooltip="Remove room" class="h-8 w-8">
+                            <mat-icon class="text-sm">delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+
+            <!-- Breakdown Summary Section (Below) -->
+            <break-down-total />
+        </div>
+        }
+
+        <!-- Empty State -->
+        @if (!isLoading() && !error() && getRoomsFormArray()?.length === 0) {
+        <div class="text-center py-8 text-gray-500">
+            <mat-icon class="text-4xl text-gray-300 mb-2">meeting_room</mat-icon>
+            <p class="text-sm">No rooms selected</p>
+        </div>
+        }
+        <!-- <pre>{{ getRoomsFormArray()?.value| json }}</pre> -->
+    </mat-card-content>
+    <mat-card-actions align="start" class="border-t border-gray-200 pt-4 flex justify-end gap-2">
+        <a matButton="filled" color="primary" (click)="onCreateRoom()">
+            <mat-icon class="material-icons-outlined">add</mat-icon>
+            ADD MORE ROOM(S)
+        </a>
+    </mat-card-actions>
+</mat-card>

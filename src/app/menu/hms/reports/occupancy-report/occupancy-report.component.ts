@@ -142,7 +142,7 @@ export class OccupancyReportComponent implements OnInit, OnDestroy {
               style: 'currency',
               currency: currency
             });
-            return `Revenue: ${formatter.format(context.parsed.y)}`;
+            return `Revenue: ${formatter.format(context.parsed.y ?? 0)}`;
           }
         }
       }

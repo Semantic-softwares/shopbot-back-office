@@ -1,0 +1,37 @@
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <mat-card-title>
+      Special Requests & Notes
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div [formGroup]="getReservationForm()" class="space-y-4">
+      <!-- Special Requests Field -->
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Special Requests</mat-label>
+        <textarea
+          matInput
+          formControlName="specialRequests"
+          placeholder="e.g., High floor, late arrival, anniversary celebration, dietary requirements..."
+          rows="3"
+          class="text-sm"
+        ></textarea>
+        <mat-hint>Enter any special requests from the guest (visible to guest)</mat-hint>
+      </mat-form-field>
+
+      <!-- Internal Notes Field -->
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Internal Notes</mat-label>
+        <textarea
+          matInput
+          formControlName="internalNotes"
+          placeholder="e.g., Guest prefers quiet hours, previous complaints, VIP notes, maintenance issues..."
+          rows="3"
+          class="text-sm"
+        ></textarea>
+        <mat-hint>Internal notes visible only to staff (not shown to guest)</mat-hint>
+      </mat-form-field>
+    </div>
+  </mat-card-content>
+</mat-card>

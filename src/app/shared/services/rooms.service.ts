@@ -94,6 +94,21 @@ export class RoomsService {
   }
 
   /**
+   * Get multiple rooms by their IDs
+   */
+  getRoomsByIds(roomIds: string[]): Observable<Room[]> {
+    if (!roomIds || roomIds.length === 0) {
+      return new Observable(observer => {
+        observer.next([]);
+        observer.complete();
+      });
+    }
+    
+    const params = new HttpParams().set('ids', roomIds.join(','));
+    return this.http.get<Room[]>(`${this.baseUrl}/rooms/batch`, { params });
+  }
+
+  /**
    * Create a new room
    */
   createRoom(storeId: string, roomData: CreateRoomRequest): Observable<Room> {

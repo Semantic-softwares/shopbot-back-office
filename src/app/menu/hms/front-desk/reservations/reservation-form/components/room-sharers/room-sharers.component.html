@@ -1,0 +1,145 @@
+<!-- Room Sharers Card - Only for Single Reservation -->
+<mat-card appearance="outlined" [formGroup]="reservationForm()!">
+  <mat-card-header>
+      <mat-card-title>
+        Room Sharers
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ getSharersFormArray().length }} / {{ (reservationForm()!.get('numberOfAdults')?.value || 1) + (reservationForm()!.get('numberOfChildren')?.value || 0) }} Guests
+      </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content formArrayName="sharers">
+
+    <!-- TailwindCSS Guest List -->
+    <div class="py-4 space-y-3">
+      @for (element of getSharersFormArray().controls; track trackByIndex($index); let i = $index) {
+        <div class="border border-gray-200 rounded-lg" [formGroup]="asFormGroup(element)">
+          <!-- Table-like Row -->
+          <div class="flex items-center gap-3 p-4">
+            <!-- ID Badge -->
+            <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold min-w-fit">
+              P{{ i + 1 }}
+            </span>
+            
+            <!-- Guest Name -->
+            <div class="flex items-center gap-2 min-w-[180px]">
+              <mat-icon class="text-gray-400">person</mat-icon>
+              <div class="flex flex-col">
+                <span class="font-medium text-gray-900 truncate">
+                  {{ getSharerName(element) || 'Unassigned Guest' }}
+                </span>
+                <span class="text-xs text-gray-500 uppercase">
+                  {{ element.get('ageGrade')?.value || 'Adult' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Date Range Picker -->
+            <mat-form-field appearance="outline" class="min-w-[220px] w-[220px]">
+              <mat-label>Check-in to Check-out</mat-label>
+              <mat-date-range-input [rangePicker]="picker" [min]="getReservationMinDate()" [max]="getReservationMaxDate()">
+                <input
+                  matStartDate
+                  formControlName="checkInDate"
+                  placeholder="Start date"
+                  
+                />
+                <input
+                  matEndDate
+                  formControlName="checkOutDate"
+                  placeholder="End date"
+                />
+              </mat-date-range-input>
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-date-range-picker #picker ></mat-date-range-picker>
+              <mat-hint>{{ calculateNights(element.get('checkInDate')?.value, element.get('checkOutDate')?.value) }} night(s)</mat-hint>
+            </mat-form-field>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-1 ml-auto">
+              <button
+                mat-icon-button
+                matTooltip="{{ !hasPrimaryGuest() && element.get('ageGrade')?.value === 'child' ? 'Assign primary guest first' : 'Edit Guest' }}"
+                (click)="editSharer(i, element.get('ageGrade')?.value)"
+                [disabled]="!hasPrimaryGuest() && element.get('ageGrade')?.value === 'child'"
+                [ngClass]="!hasPrimaryGuest() && element.get('ageGrade')?.value === 'child' ? 'text-gray-300' : 'text-blue-600 hover:bg-blue-50'"
+              >
+                <mat-icon class="material-icons-outlined">edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                matTooltip="Delete Guest"
+                [disabled]="i === 0"
+                (click)="deleteSharer(i)"
+                
+                [ngClass]="i === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-red-600 hover:bg-red-50'"
+              >
+                <mat-icon class="material-icons-outlined">delete</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                matTooltip="CHECK-IN"
+                (click)="onSharerHome(i)"
+                [ngClass]="i === 0 ? 'text-blue-600 hover:bg-blue-50' : 'text-gray-400 hover:bg-gray-100'"
+              >
+                <mat-icon class="material-icons-outlined">login</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <div class="text-center py-8 text-gray-500">
+          <mat-icon class="text-4xl text-gray-300 mb-2">group_off</mat-icon>
+          <p class="text-sm">No guests added yet</p>
+        </div>
+      }
+
+      @if (roomsResource.hasValue()) {
+        <!-- Breakdown Summary Section (Below) -->
+        <break-down-total />
+      } @else {
+        <div class="text-center py-8 text-gray-500">
+          <mat-icon class="text-4xl text-gray-300 mb-2">meeting_room</mat-icon>
+          <p class="text-sm">No rooms assigned yet</p>
+        </div>
+      }
+
+    </div>
+
+  
+  </mat-card-content>
+  <mat-card-actions align="start" class="border-t border-gray-200 pt-4 flex justify-end gap-2">
+    <button 
+      matButton 
+      color="accent" 
+      (click)="onEditRoomPricing()"
+      class="mt-2">
+      <mat-icon class="material-icons-outlined">attach_money</mat-icon>
+      Edit Pricing
+    </button>
+
+    <button 
+      matButton 
+      color="secondary" 
+      (click)="onAddInfants()" 
+      [disabled]="!hasPrimaryGuest()"
+      [matTooltip]="!hasPrimaryGuest() ? 'Please assign a primary guest first' : ''"
+      class="mt-2">
+      <mat-icon class="material-icons-outlined">infant</mat-icon>
+      Add Infant(s)
+    </button>
+
+    <button matButton="outlined" color="primary" (click)="onGuestCheckIn()">
+        <mat-icon class="material-icons-outlined">login</mat-icon>
+        GUEST CHECK-IN
+      </button>
+
+      <a matButton="filled" color="primary" (click)="onCreateGuest()">
+        <mat-icon class="material-icons-outlined">person_add</mat-icon>
+        ADD MORE GUEST(S)
+      </a>
+  </mat-card-actions>
+</mat-card>
+ 
+

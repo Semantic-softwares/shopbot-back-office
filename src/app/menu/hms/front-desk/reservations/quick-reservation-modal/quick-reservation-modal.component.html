@@ -1,0 +1,112 @@
+<div class="flex justify-between items-center">
+    <h2 mat-dialog-title>Add Quick Reservation</h2>
+    <div class="flex items-center space-x-2 pr-4">
+        <span class="text-gray-600 font-medium">Total:</span>
+        <span class="text-lg font-bold text-blue-600">
+            {{ totalAmount() | currency: (storeStore.selectedStore()?.currency || storeStore.selectedStore()?.currencyCode || '$') }}
+        </span>
+    </div>
+</div>
+
+<mat-dialog-content>
+    <form [formGroup]="quickReservationForm">
+        <div class="space-y-4">
+            <!-- Booking Type Selection -->
+            <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Booking Type</mat-label>
+                <mat-select formControlName="bookingType">
+                    <mat-option value="single">Single</mat-option>
+                    <mat-option value="group">Group</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Check-in and Check-out Date Range -->
+            <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Stay Dates</mat-label>
+                <mat-date-range-input [min]="minDate()" [rangePicker]="picker" formGroupName="dateRange">
+                    <input matStartDate formControlName="start" placeholder="Check-in" readonly />
+                    <span matDateRangeSeparator>–</span>
+                    <input matEndDate formControlName="end" placeholder="Check-out" readonly />
+                </mat-date-range-input>
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-date-range-picker #picker ></mat-date-range-picker>
+            </mat-form-field>
+
+            <!-- Room Type Selection -->
+            <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Room Type</mat-label>
+                <mat-select [formControl]="roomTypeField">
+                    <mat-option value="">All Room Types</mat-option>
+                    @for (roomType of uniqueRoomTypes(); track roomType) {
+                    <mat-option [value]="roomType">{{ roomType }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Room Selection -->
+            @if (availableRoomsResource.isLoading()) {
+            <div class="flex justify-center py-4">
+                <mat-spinner diameter="40"></mat-spinner>
+            </div>
+            } @else if ((availableRoomsResource.value() || []).length > 0) {
+                @if (bookingType() === 'single') {
+                <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Select Room</mat-label>
+                    <mat-select formControlName="selectedRoom">
+                        @for (room of filteredRooms(); track room._id || room.id) {
+                        <mat-option [value]="room._id || room.id">
+                            {{ room.name }}
+                            @if (room.roomNumber) {
+                            - Room #{{ room.roomNumber }}
+                            }
+                        </mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+                } @else {
+                <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Select Rooms</mat-label>
+                    <mat-select formControlName="selectedRoom" multiple>
+                        @for (room of filteredRooms(); track room._id || room.id) {
+                        <mat-option [value]="room._id || room.id">
+                            {{ room.name }}
+                            @if (room.roomNumber) {
+                            - Room #{{ room.roomNumber }}
+                            }
+                        </mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+                }
+            } @else if ((availableRoomsResource.value() || []).length === 0 && !availableRoomsResource.isLoading()) {
+            <p class="text-gray-500 text-sm text-center py-4">No rooms available for selected dates</p>
+            } @else {
+            <p class="text-gray-500 text-sm text-center py-4">Select a room type to see available rooms</p>
+            }
+
+            <!-- Adults Count -->
+            <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Number of Adults</mat-label>
+                <input matInput type="number" formControlName="adults"  />
+            </mat-form-field>
+
+            <!-- Children Count -->
+            <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Number of Children</mat-label>
+                <input matInput type="number" formControlName="children"  />
+            </mat-form-field>
+
+            
+        </div>
+    </form>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="space-x-2 mt-6">
+    <button matButton="outlined" (click)="onCancel()">
+        Cancel
+    </button>
+    <button matButton="filled" color="primary" (click)="onProceed()" [disabled]="quickReservationForm.invalid">
+        Proceed to Details
+    </button>
+</mat-dialog-actions>

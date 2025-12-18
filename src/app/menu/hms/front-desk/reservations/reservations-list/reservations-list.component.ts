@@ -25,6 +25,7 @@ import { StoreStore } from '../../../../../shared/stores/store.store';
 import { CheckInConfirmationDialogComponent, CheckInDialogData } from '../check-in-confirmation-dialog/check-in-confirmation-dialog.component';
 import { PaymentUpdateDialogComponent, PaymentUpdateDialogData } from '../payment-update-dialog/payment-update-dialog.component';
 import { PinAuthorizationDialogComponent, PinAuthorizationDialogData, PinAuthorizationDialogResult } from '../pin-authorization-dialog/pin-authorization-dialog.component';
+import { QuickReservationModalComponent, QuickReservationData } from '../quick-reservation-modal/quick-reservation-modal.component';
 
 @Component({
   selector: 'app-reservations-list',
@@ -254,10 +255,10 @@ export class ReservationsListComponent {
   }
 
   getGuestName(reservation: Reservation): string {
-    if (typeof reservation.guest === 'string') {
-      return reservation.guestDetails.primaryGuest.firstName + ' ' + reservation.guestDetails.primaryGuest.lastName;
+    if (typeof reservation.guest === 'object' && reservation.guest !== null) {
+      return reservation.guest.firstName + ' ' + reservation.guest.lastName;
     }
-    return reservation.guest.firstName + ' ' + reservation.guest.lastName;
+    return String(reservation.guest);
   }
 
   getRoomNumbers(reservation: Reservation): string {
@@ -272,7 +273,21 @@ export class ReservationsListComponent {
 
   // Navigation methods
   createReservation() {
-    this.router.navigate(['../create'], { relativeTo: this.route });
+    const dialogRef = this.dialog.open(QuickReservationModalComponent, {
+      width: '600px',
+      disableClose: false,
+    });
+
+    dialogRef.afterClosed().subscribe((result: QuickReservationData | undefined) => {
+      if (result) {
+        // Navigate to the full reservation form with the quick reservation data
+        this.router.navigate(['../create'], { 
+          relativeTo: this.route,
+          queryParams: { quickReservation: JSON.stringify(result) }
+        });
+       
+      }
+    });
   }
 
   viewReservation(reservation: Reservation) {
@@ -898,16 +913,16 @@ export class ReservationsListComponent {
       const row = [
         this.escapeCsvField(reservation.confirmationNumber || ''),
         this.escapeCsvField(this.getGuestName(reservation)),
-        this.escapeCsvField(reservation.guestDetails?.primaryGuest?.email || ''),
-        this.escapeCsvField(reservation.guestDetails?.primaryGuest?.phone || ''),
+        this.escapeCsvField(typeof reservation.guest !== 'string' ? reservation.guest?.email || '' : ''),
+        this.escapeCsvField(typeof reservation.guest !== 'string' ? reservation.guest?.phone || '' : ''),
         this.escapeCsvField(this.getRoomNumbers(reservation)),
         this.formatDateForCSV(reservation.checkInDate),
         this.formatDateForCSV(this.getEffectiveCheckOutDate(reservation)),
         this.escapeCsvField(reservation.expectedCheckInTime || ''),
         this.escapeCsvField(reservation.expectedCheckOutTime || ''),
         this.escapeCsvField(reservation.status || ''),
-        reservation.guestDetails?.totalAdults || 0,
-        reservation.guestDetails?.totalChildren || 0,
+        // reservation.guestDetails?.totalAdults || 0,
+        // reservation.guestDetails?.totalChildren || 0,
         reservation.numberOfNights || 0,
         reservation.pricing?.subtotal || 0,
         reservation.pricing?.taxes || 0,

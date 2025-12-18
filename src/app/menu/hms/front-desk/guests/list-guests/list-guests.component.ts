@@ -80,10 +80,11 @@ export class ListGuestsComponent implements OnInit {
     if (!search) return guests;
     
     return guests.filter(guest => 
-      guest.firstName.toLowerCase().includes(search) ||
-      guest.lastName.toLowerCase().includes(search) ||
-      guest.email.toLowerCase().includes(search) ||
-      guest.phone.toLowerCase().includes(search)
+      (guest.firstName?.toLowerCase().includes(search) ?? false) ||
+      (guest.lastName?.toLowerCase().includes(search) ?? false) ||
+      (guest.companyName?.toLowerCase().includes(search) ?? false) ||
+      (guest.email?.toLowerCase().includes(search) ?? false) ||
+      (guest.phone?.toLowerCase().includes(search) ?? false)
     );
   });
 
