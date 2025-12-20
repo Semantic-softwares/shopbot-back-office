@@ -6,8 +6,7 @@ import {
   computed,
   inject,
   OnInit,
-  AfterViewInit,
-  ChangeDetectorRef,
+  ResourceRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -39,9 +38,12 @@ import { CurrencyMaskModule } from 'ng2-currency-mask';
 import { GuestFormModalComponent } from '../../../../../../../shared/components/guest-form-modal/guest-form-modal.component';
 import { PriceEditDialogComponent } from '../price-edit-dialog/price-edit-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { BreakDownTotal } from "../break-down-total/break-down-total";
+import { BreakDownTotal } from '../break-down-total/break-down-total';
 import { ReservationFormService } from '../../../../../../../shared/services/reservation-form.service';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
+import { tap } from 'rxjs';
+import { Reservation } from '../../../../../../../shared/models/reservation.model';
+import { GuestService } from '../../../../../../../shared/services/guest.service';
 
 @Component({
   selector: 'app-room-details',
@@ -64,14 +66,15 @@ import { toSignal } from '@angular/core/rxjs-interop';
     MatSnackBarModule,
     MatListModule,
     CurrencyMaskModule,
-    BreakDownTotal
-],
+    BreakDownTotal,
+  ],
   templateUrl: './room-details.component.html',
   styleUrl: './room-details.component.scss',
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-US' }],
 })
-export class RoomDetailsComponent implements OnInit {
+export class RoomDetailsComponent {
   private roomsService = inject(RoomsService);
+  private guestService = inject(GuestService);
   public storeStore = inject(StoreStore);
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
@@ -83,24 +86,67 @@ export class RoomDetailsComponent implements OnInit {
     this.reservationFormService.form$,
     { initialValue: null }
   );
-  selectedRoomIds = input<string[]>([]);
-
-  // Outputs
+  public selectedRoomIds = input<string[]>([]);
+  public reservation = input<Reservation | null>(null);
   roomAssigned = output<any>();
-
-  // Signals
-  rooms = signal<Room[]>([]);
-  roomTypes = signal<RoomType[]>([]);
-  isLoading = signal<boolean>(false);
-  error = signal<string | null>(null);
   assigningRoomId = signal<string | null>(null);
   filteredRooms = signal<Room[]>([]);
   assignedGuests = signal<Map<string, any>>(new Map()); // Store guest objects by ID
 
+  /**
+   * Load all room types
+   */
+  public roomTypes = rxResource({
+    params: () => ({ id: this.storeStore.selectedStore()?._id }),
+    stream: ({ params }) => this.roomsService.getRoomTypes(params.id!),
+  });
+
+  public selectedRooms = rxResource({
+    params: () => ({ roomIds: this.selectedRoomIds() }),
+    stream: ({ params }) => {
+      return this.roomsService.getRoomsByIds(params.roomIds!).pipe(
+        tap((rooms) => {
+          this.populateRoomsFormArray2(rooms);
+        })
+      );
+    },
+  });
+
+  public rooms = rxResource({
+    params: () => ({ store: this.storeStore.selectedStore()?._id }),
+    stream: ({ params }) => {
+      return this.roomsService.getRooms(params.store!);
+    },
+  });
+
+  
+
+  
+
+  public isRoomsReadyForAssignment = computed(() => {
+    if (this.selectedRoomIds()) {
+      return (
+        this.selectedRooms.hasValue() &&
+        this.rooms.hasValue() &&
+        this.roomTypes.hasValue() 
+        
+      );
+    } else {
+      return (
+        this.rooms.hasValue() &&
+        this.roomTypes.hasValue() 
+        
+      );
+    }
+  });
+
   // Computed properties
-  totalRooms = computed(() => this.rooms().length);
-  totalCapacity = computed(() => {
-    return this.rooms().reduce((sum, room) => {
+  public totalRooms = computed(() => {
+   return this.rooms.hasValue() ? this.rooms.value()!.length : 0;
+  });
+
+  public totalCapacity = computed(() => {
+    return this.rooms.value()?.reduce((sum, room) => {
       const capacity = room.capacity;
       if (typeof capacity === 'object' && capacity !== null) {
         return (
@@ -114,78 +160,14 @@ export class RoomDetailsComponent implements OnInit {
   });
 
   // Check if we're in edit mode by seeing if rooms are already populated in the form
-  isEditingRooms = computed(() => {
+  public isEditingRooms = computed(() => {
     const roomsArray = this.getRoomsFormArray();
     return roomsArray && roomsArray.length > 0;
   });
 
-  price(index: number): number {  
-    return this.getRoomsFormArray()!.at(index)!.get('pricing')!.get('total')?.value 
-  }
-
-  ngOnInit() {
-    this.loadRoomTypes();
-    // Only load rooms if not in edit mode (form is empty)
-    // If editing, rooms are already populated by parent component
-    if (!this.isEditingRooms()) {
-      this.loadRooms();
-    } else {
-      // In edit mode, just load the room details for display (without overwriting form data)
-      this.loadRoomDetailsForDisplay();
-    }
-  }
-
- 
-
-
-
-  /**
-   * Load all room types
-   */
-  private loadRoomTypes() {
-    const storeId = this.storeStore.selectedStore()?._id;
-    if (!storeId) {
-      console.warn('No store selected');
-      return;
-    }
-
-    this.roomsService.getRoomTypes(storeId).subscribe({
-      next: (types) => {
-        this.roomTypes.set(types);
-      },
-      error: (err) => {
-        console.error('Error loading room types:', err);
-      },
-    });
-  }
-
-  /**
-   * Load all store rooms for display in edit mode (allows users to change room assignments)
-   * This loads all rooms without overwriting the already-populated form data
-   */
-  private loadRoomDetailsForDisplay() {
-    const storeId = this.storeStore.selectedStore()?._id;
-    if (!storeId) {
-      this.rooms.set([]);
-      return;
-    }
-
-    this.isLoading.set(true);
-    this.error.set(null);
-
-    // Load all rooms for the store so users can change room assignments
-    this.roomsService.getRooms(storeId).subscribe({
-      next: (loadedRooms: Room[]) => {
-        // Set rooms signal for display purposes only - don't touch the form
-        this.rooms.set(loadedRooms);
-        this.isLoading.set(false);
-      },
-      error: (err: any) => {
-        console.error('Error loading rooms for edit mode:', err);
-        // Silently fail to avoid disrupting edit mode - form data is still valid
-        this.isLoading.set(false);
-      },
-    });
+  public price(index: number): number {
+    return this.getRoomsFormArray()!.at(index)!.get('pricing')!.get('total')
+      ?.value;
   }
 
   onCreateRoom() {
@@ -196,7 +178,7 @@ export class RoomDetailsComponent implements OnInit {
     if (roomsArray) {
       const newIndex = roomsArray.length;
       roomsArray.push(newRoomForm);
-      
+
       // Set up subscription for the new room's stay period
       const stayPeriodForm = newRoomForm.get('stayPeriod');
       if (stayPeriodForm) {
@@ -204,71 +186,139 @@ export class RoomDetailsComponent implements OnInit {
           this.onStayPeriodChange(newIndex);
         });
       }
-
     }
-  }
-
-  /**
-   * Load rooms by IDs from selectedRoomIds input
-   */
-  private loadRooms() {
-    const roomIds = this.selectedRoomIds();
-    if (!roomIds || roomIds.length === 0) {
-      this.rooms.set([]);
-      return;
-    }
-
-    this.isLoading.set(true);
-    this.error.set(null);
-
-    this.roomsService.getRoomsByIds(roomIds).subscribe({
-      next: (rooms) => {
-        this.rooms.set(rooms);
-        this.populateRoomsFormArray(rooms);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Error loading rooms:', err);
-        this.error.set('Failed to load room details');
-        this.isLoading.set(false);
-      },
-    });
   }
 
   /**
    * Populate the rooms FormArray with all loaded rooms
    */
   private populateRoomsFormArray(rooms: Room[]) {
-    const roomsArray = this.getRoomsFormArray();
-    if (!roomsArray) return;
+    // this.content(rooms);
+    // if (!roomsArray) return;
 
     // Clear existing rooms
-    while (roomsArray.length > 0) {
-      roomsArray.removeAt(0);
-    }
+    // while (roomsArray.length > 0) {
+    //   roomsArray.removeAt(0);
+    // }
 
     // Add each room as a form group
-    rooms.forEach((room, index) => {
-      const roomForm = this.createRoomFormGroup(room);
-      roomsArray.push(roomForm);
+    // rooms.forEach((room, index) => {
+    //   // console.log(room)
 
-      // Set up subscription for stay period changes
-      const stayPeriodForm = roomForm.get('stayPeriod');
-      if (stayPeriodForm) {
-        stayPeriodForm.valueChanges.subscribe(() => {
-          this.onStayPeriodChange(index);
-        });
-      }
+    //   const roomForm = this.createRoomFormGroup(room);
+
+    //   // Set up subscription for stay period changes
+    //   const stayPeriodForm = roomForm.get('stayPeriod');
+    //   if (stayPeriodForm) {
+    //     stayPeriodForm.valueChanges.subscribe(() => {
+    //       this.onStayPeriodChange(index);
+    //     });
+    //   }
+    // });
+  }
+
+
+ populateRoomsFormArray2(rooms: Room[]) {
+    console.log('[RoomDetails] populateRoomsFormArray2 called with rooms:', rooms);
+    
+    const roomsArray = this.getRoomsFormArray();
+    if (!roomsArray) {
+      return;
+    }
+
+    // Clear existing rooms FIRST
+    roomsArray.clear();
+    
+    const reservation = this.reservation()!;
+    const isEditMode = !!reservation;
+    const roomsToUse = isEditMode ? reservation.rooms : rooms;
+    roomsToUse.forEach((room: any, index: number) => {
+        
+        let roomForm;
+        
+        if (isEditMode) {
+          // EDIT MODE: room is a ReservationRoom with nested room object
+          let assignedGuestId = '';
+          let assignedGuestName = '';
+
+          if (room.assignedGuest) {
+            if (typeof room.assignedGuest === 'object' && room.assignedGuest._id) {
+              assignedGuestId = room.assignedGuest._id;
+              assignedGuestName = this.guestService.getGuestName(room.assignedGuest);
+            } else if (typeof room.assignedGuest === 'string') {
+              assignedGuestId = room.assignedGuest;
+            }
+          }
+
+          roomForm = this.fb.group({
+            room: [room.room._id || room.room, [Validators.required]],
+            roomNumber: [room.room?.roomNumber || '', []],
+            roomType: [room?.roomType || room?.room?.roomType?._id, []],
+            assignedGuest: [assignedGuestId, [Validators.required]],
+            status: [room.status || 'reserved', [Validators.required]],
+            assignedGuestName: [assignedGuestName, [Validators.required]],
+            stayPeriod: this.fb.group({
+              from: [new Date(room.stayPeriod?.from || reservation.checkInDate), [Validators.required]],
+              to: [new Date(room.stayPeriod?.to || reservation.checkOutDate), [Validators.required]],
+              numberOfNights: [
+                room.stayPeriod?.numberOfNights || 1,
+                [Validators.required, Validators.min(1)],
+              ],
+            }),
+            guests: this.fb.group({
+              adults: [
+                room.guests?.adults || 1,
+                [Validators.required, Validators.min(1)],
+              ],
+              children: [
+                room.guests?.children || 0,
+                [Validators.required, Validators.min(0)],
+              ],
+            }),
+            pricing: this.fb.group({
+              pricePerNight: [
+                room?.pricing?.pricePerNight || room?.room?.priceOverride || 0,
+                [Validators.required, Validators.min(0)],
+              ],
+              totalPrice: [
+                room.pricing?.totalPrice || 0,
+                [Validators.required, Validators.min(0)],
+              ],
+              discount: [room.pricing?.discount || 0, [Validators.min(0)]],
+              discountType: [room.pricing?.discountType || 'percentage', []],
+              subtotal: [room.pricing?.subtotal || 0, [Validators.min(0)]],
+              taxes: [room.pricing?.taxes || 0, [Validators.min(0)]],
+              fees: this.fb.group({
+                serviceFee: [room.pricing?.fees?.serviceFee || 0, [Validators.min(0)]],
+                cleaningFee: [room.pricing?.fees?.cleaningFee || 0, [Validators.min(0)]],
+                resortFee: [room.pricing?.fees?.resortFee || 0, [Validators.min(0)]],
+                other: [room.pricing?.fees?.other || 0, [Validators.min(0)]],
+              }),
+              total: [room.pricing?.total || 0, [Validators.min(0)]],
+            }),
+            notes: [room.notes || '', []],
+          });
+        } else {
+          // NEW MODE: room is a plain Room object, use createRoomFormGroup
+          console.log('[RoomDetails] NEW mode - using createRoomFormGroup for room:', room._id);
+          roomForm = this.createRoomFormGroup(room);
+        }
+        
+        roomsArray.push(roomForm);
+        console.log(`[RoomDetails] Room ${index} added to form array. Current array length:`, roomsArray.length);
     });
 
-  }
+    // Update the parent reservation form with the populated rooms array
+    console.log('[RoomDetails] populateRoomsFormArray2 completed. Final array length:', roomsArray.length);
+    this.reservationForm()?.patchValue({ rooms: roomsArray }, { emitEvent: false });
+}
 
   /**
    * Create a room form group based on the schema structure
    */
   createRoomFormGroup(room: Room, roomData?: any) {
     // Determine the room price: use priceOverride if available, otherwise use room type base price
-    let roomPrice = roomData?.pricing?.pricePerNight || 0;
+    let roomPrice = roomData?.pricing?.pricePerNight;
     if (!roomPrice) {
       if (room.priceOverride) {
         roomPrice = room.priceOverride;
@@ -292,11 +342,13 @@ export class RoomDetailsComponent implements OnInit {
       new Date();
 
     // Calculate initial number of nights
-    const initialNights = this.calculateNumberOfNights(defaultCheckIn, defaultCheckOut);
+    const initialNights = this.calculateNumberOfNights(
+      defaultCheckIn,
+      defaultCheckOut
+    );
 
     // Calculate initial total price based on price per night and number of nights
     const initialTotalPrice = roomPrice * initialNights;
-
     return this.fb.group({
       room: [roomData?.room || room._id || '', [Validators.required]], // Room ID
       roomNumber: [roomData?.roomNumber || room.roomNumber || ''], // Store room number for display
@@ -344,7 +396,10 @@ export class RoomDetailsComponent implements OnInit {
           [Validators.required, Validators.min(0)],
         ],
         discount: [roomData?.pricing?.discount || 0, [Validators.min(0)]],
-        subtotal: [roomData?.pricing?.subtotal || initialTotalPrice, [Validators.min(0)]],
+        subtotal: [
+          roomData?.pricing?.subtotal || initialTotalPrice,
+          [Validators.min(0)],
+        ],
         taxes: [roomData?.pricing?.taxes || 0, [Validators.min(0)]],
         discountType: [roomData?.pricing?.discountType || 'amount'], // 'amount' or 'percentage'
         fees: this.fb.group({
@@ -362,7 +417,10 @@ export class RoomDetailsComponent implements OnInit {
           ],
           other: [roomData?.pricing?.fees?.other || 0, [Validators.min(0)]],
         }),
-        total: [roomData?.pricing?.total || initialTotalPrice, [Validators.min(0)]],
+        total: [
+          roomData?.pricing?.total || initialTotalPrice,
+          [Validators.min(0)],
+        ],
       }),
 
       // Optional notes
@@ -390,7 +448,6 @@ export class RoomDetailsComponent implements OnInit {
         });
       }
 
-
       this.roomAssigned.emit({
         room,
         formGroup: roomForm,
@@ -413,12 +470,11 @@ export class RoomDetailsComponent implements OnInit {
    * Filter rooms by selected room type (without excluding already selected rooms)
    */
   filterRoomsByType(roomTypeId: string, currentIndex?: number): Room[] {
-    console.log(roomTypeId, 'filterRoomsByType called');
     if (!roomTypeId) {
-      return this.rooms();
+      return this.rooms.value() || [];
     }
 
-    return this.rooms().filter((room) => {
+    return this.rooms.value()!.filter((room) => {
       const typeId =
         typeof room.roomType === 'string' ? room.roomType : room.roomType?._id;
       return typeId === roomTypeId;
@@ -443,8 +499,11 @@ export class RoomDetailsComponent implements OnInit {
   getRoomsFormArray() {
     const form = this.reservationForm();
     if (form) {
-      return form.controls['rooms'] as FormArray;
+      const roomsArray = form.controls['rooms'] as FormArray;
+      console.log('[RoomDetails] getRoomsFormArray called, array length:', roomsArray?.length);
+      return roomsArray;
     }
+    console.warn('[RoomDetails] getRoomsFormArray: form is null');
     return null;
   }
 
@@ -526,16 +585,12 @@ export class RoomDetailsComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result && result.success) {
         // The form has already been updated directly
-        this.snackBar.open(
-          'Price updated successfully',
-          'Close',
-          {
-            duration: 2000,
-            horizontalPosition: 'end',
-            verticalPosition: 'top',
-            panelClass: ['success-snackbar'],
-          }
-        );
+        this.snackBar.open('Price updated successfully', 'Close', {
+          duration: 2000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar'],
+        });
       }
     });
   }
@@ -601,24 +656,28 @@ export class RoomDetailsComponent implements OnInit {
     }
 
     // Update room details when room is selected
-    const selectedRoom = this.rooms().find((r) => r._id === roomId);
+    const selectedRoom = this.rooms.value()!.find((r) => r._id === roomId);
     if (selectedRoom) {
       const roomsArray = this.getRoomsFormArray();
       if (roomsArray) {
         const roomControl = roomsArray.at(index);
-        
+
         // Determine room price from priceOverride or room type base price
         let roomPrice = 0;
         if (selectedRoom.priceOverride) {
           roomPrice = selectedRoom.priceOverride;
-        } else if (typeof selectedRoom.roomType === 'object' && selectedRoom.roomType?.basePrice) {
+        } else if (
+          typeof selectedRoom.roomType === 'object' &&
+          selectedRoom.roomType?.basePrice
+        ) {
           roomPrice = selectedRoom.roomType.basePrice;
         }
 
         // Get the number of nights from stay period
         const stayPeriodForm = roomControl?.get('stayPeriod');
-        const numberOfNights = stayPeriodForm?.get('numberOfNights')?.value || 1;
-        
+        const numberOfNights =
+          stayPeriodForm?.get('numberOfNights')?.value || 1;
+
         // Calculate total price based on room price and number of nights
         const totalPrice = roomPrice * numberOfNights;
 
@@ -694,9 +753,9 @@ export class RoomDetailsComponent implements OnInit {
    * Get room type name by ID
    */
   getRoomTypeNameById(roomTypeId: string): string {
-    const type = this.roomTypes().find(
-      (t) => t._id === roomTypeId || t.id === roomTypeId
-    );
+    const type = this.roomTypes
+      .value()!
+      .find((t) => t._id === roomTypeId || t.id === roomTypeId);
     return type ? type.name : 'Unknown';
   }
 
@@ -721,17 +780,19 @@ export class RoomDetailsComponent implements OnInit {
    */
   calculateNumberOfNights(checkInDate: Date, checkOutDate: Date): number {
     if (!checkInDate || !checkOutDate) return 0;
-    
+
     const from = new Date(checkInDate);
     const to = new Date(checkOutDate);
-    
+
     // Reset time portion to get accurate day count
     from.setHours(0, 0, 0, 0);
     to.setHours(0, 0, 0, 0);
-    
+
     const millisecondsPerDay = 24 * 60 * 60 * 1000;
-    const nights = Math.ceil((to.getTime() - from.getTime()) / millisecondsPerDay);
-    
+    const nights = Math.ceil(
+      (to.getTime() - from.getTime()) / millisecondsPerDay
+    );
+
     return Math.max(1, nights); // Minimum 1 night
   }
 
@@ -745,7 +806,7 @@ export class RoomDetailsComponent implements OnInit {
     const roomControl = roomsArray.at(index);
     const stayPeriodForm = roomControl?.get('stayPeriod');
     const roomId = roomControl?.get('room')?.value;
-    
+
     if (!stayPeriodForm || !roomId) return;
 
     const checkInDate = stayPeriodForm.get('from')?.value;
@@ -755,24 +816,30 @@ export class RoomDetailsComponent implements OnInit {
 
     // Calculate and update numberOfNights
     const nights = this.calculateNumberOfNights(checkInDate, checkOutDate);
-    
+
     // Get the pricing form and calculate total price
     const pricingForm = roomControl?.get('pricing');
     const pricePerNight = pricingForm?.get('pricePerNight')?.value || 0;
     const totalPrice = pricePerNight * nights;
-    
-    stayPeriodForm.patchValue({
-      numberOfNights: nights,
-    }, { emitEvent: false }); // Prevent infinite loop
-    
-    pricingForm?.patchValue({
-      totalPrice: totalPrice,
-      subtotal: totalPrice,
-      total: totalPrice,
-    }, { emitEvent: true }); // Emit event so breakdown listens
+
+    stayPeriodForm.patchValue(
+      {
+        numberOfNights: nights,
+      },
+      { emitEvent: false }
+    ); // Prevent infinite loop
+
+    pricingForm?.patchValue(
+      {
+        totalPrice: totalPrice,
+        subtotal: totalPrice,
+        total: totalPrice,
+      },
+      { emitEvent: true }
+    ); // Emit event so breakdown listens
 
     // Get the room data
-    const room = this.rooms().find(r => r._id === roomId);
+    const room = this.rooms.value()!.find((r) => r._id === roomId);
     if (!room) return;
 
     // Get reservation form dates
@@ -842,24 +909,20 @@ export class RoomDetailsComponent implements OnInit {
   private updateReservationDatesFromRooms() {
     // const roomsArray = this.getRoomsFormArray();
     // if (!roomsArray || roomsArray.length === 0) return;
-
     // let earliestCheckIn: Date | null = null;
     // let latestCheckOut: Date | null = null;
-
     // // Find the earliest check-in and latest check-out dates from all rooms
     // roomsArray.controls.forEach((control) => {
     //   const stayPeriodForm = control.get('stayPeriod');
     //   if (stayPeriodForm) {
     //     const fromDate = stayPeriodForm.get('from')?.value;
     //     const toDate = stayPeriodForm.get('to')?.value;
-
     //     if (fromDate) {
     //       const from = new Date(fromDate);
     //       if (!earliestCheckIn || from < earliestCheckIn) {
     //         earliestCheckIn = from;
     //       }
     //     }
-
     //     if (toDate) {
     //       const to = new Date(toDate);
     //       if (!latestCheckOut || to > latestCheckOut) {
@@ -868,7 +931,6 @@ export class RoomDetailsComponent implements OnInit {
     //     }
     //   }
     // });
-
     // // Update reservation dates if we found any valid dates
     // const reservationForm = this.reservationForm();
     // if (reservationForm && earliestCheckIn && latestCheckOut) {
@@ -876,7 +938,6 @@ export class RoomDetailsComponent implements OnInit {
     //     checkInDate: earliestCheckIn,
     //     checkOutDate: latestCheckOut,
     //   });
-
     //   this.snackBar.open(
     //     'Reservation dates updated based on room selections',
     //     'Close',
@@ -935,7 +996,18 @@ export class RoomDetailsComponent implements OnInit {
   /**
    * Calculate total breakdown for all rooms
    */
-  calculateTotalBreakdown(type: 'subtotal' | 'fees' | 'taxes' | 'discount' | 'total' | 'serviceFee' | 'cleaningFee' | 'resortFee' | 'otherFees'): number {
+  calculateTotalBreakdown(
+    type:
+      | 'subtotal'
+      | 'fees'
+      | 'taxes'
+      | 'discount'
+      | 'total'
+      | 'serviceFee'
+      | 'cleaningFee'
+      | 'resortFee'
+      | 'otherFees'
+  ): number {
     const roomsArray = this.getRoomsFormArray();
     if (!roomsArray) return 0;
 
@@ -973,11 +1045,13 @@ export class RoomDetailsComponent implements OnInit {
         case 'fees':
           const allFees = pricingForm.get('fees') as FormGroup;
           if (allFees) {
-            return sum + 
+            return (
+              sum +
               ((allFees.get('serviceFee')?.value || 0) +
-               (allFees.get('cleaningFee')?.value || 0) +
-               (allFees.get('resortFee')?.value || 0) +
-               (allFees.get('other')?.value || 0));
+                (allFees.get('cleaningFee')?.value || 0) +
+                (allFees.get('resortFee')?.value || 0) +
+                (allFees.get('other')?.value || 0))
+            );
           }
           return sum;
         case 'taxes':
@@ -989,10 +1063,12 @@ export class RoomDetailsComponent implements OnInit {
           const feesTotal = (() => {
             const fees = pricingForm.get('fees') as FormGroup;
             if (fees) {
-              return (fees.get('serviceFee')?.value || 0) +
-                     (fees.get('cleaningFee')?.value || 0) +
-                     (fees.get('resortFee')?.value || 0) +
-                     (fees.get('other')?.value || 0);
+              return (
+                (fees.get('serviceFee')?.value || 0) +
+                (fees.get('cleaningFee')?.value || 0) +
+                (fees.get('resortFee')?.value || 0) +
+                (fees.get('other')?.value || 0)
+              );
             }
             return 0;
           })();

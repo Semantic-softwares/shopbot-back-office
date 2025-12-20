@@ -26,6 +26,7 @@ import { CheckInConfirmationDialogComponent, CheckInDialogData } from '../check-
 import { PaymentUpdateDialogComponent, PaymentUpdateDialogData } from '../payment-update-dialog/payment-update-dialog.component';
 import { PinAuthorizationDialogComponent, PinAuthorizationDialogData, PinAuthorizationDialogResult } from '../pin-authorization-dialog/pin-authorization-dialog.component';
 import { QuickReservationModalComponent, QuickReservationData } from '../quick-reservation-modal/quick-reservation-modal.component';
+import { GetGuestNamePipe } from "../../../../../shared/pipes/get-guest-name.pipe";
 
 @Component({
   selector: 'app-reservations-list',
@@ -46,8 +47,9 @@ import { QuickReservationModalComponent, QuickReservationData } from '../quick-r
     MatTooltipModule,
     MatDatepickerModule,
     MatProgressSpinnerModule,
-    MatDividerModule
-  ],
+    MatDividerModule,
+    GetGuestNamePipe
+],
   templateUrl: './reservations-list.component.html'
 })
 export class ReservationsListComponent {
@@ -291,7 +293,7 @@ export class ReservationsListComponent {
   }
 
   viewReservation(reservation: Reservation) {
-    this.router.navigate(['../details', reservation._id], { relativeTo: this.route });
+    this.router.navigate(['../edit', reservation._id], { relativeTo: this.route });
   }
 
   editReservation(reservation: Reservation) {

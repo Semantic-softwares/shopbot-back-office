@@ -21,6 +21,7 @@ import {
 import { Guest } from '../../models/reservation.model';
 import { GuestService } from '../../services/guest.service';
 import { StoreStore } from '../../stores/store.store';
+import { GetGuestNamePipe } from "../../pipes/get-guest-name.pipe";
 
 @Component({
   selector: 'app-guest-search',
@@ -35,7 +36,8 @@ import { StoreStore } from '../../stores/store.store';
     MatProgressSpinnerModule,
     MatButtonModule,
     MatTooltipModule,
-  ],
+    GetGuestNamePipe
+],
   templateUrl: './guest-search.component.html',
   styleUrls: ['./guest-search.component.scss'],
 })
@@ -79,8 +81,7 @@ export class GuestSearchComponent implements OnInit, OnDestroy {
             searchTerm,
             1,
             10,
-            storeId,
-            this.guestType()
+            storeId
           );
         }),
         takeUntil(this.destroy$)
@@ -104,17 +105,13 @@ export class GuestSearchComponent implements OnInit, OnDestroy {
   }
 
   onGuestSelected(guest: Guest) {
-    this.guestSearchControl.setValue(`${guest?.firstName || guest?.companyName} ${guest?.lastName || guest?.contactPersonLastName}`);
+    this.guestSearchControl.setValue(`${this.guestService.getGuestName(guest)}`);
     this.guestSelected.emit(guest);
   }
 
-  displayGuestFn(guest: Guest): string {
-    return guest ? `${guest.firstName} ${guest.lastName}` : '';
-  }
-
-  getGuestDisplayText(guest: Guest): string {
-    return `${guest.firstName} ${guest.lastName} • ${guest.phone || 'No phone'}`;
-  }
+  // displayGuestFn(guest: Guest): string {
+  //   return guest ? `${guest.firstName} ${guest.lastName}` : '';
+  // }
 
   onClear() {
     this.guestSearchControl.setValue('');

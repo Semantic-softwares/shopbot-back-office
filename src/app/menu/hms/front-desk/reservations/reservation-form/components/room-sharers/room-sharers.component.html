@@ -5,7 +5,10 @@
         Room Sharers
       </mat-card-title>
       <mat-card-subtitle>
-        {{ getSharersFormArray().length }} / {{ (reservationForm()!.get('numberOfAdults')?.value || 1) + (reservationForm()!.get('numberOfChildren')?.value || 0) }} Guests
+        @if (roomsResource.hasValue()) {
+          <pre>Selected Room: {{ roomsResource.value()!.name}} ({{ roomsResource.value()!.roomNumber}}) - {{roomsResource.value()!.priceOverride | currency: storeStore.selectedStore()?.currency}} </pre> 
+        } 
+       
       </mat-card-subtitle>
   </mat-card-header>
 
@@ -13,7 +16,7 @@
 
     <!-- TailwindCSS Guest List -->
     <div class="py-4 space-y-3">
-      @for (element of getSharersFormArray().controls; track trackByIndex($index); let i = $index) {
+      @for (element of getSharersFormArray().controls; track $index; let i = $index) {
         <div class="border border-gray-200 rounded-lg" [formGroup]="asFormGroup(element)">
           <!-- Table-like Row -->
           <div class="flex items-center gap-3 p-4">
@@ -58,7 +61,7 @@
 
             <!-- Action Buttons -->
             <div class="flex items-center gap-1 ml-auto">
-              <button
+              <a
                 mat-icon-button
                 matTooltip="{{ !hasPrimaryGuest() && element.get('ageGrade')?.value === 'child' ? 'Assign primary guest first' : 'Edit Guest' }}"
                 (click)="editSharer(i, element.get('ageGrade')?.value)"
@@ -66,8 +69,8 @@
                 [ngClass]="!hasPrimaryGuest() && element.get('ageGrade')?.value === 'child' ? 'text-gray-300' : 'text-blue-600 hover:bg-blue-50'"
               >
                 <mat-icon class="material-icons-outlined">edit</mat-icon>
-              </button>
-              <button
+            </a>
+              <a
                 mat-icon-button
                 matTooltip="Delete Guest"
                 [disabled]="i === 0"
@@ -76,15 +79,15 @@
                 [ngClass]="i === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-red-600 hover:bg-red-50'"
               >
                 <mat-icon class="material-icons-outlined">delete</mat-icon>
-              </button>
-              <button
+              </a>
+              <a
                 mat-icon-button
                 matTooltip="CHECK-IN"
                 (click)="onSharerHome(i)"
                 [ngClass]="i === 0 ? 'text-blue-600 hover:bg-blue-50' : 'text-gray-400 hover:bg-gray-100'"
               >
                 <mat-icon class="material-icons-outlined">login</mat-icon>
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -110,16 +113,16 @@
   
   </mat-card-content>
   <mat-card-actions align="start" class="border-t border-gray-200 pt-4 flex justify-end gap-2">
-    <button 
+    <a 
       matButton 
       color="accent" 
       (click)="onEditRoomPricing()"
       class="mt-2">
       <mat-icon class="material-icons-outlined">attach_money</mat-icon>
       Edit Pricing
-    </button>
+  </a>
 
-    <button 
+    <a 
       matButton 
       color="secondary" 
       (click)="onAddInfants()" 
@@ -128,12 +131,12 @@
       class="mt-2">
       <mat-icon class="material-icons-outlined">infant</mat-icon>
       Add Infant(s)
-    </button>
+  </a>
 
-    <button matButton="outlined" color="primary" (click)="onGuestCheckIn()">
+    <a matButton="outlined" color="primary" (click)="onGuestCheckIn()">
         <mat-icon class="material-icons-outlined">login</mat-icon>
         GUEST CHECK-IN
-      </button>
+    </a>
 
       <a matButton="filled" color="primary" (click)="onCreateGuest()">
         <mat-icon class="material-icons-outlined">person_add</mat-icon>

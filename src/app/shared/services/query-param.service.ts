@@ -75,4 +75,55 @@ export class QueryParamService {
   get getAllParamsSnapshot() {
     return this.route.snapshot.queryParams;
   }
+
+  /**
+   * Remove query parameter(s) from a URL string.
+   * Returns the URL with the specified query parameter(s) removed.
+   * 
+   * @param url - The URL string to modify
+   * @param keysToRemove - Single key or array of keys to remove from the URL
+   * @returns The URL with the specified query parameters removed
+   * 
+   * @example
+   * // Remove single parameter
+   * this.queryParamService.removeFromUrl('http://example.com?id=123&name=test', 'id')
+   * // Returns: 'http://example.com?name=test'
+   * 
+   * // Remove multiple parameters
+   * this.queryParamService.removeFromUrl('http://example.com?id=123&name=test&sort=asc', ['id', 'sort'])
+   * // Returns: 'http://example.com?name=test'
+   */
+  removeFromUrl(url: string, keysToRemove: string | string[]): string {
+    if (!url) return url;
+
+    const urlObj = new URL(url);
+    const keys = Array.isArray(keysToRemove) ? keysToRemove : [keysToRemove];
+
+    for (const key of keys) {
+      urlObj.searchParams.delete(key);
+    }
+
+    return urlObj.toString();
+  }
+
+  /**
+   * Remove query parameter(s) from the current route.
+   * This method updates the browser URL.
+   * 
+   * @param keysToRemove - Single key or array of keys to remove from the current URL
+   * 
+   * @example
+   * // Remove single parameter
+   * this.queryParamService.removeFromCurrentUrl('openPaymentModal')
+   * 
+   * // Remove multiple parameters
+   * this.queryParamService.removeFromCurrentUrl(['openPaymentModal', 'filter'])
+   */
+  removeFromCurrentUrl(keysToRemove: string | string[]): void {
+    const currentUrl = this.router.url;
+    const cleanUrl = this.removeFromUrl(currentUrl, keysToRemove);
+    
+    // Navigate to the clean URL
+    this.router.navigateByUrl(cleanUrl);
+  }
 }

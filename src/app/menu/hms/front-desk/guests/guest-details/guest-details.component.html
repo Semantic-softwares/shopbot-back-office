@@ -76,7 +76,7 @@
             <!-- Avatar -->
             <div class="flex-shrink-0">
               <div class="h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg ring-4 ring-purple-100">
-                {{ guest()!.firstName.charAt(0).toUpperCase() }}{{ guest()!.lastName.charAt(0).toUpperCase() }}
+                {{ guest()!.firstName!.charAt(0).toUpperCase() }}{{ guest()!.lastName!.charAt(0).toUpperCase() }}
               </div>
             </div>
             

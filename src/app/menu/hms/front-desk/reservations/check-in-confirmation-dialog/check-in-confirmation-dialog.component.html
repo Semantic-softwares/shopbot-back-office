@@ -1,96 +1,68 @@
-<div class="p-6 min-w-[500px]">
-  <!-- Header -->
-  <div class="flex items-center gap-3 mb-6">
-    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-      <mat-icon class="text-blue-600 text-2xl">check_in</mat-icon>
-    </div>
-    <div>
-      <h2 class="text-xl font-bold text-gray-900">Confirm Check-In</h2>
-      <p class="text-sm text-gray-600">Reservation {{ data.reservation.confirmationNumber }}</p>
-    </div>
-  </div>
+<h2 mat-dialog-title>
+  Confirm Check-In ({{ data.reservation.confirmationNumber }})
+</h2>
 
+<mat-dialog-content>
   <!-- Guest Info -->
   <div class="bg-gray-50 rounded-lg p-4 mb-6">
-    <div class="flex items-center justify-between mb-2">
-      <h3 class="font-semibold text-gray-900">Guest Information</h3>
-      <span class="text-sm text-gray-500">Room(s): {{ roomNumbers }}</span>
-    </div>
-    <div class="text-sm text-gray-700">
-      <div><strong>Name:</strong> {{ data.reservation.guest.firstName }} {{ data.reservation.guest.lastName }}</div>
-      <!-- <div><strong>Adults:</strong> {{ data.reservation.guestDetails.totalAdults }} | <strong>Children:</strong> {{ data.reservation.guestDetails.totalChildren }}</div> -->
+    <h3 class="font-semibold text-gray-900 mb-3">Guest Information</h3>
+    <div class="grid grid-cols-2 gap-4 text-sm">
+      <div>
+        <span class="text-gray-600">Name:</span>
+        <div class="font-medium text-gray-900">{{ data.reservation.guest | getGuestName }}</div>
+      </div>
+      <div>
+        <span class="text-gray-600">Room(s):</span>
+        <div class="font-medium text-gray-900">{{ roomNumbers }}</div>
+      </div>
     </div>
   </div>
 
   <!-- Room Readiness Checklist -->
-  <form [formGroup]="checkInForm" class="space-y-4 mb-6">
-    <div>
-      <h3 class="font-semibold text-gray-900 mb-3">Room Readiness Checklist</h3>
-      <div class="space-y-3">
-        <div class="flex items-center gap-3">
-          <mat-checkbox formControlName="isClean" color="primary">
-            <span class="text-sm">Room is clean and housekeeping complete</span>
-          </mat-checkbox>
-          <mat-icon class="text-green-600 text-lg">cleaning_services</mat-icon>
-        </div>
-        
-        <div class="flex items-center gap-3">
-          <mat-checkbox formControlName="isMaintained" color="primary">
-            <span class="text-sm">All maintenance issues resolved</span>
-          </mat-checkbox>
-          <mat-icon class="text-blue-600 text-lg">build</mat-icon>
-        </div>
-        
-        <div class="flex items-center gap-3">
-          <mat-checkbox formControlName="amenitiesReady" color="primary">
-            <span class="text-sm">Amenities and supplies are stocked</span>
-          </mat-checkbox>
-          <mat-icon class="text-purple-600 text-lg">inventory_2</mat-icon>
-        </div>
+  <form [formGroup]="checkInForm" class="space-y-4">
+    <h3 class="font-semibold text-gray-900">Room Readiness Checklist</h3>
+
+    <div class="space-y-3">
+      <div class="flex items-center gap-3">
+        <mat-checkbox formControlName="isClean" color="primary"></mat-checkbox>
+        <span class="text-sm text-gray-700">Room is clean and housekeeping complete</span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <mat-checkbox formControlName="isMaintained" color="primary"></mat-checkbox>
+        <span class="text-sm text-gray-700">All maintenance issues resolved</span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <mat-checkbox formControlName="amenitiesReady" color="primary"></mat-checkbox>
+        <span class="text-sm text-gray-700">Amenities and supplies are stocked</span>
       </div>
     </div>
 
     <!-- Notes -->
-    <mat-form-field appearance="outline" class="w-full">
+    <mat-form-field appearance="outline" class="w-full mt-6">
       <mat-label>Check-in Notes (Optional)</mat-label>
-      <textarea matInput 
-                formControlName="notes" 
-                rows="3"
-                placeholder="Any special notes or observations..."></textarea>
-      <mat-icon matSuffix>note_add</mat-icon>
+      <textarea matInput formControlName="notes" rows="3" placeholder="Any special notes or observations..."></textarea>
     </mat-form-field>
   </form>
 
   <!-- Warning Message -->
   @if (!isFormValid) {
-    <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6">
-      <div class="flex items-center gap-2">
-        <mat-icon class="text-amber-600">warning</mat-icon>
-        <span class="text-sm text-amber-800 font-medium">
-          Please confirm all room readiness requirements before proceeding with check-in.
-        </span>
-      </div>
+  <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-6">
+    <div class="flex items-center gap-2">
+      <mat-icon class="text-amber-600 text-sm">warning</mat-icon>
+      <span class="text-xs text-amber-800 font-medium">
+        Please confirm all room readiness requirements before proceeding.
+      </span>
     </div>
-  }
-
-  <!-- Actions -->
-  <div class="flex justify-end gap-3">
-    <button mat-button 
-            (click)="onCancel()"
-            class="px-6 py-2">
-      Cancel
-    </button>
-    <button mat-raised-button 
-            color="primary"
-            [disabled]="!isFormValid || loading()"
-            (click)="onConfirm()"
-            class="px-6 py-2 !bg-blue-600 hover:!bg-blue-700">
-      @if (loading()) {
-        <mat-icon class="animate-spin mr-2">refresh</mat-icon>
-      } @else {
-        <mat-icon class="mr-2">check_in</mat-icon>
-      }
-      Confirm Check-In
-    </button>
   </div>
-</div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button matButton="filled" color="primary" [disabled]="!isFormValid || loading()" (click)="onConfirm()">
+    <mat-icon class="mr-2">check_circle</mat-icon>
+    Confirm Check-In
+  </button>
+</mat-dialog-actions>

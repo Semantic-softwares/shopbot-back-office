@@ -6,7 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
 import { StoreService } from '../../shared/services/store.service';
 import { SessionStorageService } from '../../shared/services/session-storage.service';
@@ -22,6 +22,7 @@ import { StoreStore } from '../../shared/stores/store.store';
     MatInputModule,
     ReactiveFormsModule,
     MatIconModule,
+    RouterLink,
   ],
   templateUrl: './login.component.html',
 })

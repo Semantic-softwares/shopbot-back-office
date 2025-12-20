@@ -528,14 +528,9 @@ export class ReservationDetailsComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result?.confirmed && result.paymentData) {
-        if (result.paymentData.amount !== undefined) {
-          // Amount-based payment (checkout flow) - not expected for regular updates
-          console.error('Amount-based payment not supported in regular update flow');
-        } else if (result.paymentData.status) {
-          // Status-based update
-          this.processPayment(result.paymentData as any);
-        }
+      if (result?.confirmed) {
+        // Reload the reservation to get updated payment/transaction info
+        this.loadReservation(reservation._id);
       }
     });
   }

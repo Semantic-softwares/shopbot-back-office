@@ -271,7 +271,8 @@ export type ReservationStatus =
   | 'checked_in' 
   | 'checked_out' 
   | 'cancelled' 
-  | 'no_show';
+  | 'no_show'
+  | 'reserved';
 
 export type RoomStatus = 
   | 'available' 

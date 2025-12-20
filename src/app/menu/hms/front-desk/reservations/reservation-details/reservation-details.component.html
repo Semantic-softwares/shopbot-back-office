@@ -502,10 +502,10 @@
                   <span class="font-medium text-gray-900">{{ reservation()!.pricing.fees?.resortFee! | currency: storeStore.selectedStore()?.currency }}</span>
                 </div>
               }
-              @if (reservation()!.pricing.discounts?.amount) {
+              @if (reservation()!.pricing.discounts) {
                 <div class="flex justify-between">
                   <span class="text-gray-600">Discount</span>
-                  <span class="font-medium text-green-600">-{{ reservation()!.pricing.discounts?.amount! | currency: storeStore.selectedStore()?.currency }}</span>
+                  <span class="font-medium text-green-600">-{{ reservation()!.pricing.discounts! | currency: storeStore.selectedStore()?.currency }}</span>
                 </div>
               }
               @if (getTotalExtensionCost() > 0) {

@@ -43,7 +43,7 @@ export const reservationRoutes: Routes = [
             (c) => c.ReservationFormComponent
           ),
         title: 'Edit Reservation - Hotel Management',
-        canActivate: [reservationEditGuard],
+        // canActivate: [reservationEditGuard],
       },
       {
         path: 'details/:id',

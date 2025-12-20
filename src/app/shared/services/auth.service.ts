@@ -152,7 +152,31 @@ export class AuthService {
     this.currentUserSubject.next(null);
   }
 
-  updatePassword(userId: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${userId}/reset-password`, { password });
+  resetPassword(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/rest-password`, { email }, { 
+      params: { userType: 'merchant' } 
+    });
+  }
+
+  verifyResetToken(email: string, resetToken: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/verify-code`, { email, resetToken }, {
+      params: { userType: 'merchant' }
+    });
+  }
+
+  updatePassword(email: string, password: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/update-password`, { email, newPassword: password }, {
+      params: { userType: 'merchant' }
+    });
+  }
+
+  changePassword(email: string, currentPassword: string, newPassword: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/change-password`, { 
+      email, 
+      currentPassword, 
+      newPassword 
+    }, {
+      params: { userType: 'merchant' }
+    });
   }
 }

@@ -9,5 +9,17 @@ export const AUTH_ROUTES: Routes = [
     {
         path: 'login',
         loadComponent: () => import('./login/login.component').then(m => m.LoginComponent)
+    },
+    {
+        path: 'forgot-password',
+        loadComponent: () => import('./forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+    },
+    {
+        path: 'verify-reset-token',
+        loadComponent: () => import('./verify-reset-token/verify-reset-token.component').then(m => m.VerifyResetTokenComponent)
+    },
+    {
+        path: 'reset-password',
+        loadComponent: () => import('./reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
     }
 ];

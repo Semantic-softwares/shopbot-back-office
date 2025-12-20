@@ -144,15 +144,23 @@ export class BreakDownTotal {
            this.breakdownTaxes() - this.breakdownDiscount();
   });
 
+  // Track pricing form changes
+  private pricingChangeCounter = signal<number>(0);
+
   // Computed signal for paid amount
-   private paidAmount = toSignal<number>(
-    this.reservationForm()!.get('pricing')!.get('paid')!.valueChanges,
-    { initialValue: this.reservationForm()!.get('pricing')!.get('paid')!.value || 0 }
-  );
+  public paidAmount = computed(() => {
+    this.pricingChangeCounter(); // Track changes
+    const form = this.reservationForm();
+    if (form) {
+      const pricingGroup = form.get('pricing') as FormGroup;
+      return pricingGroup?.get('paid')?.value || 0;
+    }
+    return 0;
+  });
 
   // Computed signal for balance
   public breakdownBalance = computed(() => {
-    return this.breakdownGrandTotal() - (this.paidAmount() || 0);
+    return this.breakdownGrandTotal() - this.paidAmount();
   });
 
   constructor() {
@@ -164,12 +172,26 @@ export class BreakDownTotal {
       });
     }
 
+    // Set up listener for pricing form changes
+    effect(() => {
+      const form = this.reservationForm();
+      if (form) {
+        const pricingGroup = form.get('pricing') as FormGroup;
+        if (pricingGroup) {
+          pricingGroup.valueChanges.subscribe(() => {
+            this.pricingChangeCounter.update(count => count + 1);
+          });
+        }
+      }
+    }, { allowSignalWrites: true });
+
     // Effect to update top-level pricing form with breakdown values
     effect(() => {
       const form = this.reservationForm();
       const pricingGroup = form?.get('pricing') as FormGroup;
       
       if (pricingGroup) {
+        // Update pricing with calculated values
         pricingGroup.patchValue({
           subtotal: this.breakdownSubtotal(),
           taxes: this.breakdownTaxes(),
@@ -180,7 +202,8 @@ export class BreakDownTotal {
             other: this.breakdownOtherFees()
           },
           discounts: this.breakdownDiscount(),
-          total: this.breakdownGrandTotal()
+          total: this.breakdownGrandTotal(),
+          balance: this.breakdownBalance()
         }, { emitEvent: false });
       }
     });

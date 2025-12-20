@@ -88,28 +88,24 @@
 
         <!-- Grand Total -->
         <mat-list-item class="py-4">
-            <span matListItemTitle class="text-base font-bold">Grand Total</span>
-            <span matListItemMeta class="text-base font-bold text-blue-700">
+            <span matListItemTitle>Grand Total</span>
+            <span matListItemMeta>
                 {{ breakdownGrandTotal() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
             </span>
         </mat-list-item>
 
         <!-- Paid Amount -->
         <mat-list-item class="py-4">
-            <span matListItemTitle class="text-base font-bold">Paid</span>
-            <span matListItemMeta class="text-base font-bold text-blue-700">
-                <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Paid</mat-label>
-                    <input matInput formControlName="paid" placeholder="Amount Paid" class="text-xs" currencyMask
-                        [options]="{ prefix: storeStore.selectedStore()?.currency }" >
-                </mat-form-field>
+            <span matListItemTitle =>Paid</span>
+            <span matListItemMeta >
+                {{ paidAmount() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}
             </span>
         </mat-list-item>
 
         <!-- Balance -->
         <mat-list-item class="py-4">
-            <span matListItemTitle class="text-base font-bold">Balance</span>
-            <span matListItemMeta class="text-base font-bold text-blue-700">
+            <span matListItemTitle >Balance</span>
+            <span matListItemMeta >
                 {{ breakdownBalance() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}
             </span>
         </mat-list-item>

@@ -312,7 +312,7 @@
                         </div>
                         <div class="ml-4">
                           <div class="text-sm font-semibold text-gray-900">
-                            {{ getGuestName(reservation) }}
+                            {{ reservation.guest | getGuestName }}
                           </div>
                           <div class="text-sm text-gray-600">
                             {{ reservation.guest.email || 'No email' }}

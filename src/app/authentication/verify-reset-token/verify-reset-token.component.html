@@ -1,0 +1,60 @@
+<div class="min-h-screen w-full flex items-center justify-center">
+        <mat-card appearance="outlined" class="w-full max-w-sm">
+            <mat-card-header class="mb-6">
+                <mat-card-title>Verify Reset Token
+                </mat-card-title>
+                <mat-card-subtitle>Enter the 6-digit token sent to your email.</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+                @if (!verified()) {
+                    <form [formGroup]="verifyTokenForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+                        <div class="text-center mb-4">
+                            <p class="text-sm text-gray-600">
+                                Token sent to: <span class="font-semibold">{{ email() }}</span>
+                            </p>
+                        </div>
+
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Reset Token</mat-label>
+                            <input matInput formControlName="token" placeholder="Enter 6-digit token" type="text" maxlength="6">
+                            <mat-icon matSuffix fontSet="material-icons-outlined">vpn_key</mat-icon>
+                            
+                            @if (verifyTokenForm.get('token')?.hasError('required')) {
+                                <mat-error>Token is required</mat-error>
+                            }
+                            @if (verifyTokenForm.get('token')?.hasError('minlength')) {
+                                <mat-error>Token must be 6 digits</mat-error>
+                            }
+                        </mat-form-field>
+                        
+                        <button mat-raised-button color="primary" 
+                                [disabled]="!verifyTokenForm.valid || loading()" 
+                                type="submit">
+                            @if (loading()) {
+                                <mat-spinner diameter="20"></mat-spinner>
+                                Verifying...
+                            } @else {
+                                Verify Token
+                            }
+                        </button>
+
+                        <div class="text-center mt-4">
+                            <p class="text-xs text-gray-600 mb-2">Didn't receive the token?</p>
+                            <a href="/auth/forgot-password" class="text-sm text-blue-600 hover:text-blue-800">
+                                Request a new one
+                            </a>
+                        </div>
+                    </form>
+                } @else {
+                    <div class="text-center">
+                        <mat-icon class="text-green-600 text-5xl mb-4">verified_user</mat-icon>
+                        <h3 class="text-lg font-semibold mb-2">Token Verified!</h3>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Redirecting to reset your password...
+                        </p>
+                    </div>
+                }
+            </mat-card-content>
+        </mat-card>
+</div>
