@@ -35,7 +35,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { GuestFormModalComponent } from '../../../../../../../shared/components/guest-form-modal/guest-form-modal.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Guest } from '../../../../../../../shared/models/reservation.model';
+import {
+  Guest,
+  Reservation,
+} from '../../../../../../../shared/models/reservation.model';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { BreakDownTotal } from '../break-down-total/break-down-total';
 import { PriceEditDialogComponent } from '../price-edit-dialog/price-edit-dialog.component';
@@ -43,6 +46,9 @@ import { RoomsService } from '../../../../../../../shared/services/rooms.service
 import { distinctUntilChanged, tap, of } from 'rxjs';
 import { Room } from '../../../../../../../shared/models/room.model';
 import { ReservationFormService } from '../../../../../../../shared/services/reservation-form.service';
+import { StoreStore } from '../../../../../../../shared/stores/store.store';
+import { ActivatedRoute } from '@angular/router';
+import { GuestService } from '../../../../../../../shared/services/guest.service';
 
 @Component({
   selector: 'app-room-sharers',
@@ -69,9 +75,13 @@ import { ReservationFormService } from '../../../../../../../shared/services/res
   templateUrl: './room-sharers.component.html',
   styleUrl: './room-sharers.component.scss',
 })
-export class RoomSharersComponent implements AfterViewInit {
+export class RoomSharersComponent {
   private fb = inject(FormBuilder);
-  private snackBar = inject(MatSnackBar);
+  public storeStore = inject(StoreStore);
+  public route = inject(ActivatedRoute);
+  public guestService = inject(GuestService);
+  private id = signal(this.route.snapshot.paramMap.get('id'));
+  public isEditing = computed(() => !!this.id());
 
   // Inputs
   private reservationFormService = inject(ReservationFormService);
@@ -100,7 +110,7 @@ export class RoomSharersComponent implements AfterViewInit {
 
   quickReservation = input<any>(null);
   selectedGuest = model<Guest | null>(null);
-  isEditing = input<boolean>(false);
+  reservation = input<Reservation | null>(null);
 
   // Outputs
   sharerAdded = output<any>();
@@ -112,145 +122,150 @@ export class RoomSharersComponent implements AfterViewInit {
   reservationMinDate = signal<Date | null>(null);
   reservationMaxDate = signal<Date | null>(null);
   private dialog = inject(MatDialog);
+
   private roomService = inject(RoomsService);
 
-  // Track for list rows
-  trackByIndex(index: number) {
-    return index;
-  }
+
 
   // Room availability resource
   public roomsResource = rxResource({
-    params: () => ({ 
-      roomId: this.isEditing() ? null : (this.quickReservation()?.selectedRoom || this.reservationForm()!.get('rooms')?.value[0]?.room),
-      isEditing: this.isEditing()
+    params: () => ({
+      roomId: this.isEditing()
+        ? this.reservation()!.rooms[0]?.room._id 
+        :this.quickReservation()?.selectedRoom,
+      isEditing: this.isEditing(),
     }),
     stream: ({ params }) => {
-      // Skip loading room data if we're editing (data already populated from form)
-      if (params.isEditing || !params.roomId) {
-        return of(null);
-      }
       return this.getRoom(params.roomId).pipe(
         tap((room) => {
-          // use the single room data to build a rooms array
-          const roomsArray = this.getRoomsFormArray();
-          if (roomsArray && room) {
-            const roomGroup = this.createRoomFormGroup(room);
-            roomsArray.clear();
-            roomsArray.push(roomGroup);
+          if (params.isEditing) {
+            this.populateSharersFromReservation(this.reservation());
+          } else {
+            this.buildSharesOnNewReservation();
           }
+          // use the single room data to build a rooms array
+          this.buildARoomForTheSharers(room);
         })
       );
     },
   });
 
-
-
-
-   ngAfterViewInit() {
-      // Update reservation date limits for sharers
-      this.reservationMinDate.set(this.checkInDate()!);
-      this.reservationMaxDate.set(this.checkOutDate()!);
-
-      const roomsArray = this.reservationForm()!.get('rooms') as FormArray;
-      const sharersArray = this.reservationForm()!.get('sharers') as FormArray;
-
-      // Listen to check-in and check-out date changes
-      const checkInSub = this.reservationForm()?.get('checkInDate')?.valueChanges.subscribe((date) => {
-        this.reservationMinDate.set(date);
-        
-        // Update rooms stay period
-        for (let i = 0; i < roomsArray.length; i++) {
-          roomsArray.at(i)?.patchValue({
-            stayPeriod: {
-              from: date,
-            }
-          }, { emitEvent: false });
-        }
-
-        // Update sharers dates
-        const sharersArray = this.reservationForm()!.get('sharers') as FormArray;
-        if (sharersArray) {
-          for (let i = 0; i < sharersArray.length; i++) {
-            sharersArray.at(i)?.patchValue({ checkInDate: date }, { emitEvent: false });
-          }
-        }
-      });
-
-      const checkOutSub = this.reservationForm()?.get('checkOutDate')?.valueChanges.subscribe((date) => {
-        this.reservationMaxDate.set(date);
-        
-        // Calculate nights from current reservation dates
-        const checkIn = this.reservationForm()?.get('checkInDate')?.value;
-        const diffTime = Math.abs(date.getTime() - checkIn.getTime());
-        const nightsCount = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        // Update rooms stay period and pricing
-        for (let i = 0; i < roomsArray.length; i++) {
-          const roomControl = roomsArray.at(i);
-          const pricing = roomControl?.get('pricing') as FormGroup;
-          const pricePerNight = pricing?.get('pricePerNight')?.value || 0;
-          const totalPrice = pricePerNight * nightsCount;
-
-          roomControl?.patchValue({
-            stayPeriod: {
-              to: date,
-              numberOfNights: nightsCount,
-            },
-            pricing: {
-              totalPrice: totalPrice,
-              subtotal: totalPrice,
-              total: totalPrice,
-            }
-          }, { emitEvent: true }); // Emit event so breakdown listens to changes
-        }
-
-        // Update sharers dates ONLY if this is a direct reservation date change
-        const sharersArray = this.reservationForm()!.get('sharers') as FormArray;
-        if (sharersArray) {
-          for (let i = 0; i < sharersArray.length; i++) {
-            sharersArray.at(i)?.patchValue({ checkOutDate: date }, { emitEvent: false });
-          }
-        }
-      });
-
-      // Listen to room nights changes to update pricing (for room-specific changes)
-      roomsArray?.valueChanges.pipe(
-        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr))
-      ).subscribe(() => {
-        // Update pricing based on each room's individual numberOfNights
-        for (let i = 0; i < roomsArray.length; i++) {
-          const roomControl = roomsArray.at(i);
-          const pricing = roomControl?.get('pricing') as FormGroup;
-          const stayPeriod = roomControl?.get('stayPeriod') as FormGroup;
-          
-          const pricePerNight = pricing?.get('pricePerNight')?.value || 0;
-          const numberOfNights = stayPeriod?.get('numberOfNights')?.value || 0;
-          const totalPrice = pricePerNight * numberOfNights;
-
-          roomControl?.patchValue({
-            pricing: {
-              totalPrice: totalPrice,
-              subtotal: totalPrice,
-              total: totalPrice,
-            }
-          }, { emitEvent: true }); // Emit event so breakdown listens
-        }
-      });
+  /**
+   * Populate sharers FormArray from reservation data (for edit mode)
+   */
+  private populateSharersFromReservation(
+    reservation: Reservation | null
+  ): void {
+    if (!reservation) {
+      console.log('[RoomSharers] No reservation provided, skipping population');
+      return;
     }
 
-  numberOfNights = computed(() => {
-    const checkIn = this.checkInDate();
-    const checkOut = this.checkOutDate();
-    if (checkIn && checkOut) {
-      const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays;
-    }
-    return 0;
-  });
+    console.log(
+      '[RoomSharers] populateSharersFromReservation called with reservation:',
+      reservation
+    );
 
-  createRoomFormGroup(room: Room, roomData?: any) {
+    const sharersArray = this.getSharersFormArray();
+    if (!sharersArray) {
+      console.warn('[RoomSharers] getSharersFormArray() returned null');
+      return;
+    }
+
+    // Clear existing sharers
+    sharersArray.clear();
+    console.log('[RoomSharers] Sharers array cleared');
+
+    if (reservation.sharers && reservation.sharers.length > 0) {
+      console.log(
+        '[RoomSharers] Populating sharers from reservation.sharers:',
+        reservation.sharers
+      );
+
+      reservation.sharers.forEach((sharer: any, index: number) => {
+        console.log(`[RoomSharers] Processing sharer ${index}:`, sharer);
+
+        const sharerForm = this.fb.group({
+          guest: [sharer.guest._id || sharer.guest, [Validators.required]],
+          meta: [sharer.guest, []],
+          guestType: [sharer.guestType || 'adult', [Validators.required]],
+          checkInDate: [new Date(sharer.checkInDate), [Validators.required]],
+          checkOutDate: [new Date(sharer.checkOutDate), [Validators.required]],
+          ageGrade: [sharer.ageGrade || '', []],
+        });
+
+        sharersArray.push(sharerForm);
+        console.log(
+          `[RoomSharers] Sharer ${index} added to form array. Current array length:`,
+          sharersArray.length
+        );
+      });
+    } else {
+      console.warn('[RoomSharers] No sharers found in reservation');
+    }
+
+    console.log(
+      '[RoomSharers] populateSharersFromReservation completed. Final array length:',
+      sharersArray.length
+    );
+  }
+
+  private buildSharesOnNewReservation(): void {
+    const sharersArray = this.getSharersFormArray();
+    if (sharersArray) {
+      // Only rebuild if the counts have changed
+      const currentLength = sharersArray.length;
+      const expectedLength = this.numberOfAdults()! + this.numberOfChildren()!;
+      if (currentLength !== expectedLength) {
+        // Clear and rebuild sharers array
+        sharersArray.clear();
+
+        // Add adult sharers
+        for (let i = 0; i < this.numberOfAdults()!; i++) {
+          const guestId =
+            i === 0 && this.selectedGuest() ? this.selectedGuest()?._id : null;
+          sharersArray.push(
+            this.fb.group({
+              guest: [guestId, [Validators.required]],
+              guestType: ['individual'],
+              ageGrade: ['adult'],
+              checkInDate: [this.checkInDate()],
+              checkOutDate: [this.checkOutDate()],
+              meta: [null],
+            })
+          );
+        }
+
+        // Add child sharers
+        for (let i = 0; i < this.numberOfChildren()!; i++) {
+          sharersArray.push(
+            this.fb.group({
+              guest: [null, [Validators.required]],
+              meta: [null],
+              guestType: ['individual'],
+              ageGrade: ['child'],
+              checkInDate: [this.checkInDate()],
+              checkOutDate: [this.checkOutDate()],
+            })
+          );
+        }
+
+        this.sharersArrayUpdated.emit(sharersArray);
+      }
+    }
+  }
+
+  private buildARoomForTheSharers(room: Room | null): void {
+    const roomsArray = this.getRoomsFormArray();
+    console.log(roomsArray, room)
+    if (roomsArray && room) {
+      const roomGroup = this.createRoomFormGroup(room);
+      roomsArray.clear();
+      roomsArray.push(roomGroup);
+    }
+  }
+
+  private createRoomFormGroup(room: Room, roomData?: any) {
     // Determine the room price: use priceOverride if available, otherwise use room type base price
     let roomPrice = roomData?.pricing?.pricePerNight || 0;
     if (!roomPrice) {
@@ -268,12 +283,12 @@ export class RoomSharersComponent implements AfterViewInit {
 
     // Calculate initial total price based on price per night and number of nights
     const initialTotalPrice = roomPrice * this.numberOfNights();
-
+    
     return this.fb.group({
       room: [roomData?.room || room._id || '', [Validators.required]], // Room ID
       roomNumber: [roomData?.roomNumber || room.roomNumber || ''], // Store room number for display
-      assignedGuest: [roomData?.assignedGuest || ''], // Guest ID (required for group)
-      assignedGuestName: [roomData?.assignedGuestName || ''], // Guest display name (for display only)
+      assignedGuest: [roomData?.assignedGuest || this.reservation()?.guest._id ||  ''], // Guest ID (required for group)
+      assignedGuestName: [roomData?.assignedGuestName || this.guestService.getGuestName(this.reservation()?.guest) || ''], // Guest display name (for display only)
       roomType: [
         roomData?.roomType ||
           (typeof room.roomType === 'string'
@@ -348,6 +363,136 @@ export class RoomSharersComponent implements AfterViewInit {
     });
   }
 
+  ngAfterViewInit() {
+    // Update reservation date limits for sharers
+    this.reservationMinDate.set(this.checkInDate()!);
+    this.reservationMaxDate.set(this.checkOutDate()!);
+
+    const roomsArray = this.reservationForm()!.get('rooms') as FormArray;
+    const sharersArray = this.reservationForm()!.get('sharers') as FormArray;
+
+    // Listen to check-in and check-out date changes
+    const checkInSub = this.reservationForm()
+      ?.get('checkInDate')
+      ?.valueChanges.subscribe((date) => {
+        this.reservationMinDate.set(date);
+
+        // Update rooms stay period
+        for (let i = 0; i < roomsArray.length; i++) {
+          roomsArray.at(i)?.patchValue(
+            {
+              stayPeriod: {
+                from: date,
+              },
+            },
+            { emitEvent: false }
+          );
+        }
+
+        // Update sharers dates
+        const sharersArray = this.reservationForm()!.get(
+          'sharers'
+        ) as FormArray;
+        if (sharersArray) {
+          for (let i = 0; i < sharersArray.length; i++) {
+            sharersArray
+              .at(i)
+              ?.patchValue({ checkInDate: date }, { emitEvent: false });
+          }
+        }
+      });
+
+    const checkOutSub = this.reservationForm()
+      ?.get('checkOutDate')
+      ?.valueChanges.subscribe((date) => {
+        this.reservationMaxDate.set(date);
+
+        // Calculate nights from current reservation dates
+        const checkIn = this.reservationForm()?.get('checkInDate')?.value;
+        const diffTime = Math.abs(date.getTime() - checkIn.getTime());
+        const nightsCount = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        // Update rooms stay period and pricing
+        for (let i = 0; i < roomsArray.length; i++) {
+          const roomControl = roomsArray.at(i);
+          const pricing = roomControl?.get('pricing') as FormGroup;
+          const pricePerNight = pricing?.get('pricePerNight')?.value || 0;
+          const totalPrice = pricePerNight * nightsCount;
+
+          roomControl?.patchValue(
+            {
+              stayPeriod: {
+                to: date,
+                numberOfNights: nightsCount,
+              },
+              pricing: {
+                totalPrice: totalPrice,
+                subtotal: totalPrice,
+                total: totalPrice,
+              },
+            },
+            { emitEvent: true }
+          ); // Emit event so breakdown listens to changes
+        }
+
+        // Update sharers dates ONLY if this is a direct reservation date change
+        const sharersArray = this.reservationForm()!.get(
+          'sharers'
+        ) as FormArray;
+        if (sharersArray) {
+          for (let i = 0; i < sharersArray.length; i++) {
+            sharersArray
+              .at(i)
+              ?.patchValue({ checkOutDate: date }, { emitEvent: false });
+          }
+        }
+      });
+
+    // Listen to room nights changes to update pricing (for room-specific changes)
+    roomsArray?.valueChanges
+      .pipe(
+        distinctUntilChanged(
+          (prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)
+        )
+      )
+      .subscribe(() => {
+        // Update pricing based on each room's individual numberOfNights
+        for (let i = 0; i < roomsArray.length; i++) {
+          const roomControl = roomsArray.at(i);
+          const pricing = roomControl?.get('pricing') as FormGroup;
+          const stayPeriod = roomControl?.get('stayPeriod') as FormGroup;
+
+          const pricePerNight = pricing?.get('pricePerNight')?.value || 0;
+          const numberOfNights = stayPeriod?.get('numberOfNights')?.value || 0;
+          const totalPrice = pricePerNight * numberOfNights;
+
+          roomControl?.patchValue(
+            {
+              pricing: {
+                totalPrice: totalPrice,
+                subtotal: totalPrice,
+                total: totalPrice,
+              },
+            },
+            { emitEvent: true }
+          ); // Emit event so breakdown listens
+        }
+      });
+  }
+
+  numberOfNights = computed(() => {
+    const checkIn = this.checkInDate();
+    const checkOut = this.checkOutDate();
+    if (checkIn && checkOut) {
+      const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    }
+    return 0;
+  });
+
+ 
+
   getRoomsFormArray(): FormArray<any> {
     const form = this.reservationForm();
     if (form) {
@@ -370,57 +515,7 @@ export class RoomSharersComponent implements AfterViewInit {
     return guestId !== null && guestId !== undefined && guestId !== '';
   });
 
-  ngOnInit() {
-    // Initialize sharers FormArray when numberOfAdults or numberOfChildren change
-    // Skip if we're editing (populateForm already populated the array)
-    if (this.reservationForm() && !this.isEditing()) {
-      const sharersArray = this.reservationForm()!.get('sharers') as FormArray;
-      if (sharersArray) {
-        // Only rebuild if the counts have changed
-        const currentLength = sharersArray.length;
-        const expectedLength =
-          this.numberOfAdults()! + this.numberOfChildren()!;
-        if (currentLength !== expectedLength) {
-          // Clear and rebuild sharers array
-          sharersArray.clear();
-
-          // Add adult sharers
-          for (let i = 0; i < this.numberOfAdults()!; i++) {
-            const guestId =
-              i === 0 && this.selectedGuest()
-                ? this.selectedGuest()?._id
-                : null;
-            sharersArray.push(
-              this.fb.group({
-                guest: [guestId, [Validators.required]],
-                guestType: ['individual'],
-                ageGrade: ['adult'],
-                checkInDate: [this.checkInDate()],
-                checkOutDate: [this.checkOutDate()],
-                meta: [null],
-              })
-            );
-          }
-
-          // Add child sharers
-          for (let i = 0; i < this.numberOfChildren()!; i++) {
-            sharersArray.push(
-              this.fb.group({
-                guest: [null, [Validators.required]],
-                meta: [null],
-                guestType: ['individual'],
-                ageGrade: ['child'],
-                checkInDate: [this.checkInDate()],
-                checkOutDate: [this.checkOutDate()],
-              })
-            );
-          }
-
-          this.sharersArrayUpdated.emit(sharersArray);
-        }
-      }
-    }
-  }
+  
 
   /**
    * Get the sharers FormArray
@@ -463,7 +558,7 @@ export class RoomSharersComponent implements AfterViewInit {
   public addSharer(guest: Guest, ageGrade: 'adult' | 'child'): void {
     const sharersArray = this.getSharersFormArray();
     const primaryGuest = this.getPrimaryGuest();
-    
+
     // Check if primary guest is assigned
     const hasPrimaryGuest = primaryGuest?.value?.guest;
 
@@ -561,30 +656,32 @@ export class RoomSharersComponent implements AfterViewInit {
    * Update a sharer with guest data (when selected from search)
    */
   updateSharerWithGuest(index: number, guest: any) {
-    const sharersArray = this.getSharersFormArray();
-    const sharer = sharersArray.at(index);
-    if (!sharer) return;
-    
-    this.selectedGuest.set(guest);
-    sharer.patchValue({
-      guest: guest._id,
-      meta: guest,
-      guestType: 'adult',
-    });
+    // const sharersArray = this.getSharersFormArray();
+    // const sharer = sharersArray.at(index);
+    // if (!sharer) return;
 
-    // Also update the room's assigned guest if this is the primary guest (index 0)
-    if (index === 0) {
-      const roomsArray = this.getRoomsFormArray();
-      if (roomsArray && roomsArray.length > 0) {
-        const roomControl = roomsArray.at(0);
-        if (roomControl) {
-          roomControl.patchValue({
-            assignedGuest: guest._id,
-            assignedGuestName: `${guest.firstName || ''} ${guest.lastName || ''}`.trim(),
-          });
-        }
-      }
-    }
+    // this.selectedGuest.set(guest);
+    // sharer.patchValue({
+    //   guest: guest._id,
+    //   meta: guest,
+    //   guestType: 'adult',
+    // });
+
+    // // Also update the room's assigned guest if this is the primary guest (index 0)
+    // if (index === 0) {
+    //   const roomsArray = this.getRoomsFormArray();
+    //   if (roomsArray && roomsArray.length > 0) {
+    //     const roomControl = roomsArray.at(0);
+    //     if (roomControl) {
+    //       roomControl.patchValue({
+    //         assignedGuest: guest._id,
+    //         assignedGuestName: `${guest.firstName || ''} ${
+    //           guest.lastName || ''
+    //         }`.trim(),
+    //       });
+    //     }
+    //   }
+    // }
   }
 
   /**
@@ -683,7 +780,6 @@ export class RoomSharersComponent implements AfterViewInit {
     this.sharerAdded.emit({ action: 'add_infants' });
   }
 
- 
   onEditRoomPricing() {
     const roomsArray = this.getRoomsFormArray();
     if (!roomsArray || roomsArray.length === 0) return;
@@ -707,4 +803,3 @@ export class RoomSharersComponent implements AfterViewInit {
     });
   }
 }
-

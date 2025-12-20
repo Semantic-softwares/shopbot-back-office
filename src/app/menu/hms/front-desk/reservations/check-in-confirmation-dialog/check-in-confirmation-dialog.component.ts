@@ -8,6 +8,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Reservation } from '../../../../../shared/models/reservation.model';
+import { CommonModule } from '@angular/common';
+import { GetGuestNamePipe } from '../../../../../shared/pipes';
 
 export interface CheckInDialogData {
   reservation: Reservation;
@@ -33,7 +35,9 @@ export interface CheckInDialogResult {
     MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    CommonModule,
+    GetGuestNamePipe
 ],
   templateUrl: './check-in-confirmation-dialog.component.html',
   styleUrls: ['./check-in-confirmation-dialog.component.scss']
@@ -43,9 +47,9 @@ export class CheckInConfirmationDialogComponent {
   private fb = inject(FormBuilder);
   public data = inject<CheckInDialogData>(MAT_DIALOG_DATA);
 
-  loading = signal(false);
+  public loading = signal(false);
 
-  checkInForm = this.fb.group({
+  public checkInForm = this.fb.group({
     isClean: [false, Validators.requiredTrue],
     isMaintained: [false, Validators.requiredTrue],
     amenitiesReady: [false, Validators.requiredTrue],

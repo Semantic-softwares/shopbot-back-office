@@ -235,13 +235,13 @@ export class SummaryComponent implements OnInit {
           {
             type: 'line' as const,
             label: this.activeLink,
-            data: chartData.data as number[],
+            data: chartData.data,
             borderColor: '#4CAF50',
             borderWidth: 2,
             fill: false,
             tension: 0.4,
             pointRadius: 1,
-          },
+          } as any,
         ],
       },
       options: {
@@ -254,7 +254,7 @@ export class SummaryComponent implements OnInit {
           },
           tooltip: {
             callbacks: {
-              label: function(context) {
+              label: function(context: any) {
                 let label = context.dataset.label || '';
                 if (label) {
                   label += ': ';
@@ -279,14 +279,14 @@ export class SummaryComponent implements OnInit {
           y: {
             beginAtZero: true,
             grid: {
-              color: function (context) {
+              color: function (context: any) {
                 return '#e2e8f0'; // Tailwind's gray-200
               },
               lineWidth: 0.5,
             },
           },
         },
-      },
+      } as any,
     });
   }
 }

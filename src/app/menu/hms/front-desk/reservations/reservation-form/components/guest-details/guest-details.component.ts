@@ -21,6 +21,7 @@ import { GuestSearchComponent } from '../../../../../../../shared/components/gue
 import { Form, FormArray, FormGroup } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReservationFormService } from '../../../../../../../shared/services/reservation-form.service';
+import { GetGuestNamePipe } from "../../../../../../../shared/pipes/get-guest-name.pipe";
 
 @Component({
   selector: 'app-guest-details',
@@ -34,7 +35,8 @@ import { ReservationFormService } from '../../../../../../../shared/services/res
     MatInputModule,
     MatListModule,
     GuestSearchComponent,
-  ],
+    GetGuestNamePipe
+],
   templateUrl: './guest-details.component.html',
   styleUrls: ['./guest-details.component.scss'],
 })
@@ -46,13 +48,11 @@ export class GuestDetailsComponent {
     );
   guest = input<Guest | null>(null);
   bookingType = signal<string>(this.reservationForm()!.get('bookingType')?.value || 'single'); 
-  // reservationForm = input<FormGroup>();
   guestAdded = output<void>();
   guestEdited = output<void>();
   guestDeleted = output<void>();
   guestSelected = output<Guest>();
   private dialog = inject(MatDialog);
-  private snackBar = inject(MatSnackBar);
 
   public onAddGuest(): void {
     const dialogRef = this.dialog.open(GuestFormModalComponent, {
@@ -69,15 +69,13 @@ export class GuestDetailsComponent {
     });
   }
 
-  getSharersFormArray() {
-    return this.reservationForm()?.controls["sharers"] as FormArray;
-  }
+  
 
-  onGuestSearchSelected(guest: Guest): void {
+  public onGuestSearchSelected(guest: Guest): void {
     this.guestSelected.emit(guest);
   }
 
-  onEditGuest() {
+  public onEditGuest(): void {
     const guest = this.guest();
     if (!guest) return;
 

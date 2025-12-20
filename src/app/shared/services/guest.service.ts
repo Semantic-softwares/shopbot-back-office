@@ -130,4 +130,47 @@ export class GuestService {
     }
     return this.http.get(`${this.apiUrl}/stats/overview`, { params });
   }
+
+  /**
+   * Get formatted guest name based on guest type and available fields
+   * Handles both individual and corporate guests
+   * @param guest - Guest object
+   * @returns Formatted guest name string
+   */
+  getGuestName(guest: Guest | null | undefined): string {
+    if (!guest) {
+      return 'Unknown Guest';
+    }
+
+    // First, try to use firstName and lastName
+    if (guest.firstName || guest.lastName) {
+      const firstName = guest.firstName || '';
+      const lastName = guest.lastName || '';
+      const name = `${firstName} ${lastName}`.trim();
+      
+      if (guest.companyName) {
+        return `${name} (${guest.companyName})`;
+      }
+      return name || 'Unknown Guest';
+    }
+
+    // If firstName/lastName not available, try contactPersonFirstName and contactPersonLastName
+    if (guest.contactPersonFirstName || guest.contactPersonLastName) {
+      const firstName = guest.contactPersonFirstName || '';
+      const lastName = guest.contactPersonLastName || '';
+      const name = `${firstName} ${lastName}`.trim();
+      
+      if (guest.companyName) {
+        return `${name} (${guest.companyName})`;
+      }
+      return name || 'Unknown Guest';
+    }
+
+    // If we only have company name, use that
+    if (guest.companyName) {
+      return guest.companyName;
+    }
+
+    return 'Unknown Guest';
+  }
 }

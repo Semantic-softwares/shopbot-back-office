@@ -6,7 +6,7 @@
         </mat-card-title>
         <!-- <mat-card-subtitle>Primary guest and contact information</mat-card-subtitle> -->
     </mat-card-header>
-    <mat-card-content >
+    <mat-card-content>
         <!-- No Guest Selected State -->
         @if (!guest()) {
         <div class="space-y-4">
@@ -28,29 +28,15 @@
         <div class="space-y-4">
             <!-- Guest Header List Item -->
             <mat-list>
-                @if (bookingType() === 'single') {
                 <mat-list-item>
 
                     <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">account_circle</mat-icon>
                     <div matListItemTitle class="text-xl font-semibold text-gray-900">
-                        {{ guest()?.firstName }} {{ guest()?.lastName }}
+                        {{ guest() | getGuestName }}
                     </div>
-                    @if (guest()?.nationality) {
-                    <div matListItemLine class="text-sm text-gray-600">
-                        {{ guest()?.nationality }}
-                    </div>
-                    }
-                </mat-list-item>
-                } @else {
-                <mat-list-item>
-                    <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">apartment</mat-icon>
-                    <div matListItemTitle class="text-sm text-gray-600!">Company</div>
-                    <div matListItemLine class="text-gray-900 font-medium">{{guest()?.companyName}}</div>
-                    <div matListItemLine class="text-gray-900 font-medium">{{ guest()?.contactPersonFirstName }} {{
-                        guest()?.contactPersonLastName }}</div>
+
                 </mat-list-item>
 
-                }
 
 
 
@@ -130,7 +116,7 @@
             <mat-icon class="mr-2">edit_outline</mat-icon>
             Edit
         </button>
-        <button type="button"  mat-button (click)="onDeleteGuest()" color="warn">
+        <button type="button" mat-button (click)="onDeleteGuest()" color="warn">
             <mat-icon class="mr-2">delete_outline</mat-icon>
             Delete
         </button>

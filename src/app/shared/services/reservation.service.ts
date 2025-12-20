@@ -901,6 +901,64 @@ export class ReservationService {
     );
   }
 
+  /**
+   * Get all transactions for a reservation
+   */
+  getReservationTransactions(storeId: string, reservationId: string): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${environment.apiUrl}/stores/${storeId}/reservation-transactions/${reservationId}`
+    ).pipe(
+      catchError(error => {
+        console.error('Error fetching transactions:', error);
+        return of([]);
+      })
+    );
+  }
+
+  /**
+   * Create a new transaction for a reservation
+   */
+  createTransaction(
+    storeId: string,
+    reservationId: string,
+    transactionData: {
+      amount: number;
+      method: string;
+      type: string;
+      notes?: string;
+      reference?: string;
+    }
+  ): Observable<any> {
+    return this.http.post<any>(
+      `${environment.apiUrl}/stores/${storeId}/reservation-transactions/${reservationId}`,
+      transactionData
+    ).pipe(
+      catchError(error => {
+        console.error('Error creating transaction:', error);
+        throw error;
+      })
+    );
+  }
+
+  /**
+   * Reverse/refund a transaction
+   */
+  reverseTransaction(
+    storeId: string,
+    reservationId: string,
+    transactionId: string
+  ): Observable<any> {
+    return this.http.post<any>(
+      `${environment.apiUrl}/stores/${storeId}/reservation-transactions/${reservationId}/${transactionId}/reverse`,
+      {}
+    ).pipe(
+      catchError(error => {
+        console.error('Error reversing transaction:', error);
+        throw error;
+      })
+    );
+  }
+
   // Private mock data for development
   
 }

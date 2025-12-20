@@ -1,0 +1,227 @@
+// Transaction Management Dialog Styles
+
+mat-dialog-content {
+  max-height: 600px;
+  padding: 24px;
+
+  mat-tab-group {
+    ::ng-deep {
+      .mat-mdc-tab-list {
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .mat-mdc-tab {
+        min-width: 150px;
+      }
+    }
+  }
+}
+
+// Breakdown section
+.bg-gray-50 {
+  background-color: #f9fafb;
+
+  .bg-white {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+
+    .text-gray-600 {
+      color: #4b5563;
+      font-size: 0.75rem;
+    }
+  }
+}
+
+// Payment progress bar
+.h-2 {
+  height: 0.5rem;
+
+  &.bg-gray-200 {
+    background-color: #e5e7eb;
+  }
+
+  .bg-green-500 {
+    background-color: #10b981;
+  }
+}
+
+// Form styling
+mat-form-field {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+// Table styling
+table {
+  border-collapse: collapse;
+
+  th {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+  }
+
+  td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  tr:hover {
+    background-color: #f9fafb;
+  }
+}
+
+// Status badges
+.px-2.py-1.rounded {
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.bg-blue-100 {
+  background-color: #dbeafe;
+  color: #0c4a6e;
+}
+
+.bg-green-100 {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.bg-red-100 {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+// Empty state
+.opacity-30 {
+  opacity: 0.3;
+}
+
+// Loading spinner
+mat-progress-spinner {
+  display: block;
+  margin: 0 auto;
+}
+
+// Dialog actions
+mat-dialog-actions {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+
+  button {
+    min-width: 100px;
+  }
+}
+
+// Utility classes
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-gray-500 {
+  color: #6b7280;
+}
+
+.text-gray-600 {
+  color: #4b5563;
+}
+
+.text-green-600 {
+  color: #16a34a;
+}
+
+.text-red-600 {
+  color: #dc2626;
+}
+
+.text-blue-800 {
+  color: #1e40af;
+}
+
+.text-blue-50 {
+  background-color: #eff6ff;
+}
+
+.border-blue-200 {
+  border: 1px solid #bfdbfe;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.p-2 {
+  padding: 0.5rem;
+}
+
+.p-3 {
+  padding: 0.75rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.grid {
+  display: grid;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 768px) {
+  .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+}

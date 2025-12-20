@@ -14,7 +14,7 @@
     <mat-autocomplete #guestAutoComplete="matAutocomplete" (optionSelected)="onGuestSelected($event.option.value)">
       @for (guest of filteredGuests(); track guest._id) {
         <mat-option [value]="guest">
-          <span class="font-medium">{{ guest?.firstName || guest?.companyName }} {{ guest?.lastName }}</span>
+          <span class="font-medium">{{ guest | getGuestName }}</span>
           <span class="text-sm text-gray-500 ml-2">{{ guest?.email }}</span>
         </mat-option>
       }
