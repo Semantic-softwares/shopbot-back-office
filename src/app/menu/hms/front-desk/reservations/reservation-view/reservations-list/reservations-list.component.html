@@ -1,0 +1,344 @@
+<app-page-header 
+  title="Reservations" 
+  subtitle="Manage hotel reservations and guest bookings"
+  [showViewToggle]="true"
+  viewToggleRoute="/menu/hms/front-desk/reservations/view">
+  
+  <ng-container actions>
+    <button matButton="outlined" (click)="clearFilters()">
+      <mat-icon>clear</mat-icon>
+      Clear Filters
+    </button>
+    
+    <button matButton="outlined" (click)="reloadData()">
+      <mat-icon class="mr-1">redo</mat-icon>
+      Reload
+    </button>
+    
+    <button matButton="outlined" (click)="exportReservations()">
+      <mat-icon class="mr-1">download</mat-icon>
+      Export
+    </button>
+    
+    <button matButton="filled" (click)="createReservation()">
+      <mat-icon class="mr-1">add</mat-icon>
+      Create Reservation
+    </button>
+  </ng-container>
+  
+</app-page-header>
+
+<!-- Loading State -->
+@if (reservations.isLoading()) {
+<div class="flex justify-center items-center">
+  <mat-spinner diameter="40"></mat-spinner>
+</div>
+} @else if (reservations.hasValue()) {
+  <div class="max-w-12xl py-6">
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <div class="text-sm text-gray-600">Total</div>
+        <div class="text-2xl font-bold">{{ reservations.value().reservations.length }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <div class="text-sm text-gray-600">Confirmed</div>
+        <div class="text-2xl font-bold">{{ confirmedCount() }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <div class="text-sm text-gray-600">Checked In</div>
+        <div class="text-2xl font-bold">{{ checkedInCount() }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <div class="text-sm text-gray-600">Pending</div>
+        <div class="text-2xl font-bold">{{ pendingCount() }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <div class="text-sm text-gray-600">Cancelled</div>
+        <div class="text-2xl font-bold">{{ cancelledCount() }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <div class="text-sm text-gray-600">Revenue</div>
+        <div class="text-2xl font-bold">{{ totalRevenue() | currency: storeStore.selectedStore()?.currency }}</div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+<!-- Table Container -->
+@if (reservations.value()!.reservations!.length > 0) {
+
+<mat-card appearance="outlined">
+  <div class="p-3">
+    <form [formGroup]="filterForm">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-4">
+        <!-- Search Input -->
+        <div class="lg:col-span-2">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Search reservations...</mat-label>
+            <mat-icon matPrefix class="text-gray-400">search</mat-icon>
+            <input matInput placeholder="Guest name or confirmation #" formControlName="search">
+          </mat-form-field>
+        </div>
+
+        <!-- Status Filter -->
+        <div>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              @for (status of statusOptions; track status.value) {
+              <mat-option [value]="status.value">
+                <span class="flex items-center">
+                  <span class="w-3 h-3 rounded-full mr-3 ring-2"
+                    [ngClass]="'bg-' + status.color + '-500 ring-' + status.color + '-200'"></span>
+                  {{ status.label }}
+                </span>
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Date Range -->
+        <div class="lg:col-span-2">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Check-in date range</mat-label>
+            <mat-date-range-input [formGroup]="filterForm.controls.dateRange" [rangePicker]="dateRangePicker">
+              <input matStartDate formControlName="start" placeholder="Start date">
+              <input matEndDate formControlName="end" placeholder="End date">
+            </mat-date-range-input>
+            <mat-datepicker-toggle matIconSuffix [for]="dateRangePicker"></mat-datepicker-toggle>
+            <mat-date-range-picker #dateRangePicker></mat-date-range-picker>
+          </mat-form-field>
+        </div>
+
+        <!-- Sort Options -->
+        <div>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Sort by</mat-label>
+            <mat-select formControlName="sortBy">
+              <mat-option value="createdAt">Created Date</mat-option>
+              <mat-option value="checkInDate">Check-in Date</mat-option>
+              <mat-option value="checkOutDate">Check-out Date</mat-option>
+              <mat-option value="total">Total Amount</mat-option>
+              <mat-option value="guestName">Guest Name</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <!-- <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <button type="button" (click)="clearFilters()"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center gap-2">
+            <mat-icon class="text-lg">clear</mat-icon>
+            Clear Filters
+          </button>
+          <button type="button" (click)="refreshReservations()"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center gap-2">
+            <mat-icon class="text-lg">refresh</mat-icon>
+            Refresh
+          </button>
+          <button type="button" (click)="exportReservations()"
+            [disabled]="reservations.value()?.reservations?.length === 0 || reservations.isLoading()"
+            class="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-green-600 rounded-lg hover:bg-green-700 hover:border-green-700 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600">
+            <mat-icon class="text-lg">download</mat-icon>
+            Export CSV
+          </button>
+        </div>
+        <div class="flex items-center text-sm text-gray-600">
+          <span>Showing {{ reservations.value()?.reservations?.length }} reservations</span>
+        </div>
+      </div> -->
+    </form>
+  </div>
+  <table mat-table [dataSource]="reservations.value()!.reservations" class="w-full">
+
+    <!-- Confirmation Number Column -->
+    <ng-container matColumnDef="confirmationNumber">
+      <th mat-header-cell *matHeaderCellDef>Confirmation #</th>
+      <td mat-cell *matCellDef="let reservation">
+        <mat-chip (click)="$event.stopPropagation(); viewReservation(reservation)">
+          {{ reservation.confirmationNumber }}
+        </mat-chip>
+      </td>
+    </ng-container>
+
+    <!-- Guest Information Column -->
+    <ng-container matColumnDef="guest">
+      <th mat-header-cell *matHeaderCellDef>Guest Information</th>
+      <td mat-cell *matCellDef="let reservation">
+        {{ reservation.guest | getGuestName }}
+      </td>
+    </ng-container>
+
+    <!-- Room Details Column -->
+    <ng-container matColumnDef="rooms">
+      <th mat-header-cell *matHeaderCellDef>Room Details</th>
+      <td mat-cell *matCellDef="let reservation">
+        {{ reservation.rooms.length }} Room(s)
+      </td>
+    </ng-container>
+
+    <!-- Stay Period Column (Check-in / Check-out) -->
+    <ng-container matColumnDef="stayPeriod">
+      <th mat-header-cell *matHeaderCellDef>Stay Period</th>
+      <td mat-cell *matCellDef="let reservation">
+        {{reservation.checkInDate | date:'MMM dd, yyyy'}}
+        -
+        {{reservation.checkInDate | date:'MMM dd, yyyy'}}
+      </td>
+    </ng-container>
+
+    <!-- Nights Column -->
+    <ng-container matColumnDef="nights">
+      <th mat-header-cell *matHeaderCellDef>Nights</th>
+      <td mat-cell *matCellDef="let reservation">
+        {{reservation.numberOfNights}}
+      </td>
+    </ng-container>
+
+    <!-- Status Column -->
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let reservation">
+        <mat-chip>{{ reservation.status | titlecase }}</mat-chip>
+      </td>
+    </ng-container>
+
+    <!-- Total Amount Column -->
+    <ng-container matColumnDef="total">
+      <th mat-header-cell *matHeaderCellDef>Total Amount</th>
+      <td mat-cell *matCellDef="let reservation">
+        <div class="font-bold">{{ reservation.pricing?.total | currency: storeStore.selectedStore()?.currency }}</div>
+      </td>
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <td mat-cell *matCellDef="let reservation">
+        <button mat-icon-button [matMenuTriggerFor]="actionMenu" (click)="$event.stopPropagation()">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #actionMenu="matMenu">
+          <button mat-menu-item (click)="viewReservation(reservation)">
+            <mat-icon>visibility</mat-icon>
+            <span>View Details</span>
+          </button>
+          @if (canEdit(reservation)) {
+          <button mat-menu-item (click)="editReservation(reservation)">
+            <mat-icon>edit</mat-icon>
+            <span>Edit</span>
+          </button>
+          }
+          @if (canDelete(reservation)) {
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="deleteReservation(reservation)">
+            <mat-icon color="warn">delete</mat-icon>
+            <span>Delete Reservation</span>
+          </button>
+          }
+        </mat-menu>
+      </td>
+    </ng-container>
+
+    <!-- Header and Row Definitions -->
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let reservation; columns: displayedColumns;" class="cursor-pointer"
+      (click)="viewReservation(reservation)"></tr>
+  </table>
+  <mat-card-actions>
+    <mat-paginator [length]="totalReservations()" [pageSize]="pageSize()" [pageSizeOptions]="[5, 10, 25, 50, 100]"
+      [pageIndex]="currentPage() - 1" (page)="onPageChange($event)" showFirstLastButtons>
+    </mat-paginator>
+  </mat-card-actions>
+</mat-card>
+} @else {
+<div class="py-20   text-center">
+  <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+    <mat-icon class="text-4xl text-gray-400">hotel</mat-icon>
+  </div>
+  <h3 class="text-lg font-semibold text-gray-900 mb-2">No reservations found</h3>
+  <p class="text-gray-500 mb-6">
+    {{ filterForm.get('search')?.value || filterForm.get('status')?.value
+    ? 'Try adjusting your filters or search terms to find matching reservations.'
+    : 'Get started by creating your first reservation to begin managing your hotel bookings.' }}
+  </p>
+  <button matButton="filled" color="primary" (click)="createReservation()">
+    <mat-icon>add</mat-icon>
+    Create New Reservation
+  </button>
+</div>
+}
+} @else if (reservations.error()) {
+<div class="bg-red-50 border border-red-200 rounded-lg p-4 m-4">
+  <div class="flex">
+    <mat-icon class="text-red-500 mr-2">error</mat-icon>
+    <div>
+      <h3 class="text-red-800 font-medium">Error loading reservations</h3>
+      <p class="text-red-700 text-sm mt-1">{{ reservations.error() }}</p>
+      <div class="mt-3 flex space-x-3">
+        <button mat-button color="warn" (click)="refreshReservations()" class="!text-red-600">
+          <mat-icon class="mr-1">refresh</mat-icon>
+          Retry
+        </button>
+        <button mat-button (click)="clearError()" class="!text-gray-600">Dismiss</button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+
+
+<!-- Status Change Menu -->
+<!-- <mat-menu #statusMenu="matMenu" class="!shadow-xl !border !border-gray-200 !rounded-lg">
+  <ng-template matMenuContent let-reservation="reservation">
+    <div class="px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
+      Change Status
+    </div>
+    @if (getAvailableStatusOptions(reservation).length === 0) {
+      <div class="px-3 py-2 text-xs text-gray-400 italic">
+        No status changes available
+      </div>
+    }
+    @for (status of getAvailableStatusOptions(reservation); track status.value) {
+      <button 
+        mat-menu-item 
+        (click)="updateReservationStatus(reservation, status.value)"
+        class="!text-gray-700 hover:!bg-gray-50 !transition-colors">
+        <mat-icon 
+          class="mr-3 !text-base" 
+          [style.color]="status.color">{{ status.icon }}</mat-icon>
+        <span>{{ status.label }}</span>
+      </button>
+    }
+    @if (reservation.status === 'pending') {
+      <div class="px-3 py-2 text-xs text-amber-600 bg-amber-50 border-t border-amber-100 mt-1">
+        💡 Confirm reservation before check-in
+      </div>
+    }
+    @if (reservation.status === 'confirmed') {
+      <div class="px-3 py-2 text-xs text-blue-600 bg-blue-50 border-t border-blue-100 mt-1">
+        💡 Ready for check-in
+      </div>
+    }
+  </ng-template>
+</mat-menu> -->

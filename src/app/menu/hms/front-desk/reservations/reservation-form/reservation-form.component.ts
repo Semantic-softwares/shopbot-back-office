@@ -63,6 +63,7 @@ import {
   ValidationErrorsDialogComponent,
   ValidationErrorsDialogData,
 } from '../../../../../shared/components/validation-errors-dialog/validation-errors-dialog.component';
+import { PinAuthorizationDialogComponent, PinAuthorizationDialogData, PinAuthorizationDialogResult } from '../pin-authorization-dialog/pin-authorization-dialog.component';
 
 @Component({
   selector: 'app-reservation-form',
@@ -231,8 +232,8 @@ export class ReservationFormComponent implements OnDestroy {
     bookingSource: ['walk_in', [Validators.required]],
     createdBy: [this.currentUser()?._id, [Validators.required]],
     paymentInfo: this.fb.group({
-      method: ['cash', [Validators.required]],
-      status: ['pending', [Validators.required]],
+      method: [{value: 'cash', disabled: true}, [Validators.required]],
+      status: [{value: 'pending', disabled: true}, [Validators.required]],
     }),
     // Room Sharers
     numberOfAdults: [1, [Validators.required, Validators.min(1)]],
@@ -303,6 +304,77 @@ export class ReservationFormComponent implements OnDestroy {
       ),
   });
 
+    // Reopen cancelled reservation with PIN authorization
+    async reopenReservation(): Promise<void> {
+      const reservation = this.reservation.value();
+      if (!reservation) return;
+  
+      if (reservation.status !== ReservationStatus.CANCELLED && reservation.status !== ReservationStatus.CHECKED_OUT && reservation.status !== ReservationStatus.NO_SHOW) {
+        this.snackBar.open('Only cancelled, checked-out, or no-show reservations can be reopened', 'Close', {
+          duration: 5000,
+          panelClass: ['error-snackbar']
+        });
+        return;
+      }
+  
+      const storeId = this.storeStore.selectedStore()?._id;
+      if (!storeId) {
+        this.snackBar.open('Store information not available', 'Close', {
+          duration: 5000,
+          panelClass: ['error-snackbar']
+        });
+        return;
+      }
+  
+      // Open PIN authorization dialog
+      const dialogRef = this.dialog.open(PinAuthorizationDialogComponent, {
+        width: '400px',
+        disableClose: true,
+        data: {
+          storeId: storeId,
+          actionDescription: 'reopen this cancelled reservation',
+          reservationId: reservation._id
+        } as PinAuthorizationDialogData
+      });
+  
+      dialogRef.afterClosed().subscribe(async (result: PinAuthorizationDialogResult) => {
+        if (result && result.authorized && result.pin) {
+          this.statusUpdating.set(true);
+  
+          try {
+            const updatedReservation = await this.reservationService.reopenReservation(
+              reservation._id,
+              result.pin
+            ).toPromise();
+  
+            if (updatedReservation) {
+              this.reservation.set(updatedReservation);
+              this.snackBar.open('Reservation reopened successfully', 'Close', { 
+                duration: 3000,
+                panelClass: ['success-snackbar']
+              });
+            }
+          } catch (error) {
+            console.error('Error reopening reservation:', error);
+            
+            // The service already extracts the error message and throws it as error.message
+            let errorMessage = 'Failed to reopen reservation';
+            if (error instanceof Error && error.message) {
+              errorMessage = error.message;
+            } else if (error && typeof error === 'object' && (error as any).message) {
+              errorMessage = (error as any).message;
+            }
+            
+            this.snackBar.open(errorMessage, 'Close', { 
+              duration: 5000,
+              panelClass: ['error-snackbar']
+            });
+          } finally {
+            this.statusUpdating.set(false);
+          }
+        }
+      });
+    }
   
 
   ngOnDestroy() {

@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { reservationEditGuard } from '../../../../shared/guards/reservation-edit.guard';
 
 export const reservationRoutes: Routes = [
   {
@@ -9,25 +8,18 @@ export const reservationRoutes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'list',
+        redirectTo: 'view',
         pathMatch: 'full',
       },
       {
-        path: 'list',
-        loadComponent: () =>
-          import('./reservations-list/reservations-list.component').then(
-            (c) => c.ReservationsListComponent
+        path: 'view',
+        loadChildren: () =>
+          import('./reservation-view/reservations-view.routes').then(
+            (c) => c.RESERVATION_VIEW_ROUTES
           ),
         title: 'Reservations - Hotel Management',
       },
-      //   {
-      //     path: 'calendar',
-      //     loadComponent: () =>
-      //       import('./calendar/reservations-calendar.component').then(
-      //         (c) => c.ReservationsCalendarComponent
-      //       ),
-      //     title: 'Reservation Calendar - Hotel Management',
-      //   },
+       
       {
         path: 'create',
         loadComponent: () =>

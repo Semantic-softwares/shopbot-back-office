@@ -19,14 +19,16 @@ import { MatDividerModule } from "@angular/material/divider";
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { ReservationService } from '../../../../../shared/services/reservation.service';
-import { Reservation, ReservationStatus } from '../../../../../shared/models/reservation.model';
-import { StoreStore } from '../../../../../shared/stores/store.store';
-import { CheckInConfirmationDialogComponent, CheckInDialogData } from '../check-in-confirmation-dialog/check-in-confirmation-dialog.component';
-import { PaymentUpdateDialogComponent, PaymentUpdateDialogData } from '../payment-update-dialog/payment-update-dialog.component';
-import { PinAuthorizationDialogComponent, PinAuthorizationDialogData, PinAuthorizationDialogResult } from '../pin-authorization-dialog/pin-authorization-dialog.component';
-import { QuickReservationModalComponent, QuickReservationData } from '../quick-reservation-modal/quick-reservation-modal.component';
-import { GetGuestNamePipe } from "../../../../../shared/pipes/get-guest-name.pipe";
+import { ReservationService } from '../../../../../../shared/services/reservation.service';
+import { Reservation, ReservationStatus } from '../../../../../../shared/models/reservation.model';
+import { StoreStore } from '../../../../../../shared/stores/store.store';
+import { PageHeaderComponent } from '../../../../../../shared/components/page-header/page-header.component';
+import { CheckInConfirmationDialogComponent, CheckInDialogData } from '../../check-in-confirmation-dialog/check-in-confirmation-dialog.component';
+import { PaymentUpdateDialogComponent, PaymentUpdateDialogData } from '../../payment-update-dialog/payment-update-dialog.component';
+import { PinAuthorizationDialogComponent, PinAuthorizationDialogData, PinAuthorizationDialogResult } from '../../pin-authorization-dialog/pin-authorization-dialog.component';
+import { QuickReservationModalComponent, QuickReservationData } from '../../quick-reservation-modal/quick-reservation-modal.component';
+import { GetGuestNamePipe } from "../../../../../../shared/pipes/get-guest-name.pipe";
+import { rxResource } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-reservations-list',
@@ -48,7 +50,8 @@ import { GetGuestNamePipe } from "../../../../../shared/pipes/get-guest-name.pip
     MatDatepickerModule,
     MatProgressSpinnerModule,
     MatDividerModule,
-    GetGuestNamePipe
+    GetGuestNamePipe,
+    PageHeaderComponent
 ],
   templateUrl: './reservations-list.component.html'
 })
@@ -57,14 +60,9 @@ export class ReservationsListComponent {
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
   private reservationService = inject(ReservationService);
-  private storeStore = inject(StoreStore);
+  public storeStore = inject(StoreStore);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
-
-  // Signals for reactive data
-  reservations = signal<Reservation[]>([]);
-  loading = signal<boolean>(false);
-  error = signal<string | null>(null);
   currentPage = signal<number>(1);
   pageSize = signal<number>(10);
   totalReservations = signal<number>(0);
@@ -82,31 +80,33 @@ export class ReservationsListComponent {
   filterForm = this.fb.group({
     search: [''],
     status: [''],
-    dateFrom: [null],
-    dateTo: [null],
+    dateRange: this.fb.group({
+      start: [null as Date | null],
+      end: [null as Date | null]
+    }),
     sortBy: ['createdAt'],
     sortOrder: ['desc']
   });
 
   // Computed statistics for dashboard cards
   confirmedCount = computed(() => {
-    return this.reservations().filter(r => r.status === 'confirmed').length;
+    return this.reservations.value()?.reservations.filter(r => r.status === 'confirmed').length;
   });
 
   checkedInCount = computed(() => {
-    return this.reservations().filter(r => r.status === 'checked_in').length;
+    return this.reservations.value()?.reservations.filter(r => r.status === 'checked_in').length;
   });
 
   pendingCount = computed(() => {
-    return this.reservations().filter(r => r.status === 'pending').length;
+    return this.reservations.value()?.reservations.filter(r => r.status === 'pending').length;
   });
 
   cancelledCount = computed(() => {
-    return this.reservations().filter(r => r.status === 'cancelled').length;
+    return this.reservations.value()?.reservations.filter(r => r.status === 'cancelled').length;
   });
 
   totalRevenue = computed(() => {
-    return this.reservations().reduce((sum, r) => sum + this.getEffectiveTotal(r), 0);
+    return this.reservations.value()?.reservations.reduce((sum, r) => sum + this.getEffectiveTotal(r), 0);
   });
 
   // Create a computed signal for filter parameters
@@ -144,7 +144,7 @@ export class ReservationsListComponent {
   });
 
   // Table configuration
-  displayedColumns = ['confirmationNumber', 'guest', 'rooms', 'checkIn', 'checkOut', 'status', 'total', 'actions'];
+  displayedColumns = ['confirmationNumber', 'guest', 'rooms', 'stayPeriod', 'nights', 'status', 'total', 'actions'];
 
   // Status options
   statusOptions: { value: ReservationStatus | '', label: string, color: string }[] = [
@@ -159,19 +159,7 @@ export class ReservationsListComponent {
 
   constructor() {
     // Set up reactive loading based on filter changes
-    effect(() => {
-      // This effect runs whenever filterParams() computed signal changes
-      const params = this.filterParams();
-      console.log('Filter params changed, loading reservations:', params);
-      
-      // Skip if no store is selected
-      if (!params.storeId) {
-        console.log('No store selected, skipping load');
-        return;
-      }
-      
-      this.loadReservationsInternal();
-    });
+    
 
     // Sync form changes to signals
     this.filterForm.valueChanges.pipe(
@@ -186,39 +174,44 @@ export class ReservationsListComponent {
       // Update filter signals
       this.searchFilter.set(formValues.search || '');
       this.statusFilter.set(formValues.status || '');
-      this.dateFromFilter.set(formValues.dateFrom || null);
-      this.dateToFilter.set(formValues.dateTo || null);
+      this.dateFromFilter.set(formValues.dateRange?.start || null);
+      this.dateToFilter.set(formValues.dateRange?.end || null);
       this.sortByFilter.set(formValues.sortBy || 'createdAt');
       this.sortOrderFilter.set(formValues.sortOrder || 'desc');
     });
   }
 
-  private loadReservationsInternal() {
-    this.loading.set(true);
-    this.error.set(null);
+  // private loadReservationsInternal() {
+  //   this.loading.set(true);
+  //   this.error.set(null);
     
-    const params = this.filterParams();
-    console.log('Loading reservations with params:', params);
+  //   const params = this.filterParams();
+  //   console.log('Loading reservations with params:', params);
     
-    this.reservationService.getReservations(params).subscribe({
-      next: (response) => {
-        console.log('Reservations response:', response);
-        this.reservations.set(response.reservations);
-        this.totalReservations.set(response.total);
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading reservations:', error);
-        this.error.set(error.message || 'Failed to load reservations');
-        this.loading.set(false);
-        this.reservations.set([]);
-        this.totalReservations.set(0);
-      }
-    });
-  }
+  //   this.reservationService.getReservations(params).subscribe({
+  //     next: (response) => {
+  //       console.log('Reservations response:', response);
+  //       this.reservations.set(response.reservations);
+  //       this.totalReservations.set(response.total);
+  //       this.loading.set(false);
+  //     },
+  //     error: (error) => {
+  //       console.error('Error loading reservations:', error);
+  //       this.error.set(error.message || 'Failed to load reservations');
+  //       this.loading.set(false);
+  //       this.reservations.set([]);
+  //       this.totalReservations.set(0);
+  //     }
+  //   });
+  // }
+
+  public reservations = rxResource({
+    params: () => ({ params: this.filterParams() }),
+    stream: ({ params }) => this.reservationService.getReservations(params.params),
+  });
 
   private loadReservations() {
-    this.loadReservationsInternal();
+    // this.loadReservationsInternal();
   }
 
   onPageChange(event: any) {
@@ -231,8 +224,10 @@ export class ReservationsListComponent {
     this.filterForm.reset({
       search: '',
       status: '',
-      dateFrom: null,
-      dateTo: null,
+      dateRange: {
+        start: null,
+        end: null
+      },
       sortBy: 'createdAt',
       sortOrder: 'desc'
     });
@@ -269,8 +264,8 @@ export class ReservationsListComponent {
     ).join(', ');
   }
 
-  get currency(): string {
-    return this.storeStore.selectedStore()?.currencyCode || this.storeStore.selectedStore()?.currency || '$';
+  reloadData() {
+    this.reservations.reload();
   }
 
   // Navigation methods
@@ -284,7 +279,7 @@ export class ReservationsListComponent {
       if (result) {
         // Navigate to the full reservation form with the quick reservation data
         this.router.navigate(['../create'], { 
-          relativeTo: this.route,
+          relativeTo: this.route.parent,
           queryParams: { quickReservation: JSON.stringify(result) }
         });
        
@@ -293,11 +288,11 @@ export class ReservationsListComponent {
   }
 
   viewReservation(reservation: Reservation) {
-    this.router.navigate(['../edit', reservation._id], { relativeTo: this.route });
+    this.router.navigate(['../edit', reservation._id], { relativeTo: this.route.parent });
   }
 
   editReservation(reservation: Reservation) {
-    this.router.navigate(['../edit', reservation._id], { relativeTo: this.route });
+    this.router.navigate(['../edit', reservation._id], { relativeTo: this.route.parent });
   }
 
   // Action methods
@@ -404,9 +399,8 @@ export class ReservationsListComponent {
     this.reservationService.deleteReservationWithPin(reservation._id, pin).subscribe({
       next: (response) => {
         // Remove from local list
-        const currentReservations = this.reservations();
+        const currentReservations = this.reservations.value()?.reservations || [];
         const updatedReservations = currentReservations.filter(r => r._id !== reservation._id);
-        this.reservations.set(updatedReservations);
         
         // Update total count
         this.totalReservations.set(this.totalReservations() - 1);
@@ -476,157 +470,157 @@ export class ReservationsListComponent {
   }
 
   // Get available status options for a specific reservation
-  getAvailableStatusOptions(reservation: Reservation) {
-    const currentStatus = reservation.status;
-    return this.allStatusOptions.filter(option => 
-      option.value !== currentStatus && 
-      this.isValidStatusTransition(currentStatus, option.value)
-    );
-  }
+  // getAvailableStatusOptions(reservation: Reservation) {
+  //   const currentStatus = reservation.status;
+  //   return this.allStatusOptions.filter(option => 
+  //     option.value !== currentStatus && 
+  //     this.isValidStatusTransition(currentStatus, option.value)
+  //   );
+  // }
 
   // Update reservation status
-  async updateReservationStatus(reservation: Reservation, newStatus: string): Promise<void> {
-    if (reservation.status === newStatus) return;
+  // async updateReservationStatus(reservation: Reservation, newStatus: string): Promise<void> {
+  //   if (reservation.status === newStatus) return;
 
-    // Special handling for check-in - show room readiness dialog
-    if (newStatus === 'checked_in') {
-      this.showCheckInDialog(reservation);
-      return;
-    }
+  //   // Special handling for check-in - show room readiness dialog
+  //   if (newStatus === 'checked_in') {
+  //     this.showCheckInDialog(reservation);
+  //     return;
+  //   }
 
-    // Special handling for check-out - handle room status updates
-    if (newStatus === 'checked_out') {
-      await this.performCheckOut(reservation);
-      return;
-    }
+  //   // Special handling for check-out - handle room status updates
+  //   if (newStatus === 'checked_out') {
+  //     await this.performCheckOut(reservation);
+  //     return;
+  //   }
 
-    // Validate business rules for status transitions
-    if (!this.isValidStatusTransition(reservation.status, newStatus)) {
-      this.snackBar.open(this.getStatusTransitionError(reservation.status, newStatus), 'Close', { 
-        duration: 5000,
-        panelClass: ['error-snackbar']
-      });
-      return;
-    }
+  //   // Validate business rules for status transitions
+  //   if (!this.isValidStatusTransition(reservation.status, newStatus)) {
+  //     this.snackBar.open(this.getStatusTransitionError(reservation.status, newStatus), 'Close', { 
+  //       duration: 5000,
+  //       panelClass: ['error-snackbar']
+  //     });
+  //     return;
+  //   }
 
-    // Confirm status change for critical statuses
-    if (newStatus === 'cancelled' || newStatus === 'no_show') {
-      const confirmed = confirm(`Are you sure you want to change the status to ${newStatus}?`);
-      if (!confirmed) return;
-    }
+  //   // Confirm status change for critical statuses
+  //   if (newStatus === 'cancelled' || newStatus === 'no_show') {
+  //     const confirmed = confirm(`Are you sure you want to change the status to ${newStatus}?`);
+  //     if (!confirmed) return;
+  //   }
 
-    await this.performStatusUpdate(reservation, newStatus);
-  }
+  //   await this.performStatusUpdate(reservation, newStatus);
+  // }
 
   // Show check-in confirmation dialog
-  private showCheckInDialog(reservation: Reservation): void {
-    const dialogData: CheckInDialogData = { reservation };
+  // private showCheckInDialog(reservation: Reservation): void {
+  //   const dialogData: CheckInDialogData = { reservation };
     
-    const dialogRef = this.dialog.open(CheckInConfirmationDialogComponent, {
-      data: dialogData,
-      width: '600px',
-      maxWidth: '90vw',
-      disableClose: true
-    });
+  //   const dialogRef = this.dialog.open(CheckInConfirmationDialogComponent, {
+  //     data: dialogData,
+  //     width: '600px',
+  //     maxWidth: '90vw',
+  //     disableClose: true
+  //   });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result?.confirmed) {
-        this.performCheckIn(reservation, result);
-      }
-    });
-  }
+  //   dialogRef.afterClosed().subscribe(result => {
+  //     if (result?.confirmed) {
+  //       this.performCheckIn(reservation, result);
+  //     }
+  //   });
+  // }
 
   // Perform the actual check-in process
-  private async performCheckIn(reservation: Reservation, checkInData: any): Promise<void> {
-    // Add reservation ID to updating set
-    const updatingSet = new Set(this.statusUpdating());
-    updatingSet.add(reservation._id);
-    this.statusUpdating.set(updatingSet);
+  // private async performCheckIn(reservation: Reservation, checkInData: any): Promise<void> {
+  //   // Add reservation ID to updating set
+  //   const updatingSet = new Set(this.statusUpdating());
+  //   updatingSet.add(reservation._id);
+  //   this.statusUpdating.set(updatingSet);
 
-    try {
-      // Use the enhanced check-in method that handles room status
-      const updatedReservation = await this.reservationService.checkInReservationWithRooms(
-        reservation._id
-      ).toPromise();
+  //   try {
+  //     // Use the enhanced check-in method that handles room status
+  //     const updatedReservation = await this.reservationService.checkInReservationWithRooms(
+  //       reservation._id
+  //     ).toPromise();
 
-      if (updatedReservation) {
-        // Update the reservation in the local list
-        const currentReservations = this.reservations();
-        const updatedReservations = currentReservations.map(r => 
-          r._id === reservation._id ? updatedReservation : r
-        );
-        this.reservations.set(updatedReservations);
+  //     if (updatedReservation) {
+  //       // Update the reservation in the local list
+  //       const currentReservations = this.reservations();
+  //       const updatedReservations = currentReservations.map(r => 
+  //         r._id === reservation._id ? updatedReservation : r
+  //       );
+  //       this.reservations.set(updatedReservations);
         
-        this.snackBar.open(
-          `Guest checked in successfully! Room status updated to occupied.`, 
-          'Close', 
-          { duration: 5000 }
-        );
-      }
-    } catch (error) {
-      console.error('Error during check-in:', error);
+  //       this.snackBar.open(
+  //         `Guest checked in successfully! Room status updated to occupied.`, 
+  //         'Close', 
+  //         { duration: 5000 }
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error('Error during check-in:', error);
       
-      const errorMessage = error instanceof Error ? error.message : 'Failed to check in guest';
-      this.snackBar.open(errorMessage, 'Close', { 
-        duration: 5000,
-        panelClass: ['error-snackbar']
-      });
-    } finally {
-      // Remove reservation ID from updating set
-      const updatingSet = new Set(this.statusUpdating());
-      updatingSet.delete(reservation._id);
-      this.statusUpdating.set(updatingSet);
-    }
-  }
+  //     const errorMessage = error instanceof Error ? error.message : 'Failed to check in guest';
+  //     this.snackBar.open(errorMessage, 'Close', { 
+  //       duration: 5000,
+  //       panelClass: ['error-snackbar']
+  //     });
+  //   } finally {
+  //     // Remove reservation ID from updating set
+  //     const updatingSet = new Set(this.statusUpdating());
+  //     updatingSet.delete(reservation._id);
+  //     this.statusUpdating.set(updatingSet);
+  //   }
+  // }
 
   // Perform the actual check-out process
-  private async performCheckOut(reservation: Reservation): Promise<void> {
-    // Check if payment is required before checkout
-    if (this.requiresPaymentBeforeCheckout(reservation)) {
-      this.showPaymentRequiredDialog(reservation);
-      return;
-    }
+  // private async performCheckOut(reservation: Reservation): Promise<void> {
+  //   // Check if payment is required before checkout
+  //   if (this.requiresPaymentBeforeCheckout(reservation)) {
+  //     this.showPaymentRequiredDialog(reservation);
+  //     return;
+  //   }
 
-    // Add reservation ID to updating set
-    const updatingSet = new Set(this.statusUpdating());
-    updatingSet.add(reservation._id);
-    this.statusUpdating.set(updatingSet);
+  //   // Add reservation ID to updating set
+  //   const updatingSet = new Set(this.statusUpdating());
+  //   updatingSet.add(reservation._id);
+  //   this.statusUpdating.set(updatingSet);
 
-    try {
-      // Use the enhanced check-out method that handles room status
-      const updatedReservation = await this.reservationService.checkOutReservationWithRooms(
-        reservation._id
-      ).toPromise();
+  //   try {
+  //     // Use the enhanced check-out method that handles room status
+  //     const updatedReservation = await this.reservationService.checkOutReservationWithRooms(
+  //       reservation._id
+  //     ).toPromise();
 
-      if (updatedReservation) {
-        // Update the reservation in the local list
-        const currentReservations = this.reservations();
-        const updatedReservations = currentReservations.map(r => 
-          r._id === reservation._id ? updatedReservation : r
-        );
-        this.reservations.set(updatedReservations);
+  //     if (updatedReservation) {
+  //       // Update the reservation in the local list
+  //       const currentReservations = this.reservations();
+  //       const updatedReservations = currentReservations.map(r => 
+  //         r._id === reservation._id ? updatedReservation : r
+  //       );
+  //       this.reservations.set(updatedReservations);
         
-        this.snackBar.open(
-          `Guest checked out successfully! Room status updated to cleaning.`, 
-          'Close', 
-          { duration: 5000 }
-        );
-      }
-    } catch (error) {
-      console.error('Error during check-out:', error);
+  //       this.snackBar.open(
+  //         `Guest checked out successfully! Room status updated to cleaning.`, 
+  //         'Close', 
+  //         { duration: 5000 }
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error('Error during check-out:', error);
       
-      const errorMessage = error instanceof Error ? error.message : 'Failed to check out guest';
-      this.snackBar.open(errorMessage, 'Close', { 
-        duration: 5000,
-        panelClass: ['error-snackbar']
-      });
-    } finally {
-      // Remove reservation ID from updating set
-      const updatingSet = new Set(this.statusUpdating());
-      updatingSet.delete(reservation._id);
-      this.statusUpdating.set(updatingSet);
-    }
-  }
+  //     const errorMessage = error instanceof Error ? error.message : 'Failed to check out guest';
+  //     this.snackBar.open(errorMessage, 'Close', { 
+  //       duration: 5000,
+  //       panelClass: ['error-snackbar']
+  //     });
+  //   } finally {
+  //     // Remove reservation ID from updating set
+  //     const updatingSet = new Set(this.statusUpdating());
+  //     updatingSet.delete(reservation._id);
+  //     this.statusUpdating.set(updatingSet);
+  //   }
+  // }
 
   // Check if payment is required before checkout
   private requiresPaymentBeforeCheckout(reservation: Reservation): boolean {
@@ -637,188 +631,182 @@ export class ReservationsListComponent {
   }
 
   // Show payment required dialog before checkout
-  private showPaymentRequiredDialog(reservation: Reservation): void {
-    const dialogData: PaymentUpdateDialogData = { 
-      reservation,
-      isCheckoutFlow: true
-    };
+  // private showPaymentRequiredDialog(reservation: Reservation): void {
+  //   const dialogData: PaymentUpdateDialogData = { 
+  //     reservation,
+  //     isCheckoutFlow: true
+  //   };
     
-    const dialogRef = this.dialog.open(PaymentUpdateDialogComponent, {
-      data: dialogData,
-      width: '600px',
-      maxWidth: '90vw',
-      disableClose: true
-    });
+  //   const dialogRef = this.dialog.open(PaymentUpdateDialogComponent, {
+  //     data: dialogData,
+  //     width: '600px',
+  //     maxWidth: '90vw',
+  //     disableClose: true
+  //   });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result?.confirmed && result.paymentData) {
-        if (result.paymentData.amount !== undefined) {
-          // Amount-based payment (checkout flow)
-          this.processPaymentAndCheckout(reservation, result.paymentData as any);
-        } else {
-          console.error('Expected amount-based payment data for checkout flow');
-        }
-      }
-    });
-  }
+  //   dialogRef.afterClosed().subscribe(result => {
+  //     if (result?.confirmed && result.paymentData) {
+  //       if (result.paymentData.amount !== undefined) {
+  //         // Amount-based payment (checkout flow)
+  //         this.processPaymentAndCheckout(reservation, result.paymentData as any);
+  //       } else {
+  //         console.error('Expected amount-based payment data for checkout flow');
+  //       }
+  //     }
+  //   });
+  // }
 
   // Process payment and then proceed with checkout
-  private async processPaymentAndCheckout(reservation: Reservation, paymentData: {
-    amount: number;
-    method: string;
-    reference?: string;
-    notes?: string;
-  }): Promise<void> {
-    // Add reservation ID to updating set
-    const updatingSet = new Set(this.statusUpdating());
-    updatingSet.add(reservation._id);
-    this.statusUpdating.set(updatingSet);
+  // private async processPaymentAndCheckout(reservation: Reservation, paymentData: {
+  //   amount: number;
+  //   method: string;
+  //   reference?: string;
+  //   notes?: string;
+  // }): Promise<void> {
+  //   // Add reservation ID to updating set
+  //   const updatingSet = new Set(this.statusUpdating());
+  //   updatingSet.add(reservation._id);
+  //   this.statusUpdating.set(updatingSet);
 
-    try {
-      // First, process the payment
-      await this.reservationService.processPayment(reservation._id, {
-        amount: paymentData.amount,
-        method: paymentData.method,
-        reference: paymentData.reference || `PAY-${Date.now()}`
-      }).toPromise();
+  //   try {
+  //     // First, process the payment
+  //     await this.reservationService.processPayment(reservation._id, {
+  //       amount: paymentData.amount,
+  //       method: paymentData.method,
+  //       reference: paymentData.reference || `PAY-${Date.now()}`
+  //     }).toPromise();
 
-      // Reload the reservation to get updated payment info
-      const updatedReservation = await this.reservationService.getReservationById(reservation._id).toPromise();
-      if (updatedReservation) {
-        // Update the reservation in the local list
-        const currentReservations = this.reservations();
-        const updatedReservations = currentReservations.map(r => 
-          r._id === reservation._id ? updatedReservation : r
-        );
-        this.reservations.set(updatedReservations);
+  //     // Reload the reservation to get updated payment info
+  //     const updatedReservation = await this.reservationService.getReservationById(reservation._id).toPromise();
+  //     if (updatedReservation) {
+  //       // Update the reservation in the local list
+  //       const currentReservations = this.reservations();
+  //       const updatedReservations = currentReservations.map(r => 
+  //         r._id === reservation._id ? updatedReservation : r
+  //       );
+  //       this.reservations.set(updatedReservations);
         
-        this.snackBar.open(
-          `Payment of ${this.formatCurrency(paymentData.amount)} recorded successfully`, 
-          'Close', 
-          { duration: 3000 }
-        );
+  //       this.snackBar.open(
+  //         `Payment of ${this.formatCurrency(paymentData.amount)} recorded successfully`, 
+  //         'Close', 
+  //         { duration: 3000 }
+  //       );
 
-        // Check if payment clears the balance, then proceed with checkout
-        if (updatedReservation.pricing.balance <= 0 || updatedReservation.paymentInfo?.status === 'paid') {
-          // Wait a moment for user to see payment success message
-          setTimeout(() => {
-            this.proceedWithCheckout(updatedReservation);
-          }, 1500);
-        } else {
-          this.snackBar.open(
-            'Payment recorded, but outstanding balance remains. Please complete payment before checkout.', 
-            'Close', 
-            { duration: 5000, panelClass: ['warning-snackbar'] }
-          );
-        }
-      }
-    } catch (error) {
-      console.error('Error processing payment for checkout:', error);
+  //       // Check if payment clears the balance, then proceed with checkout
+  //       if (updatedReservation.pricing.balance <= 0 || updatedReservation.paymentInfo?.status === 'paid') {
+  //         // Wait a moment for user to see payment success message
+  //         setTimeout(() => {
+  //           this.proceedWithCheckout(updatedReservation);
+  //         }, 1500);
+  //       } else {
+  //         this.snackBar.open(
+  //           'Payment recorded, but outstanding balance remains. Please complete payment before checkout.', 
+  //           'Close', 
+  //           { duration: 5000, panelClass: ['warning-snackbar'] }
+  //         );
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error processing payment for checkout:', error);
       
-      const errorMessage = error instanceof Error ? error.message : 'Failed to process payment';
-      this.snackBar.open(errorMessage, 'Close', { 
-        duration: 5000,
-        panelClass: ['error-snackbar']
-      });
-    } finally {
-      // Remove reservation ID from updating set
-      const updatingSet = new Set(this.statusUpdating());
-      updatingSet.delete(reservation._id);
-      this.statusUpdating.set(updatingSet);
-    }
-  }
+  //     const errorMessage = error instanceof Error ? error.message : 'Failed to process payment';
+  //     this.snackBar.open(errorMessage, 'Close', { 
+  //       duration: 5000,
+  //       panelClass: ['error-snackbar']
+  //     });
+  //   } finally {
+  //     // Remove reservation ID from updating set
+  //     const updatingSet = new Set(this.statusUpdating());
+  //     updatingSet.delete(reservation._id);
+  //     this.statusUpdating.set(updatingSet);
+  //   }
+  // }
 
   // Proceed with actual checkout after payment is cleared
-  private async proceedWithCheckout(reservation: Reservation): Promise<void> {
-    // Add reservation ID to updating set
-    const updatingSet = new Set(this.statusUpdating());
-    updatingSet.add(reservation._id);
-    this.statusUpdating.set(updatingSet);
+  // private async proceedWithCheckout(reservation: Reservation): Promise<void> {
+  //   // Add reservation ID to updating set
+  //   const updatingSet = new Set(this.statusUpdating());
+  //   updatingSet.add(reservation._id);
+  //   this.statusUpdating.set(updatingSet);
 
-    try {
-      // Use the enhanced check-out method that handles room status
-      const updatedReservation = await this.reservationService.checkOutReservationWithRooms(
-        reservation._id
-      ).toPromise();
+  //   try {
+  //     // Use the enhanced check-out method that handles room status
+  //     const updatedReservation = await this.reservationService.checkOutReservationWithRooms(
+  //       reservation._id
+  //     ).toPromise();
 
-      if (updatedReservation) {
-        // Update the reservation in the local list
-        const currentReservations = this.reservations();
-        const updatedReservations = currentReservations.map(r => 
-          r._id === reservation._id ? updatedReservation : r
-        );
-        this.reservations.set(updatedReservations);
+  //     if (updatedReservation) {
+  //       // Update the reservation in the local list
+  //       const currentReservations = this.reservations();
+  //       const updatedReservations = currentReservations.map(r => 
+  //         r._id === reservation._id ? updatedReservation : r
+  //       );
+  //       this.reservations.set(updatedReservations);
         
-        this.snackBar.open(
-          'Guest checked out successfully! Room status updated to cleaning.', 
-          'Close', 
-          { duration: 5000 }
-        );
-      }
-    } catch (error) {
-      console.error('Error during checkout after payment:', error);
+  //       this.snackBar.open(
+  //         'Guest checked out successfully! Room status updated to cleaning.', 
+  //         'Close', 
+  //         { duration: 5000 }
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error('Error during checkout after payment:', error);
       
-      const errorMessage = error instanceof Error ? error.message : 'Failed to complete checkout';
-      this.snackBar.open(errorMessage, 'Close', { 
-        duration: 5000,
-        panelClass: ['error-snackbar']
-      });
-    } finally {
-      // Remove reservation ID from updating set
-      const updatingSet = new Set(this.statusUpdating());
-      updatingSet.delete(reservation._id);
-      this.statusUpdating.set(updatingSet);
-    }
-  }
+  //     const errorMessage = error instanceof Error ? error.message : 'Failed to complete checkout';
+  //     this.snackBar.open(errorMessage, 'Close', { 
+  //       duration: 5000,
+  //       panelClass: ['error-snackbar']
+  //     });
+  //   } finally {
+  //     // Remove reservation ID from updating set
+  //     const updatingSet = new Set(this.statusUpdating());
+  //     updatingSet.delete(reservation._id);
+  //     this.statusUpdating.set(updatingSet);
+  //   }
+  // }
 
-  // Helper method to format currency
-  private formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: this.storeStore.selectedStore()?.currencyCode || 'USD'
-    }).format(amount);
-  }
+
 
   // Perform regular status updates (non-check-in)
-  private async performStatusUpdate(reservation: Reservation, newStatus: string): Promise<void> {
+  // private async performStatusUpdate(reservation: Reservation, newStatus: string): Promise<void> {
 
-    // Add reservation ID to updating set
-    const updatingSet = new Set(this.statusUpdating());
-    updatingSet.add(reservation._id);
-    this.statusUpdating.set(updatingSet);
+  //   // Add reservation ID to updating set
+  //   const updatingSet = new Set(this.statusUpdating());
+  //   updatingSet.add(reservation._id);
+  //   this.statusUpdating.set(updatingSet);
 
-    try {
-      const updatedReservation = await this.reservationService.updateReservationStatus(
-        reservation._id, 
-        newStatus
-      ).toPromise();
+  //   try {
+  //     const updatedReservation = await this.reservationService.updateReservationStatus(
+  //       reservation._id, 
+  //       newStatus
+  //     ).toPromise();
 
-      if (updatedReservation) {
-        // Update the reservation in the local list
-        const currentReservations = this.reservations();
-        const updatedReservations = currentReservations.map(r => 
-          r._id === reservation._id ? updatedReservation : r
-        );
-        this.reservations.set(updatedReservations);
+  //     if (updatedReservation) {
+  //       // Update the reservation in the local list
+  //       const currentReservations = this.reservations();
+  //       const updatedReservations = currentReservations.map(r => 
+  //         r._id === reservation._id ? updatedReservation : r
+  //       );
+  //       this.reservations.set(updatedReservations);
         
-        this.snackBar.open(`Status updated to ${newStatus}`, 'Close', { duration: 3000 });
-      }
-    } catch (error) {
-      console.error('Error updating reservation status:', error);
+  //       this.snackBar.open(`Status updated to ${newStatus}`, 'Close', { duration: 3000 });
+  //     }
+  //   } catch (error) {
+  //     console.error('Error updating reservation status:', error);
       
-      // Show specific error message from backend or fallback to generic message
-      const errorMessage = error instanceof Error ? error.message : 'Failed to update status';
-      this.snackBar.open(errorMessage, 'Close', { 
-        duration: 5000,
-        panelClass: ['error-snackbar']
-      });
-    } finally {
-      // Remove reservation ID from updating set
-      const updatingSet = new Set(this.statusUpdating());
-      updatingSet.delete(reservation._id);
-      this.statusUpdating.set(updatingSet);
-    }
-  }
+  //     // Show specific error message from backend or fallback to generic message
+  //     const errorMessage = error instanceof Error ? error.message : 'Failed to update status';
+  //     this.snackBar.open(errorMessage, 'Close', { 
+  //       duration: 5000,
+  //       panelClass: ['error-snackbar']
+  //     });
+  //   } finally {
+  //     // Remove reservation ID from updating set
+  //     const updatingSet = new Set(this.statusUpdating());
+  //     updatingSet.delete(reservation._id);
+  //     this.statusUpdating.set(updatingSet);
+  //   }
+  // }
 
   // Check if a reservation is currently being updated
   isStatusUpdating(reservationId: string): boolean {
@@ -852,7 +840,6 @@ export class ReservationsListComponent {
   }
 
   clearError() {
-    this.error.set(null);
     this.loadReservations();
   }
 
@@ -911,7 +898,7 @@ export class ReservationsListComponent {
 
     const csvRows = [headers.join(',')];
 
-    this.reservations().forEach(reservation => {
+    this.reservations.value()?.reservations.forEach(reservation => {
       const row = [
         this.escapeCsvField(reservation.confirmationNumber || ''),
         this.escapeCsvField(this.getGuestName(reservation)),
@@ -974,7 +961,7 @@ export class ReservationsListComponent {
     if (formValue.status) {
       filename += `_${formValue.status}`;
     }
-    if (formValue.dateFrom || formValue.dateTo) {
+    if (formValue.dateRange?.start || formValue.dateRange?.end) {
       filename += '_filtered';
     }
     

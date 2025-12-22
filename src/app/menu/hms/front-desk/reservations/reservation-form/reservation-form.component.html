@@ -50,6 +50,12 @@
         Cancel
       </a>
       }
+
+
+      <a matButton="outlined" (click)="payment()" [disabled]="isSubmitted()">
+        <mat-icon>payment</mat-icon>
+        Payment
+      </a>
     
 
       @if (reservation.value()?.status === ReservationStatus.PENDING || reservation.value()?.status ===
@@ -58,6 +64,14 @@
         [disabled]="statusUpdating() || isSubmitted()">
         <mat-icon>verified</mat-icon>
         Confirm
+      </button>
+      }
+        @if (reservation.value()?.status === ReservationStatus.CHECKED_OUT || reservation.value()?.status ===
+      ReservationStatus.CANCELLED || reservation.value()?.status === ReservationStatus.NO_SHOW) {
+      <button matButton="outlined"  (click)="reopenReservation()"
+        [disabled]="statusUpdating() || isSubmitted()">
+        <mat-icon>redo</mat-icon>
+        Re-open
       </button>
       }
       @if (reservation.value()?.status === ReservationStatus.CONFIRMED) {

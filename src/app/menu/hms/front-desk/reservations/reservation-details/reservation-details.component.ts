@@ -869,7 +869,7 @@ export class ReservationDetailsComponent implements OnInit {
     const reservation = this.reservation();
     if (!reservation) return;
 
-    if (reservation.status !== 'cancelled') {
+    if (reservation.status !== 'cancelled' && reservation.status !== 'checked_out') {
       this.snackBar.open('Only cancelled reservations can be reopened', 'Close', {
         duration: 5000,
         panelClass: ['error-snackbar']

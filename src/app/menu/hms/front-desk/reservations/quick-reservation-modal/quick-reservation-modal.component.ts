@@ -1,7 +1,7 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
-import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
@@ -39,6 +39,16 @@ export interface QuickReservationData {
   children: number;
 }
 
+// Dialog input data interface for pre-filling from calendar drag selection
+export interface QuickReservationDialogData {
+  checkInDate: Date;
+  checkOutDate: Date;
+  preselectedRoomId?: string;
+  preselectedRoomName?: string;
+  preselectedRoomTypeId?: string;
+  preselectedRoomTypeName?: string;
+}
+
 @Component({
   selector: 'app-quick-reservation-modal',
   standalone: true,
@@ -60,12 +70,15 @@ export interface QuickReservationData {
   templateUrl: './quick-reservation-modal.component.html',
   styleUrls: ['./quick-reservation-modal.component.scss']
 })
-export class QuickReservationModalComponent {
+export class QuickReservationModalComponent implements OnInit {
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<QuickReservationModalComponent>);
   private roomsService = inject(RoomsService);
   private router = inject(Router);
   public storeStore = inject(StoreStore);
+  
+  // Optional dialog data for pre-filling from calendar drag selection
+  public dialogData = inject<QuickReservationDialogData | null>(MAT_DIALOG_DATA, { optional: true });
 
   public roomTypeField = new FormControl('');
 
@@ -82,6 +95,31 @@ export class QuickReservationModalComponent {
     adults: [1, [Validators.required, Validators.min(1)]],
     children: [0, [Validators.required, Validators.min(0)]],
   });
+
+  ngOnInit(): void {
+    // Pre-fill form with dialog data if provided (from calendar drag selection)
+    if (this.dialogData) {
+      if (this.dialogData.checkInDate && this.dialogData.checkOutDate) {
+        this.quickReservationForm.get('dateRange')?.patchValue({
+          start: this.dialogData.checkInDate,
+          end: this.dialogData.checkOutDate
+        });
+      }
+      
+      if (this.dialogData.preselectedRoomId) {
+        // Set the room after the available rooms are loaded
+        this.quickReservationForm.patchValue({ selectedRoom: this.dialogData.preselectedRoomId });
+      }
+      
+      if (this.dialogData.preselectedRoomTypeName) {
+        // Set the room type filter
+        this.roomTypeField.patchValue(this.dialogData.preselectedRoomTypeName);
+      }
+    }
+  }
+
+  // Store preselected room ID to set after rooms are loaded
+  private preselectedRoomId: string | null = null;
 
   // Signals for form values - similar to reservation form
   public checkIn = toSignal(
@@ -152,6 +190,18 @@ export class QuickReservationModalComponent {
   public filteredRooms = computed(() => {
     const rooms = this.availableRoomsResource.value() || [];
     const selectedType = this.roomTypeValue();
+    
+    // Auto-select preselected room when rooms are loaded
+    if (this.preselectedRoomId && rooms.length > 0) {
+      const preselectedRoom = rooms.find(r => (r._id || r.id) === this.preselectedRoomId);
+      if (preselectedRoom) {
+        // Set the room in the form
+        this.quickReservationForm.get('selectedRoom')?.setValue(this.preselectedRoomId);
+        // Clear the preselected ID so we don't keep setting it
+        this.preselectedRoomId = null;
+      }
+    }
+    
     if (!selectedType) return rooms;
     return rooms.filter(room => room.roomType.name === selectedType);
   });

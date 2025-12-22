@@ -119,10 +119,6 @@ export class RoomDetailsComponent {
     },
   });
 
-  
-
-  
-
   public isRoomsReadyForAssignment = computed(() => {
     if (this.selectedRoomIds()) {
       return (
@@ -170,7 +166,7 @@ export class RoomDetailsComponent {
       ?.value;
   }
 
-  onCreateRoom() {
+  public onCreateRoom(): void {
     // build empty room form group
     const newRoomForm = this.createRoomFormGroup({} as Room);
     // add to rooms form array
@@ -189,38 +185,7 @@ export class RoomDetailsComponent {
     }
   }
 
-  /**
-   * Populate the rooms FormArray with all loaded rooms
-   */
-  private populateRoomsFormArray(rooms: Room[]) {
-    // this.content(rooms);
-    // if (!roomsArray) return;
-
-    // Clear existing rooms
-    // while (roomsArray.length > 0) {
-    //   roomsArray.removeAt(0);
-    // }
-
-    // Add each room as a form group
-    // rooms.forEach((room, index) => {
-    //   // console.log(room)
-
-    //   const roomForm = this.createRoomFormGroup(room);
-
-    //   // Set up subscription for stay period changes
-    //   const stayPeriodForm = roomForm.get('stayPeriod');
-    //   if (stayPeriodForm) {
-    //     stayPeriodForm.valueChanges.subscribe(() => {
-    //       this.onStayPeriodChange(index);
-    //     });
-    //   }
-    // });
-  }
-
-
- populateRoomsFormArray2(rooms: Room[]) {
-    console.log('[RoomDetails] populateRoomsFormArray2 called with rooms:', rooms);
-    
+ populateRoomsFormArray2(rooms: Room[]) {    
     const roomsArray = this.getRoomsFormArray();
     if (!roomsArray) {
       return;
@@ -470,6 +435,7 @@ export class RoomDetailsComponent {
    * Filter rooms by selected room type (without excluding already selected rooms)
    */
   filterRoomsByType(roomTypeId: string, currentIndex?: number): Room[] {
+    console.log(this.rooms.value())
     if (!roomTypeId) {
       return this.rooms.value() || [];
     }

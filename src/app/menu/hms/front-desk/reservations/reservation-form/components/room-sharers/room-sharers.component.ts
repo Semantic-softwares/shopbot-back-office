@@ -49,6 +49,7 @@ import { ReservationFormService } from '../../../../../../../shared/services/res
 import { StoreStore } from '../../../../../../../shared/stores/store.store';
 import { ActivatedRoute } from '@angular/router';
 import { GuestService } from '../../../../../../../shared/services/guest.service';
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 @Component({
   selector: 'app-room-sharers',
@@ -71,7 +72,8 @@ import { GuestService } from '../../../../../../../shared/services/guest.service
     MatCheckboxModule,
     BreakDownTotal,
     PriceEditDialogComponent,
-  ],
+    MatProgressSpinnerModule
+],
   templateUrl: './room-sharers.component.html',
   styleUrl: './room-sharers.component.scss',
 })
