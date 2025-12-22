@@ -1,31 +1,28 @@
-<app-page-header 
-  title="Reservations" 
-  subtitle="Manage hotel reservations and guest bookings"
-  [showViewToggle]="true"
+<app-page-header title="Reservations" subtitle="Manage hotel reservations and guest bookings" [showViewToggle]="true"
   viewToggleRoute="/menu/hms/front-desk/reservations/view">
-  
+
   <ng-container actions>
     <button matButton="outlined" (click)="clearFilters()">
       <mat-icon>clear</mat-icon>
       Clear Filters
     </button>
-    
+
     <button matButton="outlined" (click)="reloadData()">
       <mat-icon class="mr-1">redo</mat-icon>
       Reload
     </button>
-    
+
     <button matButton="outlined" (click)="exportReservations()">
       <mat-icon class="mr-1">download</mat-icon>
       Export
     </button>
-    
+
     <button matButton="filled" (click)="createReservation()">
       <mat-icon class="mr-1">add</mat-icon>
       Create Reservation
     </button>
   </ng-container>
-  
+
 </app-page-header>
 
 <!-- Loading State -->
@@ -34,7 +31,7 @@
   <mat-spinner diameter="40"></mat-spinner>
 </div>
 } @else if (reservations.hasValue()) {
-  <div class="max-w-12xl py-6">
+<div class="max-w-12xl py-6">
   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
@@ -140,31 +137,6 @@
           </mat-form-field>
         </div>
       </div>
-
-      <!-- Action Buttons Row -->
-      <!-- <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <button type="button" (click)="clearFilters()"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center gap-2">
-            <mat-icon class="text-lg">clear</mat-icon>
-            Clear Filters
-          </button>
-          <button type="button" (click)="refreshReservations()"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center gap-2">
-            <mat-icon class="text-lg">refresh</mat-icon>
-            Refresh
-          </button>
-          <button type="button" (click)="exportReservations()"
-            [disabled]="reservations.value()?.reservations?.length === 0 || reservations.isLoading()"
-            class="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-green-600 rounded-lg hover:bg-green-700 hover:border-green-700 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600">
-            <mat-icon class="text-lg">download</mat-icon>
-            Export CSV
-          </button>
-        </div>
-        <div class="flex items-center text-sm text-gray-600">
-          <span>Showing {{ reservations.value()?.reservations?.length }} reservations</span>
-        </div>
-      </div> -->
     </form>
   </div>
   <table mat-table [dataSource]="reservations.value()!.reservations" class="w-full">
@@ -264,7 +236,7 @@
     <tr mat-row *matRowDef="let reservation; columns: displayedColumns;" class="cursor-pointer"
       (click)="viewReservation(reservation)"></tr>
   </table>
-  <mat-card-actions>
+  <mat-card-actions class="flex justify-end">
     <mat-paginator [length]="totalReservations()" [pageSize]="pageSize()" [pageSizeOptions]="[5, 10, 25, 50, 100]"
       [pageIndex]="currentPage() - 1" (page)="onPageChange($event)" showFirstLastButtons>
     </mat-paginator>
@@ -305,40 +277,3 @@
   </div>
 </div>
 }
-
-
-
-<!-- Status Change Menu -->
-<!-- <mat-menu #statusMenu="matMenu" class="!shadow-xl !border !border-gray-200 !rounded-lg">
-  <ng-template matMenuContent let-reservation="reservation">
-    <div class="px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
-      Change Status
-    </div>
-    @if (getAvailableStatusOptions(reservation).length === 0) {
-      <div class="px-3 py-2 text-xs text-gray-400 italic">
-        No status changes available
-      </div>
-    }
-    @for (status of getAvailableStatusOptions(reservation); track status.value) {
-      <button 
-        mat-menu-item 
-        (click)="updateReservationStatus(reservation, status.value)"
-        class="!text-gray-700 hover:!bg-gray-50 !transition-colors">
-        <mat-icon 
-          class="mr-3 !text-base" 
-          [style.color]="status.color">{{ status.icon }}</mat-icon>
-        <span>{{ status.label }}</span>
-      </button>
-    }
-    @if (reservation.status === 'pending') {
-      <div class="px-3 py-2 text-xs text-amber-600 bg-amber-50 border-t border-amber-100 mt-1">
-        💡 Confirm reservation before check-in
-      </div>
-    }
-    @if (reservation.status === 'confirmed') {
-      <div class="px-3 py-2 text-xs text-blue-600 bg-blue-50 border-t border-blue-100 mt-1">
-        💡 Ready for check-in
-      </div>
-    }
-  </ng-template>
-</mat-menu> -->

@@ -9,7 +9,7 @@
       <mat-icon>clear</mat-icon>
       Clear Filters
     </button>
-    
+
     <button matButton="outlined" (click)="reloadData()">
       <mat-icon class="mr-1">redo</mat-icon>
       Reload
@@ -23,7 +23,7 @@
   
 </app-page-header>
 
-<div class="h-screen flex flex-col ">
+<div class="min-h-screen flex flex-col ">
   <!-- Calendar Controls Header -->
   <div class=" border-b border-gray-200  py-4 ">
     <div class="flex justify-between items-center">
@@ -88,8 +88,8 @@
   </div>
 
   <!-- Calendar Table Container -->
-  <div class="flex-1 overflow-hidden flex flex-col">
-    <div class="overflow-auto flex-1 relative">
+  <div class="flex-1 overflow-hidden flex flex-col min-h-96">
+    <div class="overflow-auto flex-1 relative min-h-80">
       @if (reservations.isLoading()) {
         <div class="absolute inset-0 z-50 flex items-center justify-center bg-white/60">
           <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>

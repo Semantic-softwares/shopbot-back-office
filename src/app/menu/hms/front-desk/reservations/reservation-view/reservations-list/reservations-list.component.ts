@@ -65,7 +65,7 @@ export class ReservationsListComponent {
   private dialog = inject(MatDialog);
   currentPage = signal<number>(1);
   pageSize = signal<number>(10);
-  totalReservations = signal<number>(0);
+  
   statusUpdating = signal<Set<string>>(new Set());
   
   // Filter signals
@@ -108,6 +108,8 @@ export class ReservationsListComponent {
   totalRevenue = computed(() => {
     return this.reservations.value()?.reservations.reduce((sum, r) => sum + this.getEffectiveTotal(r), 0);
   });
+
+  totalReservations = computed(() => this.reservations.value()?.total || 0);
 
   // Create a computed signal for filter parameters
   private filterParams = computed(() => {
@@ -403,7 +405,7 @@ export class ReservationsListComponent {
         const updatedReservations = currentReservations.filter(r => r._id !== reservation._id);
         
         // Update total count
-        this.totalReservations.set(this.totalReservations() - 1);
+        // this.totalReservations.set(this.totalReservations() - 1);
         
         this.snackBar.open(
           `Reservation ${reservation.confirmationNumber} deleted successfully`, 
