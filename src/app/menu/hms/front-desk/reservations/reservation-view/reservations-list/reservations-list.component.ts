@@ -253,6 +253,19 @@ export class ReservationsListComponent {
     return statusOption?.color || 'gray';
   }
 
+  getStatusChipClass(status: ReservationStatus): string {
+    const colorMap: Record<string, string> = {
+      pending: 'bg-yellow-500! text-white!',
+      confirmed: 'bg-blue-600! text-white!',
+      checked_in: 'bg-green-600! text-white!',
+      checked_out: 'bg-gray-500! text-white!',
+      cancelled: 'bg-red-600! text-white!',
+      no_show: 'bg-orange-600! text-white!',
+      reserved: 'bg-indigo-600! text-white!',
+    };
+    return colorMap[status] || 'bg-gray-500! text-white!';
+  }
+
   getGuestName(reservation: Reservation): string {
     if (typeof reservation.guest === 'object' && reservation.guest !== null) {
       return reservation.guest.firstName + ' ' + reservation.guest.lastName;

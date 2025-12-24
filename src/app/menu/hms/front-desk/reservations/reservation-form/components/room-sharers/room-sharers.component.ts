@@ -258,10 +258,10 @@ export class RoomSharersComponent {
   }
 
   private buildARoomForTheSharers(room: Room | null): void {
+    console.log(room, "nvnbbnvv");
     const roomsArray = this.getRoomsFormArray();
-    console.log(roomsArray, room)
     if (roomsArray && room) {
-      const roomGroup = this.createRoomFormGroup(room);
+      const roomGroup = this.createRoomFormGroup(room, this.reservation()?.rooms[0]);
       roomsArray.clear();
       roomsArray.push(roomGroup);
     }
@@ -285,7 +285,8 @@ export class RoomSharersComponent {
 
     // Calculate initial total price based on price per night and number of nights
     const initialTotalPrice = roomPrice * this.numberOfNights();
-    
+          console.log(roomData?.pricing?.discount, "roomData?.pricing?.discount");
+
     return this.fb.group({
       room: [roomData?.room || room._id || '', [Validators.required]], // Room ID
       roomNumber: [roomData?.roomNumber || room.roomNumber || ''], // Store room number for display
@@ -321,7 +322,6 @@ export class RoomSharersComponent {
           [Validators.required, Validators.min(0)],
         ],
       }),
-
       // Per-room pricing
       pricing: this.fb.group({
         pricePerNight: [

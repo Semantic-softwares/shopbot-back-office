@@ -12,7 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
     <mat-dialog-content>{{ data.message }}</mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button [mat-dialog-close]="false">Cancel</button>
-      <button mat-raised-button color="warn" [mat-dialog-close]="true">Delete</button>
+      <button matButton="filled" color="warn" [mat-dialog-close]="true">Delete</button>
     </mat-dialog-actions>
   `
 })

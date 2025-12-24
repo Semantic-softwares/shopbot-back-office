@@ -9,12 +9,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { RolesService } from '../../../../shared/services/role.service';
+import { RolesService } from '../../../../../shared/services/roles.service';
 import { Role } from '../../../../../shared/models/role.model';
 import { ConfirmationDialogComponent } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { CreateRoleComponent } from '../modals/create-role/create-role.component';
-import { PermissionService } from '../../../../shared/services/permission.service';
-import { CreatePermissionComponent } from '../modals/create-permission/create-permission.component';
 
 @Component({
   selector: 'app-roles',
@@ -34,7 +32,6 @@ import { CreatePermissionComponent } from '../modals/create-permission/create-pe
 })
 export class RolesComponent {
   private rolesService = inject(RolesService);
-  private permissionService = inject(PermissionService);
   private dialog = inject(MatDialog);
   public displayedColumns = ['name', 'description', 'actions'];
 
@@ -46,7 +43,7 @@ export class RolesComponent {
 
   public permissions = rxResource({
     request: () => this.selectedRole(),
-    loader: () => this.permissionService.getPermissions()
+    loader: () => this.rolesService.getPermissions()
   });
 
   public selectedRolePermissionsGranted = rxResource({
@@ -81,16 +78,16 @@ export class RolesComponent {
   });
 
   private groupPermissionsByCategory(permissions: any[]): any[] {
-    // Create a map of categories with their permissions
+    // Create a map of categories with their permissions (using module as category)
     const categoryMap = permissions.reduce((acc, permission) => {
-      const categoryId = permission.categoryId?._id;
-      const category = acc.get(categoryId) || {
-        _id: permission.categoryId?._id,
-        name: permission.categoryId?.name,
+      const categoryKey = permission.module || 'Other';
+      const category = acc.get(categoryKey) || {
+        _id: categoryKey,
+        name: categoryKey,
         permissions: []
       };
       category.permissions.push(permission);
-      acc.set(categoryId, category);
+      acc.set(categoryKey, category);
       return acc;
     }, new Map());
 
@@ -142,21 +139,6 @@ export class RolesComponent {
           this.permissions.reload();
           this.selectedRolePermissionsGranted.reload();
         });
-      }
-    });
-  }
-
-  onAddPermission(): void {
-    const dialogRef = this.dialog.open(CreatePermissionComponent, {
-      width: '600px',
-      data: { mode: 'create' }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.permissions.reload();
-        this.selectedRolePermissionsGranted.reload();
-        
       }
     });
   }

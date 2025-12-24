@@ -13,7 +13,7 @@ export const SETTINGS_MANAGEMENT_ROUTES: Routes = [
       // Hotel Settings
       {
         path: 'hotel-settings',
-        loadComponent: () => import('./hotel-settings/hotel-settings.component').then(m => m.HotelSettingsComponent)
+        loadChildren: () => import('./hotel-settings/hotel-settings.routes').then(m => m.HOTEL_SETTINGS_ROUTES)
       },
       
     ]

@@ -1,0 +1,201 @@
+<div class="py-6">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Printer Connection Card -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <mat-icon class="text-green-600">bluetooth</mat-icon>
+                  Printer Connection
+                </h3>
+              </div>
+              <div class="p-6">
+                @if (printerConnected()) {
+                  <!-- Connected State -->
+                  <div class="text-center py-4">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <mat-icon class="text-4xl text-green-600">check_circle</mat-icon>
+                    </div>
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2">Printer Connected</h4>
+                    <p class="text-gray-600 mb-4">{{ connectedPrinter()?.name }}</p>
+                    <div class="flex flex-col gap-3">
+                      <button 
+                        mat-stroked-button 
+                        color="primary" 
+                        (click)="testPrint()"
+                        class="w-full">
+                        <mat-icon class="mr-2">print</mat-icon>
+                        Test Print
+                      </button>
+                      <button 
+                        mat-stroked-button 
+                        color="accent" 
+                        (click)="testPaperUtilization()"
+                        class="w-full">
+                        <mat-icon class="mr-2">straighten</mat-icon>
+                        Test Paper Width
+                      </button>
+                      
+                      <!-- Logo Upload Button -->
+                      <div class="w-full">
+                        <input 
+                          type="file" 
+                          #logoInput 
+                          accept="image/*" 
+                          (change)="uploadLogo($event)"
+                          class="hidden">
+                        <button 
+                          mat-stroked-button 
+                          color="primary" 
+                          (click)="logoInput.click()"
+                          class="w-full">
+                          <mat-icon class="mr-2">image</mat-icon>
+                          Upload Logo
+                        </button>
+                      </div>
+                      
+                      <button 
+                        mat-stroked-button 
+                        color="warn" 
+                        (click)="disconnectPrinter()"
+                        class="w-full">
+                        <mat-icon class="mr-2">bluetooth_disabled</mat-icon>
+                        Disconnect
+                      </button>
+                    </div>
+                  </div>
+                } @else {
+                  <!-- Disconnected State -->
+                  <div class="text-center py-4">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <mat-icon class="text-4xl text-gray-400">print_disabled</mat-icon>
+                    </div>
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2">No Printer Connected</h4>
+                    <p class="text-gray-600 mb-4">Connect a Bluetooth printer to enable receipt printing</p>
+                    <button 
+                      mat-raised-button 
+                      color="primary" 
+                      (click)="connectPrinter()"
+                      [disabled]="printerConnecting()"
+                      class="w-full">
+                      @if (printerConnecting()) {
+                        <mat-icon class="animate-spin mr-2">refresh</mat-icon>
+                        Connecting...
+                      } @else {
+                        <mat-icon class="mr-2">bluetooth</mat-icon>
+                        Connect Printer
+                      }
+                    </button>
+                  </div>
+                }
+
+                <!-- Printer Requirements -->
+                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h5 class="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                    <mat-icon class="text-blue-600">info</mat-icon>
+                    Printer Requirements
+                  </h5>
+                  <ul class="text-sm text-blue-800 space-y-1">
+                    <li>• ESC/POS compatible Bluetooth printer</li>
+                    <li>• Chrome browser (version 56+)</li>
+                    <li>• HTTPS connection required</li>
+                    <li>• Supported brands: EPSON, Star, Citizen, Bixolon</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Printer Configuration Card -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <mat-icon class="text-purple-600">tune</mat-icon>
+                  Print Configuration
+                </h3>
+              </div>
+              <div class="p-6">
+                <form [formGroup]="printerSettingsForm" (ngSubmit)="savePrinterSettings()">
+                  <div class="space-y-6">
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Paper Size</mat-label>
+                      <mat-select formControlName="paperSize">
+                        @for (size of paperSizeOptions; track size.value) {
+                          <mat-option [value]="size.value">{{ size.label }}</mat-option>
+                        }
+                      </mat-select>
+                      <mat-icon matSuffix>straighten</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Print Quality</mat-label>
+                      <mat-select formControlName="printQuality">
+                        @for (quality of printQualityOptions; track quality.value) {
+                          <mat-option [value]="quality.value">{{ quality.label }}</mat-option>
+                        }
+                      </mat-select>
+                      <mat-icon matSuffix>high_quality</mat-icon>
+                    </mat-form-field>
+
+                    <div class="grid grid-cols-2 gap-4">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Font Size</mat-label>
+                        <input matInput type="number" formControlName="fontSize" min="8" max="20">
+                        <span matSuffix>px</span>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>Line Spacing</mat-label>
+                        <input matInput type="number" formControlName="lineSpacing" min="1" max="3" step="0.1">
+                        <span matSuffix>x</span>
+                      </mat-form-field>
+                    </div>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Header Text (Optional)</mat-label>
+                      <input matInput formControlName="headerText" placeholder="Welcome to our hotel">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Footer Text</mat-label>
+                      <input matInput formControlName="footerText" placeholder="Thank you for your stay!">
+                    </mat-form-field>
+
+                    <!-- Toggle Options -->
+                    <div class="space-y-4">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <label class="text-sm font-medium text-gray-700">Auto Cut Paper</label>
+                          <p class="text-xs text-gray-500">Automatically cut paper after printing</p>
+                        </div>
+                        <mat-slide-toggle formControlName="autocut" color="primary"></mat-slide-toggle>
+                      </div>
+
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <label class="text-sm font-medium text-gray-700">Include Logo</label>
+                          <p class="text-xs text-gray-500">Print hotel logo on receipts</p>
+                        </div>
+                        <mat-slide-toggle formControlName="includeLogo" color="primary"></mat-slide-toggle>
+                      </div>
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      mat-raised-button 
+                      color="primary"
+                      [disabled]="printerSettingsForm.invalid || saving()"
+                      class="w-full">
+                      @if (saving()) {
+                        <mat-icon class="animate-spin mr-2">refresh</mat-icon>
+                        Saving...
+                      } @else {
+                        <mat-icon class="mr-2">save</mat-icon>
+                        Save Printer Settings
+                      }
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>

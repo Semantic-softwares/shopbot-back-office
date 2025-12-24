@@ -48,6 +48,10 @@ export class AuthService {
     return this.currentUserRole.getValue();
   }
 
+  /**
+   * Check if user has a specific permission
+   * @param requiredPermission - Permission code (e.g., 'hotel.reservations.view') or array of codes
+   */
   hasPermission(requiredPermission: string | string[]): boolean {
     const userRole = this.currentUserRole.getValue();
     if (!userRole) return false;
@@ -60,63 +64,55 @@ export class AuthService {
     return this.checkSinglePermission(requiredPermission);
   }
 
-  private checkSinglePermission(permission: string): boolean {
+  private checkSinglePermission(permissionCode: string): boolean {
     // Check cache first
-    if (this.permissionCache.has(permission)) {
-      return this.permissionCache.get(permission) || false;
+    if (this.permissionCache.has(permissionCode)) {
+      return this.permissionCache.get(permissionCode) || false;
     }
 
     const userRole = this.currentUserRole.getValue();
-    if (!userRole) return false;
+    if (!userRole || !userRole.permissions) return false;
 
-    // Split permission string (e.g., "manage_user" becomes ["manage", "user"])
-    const [action, resource] = permission.toLowerCase().split('_');
+    // Check for exact permission match by code
+    const hasPermission = userRole.permissions.some(p => p.code === permissionCode);
 
-    // Check for exact permission match
-    const hasExactPermission = userRole.permissions.some(p => 
-      p.action.toLowerCase() === action &&
-      p.resource.toLowerCase() === resource
-    );
-
-    // Check for wildcard permissions (e.g., "manage_all" or "all_user")
-    const hasWildcardPermission = userRole.permissions.some(p => 
-      (p.action.toLowerCase() === 'all' && p.resource.toLowerCase() === resource) ||
-      (p.action.toLowerCase() === action && p.resource.toLowerCase() === 'all') ||
-      (p.action.toLowerCase() === 'all' && p.resource.toLowerCase() === 'all')
-    );
-
-    const result = hasExactPermission || hasWildcardPermission;
-    
     // Cache the result
-    this.permissionCache.set(permission, result);
+    this.permissionCache.set(permissionCode, hasPermission);
     
-    return result;
+    return hasPermission;
   }
 
+  /**
+   * Check if user has ALL of the specified permissions
+   */
   hasAllPermissions(permissions: string[]): boolean {
     return permissions.every(permission => this.hasPermission(permission));
   }
 
+  /**
+   * Check if user has ANY of the specified permissions
+   */
   hasAnyPermission(permissions: string[]): boolean {
     return permissions.some(permission => this.hasPermission(permission));
   }
 
-  getPermissionsByCategory(categoryName: string): Permission[] {
+  /**
+   * Get permissions by module
+   */
+  getPermissionsByModule(moduleName: string): Permission[] {
     const userRole = this.currentUserRole.getValue();
-    if (!userRole) return [];
+    if (!userRole || !userRole.permissions) return [];
 
     return userRole.permissions.filter(permission => 
-      permission.categoryId.name.toLowerCase() === categoryName.toLowerCase()
+      permission.module.toLowerCase() === moduleName.toLowerCase()
     );
   }
 
-  hasCategory(categoryName: string): boolean {
-    const userRole = this.currentUserRole.getValue();
-    if (!userRole) return false;
-
-    return userRole.permissions.some(permission => 
-      permission.categoryId.name.toLowerCase() === categoryName.toLowerCase()
-    );
+  /**
+   * Check if user has any permissions for a module
+   */
+  hasModuleAccess(moduleName: string): boolean {
+    return this.getPermissionsByModule(moduleName).length > 0;
   }
 
   clearPermissions() {

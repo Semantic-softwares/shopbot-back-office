@@ -1,0 +1,116 @@
+  <div class="py-6">
+          <form [formGroup]="emailSettingsForm" (ngSubmit)="saveEmailSettings()">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              
+              <!-- SMTP Configuration Card -->
+              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                  <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <mat-icon class="text-orange-600">settings</mat-icon>
+                    SMTP Configuration
+                  </h3>
+                </div>
+                <div class="p-6 space-y-6">
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>SMTP Host</mat-label>
+                    <input matInput formControlName="smtpHost" placeholder="smtp.gmail.com">
+                    <mat-icon matSuffix>dns</mat-icon>
+                  </mat-form-field>
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Port</mat-label>
+                      <input matInput type="number" formControlName="smtpPort" placeholder="587">
+                    </mat-form-field>
+
+                    <div class="flex items-center">
+                      <mat-slide-toggle formControlName="smtpSecure" color="primary"></mat-slide-toggle>
+                      <span class="ml-2 text-sm text-gray-700">Use SSL/TLS</span>
+                    </div>
+                  </div>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Username</mat-label>
+                    <input matInput formControlName="smtpUsername" placeholder="your-email@domain.com">
+                    <mat-icon matSuffix>person</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Password</mat-label>
+                    <input matInput type="password" formControlName="smtpPassword" placeholder="••••••••">
+                    <mat-icon matSuffix>lock</mat-icon>
+                  </mat-form-field>
+
+                  <button 
+                    type="button" 
+                    mat-stroked-button 
+                    color="accent" 
+                    (click)="testEmailConnection()"
+                    class="w-full">
+                    <mat-icon class="mr-2">send</mat-icon>
+                    Test Connection
+                  </button>
+                </div>
+              </div>
+
+              <!-- Email Branding Card -->
+              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                  <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <mat-icon class="text-blue-600">branding_watermark</mat-icon>
+                    Email Branding
+                  </h3>
+                </div>
+                <div class="p-6 space-y-6">
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Sender Name</mat-label>
+                    <input matInput formControlName="senderName" placeholder="Hotel Name">
+                    <mat-icon matSuffix>badge</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Sender Email</mat-label>
+                    <input matInput type="email" formControlName="senderEmail" placeholder="noreply@hotel.com">
+                    <mat-icon matSuffix>email</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Reply-To Email</mat-label>
+                    <input matInput type="email" formControlName="replyToEmail" placeholder="reservations@hotel.com">
+                    <mat-icon matSuffix>reply</mat-icon>
+                  </mat-form-field>
+
+                  <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <h5 class="font-semibold text-yellow-900 mb-2 flex items-center gap-2">
+                      <mat-icon class="text-yellow-600">lightbulb</mat-icon>
+                      Email Tips
+                    </h5>
+                    <ul class="text-sm text-yellow-800 space-y-1">
+                      <li>• Use a dedicated email for hotel communications</li>
+                      <li>• Enable 2FA for better security</li>
+                      <li>• Test emails before going live</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="flex justify-end mt-8">
+              <button 
+                type="submit" 
+                mat-raised-button 
+                color="primary"
+                [disabled]="emailSettingsForm.invalid || saving()"
+                class="px-8 py-2">
+                @if (saving()) {
+                  <mat-icon class="animate-spin mr-2">refresh</mat-icon>
+                  Saving...
+                } @else {
+                  <mat-icon class="mr-2">save</mat-icon>
+                  Save Email Settings
+                }
+              </button>
+            </div>
+          </form>
+        </div>

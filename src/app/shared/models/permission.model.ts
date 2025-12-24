@@ -1,14 +1,17 @@
-export interface PermissionCategory {
-  _id: string;
-  name: string;
-  description: string;
-}
-
 export interface Permission {
   _id: string;
+  code: string;
   name: string;
   description: string;
-  categoryId: PermissionCategory;
+  module: string;
+  group: string;
   action: string;
-  resource: string;
+  isActive: boolean;
+  sortOrder: number;
+}
+
+export interface GroupedPermissions {
+  [module: string]: {
+    [group: string]: Permission[];
+  };
 }

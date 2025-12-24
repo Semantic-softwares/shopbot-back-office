@@ -10,9 +10,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { Role } from '../../../../../../shared/models/role.model';
-import { RolesService } from '../../../../../shared/services/role.service';
-import { PermissionService } from '../../../../../shared/services/permission.service';
-import { Permission, PermissionCategory } from '../../../../../../shared/models/permission.model';
+import { RolesService } from '../../../../../../shared/services/roles.service';
+import { Permission } from '../../../../../../shared/models/permission.model';
 
 @Component({
   selector: 'app-create-role',
@@ -36,7 +35,6 @@ export class CreateRoleComponent implements OnInit {
   private dialogRef = inject(MatDialogRef<CreateRoleComponent>);
   private data: Role = inject(MAT_DIALOG_DATA);
   private rolesService = inject(RolesService);
-  private permissionService = inject(PermissionService);
 
   public isEditMode = signal(!!this.data?._id);
   public modalTitle = this.isEditMode() ? 'Edit Role' : 'Create Role';
@@ -64,22 +62,22 @@ export class CreateRoleComponent implements OnInit {
   }
 
   private loadPermissions() {
-    this.permissionService.getPermissions().subscribe({
+    this.rolesService.getPermissions().subscribe({
       next: (permissions: Permission[]) => {
-        this.groupPermissionsByCategory(permissions);
+        this.groupPermissionsByModule(permissions);
         this.initializePermissionsForm(permissions);
       }
     });
   }
 
-  private groupPermissionsByCategory(permissions: Permission[]) {
+  private groupPermissionsByModule(permissions: Permission[]) {
     this.groupedPermissions.clear();
     permissions.forEach(permission => {
-      const categoryName = permission.categoryId.name;
-      if (!this.groupedPermissions.has(categoryName)) {
-        this.groupedPermissions.set(categoryName, []);
+      const moduleName = permission.module || 'Other';
+      if (!this.groupedPermissions.has(moduleName)) {
+        this.groupedPermissions.set(moduleName, []);
       }
-      this.groupedPermissions.get(categoryName)?.push(permission);
+      this.groupedPermissions.get(moduleName)?.push(permission);
     });
   }
 

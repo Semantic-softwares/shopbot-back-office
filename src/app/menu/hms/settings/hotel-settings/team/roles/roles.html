@@ -1,0 +1,171 @@
+<div class="flex flex-col h-[calc(100vh-200px)]">
+  <!-- Back Button -->
+  <div class="mb-4">
+    <button mat-button (click)="location.back()">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </button>
+  </div>
+
+  <div class="flex gap-6 flex-1 min-h-0">
+  <!-- Left Panel - Roles List -->
+  <div class="w-96 shrink-0 flex flex-col">
+    <mat-card appearance="outlined" class="h-full flex flex-col overflow-hidden">
+      <mat-card-header class="shrink-0 !flex !justify-between !items-center">
+        <mat-card-title>Roles</mat-card-title>
+        <button mat-mini-fab color="primary" (click)="openCreateRoleDialog()" matTooltip="Create Custom Role">
+          <mat-icon>add</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content class="p-0 flex-1 overflow-y-auto">
+        @if (roles.isLoading()) {
+        <div class="flex justify-center items-center p-8">
+          <mat-spinner diameter="32"></mat-spinner>
+        </div>
+        } @else if (roles.value()?.length === 0) {
+        <app-no-record icon="badge" title="No Roles Found" message="Create your first role to manage staff permissions">
+        </app-no-record>
+        } @else {
+        <mat-selection-list [multiple]="false">
+          <!-- Administrative Roles -->
+          @if (administrativeRoles().length > 0) {
+            <div mat-subheader>Administrative Roles</div>
+            @for (role of administrativeRoles(); track role._id) {
+              <mat-list-option [selected]="selectedRole()?._id === role._id" (click)="selectRole(role)">
+                <mat-icon matListItemIcon>{{ getRoleIcon(role) }}</mat-icon>
+                <div matListItemTitle>{{ role.name }}</div>
+                <div matListItemLine>{{ role.permissions.length || 0 }} permissions</div>
+              </mat-list-option>
+            }
+          }
+
+          <!-- Custom Store Roles -->
+          <div mat-subheader>Custom Roles</div>
+          @if (customRoles().length > 0) {
+            @for (role of customRoles(); track role._id) {
+              <mat-list-option [selected]="selectedRole()?._id === role._id" (click)="selectRole(role)">
+                <mat-icon matListItemIcon>{{ getRoleIcon(role) }}</mat-icon>
+                <div matListItemTitle>{{ role.name }}</div>
+                <div matListItemLine>{{ role.permissions.length || 0 }} permissions</div>
+              </mat-list-option>
+            }
+          } @else {
+            <div class="px-4 py-3 text-sm text-gray-500 italic">
+              No custom roles created yet
+            </div>
+          }
+        </mat-selection-list>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Right Panel - Permissions Display -->
+  <div class="flex-1 min-w-0 flex flex-col">
+    @if (selectedRole()) {
+    <mat-card appearance="outlined" class="h-full flex flex-col overflow-hidden">
+      <mat-card-header class="pb-4 mb-4 shrink-0">
+        <div class="flex items-center gap-4 w-full">
+          <div class="w-12 h-12 rounded-full flex items-center justify-center"
+            [ngClass]="getRoleColor(selectedRole()!)">
+            <mat-icon>{{ getRoleIcon(selectedRole()!) }}</mat-icon>
+          </div>
+          <div class="flex-1">
+            <mat-card-title>{{ selectedRole()?.name }}</mat-card-title>
+            <mat-card-subtitle>{{ selectedRole()?.description || 'No description' }}</mat-card-subtitle>
+          </div>
+          <div class="flex gap-2">
+            <button mat-stroked-button [disabled]="selectedRole()?.isAdministrative" (click)="openEditRoleDialog()">
+              <mat-icon>edit</mat-icon>
+              Edit Role
+            </button>
+            <button mat-stroked-button color="warn" [disabled]="selectedRole()?.isAdministrative" (click)="deleteRole()">
+              <mat-icon>delete</mat-icon>
+              Delete
+            </button>
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="pt-4 flex-1 overflow-y-auto">
+        <!-- Permissions Lists -->
+        <div class="flex gap-4">
+          <!-- Granted Permissions -->
+          <mat-card appearance="outlined" class="flex-1 !overflow-hidden">
+            <mat-card-header >
+              <mat-card-title>
+                <!-- <mat-icon class="text-green-600 mr-2">check_circle</mat-icon> -->
+                Granted Permissions ({{ allowedPermissions().length }})
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="!p-0 max-h-[400px] overflow-y-auto">
+              <mat-list>
+                @for (module of modules(); track module) {
+                  @if (getGrantedPermissionsForModule(module).length > 0) {
+                    <div mat-subheader>{{ module }}</div>
+                    @for (perm of getGrantedPermissionsForModule(module); track perm.code) {
+                      <mat-list-item>
+                        <mat-icon matListItemIcon class="text-green-600">check_circle</mat-icon>
+                        <div matListItemTitle>{{ perm.name }}</div>
+                        <div matListItemLine>{{ perm.group }}</div>
+                      </mat-list-item>
+                    }
+                  }
+                }
+                @if (allowedPermissions().length === 0) {
+                  <div class="p-4 text-center text-gray-500 italic">
+                    No permissions granted
+                  </div>
+                }
+              </mat-list>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Denied Permissions -->
+          <mat-card appearance="outlined" class="flex-1 !overflow-hidden">
+            <mat-card-header>
+              <mat-card-title >
+                <!-- <mat-icon class="text-red-400 mr-2">cancel</mat-icon> -->
+                Denied Permissions ({{ deniedPermissions().length }})
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="!p-0 max-h-[400px] overflow-y-auto">
+              <mat-list>
+                @for (module of modules(); track module) {
+                  @if (getDeniedPermissionsForModule(module).length > 0) {
+                    <div mat-subheader>{{ module }}</div>
+                    @for (perm of getDeniedPermissionsForModule(module); track perm.code) {
+                      <mat-list-item>
+                        <mat-icon matListItemIcon class="text-red-400">cancel</mat-icon>
+                        <div matListItemTitle>{{ perm.name }}</div>
+                        <div matListItemLine>{{ perm.group }}</div>
+                      </mat-list-item>
+                    }
+                  }
+                }
+                @if (deniedPermissions().length === 0) {
+                  <div class="p-4 text-center text-gray-500 italic">
+                    All permissions granted
+                  </div>
+                }
+              </mat-list>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    } @else {
+    <!-- No Role Selected State -->
+    <mat-card appearance="outlined" class="h-full flex flex-col">
+      <mat-card-content class="flex-1 flex items-center justify-center">
+        <div class="text-center py-16">
+          <mat-icon class="text-6xl text-gray-300 mb-4">touch_app</mat-icon>
+          <h3 class="text-lg font-medium text-gray-600 mb-2">Select a Role</h3>
+          <p class="text-gray-500">Click on a role from the list to view its permissions</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    }
+  </div>
+  </div>
+</div>

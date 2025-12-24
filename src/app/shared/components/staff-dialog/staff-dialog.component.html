@@ -1,0 +1,102 @@
+<h2 mat-dialog-title class="!m-0 !p-6 !pb-4">
+      {{ isEditMode() ? 'Edit Staff Member' : 'Add Staff Member' }}
+    </h2>
+
+    <mat-dialog-content class="!px-6 !py-0">
+      <form [formGroup]="staffForm" class="flex flex-col gap-4">
+        <!-- Name -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Full Name</mat-label>
+          <input matInput formControlName="name" placeholder="Enter full name">
+          <mat-icon matSuffix>person</mat-icon>
+          @if (staffForm.get('name')?.hasError('required') && staffForm.get('name')?.touched) {
+            <mat-error>Name is required</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Email -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Email Address</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="Enter email address">
+          <mat-icon matSuffix>email</mat-icon>
+          @if (staffForm.get('email')?.hasError('required') && staffForm.get('email')?.touched) {
+            <mat-error>Email is required</mat-error>
+          }
+          @if (staffForm.get('email')?.hasError('email') && staffForm.get('email')?.touched) {
+            <mat-error>Please enter a valid email</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Phone Number -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Phone Number</mat-label>
+          <input matInput formControlName="phoneNumber" placeholder="Enter phone number">
+          <mat-icon matSuffix>phone</mat-icon>
+          @if (staffForm.get('phoneNumber')?.hasError('required') && staffForm.get('phoneNumber')?.touched) {
+            <mat-error>Phone number is required</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Gender -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Gender</mat-label>
+          <mat-select formControlName="gender">
+            <mat-option value="male">Male</mat-option>
+            <mat-option value="female">Female</mat-option>
+            <mat-option value="other">Other</mat-option>
+          </mat-select>
+          <mat-icon matSuffix>wc</mat-icon>
+        </mat-form-field>
+
+        <!-- Password (only for create mode) -->
+        @if (!isEditMode()) {
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Password</mat-label>
+            <input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'" 
+                   placeholder="Enter password">
+            <button mat-icon-button matSuffix type="button" (click)="hidePassword.set(!hidePassword())">
+              <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (staffForm.get('password')?.hasError('required') && staffForm.get('password')?.touched) {
+              <mat-error>Password is required</mat-error>
+            }
+            @if (staffForm.get('password')?.hasError('minlength') && staffForm.get('password')?.touched) {
+              <mat-error>Password must be at least 6 characters</mat-error>
+            }
+          </mat-form-field>
+        }
+
+        <!-- Role -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Role</mat-label>
+          <mat-select formControlName="role">
+            @if (rolesResource.isLoading()) {
+              <mat-option disabled>Loading roles...</mat-option>
+            } @else {
+              @for (role of rolesResource.value(); track role._id) {
+                <mat-option [value]="role._id">
+                  <div class="flex items-center gap-2">
+                    <span>{{ role.name }}</span>
+                  </div>
+                </mat-option>
+              }
+            }
+          </mat-select>
+          <mat-icon matSuffix>admin_panel_settings</mat-icon>
+          @if (staffForm.get('role')?.hasError('required') && staffForm.get('role')?.touched) {
+            <mat-error>Role is required</mat-error>
+          }
+        </mat-form-field>
+      </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end" class="!px-6 !py-4">
+      <button mat-button mat-dialog-close [disabled]="saving()">Cancel</button>
+      <button mat-flat-button color="primary" (click)="saveStaff()" 
+              [disabled]="staffForm.invalid || saving()">
+        @if (saving()) {
+          <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+        }
+        {{ isEditMode() ? 'Update' : 'Create' }}
+      </button>
+    </mat-dialog-actions>
