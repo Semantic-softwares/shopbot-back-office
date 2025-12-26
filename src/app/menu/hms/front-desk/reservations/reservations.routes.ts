@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { roleGuard } from '../../../../shared/guards/role.guard';
 
 export const reservationRoutes: Routes = [
   {
@@ -18,6 +19,8 @@ export const reservationRoutes: Routes = [
             (c) => c.RESERVATION_VIEW_ROUTES
           ),
         title: 'Reservations - Hotel Management',
+        canActivate: [roleGuard],
+        data: { requiredPermission: 'hotel.reservations.view' }
       },
        
       {
@@ -27,6 +30,8 @@ export const reservationRoutes: Routes = [
             (c) => c.ReservationFormComponent
           ),
         title: 'New Reservation - Hotel Management',
+        canActivate: [roleGuard],
+        data: { requiredPermission: 'hotel.reservations.create' }
       },
       {
         path: 'edit/:id',
@@ -35,7 +40,8 @@ export const reservationRoutes: Routes = [
             (c) => c.ReservationFormComponent
           ),
         title: 'Edit Reservation - Hotel Management',
-        // canActivate: [reservationEditGuard],
+        canActivate: [roleGuard],
+        data: { requiredPermission: 'hotel.reservations.edit' }
       },
       {
         path: 'details/:id',
@@ -44,6 +50,8 @@ export const reservationRoutes: Routes = [
             (c) => c.ReservationDetailsComponent
           ),
         title: 'Reservation Details - Hotel Management',
+        canActivate: [roleGuard],
+        data: { requiredPermission: 'hotel.reservations.view' }
       },
 
     ],

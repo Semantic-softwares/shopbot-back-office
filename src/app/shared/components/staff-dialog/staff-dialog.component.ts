@@ -102,7 +102,7 @@ export class StaffDialogComponent implements OnInit {
 
     const staffData: any = {
       ...this.staffForm.value,
-      store: this.data.storeId,
+      stores: [this.data.storeId], // Use stores array instead of single store
       pin: this.generatePin(), // Generate a random PIN
     };
 

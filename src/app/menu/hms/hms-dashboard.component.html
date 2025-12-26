@@ -18,7 +18,7 @@
             </a>
           }
             
-          <h2 matListItemTitle [routerLink]="['../settings']">{{currentUser()?.role }}</h2>
+          <h2 matListItemTitle [routerLink]="['../settings']">{{currentUser()?.role?.name }}</h2>
           <div matListItemLine [routerLink]="['../settings']">{{storeStore.selectedStore()?.name}} - Hotel</div>
           <a matListItemMeta mat-icon-button class="block" [matMenuTriggerFor]="menu">
             <mat-icon>keyboard_arrow_down</mat-icon>
@@ -36,7 +36,7 @@
       <mat-nav-list>
         <app-usage-indicator [storeId]="storeStore.selectedStore()?._id"></app-usage-indicator>
         <mat-accordion multi>
-          @for (link of navItems; track $index) {
+          @for (link of navItems(); track $index) {
           <mat-expansion-panel class="mat-elevation-z0" [expanded]="true">
             <mat-expansion-panel-header>
               <mat-panel-title>

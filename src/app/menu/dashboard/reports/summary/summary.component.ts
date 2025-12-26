@@ -19,7 +19,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { Chart, registerables } from 'chart.js';
+import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { distinctUntilChanged, tap } from 'rxjs/operators';
@@ -122,7 +122,7 @@ export class SummaryComponent implements OnInit {
   
 
   activeLink = 'grossSales';
-  currentChart: Chart | null = null;
+  currentChart: Chart<'line'> | null = null;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   pageSize = 10;
@@ -227,13 +227,12 @@ export class SummaryComponent implements OnInit {
     
     const chartData = this.getChartData(period);
 
-    this.currentChart = new Chart(ctx as CanvasRenderingContext2D, {
-      type: 'line' as const,
+    const config: ChartConfiguration<'line'> = {
+      type: 'line',
       data: {
         labels: chartData.labels,
         datasets: [
           {
-            type: 'line' as const,
             label: this.activeLink,
             data: chartData.data,
             borderColor: '#4CAF50',
@@ -241,7 +240,7 @@ export class SummaryComponent implements OnInit {
             fill: false,
             tension: 0.4,
             pointRadius: 1,
-          } as any,
+          },
         ],
       },
       options: {
@@ -254,7 +253,7 @@ export class SummaryComponent implements OnInit {
           },
           tooltip: {
             callbacks: {
-              label: function(context: any) {
+              label: function(context) {
                 let label = context.dataset.label || '';
                 if (label) {
                   label += ': ';
@@ -279,14 +278,14 @@ export class SummaryComponent implements OnInit {
           y: {
             beginAtZero: true,
             grid: {
-              color: function (context: any) {
-                return '#e2e8f0'; // Tailwind's gray-200
-              },
+              color: '#e2e8f0', // Tailwind's gray-200
               lineWidth: 0.5,
             },
           },
         },
-      } as any,
-    });
+      },
+    };
+
+    this.currentChart = new Chart(ctx, config);
   }
 }

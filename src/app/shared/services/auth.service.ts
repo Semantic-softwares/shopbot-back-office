@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -7,6 +7,7 @@ import { User } from '../models/user.model';
 import { SessionStorageService } from './session-storage.service';
 import { Role } from '../models/role.model';
 import { Permission } from '../models/permission.model';
+import { RolesService } from './roles.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,8 @@ export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
   private currentUserRole = new BehaviorSubject<Role | null>(null);
   private permissionCache: Map<string, boolean> = new Map();
+  private rolesService = inject(RolesService);
+
 
   constructor(
     private http: HttpClient,
@@ -128,6 +131,7 @@ export class AuthService {
   login(email: string, password: string): Observable<User> {
     return this.http.post<{access_token: string, user: User}>(`${environment.apiUrl}/auth/login?user=merchant`, { email, password })
       .pipe(map(response => {
+        console.log(response.user);
         this.sessionStorage.setItem('currentUser', response.user);
         this.sessionStorage.setItem('auth_token', response.access_token);
         this.currentUserSubject.next(response.user);
@@ -136,13 +140,15 @@ export class AuthService {
   }
 
   signup(userData: Partial<User>): Observable<User> {
-    return this.http.post<{token: string, user: User}>(`${environment.apiUrl}/auth/signup`, userData)
+    return this.http.post<User>(`${environment.apiUrl}/merchants`, userData)
       .pipe(map(response => {
-        return response.user;
+        return response;
       }));
   }
 
   logout() {
+    // Clear role access from RolesService
+    this.rolesService.clearAccess();
     this.sessionStorage.removeItem('currentUser');
     this.sessionStorage.clearAll()
     this.currentUserSubject.next(null);

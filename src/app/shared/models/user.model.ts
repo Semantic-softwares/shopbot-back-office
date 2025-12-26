@@ -1,3 +1,4 @@
+import { Role } from "./role.model";
 
 export enum UserRole {
   Owner = 'Owner',
@@ -31,10 +32,12 @@ export interface User {
   totalOrders: number;
   shipping: Shipping;
   pin: number;
-  role?: string;
+  role?:  Role;
   ban?: boolean;
-  store: string;
-  phoneCredentials?: PhoneCredentials[]
+  store?: string; // Legacy single store (deprecated)
+  stores?: string[]; // Array of store IDs the merchant belongs to
+  phoneCredentials?: PhoneCredentials[];
+  isOwner?: boolean; // Flag to assign Super Admin role during signup
 }
 
 export interface Shipping {

@@ -73,7 +73,7 @@ export class StoreService {
   }
 
   addStore(store: Store): Observable<any> {
-    return this._httpClient.post(`${this.hostServer}/stores`, store);
+    return this._httpClient.post(`${this.hostServer}/stores/web`, store);
   }
 
   getStoreOrders(storeId: string) {
@@ -127,6 +127,24 @@ export class StoreService {
     return this._httpClient.post<boolean>(
       `${this.hostServer}/stores/${storeId}/validate-pin`,
       { pin }
+    );
+  }
+
+  /**
+   * Find a store by its unique store number
+   */
+  getStoreByNumber(storeNumber: string): Observable<{ success: boolean; data: Store; message?: string }> {
+    return this._httpClient.get<{ success: boolean; data: Store; message?: string }>(
+      `${this.hostServer}/stores/by-number/${storeNumber}`
+    );
+  }
+
+  /**
+   * Validate if a merchant has access to a store by store number
+   */
+  validateMerchantStoreAccess(storeNumber: string, merchantId: string): Observable<{ success: boolean; data: Store; message?: string }> {
+    return this._httpClient.get<{ success: boolean; data: Store; message?: string }>(
+      `${this.hostServer}/stores/validate-access/${storeNumber}/${merchantId}`
     );
   }
 }

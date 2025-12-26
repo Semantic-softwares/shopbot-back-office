@@ -1,9 +1,10 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Role, CreateRoleDto, CreateAdministrativeRoleDto } from '../models/role.model';
 import { Permission, GroupedPermissions } from '../models/permission.model';
+import { SessionStorageService } from './session-storage.service';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -11,12 +12,86 @@ interface ApiResponse<T> {
   data: T;
 }
 
+interface StoredRoleAccess {
+  role: Role;
+  permissions: string[];
+  isAdmin: boolean;
+}
+
+const ROLE_ACCESS_KEY = 'role_access';
+
 @Injectable({
   providedIn: 'root'
 })
 export class RolesService {
+  role = signal<Role | null>(null);
+  permissions = signal<Set<string>>(new Set());
+  isAdmin = signal(false);
   private http = inject(HttpClient);
+  private sessionStorage = inject(SessionStorageService);
   private hostServer: string = environment.apiUrl;
+
+  constructor() {
+    // Restore role from session storage on service initialization
+    this.restoreFromStorage();
+  }
+
+  /**
+   * Restore role access from session storage (for page reload)
+   */
+  private restoreFromStorage(): void {
+    const stored = this.sessionStorage.getItem<StoredRoleAccess>(ROLE_ACCESS_KEY);
+    if (stored) {
+      this.role.set(stored.role);
+      this.permissions.set(new Set(stored.permissions));
+      this.isAdmin.set(stored.isAdmin);
+    }
+  }
+
+  /**
+   * Set role access and persist to session storage
+   */
+  setAccess(data: {
+    role: Role;
+    permissions: string[];
+    isAdmin: boolean;
+  }) {
+    // Update signals
+    this.role.set(data.role);
+    this.permissions.set(new Set(data.permissions));
+    this.isAdmin.set(data.isAdmin);
+
+    // Persist to session storage
+    this.sessionStorage.setItem(ROLE_ACCESS_KEY, {
+      role: data.role,
+      permissions: data.permissions,
+      isAdmin: data.isAdmin
+    });
+  }
+
+  /**
+   * Clear role access (call on logout)
+   */
+  clearAccess(): void {
+    this.role.set(null);
+    this.permissions.set(new Set());
+    this.isAdmin.set(false);
+    this.sessionStorage.removeItem(ROLE_ACCESS_KEY);
+  }
+
+  has(permission: string) {
+    return this.permissions().has(permission);
+  }
+
+  hasAny(perms: string[]) {
+    return perms.some(p => this.permissions().has(p));
+  }
+
+  hasAll(perms: string[]) {
+    return perms.every(p => this.permissions().has(p));
+  }
+
+  
 
   /**
    * Get all roles
@@ -104,6 +179,15 @@ export class RolesService {
    */
   deleteRole(roleId: string): Observable<any> {
     return this.http.delete<ApiResponse<any>>(`${this.hostServer}/roles/${roleId}`);
+  }
+
+  /**
+   * Get role by merchant ID
+   */
+  getRoleByMerchantId(merchantId: string): Observable<Role> {
+    return this.http.get<ApiResponse<Role>>(`${this.hostServer}/roles/merchant/${merchantId}`).pipe(
+      map(response => response.data)
+    );
   }
 
   /**

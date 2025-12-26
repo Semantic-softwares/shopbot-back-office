@@ -1,0 +1,314 @@
+<div class="min-h-screen w-full flex flex-col lg:flex-row">
+    <!-- Left Column - Form -->
+    <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 py-8 lg:px-16 xl:px-24 bg-white">
+        <!-- Logo/Brand -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-gray-900">ShopBot</h1>
+            <p class="text-gray-500 mt-1">Create your account</p>
+        </div>
+
+        <!-- Stepper Form -->
+        <div class="max-w-lg">
+        <mat-stepper #stepper linear class="signup-stepper">
+            <!-- Step 1: Owner Information -->
+            <mat-step [stepControl]="merchantForm" [editable]="true">
+                <ng-template matStepLabel>Owner</ng-template>
+                
+                <form [formGroup]="merchantForm" class="flex flex-col gap-3 mt-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-2">Personal Information</h2>
+                    
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Full Name</mat-label>
+                        <input matInput formControlName="name" placeholder="Enter your full name">
+                        <mat-icon matSuffix fontSet="material-icons-outlined">person</mat-icon>
+                        @if (merchantForm.get('name')?.hasError('required')) {
+                        <mat-error>Name is required</mat-error>
+                        }
+                        @if (merchantForm.get('name')?.hasError('minlength')) {
+                        <mat-error>Name must be at least 2 characters</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Email</mat-label>
+                            <input matInput formControlName="email" type="email" placeholder="you@example.com">
+                            <mat-icon matSuffix fontSet="material-icons-outlined">email</mat-icon>
+                            @if (merchantForm.get('email')?.hasError('required')) {
+                            <mat-error>Email is required</mat-error>
+                            }
+                            @if (merchantForm.get('email')?.hasError('email')) {
+                            <mat-error>Please enter a valid email</mat-error>
+                            }
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Phone Number</mat-label>
+                            <input matInput formControlName="phoneNumber" placeholder="+234XXXXXXXXXX">
+                            <mat-icon matSuffix fontSet="material-icons-outlined">phone</mat-icon>
+                            @if (merchantForm.get('phoneNumber')?.hasError('required')) {
+                            <mat-error>Phone is required</mat-error>
+                            }
+                            @if (merchantForm.get('phoneNumber')?.hasError('pattern')) {
+                            <mat-error>Invalid phone number</mat-error>
+                            }
+                        </mat-form-field>
+                    </div>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Gender</mat-label>
+                        <mat-select formControlName="gender">
+                            <mat-option value="male">Male</mat-option>
+                            <mat-option value="female">Female</mat-option>
+                            <mat-option value="other">Other</mat-option>
+                        </mat-select>
+                        @if (merchantForm.get('gender')?.hasError('required')) {
+                        <mat-error>Gender is required</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Password</mat-label>
+                            <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password"
+                                placeholder="••••••••">
+                            <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility($event)">
+                                <mat-icon fontSet="material-icons-outlined">{{hidePassword() ? 'visibility_off' : 'visibility'}}</mat-icon>
+                            </button>
+                            @if (merchantForm.get('password')?.hasError('required')) {
+                            <mat-error>Password is required</mat-error>
+                            }
+                            @if (merchantForm.get('password')?.hasError('minlength')) {
+                            <mat-error>Min 6 characters</mat-error>
+                            }
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Confirm Password</mat-label>
+                            <input matInput [type]="hideConfirmPassword() ? 'password' : 'text'" formControlName="confirmPassword"
+                                placeholder="••••••••">
+                            <button mat-icon-button matSuffix type="button" (click)="toggleConfirmPasswordVisibility($event)">
+                                <mat-icon fontSet="material-icons-outlined">{{hideConfirmPassword() ? 'visibility_off' : 'visibility'}}</mat-icon>
+                            </button>
+                            @if (merchantForm.get('confirmPassword')?.hasError('required')) {
+                            <mat-error>Required</mat-error>
+                            }
+                        </mat-form-field>
+                    </div>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>PIN (4 digits)</mat-label>
+                        <input matInput formControlName="pin" type="password" maxlength="4" minlength="4" placeholder="••••">
+                        <mat-icon matSuffix fontSet="material-icons-outlined">pin</mat-icon>
+                        <mat-hint>Used for sensitive operations</mat-hint>
+                        @if (merchantForm.get('pin')?.hasError('required')) {
+                        <mat-error>PIN is required</mat-error>
+                        }
+                        @if (merchantForm.get('pin')?.hasError('pattern') || merchantForm.get('pin')?.hasError('minlength')) {
+                        <mat-error>PIN must be 4 digits</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <div class="flex justify-end mt-4">
+                        @if (validating()) {
+                            <button mat-flat-button color="primary" type="button" disabled class="w-full sm:w-auto">
+                                <mat-spinner diameter="20"></mat-spinner>
+                                <span class="ml-2">Validating...</span>
+                            </button>
+                        } @else {
+                            <button mat-flat-button color="primary" type="button" 
+                                    [disabled]="!merchantForm.valid"
+                                    (click)="validateAndProceed()"
+                                    class="w-full sm:w-auto">
+                                Continue
+                                <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+                            </button>
+                        }
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Step 2: Store Information -->
+            <mat-step [stepControl]="storeForm" [editable]="true">
+                <ng-template matStepLabel>Business</ng-template>
+                
+                <form [formGroup]="storeForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-3 mt-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-2">Business Information</h2>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Business Name</mat-label>
+                            <input matInput formControlName="name" placeholder="Your business name">
+                            <mat-icon matSuffix fontSet="material-icons-outlined">store</mat-icon>
+                            @if (storeForm.get('name')?.hasError('required')) {
+                            <mat-error>Business name is required</mat-error>
+                            }
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Business Type</mat-label>
+                            <mat-select formControlName="storeType">
+                                @for (type of storeTypes; track type.value) {
+                                <mat-option [value]="type.value">{{type.label}}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Description</mat-label>
+                        <textarea matInput formControlName="description" rows="2" 
+                                  placeholder="Brief description of your business"></textarea>
+                    </mat-form-field>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Country</mat-label>
+                            <mat-select formControlName="country" (selectionChange)="selectCountry($event.value)">
+                                @for (zone of deliveryZones.value(); track zone.country) {
+                                <mat-option [value]="zone.country">{{zone.country}}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Currency</mat-label>
+                            <input matInput formControlName="currency" readonly placeholder="Auto-filled">
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Contact Info Section -->
+                    <div class="border-t border-gray-200 pt-4 mt-2">
+                        <h3 class="text-sm font-medium text-gray-600 mb-3">Contact Information (Optional)</h3>
+                        
+                        <div formGroupName="contactInfo" class="flex flex-col gap-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <mat-form-field appearance="outline" class="w-full">
+                                    <mat-label>Business Email</mat-label>
+                                    <input matInput formControlName="email" type="email" placeholder="contact@business.com">
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="w-full">
+                                    <mat-label>Business Phone</mat-label>
+                                    <input matInput formControlName="phone" placeholder="Business phone">
+                                </mat-form-field>
+                            </div>
+
+                            <mat-form-field appearance="outline" class="w-full">
+                                <mat-label>Address</mat-label>
+                                <input matInput formControlName="address" placeholder="Street address">
+                            </mat-form-field>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <mat-form-field appearance="outline" class="w-full">
+                                    <mat-label>City</mat-label>
+                                    <input matInput formControlName="city" placeholder="City">
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="w-full">
+                                    <mat-label>State</mat-label>
+                                    <mat-select formControlName="state">
+                                        @for (state of states(); track state.name) {
+                                        <mat-option [value]="state.name">{{state.name}}</mat-option>
+                                        }
+                                    </mat-select>
+                                    @if (!states()?.length) {
+                                    <mat-hint>Select a country first</mat-hint>
+                                    }
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                        <button mat-stroked-button type="button" matStepperPrevious class="sm:order-1">
+                            <mat-icon>arrow_back</mat-icon>
+                            Back
+                        </button>
+                        <button mat-flat-button color="primary" type="submit"
+                                [disabled]="!storeForm.valid || loading()"
+                                class="flex-1 sm:order-2">
+                            @if (loading()) {
+                                <mat-spinner diameter="20"></mat-spinner>
+                                <span class="ml-2">Creating account...</span>
+                            } @else {
+                                Create Account
+                            }
+                        </button>
+                    </div>
+                </form>
+            </mat-step>
+        </mat-stepper>
+
+        <!-- Sign in link -->
+        <div class="text-center mt-8 pt-6 border-t border-gray-200">
+            <span class="text-sm text-gray-600">Already have an account?</span>
+            <a routerLink="/auth/login" class="text-sm font-medium text-blue-600 hover:text-blue-800 ml-1">
+                Sign in
+            </a>
+        </div>
+        </div>
+    </div>
+
+    <!-- Right Column - Hero/Feature Section -->
+    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 relative overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+            <div class="absolute bottom-0 right-0 w-80 h-80 bg-white rounded-full translate-x-1/3 translate-y-1/3"></div>
+            <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="relative z-10 flex flex-col justify-center px-12 xl:px-16 text-white">
+            <!-- Main Headline -->
+            <div class="mb-10">
+                <h2 class="text-3xl xl:text-4xl font-bold leading-tight mb-4">
+                    The WORLD'S EASIEST SYSTEM to get started with.
+                </h2>
+                <p class="text-blue-200 text-lg">
+                    Start managing your property with our all-in-one solution.
+                </p>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="grid grid-cols-2 gap-6">
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+                    <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">domain</mat-icon>
+                    <h4 class="font-semibold text-white mb-1">Multi-Property</h4>
+                    <p class="text-blue-200 text-sm">Manage multiple properties with multi-currency support</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+                    <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">cleaning_services</mat-icon>
+                    <h4 class="font-semibold text-white mb-1">Housekeeping</h4>
+                    <p class="text-blue-200 text-sm">Complete housekeeping management module</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+                    <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">travel_explore</mat-icon>
+                    <h4 class="font-semibold text-white mb-1">Travel Agents</h4>
+                    <p class="text-blue-200 text-sm">Agent and corporate booking consoles</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+                    <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">analytics</mat-icon>
+                    <h4 class="font-semibold text-white mb-1">Revenue Management</h4>
+                    <p class="text-blue-200 text-sm">Powerful reporting and analytics</p>
+                </div>
+            </div>
+
+            <!-- Trust Badge -->
+            <div class="mt-12 pt-8 border-t border-white/20">
+                <div class="flex items-center gap-4">
+                    <div class="flex -space-x-2">
+                        <div class="w-10 h-10 rounded-full bg-blue-400 border-2 border-white flex items-center justify-center text-sm font-medium">JD</div>
+                        <div class="w-10 h-10 rounded-full bg-indigo-400 border-2 border-white flex items-center justify-center text-sm font-medium">KL</div>
+                        <div class="w-10 h-10 rounded-full bg-purple-400 border-2 border-white flex items-center justify-center text-sm font-medium">MN</div>
+                    </div>
+                    <div>
+                        <p class="text-white font-medium">Trusted by 1,000+ businesses</p>
+                        <p class="text-blue-200 text-sm">Join our growing community</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

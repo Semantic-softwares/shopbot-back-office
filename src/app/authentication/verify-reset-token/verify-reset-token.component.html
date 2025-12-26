@@ -1,60 +1,117 @@
-<div class="min-h-screen w-full flex items-center justify-center">
-        <mat-card appearance="outlined" class="w-full max-w-sm">
-            <mat-card-header class="mb-6">
-                <mat-card-title>Verify Reset Token
-                </mat-card-title>
-                <mat-card-subtitle>Enter the 6-digit token sent to your email.</mat-card-subtitle>
-            </mat-card-header>
+<div class="min-h-screen w-full flex flex-col lg:flex-row">
+    <!-- Left Column - Form -->
+    <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 py-12 lg:px-16 xl:px-24 bg-white">
+        <!-- Logo/Brand -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-gray-900">ShopBot</h1>
+            <p class="text-gray-500 mt-1">Verify Reset Token</p>
+        </div>
 
-            <mat-card-content>
-                @if (!verified()) {
-                    <form [formGroup]="verifyTokenForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
-                        <div class="text-center mb-4">
-                            <p class="text-sm text-gray-600">
-                                Token sent to: <span class="font-semibold">{{ email() }}</span>
-                            </p>
-                        </div>
+        <!-- Form Content -->
+        <div class="max-w-md">
+            @if (!verified()) {
+                <h2 class="text-2xl font-semibold text-gray-800 mb-2">Enter verification code</h2>
+                <p class="text-gray-500 mb-8">Enter the 6-digit token sent to your email.</p>
 
-                        <mat-form-field appearance="outline" class="w-full">
-                            <mat-label>Reset Token</mat-label>
-                            <input matInput formControlName="token" placeholder="Enter 6-digit token" type="text" maxlength="6">
-                            <mat-icon matSuffix fontSet="material-icons-outlined">vpn_key</mat-icon>
-                            
-                            @if (verifyTokenForm.get('token')?.hasError('required')) {
-                                <mat-error>Token is required</mat-error>
-                            }
-                            @if (verifyTokenForm.get('token')?.hasError('minlength')) {
-                                <mat-error>Token must be 6 digits</mat-error>
-                            }
-                        </mat-form-field>
+                <div class="bg-blue-50 text-blue-700 text-sm p-4 rounded-lg mb-6 flex items-center gap-3">
+                    <mat-icon class="text-blue-600" fontSet="material-icons-outlined">mail</mat-icon>
+                    <span>Token sent to: <strong>{{ email() }}</strong></span>
+                </div>
+
+                <form [formGroup]="verifyTokenForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Reset Token</mat-label>
+                        <input matInput formControlName="token" placeholder="Enter 6-digit token" type="text" maxlength="6"
+                               class="text-center text-2xl tracking-widest">
+                        <mat-icon matSuffix fontSet="material-icons-outlined">vpn_key</mat-icon>
                         
-                        <button mat-raised-button color="primary" 
-                                [disabled]="!verifyTokenForm.valid || loading()" 
-                                type="submit">
-                            @if (loading()) {
+                        @if (verifyTokenForm.get('token')?.hasError('required')) {
+                            <mat-error>Token is required</mat-error>
+                        }
+                        @if (verifyTokenForm.get('token')?.hasError('minlength')) {
+                            <mat-error>Token must be 6 digits</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <button mat-flat-button color="primary" type="submit"
+                            [disabled]="!verifyTokenForm.valid || loading()"
+                            class="w-full h-12 text-base">
+                        @if (loading()) {
+                            <span class="flex items-center justify-center gap-2">
                                 <mat-spinner diameter="20"></mat-spinner>
                                 Verifying...
-                            } @else {
-                                Verify Token
-                            }
-                        </button>
+                            </span>
+                        } @else {
+                            Verify Token
+                        }
+                    </button>
 
-                        <div class="text-center mt-4">
-                            <p class="text-xs text-gray-600 mb-2">Didn't receive the token?</p>
-                            <a href="/auth/forgot-password" class="text-sm text-blue-600 hover:text-blue-800">
-                                Request a new one
-                            </a>
-                        </div>
-                    </form>
-                } @else {
-                    <div class="text-center">
-                        <mat-icon class="text-green-600 text-5xl mb-4">verified_user</mat-icon>
-                        <h3 class="text-lg font-semibold mb-2">Token Verified!</h3>
-                        <p class="text-gray-600 text-sm mb-4">
-                            Redirecting to reset your password...
-                        </p>
+                    <div class="text-center mt-6">
+                        <p class="text-sm text-gray-500 mb-2">Didn't receive the token?</p>
+                        <a href="/auth/forgot-password" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                            Request a new one
+                        </a>
                     </div>
-                }
-            </mat-card-content>
-        </mat-card>
+                </form>
+            } @else {
+                <div class="text-center py-8">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <mat-icon class="text-green-600 text-3xl">verified_user</mat-icon>
+                    </div>
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-2">Token Verified!</h2>
+                    <p class="text-gray-500 mb-4">
+                        Redirecting to reset your password...
+                    </p>
+                    <mat-spinner diameter="32" class="mx-auto"></mat-spinner>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Right Column - Hero/Feature Section -->
+    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 relative overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+            <div class="absolute bottom-0 right-0 w-80 h-80 bg-white rounded-full translate-x-1/3 translate-y-1/3"></div>
+            <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="relative z-10 flex flex-col justify-center px-12 xl:px-16 text-white">
+            <!-- Main Headline -->
+            <div class="mb-10">
+                <h2 class="text-3xl xl:text-4xl font-bold leading-tight mb-4">
+                    Almost there!
+                </h2>
+                <p class="text-blue-200 text-lg">
+                    Verify your identity to continue with the password reset process.
+                </p>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="grid grid-cols-2 gap-6">
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+                    <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">verified_user</mat-icon>
+                    <h4 class="font-semibold text-white mb-1">Secure Verification</h4>
+                    <p class="text-blue-200 text-sm">One-time token for your security</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+                    <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">schedule</mat-icon>
+                    <h4 class="font-semibold text-white mb-1">Time Limited</h4>
+                    <p class="text-blue-200 text-sm">Token expires for added security</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+                    <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">lock</mat-icon>
+                    <h4 class="font-semibold text-white mb-1">Encrypted</h4>
+                    <p class="text-blue-200 text-sm">Your data is always protected</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+                    <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">refresh</mat-icon>
+                    <h4 class="font-semibold text-white mb-1">Resend Token</h4>
+                    <p class="text-blue-200 text-sm">Request a new code if needed</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

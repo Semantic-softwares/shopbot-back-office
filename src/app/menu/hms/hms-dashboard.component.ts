@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -9,12 +9,13 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
-import { rxResource, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDividerModule } from '@angular/material/divider';
 import { StoreStore } from '../../shared/stores/store.store';
 import { Store } from '../../shared/models';
 import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.component';
 import { UsageIndicatorComponent } from "../../shared/components/usage-indicator/usage-indicator.component";
+import { RolesService } from '../../shared/services/roles.service';
 
 @Component({
   selector: 'app-hms-dashboard',
@@ -40,13 +41,14 @@ export class HmsDashboardComponent {
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
   public storeStore = inject(StoreStore);
+  public rolesService = inject(RolesService);
   public isMobile = signal(window.innerWidth < 768);
   public opened = signal(true);
   public currentUser = toSignal(this.authService.currentUser, {
     initialValue: null,
   });
 
-  public navItems = [
+  private navItemsConfig = [
     {
       name: 'Dashboard',
       children: [
@@ -54,14 +56,8 @@ export class HmsDashboardComponent {
           icon: 'dashboard',
           label: 'Overview',
           link: './overview',
-          permission: 'view_hotel_dashboard',
+          permissions: ['hotel.reservations.view', 'hotel.rooms.view'],
         },
-        // {
-        //   icon: 'analytics',
-        //   label: 'Analytics',
-        //   link: './analytics',
-        //   permission: 'view_hotel_analytics',
-        // },
       ],
     },
     {
@@ -71,19 +67,19 @@ export class HmsDashboardComponent {
           icon: 'book_online',
           label: 'Reservations',
           link: './front-desk/reservations',
-          permission: 'manage_reservations',
+          permissions: ['hotel.reservations.view', 'hotel.reservations.create'],
         },
         {
           icon: 'check_in',
           label: 'Check-In / Check-Out',
           link: './front-desk/check-in-check-out',
-          permission: 'manage_checkin',
+          permissions: ['hotel.reservations.checkin', 'hotel.reservations.checkout'],
         },
         {
           icon: 'people',
           label: 'Guests',
           link: './front-desk/guests',
-          permission: 'manage_guests',
+          permissions: ['hotel.guests.view', 'hotel.guests.create'],
         },
       ],
     },
@@ -94,20 +90,14 @@ export class HmsDashboardComponent {
           icon: 'hotel',
           label: 'Rooms',
           link: './rooms-management/rooms',
-          permission: 'manage_rooms',
+          permissions: ['hotel.rooms.view', 'hotel.rooms.create', 'hotel.rooms.edit'],
         },
         {
           icon: 'category',
           label: 'Room Types',
           link: './rooms-management/room-types',
-          permission: 'manage_room_types',
+          permissions: ['hotel.roomtypes.view', 'hotel.roomtypes.create'],
         },
-        // {
-        //   icon: 'cleaning_services',
-        //   label: 'Housekeeping',
-        //   link: './housekeeping',
-        //   permission: 'manage_housekeeping',
-        // },
       ],
     },
     {
@@ -117,19 +107,19 @@ export class HmsDashboardComponent {
           icon: 'assessment',
           label: 'Occupancy Report',
           link: './reports/occupancy',
-          permission: 'view_reports',
+          permissions: ['finance.reports.view'],
         },
         {
           icon: 'monetization_on',
           label: 'Revenue Report',
           link: './reports/revenue',
-          permission: 'view_reports',
+          permissions: ['finance.reports.view', 'finance.transactions.view'],
         },
         {
           icon: 'people_outline',
           label: 'Guest Report',
           link: './reports/guest',
-          permission: 'view_reports',
+          permissions: ['finance.reports.view'],
         },
       ],
     },
@@ -140,17 +130,24 @@ export class HmsDashboardComponent {
           icon: 'settings',
           label: 'Hotel Settings',
           link: './settings/hotel-settings',
-          permission: 'manage_hotel_settings',
+          permissions: ['settings.store.view', 'settings.store.edit', 'settings.staff.view', 'settings.roles.view'],
         },
-        // {
-        //   icon: 'attach_money',
-        //   label: 'Pricing',
-        //   link: './pricing',
-        //   permission: 'manage_pricing',
-        // },
       ],
     },
   ];
+
+  // Computed nav items that filters based on user permissions
+  public navItems = computed(() => {
+    // Filter nav items based on permissions
+    return this.navItemsConfig
+      .map(section => ({
+        ...section,
+        children: section.children.filter(item => 
+          this.rolesService.hasAny(item.permissions)
+        )
+      }))
+      .filter(section => section.children.length > 0);
+  });
 
   public openLink(link: string): void {
     this.router.navigate([link], { relativeTo: this.route });
