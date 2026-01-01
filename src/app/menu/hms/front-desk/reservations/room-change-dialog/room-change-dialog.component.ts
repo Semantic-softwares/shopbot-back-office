@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -7,46 +7,45 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatOptionModule } from '@angular/material/core';
-import { Subscription } from 'rxjs';
+import { MatListModule } from '@angular/material/list';
 import { RoomsService } from '../../../../../shared/services/rooms.service';
-import { ReservationService } from '../../../../../shared/services/reservation.service';
 import { StoreService } from '../../../../../shared/services/store.service';
+import { AuthService } from '../../../../../shared/services/auth.service';
 
 export interface RoomChangeDialogData {
   reservationId: string;
-  currentRooms: any[];
+  currentRooms: any[];           // All rooms in the reservation
+  currentRoomIndex?: number;     // Index of room to change (default 0 for single)
   checkInDate: string;
   checkOutDate: string;
   numberOfNights: number;
   currency: string;
-}
-
-export interface RoomSwapPair {
-  currentRoom: any;
-  replacementRoom: any | null;
-  priceDifference: number;
+  actualCheckInDate?: string;
+  reservationStatus?: string;
 }
 
 export interface RoomChangeResult {
-  mode: 'swap';
+  mode: 'single';
+  currentRoom: any;
+  newRoom: any;
   newRooms: any[];
-  swapPairs: RoomSwapPair[];
   pricingAdjustment: {
     oldTotal: number;
     newTotal: number;
     difference: number;
     requiresPayment: boolean;
     refundAmount?: number;
+    nightsConsumed?: number;
+    nightsRemaining?: number;
   };
   reason: string;
+  effectiveDate?: string;
   suggestedInternalNote: string;
   roomMapping: any[];
+  performedBy: string;  // Merchant ID who performed the room change
 }
 
 @Component({
@@ -61,153 +60,136 @@ export interface RoomChangeResult {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatCardModule,
-    MatCheckboxModule,
     MatDividerModule,
     MatProgressSpinnerModule,
-    MatOptionModule
+    MatListModule,
   ],
   templateUrl: './room-change-dialog.component.html'
 })
-export class RoomChangeDialogComponent implements OnInit, OnDestroy {
+export class RoomChangeDialogComponent implements OnInit {
   private dialogRef = inject(MatDialogRef<RoomChangeDialogComponent>);
   private fb = inject(FormBuilder);
   private roomsService = inject(RoomsService);
-  private reservationService = inject(ReservationService);
   private storeService = inject(StoreService);
+  private authService = inject(AuthService);
   private snackBar = inject(MatSnackBar);
   
   data: RoomChangeDialogData = inject(MAT_DIALOG_DATA);
 
-  private subscriptions = new Subscription();
-
+  // Form
   roomChangeForm: FormGroup = this.fb.group({
+    newRoom: [null, Validators.required],
     reason: ['', [Validators.required, Validators.minLength(10)]]
   });
 
+  // State
   availableRooms = signal<any[]>([]);
   loadingRooms = signal(true);
   submitting = signal(false);
-  formValid = signal(false); // Track form validity as a signal
+  selectedNewRoom = signal<any>(null);
+  formValid = signal(false);
 
-  // Swap pairs for room swapping
-  swapPairs = signal<RoomSwapPair[]>([]);
-  selectedCurrentRooms = signal<any[]>([]);
+  // Effective date for room change
+  effectiveDate = signal<Date>(new Date());
 
-  // Computed values
-  currentTotal = computed(() => {
-    // Always show the full current reservation total
-    const total = this.data.currentRooms.reduce((total, room) => {
-      const roomCost = this.getRoomTotalCost(room);
-      console.log('Current room cost calculation:', {
-        room: room,
-        roomRate: this.getRoomRate(room),
-        nights: this.data.numberOfNights,
-        totalCost: roomCost
-      });
-      return total + roomCost;
-    }, 0);
-    
-    console.log('Current total calculated:', total);
-    return total;
+  // The current room being changed (first room or specified index)
+  currentRoom = computed(() => {
+    const index = this.data.currentRoomIndex ?? 0;
+    return this.data.currentRooms[index] || this.data.currentRooms[0];
   });
 
-  newTotal = computed(() => {
-    // Calculate total with swaps applied
-    const currentRoomTotal = this.currentTotal();
-    
-    // Calculate adjustment from swaps  
-    const swapAdjustment = this.swapPairs().reduce((total, pair) => {
-      return total + pair.priceDifference;
-    }, 0);
-
-    return currentRoomTotal + swapAdjustment;
+  // Current room details for display
+  currentRoomDetails = computed(() => {
+    const room = this.currentRoom();
+    const roomData = room?.room || room;
+    return {
+      roomNumber: roomData?.roomNumber || '—',
+      roomName: roomData?.name || '—',
+      roomTypeName: roomData?.roomType?.name || room?.roomType?.name || 'Standard',
+      rate: this.getRoomRate(room),
+    };
   });
 
+  // Calculate nights consumed (past nights that cannot be changed)
+  nightsConsumed = computed(() => {
+    const checkInDate = new Date(this.data.checkInDate);
+    const effective = this.effectiveDate();
+    
+    if (this.data.reservationStatus !== 'checked_in') {
+      return 0;
+    }
+    
+    const actualCheckIn = this.data.actualCheckInDate 
+      ? new Date(this.data.actualCheckInDate) 
+      : checkInDate;
+    
+    const diffTime = effective.getTime() - actualCheckIn.getTime();
+    return Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+  });
+
+  // Calculate nights remaining
+  nightsRemaining = computed(() => {
+    const checkOutDate = new Date(this.data.checkOutDate);
+    const effective = this.effectiveDate();
+    
+    const diffTime = checkOutDate.getTime() - effective.getTime();
+    return Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+  });
+
+  // Check if mid-stay change
+  isMidStayChange = computed(() => this.nightsConsumed() > 0);
+
+  // Current room total cost
+  currentRoomCost = computed(() => {
+    return this.currentRoomDetails().rate * this.data.numberOfNights;
+  });
+
+  // New room rate
+  newRoomRate = computed(() => {
+    const newRoom = this.selectedNewRoom();
+    if (!newRoom) return 0;
+    return this.getRoomRate(newRoom);
+  });
+
+  // Price difference (based on remaining nights only)
   priceDifference = computed(() => {
-    // Calculate difference from swaps
-    return this.swapPairs().reduce((total, pair) => {
-      return total + pair.priceDifference;
-    }, 0);
+    const newRoom = this.selectedNewRoom();
+    if (!newRoom) return 0;
+    
+    const remaining = this.nightsRemaining();
+    const oldRate = this.currentRoomDetails().rate;
+    const newRate = this.newRoomRate();
+    
+    return (remaining * newRate) - (remaining * oldRate);
   });
 
-  hasValidSelections = computed(() => {
-    return this.swapPairs().some(pair => pair.replacementRoom !== null);
+  // New total
+  newTotal = computed(() => {
+    return this.currentRoomCost() + this.priceDifference();
   });
 
-  // Form is valid when we have valid reason and all swap pairs have replacements
+  // Can submit
   canSubmit = computed(() => {
-    // Use the signal for form validity
-    const formValid = this.formValid();
-    const isSubmitting = this.submitting();
-    const swaps = this.swapPairs();
-    
-    console.log('canSubmit check:', {
-      formValid,
-      isSubmitting,
-      swapPairsCount: swaps.length,
-      swapPairs: swaps,
-      allHaveReplacements: swaps.every(pair => pair.replacementRoom !== null)
-    });
-    
-    if (!formValid || isSubmitting) {
-      return false;
-    }
-    
-    // Must have at least one swap pair
-    if (swaps.length === 0) {
-      return false;
-    }
-    
-    // All pairs must have replacement rooms selected
-    const allPairsComplete = swaps.every(pair => pair.replacementRoom !== null);
-    
-    return allPairsComplete;
+    return this.formValid() && 
+           this.selectedNewRoom() !== null && 
+           !this.submitting();
   });
 
-  // Template helper methods
+  // Helper for template
   Math = Math;
 
-  compareRooms(room1: any, room2: any): boolean {
-    return room1 && room2 && room1._id === room2._id;
-  }
-
-  findOriginalReservationRoom(roomId: string) {
-    return this.data.currentRooms.find(room => room.room._id === roomId);
-  }
-
   ngOnInit() {
-    console.log('Current rooms data structure:', this.data.currentRooms);
     this.loadAvailableRooms();
     
-    // Subscribe to form changes to trigger validation updates
-    this.subscriptions.add(
-      this.roomChangeForm.valueChanges.subscribe(() => {
-        this.formValid.set(this.roomChangeForm.valid);
-        console.log('Form value changed:', {
-          valid: this.roomChangeForm.valid,
-          value: this.roomChangeForm.value
-        });
-      })
-    );
-    
-    // Also subscribe to status changes
-    this.subscriptions.add(
-      this.roomChangeForm.statusChanges.subscribe(() => {
-        this.formValid.set(this.roomChangeForm.valid);
-        console.log('Form status changed:', {
-          valid: this.roomChangeForm.valid,
-          status: this.roomChangeForm.status
-        });
-      })
-    );
-    
-    // Set initial validity
-    this.formValid.set(this.roomChangeForm.valid);
-  }
+    // Listen to form changes
+    this.roomChangeForm.get('newRoom')?.valueChanges.subscribe(room => {
+      this.selectedNewRoom.set(room);
+    });
 
-  ngOnDestroy() {
-    this.subscriptions.unsubscribe();
+    // Track form validity changes
+    this.roomChangeForm.statusChanges.subscribe(() => {
+      this.formValid.set(this.roomChangeForm.valid);
+    });
   }
 
   async loadAvailableRooms() {
@@ -219,7 +201,6 @@ export class RoomChangeDialogComponent implements OnInit, OnDestroy {
         throw new Error('No store selected');
       }
 
-      // Get available rooms for the reservation dates
       const response = await this.roomsService.getAvailableRooms({
         storeId: store._id,
         checkInDate: this.data.checkInDate,
@@ -227,16 +208,11 @@ export class RoomChangeDialogComponent implements OnInit, OnDestroy {
         excludeReservationId: this.data.reservationId
       }).toPromise();
 
-      // Include current rooms in available options
-      const currentRoomsAsAvailable = this.data.currentRooms.map(r => r.room);
-      
-      // Combine and deduplicate (response is now an array directly)
-      const allRooms = [...(response || []), ...currentRoomsAsAvailable];
-      const uniqueRooms = allRooms.filter((room, index, self) => 
-        index === self.findIndex(r => r._id === room._id)
-      );
+      // Filter out the current room
+      const currentRoomId = this.currentRoom()?.room?._id || this.currentRoom()?.room;
+      const filteredRooms = (response || []).filter((room: any) => room._id !== currentRoomId);
 
-      this.availableRooms.set(uniqueRooms);
+      this.availableRooms.set(filteredRooms);
     } catch (error) {
       console.error('Error loading available rooms:', error);
       this.snackBar.open('Failed to load available rooms', 'Close', { duration: 3000 });
@@ -245,210 +221,35 @@ export class RoomChangeDialogComponent implements OnInit, OnDestroy {
     }
   }
 
-  getRoomTotalCost(room: any): number {
-    // Calculate total cost as rate * number of nights (matching reservation details logic)
-    const baseRate = this.getRoomRate(room);
-    return baseRate * this.data.numberOfNights;
-  }
-
   getRoomRate(room: any): number {
-    let rate = 0;
-    let source = '';
-
-    // PRIORITY 1: Check for priceOverride first (handle null values properly)
+    if (!room) return 0;
+    
+    // Check pricing.pricePerNight first (reservation room structure)
+    if (room.pricing?.pricePerNight) {
+      return room.pricing.pricePerNight;
+    }
+    
+    // Check priceOverride
     if (room.priceOverride !== null && room.priceOverride !== undefined && typeof room.priceOverride === 'number') {
-      rate = room.priceOverride;
-      source = 'room.priceOverride';
+      return room.priceOverride;
     }
-    // PRIORITY 2: Handle reservation room structure (like in reservation details)
-    else if (room.rate && typeof room.rate === 'number') {
-      rate = room.rate;
-      source = 'room.rate';
-    }
-    // PRIORITY 3: Handle nested room structure for reservation rooms
-    else if (room.room && typeof room.room === 'object') {
-      // Check for priceOverride first (handle null values)
-      if (room.room.priceOverride !== null && room.room.priceOverride !== undefined && typeof room.room.priceOverride === 'number') {
-        rate = room.room.priceOverride;
-        source = 'room.room.priceOverride';
+    
+    // Check nested room structure
+    if (room.room && typeof room.room === 'object') {
+      if (room.room.priceOverride !== null && room.room.priceOverride !== undefined) {
+        return room.room.priceOverride;
       }
-      // Fall back to room type pricing
-      else if (room.room.roomType?.basePrice) {
-        rate = room.room.roomType.basePrice;
-        source = 'room.room.roomType.basePrice';
-      }
-      else if (room.room.roomType?.baseRate) {
-        rate = room.room.roomType.baseRate;
-        source = 'room.room.roomType.baseRate';
+      if (room.room.roomType?.basePrice) {
+        return room.room.roomType.basePrice;
       }
     }
-    // PRIORITY 4: Handle room type pricing as fallback
-    else if (room.roomType?.basePrice) {
-      rate = room.roomType.basePrice;
-      source = 'room.roomType.basePrice';
-    }
-    else if (room.roomType?.baseRate) {
-      rate = room.roomType.baseRate;
-      source = 'room.roomType.baseRate';
-    }
-
-    console.log('Room rate lookup:', {
-      roomNumber: room.roomNumber || room.room?.roomNumber,
-      roomId: room._id || room.room?._id,
-      rate,
-      source,
-      roomStructure: {
-        hasRate: !!room.rate,
-        priceOverride: room.priceOverride,
-        priceOverrideType: typeof room.priceOverride,
-        priceOverrideIsNull: room.priceOverride === null,
-        hasNestedRoom: !!room.room,
-        nestedPriceOverride: room.room?.priceOverride,
-        nestedPriceOverrideType: typeof room.room?.priceOverride,
-        roomTypeBasePrice: room.roomType?.basePrice || room.room?.roomType?.basePrice
-      }
-    });
     
-    if (rate === 0) {
-      console.warn('No room rate found for room:', room);
+    // Check room type pricing
+    if (room.roomType?.basePrice) {
+      return room.roomType.basePrice;
     }
     
-    return rate;
-  }
-
-  isRoomSelected(roomId: string): boolean {
-    // Room is selected if it's part of any swap pair
-    return this.swapPairs().some(pair => {
-      const pairRoomId = pair.currentRoom.room?._id || pair.currentRoom._id;
-      return pairRoomId === roomId;
-    });
-  }
-
-  isCurrentRoomSelected(roomId: string): boolean {
-    return this.selectedCurrentRooms().some((r: any) => r._id === roomId);
-  }
-
-  toggleCurrentRoomForSwap(room: any, selected: boolean) {
-    console.log('Toggle room swap - Room:', room._id, 'Selected:', selected);
-    
-    const current = this.selectedCurrentRooms();
-    
-    if (selected) {
-      if (!current.some(r => r._id === room._id)) {
-        this.selectedCurrentRooms.set([...current, room]);
-        
-        // Check if swap pair already exists
-        const existingPair = this.swapPairs().find(p => {
-          const pairRoomId = p.currentRoom.room?._id || p.currentRoom._id;
-          return pairRoomId === room._id;
-        });
-        
-        if (!existingPair) {
-          const reservationRoom = this.data.currentRooms.find(r => r.room._id === room._id);
-          const newPair: RoomSwapPair = {
-            currentRoom: reservationRoom || { room: room },
-            replacementRoom: null,
-            priceDifference: 0
-          };
-          this.swapPairs.set([...this.swapPairs(), newPair]);
-          console.log('Created new swap pair for room:', room._id);
-        }
-      }
-    } else {
-      this.selectedCurrentRooms.set(current.filter(r => r._id !== room._id));
-      
-      // Remove swap pair
-      const updatedPairs = this.swapPairs().filter(p => {
-        const pairRoomId = p.currentRoom.room?._id || p.currentRoom._id;
-        return pairRoomId !== room._id;
-      });
-      this.swapPairs.set(updatedPairs);
-      console.log('Removed swap pair for room:', room._id);
-    }
-    
-    // Force change detection by updating form status
-    this.roomChangeForm.updateValueAndValidity();
-  }
-
-  assignReplacementRoom(currentRoomId: string, replacementRoom: any) {
-    console.log('=== ASSIGNING REPLACEMENT ROOM ===');
-    console.log('Current Room ID:', currentRoomId);
-    console.log('Replacement Room Object:', replacementRoom);
-    
-    const pairs = this.swapPairs().map(pair => {
-      const roomId = pair.currentRoom.room?._id || pair.currentRoom._id;
-      if (roomId === currentRoomId) {
-        const oldRate = this.getRoomRate(pair.currentRoom);
-        const newRate = this.getRoomRate(replacementRoom);
-        const oldCost = oldRate * this.data.numberOfNights;
-        const newCost = newRate * this.data.numberOfNights;
-        const difference = newCost - oldCost;
-        
-        console.log('✅ Swap calculation:', {
-          currentRoomId: roomId,
-          oldRate,
-          newRate,
-          difference,
-          nights: this.data.numberOfNights
-        });
-        
-        return {
-          ...pair,
-          replacementRoom,
-          priceDifference: difference
-        };
-      }
-      return pair;
-    });
-    
-    this.swapPairs.set(pairs);
-    
-    // Force change detection
-    this.roomChangeForm.updateValueAndValidity();
-  }
-
-  removeSwapPair(currentRoomId: string) {
-    this.swapPairs.set(this.swapPairs().filter(p => {
-      const roomId = p.currentRoom.room?._id || p.currentRoom._id;
-      return roomId !== currentRoomId;
-    }));
-    this.selectedCurrentRooms.set(this.selectedCurrentRooms().filter((r: any) => r._id !== currentRoomId));
-  }
-
-  getSwapPairForCurrentRoom(roomId: string): RoomSwapPair | undefined {
-    return this.swapPairs().find(pair => pair.currentRoom._id === roomId);
-  }
-
-  isReplacementRoomUsed(roomId: string): boolean {
-    return this.swapPairs().some(pair => pair.replacementRoom?._id === roomId);
-  }
-
-  getAvailableRoomsForSwap(): any[] {
-    // Filter out rooms that are already used as replacements
-    const usedRoomIds = this.swapPairs()
-      .map(pair => pair.replacementRoom?._id)
-      .filter(Boolean);
-    
-    return this.availableRooms().filter(room => !usedRoomIds.includes(room._id));
-  }
-
-  getAvailableRoomsForSpecificSwap(currentRoomId: string): any[] {
-    // Get the current room ID to exclude it from its own replacement options
-    const currentRoom = this.selectedCurrentRooms().find(room => room._id === currentRoomId);
-    
-    // Filter out rooms that are already used as replacements by other pairs
-    const usedRoomIds = this.swapPairs()
-      .filter(pair => {
-        const pairRoomId = pair.currentRoom.room?._id || pair.currentRoom._id;
-        return pairRoomId !== currentRoomId; // Don't count current pair's replacement
-      })
-      .map(pair => pair.replacementRoom?._id)
-      .filter(Boolean);
-    
-    return this.availableRooms().filter(room => 
-      !usedRoomIds.includes(room._id) && // Not used by other pairs
-      room._id !== currentRoomId // Cannot swap room with itself
-    );
+    return 0;
   }
 
   async onSubmit() {
@@ -457,95 +258,88 @@ export class RoomChangeDialogComponent implements OnInit, OnDestroy {
     try {
       this.submitting.set(true);
 
-      // Validate swap pairs - ensure no room is being swapped with itself
-      const invalidSwaps = this.swapPairs().filter(pair => {
-        const currentRoomId = pair.currentRoom.room?._id || pair.currentRoom._id;
-        const replacementRoomId = pair.replacementRoom?._id;
-        return currentRoomId === replacementRoomId;
-      });
+      const currentRoom = this.currentRoom();
+      const newRoom = this.selectedNewRoom();
+      const currentRoomData = currentRoom?.room || currentRoom;
+      const reason = this.roomChangeForm.get('reason')?.value;
+      
+      const nightsConsumed = this.nightsConsumed();
+      const nightsRemaining = this.nightsRemaining();
+      const oldRate = this.currentRoomDetails().rate;
+      const newRate = this.newRoomRate();
+      const roomIndex = this.data.currentRoomIndex ?? 0;
 
-      if (invalidSwaps.length > 0) {
-        this.snackBar.open('Cannot swap a room with itself. Please select different rooms.', 'Close', { duration: 5000 });
-        return;
-      }
-
-      console.log('=== SWAP PAIRS DEBUG ===');
-      console.log('Original swap pairs:', this.swapPairs());
-
-      // Convert swap pairs to newRooms format with enhanced room information
-      const newRooms = this.swapPairs().map(pair => {
-        const currentRoom = pair.currentRoom.room || pair.currentRoom;
-        const replacementRoom = pair.replacementRoom;
-        
+      // Build result for backend - update only the specific room being changed
+      const newRooms = this.data.currentRooms.map((room, index) => {
+        if (index === roomIndex) {
+          // This is the room being changed
+          return {
+            currentRoomId: room._id || currentRoomData._id,
+            room: newRoom._id,
+            roomType: newRoom.roomType?._id || newRoom.roomType,
+            guests: room.guests || { adults: 1, children: 0 },
+            currentRoomDetails: {
+              roomNumber: currentRoomData.roomNumber,
+              name: currentRoomData.name,
+              rate: oldRate
+            },
+            newRoomDetails: {
+              roomNumber: newRoom.roomNumber,
+              name: newRoom.name,
+              rate: newRate,
+              priceOverride: newRoom.priceOverride
+            },
+            priceDifference: this.priceDifference(),
+            fromRate: oldRate,
+            toRate: newRate,
+          };
+        }
+        // Keep other rooms as-is
         return {
-          currentRoomId: pair.currentRoom._id || currentRoom._id,
-          room: replacementRoom._id,
-          guests: pair.currentRoom.guests || { adults: 1, children: 0 },
-          // Enhanced room information for backend
-          currentRoomDetails: {
-            roomNumber: currentRoom.roomNumber,
-            name: currentRoom.name,
-            rate: this.getRoomRate(pair.currentRoom)
-          },
-          newRoomDetails: {
-            roomNumber: replacementRoom.roomNumber,
-            name: replacementRoom.name,
-            rate: this.getRoomRate(replacementRoom),
-            priceOverride: replacementRoom.priceOverride
-          },
-          priceDifference: pair.priceDifference
+          room: room.room?._id || room.room,
+          roomType: room.roomType?._id || room.roomType,
+          guests: room.guests || { adults: 1, children: 0 },
         };
       });
 
-      console.log('New rooms array for swap mode:', newRooms);
+      const nightsInfo = nightsConsumed > 0 
+        ? ` (${nightsConsumed} night(s) consumed, ${nightsRemaining} night(s) remaining)` 
+        : '';
+      const detailedNote = `Room changed from ${currentRoomData.roomNumber} to ${newRoom.roomNumber}${nightsInfo}. Reason: ${reason}`;
 
-      // Generate detailed internal note for backend
-      const swapSummary = this.swapPairs().map(pair => {
-        const currentRoom = pair.currentRoom.room || pair.currentRoom;
-        const replacementRoom = pair.replacementRoom;
-        const currency = this.data.currency;
-        
-        return `Room ${currentRoom.roomNumber} (${currentRoom.name}) → Room ${replacementRoom.roomNumber} (${replacementRoom.name}). ` +
-               `Price difference: ${currency}${pair.priceDifference.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      }).join('; ');
-      
-      const detailedNote = `Room swap completed. ${swapSummary}. Reason: ${this.roomChangeForm.get('reason')?.value}`;
-      
-      console.log('Generated internal note:', detailedNote);
-      console.log('Swap summary details:', swapSummary);
-
-      // Swap mode result - use same structure as bulk mode with enhanced details
       const result: RoomChangeResult = {
-        mode: 'swap',
-        newRooms: newRooms, // Backend expects this property name
-        swapPairs: this.swapPairs(), // Keep for additional context
+        mode: 'single',
+        currentRoom: currentRoom,
+        newRoom: newRoom,
+        newRooms: newRooms,
         pricingAdjustment: {
-          oldTotal: this.currentTotal(),
+          oldTotal: this.currentRoomCost(),
           newTotal: this.newTotal(),
           difference: this.priceDifference(),
           requiresPayment: this.priceDifference() > 0,
-          refundAmount: this.priceDifference() < 0 ? Math.abs(this.priceDifference()) : undefined
+          refundAmount: this.priceDifference() < 0 ? Math.abs(this.priceDifference()) : undefined,
+          nightsConsumed,
+          nightsRemaining,
         },
-        reason: this.roomChangeForm.get('reason')?.value,
-        // Enhanced internal note suggestion
+        reason: reason,
+        effectiveDate: this.effectiveDate().toISOString(),
         suggestedInternalNote: detailedNote,
-        // Room mapping for backend to easily create proper notes
-        roomMapping: this.swapPairs().map(pair => {
-          const currentRoom = pair.currentRoom.room || pair.currentRoom;
-          const replacementRoom = pair.replacementRoom;
-          return {
-            fromRoomId: pair.currentRoom._id || currentRoom._id,
-            fromRoomNumber: currentRoom.roomNumber,
-            fromRoomName: currentRoom.name,
-            toRoomId: replacementRoom._id,
-            toRoomNumber: replacementRoom.roomNumber,
-            toRoomName: replacementRoom.name,
-            priceDifference: pair.priceDifference
-          };
-        })
+        performedBy: this.authService.currentUserValue?._id || '',
+        roomMapping: [{
+          // Use the actual room document ID (currentRoomData._id), also include reservation entry ID for matching
+          fromRoomId: currentRoomData._id,
+          fromReservationRoomId: currentRoom._id,  // The reservation.rooms array entry ID
+          fromRoomNumber: currentRoomData.roomNumber,
+          fromRoomName: currentRoomData.name,
+          fromRate: oldRate,
+          toRoomId: newRoom._id,
+          toRoomNumber: newRoom.roomNumber,
+          toRoomName: newRoom.name,
+          toRate: newRate,
+          toRoomType: newRoom.roomType?._id || newRoom.roomType,
+          priceDifference: this.priceDifference()
+        }]
       };
-
-      console.log('Final swap mode payload:', result);
 
       this.dialogRef.close(result);
     } catch (error) {

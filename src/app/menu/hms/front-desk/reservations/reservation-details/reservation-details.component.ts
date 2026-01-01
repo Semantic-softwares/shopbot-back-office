@@ -1521,9 +1521,8 @@ export class ReservationDetailsComponent implements OnInit {
     }
 
     const dialogRef = this.dialog.open(RoomChangeDialogComponent, {
-      width: '1000px',
+      width: '500px',
       maxWidth: '95vw',
-      maxHeight: '90vh',
       disableClose: true,
       data: {
         reservationId: reservation._id,
@@ -1531,7 +1530,12 @@ export class ReservationDetailsComponent implements OnInit {
         checkInDate: new Date(reservation.checkInDate).toISOString(),
         checkOutDate: new Date(reservation.checkOutDate).toISOString(),
         numberOfNights: reservation.numberOfNights,
-        currency: this.storeStore.selectedStore()?.currency || 'USD'
+        currency: this.storeStore.selectedStore()?.currency || 'USD',
+        // Include actual check-in date and status for mid-stay pricing calculations
+        actualCheckInDate: reservation.actualCheckInDate 
+          ? new Date(reservation.actualCheckInDate).toISOString() 
+          : undefined,
+        reservationStatus: reservation.status
       } as RoomChangeDialogData
     });
 
@@ -1584,7 +1588,8 @@ export class ReservationDetailsComponent implements OnInit {
       }
     } catch (error: any) {
       console.error('Error processing room change:', error);
-      this.snackBar.open('Failed to change rooms', 'Close', { duration: 3000 });
+      const errorMessage = error?.error?.error || error?.error?.message || error?.message || 'Failed to change rooms';
+      this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
     } finally {
       this.loading.set(false);
     }

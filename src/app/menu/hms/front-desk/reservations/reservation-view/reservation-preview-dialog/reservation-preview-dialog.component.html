@@ -75,6 +75,12 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="gap-2">
+  @if (canChangeRooms()) {
+    <button matButton="tonal" (click)="openRoomChangeDialog()">
+      <mat-icon>swap_horiz</mat-icon>
+      Change Room
+    </button>
+  }
   <a matButton="outlined" [routerLink]="['/menu', 'hms', 'front-desk', 'reservations', 'edit', reservation()._id]" (click)="close()">View</a>
   <button matButton="outlined" (click)="close()">Close</button>
 </mat-dialog-actions>

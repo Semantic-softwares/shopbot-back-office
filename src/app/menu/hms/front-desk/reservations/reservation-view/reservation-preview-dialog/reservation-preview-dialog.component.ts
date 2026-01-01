@@ -3,12 +3,15 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef, MatDialog } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatListModule } from '@angular/material/list';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { GuestService } from '../../../../../../shared/services/guest.service';
+import { ReservationService } from '../../../../../../shared/services/reservation.service';
 import { StoreStore } from '../../../../../../shared/stores/store.store';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { RoomChangeDialogComponent, RoomChangeDialogData, RoomChangeResult } from '../../room-change-dialog/room-change-dialog.component';
 
 interface ReservationPreviewData {
   reservation: any;
@@ -24,7 +27,10 @@ interface ReservationPreviewData {
 export class ReservationPreviewDialogComponent {
   private dialogRef = inject(MatDialogRef<ReservationPreviewDialogComponent>);
   public data = inject<ReservationPreviewData>(MAT_DIALOG_DATA);
+  private dialog = inject(MatDialog);
   private guestService = inject(GuestService);
+  private reservationService = inject(ReservationService);
+  private snackBar = inject(MatSnackBar);
   public storeStore = inject(StoreStore);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -143,6 +149,56 @@ export class ReservationPreviewDialogComponent {
   public paymentMethod = computed(() => {
     return this.reservation()?.paymentInfo?.method || '—';
   });
+
+  /** Check if room change is allowed based on status */
+  public canChangeRooms = computed(() => {
+    const status = this.reservation()?.status;
+    return status && !['checked_out', 'cancelled', 'no_show'].includes(status);
+  });
+
+  /** Open room change dialog */
+  openRoomChangeDialog() {
+    const reservation = this.reservation();
+    
+    if (!reservation || !this.canChangeRooms()) {
+      this.snackBar.open('Cannot change rooms for this reservation', 'Close', { duration: 3000 });
+      return;
+    }
+
+    const changeDialogRef = this.dialog.open(RoomChangeDialogComponent, {
+      width: '500px',
+      maxWidth: '95vw',
+      disableClose: true,
+      data: {
+        reservationId: reservation._id,
+        currentRooms: reservation.rooms,
+        checkInDate: new Date(reservation.checkInDate).toISOString(),
+        checkOutDate: new Date(reservation.checkOutDate).toISOString(),
+        numberOfNights: reservation.numberOfNights,
+        currency: this.storeStore.selectedStore()?.currency || 'USD',
+        actualCheckInDate: reservation.actualCheckInDate 
+          ? new Date(reservation.actualCheckInDate).toISOString() 
+          : undefined,
+        reservationStatus: reservation.status
+      } as RoomChangeDialogData
+    });
+
+    changeDialogRef.afterClosed().subscribe(async (result: RoomChangeResult) => {
+      if (result) {
+        try {
+          const response = await this.reservationService.changeRooms(reservation._id, result).toPromise();
+          if (response?.success) {
+            this.snackBar.open('Room changed successfully', 'Close', { duration: 3000 });
+            this.reservation.set(response.data);
+          }
+        } catch (error: any) {
+          console.error('Error changing rooms:', error);
+          const errorMessage = error?.error?.error || error?.error?.message || error?.message || 'Failed to change rooms';
+          this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+        }
+      }
+    });
+  }
 
   close() {
     this.dialogRef.close();

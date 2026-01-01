@@ -56,6 +56,7 @@
                             <mat-form-field class="w-full" appearance="outline">
                                 <mat-label>Room</mat-label>
                                 <mat-select formControlName="room" class="text-xs"
+                                    
                                     (selectionChange)="onRoomChange(i, $event.value)">
                                     <mat-option value="">-- Select Room --</mat-option>
                                     @for (r of filterRoomsByType(getRoomsFormArray()?.at(i)?.get('roomType')?.value, i);
@@ -142,8 +143,14 @@
                             </mat-form-field>
                         </div>
 
-                        <!-- Delete Action -->
-                        <div class="flex justify-center">
+                        <!-- Actions: Change Room & Delete -->
+                        <div class="flex justify-center gap-2">
+                            @if (isEditMode()) {
+                            <button type="button" mat-icon-button color="primary" (click)="onChangeRoom(i)"
+                                matTooltip="Change room" class="h-8 w-8">
+                                <mat-icon class="text-sm">swap_horiz</mat-icon>
+                            </button>
+                            }
                             <button type="button" mat-icon-button color="warn" (click)="removeRoom(i)"
                                 matTooltip="Remove room" class="h-8 w-8">
                                 <mat-icon class="text-sm">delete</mat-icon>

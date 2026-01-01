@@ -6,20 +6,25 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideHttpClient, withFetch, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
 import { authInterceptor } from './shared/interceptors/auth.interceptor';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { MAT_ICON_DEFAULT_OPTIONS } from '@angular/material/icon';
+import { progressInterceptor } from 'ngx-progressbar/http';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes, withHashLocation(), withInMemoryScrolling({
-        scrollPositionRestoration: 'enabled', // scrolls to top on route change
-        anchorScrolling: 'enabled', // allows scrolling to element IDs (#section)
-      })),
+    provideRouter(routes, withHashLocation()),
     provideAnimationsAsync(), 
     provideNativeDateAdapter(),
+    {
+      provide: MAT_ICON_DEFAULT_OPTIONS,
+      useValue: {
+        fontSet: 'material-symbols-outlined',
+      },
+    },
     provideHttpClient(
       withFetch(),
       withInterceptorsFromDi(),
-      withInterceptors([authInterceptor])
+      withInterceptors([authInterceptor, progressInterceptor])
     ), provideCharts(withDefaultRegisterables()), provideCharts(withDefaultRegisterables())
   ],
 };

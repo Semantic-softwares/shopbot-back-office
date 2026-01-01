@@ -34,10 +34,8 @@ import { RoomsService } from '../../../../../shared/services/rooms.service';
 import { GuestService } from '../../../../../shared/services/guest.service';
 import { AuthService } from '../../../../../shared/services/auth.service';
 import {
-  CreateReservationDto,
   UpdateReservationDto,
   Reservation,
-  PaymentMethod,
   Guest,
 } from '../../../../../shared/models/reservation.model';
 import { AvailableRoom } from '../../../../../shared/models/room.model';
@@ -64,6 +62,9 @@ import {
   ValidationErrorsDialogData,
 } from '../../../../../shared/components/validation-errors-dialog/validation-errors-dialog.component';
 import { PinAuthorizationDialogComponent, PinAuthorizationDialogData, PinAuthorizationDialogResult } from '../pin-authorization-dialog/pin-authorization-dialog.component';
+import { RoomChangeDialogComponent, RoomChangeDialogData, RoomChangeResult } from '../room-change-dialog/room-change-dialog.component';
+import { RoomChangeHistoryComponent } from '../room-change-history/room-change-history.component';
+import { ReservationTransactionsComponent } from '../reservation-transactions/reservation-transactions.component';
 
 @Component({
   selector: 'app-reservation-form',
@@ -86,6 +87,8 @@ import { PinAuthorizationDialogComponent, PinAuthorizationDialogData, PinAuthori
     RoomDetailsComponent,
     PaymentInfo,
     SpecialRequestsComponent,
+    RoomChangeHistoryComponent,
+    ReservationTransactionsComponent,
   ],
   templateUrl: './reservation-form.component.html',
   styleUrls: ['./reservation-form.component.scss'],
@@ -99,7 +102,7 @@ export class ReservationFormComponent implements OnDestroy {
   private roomsService = inject(RoomsService);
   private guestService = inject(GuestService);
   private authService = inject(AuthService);
-  private storeStore = inject(StoreStore);
+  public storeStore = inject(StoreStore);
   private snackBar = inject(MatSnackBar);
   private cdr = inject(ChangeDetectorRef);
   private dialog = inject(MatDialog);
@@ -251,7 +254,7 @@ export class ReservationFormComponent implements OnDestroy {
       discounts: [0, [Validators.min(0)]],
       total: [0, [Validators.required, Validators.min(0)]],
       paid: [0, [Validators.min(0)]],
-      balance: [0, [Validators.min(0)]],
+      balance: [0],
     }),
 
     // Special requests and notes
@@ -1021,6 +1024,60 @@ export class ReservationFormComponent implements OnDestroy {
     } finally {
       this.statusUpdating.set(false);
     }
+  }
+
+  /** Check if room change is allowed based on status */
+  canChangeRooms(): boolean {
+    const reservation = this.reservation.value();
+    if (!reservation) return false;
+    const status = reservation.status;
+    return status && !['checked_out', 'cancelled', 'no_show'].includes(status);
+  }
+
+  /** Open room change dialog */
+  async openRoomChangeDialog(roomIndex?: number) {
+    const reservationData = this.reservation.value();
+    
+    if (!reservationData || !this.canChangeRooms()) {
+      this.snackBar.open('Cannot change rooms for this reservation', 'Close', { duration: 3000 });
+      return;
+    }
+
+    const dialogRef = this.dialog.open(RoomChangeDialogComponent, {
+      width: '500px',
+      maxWidth: '95vw',
+      disableClose: true,
+      data: {
+        reservationId: reservationData._id,
+        currentRooms: reservationData.rooms,
+        currentRoomIndex: roomIndex, // Pass the room index if provided
+        checkInDate: new Date(reservationData.checkInDate).toISOString(),
+        checkOutDate: new Date(reservationData.checkOutDate).toISOString(),
+        numberOfNights: reservationData.numberOfNights,
+        currency: this.storeStore.selectedStore()?.currency || 'USD',
+        actualCheckInDate: reservationData.actualCheckInDate 
+          ? new Date(reservationData.actualCheckInDate).toISOString() 
+          : undefined,
+        reservationStatus: reservationData.status
+      } as RoomChangeDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: RoomChangeResult) => {
+      if (result) {
+        try {
+          const response = await this.reservationService.changeRooms(reservationData._id, result).toPromise();
+          if (response?.success) {
+            this.snackBar.open('Room changed successfully', 'Close', { duration: 3000 });
+            // Reload the reservation data
+            this.reservation.reload();
+          }
+        } catch (error: any) {
+          console.error('Error changing rooms:', error);
+          const errorMessage = error?.error?.error || error?.error?.message || error?.message || 'Failed to change rooms';
+          this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+        }
+      }
+    });
   }
 
   onCancel() {

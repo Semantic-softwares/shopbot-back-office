@@ -1,0 +1,12 @@
+.root-progress-bar {
+  --ng-progress-thickness: 3;
+  ::ng-deep {
+    .ng-bar-placeholder {
+      background-color: lightgray;
+    }
+    .ng-bar {
+      background: #0000ef;
+    //   background: linear-gradient(to right, #0000ef, #00F260);
+    }
+  }
+}

@@ -27,6 +27,7 @@ import { CheckInConfirmationDialogComponent, CheckInDialogData } from '../../che
 import { PaymentUpdateDialogComponent, PaymentUpdateDialogData } from '../../payment-update-dialog/payment-update-dialog.component';
 import { PinAuthorizationDialogComponent, PinAuthorizationDialogData, PinAuthorizationDialogResult } from '../../pin-authorization-dialog/pin-authorization-dialog.component';
 import { QuickReservationModalComponent, QuickReservationData } from '../../quick-reservation-modal/quick-reservation-modal.component';
+import { RoomChangeDialogComponent, RoomChangeDialogData, RoomChangeResult } from '../../room-change-dialog/room-change-dialog.component';
 import { GetGuestNamePipe } from "../../../../../../shared/pipes/get-guest-name.pipe";
 import { rxResource } from '@angular/core/rxjs-interop';
 
@@ -370,6 +371,54 @@ export class ReservationsListComponent {
            reservation.status !== 'no_show' &&
            reservation.status !== 'checked_in' &&
            !reservation.actualCheckInDate;
+  }
+
+  canChangeRooms(reservation: Reservation): boolean {
+    return reservation.status !== 'cancelled' && 
+           reservation.status !== 'checked_out' && 
+           reservation.status !== 'no_show';
+  }
+
+  /** Open room change dialog */
+  async openRoomChangeDialog(reservation: Reservation) {
+    if (!this.canChangeRooms(reservation)) {
+      this.snackBar.open('Cannot change rooms for this reservation', 'Close', { duration: 3000 });
+      return;
+    }
+
+    const dialogRef = this.dialog.open(RoomChangeDialogComponent, {
+      width: '500px',
+      maxWidth: '95vw',
+      disableClose: true,
+      data: {
+        reservationId: reservation._id,
+        currentRooms: reservation.rooms,
+        checkInDate: new Date(reservation.checkInDate).toISOString(),
+        checkOutDate: new Date(reservation.checkOutDate).toISOString(),
+        numberOfNights: reservation.numberOfNights,
+        currency: this.storeStore.selectedStore()?.currency || 'USD',
+        actualCheckInDate: reservation.actualCheckInDate 
+          ? new Date(reservation.actualCheckInDate).toISOString() 
+          : undefined,
+        reservationStatus: reservation.status
+      } as RoomChangeDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: RoomChangeResult) => {
+      if (result) {
+        try {
+          const response = await this.reservationService.changeRooms(reservation._id, result).toPromise();
+          if (response?.success) {
+            this.snackBar.open('Room changed successfully', 'Close', { duration: 3000 });
+            this.reloadData();
+          }
+        } catch (error: any) {
+          console.error('Error changing rooms:', error);
+          const errorMessage = error?.error?.error || error?.error?.message || error?.message || 'Failed to change rooms';
+          this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+        }
+      }
+    });
   }
 
   canDelete(reservation: Reservation): boolean {

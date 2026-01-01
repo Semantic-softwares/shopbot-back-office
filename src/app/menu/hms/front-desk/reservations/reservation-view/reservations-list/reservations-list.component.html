@@ -222,6 +222,12 @@
             <span>Edit</span>
           </button>
           }
+          @if (canChangeRooms(reservation)) {
+          <button mat-menu-item (click)="openRoomChangeDialog(reservation)">
+            <mat-icon>swap_horiz</mat-icon>
+            <span>Change Room</span>
+          </button>
+          }
           @if (canDelete(reservation)) {
           <mat-divider></mat-divider>
           <button mat-menu-item (click)="deleteReservation(reservation)">

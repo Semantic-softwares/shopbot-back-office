@@ -7,6 +7,7 @@ import {
   inject,
   OnInit,
   ResourceRef,
+  effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -28,7 +29,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
-import { MatDateRangeSelectionStrategy } from '@angular/material/datepicker';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatListModule } from '@angular/material/list';
 import { RoomsService } from '../../../../../../../shared/services/rooms.service';
@@ -89,9 +89,13 @@ export class RoomDetailsComponent {
   public selectedRoomIds = input<string[]>([]);
   public reservation = input<Reservation | null>(null);
   roomAssigned = output<any>();
+  roomChangeRequested = output<number>();
   assigningRoomId = signal<string | null>(null);
   filteredRooms = signal<Room[]>([]);
   assignedGuests = signal<Map<string, any>>(new Map()); // Store guest objects by ID
+
+  // Computed signal to check if we're in edit mode
+  public isEditMode = computed(() => !!this.reservation());
 
   /**
    * Load all room types
@@ -118,6 +122,19 @@ export class RoomDetailsComponent {
       return this.roomsService.getRooms(params.store!);
     },
   });
+
+  // Effect to reload room data when reservation changes
+  constructor() {
+    effect(() => {
+      // Trigger when reservation input changes
+      if (this.reservation()) {
+        // Reload all room-related resources
+        this.rooms.reload();
+        this.roomTypes.reload();
+        this.selectedRooms.reload();
+      }
+    });
+  }
 
   public isRoomsReadyForAssignment = computed(() => {
     if (this.selectedRoomIds()) {
@@ -216,9 +233,9 @@ export class RoomDetailsComponent {
           }
 
           roomForm = this.fb.group({
-            room: [room.room._id || room.room, [Validators.required]],
+            room: [{value:room.room._id || room.room, disabled: this.isEditMode()}, [Validators.required]],
             roomNumber: [room.room?.roomNumber || '', []],
-            roomType: [room?.roomType || room?.room?.roomType?._id, []],
+            roomType: [{value: room?.roomType || room?.room?.roomType?._id, disabled: this.isEditMode()}, []],
             assignedGuest: [assignedGuestId, [Validators.required]],
             status: [room.status || 'reserved', [Validators.required]],
             assignedGuestName: [assignedGuestName, [Validators.required]],
@@ -317,8 +334,8 @@ export class RoomDetailsComponent {
     return this.fb.group({
       room: [roomData?.room || room._id || '', [Validators.required]], // Room ID
       roomNumber: [roomData?.roomNumber || room.roomNumber || ''], // Store room number for display
-      assignedGuest: [roomData?.assignedGuest || ''], // Guest ID (required for group)
-      assignedGuestName: [roomData?.assignedGuestName || ''], // Guest display name (for display only)
+      assignedGuest: [roomData?.assignedGuest || '', Validators.required], // Guest ID (required for group)
+      assignedGuestName: [roomData?.assignedGuestName || '', Validators.required], // Guest display name (for display only)
       roomType: [
         roomData?.roomType ||
           (typeof room.roomType === 'string'
@@ -429,6 +446,13 @@ export class RoomDetailsComponent {
     if (roomsArray) {
       roomsArray.removeAt(index);
     }
+  }
+
+  /**
+   * Emit room change request with room index
+   */
+  onChangeRoom(index: number) {
+    this.roomChangeRequested.emit(index);
   }
 
   /**

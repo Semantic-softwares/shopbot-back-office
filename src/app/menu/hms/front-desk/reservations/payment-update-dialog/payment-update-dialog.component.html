@@ -70,11 +70,25 @@
                 @if (data.isCheckoutFlow) {
                 <!-- Amount-based form for checkout flow -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Payment Amount -->
+                    <!-- Transaction Type: Payment or Refund -->
+                    <mat-form-field appearance="outline" class="w-full" *ngIf="balanceAmount() < 0">
+                        <mat-label>Transaction Type</mat-label>
+                        <mat-select formControlName="type">
+                            <mat-option value="refund">Refund</mat-option>
+                            <mat-option value="payment">Payment</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Payment/Refund Amount -->
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Payment Amount</mat-label>
+                        <mat-label>{{ paymentForm.get('type')?.value === 'refund' ? 'Refund Amount' : 'Payment Amount' }}</mat-label>
                         <span matPrefix>{{ storeStore.selectedStore()?.currency }}&nbsp;</span>
-                        <input matInput type="number" step="0.01" min="0" [max]="balanceAmount()"
+                        <input matInput 
+                            currencyMask
+                            [options]="{ prefix: storeStore.selectedStore()?.currency }"
+                            step="0.01"
+                            [min]="paymentForm.get('type')?.value === 'refund' ? 0.01 : 0.01"
+                            [max]="paymentForm.get('type')?.value === 'refund' ? absBalanceAmount() : balanceAmount()"
                             formControlName="amount" placeholder="0.00">
                         @if (paymentForm.get('amount')?.hasError('required')) {
                         <mat-error>Amount is required</mat-error>
@@ -83,13 +97,15 @@
                         <mat-error>Amount must be greater than 0</mat-error>
                         }
                         @if (paymentForm.get('amount')?.hasError('max')) {
-                        <mat-error>Amount cannot exceed balance due</mat-error>
+                        <mat-error>
+                            Amount cannot exceed {{ paymentForm.get('type')?.value === 'refund' ? 'refund due' : 'balance due' }}
+                        </mat-error>
                         }
                     </mat-form-field>
 
-                    <!-- Payment Method -->
+                    <!-- Payment/Refund Method -->
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Payment Method</mat-label>
+                        <mat-label>{{ paymentForm.get('type')?.value === 'refund' ? 'Refund Method' : 'Payment Method' }}</mat-label>
                         <mat-select formControlName="method">
                             <mat-option value="cash">Cash</mat-option>
                             <mat-option value="card">Credit/Debit Card</mat-option>
@@ -97,9 +113,10 @@
                             <mat-option value="mobile_money">Mobile Money</mat-option>
                             <mat-option value="check">Check</mat-option>
                             <mat-option value="online">Online Payment</mat-option>
+                            <mat-option value="refund">Refund</mat-option>
                         </mat-select>
                         @if (paymentForm.get('method')?.hasError('required')) {
-                        <mat-error>Payment method is required</mat-error>
+                        <mat-error>{{ paymentForm.get('type')?.value === 'refund' ? 'Refund method' : 'Payment method' }} is required</mat-error>
                         }
                     </mat-form-field>
                 </div>
@@ -118,7 +135,7 @@
                 </mat-form-field>
 
                 <!-- Quick Amount Buttons -->
-                <div>
+                <div *ngIf="paymentForm.get('type')?.value !== 'refund'">
                     <h4 class="text-sm font-medium mb-2">Quick Amounts</h4>
                     <div class="flex flex-wrap gap-2">
                         <button type="button" mat-stroked-button (click)="setAmount(balanceAmount())">

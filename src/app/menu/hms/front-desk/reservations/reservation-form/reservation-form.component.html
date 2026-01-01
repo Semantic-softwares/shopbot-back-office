@@ -56,7 +56,13 @@
         <mat-icon>payment</mat-icon>
         Payment
       </a>
-    
+
+      @if (canChangeRooms() && isSingleBooking()) {
+      <button matButton="tonal" (click)="openRoomChangeDialog()" [disabled]="statusUpdating() || isSubmitted()">
+        <mat-icon>swap_horiz</mat-icon>
+        Change Room
+      </button>
+      }
 
       @if (reservation.value()?.status === ReservationStatus.PENDING || reservation.value()?.status ===
       ReservationStatus.RESERVED) {
@@ -168,12 +174,28 @@
       <!-- Row 2: Room Details Component - Only for Group Reservation -->
       <!-- <pre>{{reservation.value() | json}}</pre> -->
       <app-room-details class="lg:col-span-4" [reservation]="reservation.value()"
-        [selectedRoomIds]="selectedRoomIds()" />
+        [selectedRoomIds]="selectedRoomIds()" 
+        (roomChangeRequested)="openRoomChangeDialog($event)" />
       }
 
       <!-- Row 3: Special Requests & Notes - Full Width -->
       <app-special-requests class="lg:col-span-4" [reservationForm]="reservationForm" />
-      <!-- <pre>{{reservationForm.value | json}}</pre> -->
+
+      <!-- Row 4: Room Change History - Only shown in edit mode when there are room changes -->
+      @if (isEditing() && (reservation.value()?.roomChanges?.length ?? 0) > 0) {
+        <app-room-change-history 
+          class="lg:col-span-4" 
+          [reservation]="reservation.value()!"
+           />
+      }
+
+      <!-- Row 5: Payment Transactions - Only shown in edit mode -->
+      @if (isEditing()) {
+        <app-reservation-transactions 
+          class="lg:col-span-4" 
+          [reservation]="reservation.value()!"
+        />
+      }
     </div>
   </form>
 </div>

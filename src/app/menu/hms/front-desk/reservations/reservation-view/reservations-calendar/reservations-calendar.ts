@@ -84,6 +84,9 @@ export class ReservationsCalendar implements OnInit {
   public viewMode = signal<'weekly' | 'monthly'>('monthly');
   private startDate = signal<Date>(new Date());
   public selectedStatus = signal<ReservationStatus | 'all'>('all');
+  public excludedStatuses = signal<Set<ReservationStatus>>(
+    new Set(['checked_out', 'cancelled', 'no_show'])
+  );
   
   // Drag selection signal for click-and-drag room booking
   public dragSelection = signal<DragSelection>({
@@ -190,6 +193,17 @@ export class ReservationsCalendar implements OnInit {
     const reservationsList = Array.isArray(reservationsData)
       ? reservationsData
       : reservationsData?.reservations || [];
+    const excluded = this.excludedStatuses();
+
+    // Filter out reservations that are in excluded statuses
+    const filteredReservations = reservationsList.filter((r: any) => {
+      // If a specific status is selected (not 'all'), only include that status
+      if (this.selectedStatus() !== 'all') {
+        return r.status === this.selectedStatus();
+      }
+      // Otherwise, exclude the statuses in the excludedStatuses set
+      return !excluded.has(r.status);
+    });
 
     // Map typeId -> typeName from API
     const typesById = new Map<string, string>();
@@ -232,7 +246,7 @@ export class ReservationsCalendar implements OnInit {
       for (const room of group.rooms) {
         // Build per-room stays using the room's own assignment dates (stayPeriod.from/to)
         const stays: RoomStay[] = [];
-        for (const r of reservationsList as any[]) {
+        for (const r of filteredReservations as any[]) {
           if (!r?.rooms) continue;
           const matchingAssignments = r.rooms.filter((rr: any) => rr?.room?._id === room._id);
           if (!matchingAssignments?.length) continue;
@@ -377,6 +391,41 @@ export class ReservationsCalendar implements OnInit {
     const compareDate = new Date(date.date);
     compareDate.setHours(0, 0, 0, 0);
     return compareDate.getTime() === checkIn.getTime();
+  }
+
+  /**
+   * Check if the reservation block should render starting from this date.
+   * Returns true if:
+   * - Reservation starts on this date, OR
+   * - Reservation spans across this date AND this is the first visible date in the current range
+   * This ensures multi-day reservations spanning month/week boundaries display correctly.
+   */
+  shouldRenderReservationFromDate(reservation: any, date: DateRange): boolean {
+    const checkIn = new Date(reservation.checkInDate);
+    const checkOut = new Date(reservation.checkOutDate);
+    checkIn.setHours(0, 0, 0, 0);
+    checkOut.setHours(0, 0, 0, 0);
+    const compareDate = new Date(date.date);
+    compareDate.setHours(0, 0, 0, 0);
+
+    // Case 1: Reservation starts on this date
+    if (compareDate.getTime() === checkIn.getTime()) {
+      return true;
+    }
+
+    // Case 2: Reservation spans this date AND this is the first visible date
+    // (means the reservation started before the current view)
+    const dates = this.dateRange();
+    if (Array.isArray(dates) && dates.length > 0) {
+      const firstVisible = new Date(dates[0].date);
+      firstVisible.setHours(0, 0, 0, 0);
+      // If this date is the first visible date AND the reservation spans it (started before and ends after/on it)
+      if (compareDate.getTime() === firstVisible.getTime() && compareDate >= checkIn && compareDate < checkOut) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**

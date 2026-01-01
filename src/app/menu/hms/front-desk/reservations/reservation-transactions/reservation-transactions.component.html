@@ -1,0 +1,103 @@
+<mat-card appearance="outlined" class="mb-20">
+  <!-- Header -->
+  <mat-card-header>
+    <mat-card-title>
+      Payment Transactions
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content class="p-0!">
+    <!-- Loading State -->
+    @if (isLoading()) {
+    <div class="flex justify-center items-center py-8">
+      <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+      <span class="ml-3 text-gray-600">Loading transactions...</span>
+    </div>
+  } @else if (error()) {
+    <!-- Error State -->
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <div class="flex items-start">
+        <mat-icon class="text-red-500 mr-3 mt-1">error</mat-icon>
+        <div>
+          <h4 class="text-red-800 font-medium">Failed to load transactions</h4>
+          <p class="text-red-700 text-sm mt-1">{{ error()?.message || 'An error occurred while loading transactions.' }}</p>
+        </div>
+      </div>
+    </div>
+  } @else if (transactions().length === 0) {
+    <!-- Empty State -->
+    <app-no-record 
+      icon="payment" 
+      title="No Transactions" 
+      message="No payment transactions recorded for this reservation yet."
+    />
+  } @else {
+    <!-- Transactions Table -->
+   
+      <table mat-table [dataSource]="transactions()" class="w-full">
+        <!-- Date Column -->
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.createdAt | date:'medium' }}
+          </td>
+        </ng-container>
+
+        <!-- Amount Column -->
+        <ng-container matColumnDef="amount">
+          <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
+          <td mat-cell *matCellDef="let element" class="text-right font-semibold">
+            {{ element.amount | currency: getCurrencyFormat() }}
+          </td>
+        </ng-container>
+
+        <!-- Type Column -->
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let element">
+            <span class="px-2 py-1 rounded text-xs font-semibold" [ngClass]="getTransactionTypeClass(element.type)">
+              {{ element.type | titlecase }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Method Column -->
+        <ng-container matColumnDef="method">
+          <th mat-header-cell *matHeaderCellDef>Method</th>
+          <td mat-cell *matCellDef="let element">
+            <span class="px-2 py-1 rounded text-xs font-semibold bg-blue-100 text-blue-800">
+              {{ element.method | titlecase }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Notes Column -->
+        <ng-container matColumnDef="notes">
+          <th mat-header-cell *matHeaderCellDef>Notes</th>
+          <td mat-cell *matCellDef="let element" class="text-gray-600">
+            @if (element.notes) {
+              <span [matTooltip]="element.notes" matTooltipPosition="above">
+                {{ element.notes | slice:0:50 }}{{ element.notes.length > 50 ? '...' : '' }}
+              </span>
+            } @else {
+              <span class="text-gray-400">-</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Balance Column -->
+        <ng-container matColumnDef="balance">
+          <th mat-header-cell *matHeaderCellDef class="text-right">Balance After</th>
+          <td mat-cell *matCellDef="let element" class="text-right font-semibold" 
+              [class]="element.balanceAfterTransaction > 0 ? 'text-red-600' : 'text-green-600'">
+            {{ element.balanceAfterTransaction | currency: getCurrencyFormat() }}
+          </td>
+        </ng-container>
+
+        <!-- Table Rows -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50"></tr>
+      </table>
+    }
+  </mat-card-content>
+</mat-card>

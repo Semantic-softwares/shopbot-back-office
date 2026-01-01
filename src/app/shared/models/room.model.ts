@@ -200,6 +200,38 @@ export interface AvailableRoom extends Room {
   totalCost: number;
 }
 
+export interface RoomChangeEntry {
+  _id?: string;
+  changeType: 'upgrade' | 'downgrade' | 'lateral' | 'maintenance' | 'guest_request';
+  effectiveDate: string | Date;
+  fromRoom: {
+    room: any;
+    roomType?: any;
+    roomNumber?: string;
+    ratePerNight: number;
+  };
+  toRoom: {
+    room: any;
+    roomType?: any;
+    roomNumber?: string;
+    ratePerNight: number;
+  };
+  pricingDetails: {
+    nightsConsumed: number;
+    nightsRemaining: number;
+    originalRemainingCost: number;
+    newRemainingCost: number;
+    difference: number;
+    adjustmentType: 'charged' | 'refunded' | 'credited' | 'waived' | 'kept_original_rate';
+    adjustmentAmount: number;
+    adjustmentNotes?: string;
+  };
+  reason: string;
+  performedBy?: any;
+  performedAt: string | Date;
+  transaction?: any;
+}
+
 export interface AvailableRoomType extends RoomType {
   availableRooms: number;
   lowestRate: number;
