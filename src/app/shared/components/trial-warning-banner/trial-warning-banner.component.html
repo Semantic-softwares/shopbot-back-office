@@ -1,0 +1,21 @@
+@if (showBanner()) {
+  <div [ngClass]="'px-4 py-3 my-2 rounded-md border-l-4 bg-white flex items-center justify-between shadow-sm gap-2 animate-pulse ' + bannerClass()">
+    <div class="flex items-center gap-3 w-full flex-wrap">
+      <div [ngClass]="'flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0 ' + (bannerClass() === 'info' ? 'text-cyan-600 bg-cyan-100' : bannerClass() === 'warning' ? 'text-orange-600 bg-orange-100' : 'text-red-600 bg-red-100')">
+        <mat-icon class="text-sm">{{ bannerIcon() }}</mat-icon>
+      </div>
+      <div class="flex-1 min-w-[180px]">
+        <strong [ngClass]="'block m-0 mb-1 text-sm font-semibold ' + (bannerClass() === 'info' ? 'text-cyan-900' : bannerClass() === 'warning' ? 'text-orange-900' : 'text-red-900')">{{ bannerTitle() }}</strong>
+        <p [ngClass]="'m-0 text-xs leading-snug ' + (bannerClass() === 'info' ? 'text-cyan-900' : bannerClass() === 'warning' ? 'text-orange-900' : 'text-red-900 font-medium')">{{ bannerMessage() }}</p>
+      </div>
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <button mat-raised-button color="primary" (click)="upgradeTrial()" class="whitespace-nowrap">
+          Upgrade Now
+        </button>
+        <button mat-icon-button (click)="closeBanner()" class="w-8 h-8">
+          <mat-icon class="text-gray-400 hover:text-gray-600">close</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+}

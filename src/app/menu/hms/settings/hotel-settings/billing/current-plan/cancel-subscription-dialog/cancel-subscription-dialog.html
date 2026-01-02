@@ -1,0 +1,50 @@
+<h2 mat-dialog-title>Cancel Subscription</h2>
+
+<mat-dialog-content>
+  <p class="text-sm text-gray-600 mb-6">
+    We'd like to understand why you're cancelling. Your feedback helps us improve.
+  </p>
+
+  <mat-radio-group [(ngModel)]="selectedReason" class="block mb-4">
+    <mat-list>
+      @for (reason of reasons; track reason) {
+        <mat-list-item>
+          <mat-radio-button [value]="reason">
+            {{ reason }}
+          </mat-radio-button>
+        </mat-list-item>
+      }
+    </mat-list>
+  </mat-radio-group>
+
+  @if (selectedReason === 'Other') {
+    <mat-form-field appearance="outline" class="w-full mt-4">
+      <mat-label>Please tell us more</mat-label>
+      <textarea
+        matInput
+        [(ngModel)]="reason"
+        placeholder="Why are you cancelling?"
+        rows="4"
+      ></textarea>
+    </mat-form-field>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button matButton="outlined" (click)="onCancel()" [disabled]="isSubmitting()">
+    Keep Subscription
+  </button>
+  <button
+    matButton="filled"
+    color="warn"
+    (click)="onConfirm()"
+    [disabled]="!selectedReason || (selectedReason === 'Other' && !reason.trim()) || isSubmitting()"
+  >
+    @if (isSubmitting()) {
+      <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+      Cancelling...
+    } @else {
+      Cancel Subscription
+    }
+  </button>
+</mat-dialog-actions>

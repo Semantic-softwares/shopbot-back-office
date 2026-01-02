@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,7 +26,7 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
   templateUrl: './hotel-settings.component.html',
   styleUrl: './hotel-settings.component.scss',
 })
-export class HotelSettingsComponent implements OnInit {
+export class HotelSettingsComponent {
   public storeStore = inject(StoreStore);
 
   // State signals
@@ -39,9 +39,8 @@ export class HotelSettingsComponent implements OnInit {
     { path: 'email', label: 'Email', icon: 'email', iconColor: 'text-orange-600' },
     { path: 'notification', label: 'Notifications', icon: 'notifications', iconColor: 'text-red-600' },
     { path: 'team', label: 'Teams', icon: 'people', iconColor: 'text-purple-600' },
+    { path: 'billing', label: 'Billing', icon: 'credit_card', iconColor: 'text-yellow-600' },
   ];
 
-  ngOnInit(): void {
-    // Initial loading handled by child components
-  }
+  
 }

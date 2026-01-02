@@ -31,6 +31,10 @@ export const HOTEL_SETTINGS_ROUTES: Routes = [
         path: 'team',
         loadChildren: () => import('./team/team.routes').then(m => m.TEAM_ROUTES)
       },
+      {
+        path: 'billing',
+        loadChildren: () => import('./billing/billing.routes').then(m => m.BILLING_ROUTES)
+      }
     ]
   }
 ];

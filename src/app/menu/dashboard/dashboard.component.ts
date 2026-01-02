@@ -9,11 +9,10 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
-import { rxResource, toSignal } from '@angular/core/rxjs-interop';
+import {  toSignal } from '@angular/core/rxjs-interop';
 import { MatDividerModule } from '@angular/material/divider';
 import { StoreStore } from '../../shared/stores/store.store';
 import { Store } from '../../shared/models';
-import { UsageIndicatorComponent } from '../../shared/components/usage-indicator/usage-indicator.component';
 import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.component';
 
 @Component({
@@ -29,7 +28,6 @@ import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.compon
     RouterModule,
     MatExpansionModule,
     MatDividerModule,
-    UsageIndicatorComponent,
     ToolbarComponent
 ],
   templateUrl: './dashboard.component.html',

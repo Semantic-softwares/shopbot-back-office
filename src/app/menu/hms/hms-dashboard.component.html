@@ -34,7 +34,6 @@
       </mat-menu>
 
       <mat-nav-list>
-        <app-usage-indicator [storeId]="storeStore.selectedStore()?._id"></app-usage-indicator>
         <mat-accordion multi>
           @for (link of navItems(); track $index) {
           <mat-expansion-panel class="mat-elevation-z0" [expanded]="true">

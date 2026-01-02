@@ -16,3 +16,4 @@ export * from './dashboard.model';
 export * from './station.model';
 export * from './cart.model';
 export * from './timesheet.model';
+export * from './subscription.model';

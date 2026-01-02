@@ -14,7 +14,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { StoreStore } from '../../shared/stores/store.store';
 import { Store } from '../../shared/models';
 import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.component';
-import { UsageIndicatorComponent } from "../../shared/components/usage-indicator/usage-indicator.component";
 import { RolesService } from '../../shared/services/roles.service';
 
 @Component({
@@ -30,8 +29,7 @@ import { RolesService } from '../../shared/services/roles.service';
     RouterModule,
     MatExpansionModule,
     MatDividerModule,
-    ToolbarComponent,
-    UsageIndicatorComponent
+    ToolbarComponent
 ],
   templateUrl: './hms-dashboard.component.html',
   styleUrls: ['./hms-dashboard.component.scss'],

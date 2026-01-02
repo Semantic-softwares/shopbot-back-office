@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { authGuard } from './shared/guards/auth.guard';
 import { noAuthGuard } from './shared/guards/no-auth.guard';
 import { roleResolver } from './shared/resolvers/role.resolver';
+import { subscriptionResolver } from './shared/resolvers/subscription.resolver';
+import { subscriptionActiveGuard } from './shared/guards/subscription-active.guard';
 
 export const routes: Routes = [
     {
@@ -15,9 +17,35 @@ export const routes: Routes = [
         canActivate: [noAuthGuard]
     },
     {
+        path: 'pricing',
+        loadComponent: () => import('./pages/billing/pricing/pricing-shell.component').then(m => m.PricingShellComponent),
+        canActivate: [authGuard],
+        resolve: { subscription: subscriptionResolver },
+        children: [
+            {
+                path: '',
+                redirectTo: 'pricing',
+                pathMatch: 'full',
+             
+            },
+            {
+                path: 'pricing',
+                loadComponent: () => import('./pages/billing/pricing/pricing.component').then(m => m.PricingComponent),
+            },
+            {
+                path: 'billing',
+                loadComponent: () => import('./pages/billing/billing.component').then(m => m.BillingComponent),
+            },
+            {
+                path: 'payment-callback',
+                loadComponent: () => import('./pages/billing/payment-callback/payment-callback.component').then(m => m.PaymentCallbackComponent)
+            }
+        ]
+    },
+    {
         path: 'menu',
         loadChildren: () => import('./menu/menu.route').then(m => m.MENU_ROUTES),
-        canActivate: [authGuard],
-       resolve: { role: roleResolver }
+        canActivate: [authGuard, subscriptionActiveGuard],
+        resolve: { role: roleResolver, subscription: subscriptionResolver }
     },
 ];

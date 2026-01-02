@@ -4,4 +4,8 @@ export const environment = {
   socketUrl: 'https://shopbot-server.herokuapp.com',
   subscriptionApiUrl: 'https://shopbot-server.herokuapp.com/subscriptions',
   usageApiUrl: 'https://shopbot-server.herokuapp.com/usage',
+  appUrl: 'https://office.shopbot.africa',
+  paymentReturnUrl: 'https://office.shopbot.africa/pricing/payment-callback',
+  webhookUrl: 'https://shopbot-server.herokuapp.com/webhooks/paystack',
 };
+
