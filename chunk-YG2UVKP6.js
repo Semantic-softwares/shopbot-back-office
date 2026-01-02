@@ -1,1 +1,0 @@
-import"./chunk-EQDQRRRY.js";var o=[{path:"",loadComponent:()=>import("./chunk-BAGFDKXS.js").then(t=>t.SettingsComponent),children:[{path:"",redirectTo:"hotel-settings",pathMatch:"full"},{path:"hotel-settings",loadChildren:()=>import("./chunk-BWQQXEXP.js").then(t=>t.HOTEL_SETTINGS_ROUTES)}]}];export{o as SETTINGS_MANAGEMENT_ROUTES};

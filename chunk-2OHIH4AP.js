@@ -1,0 +1,1 @@
+import"./chunk-EQDQRRRY.js";var o=[{path:"",loadComponent:()=>import("./chunk-GBZUG6JB.js").then(t=>t.Team),children:[{path:"",redirectTo:"staffs",pathMatch:"full"},{path:"staffs",loadComponent:()=>import("./chunk-KQBWMFOE.js").then(t=>t.StaffAccount)},{path:"roles",loadComponent:()=>import("./chunk-33T7IOYL.js").then(t=>t.Roles)}]}];export{o as TEAM_ROUTES};
