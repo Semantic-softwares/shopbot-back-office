@@ -8,7 +8,7 @@
     </button>
 
     <button matButton="outlined" (click)="reloadData()">
-      <mat-icon class="mr-1">redo</mat-icon>
+      <mat-icon class="mr-1">refresh</mat-icon>
       Reload
     </button>
 
@@ -25,60 +25,53 @@
 
 </app-page-header>
 
-<!-- Loading State -->
-@if (reservations.isLoading()) {
-<div class="flex justify-center items-center">
-  <mat-spinner diameter="40"></mat-spinner>
-</div>
-} @else if (reservations.hasValue()) {
+
 <div class="max-w-12xl py-6">
   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
         <div class="text-sm text-gray-600">Total</div>
-        <div class="text-2xl font-bold">{{ reservations.value().reservations.length }}</div>
+        <div class="text-2xl font-bold">{{ reservations.value()?.reservations?.length || 0 }}</div>
       </mat-card-content>
     </mat-card>
 
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
         <div class="text-sm text-gray-600">Confirmed</div>
-        <div class="text-2xl font-bold">{{ confirmedCount() }}</div>
+        <div class="text-2xl font-bold">{{ confirmedCount() || 0 }}</div>
       </mat-card-content>
     </mat-card>
 
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
         <div class="text-sm text-gray-600">Checked In</div>
-        <div class="text-2xl font-bold">{{ checkedInCount() }}</div>
+        <div class="text-2xl font-bold">{{ checkedInCount() || 0 }}</div>
       </mat-card-content>
     </mat-card>
 
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
         <div class="text-sm text-gray-600">Pending</div>
-        <div class="text-2xl font-bold">{{ pendingCount() }}</div>
+        <div class="text-2xl font-bold">{{ pendingCount() || 0 }}</div>
       </mat-card-content>
     </mat-card>
 
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
         <div class="text-sm text-gray-600">Cancelled</div>
-        <div class="text-2xl font-bold">{{ cancelledCount() }}</div>
+        <div class="text-2xl font-bold">{{ cancelledCount() || 0 }}</div>
       </mat-card-content>
     </mat-card>
 
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
         <div class="text-sm text-gray-600">Revenue</div>
-        <div class="text-2xl font-bold">{{ totalRevenue() | currency: storeStore.selectedStore()?.currency }}</div>
+        <div class="text-2xl font-bold">{{ totalRevenue() || 0 | currency: storeStore.selectedStore()?.currency }}</div>
       </mat-card-content>
     </mat-card>
   </div>
 </div>
 <!-- Table Container -->
-@if (reservations.value()!.reservations!.length > 0) {
-
 <mat-card appearance="outlined">
   <div class="p-3">
     <form [formGroup]="filterForm">
@@ -139,149 +132,164 @@
       </div>
     </form>
   </div>
-  <table mat-table [dataSource]="reservations.value()!.reservations" class="w-full">
 
-    <!-- Confirmation Number Column -->
-    <ng-container matColumnDef="confirmationNumber">
-      <th mat-header-cell *matHeaderCellDef>Confirmation #</th>
-      <td mat-cell *matCellDef="let reservation">
-        <mat-chip (click)="$event.stopPropagation(); viewReservation(reservation)">
-          {{ reservation.confirmationNumber }}
-        </mat-chip>
-      </td>
-    </ng-container>
 
-    <!-- Guest Information Column -->
-    <ng-container matColumnDef="guest">
-      <th mat-header-cell *matHeaderCellDef>Guest Information</th>
-      <td mat-cell *matCellDef="let reservation">
-        {{ reservation.guest | getGuestName }}
-      </td>
-    </ng-container>
+  @if (reservations.hasValue()) {
+     @if (reservations.value()!.reservations!.length > 0) {
+      <table mat-table [dataSource]="reservations.value()!.reservations" class="w-full">
 
-    <!-- Room Details Column -->
-    <ng-container matColumnDef="rooms">
-      <th mat-header-cell *matHeaderCellDef>Room Details</th>
-      <td mat-cell *matCellDef="let reservation">
-        {{ reservation.rooms.length }} Room(s)
-      </td>
-    </ng-container>
+        <!-- Confirmation Number Column -->
+        <ng-container matColumnDef="confirmationNumber">
+          <th mat-header-cell *matHeaderCellDef>Confirmation #</th>
+          <td mat-cell *matCellDef="let reservation">
+            <mat-chip (click)="$event.stopPropagation(); viewReservation(reservation)">
+              {{ reservation.confirmationNumber }}
+            </mat-chip>
+          </td>
+        </ng-container>
 
-    <!-- Stay Period Column (Check-in / Check-out) -->
-    <ng-container matColumnDef="stayPeriod">
-      <th mat-header-cell *matHeaderCellDef>Stay Period</th>
-      <td mat-cell *matCellDef="let reservation">
-        {{reservation.checkInDate | date:'MMM dd, yyyy'}}
-        -
-        {{reservation.checkOutDate | date:'MMM dd, yyyy'}}
-      </td>
-    </ng-container>
+        <!-- Guest Information Column -->
+        <ng-container matColumnDef="guest">
+          <th mat-header-cell *matHeaderCellDef>Guest Information</th>
+          <td mat-cell *matCellDef="let reservation">
+            {{ reservation.guest | getGuestName }}
+          </td>
+        </ng-container>
 
-    <!-- Nights Column -->
-    <ng-container matColumnDef="nights">
-      <th mat-header-cell *matHeaderCellDef>Nights</th>
-      <td mat-cell *matCellDef="let reservation">
-        {{reservation.numberOfNights}}
-      </td>
-    </ng-container>
+        <!-- Room Details Column -->
+        <ng-container matColumnDef="rooms">
+          <th mat-header-cell *matHeaderCellDef>Room Details</th>
+          <td mat-cell *matCellDef="let reservation">
+            {{ reservation.rooms.length }} Room(s)
+          </td>
+        </ng-container>
 
-    <!-- Status Column -->
-    <ng-container matColumnDef="status">
-      <th mat-header-cell *matHeaderCellDef>Status</th>
-      <td mat-cell *matCellDef="let reservation">
-        <mat-chip [ngClass]="getStatusChipClass(reservation.status)">
-          {{ reservation.status | titlecase }}
-        </mat-chip>
-      </td>
-    </ng-container>
+        <!-- Stay Period Column (Check-in / Check-out) -->
+        <ng-container matColumnDef="stayPeriod">
+          <th mat-header-cell *matHeaderCellDef>Stay Period</th>
+          <td mat-cell *matCellDef="let reservation">
+            {{reservation.checkInDate | date:'MMM dd, yyyy'}}
+            -
+            {{reservation.checkOutDate | date:'MMM dd, yyyy'}}
+          </td>
+        </ng-container>
 
-    <!-- Total Amount Column -->
-    <ng-container matColumnDef="total">
-      <th mat-header-cell *matHeaderCellDef>Total Amount</th>
-      <td mat-cell *matCellDef="let reservation">
-        <div class="font-bold">{{ reservation.pricing?.total | currency: storeStore.selectedStore()?.currency }}</div>
-      </td>
-    </ng-container>
+        <!-- Nights Column -->
+        <ng-container matColumnDef="nights">
+          <th mat-header-cell *matHeaderCellDef>Nights</th>
+          <td mat-cell *matCellDef="let reservation">
+            {{reservation.numberOfNights}}
+          </td>
+        </ng-container>
 
-    <!-- Actions Column -->
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>Actions</th>
-      <td mat-cell *matCellDef="let reservation">
-        <button mat-icon-button [matMenuTriggerFor]="actionMenu" (click)="$event.stopPropagation()">
-          <mat-icon>more_vert</mat-icon>
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let reservation">
+            <mat-chip [ngClass]="getStatusChipClass(reservation.status)">
+              {{ reservation.status | titlecase }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Total Amount Column -->
+        <ng-container matColumnDef="total">
+          <th mat-header-cell *matHeaderCellDef>Total Amount</th>
+          <td mat-cell *matCellDef="let reservation">
+            <div class="font-bold">{{ reservation.pricing?.total | currency: storeStore.selectedStore()?.currency }}</div>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let reservation">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu" (click)="$event.stopPropagation()">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="viewReservation(reservation)">
+                <mat-icon>visibility</mat-icon>
+                <span>View Details</span>
+              </button>
+              @if (canEdit(reservation)) {
+              <button mat-menu-item (click)="editReservation(reservation)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              }
+              @if (canChangeRooms(reservation)) {
+              <button mat-menu-item (click)="openRoomChangeDialog(reservation)">
+                <mat-icon>swap_horiz</mat-icon>
+                <span>Change Room</span>
+              </button>
+              }
+              @if (canDelete(reservation)) {
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="deleteReservation(reservation)">
+                <mat-icon color="warn">delete</mat-icon>
+                <span>Delete Reservation</span>
+              </button>
+              }
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <!-- Header and Row Definitions -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let reservation; columns: displayedColumns;" class="cursor-pointer"
+          (click)="viewReservation(reservation)"></tr>
+      </table>
+      <mat-card-actions class="flex justify-end">
+        <mat-paginator [length]="totalReservations()" [pageSize]="pageSize()" [pageSizeOptions]="[5, 10, 25, 50, 100]"
+          [pageIndex]="currentPage() - 1" (page)="onPageChange($event)" showFirstLastButtons>
+        </mat-paginator>
+      </mat-card-actions>
+    }
+
+    @if (reservations.value()!.reservations!.length === 0) {
+      <div class="py-20   text-center">
+        <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+          <mat-icon class="text-4xl text-gray-400">hotel</mat-icon>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">No reservations found</h3>
+        <p class="text-gray-500 mb-6">
+          {{ filterForm.get('search')?.value || filterForm.get('status')?.value
+          ? 'Try adjusting your filters or search terms to find matching reservations.'
+          : 'Get started by creating your first reservation to begin managing your hotel bookings.' }}
+        </p>
+        <button matButton="filled" color="primary" (click)="createReservation()">
+          <mat-icon>add</mat-icon>
+          Create New Reservation
         </button>
-
-        <mat-menu #actionMenu="matMenu">
-          <button mat-menu-item (click)="viewReservation(reservation)">
-            <mat-icon>visibility</mat-icon>
-            <span>View Details</span>
+      </div>
+    }
+  }
+ 
+  @if (reservations.error()) {
+  <div class="bg-red-50 border border-red-200 rounded-lg p-4 m-4">
+    <div class="flex">
+      <mat-icon class="text-red-500 mr-2">error</mat-icon>
+      <div>
+        <h3 class="text-red-800 font-medium">Error loading reservations</h3>
+        <p class="text-red-700 text-sm mt-1">{{ reservations.error() }}</p>
+        <div class="mt-3 flex space-x-3">
+          <button mat-button color="warn" (click)="refreshReservations()" class="!text-red-600">
+            <mat-icon class="mr-1">refresh</mat-icon>
+            Retry
           </button>
-          @if (canEdit(reservation)) {
-          <button mat-menu-item (click)="editReservation(reservation)">
-            <mat-icon>edit</mat-icon>
-            <span>Edit</span>
-          </button>
-          }
-          @if (canChangeRooms(reservation)) {
-          <button mat-menu-item (click)="openRoomChangeDialog(reservation)">
-            <mat-icon>swap_horiz</mat-icon>
-            <span>Change Room</span>
-          </button>
-          }
-          @if (canDelete(reservation)) {
-          <mat-divider></mat-divider>
-          <button mat-menu-item (click)="deleteReservation(reservation)">
-            <mat-icon color="warn">delete</mat-icon>
-            <span>Delete Reservation</span>
-          </button>
-          }
-        </mat-menu>
-      </td>
-    </ng-container>
-
-    <!-- Header and Row Definitions -->
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let reservation; columns: displayedColumns;" class="cursor-pointer"
-      (click)="viewReservation(reservation)"></tr>
-  </table>
-  <mat-card-actions class="flex justify-end">
-    <mat-paginator [length]="totalReservations()" [pageSize]="pageSize()" [pageSizeOptions]="[5, 10, 25, 50, 100]"
-      [pageIndex]="currentPage() - 1" (page)="onPageChange($event)" showFirstLastButtons>
-    </mat-paginator>
-  </mat-card-actions>
-</mat-card>
-} @else {
-<div class="py-20   text-center">
-  <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-    <mat-icon class="text-4xl text-gray-400">hotel</mat-icon>
-  </div>
-  <h3 class="text-lg font-semibold text-gray-900 mb-2">No reservations found</h3>
-  <p class="text-gray-500 mb-6">
-    {{ filterForm.get('search')?.value || filterForm.get('status')?.value
-    ? 'Try adjusting your filters or search terms to find matching reservations.'
-    : 'Get started by creating your first reservation to begin managing your hotel bookings.' }}
-  </p>
-  <button matButton="filled" color="primary" (click)="createReservation()">
-    <mat-icon>add</mat-icon>
-    Create New Reservation
-  </button>
-</div>
-}
-} @else if (reservations.error()) {
-<div class="bg-red-50 border border-red-200 rounded-lg p-4 m-4">
-  <div class="flex">
-    <mat-icon class="text-red-500 mr-2">error</mat-icon>
-    <div>
-      <h3 class="text-red-800 font-medium">Error loading reservations</h3>
-      <p class="text-red-700 text-sm mt-1">{{ reservations.error() }}</p>
-      <div class="mt-3 flex space-x-3">
-        <button mat-button color="warn" (click)="refreshReservations()" class="!text-red-600">
-          <mat-icon class="mr-1">refresh</mat-icon>
-          Retry
-        </button>
-        <button mat-button (click)="clearError()" class="!text-gray-600">Dismiss</button>
+          <button mat-button (click)="clearError()" class="!text-gray-600">Dismiss</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
-}
+  }
+
+  @if (reservations.isLoading()) {
+    <div class="flex items-center justify-center py-20">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  }
+  
+</mat-card>

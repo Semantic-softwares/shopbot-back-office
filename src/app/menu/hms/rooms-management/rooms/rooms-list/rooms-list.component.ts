@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -8,6 +8,18 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatCardModule } from '@angular/material/card';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, of } from 'rxjs';
 
 import { RoomsService } from '../../../../../shared/services/rooms.service';
 import { StoreStore } from '../../../../../shared/stores/store.store';
@@ -17,6 +29,7 @@ import {
   RoomFilters, 
   RoomStatus, 
   HousekeepingStatus,
+  PaginatedRoomsResponse,
   ROOM_STATUS_COLORS,
   HOUSEKEEPING_STATUS_COLORS
 } from '../../../../../shared/models/room.model';
@@ -34,21 +47,37 @@ import {
     MatButtonModule,
     MatIconModule,
     MatCheckboxModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    MatCardModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatMenuModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatDividerModule,
+    MatButtonToggleModule,
+    PageHeaderComponent
   ],
   templateUrl: './rooms-list.component.html',
   styleUrl: './rooms-list.component.scss'
 })
-export class RoomsListComponent implements OnInit {
+export class RoomsListComponent {
   private roomsService = inject(RoomsService);
   private storeStore = inject(StoreStore);
   private fb = inject(FormBuilder);
 
-  // Signals for reactive data
-  rooms = signal<Room[]>([]);
-  roomTypes = signal<RoomType[]>([]);
-  loading = signal<boolean>(false);
-  error = signal<string | null>(null);
+  // Filter signals
+  searchFilter = signal<string>('');
+  statusFilter = signal<RoomStatus[]>([]);
+  housekeepingStatusFilter = signal<HousekeepingStatus[]>([]);
+  roomTypeFilter = signal<string[]>([]);
+  floorFilter = signal<number[]>([]);
+
+  // Pagination signals
+  pageIndex = signal<number>(0);
+  pageSize = signal<number>(10);
+  totalRooms = signal<number>(0);
 
   // Local state
   selectedRooms = signal<Room[]>([]);
@@ -63,6 +92,7 @@ export class RoomsListComponent implements OnInit {
     'roomNumber',
     'roomType',
     'floor',
+    'priceOverride',
     'status',
     'housekeepingStatus',
     'features',
@@ -73,65 +103,91 @@ export class RoomsListComponent implements OnInit {
   statusOptions: RoomStatus[] = ['available', 'occupied', 'maintenance', 'cleaning', 'out_of_order'];
   housekeepingOptions: HousekeepingStatus[] = ['clean', 'dirty', 'inspected', 'out_of_order'];
 
-  // Computed properties
-  filteredRooms = computed(() => {
-    const rooms = this.rooms();
-    const filters = this.filterForm?.value;
+  // Computed filter params for rxResource
+  private filterParams = computed(() => {
+    const selectedStore = this.storeStore.selectedStore();
     
-    if (!filters) return rooms;
+    const filters: RoomFilters = {};
 
-    return rooms.filter(room => {
-      // Search filter
-      if (filters.search) {
-        const search = filters.search.toLowerCase();
-        const roomTypeNameLower = typeof room.roomType === 'object' 
-          ? room.roomType.name.toLowerCase() 
-          : '';
-        
-        if (!room.roomNumber.toLowerCase().includes(search) &&
-            !roomTypeNameLower.includes(search)) {
-          return false;
-        }
-      }
+    if (this.searchFilter() && this.searchFilter().trim()) {
+      filters.search = this.searchFilter().trim();
+    }
 
-      // Status filter
-      if (filters.status?.length && !filters.status.includes(room.status)) {
-        return false;
-      }
+    if (this.statusFilter().length > 0) {
+      filters.status = this.statusFilter();
+    }
 
-      // Housekeeping status filter
-      if (filters.housekeepingStatus?.length && !filters.housekeepingStatus.includes(room.housekeepingStatus)) {
-        return false;
-      }
+    if (this.housekeepingStatusFilter().length > 0) {
+      filters.housekeepingStatus = this.housekeepingStatusFilter();
+    }
 
-      // Room type filter
-      if (filters.roomType?.length) {
-        const roomTypeId = typeof room.roomType === 'object' ? room.roomType._id || room.roomType.id : room.roomType;
-        if (!filters.roomType.includes(roomTypeId)) {
-          return false;
-        }
-      }
+    if (this.roomTypeFilter().length > 0) {
+      filters.roomType = this.roomTypeFilter();
+    }
 
-      // Floor filter
-      if (filters.floor?.length && room.floor && !filters.floor.includes(room.floor)) {
-        return false;
-      }
+    if (this.floorFilter().length > 0) {
+      filters.floor = this.floorFilter();
+    }
 
-      return true;
-    });
-  });
+    // Add pagination params
+    filters.page = this.pageIndex() + 1; // Backend uses 1-based pages
+    filters.limit = this.pageSize();
 
-  roomStats = computed(() => {
-    const rooms = this.filteredRooms();
     return {
-      total: rooms.length,
-      available: rooms.filter(r => r.status === 'available').length,
-      occupied: rooms.filter(r => r.status === 'occupied').length,
-      maintenance: rooms.filter(r => r.status === 'maintenance').length,
-      cleaning: rooms.filter(r => r.status === 'cleaning').length,
-      outOfOrder: rooms.filter(r => r.status === 'out_of_order').length
+      storeId: selectedStore?._id,
+      filters
     };
   });
+
+  // rxResource for rooms - automatically reloads when filterParams changes
+  public roomsResource = rxResource({
+    params: () => this.filterParams(),
+    stream: ({ params }) => {
+      if (!params.storeId) {
+        return of({ rooms: [], total: 0, page: 1, limit: 10, totalPages: 0 } as PaginatedRoomsResponse);
+      }
+      return this.roomsService.getRoomsPaginated(params.storeId, params.filters);
+    }
+  });
+
+  // Computed accessor for rooms array
+  rooms = computed(() => this.roomsResource.value()?.rooms || []);
+
+  // Sync total count from response
+  roomsTotal = computed(() => this.roomsResource.value()?.total || 0);
+
+  // rxResource for room types
+  public roomTypesResource = rxResource({
+    params: () => ({ storeId: this.storeStore.selectedStore()?._id }),
+    stream: ({ params }) => {
+      if (!params.storeId) {
+        return of([]);
+      }
+      return this.roomsService.getRoomTypes(params.storeId);
+    }
+  });
+
+  // Computed room types accessor
+  roomTypes = computed(() => this.roomTypesResource.value() || []);
+
+  // Get store currency for formatting
+  storeCurrency = computed(() => this.storeStore.selectedStore()?.currency || this.storeStore.selectedStore()?.currencyCode || 'USD');
+
+  // Computed room stats based on current data
+  roomStats = computed(() => {
+    const roomsList = this.rooms() || [];
+    return {
+      total: this.roomsTotal(),
+      available: roomsList.filter(r => r.status === 'available').length,
+      occupied: roomsList.filter(r => r.status === 'occupied').length,
+      maintenance: roomsList.filter(r => r.status === 'maintenance').length,
+      cleaning: roomsList.filter(r => r.status === 'cleaning').length,
+      outOfOrder: roomsList.filter(r => r.status === 'out_of_order').length
+    };
+  });
+
+  // Page size options
+  pageSizeOptions = [5, 10, 25, 50, 100];
 
   constructor() {
     this.filterForm = this.fb.group({
@@ -142,43 +198,25 @@ export class RoomsListComponent implements OnInit {
       floor: [[]]
     });
 
-    // Subscribe to filter changes
-    this.filterForm.valueChanges.subscribe(() => {
-      // Trigger computed update (happens automatically)
+    // Sync form changes to signals with debounce
+    this.filterForm.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe((formValues) => {
+      // Reset to first page when filters change
+      this.pageIndex.set(0);
+      this.searchFilter.set(formValues.search || '');
+      this.statusFilter.set(formValues.status || []);
+      this.housekeepingStatusFilter.set(formValues.housekeepingStatus || []);
+      this.roomTypeFilter.set(formValues.roomType || []);
+      this.floorFilter.set(formValues.floor || []);
     });
   }
 
-  ngOnInit(): void {
-    this.loadData();
-  }
-
-  async loadData(): Promise<void> {
-    try {
-      const selectedStore = this.storeStore.selectedStore();
-      const storeId = selectedStore?._id;
-      
-      if (!storeId) {
-        this.error.set('No store selected');
-        return;
-      }
-
-      this.loading.set(true);
-      this.error.set(null);
-      
-      // Load rooms and room types in parallel
-      const [rooms, roomTypes] = await Promise.all([
-        this.roomsService.getRooms(storeId).toPromise(),
-        this.roomsService.getRoomTypes(storeId).toPromise()
-      ]);
-      
-      this.rooms.set(rooms || []);
-      this.roomTypes.set(roomTypes || []);
-      this.loading.set(false);
-    } catch (error) {
-      console.error('Error loading data:', error);
-      this.error.set('Failed to load rooms data');
-      this.loading.set(false);
-    }
+  // Pagination handler
+  onPageChange(event: { pageIndex: number; pageSize: number }): void {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
   }
 
   // Filter methods
@@ -190,6 +228,7 @@ export class RoomsListComponent implements OnInit {
       roomType: [],
       floor: []
     });
+    this.pageIndex.set(0);
   }
 
   applyQuickFilter(filter: Partial<RoomFilters>): void {
@@ -215,7 +254,7 @@ export class RoomsListComponent implements OnInit {
   }
 
   selectAllRooms(): void {
-    this.selectedRooms.set([...this.filteredRooms()]);
+    this.selectedRooms.set([...this.rooms()]);
   }
 
   clearSelection(): void {
@@ -227,7 +266,7 @@ export class RoomsListComponent implements OnInit {
     try {
       const roomId = room._id || room.id!;
       await this.roomsService.updateRoomStatus(roomId, status).toPromise();
-      await this.loadData(); // Refresh data
+      this.roomsResource.reload(); // Refresh data
     } catch (error) {
       console.error('Error updating room status:', error);
     }
@@ -237,7 +276,7 @@ export class RoomsListComponent implements OnInit {
     try {
       const roomId = room._id || room.id!;
       await this.roomsService.updateHousekeepingStatus(roomId, status).toPromise();
-      await this.loadData(); // Refresh data
+      this.roomsResource.reload(); // Refresh data
     } catch (error) {
       console.error('Error updating housekeeping status:', error);
     }
@@ -248,7 +287,7 @@ export class RoomsListComponent implements OnInit {
       const roomIds = this.selectedRooms().map(r => r._id || r.id!);
       await this.roomsService.bulkUpdateRoomStatus(roomIds, status).toPromise();
       this.clearSelection();
-      await this.loadData(); // Refresh data
+      this.roomsResource.reload(); // Refresh data
     } catch (error) {
       console.error('Error bulk updating status:', error);
     }
@@ -322,8 +361,8 @@ export class RoomsListComponent implements OnInit {
   // Floor options for filter
   getFloorOptions(): number[] {
     const floors = new Set<number>();
-    const rooms = this.rooms();
-    rooms.forEach((room: Room) => {
+    const roomsList = this.rooms();
+    roomsList.forEach((room: Room) => {
       if (room.floor !== undefined) {
         floors.add(room.floor);
       }

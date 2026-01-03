@@ -71,7 +71,6 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
     MatNativeDateModule,
     MatCheckboxModule,
     BreakDownTotal,
-    PriceEditDialogComponent,
     MatProgressSpinnerModule
 ],
   templateUrl: './room-sharers.component.html',

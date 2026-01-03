@@ -18,7 +18,8 @@ import {
   AvailableRoom,
   AvailableRoomType,
   RoomStatus,
-  HousekeepingStatus
+  HousekeepingStatus,
+  PaginatedRoomsResponse
 } from '../models/room.model';
 
 @Injectable({
@@ -44,7 +45,7 @@ export class RoomsService {
   // Room Management Methods
   
   /**
-   * Get all rooms for a store with optional filtering
+   * Get all rooms for a store with optional filtering and pagination
    */
   getRooms(storeId: string, filters?: RoomFilters): Observable<Room[]> {
     this.loadingSignal.set(true);
@@ -67,6 +68,12 @@ export class RoomsService {
       if (filters.search) {
         params = params.set('search', filters.search);
       }
+      if (filters.page !== undefined) {
+        params = params.set('page', filters.page.toString());
+      }
+      if (filters.limit !== undefined) {
+        params = params.set('limit', filters.limit.toString());
+      }
     }
 
     return this.http.get<Room[]>(`${this.baseUrl}/rooms/${storeId}/store`, { params })
@@ -76,6 +83,47 @@ export class RoomsService {
           this.loadingSignal.set(false);
         }),
         map(rooms => rooms)
+      );
+  }
+
+  /**
+   * Get paginated rooms for a store with optional filtering
+   */
+  getRoomsPaginated(storeId: string, filters?: RoomFilters): Observable<PaginatedRoomsResponse> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+    
+    let params = new HttpParams();
+    if (filters) {
+      if (filters.status?.length) {
+        params = params.set('status', filters.status.join(','));
+      }
+      if (filters.housekeepingStatus?.length) {
+        params = params.set('housekeepingStatus', filters.housekeepingStatus.join(','));
+      }
+      if (filters.roomType?.length) {
+        params = params.set('roomType', filters.roomType.join(','));
+      }
+      if (filters.floor?.length) {
+        params = params.set('floor', filters.floor.join(','));
+      }
+      if (filters.search) {
+        params = params.set('search', filters.search);
+      }
+      if (filters.page !== undefined) {
+        params = params.set('page', filters.page.toString());
+      }
+      if (filters.limit !== undefined) {
+        params = params.set('limit', filters.limit.toString());
+      }
+    }
+
+    return this.http.get<PaginatedRoomsResponse>(`${this.baseUrl}/rooms/${storeId}/store`, { params })
+      .pipe(
+        tap(response => {
+          this.roomsSignal.set(response.rooms);
+          this.loadingSignal.set(false);
+        })
       );
   }
 

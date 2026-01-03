@@ -1,6 +1,6 @@
 <div class="min-h-screen w-full flex flex-col lg:flex-row">
     <!-- Left Column - Form -->
-    <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 py-12 lg:px-16 xl:px-24 bg-white">
+    <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 py-12 lg:px-16 xl:px-24 ">
         <!-- Logo/Brand -->
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900">ShopBot</h1>
@@ -55,12 +55,12 @@
                         <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                         <span class="text-sm text-gray-600">Remember me</span>
                     </label>
-                    <a routerLink="/auth/forgot-password" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                    <a matButton routerLink="/auth/forgot-password" class="text-sm font-medium">
                         Forgot password?
                     </a>
                 </div>
 
-                <button mat-flat-button color="primary" type="submit" 
+                <button matButton="filled" color="primary" type="submit" 
                         [disabled]="!loginForm.valid || loading()"
                         class="w-full h-12 text-base mt-2">
                     @if (loading()) {
@@ -75,7 +75,7 @@
 
                 <div class="text-center mt-6">
                     <span class="text-sm text-gray-600">Don't have an account?</span>
-                    <a routerLink="/auth/signup" class="text-sm font-medium text-blue-600 hover:text-blue-800 ml-1">
+                    <a matButton routerLink="/auth/signup" class=" font-medium  ml-1">
                         Create account
                     </a>
                 </div>

@@ -1,12 +1,25 @@
-import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData } from 'chart.js';
-import { Subject, takeUntil, forkJoin } from 'rxjs';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { forkJoin, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTableModule } from '@angular/material/table';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { 
   RevenueService, 
   RevenueData, 
@@ -16,6 +29,7 @@ import {
 } from './revenue.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
 import { ExportService } from '../../../../shared/services/export.service';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 
 @Component({
   selector: 'app-revenue-report',
@@ -25,39 +39,94 @@ import { ExportService } from '../../../../shared/services/export.service';
     CurrencyPipe,
     ReactiveFormsModule,
     BaseChartDirective,
+    PageHeaderComponent,
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatTableModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatDividerModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatProgressBarModule,
   ],
   templateUrl: './revenue-report.component.html',
   styleUrl: './revenue-report.component.scss',
 })
-export class RevenueReportComponent implements OnInit, OnDestroy {
+export class RevenueReportComponent {
   private fb = inject(FormBuilder);
   private revenueService = inject(RevenueService);
   private storeStore = inject(StoreStore);
   private exportService = inject(ExportService);
-  private destroy$ = new Subject<void>();
 
   // Export state
   isExporting = signal<boolean>(false);
 
   // Computed values
   selectedStore = computed(() => this.storeStore.selectedStore());
-  currency = computed(() => 
-    this.selectedStore()?.currencyCode || this.selectedStore()?.currency || 'USD'
-  );
+  
+  // Currency mapping for formatting
+  private currencySymbolToCode: Record<string, string> = {
+    '₦': 'NGN', '$': 'USD', '€': 'EUR', '£': 'GBP', '¥': 'JPY',
+    '₹': 'INR', '₽': 'RUB', '₩': 'KRW', '฿': 'THB', '₫': 'VND',
+    'R$': 'BRL', 'R': 'ZAR', 'CHF': 'CHF', 'kr': 'SEK', 'zł': 'PLN'
+  };
+
+  currency = computed(() => {
+    const store = this.selectedStore();
+    const currencyValue = store?.currency || store?.currencyCode || 'USD';
+    return this.currencySymbolToCode[currencyValue] || currencyValue;
+  });
+
+  // Filter signals
+  filterTrigger = signal(0);
 
   // Form
   filterForm: FormGroup;
 
   // Signals
-  loading = signal<boolean>(false);
-  revenueData = signal<RevenueData[]>([]);
-  revenueBreakdown = signal<RevenueBreakdown[]>([]);
-  revenueStats = signal<RevenueStats | null>(null);
-  error = signal<string | null>(null);
   lastUpdated = signal<Date>(new Date());
+
+  // Filter params for rxResource
+  private filterParams = computed(() => {
+    this.filterTrigger(); // Trigger reload
+    const storeId = this.selectedStore()?._id || '';
+    return { storeId, filters: this.getFilters() };
+  });
+
+  // rxResource for revenue data
+  revenueResource = rxResource({
+    params: this.filterParams,
+    stream: ({ params }) => {
+      if (!params.storeId) return of(null);
+      return forkJoin({
+        revenueData: this.revenueService.getRevenueData(params.storeId, params.filters),
+        revenueBreakdown: this.revenueService.getRevenueBreakdown(params.storeId, params.filters),
+        stats: this.revenueService.getRevenueStats(params.storeId, params.filters)
+      }).pipe(
+        map(result => {
+          this.lastUpdated.set(new Date());
+          return result;
+        }),
+        catchError(error => {
+          console.error('Error loading data:', error);
+          return of(null);
+        })
+      );
+    }
+  });
+
+  // Computed values from resource
+  loading = computed(() => this.revenueResource.isLoading());
+  error = signal<string | null>(null);
+  revenueData = computed(() => this.revenueResource.value()?.revenueData || []);
+  revenueBreakdown = computed(() => this.revenueResource.value()?.revenueBreakdown || []);
+  revenueStats = computed(() => this.revenueResource.value()?.stats || null);
 
   // Chart data computed signals
   revenueTrendChartData = computed(() => {
@@ -187,7 +256,8 @@ export class RevenueReportComponent implements OnInit, OnDestroy {
   }));
 
   // Table columns
-  displayedColumns: string[] = ['date', 'totalRevenue', 'roomRevenue', 'serviceRevenue', 'otherRevenue', 'transactions', 'averageTransaction'];
+  displayedColumns: string[] = ['date', 'totalRevenue', 'roomRevenue', 'serviceRevenue', 'otherRevenue', 'transactions', 'averageTransaction', 'revenueGrowth'];
+  breakdownColumns: string[] = ['category', 'amount', 'percentage', 'transactions', 'averageAmount'];
 
   constructor() {
     this.filterForm = this.fb.group({
@@ -199,47 +269,20 @@ export class RevenueReportComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit() {
-    this.loadData();
-    
-    // Subscribe to form changes
-    this.filterForm.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.loadData();
-      });
+  refreshData() {
+    this.filterTrigger.update(v => v + 1);
   }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+  onDateRangeChange() {
+    this.filterTrigger.update(v => v + 1);
   }
 
-  loadData() {
-    const storeId = this.selectedStore()?._id || '';
-    const filters = this.getFilters();
-    this.loading.set(true);
-    
-    forkJoin({
-      revenueData: this.revenueService.getRevenueData(storeId, filters),
-      revenueBreakdown: this.revenueService.getRevenueBreakdown(storeId, filters),
-      stats: this.revenueService.getRevenueStats(storeId, filters)
-    }).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: ({ revenueData, revenueBreakdown, stats }) => {
-        this.revenueData.set(revenueData);
-        this.revenueBreakdown.set(revenueBreakdown);
-        this.revenueStats.set(stats);
-        this.lastUpdated.set(new Date());
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading data:', error);
-        this.error.set('Failed to load revenue data. Please try again.');
-        this.loading.set(false);
-      }
-    });
+  onFilterChange() {
+    this.filterTrigger.update(v => v + 1);
+  }
+
+  clearError() {
+    this.error.set(null);
   }
 
   private getFilters(): RevenueFilters {
@@ -251,14 +294,6 @@ export class RevenueReportComponent implements OnInit, OnDestroy {
       revenueType: formValue.revenueType !== 'all' ? formValue.revenueType : undefined,
       paymentMethod: formValue.paymentMethod !== 'all' ? formValue.paymentMethod : undefined
     };
-  }
-
-  private updateCharts(revenueData: RevenueData[], revenueBreakdown: RevenueBreakdown[]) {
-    // Charts are now computed automatically via signals
-  }
-
-  onDateRangeChange() {
-    this.loadData();
   }
 
   exportToCSV() {
@@ -278,7 +313,6 @@ export class RevenueReportComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Export error:', error);
-        this.error.set('Failed to export CSV. Please try again.');
         this.isExporting.set(false);
       }
     });
@@ -301,7 +335,6 @@ export class RevenueReportComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Export error:', error);
-        this.error.set('Failed to export PDF. Please try again.');
         this.isExporting.set(false);
       }
     });
@@ -330,24 +363,16 @@ export class RevenueReportComponent implements OnInit, OnDestroy {
     }
   }
 
-  refreshData() {
-    this.loadData();
-  }
-
-  clearError() {
-    this.error.set(null);
-  }
-
   getRevenueGrowthClass(growth: number): string {
     if (growth > 0) return 'text-green-600';
     if (growth < 0) return 'text-red-600';
-    return 'text-gray-600';
+    return 'text-gray-500';
   }
 
   getRevenueGrowthIcon(growth: number): string {
-    if (growth > 0) return '↗️';
-    if (growth < 0) return '↘️';
-    return '➡️';
+    if (growth > 0) return 'trending_up';
+    if (growth < 0) return 'trending_down';
+    return 'trending_flat';
   }
 
   formatCurrency(amount: number): string {

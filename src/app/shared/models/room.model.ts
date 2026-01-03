@@ -176,6 +176,16 @@ export interface RoomFilters {
   floor?: number[];
   features?: Partial<RoomFeatures>;
   search?: string; // for room number search
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedRoomsResponse {
+  rooms: Room[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 export interface RoomTypeFilters {

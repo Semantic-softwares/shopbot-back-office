@@ -1,28 +1,20 @@
-<!-- Header Section -->
-<div class="bg-white shadow-sm border-b border-gray-200">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <button
-          type="button"
-          (click)="onCancel()"
-          class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
-          <mat-icon class="text-gray-600">arrow_back</mat-icon>
-        </button>
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">{{ pageTitle() }}</h1>
-          <p class="text-sm text-gray-600 mt-1">Fill in the guest information below</p>
-        </div>
-      </div>
-      @if (isEditMode() && guest()) {
-        <div class="flex items-center gap-2 text-sm text-gray-600">
-          <mat-icon class="text-lg">schedule</mat-icon>
-          <span>Last updated: {{ guest()?.updatedAt | date:'medium' }}</span>
-        </div>
+<app-page-header [title]="pageTitle()" subtitle="Fill in the guest information below">
+  <ng-container actions>
+    <button matButton="outlined" (click)="onCancel()">
+      <mat-icon>close</mat-icon>
+      Cancel
+    </button>
+
+    <button matButton="filled" (click)="onSubmit()" [disabled]="guestForm.invalid || isSaving()">
+      @if (isSaving()) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        <mat-icon>save</mat-icon>
       }
-    </div>
-  </div>
-</div>
+      {{ submitButtonText() }}
+    </button>
+  </ng-container>
+</app-page-header>
 
 <!-- Loading State -->
 @if (isLoading()) {
@@ -33,18 +25,16 @@
 
 <!-- Form Section -->
 @if (!isLoading()) {
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <form [formGroup]="guestForm" (ngSubmit)="onSubmit()" class="space-y-8">
+  <div class="max-w-4xl mx-auto py-8">
+    <form [formGroup]="guestForm" (ngSubmit)="onSubmit()" class="space-y-6">
       
       <!-- Personal Information Section -->
-      <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <mat-icon class="text-purple-600">person</mat-icon>
-            Personal Information
-          </h2>
-        </div>
-        <div class="p-6 space-y-6">
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-purple-600">person</mat-icon>
+          <mat-card-title>Personal Information</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="p-6! space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <mat-form-field appearance="outline" class="w-full">
@@ -110,18 +100,16 @@
               </mat-form-field>
             </div>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- ID Document Section -->
-      <div class="bg-white rounded-lg border border-gray-200 shadow-sm" formGroupName="idDocument">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <mat-icon class="text-purple-600">badge</mat-icon>
-            Identification Document
-          </h2>
-        </div>
-        <div class="p-6 space-y-6">
+      <mat-card appearance="outlined" formGroupName="idDocument">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-purple-600">badge</mat-icon>
+          <mat-card-title>Identification Document</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="p-6! space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <mat-form-field appearance="outline" class="w-full">
@@ -163,18 +151,16 @@
               </mat-form-field>
             </div>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- Address Section -->
-      <div class="bg-white rounded-lg border border-gray-200 shadow-sm" formGroupName="address">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <mat-icon class="text-purple-600">location_on</mat-icon>
-            Address Information
-          </h2>
-        </div>
-        <div class="p-6 space-y-6">
+      <mat-card appearance="outlined" formGroupName="address">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-purple-600">location_on</mat-icon>
+          <mat-card-title>Address Information</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="p-6! space-y-6">
           <div>
             <mat-form-field appearance="outline" class="w-full">
               <mat-label>Street Address</mat-label>
@@ -214,18 +200,16 @@
               </mat-select>
             </mat-form-field>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- Preferences Section -->
-      <div class="bg-white rounded-lg border border-gray-200 shadow-sm" formGroupName="preferences">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <mat-icon class="text-purple-600">tune</mat-icon>
-            Preferences
-          </h2>
-        </div>
-        <div class="p-6 space-y-6">
+      <mat-card appearance="outlined" formGroupName="preferences">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-purple-600">tune</mat-icon>
+          <mat-card-title>Preferences</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="p-6! space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <mat-form-field appearance="outline" class="w-full">
@@ -275,18 +259,16 @@
               </mat-select>
             </mat-form-field>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- Emergency Contact Section -->
-      <div class="bg-white rounded-lg border border-gray-200 shadow-sm" formGroupName="emergencyContact">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <mat-icon class="text-purple-600">contact_emergency</mat-icon>
-            Emergency Contact
-          </h2>
-        </div>
-        <div class="p-6 space-y-6">
+      <mat-card appearance="outlined" formGroupName="emergencyContact">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-purple-600">contact_emergency</mat-icon>
+          <mat-card-title>Emergency Contact</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="p-6! space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <mat-form-field appearance="outline" class="w-full">
@@ -318,18 +300,16 @@
               </mat-form-field>
             </div>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- Status & Notes Section -->
-      <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <mat-icon class="text-purple-600">notes</mat-icon>
-            Status & Additional Information
-          </h2>
-        </div>
-        <div class="p-6 space-y-6">
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-purple-600">notes</mat-icon>
+          <mat-card-title>Status & Additional Information</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="p-6! space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-4">
               <div>
@@ -358,27 +338,8 @@
               </textarea>
             </mat-form-field>
           </div>
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
-        <button
-          type="button"
-          (click)="onCancel()"
-          class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200">
-          Cancel
-        </button>
-        <button
-          type="submit"
-          [disabled]="guestForm.invalid || isSaving()"
-          class="px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 border border-transparent rounded-lg shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-          @if (isSaving()) {
-            <mat-spinner diameter="20" class="text-white"></mat-spinner>
-          }
-          {{ submitButtonText() }}
-        </button>
-      </div>
+        </mat-card-content>
+      </mat-card>
     </form>
   </div>
 }

@@ -14,6 +14,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { StoreService } from '../../../../../shared/services/store.service';
 import { BluetoothPrinterService, PrinterConfiguration } from '../../../../../shared/services/bluetooth-printer.service';
+import { MatDialogClose } from "@angular/material/dialog";
 
 @Component({
   selector: 'app-printer-settings',

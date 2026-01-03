@@ -2,14 +2,12 @@
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             <!-- Printer Connection Card -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <mat-icon class="text-green-600">bluetooth</mat-icon>
-                  Printer Connection
-                </h3>
-              </div>
-              <div class="p-6">
+            <mat-card appearance="outlined">
+              <mat-card-header>
+                <mat-icon mat-card-avatar class="text-green-600 !flex !items-center !justify-center">bluetooth</mat-icon>
+                <mat-card-title>Printer Connection</mat-card-title>
+              </mat-card-header>
+              <mat-card-content class="pt-4">
                 @if (printerConnected()) {
                   <!-- Connected State -->
                   <div class="text-center py-4">
@@ -73,18 +71,12 @@
                     <h4 class="text-lg font-semibold text-gray-900 mb-2">No Printer Connected</h4>
                     <p class="text-gray-600 mb-4">Connect a Bluetooth printer to enable receipt printing</p>
                     <button 
-                      mat-raised-button 
+                      matButton="outlined" 
                       color="primary" 
                       (click)="connectPrinter()"
                       [disabled]="printerConnecting()"
                       class="w-full">
-                      @if (printerConnecting()) {
-                        <mat-icon class="animate-spin mr-2">refresh</mat-icon>
-                        Connecting...
-                      } @else {
-                        <mat-icon class="mr-2">bluetooth</mat-icon>
-                        Connect Printer
-                      }
+                     {{ printerConnecting() ? 'Connecting...' : 'Connect Printer' }}
                     </button>
                   </div>
                 }
@@ -102,18 +94,16 @@
                     <li>• Supported brands: EPSON, Star, Citizen, Bixolon</li>
                   </ul>
                 </div>
-              </div>
-            </div>
+              </mat-card-content>
+            </mat-card>
 
             <!-- Printer Configuration Card -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <mat-icon class="text-purple-600">tune</mat-icon>
-                  Print Configuration
-                </h3>
-              </div>
-              <div class="p-6">
+            <mat-card appearance="outlined">
+              <mat-card-header>
+                <mat-icon mat-card-avatar class="text-purple-600 !flex !items-center !justify-center">tune</mat-icon>
+                <mat-card-title>Print Configuration</mat-card-title>
+              </mat-card-header>
+              <mat-card-content class="pt-4">
                 <form [formGroup]="printerSettingsForm" (ngSubmit)="savePrinterSettings()">
                   <div class="space-y-6">
                     <mat-form-field appearance="outline" class="w-full">
@@ -181,21 +171,15 @@
 
                     <button 
                       type="submit" 
-                      mat-raised-button 
+                      matButton="filled" 
                       color="primary"
                       [disabled]="printerSettingsForm.invalid || saving()"
                       class="w-full">
-                      @if (saving()) {
-                        <mat-icon class="animate-spin mr-2">refresh</mat-icon>
-                        Saving...
-                      } @else {
-                        <mat-icon class="mr-2">save</mat-icon>
-                        Save Printer Settings
-                      }
+                      {{ saving() ? 'Saving...' : 'Save Printer Settings' }}
                     </button>
                   </div>
                 </form>
-              </div>
-            </div>
+              </mat-card-content>
+            </mat-card>
           </div>
         </div>

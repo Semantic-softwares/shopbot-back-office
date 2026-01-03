@@ -98,13 +98,7 @@
       [disabled]="pinForm.invalid || verifying()"
       class="!bg-gradient-to-r !from-blue-600 !to-blue-700 hover:!from-blue-700 hover:!to-blue-800 !text-white !px-8 !py-2 !rounded-lg !font-medium !transition-all !duration-200 !shadow-lg hover:!shadow-xl disabled:!opacity-50 disabled:!cursor-not-allowed">
       
-      @if (verifying()) {
-        <mat-icon class="!text-sm mr-2 animate-spin">sync</mat-icon>
-        Verifying...
-      } @else {
-        <mat-icon class="!text-sm mr-2">security</mat-icon>
-        Authorize
-      }
+      {{ verifying() ? 'Verifying...' : 'Authorize Action' }}
     </button>
   </div>
 </div>

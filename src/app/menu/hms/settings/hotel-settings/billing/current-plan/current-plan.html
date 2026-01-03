@@ -58,7 +58,7 @@
 
           <!-- Action Button -->
           <button 
-            mat-raised-button
+            matButton="filled"
             (click)="onActionClick()"
             [color]="subscription()!.status === 'TRIAL' ? 'primary' : 'warn'"
             class="flex-shrink-0"

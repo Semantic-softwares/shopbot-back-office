@@ -8,6 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
+import { CdkMenuModule } from '@angular/cdk/menu';
 import { QuickReservationModalComponent, QuickReservationData, QuickReservationDialogData } from '../../quick-reservation-modal/quick-reservation-modal.component';
 import { ReservationPreviewDialogComponent } from '../reservation-preview-dialog/reservation-preview-dialog.component';
 import { StoreStore } from '../../../../../../shared/stores/store.store';
@@ -67,6 +68,7 @@ interface DragSelection {
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatDialogModule,
+    CdkMenuModule,
     PageHeaderComponent,
   ],
   templateUrl: './reservations-calendar.html',
@@ -100,6 +102,9 @@ export class ReservationsCalendar implements OnInit {
     hasConflict: false,
   });
 
+  // Track hovered date for column highlighting
+  public hoveredDateKey = signal<string | null>(null);
+
   public reservationStatuses: ReservationStatus[] = [
     'pending',
     'confirmed',
@@ -109,6 +114,14 @@ export class ReservationsCalendar implements OnInit {
     'no_show',
     'reserved',
   ];
+
+  public housekeepingStatuses = [
+    { key: 'clean', label: 'Clean' },
+    { key: 'dirty', label: 'Dirty' },
+    { key: 'inspected', label: 'Inspected' },
+    { key: 'out_of_order', label: 'Out of Order' },
+  ];
+
   private statusColorMap: Record<ReservationStatus, string> = {
     pending: 'bg-yellow-500',
     confirmed: 'bg-blue-600',
@@ -276,6 +289,7 @@ export class ReservationsCalendar implements OnInit {
           roomTypeId: typeof room.roomType === 'string' ? room.roomType : room.roomType?._id,
           roomTypeName: group.typeName,
           capacity: room.capacity || 2,
+          housekeepingStatus: room.housekeepingStatus || 'clean',
           reservations: stays,
         });
       }
@@ -386,10 +400,8 @@ export class ReservationsCalendar implements OnInit {
    * Check if reservation starts on the given date (normalized)
    */
   isReservationStartingOnDate(reservation: any, date: DateRange): boolean {
-    const checkIn = new Date(reservation.checkInDate);
-    checkIn.setHours(0, 0, 0, 0);
-    const compareDate = new Date(date.date);
-    compareDate.setHours(0, 0, 0, 0);
+    const checkIn = this.parseDateOnly(reservation.checkInDate);
+    const compareDate = this.parseDateOnly(date.date);
     return compareDate.getTime() === checkIn.getTime();
   }
 
@@ -401,12 +413,9 @@ export class ReservationsCalendar implements OnInit {
    * This ensures multi-day reservations spanning month/week boundaries display correctly.
    */
   shouldRenderReservationFromDate(reservation: any, date: DateRange): boolean {
-    const checkIn = new Date(reservation.checkInDate);
-    const checkOut = new Date(reservation.checkOutDate);
-    checkIn.setHours(0, 0, 0, 0);
-    checkOut.setHours(0, 0, 0, 0);
-    const compareDate = new Date(date.date);
-    compareDate.setHours(0, 0, 0, 0);
+    const checkIn = this.parseDateOnly(reservation.checkInDate);
+    const checkOut = this.parseDateOnly(reservation.checkOutDate);
+    const compareDate = this.parseDateOnly(date.date);
 
     // Case 1: Reservation starts on this date
     if (compareDate.getTime() === checkIn.getTime()) {
@@ -417,8 +426,7 @@ export class ReservationsCalendar implements OnInit {
     // (means the reservation started before the current view)
     const dates = this.dateRange();
     if (Array.isArray(dates) && dates.length > 0) {
-      const firstVisible = new Date(dates[0].date);
-      firstVisible.setHours(0, 0, 0, 0);
+      const firstVisible = this.parseDateOnly(dates[0].date);
       // If this date is the first visible date AND the reservation spans it (started before and ends after/on it)
       if (compareDate.getTime() === firstVisible.getTime() && compareDate >= checkIn && compareDate < checkOut) {
         return true;
@@ -429,44 +437,70 @@ export class ReservationsCalendar implements OnInit {
   }
 
   /**
+   * Parse a date string and extract just the date portion (ignoring time/timezone)
+   * This handles ISO strings like "2026-01-04T00:00:00.000Z"
+   */
+  private parseDateOnly(dateInput: string | Date): Date {
+    if (dateInput instanceof Date) {
+      return new Date(dateInput.getFullYear(), dateInput.getMonth(), dateInput.getDate());
+    }
+    // For ISO strings, extract the date portion directly to avoid timezone shifts
+    const dateStr = String(dateInput);
+    if (dateStr.includes('T') || dateStr.includes('Z')) {
+      // ISO format: "2026-01-04T00:00:00.000Z" - extract "2026-01-04"
+      const datePart = dateStr.split('T')[0];
+      const [year, month, day] = datePart.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    }
+    // Fallback for other formats
+    const d = new Date(dateInput);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  /**
    * Calculate the width in pixels of the reservation block based on duration
+   * Note: The checkout date is exclusive - guest checks out on that day but doesn't occupy the room
    */
   getReservationWidth(reservation: any, date: DateRange): number {
-    const checkIn = new Date(reservation.checkInDate);
-    const checkOut = new Date(reservation.checkOutDate);
     const cellWidth = this.cellWidthPx();
-    const cellGap = this.cellGapPx();
 
-    // Normalize dates
-    checkIn.setHours(0, 0, 0, 0);
-    checkOut.setHours(0, 0, 0, 0);
-    const compareDate = new Date(date.date);
-    compareDate.setHours(0, 0, 0, 0);
+    // Parse dates properly to avoid timezone issues
+    const checkInNorm = this.parseDateOnly(reservation.checkInDate);
+    const checkOutNorm = this.parseDateOnly(reservation.checkOutDate);
+    const compareDateNorm = this.parseDateOnly(date.date);
 
     // If current cell date is before the check-in, nothing to render
-    if (compareDate < checkIn) return 0;
+    if (compareDateNorm < checkInNorm) return 0;
 
     // Start drawing from the later of the cell date or the check-in
-    const startDate = compareDate > checkIn ? compareDate : checkIn;
+    const startDate = compareDateNorm > checkInNorm ? compareDateNorm : checkInNorm;
 
-    // Clamp the end to the visible range (end is exclusive)
+    // The checkout date is exclusive (guest doesn't occupy room on checkout day)
+    // So we draw up to checkOut - 1 day as the last occupied cell
+    const lastOccupiedDate = new Date(checkOutNorm);
+    lastOccupiedDate.setDate(lastOccupiedDate.getDate() - 1);
+
+    // Clamp the end to the visible range
     const dates = this.dateRange();
-    let endExclusive = checkOut;
+    let endDate = lastOccupiedDate;
     if (Array.isArray(dates) && dates.length > 0) {
-      const lastVisible = new Date(dates[dates.length - 1].date);
-      lastVisible.setHours(0, 0, 0, 0);
-      const visibleEndExclusive = new Date(lastVisible);
-      visibleEndExclusive.setDate(visibleEndExclusive.getDate() + 1);
-      endExclusive = endExclusive < visibleEndExclusive ? endExclusive : visibleEndExclusive;
+      const lastVisible = this.parseDateOnly(dates[dates.length - 1].date);
+      endDate = endDate < lastVisible ? endDate : lastVisible;
     }
 
+    // Calculate duration in days (inclusive of both start and end)
     const msPerDay = 1000 * 60 * 60 * 24;
-    const durationDaysRaw = (endExclusive.getTime() - startDate.getTime()) / msPerDay;
-    const durationDays = Math.max(0, Math.ceil(durationDaysRaw));
+    const durationDays = Math.round((endDate.getTime() - startDate.getTime()) / msPerDay) + 1;
+    
     if (durationDays <= 0) return 0;
 
-    const width = (durationDays * cellWidth) + ((durationDays - 1) * cellGap);
-    return width;
+    // Width calculation:
+    // Each cell is cellWidth px + 1px border (shared/collapsed with adjacent cell)
+    // For N cells: N * cellWidth + (N-1) * 1px for internal borders
+    // Subtract a small amount to prevent overflow into next cell
+    const borderWidth = 1;
+    const width = (durationDays * cellWidth) + ((durationDays - 1) * borderWidth) - 2;
+    return Math.max(width, cellWidth - 4); // Minimum width of one cell minus padding
   }
 
   /**
@@ -479,6 +513,41 @@ export class ReservationsCalendar implements OnInit {
 
   public getStatusColorClass(status: ReservationStatus): string {
     return this.statusColorMap[status] || 'bg-gray-500';
+  }
+
+  /** Get background color class based on housekeeping status */
+  public getHousekeepingStatusClass(status: string): string {
+    const colorMap: Record<string, string> = {
+      'clean': 'bg-green-100 border-l-4 border-l-green-500',
+      'dirty': 'bg-amber-100 border-l-4 border-l-amber-500',
+      'inspected': 'bg-blue-100 border-l-4 border-l-blue-500',
+      'out_of_order': 'bg-red-100 border-l-4 border-l-red-500',
+    };
+    return colorMap[status] || 'bg-gray-50';
+  }
+
+  /** Get icon for housekeeping status */
+  public getHousekeepingStatusIcon(status: string): string {
+    const iconMap: Record<string, string> = {
+      'clean': 'check_circle',
+      'dirty': 'warning',
+      'inspected': 'verified',
+      'out_of_order': 'do_not_disturb',
+    };
+    return iconMap[status] || 'help';
+  }
+
+  /** Update housekeeping status for a room */
+  public updateHousekeepingStatus(roomId: string, status: string): void {
+    this.roomService.updateHousekeepingStatus(roomId, status as any).subscribe({
+      next: () => {
+        // Reload rooms to reflect the update
+        this.rooms.reload();
+      },
+      error: (err) => {
+        console.error('Failed to update housekeeping status:', err);
+      }
+    });
   }
 
   /** Navigate to previous period based on view mode */
@@ -651,14 +720,11 @@ export class ReservationsCalendar implements OnInit {
     const roomRow = rooms.find((r: any) => !r.isGroup && r.roomId === roomId);
     if (!roomRow || !roomRow.reservations) return false;
 
-    const checkDate = new Date(date);
-    checkDate.setHours(0, 0, 0, 0);
+    const checkDate = this.parseDateOnly(date);
 
     return roomRow.reservations.some((res: any) => {
-      const checkIn = new Date(res.checkInDate);
-      const checkOut = new Date(res.checkOutDate);
-      checkIn.setHours(0, 0, 0, 0);
-      checkOut.setHours(0, 0, 0, 0);
+      const checkIn = this.parseDateOnly(res.checkInDate);
+      const checkOut = this.parseDateOnly(res.checkOutDate);
       // A date is occupied if it's >= checkIn and < checkOut
       return checkDate >= checkIn && checkDate < checkOut;
     });

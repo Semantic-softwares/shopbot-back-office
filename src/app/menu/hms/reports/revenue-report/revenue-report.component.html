@@ -1,396 +1,386 @@
-<div class="p-6 bg-gray-50 min-h-screen">
-  <!-- Header Section -->
-  <div class="mb-6">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900">Revenue Report</h1>
-        <p class="text-gray-600 mt-1">Track and analyze your revenue performance and trends</p>
-      </div>
-      
-      <!-- Export Controls -->
-      <div>
-        <button mat-flat-button color="primary" [matMenuTriggerFor]="exportMenu">
-          <mat-icon class="mr-2">file_download</mat-icon>
-          Export Data
-        </button>
-        <mat-menu #exportMenu="matMenu">
-          <button mat-menu-item (click)="exportData('pdf')">
-            <mat-icon>picture_as_pdf</mat-icon>
-            <span>Export as PDF</span>
-          </button>
-          <button mat-menu-item (click)="exportData('csv')">
-            <mat-icon>description</mat-icon>
-            <span>Export as CSV</span>
-          </button>
-          <button mat-menu-item (click)="exportData('excel')">
-            <mat-icon>table_chart</mat-icon>
-            <span>Export as Excel</span>
-          </button>
-        </mat-menu>
-      </div>
-    </div>
-  </div>
+<app-page-header title="Revenue Report" subtitle="Track and analyze your revenue performance and trends">
+  <ng-container actions>
+    <button mat-stroked-button (click)="refreshData()" [disabled]="loading()">
+      @if (loading()) {
+        <mat-spinner diameter="18"></mat-spinner>
+      } @else {
+        <mat-icon>refresh</mat-icon>
+      }
+      {{ loading() ? 'Loading...' : 'Refresh' }}
+    </button>
+    
+    <button mat-flat-button color="primary" [matMenuTriggerFor]="exportMenu">
+      <mat-icon>download</mat-icon>
+      Export Data
+      <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #exportMenu="matMenu">
+      <button mat-menu-item (click)="exportData('pdf')">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span>Export as PDF</span>
+      </button>
+      <button mat-menu-item (click)="exportData('csv')">
+        <mat-icon>description</mat-icon>
+        <span>Export as CSV</span>
+      </button>
+      <button mat-menu-item (click)="exportData('excel')">
+        <mat-icon>table_chart</mat-icon>
+        <span>Export as Excel</span>
+      </button>
+    </mat-menu>
+  </ng-container>
+</app-page-header>
 
-  <!-- Error Alert -->
-  @if (error()) {
-    <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-md p-4">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-          </svg>
-        </div>
-        <div class="ml-3">
+<!-- Loading State -->
+@if (loading() && !revenueStats()) {
+  <div class="flex justify-center items-center py-16">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+}
+
+<!-- Error Alert -->
+@if (error()) {
+  <mat-card appearance="outlined" class="m-6 bg-yellow-50!">
+    <mat-card-content class="p-4!">
+      <div class="flex items-center">
+        <mat-icon class="text-yellow-500 mr-3">warning</mat-icon>
+        <div class="flex-1">
           <p class="text-sm text-yellow-700">{{ error() }}</p>
         </div>
-        <div class="ml-auto pl-3">
-          <div class="-mx-1.5 -my-1.5">
-            <button (click)="clearError()" class="inline-flex bg-yellow-50 rounded-md p-1.5 text-yellow-500 hover:bg-yellow-100">
-              <span class="sr-only">Dismiss</span>
-              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
+        <button mat-icon-button (click)="clearError()">
+          <mat-icon class="text-yellow-500">close</mat-icon>
+        </button>
       </div>
-    </div>
-  }
+    </mat-card-content>
+  </mat-card>
+}
+
+<!-- Main Content -->
+<div class="p-6 space-y-6">
 
   <!-- Filters Section -->
-  <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">Report Filters</h2>
-    
-    <form [formGroup]="filterForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-      <!-- Date Range -->
-      <div>
-        <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-        <input 
-          type="date" 
-          id="startDate"
-          formControlName="startDate"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-      </div>
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-icon mat-card-avatar class="text-blue-600">filter_list</mat-icon>
+      <mat-card-title>Report Filters</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="p-6!">
+      <form [formGroup]="filterForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        
+        <!-- Start Date -->
+        <mat-form-field appearance="outline">
+          <mat-label>Start Date</mat-label>
+          <input matInput [matDatepicker]="startPicker" formControlName="startDate" (dateChange)="onDateRangeChange()">
+          <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+        </mat-form-field>
 
-      <div>
-        <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-        <input 
-          type="date" 
-          id="endDate"
-          formControlName="endDate"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-      </div>
+        <!-- End Date -->
+        <mat-form-field appearance="outline">
+          <mat-label>End Date</mat-label>
+          <input matInput [matDatepicker]="endPicker" formControlName="endDate" (dateChange)="onDateRangeChange()">
+          <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+          <mat-datepicker #endPicker></mat-datepicker>
+        </mat-form-field>
 
-      <!-- Report Type -->
-      <div>
-        <label for="reportType" class="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
-        <select 
-          id="reportType"
-          formControlName="reportType"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-        </select>
-      </div>
+        <!-- Report Type -->
+        <mat-form-field appearance="outline">
+          <mat-label>Report Type</mat-label>
+          <mat-select formControlName="reportType" (selectionChange)="onFilterChange()">
+            <mat-option value="daily">Daily</mat-option>
+            <mat-option value="weekly">Weekly</mat-option>
+            <mat-option value="monthly">Monthly</mat-option>
+          </mat-select>
+        </mat-form-field>
 
-      <!-- Revenue Type Filter -->
-      <div>
-        <label for="revenueType" class="block text-sm font-medium text-gray-700 mb-1">Revenue Type</label>
-        <select 
-          id="revenueType"
-          formControlName="revenueType"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-          <option value="">All Categories</option>
-          <option value="room">Room Revenue</option>
-          <option value="service">Service Revenue</option>
-          <option value="other">Other Revenue</option>
-        </select>
-      </div>
+        <!-- Revenue Type Filter -->
+        <mat-form-field appearance="outline">
+          <mat-label>Revenue Type</mat-label>
+          <mat-select formControlName="revenueType" (selectionChange)="onFilterChange()">
+            <mat-option value="all">All Categories</mat-option>
+            <mat-option value="room">Room Revenue</mat-option>
+            <mat-option value="service">Service Revenue</mat-option>
+            <mat-option value="other">Other Revenue</mat-option>
+          </mat-select>
+        </mat-form-field>
 
-      <!-- Payment Method Filter -->
-      <div>
-        <label for="paymentMethod" class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
-        <select 
-          id="paymentMethod"
-          formControlName="paymentMethod"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-          <option value="">All Methods</option>
-          <option value="cash">Cash</option>
-          <option value="card">Card</option>
-          <option value="online">Online</option>
-          <option value="transfer">Bank Transfer</option>
-        </select>
-      </div>
-    </form>
-
-    <!-- Apply Filters Button -->
-    <div class="mt-4 flex justify-end">
-      <button 
-        (click)="loadData()"
-        [disabled]="loading()"
-        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
-        @if (loading()) {
-          <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="m 12,2 a 10,10 0 0 1 10,10 h -4 a 6,6 0 0 0 -6,-6 z"></path>
-          </svg>
-          Loading...
-        } @else {
-          Update Report
-        }
-      </button>
-    </div>
-  </div>
+        <!-- Payment Method Filter -->
+        <mat-form-field appearance="outline">
+          <mat-label>Payment Method</mat-label>
+          <mat-select formControlName="paymentMethod" (selectionChange)="onFilterChange()">
+            <mat-option value="all">All Methods</mat-option>
+            <mat-option value="cash">Cash</mat-option>
+            <mat-option value="card">Card</mat-option>
+            <mat-option value="online">Online</mat-option>
+            <mat-option value="transfer">Bank Transfer</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </form>
+    </mat-card-content>
+  </mat-card>
 
   @if (revenueStats()) {
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      
       <!-- Total Revenue Card -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center">
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Revenue</p>
-            <p class="text-2xl font-bold text-gray-900">
-              {{ revenueStats()!.totalRevenue | currency:currency():'symbol':'1.2-2' }}
-            </p>
-            @if (revenueStats()!.revenueGrowth !== 0) {
-              <p class="text-sm mt-1" 
-                 [class.text-green-600]="revenueStats()!.revenueGrowth > 0"
-                 [class.text-red-600]="revenueStats()!.revenueGrowth < 0">
-                @if (revenueStats()!.revenueGrowth > 0) {
-                  <span>↗ +{{ revenueStats()!.revenueGrowth }}%</span>
-                } @else {
-                  <span>↘ {{ revenueStats()!.revenueGrowth }}%</span>
-                }
+      <mat-card appearance="outlined" class="bg-green-50! border-green-200!">
+        <mat-card-content class="p-6!">
+          <div class="flex items-center">
+            <div class="flex-1">
+              <p class="text-sm font-medium text-green-600 uppercase tracking-wide">Total Revenue</p>
+              <p class="text-2xl font-bold text-green-900">
+                {{ revenueStats()!.totalRevenue | currency:currency():'symbol':'1.0-0' }}
               </p>
-            }
-          </div>
-          <div class="flex-shrink-0">
-            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-              </svg>
+              @if (revenueStats()!.revenueGrowth !== 0) {
+                <p class="text-sm mt-1 flex items-center gap-1" [class]="getRevenueGrowthClass(revenueStats()!.revenueGrowth)">
+                  <mat-icon class="text-base">{{ getRevenueGrowthIcon(revenueStats()!.revenueGrowth) }}</mat-icon>
+                  @if (revenueStats()!.revenueGrowth > 0) {
+                    <span>+{{ revenueStats()!.revenueGrowth }}%</span>
+                  } @else {
+                    <span>{{ revenueStats()!.revenueGrowth }}%</span>
+                  }
+                </p>
+              }
+            </div>
+            <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+              <mat-icon class="text-white">payments</mat-icon>
             </div>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- Total Transactions Card -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center">
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Transactions</p>
-            <p class="text-2xl font-bold text-gray-900">{{ revenueStats()!.totalTransactions | number }}</p>
-            <p class="text-sm text-gray-600 mt-1">
-              Avg: {{ revenueStats()!.averageTransactionValue | currency:currency():'symbol':'1.2-2' }}
-            </p>
-          </div>
-          <div class="flex-shrink-0">
-            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-              </svg>
+      <mat-card appearance="outlined" class="bg-blue-50! border-blue-200!">
+        <mat-card-content class="p-6!">
+          <div class="flex items-center">
+            <div class="flex-1">
+              <p class="text-sm font-medium text-blue-600 uppercase tracking-wide">Total Transactions</p>
+              <p class="text-2xl font-bold text-blue-900">{{ revenueStats()!.totalTransactions | number }}</p>
+              <p class="text-sm text-blue-600 mt-1">
+                Avg: {{ revenueStats()!.averageTransactionValue | currency:currency():'symbol':'1.2-2' }}
+              </p>
+            </div>
+            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+              <mat-icon class="text-white">receipt_long</mat-icon>
             </div>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- Average Daily Revenue Card -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center">
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Daily Average</p>
-            <p class="text-2xl font-bold text-gray-900">
-              {{ revenueStats()!.averageDailyRevenue | currency:currency():'symbol':'1.2-2' }}
-            </p>
-            <p class="text-sm text-gray-600 mt-1">
-              Peak: {{ revenueStats()!.peakRevenueAmount | currency:currency():'symbol':'1.2-2' }}
-            </p>
-          </div>
-          <div class="flex-shrink-0">
-            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
+      <mat-card appearance="outlined" class="bg-purple-50! border-purple-200!">
+        <mat-card-content class="p-6!">
+          <div class="flex items-center">
+            <div class="flex-1">
+              <p class="text-sm font-medium text-purple-600 uppercase tracking-wide">Daily Average</p>
+              <p class="text-2xl font-bold text-purple-900">
+                {{ revenueStats()!.averageDailyRevenue | currency:currency():'symbol':'1.0-0' }}
+              </p>
+              <p class="text-sm text-purple-600 mt-1">
+                Peak: {{ revenueStats()!.peakRevenueAmount | currency:currency():'symbol':'1.0-0' }}
+              </p>
+            </div>
+            <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+              <mat-icon class="text-white">bar_chart</mat-icon>
             </div>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- Monthly Projection Card -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center">
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Monthly Projection</p>
-            <p class="text-2xl font-bold text-gray-900">
-              {{ revenueStats()!.monthlyProjection | currency:currency():'symbol':'1.2-2' }}
-            </p>
-            <p class="text-sm text-gray-600 mt-1">Based on current trends</p>
-          </div>
-          <div class="flex-shrink-0">
-            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-              </svg>
+      <mat-card appearance="outlined" class="bg-orange-50! border-orange-200!">
+        <mat-card-content class="p-6!">
+          <div class="flex items-center">
+            <div class="flex-1">
+              <p class="text-sm font-medium text-orange-600 uppercase tracking-wide">Monthly Projection</p>
+              <p class="text-2xl font-bold text-orange-900">
+                {{ revenueStats()!.monthlyProjection | currency:currency():'symbol':'1.0-0' }}
+              </p>
+              <p class="text-sm text-orange-600 mt-1">Based on current trends</p>
+            </div>
+            <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+              <mat-icon class="text-white">trending_up</mat-icon>
             </div>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
     </div>
 
     <!-- Charts Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
       <!-- Revenue Trend Chart -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Revenue Trend</h3>
-        @if (revenueData().length > 0) {
-          <div class="h-80">
-            <canvas 
-              baseChart
-              [data]="revenueTrendChartData()"
-              [options]="chartOptions()"
-              type="line">
-            </canvas>
-          </div>
-        } @else {
-          <div class="h-80 flex items-center justify-center text-gray-500">
-            <div class="text-center">
-              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
-              <p class="mt-2">No revenue data available</p>
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-blue-600">show_chart</mat-icon>
+          <mat-card-title>Revenue Trend</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="p-6!">
+          @if (revenueData().length > 0) {
+            <div class="h-80">
+              <canvas 
+                baseChart
+                [data]="revenueTrendChartData()"
+                [options]="chartOptions()"
+                type="line">
+              </canvas>
             </div>
-          </div>
-        }
-      </div>
+          } @else {
+            <div class="h-80 flex items-center justify-center text-gray-500">
+              <div class="text-center">
+                <mat-icon class="text-6xl text-gray-300">bar_chart</mat-icon>
+                <p class="mt-2">No revenue data available</p>
+              </div>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
 
       <!-- Revenue Breakdown Chart -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Revenue Breakdown</h3>
-        @if (revenueBreakdown().length > 0) {
-          <div class="h-80">
-            <canvas 
-              baseChart
-              [data]="revenueBreakdownChartData()"
-              [options]="doughnutChartOptions()"
-              type="doughnut">
-            </canvas>
-          </div>
-        } @else {
-          <div class="h-80 flex items-center justify-center text-gray-500">
-            <div class="text-center">
-              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
-              </svg>
-              <p class="mt-2">No breakdown data available</p>
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-purple-600">pie_chart</mat-icon>
+          <mat-card-title>Revenue Breakdown</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="p-6!">
+          @if (revenueBreakdown().length > 0) {
+            <div class="h-80">
+              <canvas 
+                baseChart
+                [data]="revenueBreakdownChartData()"
+                [options]="doughnutChartOptions()"
+                type="doughnut">
+              </canvas>
             </div>
-          </div>
-        }
-      </div>
+          } @else {
+            <div class="h-80 flex items-center justify-center text-gray-500">
+              <div class="text-center">
+                <mat-icon class="text-6xl text-gray-300">pie_chart</mat-icon>
+                <p class="mt-2">No breakdown data available</p>
+              </div>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
     </div>
 
     <!-- Revenue Breakdown Table -->
     @if (revenueBreakdown().length > 0) {
-      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Revenue Breakdown Details</h3>
-        
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Percentage</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transactions</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg per Transaction</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              @for (item of revenueBreakdown(); track item.category) {
-                <tr class="hover:bg-gray-50">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {{ item.category }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ item.amount | currency:currency():'symbol':'1.2-2' }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div class="flex items-center">
-                      <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                        <div 
-                          class="bg-blue-600 h-2 rounded-full" 
-                          [style.width.%]="item.percentage">
-                        </div>
-                      </div>
-                      <span>{{ item.percentage }}%</span>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ item.transactions | number }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ item.averageAmount | currency:currency():'symbol':'1.2-2' }}
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-indigo-600">category</mat-icon>
+          <mat-card-title>Revenue Breakdown Details</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="p-0!">
+          <div class="overflow-x-auto">
+            <table mat-table [dataSource]="revenueBreakdown()" class="w-full">
+              
+              <!-- Category Column -->
+              <ng-container matColumnDef="category">
+                <th mat-header-cell *matHeaderCellDef>Category</th>
+                <td mat-cell *matCellDef="let item" class="font-medium">{{ item.category }}</td>
+              </ng-container>
+
+              <!-- Amount Column -->
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>Amount</th>
+                <td mat-cell *matCellDef="let item">{{ item.amount | currency:currency():'symbol':'1.2-2' }}</td>
+              </ng-container>
+
+              <!-- Percentage Column -->
+              <ng-container matColumnDef="percentage">
+                <th mat-header-cell *matHeaderCellDef>Percentage</th>
+                <td mat-cell *matCellDef="let item">
+                  <div class="flex items-center gap-2">
+                    <mat-progress-bar mode="determinate" [value]="item.percentage" class="w-16"></mat-progress-bar>
+                    <span>{{ item.percentage }}%</span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Transactions Column -->
+              <ng-container matColumnDef="transactions">
+                <th mat-header-cell *matHeaderCellDef>Transactions</th>
+                <td mat-cell *matCellDef="let item">{{ item.transactions | number }}</td>
+              </ng-container>
+
+              <!-- Average Amount Column -->
+              <ng-container matColumnDef="averageAmount">
+                <th mat-header-cell *matHeaderCellDef>Avg per Transaction</th>
+                <td mat-cell *matCellDef="let item">{{ item.averageAmount | currency:currency():'symbol':'1.2-2' }}</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="breakdownColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: breakdownColumns;" class="hover:bg-gray-50"></tr>
+            </table>
+          </div>
+        </mat-card-content>
+      </mat-card>
     }
 
     <!-- Daily Revenue Data Table -->
     @if (revenueData().length > 0) {
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-gray-900">Daily Revenue Data</h3>
-          <p class="text-sm text-gray-600">{{ revenueData().length }} records found</p>
-        </div>
-        
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Revenue</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room Revenue</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Revenue</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Other Revenue</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transactions</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Transaction</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Growth</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              @for (item of revenueData(); track item.date) {
-                <tr class="hover:bg-gray-50">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ formatDate(item.date) }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {{ item.totalRevenue | currency:currency():'symbol':'1.2-2' }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ item.roomRevenue | currency:currency():'symbol':'1.2-2' }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ item.serviceRevenue | currency:currency():'symbol':'1.2-2' }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ item.otherRevenue | currency:currency():'symbol':'1.2-2' }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ item.transactions | number }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ item.averageTransaction | currency:currency():'symbol':'1.2-2' }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm" 
-                      [class.text-green-600]="item.revenueGrowth > 0"
-                      [class.text-red-600]="item.revenueGrowth < 0"
-                      [class.text-gray-500]="item.revenueGrowth === 0">
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-teal-600">table_chart</mat-icon>
+          <mat-card-title>Daily Revenue Data</mat-card-title>
+          <mat-card-subtitle>{{ revenueData().length }} records found</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="p-0!">
+          <div class="overflow-x-auto">
+            <table mat-table [dataSource]="revenueData()" class="w-full">
+              
+              <!-- Date Column -->
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let item" class="font-medium">{{ formatDate(item.date) }}</td>
+              </ng-container>
+
+              <!-- Total Revenue Column -->
+              <ng-container matColumnDef="totalRevenue">
+                <th mat-header-cell *matHeaderCellDef>Total Revenue</th>
+                <td mat-cell *matCellDef="let item" class="font-medium">
+                  {{ item.totalRevenue | currency:currency():'symbol':'1.2-2' }}
+                </td>
+              </ng-container>
+
+              <!-- Room Revenue Column -->
+              <ng-container matColumnDef="roomRevenue">
+                <th mat-header-cell *matHeaderCellDef>Room Revenue</th>
+                <td mat-cell *matCellDef="let item">{{ item.roomRevenue | currency:currency():'symbol':'1.2-2' }}</td>
+              </ng-container>
+
+              <!-- Service Revenue Column -->
+              <ng-container matColumnDef="serviceRevenue">
+                <th mat-header-cell *matHeaderCellDef>Service Revenue</th>
+                <td mat-cell *matCellDef="let item">{{ item.serviceRevenue | currency:currency():'symbol':'1.2-2' }}</td>
+              </ng-container>
+
+              <!-- Other Revenue Column -->
+              <ng-container matColumnDef="otherRevenue">
+                <th mat-header-cell *matHeaderCellDef>Other Revenue</th>
+                <td mat-cell *matCellDef="let item">{{ item.otherRevenue | currency:currency():'symbol':'1.2-2' }}</td>
+              </ng-container>
+
+              <!-- Transactions Column -->
+              <ng-container matColumnDef="transactions">
+                <th mat-header-cell *matHeaderCellDef>Transactions</th>
+                <td mat-cell *matCellDef="let item">{{ item.transactions | number }}</td>
+              </ng-container>
+
+              <!-- Average Transaction Column -->
+              <ng-container matColumnDef="averageTransaction">
+                <th mat-header-cell *matHeaderCellDef>Avg Transaction</th>
+                <td mat-cell *matCellDef="let item">{{ item.averageTransaction | currency:currency():'symbol':'1.2-2' }}</td>
+              </ng-container>
+
+              <!-- Growth Column -->
+              <ng-container matColumnDef="revenueGrowth">
+                <th mat-header-cell *matHeaderCellDef>Growth</th>
+                <td mat-cell *matCellDef="let item">
+                  <span class="flex items-center gap-1" [class]="getRevenueGrowthClass(item.revenueGrowth)">
+                    <mat-icon class="text-base">{{ getRevenueGrowthIcon(item.revenueGrowth) }}</mat-icon>
                     @if (item.revenueGrowth > 0) {
                       <span>+{{ item.revenueGrowth }}%</span>
                     } @else if (item.revenueGrowth < 0) {
@@ -398,27 +388,22 @@
                     } @else {
                       <span>0%</span>
                     }
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-    }
-  }
+                  </span>
+                </td>
+              </ng-container>
 
-  <!-- Loading State -->
-  @if (loading() && !revenueStats()) {
-    <div class="bg-white rounded-lg shadow-md p-12">
-      <div class="flex flex-col items-center justify-center">
-        <svg class="animate-spin h-12 w-12 text-blue-600 mb-4" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="m 12,2 a 10,10 0 0 1 10,10 h -4 a 6,6 0 0 0 -6,-6 z"></path>
-        </svg>
-        <p class="text-lg text-gray-600">Loading revenue data...</p>
-        <p class="text-sm text-gray-500 mt-1">This may take a few moments</p>
-      </div>
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50"></tr>
+            </table>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Last Updated Info -->
+    <div class="text-center text-sm text-gray-500">
+      <mat-icon class="text-base align-text-bottom mr-1">schedule</mat-icon>
+      Last updated: {{ lastUpdated() | date:'medium' }}
     </div>
   }
 </div>

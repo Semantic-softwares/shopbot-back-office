@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,10 +9,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
-import { Subject, takeUntil } from 'rxjs';
+import { MatTabsModule } from '@angular/material/tabs';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { Subject, takeUntil, of } from 'rxjs';
 
 import { RoomsService } from '../../../../../shared/services/rooms.service';
+import { StoreStore } from '../../../../../shared/stores/store.store';
 import { RoomType } from '../../../../../shared/models/room.model';
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 
 @Component({
   selector: 'app-room-type-details',
@@ -26,22 +30,48 @@ import { RoomType } from '../../../../../shared/models/room.model';
     MatChipsModule,
     MatProgressSpinnerModule,
     MatMenuModule,
-    MatDividerModule
+    MatDividerModule,
+    MatTabsModule,
+    PageHeaderComponent
   ],
   templateUrl: './room-type-details.component.html'
 })
-export class RoomTypeDetailsComponent implements OnInit, OnDestroy {
+export class RoomTypeDetailsComponent implements OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private roomsService = inject(RoomsService);
   private snackBar = inject(MatSnackBar);
+  private storeStore = inject(StoreStore);
   private destroy$ = new Subject<void>();
 
-  // Signals
-  roomType = signal<RoomType | null>(null);
-  loading = signal(true);
-  error = signal<string | null>(null);
-  roomTypeId = signal<string | null>(null);
+  // Room type ID signal from route
+  roomTypeId = signal<string | null>(this.route.snapshot.paramMap.get('id'));
+
+  // rxResource for loading room type details
+  roomTypeResource = rxResource({
+    params: () => ({ roomTypeId: this.roomTypeId() }),
+    stream: ({ params }) => {
+      if (!params.roomTypeId) {
+        return of(null as RoomType | null);
+      }
+      return this.roomsService.getRoomType(params.roomTypeId);
+    }
+  });
+
+  // Computed properties from resource
+  roomType = computed<RoomType | null>(() => this.roomTypeResource.value() ?? null);
+  loading = computed(() => this.roomTypeResource.isLoading());
+  error = computed(() => this.roomTypeResource.error() ? 'Failed to load room type details' : null);
+
+  // Store currency
+  storeCurrency = computed(() => this.storeStore.selectedStore()?.currency || this.storeStore.selectedStore()?.currencyCode || 'USD');
+
+  // Currency symbol to ISO code mapping
+  private currencySymbolToCode: Record<string, string> = {
+    '₦': 'NGN', '$': 'USD', '€': 'EUR', '£': 'GBP', '¥': 'JPY',
+    '₹': 'INR', '₽': 'RUB', '₩': 'KRW', '₱': 'PHP', '฿': 'THB',
+    'R$': 'BRL', 'R': 'ZAR', 'RM': 'MYR', 'kr': 'SEK', 'Fr': 'CHF'
+  };
 
   // Computed values
   totalCapacity = computed(() => {
@@ -56,71 +86,48 @@ export class RoomTypeDetailsComponent implements OnInit, OnDestroy {
     const rt = this.roomType();
     if (!rt?.features) return [];
     
-    const features = [];
-    const featureMap = {
-      hasPrivateBathroom: 'Private Bathroom',
-      hasAirConditioning: 'Air Conditioning',
-      hasWifi: 'WiFi',
-      hasTv: 'Television',
-      hasRefrigerator: 'Refrigerator',
-      hasBalcony: 'Balcony',
-      hasKitchenette: 'Kitchenette',
-      hasWorkDesk: 'Work Desk',
-      hasSafe: 'Safe',
-      hasHairdryer: 'Hair Dryer',
-      hasIroning: 'Iron & Board',
-      hasSeatingArea: 'Seating Area'
+    const features: { name: string; icon: string }[] = [];
+    const featureMap: Record<string, { label: string; icon: string }> = {
+      hasPrivateBathroom: { label: 'Private Bathroom', icon: 'bathroom' },
+      hasAirConditioning: { label: 'Air Conditioning', icon: 'ac_unit' },
+      hasWifi: { label: 'WiFi', icon: 'wifi' },
+      hasTv: { label: 'Television', icon: 'tv' },
+      hasRefrigerator: { label: 'Refrigerator', icon: 'kitchen' },
+      hasBalcony: { label: 'Balcony', icon: 'balcony' },
+      hasKitchenette: { label: 'Kitchenette', icon: 'countertops' },
+      hasWorkDesk: { label: 'Work Desk', icon: 'desk' },
+      hasSafe: { label: 'Safe', icon: 'lock' },
+      hasHairdryer: { label: 'Hair Dryer', icon: 'dry' },
+      hasIroning: { label: 'Iron & Board', icon: 'iron' },
+      hasSeatingArea: { label: 'Seating Area', icon: 'weekend' }
     };
 
-    for (const [key, label] of Object.entries(featureMap)) {
+    for (const [key, config] of Object.entries(featureMap)) {
       if (rt.features[key as keyof typeof rt.features]) {
-        features.push(label);
+        features.push({ name: config.label, icon: config.icon });
       }
     }
     
     return features;
   });
 
-  ngOnInit() {
-    this.route.params.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(params => {
-      const id = params['id'];
-      if (id) {
-        this.roomTypeId.set(id);
-        this.loadRoomType(id);
-      }
-    });
-  }
-
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  private loadRoomType(id: string) {
-    this.loading.set(true);
-    this.error.set(null);
+  loadRoomTypeDetails(): void {
+    this.roomTypeResource.reload();
+  }
 
-    this.roomsService.getRoomType(id).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (roomType) => {
-        this.roomType.set(roomType);
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading room type:', error);
-        this.error.set('Failed to load room type details');
-        this.loading.set(false);
-      }
-    });
+  onBack(): void {
+    this.router.navigate(['../'], { relativeTo: this.route });
   }
 
   onEdit() {
     const id = this.roomTypeId();
     if (id) {
-      this.router.navigate(['/menu/hms/rooms-management/room-types/', id, 'edit']);
+      this.router.navigate(['../', id, 'edit'], { relativeTo: this.route });
     }
   }
 
@@ -137,7 +144,7 @@ export class RoomTypeDetailsComponent implements OnInit, OnDestroy {
       ).subscribe({
         next: () => {
           this.snackBar.open('Room type deleted successfully', 'Close', { duration: 3000 });
-          this.router.navigate(['/menu/hms/rooms-management/room-types/room-types']);
+          this.router.navigate(['../../room-types'], { relativeTo: this.route });
         },
         error: (error) => {
           console.error('Error deleting room type:', error);
@@ -160,9 +167,9 @@ export class RoomTypeDetailsComponent implements OnInit, OnDestroy {
     this.roomsService.updateRoomType(id, { active: newActiveStatus }).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
-      next: (updatedRoomType) => {
-        this.roomType.set(updatedRoomType);
+      next: () => {
         this.snackBar.open(`Room type ${action}d successfully`, 'Close', { duration: 3000 });
+        this.roomTypeResource.reload();
       },
       error: (error) => {
         console.error(`Error ${action}ing room type:`, error);
@@ -171,14 +178,31 @@ export class RoomTypeDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
-  goBack() {
-    this.router.navigate(['/menu/hms/rooms-management/room-types/room-types']);
-  }
-
   formatPrice(price: number): string {
+    let currencyCode = this.storeCurrency();
+    
+    // If it's a symbol, try to map it to a code
+    if (this.currencySymbolToCode[currencyCode]) {
+      currencyCode = this.currencySymbolToCode[currencyCode];
+    }
+    
+    // Validate currency code (should be 3 letters)
+    const isValidCode = /^[A-Z]{3}$/.test(currencyCode);
+    
+    if (!isValidCode) {
+      // Fallback: format number and prepend the symbol
+      const formattedNumber = new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }).format(price);
+      return `${this.storeCurrency()}${formattedNumber}`;
+    }
+    
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: currencyCode,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
     }).format(price);
   }
 

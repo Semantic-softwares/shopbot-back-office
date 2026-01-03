@@ -4,6 +4,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { MatListModule } from '@angular/material/list';
+import { MatDividerModule } from '@angular/material/divider';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { BaseChartDirective } from 'ng2-charts';
@@ -26,6 +28,8 @@ import { StoreStore } from '../../../shared/stores/store.store';
     MatIconModule,
     MatButtonModule,
     MatGridListModule,
+    MatListModule,
+    MatDividerModule,
     BaseChartDirective,
   ],
   templateUrl: './overview.component.html',
@@ -39,7 +43,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
 
   // Computed values
   get currency() {
-    return this.storeStore.selectedStore()?.currencyCode || this.storeStore.selectedStore()?.currency || '$';
+    return   this.storeStore.selectedStore()?.currency || this.storeStore.selectedStore()?.currencyCode || '$';
   }
 
   get defaultValue() {

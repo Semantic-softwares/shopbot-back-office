@@ -11,7 +11,7 @@
     </button>
 
     <button matButton="outlined" (click)="reloadData()">
-      <mat-icon class="mr-1">redo</mat-icon>
+      <mat-icon class="mr-1">refresh</mat-icon>
       Reload
     </button>
     
@@ -25,7 +25,7 @@
 
 <div class="min-h-screen flex flex-col ">
   <!-- Calendar Controls Header -->
-  <div class=" border-b border-gray-200  py-4 ">
+  <div class="py-4 ">
     <div class="flex justify-between items-center">
       <div>
         <div class="flex flex-wrap gap-4 mt-2">
@@ -95,31 +95,54 @@
           <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
         </div>
       }
-      <table class="w-full border-collapse overflow-hidden">
+      <table class="w-full border-collapse  overflow-hidden">
         <tfoot>
           <tr>
-            <td class="sticky left-0 z-10 w-48 border border-gray-200 bg-white"></td>
-            <td class="border border-gray-200 bg-white px-4 py-2" [attr.colspan]="dateRange().length">
-              <div class="flex flex-wrap items-center gap-4">
-                @for (s of reservationStatuses; track s) {
+            <td class="sticky left-0 z-10 w-48 border border-outline-variant px-4 py-2">
+              <div class="flex flex-col gap-1">
+                <span class="text-xs font-semibold text-gray-600 mb-1">Room Status</span>
+                @for (status of housekeepingStatuses; track status.key) {
                   <div class="flex items-center gap-2">
-                    <span class="inline-block w-3 h-3 rounded-sm" [ngClass]="getStatusColorClass(s)"></span>
-                    <span class="text-xs text-gray-700">{{ s | titlecase }}</span>
+                    <span class="inline-block w-3 h-3 rounded-sm border-l-2" 
+                          [ngClass]="{
+                            'bg-green-100 border-l-green-500': status.key === 'clean',
+                            'bg-amber-100 border-l-amber-500': status.key === 'dirty',
+                            'bg-blue-100 border-l-blue-500': status.key === 'inspected',
+                            'bg-red-100 border-l-red-500': status.key === 'out_of_order'
+                          }"></span>
+                    <span class="text-xs text-gray-700">{{ status.label }}</span>
                   </div>
                 }
+              </div>
+            </td>
+            <td class="border border-outline-variant px-4 py-2" [attr.colspan]="dateRange().length">
+              <div class="flex flex-col gap-2">
+                <span class="text-xs font-semibold text-gray-600">Reservation Status</span>
+                <div class="flex flex-wrap items-center gap-4">
+                  @for (s of reservationStatuses; track s) {
+                    <div class="flex items-center gap-2">
+                      <span class="inline-block w-3 h-3 rounded-sm" [ngClass]="getStatusColorClass(s)"></span>
+                      <span class="text-xs text-gray-700">{{ s | titlecase }}</span>
+                    </div>
+                  }
+                </div>
               </div>
             </td>
           </tr>
         </tfoot>
         <thead>
           <tr>
-            <th class="sticky left-0 top-0 z-30 w-48 bg-white border border-gray-200 text-center">
+            <th class="sticky left-0 top-0 z-30 w-48 bg-white border border-outline-variant text-center">
               <span class="text-xs font-semibold text-gray-700 uppercase">Rooms</span>
             </th>
             @for (date of dateRange(); track date.key) {
-              <th class="sticky top-0 z-20 bg-white border border-gray-200 text-center" [style.width.px]="cellWidthPx()">
-                <p class="text-xs font-semibold text-gray-600">{{ date.dayName }}</p>
-                <p class="text-sm font-bold text-gray-900">{{ date.day }}</p>
+              <th class="sticky top-0 z-20 border border-outline-variant text-center transition-colors duration-150"
+                  [style.width.px]="cellWidthPx()"
+                  [class.bg-white]="hoveredDateKey() !== date.key"
+                  [class.bg-blue-500]="hoveredDateKey() === date.key"
+                  [class.text-white]="hoveredDateKey() === date.key">
+                <p class="text-xs font-semibold" [class.text-gray-600]="hoveredDateKey() !== date.key">{{ date.dayName }}</p>
+                <p class="text-sm font-bold" [class.text-gray-900]="hoveredDateKey() !== date.key">{{ date.day }}</p>
               </th>
             }
           </tr>
@@ -128,28 +151,42 @@
           @for (row of roomsWithReservations(); track $index) {
             @if (row.isGroup) {
               <tr>
-                <td class="sticky left-0 z-10 w-48 border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                <td class="sticky left-0 z-10 w-48 border border-outline-variant px-4 py-2 text-left bg-gray-100">
                   <span class="text-xs font-semibold text-gray-800">{{ row.roomTypeName }}</span>
                 </td>
                 @for (date of dateRange(); track date.key) {
-                  <td class="border border-gray-200 bg-gray-100" [style.width.px]="cellWidthPx()"></td>
+                  <td class="border border-outline-variant transition-colors duration-150" 
+                      [class.bg-gray-100]="hoveredDateKey() !== date.key"
+                      [class.bg-blue-100]="hoveredDateKey() === date.key"
+                      [style.width.px]="cellWidthPx()"
+                      (mouseenter)="hoveredDateKey.set(date.key)"
+                      (mouseleave)="hoveredDateKey.set(null)"></td>
                 }
               </tr>
             } @else {
               <tr class="h-12">
-                <td class="sticky left-0 z-10 w-48 border border-gray-200 px-4 bg-gray-50 text-xs">
-                  {{ row.roomName }}
+                <td class="sticky left-0 z-10 w-48 border border-outline-variant px-4 text-xs cursor-context-menu"
+                    [ngClass]="getHousekeepingStatusClass(row.housekeepingStatus)"
+                    [matTooltip]="'Housekeeping: ' + (row.housekeepingStatus | titlecase) + ' (Right-click to change)'"
+                    matTooltipPosition="right"
+                    [cdkContextMenuTriggerFor]="housekeepingMenu"
+                    [cdkContextMenuTriggerData]="{ roomId: row.roomId, currentStatus: row.housekeepingStatus }">
+                  <div class="flex items-center gap-2">
+                    <span>{{ row.roomName }}</span>
+                  </div>
                 </td>
                 @for (date of dateRange(); track date.key) {
                   <td 
-                    class="border border-gray-200 relative overflow-visible select-none"
+                    class="border border-outline-variant relative overflow-visible select-none transition-colors duration-150"
                     [class.bg-blue-100]="isCellInSelection(date, row) && !dragSelection().hasConflict"
                     [class.bg-red-100]="isCellInSelection(date, row) && dragSelection().hasConflict"
+                    [class.bg-blue-50]="hoveredDateKey() === date.key && !isCellInSelection(date, row)"
                     [class.cursor-pointer]="!hasReservationOnDate(row.roomId, date.date)"
                     [class.cursor-not-allowed]="hasReservationOnDate(row.roomId, date.date)"
                     [style.width.px]="cellWidthPx()"
                     (mousedown)="onCellMouseDown($event, date, row)"
-                    (mouseenter)="onCellMouseEnter(date, row)"
+                    (mouseenter)="onCellMouseEnter(date, row); hoveredDateKey.set(date.key)"
+                    (mouseleave)="hoveredDateKey.set(null)"
                     (mouseup)="onCellMouseUp()"
                   >
                     @for (reservation of row.reservations; track $index) {
@@ -179,3 +216,31 @@
     </div>
   </div>
 </div>
+
+<!-- Housekeeping Status Context Menu -->
+<ng-template #housekeepingMenu let-roomId="roomId" let-currentStatus="currentStatus">
+  <div class="bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[200px]" cdkMenu>
+    <div class="px-4 py-2 border-b border-gray-100">
+      <span class="text-xs font-semibold text-gray-500 uppercase">Update Housekeeping Status</span>
+    </div>
+    @for (status of housekeepingStatuses; track status.key) {
+      <button 
+        class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3 transition-colors"
+        [class.bg-gray-50]="currentStatus === status.key"
+        [class.font-semibold]="currentStatus === status.key"
+        cdkMenuItem
+        (cdkMenuItemTriggered)="updateHousekeepingStatus(roomId, status.key)">
+        <mat-icon class="text-base" [ngClass]="{
+          'text-green-600': status.key === 'clean',
+          'text-amber-600': status.key === 'dirty',
+          'text-blue-600': status.key === 'inspected',
+          'text-red-600': status.key === 'out_of_order'
+        }">{{ getHousekeepingStatusIcon(status.key) }}</mat-icon>
+        <span>{{ status.label }}</span>
+        @if (currentStatus === status.key) {
+          <mat-icon class="ml-auto text-base text-green-600">check</mat-icon>
+        }
+      </button>
+    }
+  </div>
+</ng-template>

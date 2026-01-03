@@ -1,240 +1,214 @@
-<!-- Header Section -->
-<div class="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-100">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between items-center py-6">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-1">Occupancy Report</h1>
-        <p class="text-sm text-gray-600">Monitor room occupancy rates, availability, and revenue trends</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <button 
-          (click)="refreshData()"
-          [disabled]="loading()"
-          class="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          {{ loading() ? 'Loading...' : 'Refresh' }}
-        </button>
-        <div class="relative">
-          <button
-            id="export-menu-button"
-            class="bg-white border border-purple-300 text-purple-600 hover:bg-purple-50 px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Export
-          </button>
-          <!-- Dropdown Menu -->
-          <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10 hidden" id="export-menu">
-            <div class="py-1">
-              <button 
-                (click)="exportToCSV()" 
-                class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Export to CSV
-              </button>
-              <button 
-                (click)="exportToPDF()" 
-                class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Export to PDF
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<app-page-header title="Occupancy Report" subtitle="Monitor room occupancy rates, availability, and revenue trends">
+  <ng-container actions>
+    <button mat-stroked-button (click)="refreshData()" [disabled]="loading()">
+      @if (loading()) {
+        <mat-spinner diameter="18"></mat-spinner>
+      } @else {
+        <mat-icon>refresh</mat-icon>
+      }
+      {{ loading() ? 'Loading...' : 'Refresh' }}
+    </button>
+    
+    <button mat-flat-button color="primary" [matMenuTriggerFor]="exportMenu">
+      <mat-icon>download</mat-icon>
+      Export
+      <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #exportMenu="matMenu">
+      <button mat-menu-item (click)="exportToCSV()">
+        <mat-icon>table_chart</mat-icon>
+        <span>Export to CSV</span>
+      </button>
+      <button mat-menu-item (click)="exportToPDF()">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span>Export to PDF</span>
+      </button>
+    </mat-menu>
+  </ng-container>
+</app-page-header>
 
 <!-- Loading State -->
 @if (loading()) {
   <div class="flex justify-center items-center py-16">
-    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
-    <span class="ml-3 text-gray-600">Loading occupancy data...</span>
+    <mat-spinner diameter="40"></mat-spinner>
   </div>
 }
 
 <!-- Error State -->
-@if (error()) {
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <div class="bg-red-50 border border-red-200 rounded-lg p-6">
-      <div class="flex items-center">
-        <svg class="w-6 h-6 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <div class="flex-1">
-          <h3 class="text-lg font-semibold text-red-800">Error Loading Data</h3>
-          <p class="text-red-700 mt-1">{{ error() }}</p>
-        </div>
-        <button 
-          (click)="clearError()" 
-          class="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded text-sm">
-          Dismiss
-        </button>
+@if (error() && !loading()) {
+  <mat-card appearance="outlined" class="m-6 bg-red-50!">
+    <mat-card-content class="p-6! text-center">
+      <div class="w-16 h-16 bg-red-200 rounded-full flex items-center justify-center mx-auto mb-4">
+        <mat-icon class="text-4xl text-red-500">error</mat-icon>
       </div>
-    </div>
-  </div>
+      <h3 class="text-lg font-semibold text-red-900 mb-2">Error Loading Data</h3>
+      <p class="text-red-700 mb-4">{{ error() }}</p>
+      <button mat-flat-button color="warn" (click)="clearError()">
+        <mat-icon>close</mat-icon>
+        Dismiss
+      </button>
+    </mat-card-content>
+  </mat-card>
 }
 
 <!-- Main Content -->
 @if (!loading() && !error()) {
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+  <div class="p-6 space-y-6">
     
     <!-- Filters Section -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h2 class="text-lg font-semibold text-gray-900 mb-4">Report Filters</h2>
-      <form [formGroup]="filterForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        
-        <!-- Start Date -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
-          <input 
-            type="date" 
-            formControlName="startDate"
-            (change)="onDateRangeChange()"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-        </div>
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="text-purple-600">filter_list</mat-icon>
+        <mat-card-title>Report Filters</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="p-6!">
+        <form [formGroup]="filterForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          
+          <!-- Start Date -->
+          <mat-form-field appearance="outline">
+            <mat-label>Start Date</mat-label>
+            <input matInput [matDatepicker]="startPicker" formControlName="startDate" (dateChange)="onDateRangeChange()">
+            <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
 
-        <!-- End Date -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
-          <input 
-            type="date" 
-            formControlName="endDate"
-            (change)="onDateRangeChange()"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-        </div>
+          <!-- End Date -->
+          <mat-form-field appearance="outline">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="endPicker" formControlName="endDate" (dateChange)="onDateRangeChange()">
+            <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
 
-        <!-- Report Type -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
-          <select 
-            formControlName="reportType"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-          </select>
-        </div>
+          <!-- Report Type -->
+          <mat-form-field appearance="outline">
+            <mat-label>Report Type</mat-label>
+            <mat-select formControlName="reportType" (selectionChange)="onFilterChange()">
+              <mat-option value="daily">Daily</mat-option>
+              <mat-option value="weekly">Weekly</mat-option>
+              <mat-option value="monthly">Monthly</mat-option>
+            </mat-select>
+          </mat-form-field>
 
-        <!-- Room Type -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
-          <select 
-            formControlName="roomType"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-            <option value="all">All Room Types</option>
-            <option value="standard">Standard</option>
-            <option value="deluxe">Deluxe</option>
-            <option value="suite">Suite</option>
-            <option value="presidential">Presidential</option>
-          </select>
-        </div>
+          <!-- Room Type -->
+          <mat-form-field appearance="outline">
+            <mat-label>Room Type</mat-label>
+            <mat-select formControlName="roomType" (selectionChange)="onFilterChange()">
+              <mat-option value="all">All Room Types</mat-option>
+              <mat-option value="standard">Standard</mat-option>
+              <mat-option value="deluxe">Deluxe</mat-option>
+              <mat-option value="suite">Suite</mat-option>
+              <mat-option value="presidential">Presidential</mat-option>
+            </mat-select>
+          </mat-form-field>
 
-        <!-- Floor Number -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Floor</label>
-          <select 
-            formControlName="floorNumber"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-            <option value="all">All Floors</option>
-            <option value="1">Floor 1</option>
-            <option value="2">Floor 2</option>
-            <option value="3">Floor 3</option>
-            <option value="4">Floor 4</option>
-            <option value="5">Floor 5</option>
-          </select>
-        </div>
-      </form>
-    </div>
+          <!-- Floor Number -->
+          <mat-form-field appearance="outline">
+            <mat-label>Floor</mat-label>
+            <mat-select formControlName="floorNumber" (selectionChange)="onFilterChange()">
+              <mat-option value="all">All Floors</mat-option>
+              <mat-option value="1">Floor 1</mat-option>
+              <mat-option value="2">Floor 2</mat-option>
+              <mat-option value="3">Floor 3</mat-option>
+              <mat-option value="4">Floor 4</mat-option>
+              <mat-option value="5">Floor 5</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </form>
+      </mat-card-content>
+    </mat-card>
 
     <!-- Statistics Cards -->
     @if (occupancyStats()) {
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         
         <!-- Current Occupancy -->
-        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-sm p-4 border border-blue-200">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-medium text-blue-600 uppercase tracking-wide">Current Occupancy</p>
-              <p class="text-2xl font-bold text-blue-900">{{ formatPercent(occupancyStats()!.currentOccupancyRate) }}</p>
+        <mat-card appearance="outlined" >
+          <mat-card-content class="p-4!">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs font-medium text-blue-600 uppercase tracking-wide">Current Occupancy</p>
+                <p class="text-2xl font-bold text-blue-900">{{ formatPercent(occupancyStats()!.currentOccupancyRate) }}</p>
+              </div>
+              <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                <mat-icon class="text-white">hotel</mat-icon>
+              </div>
             </div>
-            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white text-xl">
-              🏨
-            </div>
-          </div>
-        </div>
+          </mat-card-content>
+        </mat-card>
 
         <!-- Total Rooms -->
-        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-sm p-4 border border-purple-200">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-medium text-purple-600 uppercase tracking-wide">Total Rooms</p>
-              <p class="text-2xl font-bold text-purple-900">{{ occupancyStats()!.totalRooms }}</p>
+        <mat-card appearance="outlined">
+          <mat-card-content class="p-4!">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs font-medium text-purple-600 uppercase tracking-wide">Total Rooms</p>
+                <p class="text-2xl font-bold text-purple-900">{{ occupancyStats()!.totalRooms }}</p>
+              </div>
+              <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+                <mat-icon class="text-white">meeting_room</mat-icon>
+              </div>
             </div>
-            <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white text-xl">
-              🏠
-            </div>
-          </div>
-        </div>
+          </mat-card-content>
+        </mat-card>
 
         <!-- Occupied Rooms -->
-        <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl shadow-sm p-4 border border-red-200">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-medium text-red-600 uppercase tracking-wide">Occupied</p>
-              <p class="text-2xl font-bold text-red-900">{{ occupancyStats()!.currentOccupied }}</p>
+        <mat-card appearance="outlined">
+          <mat-card-content class="p-4!">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs font-medium text-red-600 uppercase tracking-wide">Occupied</p>
+                <p class="text-2xl font-bold text-red-900">{{ occupancyStats()!.currentOccupied }}</p>
+              </div>
+              <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                <mat-icon class="text-white">people</mat-icon>
+              </div>
             </div>
-            <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white text-xl">
-              👥
-            </div>
-          </div>
-        </div>
+          </mat-card-content>
+        </mat-card>
 
         <!-- Available Rooms -->
-        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-sm p-4 border border-green-200">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-medium text-green-600 uppercase tracking-wide">Available</p>
-              <p class="text-2xl font-bold text-green-900">{{ occupancyStats()!.currentAvailable }}</p>
+        <mat-card appearance="outlined">
+          <mat-card-content class="p-4!">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs font-medium text-green-600 uppercase tracking-wide">Available</p>
+                <p class="text-2xl font-bold text-green-900">{{ occupancyStats()!.currentAvailable }}</p>
+              </div>
+              <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                <mat-icon class="text-white">check_circle</mat-icon>
+              </div>
             </div>
-            <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-xl">
-              ✅
-            </div>
-          </div>
-        </div>
+          </mat-card-content>
+        </mat-card>
 
         <!-- Average Occupancy -->
-        <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl shadow-sm p-4 border border-orange-200">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-medium text-orange-600 uppercase tracking-wide">Avg Occupancy</p>
-              <p class="text-2xl font-bold text-orange-900">{{ formatPercent(occupancyStats()!.averageOccupancyRate) }}</p>
+        <mat-card appearance="outlined">
+          <mat-card-content class="p-4!">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs font-medium text-orange-600 uppercase tracking-wide">Avg Occupancy</p>
+                <p class="text-2xl font-bold text-orange-900">{{ formatPercent(occupancyStats()!.averageOccupancyRate) }}</p>
+              </div>
+              <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+                <mat-icon class="text-white">trending_up</mat-icon>
+              </div>
             </div>
-            <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white text-xl">
-              📈
-            </div>
-          </div>
-        </div>
+          </mat-card-content>
+        </mat-card>
 
         <!-- Total Revenue -->
-        <div class="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl shadow-sm p-4 border border-teal-200">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-medium text-teal-600 uppercase tracking-wide">Total Revenue</p>
-              <p class="text-2xl font-bold text-teal-900">{{ occupancyStats()!.totalRevenue | currency:currency():'symbol':'1.2-2' }}</p>
+        <mat-card appearance="outlined">
+          <mat-card-content class="p-4!">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs font-medium text-teal-600 uppercase tracking-wide">Total Revenue</p>
+                <p class="text-2xl font-bold text-teal-900">{{ occupancyStats()!.totalRevenue | currency:currency():'symbol':'1.0-0' }}</p>
+              </div>
+              
             </div>
-            <div class="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white text-xl">
-              💰
-            </div>
-          </div>
-        </div>
+          </mat-card-content>
+        </mat-card>
       </div>
     }
 
@@ -242,152 +216,171 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       
       <!-- Occupancy Trend Chart -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div class="mb-4">
-          <h3 class="text-lg font-semibold text-gray-900">Occupancy Trend</h3>
-          <p class="text-sm text-gray-600">Room occupancy and availability over time</p>
-        </div>
-        <div class="h-80">
-          <canvas
-            baseChart
-            [data]="occupancyChartData()"
-            [options]="occupancyChartOptions"
-            type="line">
-          </canvas>
-        </div>
-      </div>
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-blue-600">show_chart</mat-icon>
+          <mat-card-title>Occupancy Trend</mat-card-title>
+          <mat-card-subtitle>Room occupancy and availability over time</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="p-6!">
+          <div class="h-80">
+            <canvas
+              baseChart
+              [data]="occupancyChartData()"
+              [options]="occupancyChartOptions"
+              type="line">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- Revenue Chart -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div class="mb-4">
-          <h3 class="text-lg font-semibold text-gray-900">Daily Revenue</h3>
-          <p class="text-sm text-gray-600">Revenue generated from room bookings</p>
-        </div>
-        <div class="h-80">
-          <canvas
-            baseChart
-            [data]="revenueChartData()"
-            [options]="revenueChartOptions"
-            type="bar">
-          </canvas>
-        </div>
-      </div>
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-purple-600">bar_chart</mat-icon>
+          <mat-card-title>Daily Revenue</mat-card-title>
+          <mat-card-subtitle>Revenue generated from room bookings</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="p-6!">
+          <div class="h-80">
+            <canvas
+              baseChart
+              [data]="revenueChartData()"
+              [options]="revenueChartOptions"
+              type="bar">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
 
     <!-- Detailed Data Table -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-900">Detailed Occupancy Data</h3>
-        <p class="text-sm text-gray-600 mt-1">Day-by-day breakdown of occupancy metrics</p>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Rooms</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Occupied</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Available</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Occupancy Rate</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Rate</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            @for (row of occupancyData(); track row.date) {
-              <tr class="hover:bg-gray-50 transition-colors duration-150">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ formatDate(row.date) }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.totalRooms }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">{{ row.occupiedRooms }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">{{ row.availableRooms }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border" 
-                        [class]="getOccupancyRateClass(row.occupancyRate)">
-                    {{ formatPercent(row.occupancyRate) }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-purple-600 font-medium">{{ row.revenue | currency:currency():'symbol':'1.2-2' }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.averageRate | currency:currency():'symbol':'1.2-2' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="text-indigo-600">table_chart</mat-icon>
+        <mat-card-title>Detailed Occupancy Data</mat-card-title>
+        <mat-card-subtitle>Day-by-day breakdown of occupancy metrics</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="p-0!">
+        <div class="overflow-x-auto">
+          <table mat-table [dataSource]="occupancyData()" class="w-full">
+            
+            <!-- Date Column -->
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let row" class="font-medium">{{ formatDate(row.date) }}</td>
+            </ng-container>
+
+            <!-- Total Rooms Column -->
+            <ng-container matColumnDef="totalRooms">
+              <th mat-header-cell *matHeaderCellDef>Total Rooms</th>
+              <td mat-cell *matCellDef="let row">{{ row.totalRooms }}</td>
+            </ng-container>
+
+            <!-- Occupied Rooms Column -->
+            <ng-container matColumnDef="occupiedRooms">
+              <th mat-header-cell *matHeaderCellDef>Occupied</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="text-red-600 font-medium">{{ row.occupiedRooms }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Available Rooms Column -->
+            <ng-container matColumnDef="availableRooms">
+              <th mat-header-cell *matHeaderCellDef>Available</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="text-green-600 font-medium">{{ row.availableRooms }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Occupancy Rate Column -->
+            <ng-container matColumnDef="occupancyRate">
+              <th mat-header-cell *matHeaderCellDef>Occupancy Rate</th>
+              <td mat-cell *matCellDef="let row">
+                <mat-chip [class]="getOccupancyRateClass(row.occupancyRate)">
+                  {{ formatPercent(row.occupancyRate) }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <!-- Revenue Column -->
+            <ng-container matColumnDef="revenue">
+              <th mat-header-cell *matHeaderCellDef>Revenue</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="text-purple-600 font-medium">{{ row.revenue | currency:currency():'symbol':'1.2-2' }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Average Rate Column -->
+            <ng-container matColumnDef="averageRate">
+              <th mat-header-cell *matHeaderCellDef>Avg Rate</th>
+              <td mat-cell *matCellDef="let row">{{ row.averageRate | currency:currency():'symbol':'1.2-2' }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50"></tr>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
 
     <!-- Room Status Grid -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <div class="mb-6">
-        <h3 class="text-lg font-semibold text-gray-900">Current Room Status</h3>
-        <p class="text-sm text-gray-600 mt-1">Real-time status of all rooms</p>
-      </div>
-      
-      <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-3 mb-6">
-        @for (room of roomStatuses(); track room.roomNumber) {
-          <div 
-            class="relative p-3 rounded-lg border-2 text-center text-sm font-medium transition-all duration-200 hover:scale-105 cursor-pointer"
-            [class]="getRoomStatusClass(room.status)"
-            [title]="room.status === 'occupied' ? 
-              'Guest: ' + room.guestName + '\nCheck-in: ' + formatDateTime(room.checkIn!) + '\nRate: ' + formatCurrency(room.rate || 0) :
-              'Room Type: ' + room.roomType + '\nStatus: ' + (room.status | titlecase)">
-            
-            <div class="text-lg font-bold">{{ room.roomNumber }}</div>
-            <div class="text-xs opacity-75">{{ room.roomType }}</div>
-            
-            <!-- Status Icon -->
-            <div class="absolute top-1 right-1 text-sm">
-              {{ getRoomStatusIcon(room.status) }}
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="text-amber-600">grid_view</mat-icon>
+        <mat-card-title>Current Room Status</mat-card-title>
+        <mat-card-subtitle>Real-time status of all rooms</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="p-6!">
+        <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-3 mb-6">
+          @for (room of roomStatuses(); track room.roomNumber) {
+            <div 
+              class="relative p-3 rounded-lg border-2 text-center text-sm font-medium transition-all duration-200 hover:scale-105 cursor-pointer"
+              [class]="getRoomStatusClass(room.status)"
+              [matTooltip]="room.status === 'occupied' ? 
+                'Guest: ' + room.guestName + ' | Check-in: ' + formatDateTime(room.checkIn!) + ' | Rate: ' + formatCurrency(room.rate || 0) :
+                'Room Type: ' + room.roomType + ' | Status: ' + (room.status | titlecase)">
+              
+              <div class="text-lg font-bold">{{ room.roomNumber }}</div>
+              <div class="text-xs opacity-75">{{ room.roomType }}</div>
+              
+              <!-- Status Icon -->
+              <div class="absolute top-1 right-1">
+                <mat-icon class="text-sm">{{ getRoomStatusIcon(room.status) }}</mat-icon>
+              </div>
             </div>
-          </div>
-        }
-      </div>
+          }
+        </div>
 
-      <!-- Room Status Legend -->
-      <div class="flex flex-wrap gap-4 text-sm">
-        <div class="flex items-center gap-2">
-          <div class="w-4 h-4 rounded bg-red-100 border border-red-300"></div>
-          <span class="text-gray-700">Occupied</span>
+        <mat-divider class="!mb-4"></mat-divider>
+
+        <!-- Room Status Legend -->
+        <div class="flex flex-wrap gap-4 text-sm">
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-red-100 border border-red-300"></div>
+            <span class="text-gray-700">Occupied</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-green-100 border border-green-300"></div>
+            <span class="text-gray-700">Available</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-gray-100 border border-gray-300"></div>
+            <span class="text-gray-700">Out of Order</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-yellow-100 border border-yellow-300"></div>
+            <span class="text-gray-700">Maintenance</span>
+          </div>
         </div>
-        <div class="flex items-center gap-2">
-          <div class="w-4 h-4 rounded bg-green-100 border border-green-300"></div>
-          <span class="text-gray-700">Available</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <div class="w-4 h-4 rounded bg-gray-100 border border-gray-300"></div>
-          <span class="text-gray-700">Out of Order</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <div class="w-4 h-4 rounded bg-yellow-100 border border-yellow-300"></div>
-          <span class="text-gray-700">Maintenance</span>
-        </div>
-      </div>
-    </div>
+      </mat-card-content>
+    </mat-card>
 
     <!-- Last Updated Info -->
     <div class="text-center text-sm text-gray-500">
+      <mat-icon class="text-base align-text-bottom mr-1">schedule</mat-icon>
       Last updated: {{ lastUpdated() | date:'medium' }}
     </div>
 
   </div>
 }
-
-<!-- Script for dropdown menu toggle -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const button = document.getElementById('export-menu-button');
-    const menu = document.getElementById('export-menu');
-    
-    if (button && menu) {
-      button.addEventListener('click', function() {
-        menu.classList.toggle('hidden');
-      });
-      
-      // Close menu when clicking outside
-      document.addEventListener('click', function(event) {
-        if (!button.contains(event.target) && !menu.contains(event.target)) {
-          menu.classList.add('hidden');
-        }
-      });
-    }
-  });
-</script>

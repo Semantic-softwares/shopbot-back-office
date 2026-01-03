@@ -11,7 +11,6 @@
   ::ng-deep .mat-horizontal-stepper-header-container {
     padding: 0 0 16px 0;
     margin-bottom: 8px;
-    border-bottom: 1px solid #e5e7eb;
   }
 
   ::ng-deep .mat-step-header {
@@ -22,17 +21,7 @@
       background-color: #f3f4f6;
     }
 
-    .mat-step-icon {
-      background-color: #3b82f6;
-    }
-
-    .mat-step-icon-state-done {
-      background-color: #10b981;
-    }
-
-    .mat-step-icon-state-edit {
-      background-color: #3b82f6;
-    }
+ 
 
     .mat-step-label {
       font-weight: 500;

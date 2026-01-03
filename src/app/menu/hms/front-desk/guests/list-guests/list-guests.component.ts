@@ -1,7 +1,9 @@
-import { Component, inject, signal, computed, effect, OnInit } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,15 +12,15 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatCardModule } from '@angular/material/card';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDividerModule } from "@angular/material/divider";
+import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { GuestService, GuestSearchResponse } from '../../../../../shared/services/guest.service';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { GuestService } from '../../../../../shared/services/guest.service';
 import { Guest } from '../../../../../shared/models/reservation.model';
 import { StoreStore } from '../../../../../shared/stores/store.store';
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 
 @Component({
   selector: 'app-list-guests',
@@ -26,6 +28,8 @@ import { StoreStore } from '../../../../../shared/stores/store.store';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    MatTableModule,
+    MatPaginatorModule,
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
@@ -34,162 +38,121 @@ import { StoreStore } from '../../../../../shared/stores/store.store';
     MatCardModule,
     MatMenuModule,
     MatTooltipModule,
-    MatDatepickerModule,
     MatProgressSpinnerModule,
-    MatDividerModule
+    MatDividerModule,
+    PageHeaderComponent
   ],
   templateUrl: './list-guests.component.html',
   styleUrl: './list-guests.component.scss'
 })
-export class ListGuestsComponent implements OnInit {
+export class ListGuestsComponent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
-  private dialog = inject(MatDialog);
   private guestService = inject(GuestService);
-  private storeStore = inject(StoreStore);
+  public storeStore = inject(StoreStore);
 
-  // Signals
-  guests = signal<Guest[]>([]);
-  loading = signal<boolean>(false);
-  searchTerm = signal<string>('');
+  // Pagination signals
   currentPage = signal<number>(1);
-  totalGuests = signal<number>(0);
-  totalPages = signal<number>(0);
-  selectedGuest = signal<Guest | null>(null);
-  isUpdating = signal<boolean>(false); // New signal for update operations
-  guestStats = signal<any>({
-    total: 0,
-    vip: 0,
-    recent: 0,
-    returning: 0,
-    new: 0,
-    blacklisted: 0
+  pageSize = signal<number>(10);
+
+  // Filter signals
+  searchFilter = signal<string>('');
+  statusFilter = signal<string>('');
+  guestTypeFilter = signal<string>('');
+
+  // Loading state for updates
+  isUpdating = signal<boolean>(false);
+
+  // Filter form
+  filterForm = this.fb.group({
+    search: [''],
+    status: [''],
+    guestType: ['']
   });
 
-  // Form
-  searchForm: FormGroup;
+  // Table configuration
+  displayedColumns = ['guest', 'email', 'phone', 'stats', 'spent', 'lastStay', 'status', 'actions'];
 
-  // Computed properties
-  selectedStore = computed(() => this.storeStore.selectedStore());
-  filteredGuests = computed(() => {
-    const guests = this.guests();
-    const search = this.searchTerm().toLowerCase();
-    
-    if (!search) return guests;
-    
-    return guests.filter(guest => 
-      (guest.firstName?.toLowerCase().includes(search) ?? false) ||
-      (guest.lastName?.toLowerCase().includes(search) ?? false) ||
-      (guest.companyName?.toLowerCase().includes(search) ?? false) ||
-      (guest.email?.toLowerCase().includes(search) ?? false) ||
-      (guest.phone?.toLowerCase().includes(search) ?? false)
-    );
+  // Status options
+  statusOptions = [
+    { value: '', label: 'All Status' },
+    { value: 'active', label: 'Active' },
+    { value: 'blacklisted', label: 'Blacklisted' }
+  ];
+
+  // Guest type options
+  guestTypeOptions = [
+    { value: '', label: 'All Guests' },
+    { value: 'vip', label: 'VIP Guests' },
+    { value: 'regular', label: 'Regular Guests' }
+  ];
+
+  // Computed filter params for rxResource
+  private filterParams = computed(() => {
+    const selectedStore = this.storeStore.selectedStore();
+    return {
+      storeId: selectedStore?._id,
+      search: this.searchFilter(),
+      page: this.currentPage(),
+      limit: this.pageSize()
+    };
   });
+
+  // rxResource for guests
+  public guests = rxResource({
+    params: () => this.filterParams(),
+    stream: ({ params }) => this.guestService.searchGuests(
+      params.search || '',
+      params.page,
+      params.limit,
+      params.storeId
+    ),
+  });
+
+  // rxResource for guest stats
+  public guestStats = rxResource({
+    params: () => ({ storeId: this.storeStore.selectedStore()?._id }),
+    stream: ({ params }) => this.guestService.getGuestStats(params.storeId),
+  });
+
+  // Computed statistics
+  totalGuests = computed(() => this.guests.value()?.total || 0);
+  vipCount = computed(() => this.guestStats.value()?.vip || 0);
+  returningCount = computed(() => this.guestStats.value()?.returning || 0);
+  newCount = computed(() => this.guestStats.value()?.new || 0);
+  recentCount = computed(() => this.guestStats.value()?.recent || 0);
+  blacklistedCount = computed(() => this.guestStats.value()?.blacklisted || 0);
 
   constructor() {
-    this.searchForm = this.fb.group({
-      search: [''],
-      nationality: [''],
-      isVip: [''],
-      blacklisted: ['']
-    });
-
-    // Search effect
-    effect(() => {
-      const formValue = this.searchForm.value;
-      if (formValue.search !== this.searchTerm()) {
-        this.searchTerm.set(formValue.search || '');
-      }
-    });
-
-    // Store change effect - reload guests when store changes
-    effect(() => {
-      const store = this.selectedStore();
-      if (store?._id) {
-        console.log('Store changed in guest list:', store.name, store._id);
-        this.loadGuests();
-        this.loadGuestStats();
-      }
-    });
-
-    // Auto-search effect
-    this.searchForm.get('search')?.valueChanges.pipe(
+    this.filterForm.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged()
-    ).subscribe(value => {
-      this.searchTerm.set(value || '');
-      this.searchGuests();
+    ).subscribe((formValues) => {
+      this.currentPage.set(1);
+      this.searchFilter.set(formValues.search || '');
+      this.statusFilter.set(formValues.status || '');
+      this.guestTypeFilter.set(formValues.guestType || '');
     });
   }
 
-  ngOnInit() {
-    // Initial data loading is handled by the store change effect
-    // If store is already selected, the effect will trigger automatically
-    const currentStore = this.selectedStore();
-    if (currentStore?._id) {
-      this.loadGuests();
-      this.loadGuestStats();
-    }
-  }
-
-  async loadGuests() {
-    const currentStore = this.selectedStore();
-    if (!currentStore?._id) {
-      console.log('No store selected, skipping guest load');
-      this.guests.set([]);
-      this.totalGuests.set(0);
-      this.totalPages.set(0);
-      return;
-    }
-
-    this.loading.set(true);
-    try {
-      console.log('Loading guests for store:', currentStore.name, currentStore._id);
-      const response = await this.guestService.searchGuests(
-        this.searchTerm(), 
-        this.currentPage(), 
-        20,
-        currentStore._id
-      ).toPromise() as GuestSearchResponse;
-      
-      this.guests.set(response.guests || []);
-      this.totalGuests.set(response.total || 0);
-      this.totalPages.set(response.totalPages || 0);
-    } catch (error) {
-      console.error('Error loading guests:', error);
-      this.showError('Failed to load guests');
-    } finally {
-      this.loading.set(false);
-    }
-  }
-
-  async loadGuestStats() {
-    try {
-      const storeId = this.selectedStore()?._id;
-      const stats = await this.guestService.getGuestStats(storeId).toPromise();
-      this.guestStats.set(stats);
-    } catch (error) {
-      console.error('Error loading guest stats:', error);
-    }
-  }
-
-  async searchGuests() {
-    this.currentPage.set(1);
-    await this.loadGuests();
-  }
-
-  onPageChange(page: number) {
-    this.currentPage.set(page);
-    this.loadGuests();
+  onPageChange(event: PageEvent) {
+    this.currentPage.set(event.pageIndex + 1);
+    this.pageSize.set(event.pageSize);
   }
 
   clearFilters() {
-    this.searchForm.reset();
-    this.searchTerm.set('');
+    this.filterForm.reset({ search: '', status: '', guestType: '' });
+    this.searchFilter.set('');
+    this.statusFilter.set('');
+    this.guestTypeFilter.set('');
     this.currentPage.set(1);
-    this.loadGuests();
+  }
+
+  reloadData() {
+    this.guests.reload();
+    this.guestStats.reload();
   }
 
   viewGuestDetails(guest: Guest) {
@@ -206,141 +169,55 @@ export class ListGuestsComponent implements OnInit {
 
   async deleteGuest(guest: Guest) {
     const guestName = `${guest.firstName} ${guest.lastName}`;
-    
-    // Enhanced confirmation with guest details
-    const confirmDelete = confirm(
-      `⚠️ PERMANENTLY DELETE GUEST\n\n` +
-      `Guest: ${guestName}\n` +
-      `Email: ${guest.email}\n` +
-      `Phone: ${guest.phone}\n` +
-      `Total Stays: ${guest.totalStays || 0}\n` +
-      `Total Spent: ${(guest.totalSpent || 0) | 0}\n\n` +
-      `This action CANNOT be undone. All guest data, reservations, and history will be permanently removed.\n\n` +
-      `Are you absolutely sure you want to delete this guest?`
-    );
-
+    const confirmDelete = confirm(`Delete guest ${guestName}? This action cannot be undone.`);
     if (confirmDelete) {
-      // Final confirmation for safety
-      const finalConfirm = confirm(
-        `🚨 FINAL CONFIRMATION\n\n` +
-        `You are about to permanently delete ${guestName}.\n\n` +
-        `Type confirmation: This will delete ALL data for this guest.\n\n` +
-        `Click OK to proceed with deletion or Cancel to abort.`
-      );
-
-      if (finalConfirm) {
-        this.isUpdating.set(true);
-        try {
-          await this.guestService.deleteGuest(guest._id).toPromise();
-          this.showSuccess(`Guest ${guestName} has been permanently deleted`);
-          
-          // Remove from local list and refresh stats
-          this.guests.update(guests => guests.filter(g => g._id !== guest._id));
-          await this.loadGuestStats();
-          
-        } catch (error) {
-          console.error('Error deleting guest:', error);
-          this.showError(`Failed to delete guest ${guestName}. Please try again.`);
-        } finally {
-          this.isUpdating.set(false);
-        }
+      this.isUpdating.set(true);
+      try {
+        await this.guestService.deleteGuest(guest._id).toPromise();
+        this.showSuccess(`Guest ${guestName} has been deleted`);
+        this.reloadData();
+      } catch (error) {
+        console.error('Error deleting guest:', error);
+        this.showError(`Failed to delete guest ${guestName}`);
+      } finally {
+        this.isUpdating.set(false);
       }
     }
   }
 
   async toggleVipStatus(guest: Guest) {
     const guestName = `${guest.firstName} ${guest.lastName}`;
+    const newVipStatus = !guest.isVip;
+    const confirmMessage = guest.isVip
+      ? `Remove VIP status from ${guestName}?`
+      : `Add VIP status to ${guestName}?`;
+    if (!confirm(confirmMessage)) return;
 
-    if (guest.isVip) {
-      // Removing VIP status - simple confirmation
-      if (!confirm(`Are you sure you want to remove VIP status from ${guestName}?\n\nThis will remove all VIP benefits and privileges.`)) {
-        return;
-      }
-      await this.updateVipStatus(guest._id, false);
-    } else {
-      // Adding VIP status - show benefits
-      const confirmMessage = `Add VIP status to ${guestName}?\n\n` +
-        `VIP Benefits include:\n` +
-        `• Priority reservations and check-in\n` +
-        `• Complimentary room upgrades (when available)\n` +
-        `• Late checkout privileges\n` +
-        `• Access to exclusive amenities\n` +
-        `• Dedicated customer service\n` +
-        `• Special welcome gifts and services`;
-
-      if (!confirm(confirmMessage)) {
-        return;
-      }
-      await this.updateVipStatus(guest._id, true);
+    this.isUpdating.set(true);
+    try {
+      const updateData: any = { isVip: newVipStatus };
+      if (newVipStatus) updateData.vipSince = new Date().toISOString();
+      await this.guestService.updateGuest(guest._id, updateData).toPromise();
+      this.showSuccess(`${guestName} ${newVipStatus ? 'granted VIP status' : 'removed from VIP status'}`);
+      this.reloadData();
+    } catch (error) {
+      console.error('Error updating VIP status:', error);
+      this.showError('Failed to update VIP status');
+    } finally {
+      this.isUpdating.set(false);
     }
   }
 
   async toggleBlacklistStatus(guest: Guest) {
     const guestName = `${guest.firstName} ${guest.lastName}`;
-
     if (guest.blacklisted) {
-      // Removing from blacklist - simple confirmation
-      if (!confirm(`Are you sure you want to remove ${guestName} from the blacklist?`)) {
-        return;
-      }
+      if (!confirm(`Remove ${guestName} from the blacklist?`)) return;
       await this.updateBlacklistStatus(guest._id, false, '');
     } else {
-      // Adding to blacklist - require reason
-      await this.addToBlacklist(guestName, guest._id);
-    }
-  }
-
-  private async addToBlacklist(guestName: string, guestId: string) {
-    // Enhanced blacklist dialog with reason
-    const reason = prompt(
-      `Please provide a reason for blacklisting ${guestName}:\n\n` +
-      `This action will:\n` +
-      `• Prevent future reservations\n` +
-      `• Flag the guest account\n` +
-      `• Require manager approval for any bookings\n\n` +
-      `Reason (required):`,
-      ''
-    );
-
-    if (reason === null) {
-      // User cancelled
-      return;
-    }
-
-    if (!reason.trim()) {
-      alert('A reason is required to blacklist a guest.');
-      return;
-    }
-
-    await this.updateBlacklistStatus(guestId, true, reason.trim());
-  }
-
-  private async updateVipStatus(guestId: string, isVip: boolean) {
-    this.isUpdating.set(true);
-    try {
-      const updateData: any = { isVip };
-      
-      // Add VIP status metadata if making VIP
-      if (isVip) {
-        updateData.vipSince = new Date().toISOString();
-      }
-
-      const updatedGuest = await this.guestService.updateGuest(guestId, updateData).toPromise();
-      if (updatedGuest) {
-        // Update the guest in the list
-        this.updateGuestInList(updatedGuest);
-        const guestName = `${updatedGuest.firstName} ${updatedGuest.lastName}`;
-        const statusText = isVip ? 'granted VIP status' : 'removed from VIP status';
-        this.showSuccess(`${guestName} ${statusText} successfully`);
-        
-        // Refresh stats to reflect changes
-        await this.loadGuestStats();
-      }
-    } catch (error) {
-      console.error('Error updating VIP status:', error);
-      this.showError('Failed to update VIP status. Please try again.');
-    } finally {
-      this.isUpdating.set(false);
+      const reason = prompt(`Please provide a reason for blacklisting ${guestName}:`);
+      if (reason === null) return;
+      if (!reason.trim()) { alert('A reason is required.'); return; }
+      await this.updateBlacklistStatus(guest._id, true, reason.trim());
     }
   }
 
@@ -348,38 +225,19 @@ export class ListGuestsComponent implements OnInit {
     this.isUpdating.set(true);
     try {
       const updateData: any = { blacklisted };
-      
-      // Add blacklist reason if blacklisting
       if (blacklisted && reason) {
         updateData.blacklistReason = reason;
         updateData.blacklistedAt = new Date().toISOString();
       }
-
-      const updatedGuest = await this.guestService.updateGuest(guestId, updateData).toPromise();
-      if (updatedGuest) {
-        // Update the guest in the list
-        this.updateGuestInList(updatedGuest);
-        const guestName = `${updatedGuest.firstName} ${updatedGuest.lastName}`;
-        const statusText = blacklisted ? 'added to blacklist' : 'removed from blacklist';
-        this.showSuccess(`${guestName} ${statusText} successfully`);
-        
-        // Refresh stats to reflect changes
-        await this.loadGuestStats();
-      }
+      await this.guestService.updateGuest(guestId, updateData).toPromise();
+      this.showSuccess(`Guest ${blacklisted ? 'added to' : 'removed from'} blacklist`);
+      this.reloadData();
     } catch (error) {
       console.error('Error updating blacklist status:', error);
-      this.showError('Failed to update blacklist status. Please try again.');
+      this.showError('Failed to update blacklist status');
     } finally {
       this.isUpdating.set(false);
     }
-  }
-
-  private updateGuestInList(updatedGuest: Guest) {
-    const currentGuests = this.guests();
-    const updatedGuests = currentGuests.map(guest => 
-      guest._id === updatedGuest._id ? updatedGuest : guest
-    );
-    this.guests.set(updatedGuests);
   }
 
   getGuestStatus(guest: Guest): string {
@@ -390,15 +248,27 @@ export class ListGuestsComponent implements OnInit {
     return 'regular';
   }
 
-  getGuestStatusClass(status: string): string {
-    const statusClasses: { [key: string]: string } = {
-      'vip': 'bg-purple-100 text-purple-800',
-      'returning': 'bg-blue-100 text-blue-800',
-      'new': 'bg-green-100 text-green-800',
-      'regular': 'bg-gray-100 text-gray-800',
-      'blacklisted': 'bg-red-100 text-red-800'
+  getStatusChipClass(status: string): string {
+    const colorMap: Record<string, string> = {
+      vip: 'bg-purple-600! text-white!',
+      returning: 'bg-blue-600! text-white!',
+      new: 'bg-green-600! text-white!',
+      regular: 'bg-gray-500! text-white!',
+      blacklisted: 'bg-red-600! text-white!'
     };
-    return statusClasses[status] || 'bg-gray-100 text-gray-800';
+    return colorMap[status] || 'bg-gray-500! text-white!';
+  }
+
+  getGuestName(guest: Guest): string {
+    const name = ((guest.firstName || '') + ' ' + (guest.lastName || '')).trim();
+    if (name && guest.companyName) return `${name} (${guest.companyName})`;
+    return name || guest.companyName || 'Unknown Guest';
+  }
+
+  getGuestInitials(guest: Guest): string {
+    const first = guest.firstName?.charAt(0) || '';
+    const last = guest.lastName?.charAt(0) || '';
+    return (first + last).toUpperCase() || '?';
   }
 
   formatDate(date: Date | string | undefined): string {
@@ -406,41 +276,19 @@ export class ListGuestsComponent implements OnInit {
     return new Date(date).toLocaleDateString();
   }
 
-  // Helper methods for template
-  Math = Math;
-  Array = Array;
+  canEdit(guest: Guest): boolean {
+    return !guest.blacklisted;
+  }
 
-  // Generate page numbers for pagination
-  getPageNumbers(): number[] {
-    const total = this.totalPages();
-    const current = this.currentPage();
-    const pages: number[] = [];
-    
-    for (let i = Math.max(1, current - 2); i <= Math.min(total, current + 2); i++) {
-      pages.push(i);
-    }
-    
-    return pages;
+  canDelete(guest: Guest): boolean {
+    return true;
   }
 
   private showSuccess(message: string) {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      panelClass: ['success-snackbar']
-    });
+    this.snackBar.open(message, 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
   }
 
   private showError(message: string) {
-    this.snackBar.open(message, 'Close', {
-      duration: 5000,
-      panelClass: ['error-snackbar']
-    });
-  }
-
-  private showInfo(message: string) {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      panelClass: ['info-snackbar']
-    });
+    this.snackBar.open(message, 'Close', { duration: 5000, panelClass: ['error-snackbar'] });
   }
 }

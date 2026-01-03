@@ -32,7 +32,6 @@ export interface PricingTier {
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
-    CancelSubscriptionDialogComponent,
   ],
   templateUrl: './current-plan.html',
 })
@@ -65,11 +64,11 @@ export class CurrentPlanComponent {
 
   private getNextTierRoomCount(): number {
     const sub = this.subscription();
-    if (!sub) return 11; // Default to next tier if no subscription
+    if (!sub) return 10; // Default to 0-10 tier if no subscription
 
-    // If trial, upgrade to 11-30 tier
+    // If trial, upgrade to 0-10 tier (minimum paid tier)
     if (sub.status === 'TRIAL') {
-      return 11;
+      return 10;
     }
 
     const roomCount = sub.roomCount || 10;

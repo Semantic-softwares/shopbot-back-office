@@ -79,7 +79,7 @@ export class TrialWarningBannerComponent {
   });
 
   upgradeTrial(): void {
-    this.router.navigate(['/billing/pricing']);
+     this.router.navigate(['/menu/hms/settings/hotel-settings/billing']);
   }
 
   closeBanner(): void {

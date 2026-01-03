@@ -2,12 +2,14 @@ import { Component, inject } from '@angular/core';
 
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
 import { ToolbarComponent } from '../shared/components/toolbar/toolbar.component';
 
 @Component({
   selector: 'app-menu',
   imports: [
     MatIconModule,
+    MatCardModule,
     ToolbarComponent
 ],
   templateUrl: './menu.component.html',

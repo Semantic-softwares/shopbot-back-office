@@ -16,6 +16,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { GuestService } from '../../../../../shared/services/guest.service';
 import { Guest } from '../../../../../shared/models/reservation.model';
 import { StoreStore } from '../../../../../shared/stores/store.store';
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 
 @Component({
   selector: 'app-guest-form',
@@ -31,7 +32,8 @@ import { StoreStore } from '../../../../../shared/stores/store.store';
     MatDatepickerModule,
     MatNativeDateModule,
     MatCheckboxModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    PageHeaderComponent
   ],
   templateUrl: './guest-form.component.html',
   styleUrl: './guest-form.component.scss'

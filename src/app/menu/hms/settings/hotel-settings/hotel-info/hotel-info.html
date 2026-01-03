@@ -1,153 +1,133 @@
 <div class="py-6">
-          <form [formGroup]="hotelInfoForm" (ngSubmit)="saveHotelInfo()">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
-              <!-- Basic Information Card -->
-              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
-                  <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <mat-icon class="text-blue-600">info</mat-icon>
-                    Basic Information
-                  </h3>
-                </div>
-                <div class="p-6 space-y-6">
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Hotel Name</mat-label>
-                    <input matInput formControlName="hotelName" placeholder="Enter hotel name">
-                    <mat-icon matSuffix>business</mat-icon>
-                  </mat-form-field>
+  <form [formGroup]="hotelInfoForm" (ngSubmit)="saveHotelInfo()">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-                  <div formGroupName="contactInfo" class="space-y-4">
-                    <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Phone Number</mat-label>
-                      <input matInput formControlName="phone" placeholder="+1 (555) 123-4567">
-                      <mat-icon matSuffix>phone</mat-icon>
-                    </mat-form-field>
+      <!-- Basic Information Card -->
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-blue-600 !flex !items-center !justify-center">info</mat-icon>
+          <mat-card-title>Basic Information</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-4 space-y-6">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Hotel Name</mat-label>
+            <input matInput formControlName="hotelName" placeholder="Enter hotel name">
+            <mat-icon matSuffix>business</mat-icon>
+          </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Email Address</mat-label>
-                      <input matInput type="email" formControlName="email" placeholder="contact@hotel.com">
-                      <mat-icon matSuffix>email</mat-icon>
-                    </mat-form-field>
+          <div formGroupName="contactInfo" class="space-y-4">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Phone Number</mat-label>
+              <input matInput formControlName="phone" placeholder="+1 (555) 123-4567">
+              <mat-icon matSuffix>phone</mat-icon>
+            </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Website (Optional)</mat-label>
-                      <input matInput formControlName="website" placeholder="https://www.hotel.com">
-                      <mat-icon matSuffix>language</mat-icon>
-                    </mat-form-field>
-                  </div>
-                </div>
-              </div>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Email Address</mat-label>
+              <input matInput type="email" formControlName="email" placeholder="contact@hotel.com">
+              <mat-icon matSuffix>email</mat-icon>
+            </mat-form-field>
 
-              <!-- Address Information Card -->
-              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
-                  <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <mat-icon class="text-green-600">location_on</mat-icon>
-                    Address Information
-                  </h3>
-                </div>
-                <div class="p-6 space-y-6" formGroupName="address">
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Street Address</mat-label>
-                    <textarea matInput formControlName="street" placeholder="123 Hotel Street" rows="2"></textarea>
-                    <mat-icon matSuffix>place</mat-icon>
-                  </mat-form-field>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Website (Optional)</mat-label>
+              <input matInput formControlName="website" placeholder="https://www.hotel.com">
+              <mat-icon matSuffix>language</mat-icon>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <mat-form-field appearance="outline">
-                      <mat-label>City</mat-label>
-                      <input matInput formControlName="city" placeholder="New York">
-                    </mat-form-field>
+      <!-- Address Information Card -->
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-green-600 !flex !items-center !justify-center">location_on</mat-icon>
+          <mat-card-title>Address Information</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-4 space-y-6" formGroupName="address">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Street Address</mat-label>
+            <textarea matInput formControlName="street" placeholder="123 Hotel Street" rows="2"></textarea>
+            <mat-icon matSuffix>place</mat-icon>
+          </mat-form-field>
 
-                    <mat-form-field appearance="outline">
-                      <mat-label>State/Province</mat-label>
-                      <input matInput formControlName="state" placeholder="NY">
-                    </mat-form-field>
-                  </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <mat-form-field appearance="outline">
+              <mat-label>City</mat-label>
+              <input matInput formControlName="city" placeholder="New York">
+            </mat-form-field>
 
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <mat-form-field appearance="outline">
-                      <mat-label>Country</mat-label>
-                      <input matInput formControlName="country" placeholder="United States">
-                    </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>State/Province</mat-label>
+              <input matInput formControlName="state" placeholder="NY">
+            </mat-form-field>
+          </div>
 
-                    <mat-form-field appearance="outline">
-                      <mat-label>Postal Code</mat-label>
-                      <input matInput formControlName="postalCode" placeholder="10001">
-                    </mat-form-field>
-                  </div>
-                </div>
-              </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <mat-form-field appearance="outline">
+              <mat-label>Country</mat-label>
+              <input matInput formControlName="country" placeholder="United States">
+            </mat-form-field>
 
-              <!-- Operational Settings Card -->
-              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden lg:col-span-2">
-                <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
-                  <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <mat-icon class="text-purple-600">settings</mat-icon>
-                    Operational Settings
-                  </h3>
-                </div>
-                <div class="p-6">
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <mat-form-field appearance="outline">
-                      <mat-label>Timezone</mat-label>
-                      <mat-select formControlName="timezone">
-                        @for (timezone of timezoneOptions; track timezone.value) {
-                          <mat-option [value]="timezone.value">{{ timezone.label }}</mat-option>
-                        }
-                      </mat-select>
-                    </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Postal Code</mat-label>
+              <input matInput formControlName="postalCode" placeholder="10001">
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
-                    <mat-form-field appearance="outline">
-                      <mat-label>Check-in Time</mat-label>
-                      <input matInput type="time" formControlName="checkInTime">
-                      <mat-icon matSuffix>schedule</mat-icon>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Check-out Time</mat-label>
-                      <input matInput type="time" formControlName="checkOutTime">
-                      <mat-icon matSuffix>schedule</mat-icon>
-                    </mat-form-field>
-                  </div>
-
-                  <!-- Currency Display (Read-only) -->
-                  <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h5 class="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-                      <mat-icon class="text-blue-600">info</mat-icon>
-                      Store Currency
-                    </h5>
-                    <p class="text-sm text-blue-800">
-                      Current store currency: <strong>{{ storeStore.selectedStore()?.currency || 'Not set' }}</strong>
-                      <br>
-                      <span class="text-xs">To change currency, update it in the main store settings.</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Save Button -->
-            <div class="flex justify-end mt-8">
-              <button 
-                type="submit" 
-                mat-raised-button 
-                color="primary"
-                [disabled]="hotelInfoForm.invalid || saving()"
-                class="px-8 py-2">
-                @if (saving()) {
-                  <ng-container>
-                    <mat-icon class="animate-spin mr-2">refresh</mat-icon>
-                    Saving...
-                  </ng-container>
-                } @else {
-                  <ng-container>
-                    <mat-icon>save </mat-icon>
-                    Save Hotel Information
-                  </ng-container>
+      <!-- Operational Settings Card -->
+      <mat-card appearance="outlined" class="lg:col-span-2">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-purple-600 !flex !items-center !justify-center">settings</mat-icon>
+          <mat-card-title>Operational Settings</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <mat-form-field appearance="outline">
+              <mat-label>Timezone</mat-label>
+              <mat-select formControlName="timezone">
+                @for (timezone of timezoneOptions; track timezone.value) {
+                <mat-option [value]="timezone.value">{{ timezone.label }}</mat-option>
                 }
-              </button>
-            </div>
-          </form>
-        </div>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Check-in Time</mat-label>
+              <input matInput type="time" formControlName="checkInTime">
+              <mat-icon matSuffix>schedule</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Check-out Time</mat-label>
+              <input matInput type="time" formControlName="checkOutTime">
+              <mat-icon matSuffix>schedule</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Currency Display (Read-only) -->
+          <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h5 class="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+              <mat-icon class="text-blue-600">info</mat-icon>
+              Store Currency
+            </h5>
+            <p class="text-sm text-blue-800">
+              Current store currency: <strong>{{ storeStore.selectedStore()?.currency || 'Not set' }}</strong>
+              <br>
+              <span class="text-xs">To change currency, update it in the main store settings.</span>
+            </p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Save Button -->
+    <div class="flex justify-end mt-8">
+      <button type="submit" matButton="filled" color="primary" [disabled]="hotelInfoForm.invalid || saving()"
+        class="px-8 py-2">
+        {{saving() ? 'Saving...' : 'Save Hotel Information'}}
+      </button>
+    </div>
+  </form>
+</div>

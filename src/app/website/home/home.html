@@ -1,0 +1,468 @@
+<app-header></app-header>
+
+<!-- Hero Section -->
+<section class="pt-24 pb-12">
+  <div class="max-w-4xl mx-auto px-6 text-center">
+    <h1 class="hero-title inline-block bg-gradient-to-br from-gray-900 to-gray-800 bg-clip-text p-2 text-4xl font-bold tracking-tighter text-transparent sm:text-6xl md:text-7xl dark:from-gray-50 dark:to-gray-300 animate-fadeIn">
+      The platform for modern hotels
+    </h1>
+    <p class="hero-subtitle mt-6 max-w-lg mx-auto text-lg text-gray-700 dark:text-gray-400 animate-fadeIn">
+      ShopBot is a general‑purpose hotel management platform built for  modern teams and the cloud era.
+    </p>
+    <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+      <button matButton="filled" color="primary" (click)="navigateToSignup()" class="text-lg py-6 px-8">
+        Start 30‑day trial
+      </button>
+      <button matButton="outlined" (click)="scrollToFeatures()" class="text-lg py-6 px-8">
+        <mat-icon class="mr-2">play_circle</mat-icon>
+        Watch video
+      </button>
+    </div>
+  </div>
+</section>
+
+
+<!-- Dashboard Preview directly below hero -->
+<section class="pb-20">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="rounded-2xl border border-gray-200 shadow-xl overflow-hidden bg-white">
+      <img src="assets/images/dashboard.png" alt="ShopBot dashboard preview" class="w-full h-auto" />
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-20 ">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Powerful Features</h2>
+      <p class="text-xl text-gray-600">Everything you need to run your hotel successfully</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <!-- Feature 1 -->
+      <mat-card appearance="outlined" class="hover:shadow-xl transition-shadow">
+        <mat-card-content class="p-8">
+          <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-100 mx-auto mb-6">
+            <mat-icon class="text-blue-600 text-4xl">calendar_today</mat-icon>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3 text-center">Reservation Management</h3>
+          <p class="text-gray-600 text-center leading-relaxed">
+            Manage bookings effortlessly with our intuitive calendar interface. Track availability, modify reservations, and handle cancellations.
+          </p>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Feature 2 -->
+      <mat-card appearance="outlined" class="hover:shadow-xl transition-shadow">
+        <mat-card-content class="p-8">
+          <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-green-100 mx-auto mb-6">
+            <mat-icon class="text-green-600 text-4xl">people</mat-icon>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3 text-center">Staff Management</h3>
+          <p class="text-gray-600 text-center leading-relaxed">
+            Schedule staff, track timesheets, and manage roles. Keep your team organized and efficient.
+          </p>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Feature 3 -->
+      <mat-card appearance="outlined" class="hover:shadow-xl transition-shadow">
+        <mat-card-content class="p-8">
+          <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-purple-100 mx-auto mb-6">
+            <mat-icon class="text-purple-600 text-4xl">payment</mat-icon>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3 text-center">Billing & Payments</h3>
+          <p class="text-gray-600 text-center leading-relaxed">
+            Process payments securely, generate invoices, and manage subscriptions with ease.
+          </p>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Feature 4 -->
+      <mat-card appearance="outlined" class="hover:shadow-xl transition-shadow">
+        <mat-card-content class="p-8">
+          <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-orange-100 mx-auto mb-6">
+            <mat-icon class="text-orange-600 text-4xl">analytics</mat-icon>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3 text-center">Analytics & Reports</h3>
+          <p class="text-gray-600 text-center leading-relaxed">
+            Gain insights with real-time analytics and detailed reports to make informed decisions.
+          </p>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Feature 5 -->
+      <mat-card appearance="outlined" class="hover:shadow-xl transition-shadow">
+        <mat-card-content class="p-8">
+          <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-red-100 mx-auto mb-6">
+            <mat-icon class="text-red-600 text-4xl">security</mat-icon>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3 text-center">Security & Compliance</h3>
+          <p class="text-gray-600 text-center leading-relaxed">
+            Enterprise-grade security with encrypted data and compliance with international standards.
+          </p>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Feature 6 -->
+      <mat-card appearance="outlined" class="hover:shadow-xl transition-shadow">
+        <mat-card-content class="p-8">
+          <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-teal-100 mx-auto mb-6">
+            <mat-icon class="text-teal-600 text-4xl">support_agent</mat-icon>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3 text-center">24/7 Support</h3>
+          <p class="text-gray-600 text-center leading-relaxed">
+            Get help whenever you need it with our dedicated support team available round the clock.
+          </p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- Client Reviews Section -->
+<section class="py-20">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">What Our Clients Say</h2>
+      <p class="text-xl text-gray-600">Trusted by businesses worldwide</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <!-- Review 1 -->
+      <mat-card appearance="outlined" class="hover:shadow-xl transition-shadow">
+        <mat-card-content class="p-8">
+          <div class="flex items-center gap-1 mb-4">
+            <mat-icon class="text-yellow-500">star</mat-icon>
+            <mat-icon class="text-yellow-500">star</mat-icon>
+            <mat-icon class="text-yellow-500">star</mat-icon>
+            <mat-icon class="text-yellow-500">star</mat-icon>
+            <mat-icon class="text-yellow-500">star</mat-icon>
+          </div>
+          <p class="text-gray-600 mb-6 leading-relaxed italic">
+            "ShopBot transformed our restaurant operations. The POS system is incredibly fast and intuitive. Our staff loves it and our customers get served quicker."
+          </p>
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">JC</div>
+            <div>
+              <p class="font-semibold text-gray-900">John Chen</p>
+              <p class="text-sm text-gray-600">Restaurant Owner</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Review 2 -->
+      <mat-card appearance="outlined" class="hover:shadow-xl transition-shadow">
+        <mat-card-content class="p-8">
+          <div class="flex items-center gap-1 mb-4">
+            <mat-icon class="text-yellow-500">star</mat-icon>
+            <mat-icon class="text-yellow-500">star</mat-icon>
+            <mat-icon class="text-yellow-500">star</mat-icon>
+            <mat-icon class="text-yellow-500">star</mat-icon>
+            <mat-icon class="text-yellow-500">star</mat-icon>
+          </div>
+          <p class="text-gray-600 mb-6 leading-relaxed italic">
+            "The reservation system cut our booking time in half. Managing room availability across all channels has never been easier. Highly recommend!"
+          </p>
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white font-bold">SM</div>
+            <div>
+              <p class="font-semibold text-gray-900">Sarah Martinez</p>
+              <p class="text-sm text-gray-600">Hotel Manager</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Review 3 -->
+      <mat-card appearance="outlined" class="hover:shadow-xl transition-shadow">
+        <mat-card-content class="p-8">
+          <div class="flex items-center gap-1 mb-4">
+            <mat-icon class="text-yellow-500">star</mat-icon>
+            <mat-icon class="text-yellow-500">star</mat-icon>
+            <mat-icon class="text-yellow-500">star</mat-icon>
+            <mat-icon class="text-yellow-500">star</mat-icon>
+            <mat-icon class="text-yellow-500">star</mat-icon>
+          </div>
+          <p class="text-gray-600 mb-6 leading-relaxed italic">
+            "Digital menu management makes it so easy to update items and prices in real-time. Our customers love browsing menus on their phones!"
+          </p>
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold">AO</div>
+            <div>
+              <p class="font-semibold text-gray-900">Ahmed Okonkwo</p>
+              <p class="text-sm text-gray-600">Cafe Owner</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing Section -->
+<section id="pricing" class="py-20">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
+      <p class="text-xl text-gray-600">Choose the perfect plan for your hotel</p>
+    </div>
+
+    <div class="grid md:grid-cols-4 gap-6">
+      <!-- Plan 1 -->
+      <mat-card appearance="outlined" class="flex flex-col">
+        <mat-card-content class="p-6 flex-1">
+          <div class="mb-4">
+            <h3 class="text-lg font-bold text-gray-900">Starter</h3>
+            <p class="text-sm text-gray-600">0-10 rooms</p>
+          </div>
+          <div class="mb-6">
+            <span class="text-4xl font-bold text-gray-900">$20</span>
+            <span class="text-gray-600">/month</span>
+          </div>
+          <ul class="space-y-3 text-sm text-gray-600">
+            <li class="flex items-center gap-2">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              Up to 10 rooms
+            </li>
+            <li class="flex items-center gap-2">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              Basic support
+            </li>
+            <li class="flex items-center gap-2">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              Core features
+            </li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Plan 2 -->
+      <mat-card appearance="outlined" class="flex flex-col border-2 border-blue-600 relative">
+        <div class="absolute -top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">Popular</div>
+        <mat-card-content class="p-6 flex-1">
+          <div class="mb-4">
+            <h3 class="text-lg font-bold text-gray-900">Professional</h3>
+            <p class="text-sm text-gray-600">11-30 rooms</p>
+          </div>
+          <div class="mb-6">
+            <span class="text-4xl font-bold text-gray-900">$30</span>
+            <span class="text-gray-600">/month</span>
+          </div>
+          <ul class="space-y-3 text-sm text-gray-600">
+            <li class="flex items-center gap-2">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              Up to 30 rooms
+            </li>
+            <li class="flex items-center gap-2">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              Priority support
+            </li>
+            <li class="flex items-center gap-2">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              Advanced analytics
+            </li>
+            <li class="flex items-center gap-2">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              Staff management
+            </li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Plan 3 -->
+      <mat-card appearance="outlined" class="flex flex-col">
+        <mat-card-content class="p-6 flex-1">
+          <div class="mb-4">
+            <h3 class="text-lg font-bold text-gray-900">Enterprise</h3>
+            <p class="text-sm text-gray-600">31-35 rooms</p>
+          </div>
+          <div class="mb-6">
+            <span class="text-4xl font-bold text-gray-900">$40</span>
+            <span class="text-gray-600">/month</span>
+          </div>
+          <ul class="space-y-3 text-sm text-gray-600">
+            <li class="flex items-center gap-2">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              Up to 35 rooms
+            </li>
+            <li class="flex items-center gap-2">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              24/7 support
+            </li>
+            <li class="flex items-center gap-2">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              All features
+            </li>
+            <li class="flex items-center gap-2">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              API access
+            </li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Plan 4 -->
+      <mat-card appearance="outlined" class="flex flex-col">
+        <mat-card-content class="p-6 flex-1">
+          <div class="mb-4">
+            <h3 class="text-lg font-bold text-gray-900">Premium</h3>
+            <p class="text-sm text-gray-600">35+ rooms</p>
+          </div>
+          <div class="mb-6">
+            <span class="text-4xl font-bold text-gray-900">$50</span>
+            <span class="text-gray-600">/month</span>
+          </div>
+          <ul class="space-y-3 text-sm text-gray-600">
+            <li class="flex items-center gap-2">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              Unlimited rooms
+            </li>
+            <li class="flex items-center gap-2">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              Dedicated support
+            </li>
+            <li class="flex items-center gap-2">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              Custom integrations
+            </li>
+            <li class="flex items-center gap-2">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              White-label option
+            </li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="text-center mt-12">
+      <p class="text-gray-600 mb-6">30 days free trial for all plans. No credit card required.</p>
+      <button 
+        matButton="outlined"
+        color="primary" 
+        (click)="navigateToSignup()"
+        class="text-lg py-6 px-12"
+      >
+        Start Your Free Trial
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-20">
+  <div class="max-w-4xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+      <p class="text-xl text-gray-600">Everything you need to know about ShopBot</p>
+    </div>
+
+    <div class="space-y-4">
+      <!-- FAQ 1 -->
+      <mat-expansion-panel class="!shadow-none !rounded-none" [expanded]="true">
+        <mat-expansion-panel-header class="!py-6">
+          <mat-panel-title class="!text-base !font-medium !text-gray-700">
+            How does the 30-day free trial work?
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <p class="text-gray-600 leading-relaxed pb-4">
+          Start using ShopBot immediately with full access to all features. No credit card required. After 30 days, choose a plan that fits your property size. You can cancel anytime during the trial.
+        </p>
+      </mat-expansion-panel>
+
+      <!-- FAQ 2 -->
+      <mat-expansion-panel class="!shadow-none !rounded-none">
+        <mat-expansion-panel-header class="!py-6">
+          <mat-panel-title class="!text-base !font-medium !text-gray-700">
+            Can I switch plans later?
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <p class="text-gray-600 leading-relaxed pb-4">
+          Absolutely! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any billing differences.
+        </p>
+      </mat-expansion-panel>
+
+      <!-- FAQ 3 -->
+      <mat-expansion-panel class="!shadow-none !rounded-none">
+        <mat-expansion-panel-header class="!py-6">
+          <mat-panel-title class="!text-base !font-medium !text-gray-700">
+            Do you offer training and onboarding support?
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <p class="text-gray-600 leading-relaxed pb-4">
+          Yes! All plans include access to our knowledge base and video tutorials. Professional and higher plans include personalized onboarding sessions with our customer success team.
+        </p>
+      </mat-expansion-panel>
+
+      <!-- FAQ 4 -->
+      <mat-expansion-panel class="!shadow-none !rounded-none">
+        <mat-expansion-panel-header class="!py-6">
+          <mat-panel-title class="!text-base !font-medium !text-gray-700">
+            Is my data secure?
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <p class="text-gray-600 leading-relaxed pb-4">
+          Security is our top priority. We use industry-standard encryption, regular backups, and comply with GDPR and other international data protection regulations. Your data is hosted on secure cloud infrastructure with 99.9% uptime.
+        </p>
+      </mat-expansion-panel>
+
+      <!-- FAQ 5 -->
+      <mat-expansion-panel class="!shadow-none !rounded-none">
+        <mat-expansion-panel-header class="!py-6">
+          <mat-panel-title class="!text-base !font-medium !text-gray-700">
+            Can I integrate with my existing systems?
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <p class="text-gray-600 leading-relaxed pb-4">
+          ShopBot integrates seamlessly with popular OTAs, payment gateways, and channel managers. Enterprise and Premium plans include API access for custom integrations with your existing tools.
+        </p>
+      </mat-expansion-panel>
+
+      <!-- FAQ 6 -->
+      <mat-expansion-panel class="!shadow-none !rounded-none">
+        <mat-expansion-panel-header class="!py-6">
+          <mat-panel-title class="!text-base !font-medium !text-gray-700">
+            What payment methods do you accept?
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <p class="text-gray-600 leading-relaxed pb-4">
+          We accept all major credit cards (Visa, Mastercard, American Express), PayPal, and bank transfers for annual plans. All payments are processed securely through Stripe.
+        </p>
+      </mat-expansion-panel>
+    </div>
+  </div>
+</section>
+
+<!-- Our Partners Section -->
+<!-- <section class="py-20 ">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Our Partners</h2>
+      <p class="mt-4 text-gray-600">
+        Seamless connectivity with OTAs, payment gateways, and hospitality platforms.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-8 items-center">
+      <img class="h-12 mx-auto object-contain grayscale hover:grayscale-0 transition" alt="Sabre"
+        src="assets/partners/sabre.svg" />
+      <img class="h-12 mx-auto object-contain grayscale hover:grayscale-0 transition" alt="Razorpay"
+        src="assets/partners/razorpay.svg" />
+      <img class="h-12 mx-auto object-contain grayscale hover:grayscale-0 transition" alt="SiteMinder"
+        src="assets/partners/siteminder.svg" />
+      <img class="h-12 mx-auto object-contain grayscale hover:grayscale-0 transition" alt="STAAH"
+        src="assets/partners/staah.svg" />
+      <img class="h-12 mx-auto object-contain grayscale hover:grayscale-0 transition" alt="Tiket"
+        src="assets/partners/tiket.svg" />
+      <img class="h-12 mx-auto object-contain grayscale hover:grayscale-0 transition" alt="Stripe"
+        src="assets/partners/stripe.svg" />
+    </div>
+  </div>
+  
+</section> -->
+
+<app-footer></app-footer>
