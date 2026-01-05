@@ -473,40 +473,7 @@ export class ReservationFormComponent implements OnDestroy {
     );
   }
 
-  // onGuestSelected(guest: Guest): void {
-  // const bookingType = this.reservationForm.get('bookingType')?.value;
-  
-  // if (bookingType === 'single') {
-  //   // In single mode, set the main guest
-  //   this.reservationForm.patchValue({
-  //     guest: guest._id,
-  //   });
 
-  //   // Also assign this guest to the first room if it exists
-  //   const roomsArray = this.reservationForm.get('rooms') as FormArray;
-  //   if (roomsArray && roomsArray.length > 0) {
-  //     const firstRoom = roomsArray.at(0);
-  //     firstRoom?.patchValue({
-  //       assignedGuest: guest._id,
-  //       assignedGuestName: this.guestService.getGuestName(guest),
-  //     });
-  //   }
-  // } else if (bookingType === 'group') {
-  //   // In group mode, set the main guest
-  //   this.reservationForm.patchValue({
-  //     guest: guest._id,
-  //   });
-  // }
-
-  // this.snackBar.open(
-  //     `Guest ${this.guestService.getGuestName(guest)} selected`,
-  //     'Close',
-  //     {
-  //       duration: 2000,
-  //       panelClass: ['success-snackbar'],
-  //     }
-  //   );
-  // }
 
   onDeleteGuest() {
     // I don't want to delete the primary guest if there are other guests in sharers with assigned IDs
@@ -575,6 +542,7 @@ export class ReservationFormComponent implements OnDestroy {
       checkOutDate: new Date(reservation.checkOutDate),
       numberOfNights: reservation.numberOfNights,
       bookingSource: reservation.bookingSource,
+      createdBy: reservation?.createdBy?._id,
       paymentInfo: {
         method: reservation.paymentInfo?.method || 'cash',
         status: reservation.paymentInfo?.status || 'pending',

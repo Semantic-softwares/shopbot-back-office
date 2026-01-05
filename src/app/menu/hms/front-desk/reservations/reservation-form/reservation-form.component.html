@@ -112,8 +112,6 @@
         Reserve
       </a>
       }
-
-
     </div>
   </div>
 </div>
@@ -157,7 +155,7 @@
         (guestSelected)="onGuestSelected($event)"></app-guest-details>
 
       <!-- Stay Details Component - Top Row Center -->
-      <app-stay-details [quickReservation]="quickReservation()" [isEditing]="isEditing()"></app-stay-details>
+      <app-stay-details [quickReservation]="quickReservation()" [isEditing]="isEditing()" [reservation]="reservation.value()"></app-stay-details>
 
       <!-- Payment Details Component - Top Row Right -->
       <payment-info [reservationForm]="reservationForm" />

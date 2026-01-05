@@ -338,7 +338,7 @@
               class="relative p-3 rounded-lg border-2 text-center text-sm font-medium transition-all duration-200 hover:scale-105 cursor-pointer"
               [class]="getRoomStatusClass(room.status)"
               [matTooltip]="room.status === 'occupied' ? 
-                'Guest: ' + room.guestName + ' | Check-in: ' + formatDateTime(room.checkIn!) + ' | Rate: ' + formatCurrency(room.rate || 0) :
+                'Guest: ' + (room.guestName || 'N/A') + ' | Check-in: ' + formatDateTime(room.checkIn) + ' | Rate: ' + formatCurrency(room.rate || 0) :
                 'Room Type: ' + room.roomType + ' | Status: ' + (room.status | titlecase)">
               
               <div class="text-lg font-bold">{{ room.roomNumber }}</div>

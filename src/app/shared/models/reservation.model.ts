@@ -28,7 +28,7 @@ export interface Reservation {
   extensions?: ReservationExtension[];
   currentExtension?: CurrentExtension;
   confirmationNumber: string;
-  createdBy?: string;
+  createdBy?: string | any;
   lastModifiedBy?: string;
   createdAt: Date;
   updatedAt: Date;

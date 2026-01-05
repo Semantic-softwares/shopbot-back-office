@@ -120,16 +120,43 @@ export class StaffDialogComponent implements OnInit {
         }
       });
     } else {
-      // Create new staff
-      this.userService.createMerchant(staffData).subscribe({
+      // Validate email and phone number before creating
+      const email = this.staffForm.value.email;
+      const phoneNumber = this.staffForm.value.phoneNumber;
+
+      this.userService.validateEmailAndPhoneNumber({ email, phoneNumber }).subscribe({
         next: (result) => {
-          this.saving.set(false);
-          this.snackBar.open('Staff member created successfully!', 'Close', { duration: 3000 });
-          this.dialogRef.close(result);
+          const errors: string[] = [];
+          
+          if (!result.email) {
+            errors.push('Email is already registered');
+          }
+          if (!result.phoneNumber) {
+            errors.push('Phone number is already registered');
+          }
+
+          if (errors.length > 0) {
+            this.saving.set(false);
+            this.snackBar.open(errors.join('. '), 'Close', { duration: 5000 });
+            return;
+          }
+
+          // Validation passed, create new staff
+          this.userService.createMerchant(staffData).subscribe({
+            next: (result) => {
+              this.saving.set(false);
+              this.snackBar.open('Staff member created successfully!', 'Close', { duration: 3000 });
+              this.dialogRef.close(result);
+            },
+            error: (err) => {
+              this.saving.set(false);
+              this.snackBar.open(err.error?.message || 'Failed to create staff member', 'Close', { duration: 5000 });
+            }
+          });
         },
         error: (err) => {
           this.saving.set(false);
-          this.snackBar.open(err.error?.message || 'Failed to create staff member', 'Close', { duration: 5000 });
+          this.snackBar.open('Error validating information. Please try again.', 'Close', { duration: 5000 });
         }
       });
     }

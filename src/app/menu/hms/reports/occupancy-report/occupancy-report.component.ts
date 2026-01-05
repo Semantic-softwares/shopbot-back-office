@@ -429,8 +429,11 @@ export class OccupancyReportComponent {
     return `${value.toFixed(1)}%`;
   }
 
-  formatDateTime(date: Date): string {
-    return date.toLocaleString('en-US', {
+  formatDateTime(date: Date | string | undefined | null): string {
+    if (!date) return 'N/A';
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    if (isNaN(dateObj.getTime())) return 'N/A';
+    return dateObj.toLocaleString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
