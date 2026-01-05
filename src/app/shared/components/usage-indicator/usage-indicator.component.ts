@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCardModule } from '@angular/material/card';
@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
-import { SubscriptionService } from '../../../services/subscription.service';
+import { SubscriptionService } from '../../services/subscription.service';
 import { SubscriptionUpgradeDialogComponent } from '../subscription-upgrade-dialog/subscription-upgrade-dialog.component';
 
 @Component({
@@ -22,18 +22,11 @@ import { SubscriptionUpgradeDialogComponent } from '../subscription-upgrade-dial
   templateUrl: './usage-indicator.component.html',
   styleUrls: ['./usage-indicator.component.scss']
 })
-export class UsageIndicatorComponent implements OnInit {
+export class UsageIndicatorComponent {
   storeId = input<string>();
   subscriptionService = inject(SubscriptionService);
   dialog = inject(MatDialog);
   Math = Math;
-
-  ngOnInit() {
-    const storeId = this.storeId();
-    if (storeId) {
-      this.subscriptionService.setCurrentStoreId(storeId);
-    }
-  }
 
   showUpgradeDialog() {
     const storeId = this.storeId();
@@ -45,7 +38,7 @@ export class UsageIndicatorComponent implements OnInit {
       data: { storeId }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result: any) => {
       if (result?.upgraded) {
         console.log('Subscription upgraded to:', result.plan);
       }

@@ -1,0 +1,23 @@
+<div class="w-full min-h-screen p-8">
+  <div class="max-w-6xl mx-auto">
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="flex justify-center py-16">
+        <mat-spinner [diameter]="50"></mat-spinner>
+      </div>
+    }
+
+    @if (!isLoading() && subscription()) {
+      <!-- Billing Information Component -->
+      <app-billing-information [subscription]="subscription()" />
+
+      <!-- Current Plan Component -->
+      @if (subscription()!.status !== 'EXPIRED' && subscription()!.status !== 'CANCELLED') {
+        <app-current-plan [subscription]="subscription()"></app-current-plan>
+      }
+
+      <!-- Invoices Component -->
+      <app-invoices></app-invoices>
+    }
+  </div>
+</div>

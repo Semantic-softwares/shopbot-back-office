@@ -1,0 +1,131 @@
+<div class="py-6">
+   
+
+    <!-- Loading State -->
+    @if (merchants.isLoading()) {
+    <div class="flex justify-center items-center py-12">
+        <mat-spinner diameter="40"></mat-spinner>
+        <span class="ml-3 text-gray-600">Loading staff...</span>
+    </div>
+    } @else if (merchants.hasValue()) {
+    @if (merchants.value().length > 0) {
+    <mat-card appearance="outlined" class="py-3">
+         <!-- Header with Actions -->
+        <div class="flex p-3  flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+                <h2 class="text-xl font-semibold text-gray-900">Staff & Merchants</h2>
+                <p class="text-sm text-gray-600">Manage your hotel staff accounts and their role permissions</p>
+            </div>
+            <div class="flex gap-3">
+                <button mat-stroked-button color="primary" [routerLink]="'../roles'" >
+                    <mat-icon>admin_panel_settings</mat-icon>
+                    Manage Roles
+                </button>
+                <button mat-flat-button color="primary" (click)="openAddMerchantDialog()">
+                    <mat-icon>person_add</mat-icon>
+                    Add Staff
+                </button>
+            </div>
+        </div>
+        <table mat-table [dataSource]="merchants.value()" class="w-full">
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef class="!py-4 !px-6 !font-semibold">Name</th>
+            <td mat-cell *matCellDef="let merchant" class="!py-4 !px-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span class="text-blue-600 font-medium">
+                            {{ merchant.name.charAt(0).toUpperCase() }}
+                        </span>
+                    </div>
+                    <span class="font-medium text-gray-900">{{ merchant.name }}</span>
+                </div>
+            </td>
+        </ng-container>
+
+        <!-- Email Column -->
+        <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef class="!py-4 !px-6 !font-semibold">Email</th>
+            <td mat-cell *matCellDef="let merchant" class="!py-4 !px-6 text-gray-600">
+                {{ merchant.email }}
+            </td>
+        </ng-container>
+
+        <!-- Phone Column -->
+        <ng-container matColumnDef="phone">
+            <th mat-header-cell *matHeaderCellDef class="!py-4 !px-6 !font-semibold">Phone</th>
+            <td mat-cell *matCellDef="let merchant" class="!py-4 !px-6 text-gray-600">
+                {{ merchant.phoneNumber }}
+            </td>
+        </ng-container>
+
+        <!-- Role Column -->
+        <ng-container matColumnDef="role">
+            <th mat-header-cell *matHeaderCellDef class="!py-4 !px-6 !font-semibold">Role</th>
+            <td mat-cell *matCellDef="let merchant" class="!py-4 !px-6">
+                @if (merchant.role) {
+                <span class="px-3 py-1 rounded-full text-sm font-medium" [class]="getRoleColor(merchant.role)">
+                    {{ merchant.role.name }}
+                </span>
+                } @else {
+                <span class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-500">
+                    No Role
+                </span>
+                }
+            </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef class="!py-4 !px-6 !font-semibold">Status</th>
+            <td mat-cell *matCellDef="let merchant" class="!py-4 !px-6">
+                <span class="px-3 py-1 rounded-full text-sm font-medium" [class]="getStatusColor(merchant)">
+                    {{ getStatusText(merchant) }}
+                </span>
+            </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="!py-4 !px-6 !font-semibold text-right">Actions</th>
+            <td mat-cell *matCellDef="let merchant" class="!py-4 !px-6 text-right">
+                <button mat-icon-button [matMenuTriggerFor]="menu" matTooltip="More actions">
+                    <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                    <button mat-menu-item (click)="openEditMerchantDialog(merchant)">
+                        <mat-icon>edit</mat-icon>
+                        <span>Edit Details</span>
+                    </button>
+                    <button mat-menu-item (click)="openAssignRoleDialog(merchant)">
+                        <mat-icon>admin_panel_settings</mat-icon>
+                        <span>Assign Role</span>
+                    </button>
+                    <button mat-menu-item (click)="toggleMerchantStatus(merchant)">
+                        <mat-icon>{{ merchant.deactivate ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+                        <span>{{ merchant.deactivate ? 'Activate' : 'Deactivate' }}</span>
+                    </button>
+                    <mat-divider></mat-divider>
+                    <button mat-menu-item class="!text-red-600" (click)="deleteMerchant(merchant)">
+                        <mat-icon class="!text-red-600">delete</mat-icon>
+                        <span>Delete</span>
+                    </button>
+                </mat-menu>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-gray-50"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50"></tr>
+    </table>
+    </mat-card>
+    } @else {
+    <app-no-record icon="people_outline" title="No Staff Members" message="Add your first staff member to get started">
+        <button mat-flat-button color="primary" (click)="openAddMerchantDialog()">
+            <mat-icon>person_add</mat-icon>
+            Add Staff Member
+        </button>
+    </app-no-record>
+
+    }
+    }
+</div>

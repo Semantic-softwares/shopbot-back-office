@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { roleGuard } from '../../../../shared/guards/role.guard';
 
 export const DASHBOARD_CHECK_IN_CHECK_OUT_ROUTES: Routes = [
   {
@@ -18,6 +19,11 @@ export const DASHBOARD_CHECK_IN_CHECK_OUT_ROUTES: Routes = [
           import('./check-in-check-out-list/check-in-check-out-list.component').then(
             (m) => m.CheckInCheckOutListComponent
           ),
+        canActivate: [roleGuard],
+        data: {
+          requiredPermissions: ['hotel.reservations.checkin', 'hotel.reservations.checkout'],
+          permissionMode: 'any'
+        }
       },
 
       {
@@ -26,6 +32,11 @@ export const DASHBOARD_CHECK_IN_CHECK_OUT_ROUTES: Routes = [
           import('./check-in-check-out-details/check-in-check-out-details.component').then(
             (m) => m.CheckInCheckOutDetailsComponent
           ),
+        canActivate: [roleGuard],
+        data: {
+          requiredPermissions: ['hotel.reservations.checkin', 'hotel.reservations.checkout'],
+          permissionMode: 'any'
+        }
       },
      
       {

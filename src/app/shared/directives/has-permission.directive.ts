@@ -1,41 +1,48 @@
-import { Directive, ElementRef, Input, OnInit, TemplateRef, ViewContainerRef, OnDestroy } from '@angular/core';
-import { AuthService } from '../services/auth.service';
-import { Subscription } from 'rxjs';
+import { Directive, OnInit, Input, TemplateRef, ViewContainerRef, inject } from "@angular/core";
+import { RolesService } from "../services/roles.service";
 
 @Directive({
-  selector: '[hasPermission]'
+  selector: '[hasPermission]',
+  standalone: true
 })
-export class HasPermissionDirective implements OnInit, OnDestroy {
-  @Input('hasPermission') permission: string = '';
-  @Input('hasPermissionElse') elseTemplateRef: TemplateRef<any> | null = null;
+export class HasPermissionDirective implements OnInit {
+  private tpl = inject(TemplateRef<unknown>);
+  private vcr = inject(ViewContainerRef);
+  private rolesService = inject(RolesService);
 
-  private subscription: Subscription | null = null;
-
-  constructor(
-    private templateRef: TemplateRef<any>,
-    private viewContainer: ViewContainerRef,
-    private authService: AuthService
-  ) {}
+  @Input('hasPermission')
+  input!: string | string[] | {
+    permissions: string[];
+    mode?: 'any' | 'all';
+  };
 
   ngOnInit() {
-    this.subscription = this.authService.getUserRole().subscribe(() => {
-      this.updateView();
-    });
-  }
+    const { permissions, mode } = this.normalizeInput(this.input);
 
-  ngOnDestroy() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
+    const allowed =
+      mode === 'all'
+        ? this.rolesService.hasAll(permissions)
+        : this.rolesService.hasAny(permissions);
+
+    if (allowed) {
+      this.vcr.createEmbeddedView(this.tpl);
+    } else {
+      this.vcr.clear();
     }
   }
 
-  private updateView() {
-    this.viewContainer.clear();
-    
-    if (this.authService.hasPermission(this.permission)) {
-      this.viewContainer.createEmbeddedView(this.templateRef);
-    } else if (this.elseTemplateRef) {
-      this.viewContainer.createEmbeddedView(this.elseTemplateRef);
+  private normalizeInput(input: HasPermissionDirective['input']) {
+    if (typeof input === 'string') {
+      return { permissions: [input], mode: 'any' as const };
     }
+
+    if (Array.isArray(input)) {
+      return { permissions: input, mode: 'any' as const };
+    }
+
+    return {
+      permissions: input.permissions,
+      mode: input.mode ?? 'any'
+    };
   }
 }

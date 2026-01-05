@@ -176,6 +176,16 @@ export interface RoomFilters {
   floor?: number[];
   features?: Partial<RoomFeatures>;
   search?: string; // for room number search
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedRoomsResponse {
+  rooms: Room[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 export interface RoomTypeFilters {
@@ -198,6 +208,38 @@ export interface AvailableRoom extends Room {
   isAvailable: boolean;
   rate: number;
   totalCost: number;
+}
+
+export interface RoomChangeEntry {
+  _id?: string;
+  changeType: 'upgrade' | 'downgrade' | 'lateral' | 'maintenance' | 'guest_request';
+  effectiveDate: string | Date;
+  fromRoom: {
+    room: any;
+    roomType?: any;
+    roomNumber?: string;
+    ratePerNight: number;
+  };
+  toRoom: {
+    room: any;
+    roomType?: any;
+    roomNumber?: string;
+    ratePerNight: number;
+  };
+  pricingDetails: {
+    nightsConsumed: number;
+    nightsRemaining: number;
+    originalRemainingCost: number;
+    newRemainingCost: number;
+    difference: number;
+    adjustmentType: 'charged' | 'refunded' | 'credited' | 'waived' | 'kept_original_rate';
+    adjustmentAmount: number;
+    adjustmentNotes?: string;
+  };
+  reason: string;
+  performedBy?: any;
+  performedAt: string | Date;
+  transaction?: any;
 }
 
 export interface AvailableRoomType extends RoomType {

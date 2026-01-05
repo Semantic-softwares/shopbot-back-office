@@ -1,92 +1,81 @@
-import { Injectable } from '@angular/core';
-import { 
-  CanActivate, 
-  ActivatedRouteSnapshot, 
-  RouterStateSnapshot, 
-  Router,
-  CanActivateChild
-} from '@angular/router';
+import { inject } from '@angular/core';
+import { CanActivateFn, CanActivateChildFn, Router, ActivatedRouteSnapshot } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AuthService } from '../services/auth.service';
-import { Observable } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { RolesService } from '../services/roles.service';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class RoleGuard implements CanActivate, CanActivateChild {
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private snackBar: MatSnackBar
-  ) {}
+/**
+ * Functional role guard for Angular 19+
+ * Checks if the user has the required permissions to access a route
+ * 
+ * Usage in routes:
+ * {
+ *   path: 'admin',
+ *   component: AdminComponent,
+ *   canActivate: [roleGuard],
+ *   data: { 
+ *     requiredPermission: 'settings.store.edit' // single permission
+ *     // OR
+ *     requiredPermissions: ['settings.store.view', 'settings.store.edit'] // multiple
+ *     permissionMode: 'any' // 'any' (default) or 'all'
+ *   }
+ * }
+ */
+export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
+  const rolesService = inject(RolesService);
+  const router = inject(Router);
+  const snackBar = inject(MatSnackBar);
 
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Observable<boolean> {
-    return this.authService.getUserRole().pipe(
-      take(1),
-      map(userRole => {
-        console.log(userRole, 'userRole')
-        if (!userRole) {
-          this.snackBar.open('Please login to access this page', 'Close', {
-            duration: 3000,
-            horizontalPosition: 'end',
-            verticalPosition: 'top'
-          });
-          this.router.navigate(['/login'], {
-            queryParams: { returnUrl: state.url }
-          });
-          return false;
-        }
-
-        const requiredPermission = route.data['requiredPermission'];
-        const requiredCategory = route.data['requiredCategory'];
-
-
-        // If neither permission nor category is specified, deny access
-        if (!requiredPermission) {
-          this.snackBar.open('Access denied: Invalid route configuration', 'Close', {
-            duration: 3000,
-            horizontalPosition: 'end',
-            verticalPosition: 'top'
-          });
-          this.router.navigate(['/auth']);
-          return false;
-        }
-
-        // Check permissions if specified
-        if (requiredPermission && !this.authService.hasPermission(requiredPermission)) {
-          this.snackBar.open('Access denied: Insufficient permissions', 'Close', {
-            duration: 3000,
-            horizontalPosition: 'end',
-            verticalPosition: 'top'
-          });
-          this.router.navigate(['/auth']);
-          return false;
-        }
-
-        // Check category if specified
-        if (requiredCategory && !this.authService.hasCategory(requiredCategory)) {
-          this.snackBar.open('Access denied: Invalid category access', 'Close', {
-            duration: 3000,
-            horizontalPosition: 'end',
-            verticalPosition: 'top'
-          });
-          this.router.navigate(['/auth']);
-          return false;
-        }
-
-        return true;
-      })
-    );
+  const role = rolesService.role();
+  
+  // Check if user has a role assigned
+  if (!role) {
+    snackBar.open('Please login to access this page', 'Close', {
+      duration: 3000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top'
+    });
+    router.navigate(['/auth']);
+    return false;
   }
 
-  canActivateChild(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Observable<boolean> {
-    return this.canActivate(route, state);
+  // Get permission requirements from route data
+  const requiredPermission = route.data['requiredPermission'] as string | undefined;
+  const requiredPermissions = route.data['requiredPermissions'] as string[] | undefined;
+  const permissionMode = (route.data['permissionMode'] as 'any' | 'all') || 'any';
+
+  // If no permission is required, allow access
+  if (!requiredPermission && !requiredPermissions) {
+    return true;
   }
-}
+
+  // Build permissions array
+  const permissions: string[] = requiredPermissions || (requiredPermission ? [requiredPermission] : []);
+
+  if (permissions.length === 0) {
+    return true;
+  }
+
+  // Check permissions based on mode
+  const hasAccess = permissionMode === 'all'
+    ? rolesService.hasAll(permissions)
+    : rolesService.hasAny(permissions);
+
+  if (!hasAccess) {
+    snackBar.open('Access denied: Insufficient permissions', 'Close', {
+      duration: 3000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top'
+    });
+    router.navigate(['/menu']);
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Functional role guard for child routes
+ */
+export const roleGuardChild: CanActivateChildFn = (route) => {
+  return roleGuard(route, {} as any);
+};

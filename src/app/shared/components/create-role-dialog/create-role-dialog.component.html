@@ -1,0 +1,107 @@
+<h2 mat-dialog-title>
+  {{ isEditMode() ? 'Edit Role' : 'Create Custom Role' }}
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="roleForm" class="space-y-4">
+    <!-- Role Name -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Role Name</mat-label>
+      <input matInput formControlName="name" placeholder="e.g., Night Shift Manager">
+      @if (roleForm.get('name')?.hasError('required')) {
+        <mat-error>Role name is required</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Role Description -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="2" 
+        placeholder="Describe what this role is for..."></textarea>
+    </mat-form-field>
+
+    <!-- Permissions Section -->
+    <div>
+      <div class="flex items-center justify-between p-4">
+        <h3 class="font-medium text-gray-700">Permissions</h3>
+        <div class="flex gap-2">
+          <button mat-stroked-button type="button" (click)="selectAll()" class="!text-sm">
+            <mat-icon>check_box</mat-icon>
+            Select All
+          </button>
+          <button mat-stroked-button type="button" (click)="deselectAll()" class="!text-sm">
+            <mat-icon>check_box_outline_blank</mat-icon>
+            Deselect All
+          </button>
+        </div>
+      </div>
+
+      <div class="text-sm text-gray-500 px-4 py-2">
+        Selected: {{ selectedPermissions().size }} / {{ allPermissions().length }} permissions
+      </div>
+
+      @if (permissionsResource.isLoading()) {
+        <div class="flex justify-center p-8">
+          <mat-spinner diameter="32"></mat-spinner>
+        </div>
+      } @else {
+        <div class="max-h-[400px] overflow-y-auto">
+          <mat-selection-list [multiple]="true">
+            @for (module of modules(); track module) {
+              <div mat-subheader class="flex items-center gap-2 !h-auto !py-2 bg-gray-100 sticky top-0 z-10">
+                <mat-checkbox
+                  [checked]="isModuleFullySelected(module)"
+                  [indeterminate]="isModulePartiallySelected(module)"
+                  (click)="$event.stopPropagation()"
+                  (change)="toggleModule(module, $event.checked)">
+                </mat-checkbox>
+                <mat-icon [class]="getModuleColor(module)">{{ getModuleIcon(module) }}</mat-icon>
+                <span class="font-semibold">{{ module }}</span>
+                <span class="text-sm text-gray-500 ml-auto">
+                  {{ getSelectedModuleCount(module) }} / {{ getTotalModulePermissions(module) }}
+                </span>
+              </div>
+
+              @for (group of getGroupsForModule(module); track group) {
+                <div mat-subheader class="flex items-center gap-2 !h-auto !py-1 bg-gray-50">
+                  <mat-checkbox
+                    [checked]="isGroupFullySelected(module, group)"
+                    [indeterminate]="isGroupPartiallySelected(module, group)"
+                    (click)="$event.stopPropagation()"
+                    (change)="toggleGroup(module, group, $event.checked)">
+                  </mat-checkbox>
+                  <span class="font-medium text-gray-700">{{ group }}</span>
+                </div>
+
+                @for (perm of groupedPermissions()[module][group]; track perm.code) {
+                  <mat-list-option
+                    [selected]="selectedPermissions().has(perm.code)"
+                    (selectedChange)="togglePermission(perm.code, $event)">
+                    <mat-icon matListItemIcon>{{ selectedPermissions().has(perm.code) ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                    <div matListItemTitle>{{ perm.name }}</div>
+                    @if (perm.description) {
+                      <div matListItemLine class="text-gray-500">{{ perm.description }}</div>
+                    }
+                  </mat-list-option>
+                }
+                <mat-divider></mat-divider>
+              }
+            }
+          </mat-selection-list>
+        </div>
+      }
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="p-4">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-flat-button color="primary" 
+    [disabled]="roleForm.invalid || saving() || selectedPermissions().size === 0"
+    (click)="saveRole()">
+    @if (saving()) {
+      <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+    }
+    {{ isEditMode() ? 'Update Role' : 'Create Role' }}
+  </button>
+</mat-dialog-actions>

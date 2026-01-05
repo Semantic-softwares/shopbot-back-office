@@ -16,6 +16,7 @@ import { ReservationService } from '../../../../../shared/services/reservation.s
 import { AuthService } from '../../../../../shared/services/auth.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { QueryParamService } from '../../../../../shared/services/query-param.service';
+import { CurrencyMaskModule } from 'ng2-currency-mask';
 
 export interface PaymentUpdateDialogData {
   reservation: Reservation;
@@ -33,7 +34,7 @@ export interface PaymentUpdateResult {
   };
 }
 
-@Component({
+  @Component({
   selector: 'app-payment-update-dialog',
   standalone: true,
   imports: [
@@ -47,7 +48,8 @@ export interface PaymentUpdateResult {
     MatIconModule,
     MatProgressSpinnerModule,
     MatTabsModule,
-    MatTableModule
+    MatTableModule,
+    CurrencyMaskModule
   ],
   templateUrl: './payment-update-dialog.component.html',
   styleUrl: './payment-update-dialog.component.scss'
@@ -62,13 +64,13 @@ export class PaymentUpdateDialogComponent implements OnInit {
   
   private currentUser = toSignal(this.authService.currentUser, { initialValue: null });
   private queryParamService = inject(QueryParamService);
-  processing = signal(false);
-  loadingTransactions = signal(false);
-  transactions = signal<any[]>([]);
-  loadError = signal<string | null>(null);
+  public processing = signal(false);
+  public loadingTransactions = signal(false);
+  public transactions = signal<any[]>([]);
+  public loadError = signal<string | null>(null);
   
   // Payment summary signals
-  totalAmount = signal(0);
+  public totalAmount = signal(0);
   paidAmount = signal(0);
   balanceAmount = signal(0);
   
@@ -79,6 +81,10 @@ export class PaymentUpdateDialogComponent implements OnInit {
     return total > 0 ? Math.round((paid / total) * 100) : 0;
   });
 
+  absBalanceAmount = computed(() => {
+    return Math.abs(this.balanceAmount());
+  });
+
   displayedColumns: string[] = ['date', 'amount', 'method', 'type', 'notes', 'balance'];
   
   paymentForm: FormGroup = this.fb.group({
@@ -86,7 +92,8 @@ export class PaymentUpdateDialogComponent implements OnInit {
     status: [''],
     method: ['', Validators.required],
     reference: [''],
-    notes: ['']
+    notes: [''],
+    type: ['payment'] // 'payment' or 'refund'
   });
 
   constructor() {
@@ -114,16 +121,22 @@ export class PaymentUpdateDialogComponent implements OnInit {
 
     const currentStatus = this.getCurrentPaymentStatus();
     const currentMethod = reservation.paymentInfo?.method || 'cash';
-    
+
     if (this.data.isCheckoutFlow) {
+      // If balance is negative, default to refund type
+      const isRefund = this.balanceAmount() < 0;
+      this.paymentForm.get('type')?.setValue(isRefund ? 'refund' : 'payment');
       this.paymentForm.get('amount')?.setValidators([
-        Validators.required, 
+        Validators.required,
         Validators.min(0.01),
-        Validators.max(this.balanceAmount() || 0)
+        isRefund
+          ? Validators.max(Math.abs(this.balanceAmount()) || 0)
+          : Validators.max(this.balanceAmount() || 0)
       ]);
       this.paymentForm.patchValue({
-        amount: this.balanceAmount() || 0,
+        amount: isRefund ? Math.abs(this.balanceAmount()) : this.balanceAmount() || 0,
         method: currentMethod,
+        type: isRefund ? 'refund' : 'payment',
       });
     } else {
       this.paymentForm.get('status')?.setValidators([Validators.required]);
@@ -132,7 +145,7 @@ export class PaymentUpdateDialogComponent implements OnInit {
         method: currentMethod,
       });
     }
-    
+
     this.paymentForm.updateValueAndValidity();
   }
 
@@ -229,16 +242,29 @@ export class PaymentUpdateDialogComponent implements OnInit {
     }
 
     if (this.data.isCheckoutFlow) {
-      return this.paymentForm.valid;
+      // For refund, amount must not exceed abs(balance)
+      if (this.paymentForm.get('type')?.value === 'refund') {
+        return (
+          this.paymentForm.valid &&
+          this.balanceAmount() < 0 &&
+          this.paymentForm.get('amount')?.value > 0 &&
+          this.paymentForm.get('amount')?.value <= Math.abs(this.balanceAmount())
+        );
+      }
+      // For payment, amount must not exceed balance
+      return (
+        this.paymentForm.valid &&
+        this.balanceAmount() > 0 &&
+        this.paymentForm.get('amount')?.value > 0 &&
+        this.paymentForm.get('amount')?.value <= this.balanceAmount()
+      );
     } else {
       const selectedStatus = this.paymentForm.get('status')?.value;
       const balance = this.balanceAmount();
-      
       if (selectedStatus === 'paid' && balance > 0) {
         return false;
       }
     }
-
     return true;
   }
 
@@ -269,12 +295,12 @@ export class PaymentUpdateDialogComponent implements OnInit {
       const userId = this.currentUser()?._id;
 
       if (this.data.isCheckoutFlow) {
-        // Checkout flow: Create payment transaction
+        // Checkout flow: Create payment or refund transaction
         transactionData = {
           reservation: this.data.reservation._id,
           amount: this.paymentForm.value.amount,
           method: this.paymentForm.value.method,
-          type: 'payment',
+          type: this.paymentForm.value.type || (this.balanceAmount() < 0 ? 'refund' : 'payment'),
           notes: this.paymentForm.value.notes || undefined,
           processedBy: userId
         };

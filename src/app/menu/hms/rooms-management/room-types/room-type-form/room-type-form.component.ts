@@ -16,6 +16,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil, switchMap, tap, of } from 'rxjs';
 
 import { RoomsService } from '../../../../../shared/services/rooms.service';
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { 
   RoomType, 
@@ -41,8 +42,9 @@ import {
     MatCardModule,
     MatDividerModule,
     MatChipsModule,
-    MatProgressSpinnerModule
-],
+    MatProgressSpinnerModule,
+    PageHeaderComponent
+  ],
   templateUrl: './room-type-form.component.html'
 })
 export class RoomTypeFormComponent implements OnInit, OnDestroy {

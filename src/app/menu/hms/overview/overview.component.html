@@ -1,5 +1,5 @@
 <!-- Modern Hotel Management Dashboard -->
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-6 lg:p-8">
+<div class="min-h-screen  p-4 md:p-6 lg:p-8">
   <div class="max-w-7xl mx-auto space-y-6">
 
     <!-- Header Section with Refresh Button -->
@@ -7,10 +7,11 @@
       <div class="flex items-center justify-center space-x-4">
         <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Hotel Management Dashboard</h1>
         <button
-          mat-icon-button
+          matIconButton
+          color="primary"
           (click)="refreshData()"
           [disabled]="loading()"
-          class="!text-blue-600 hover:!bg-blue-50">
+          >
           <mat-icon [class.animate-spin]="loading()">refresh</mat-icon>
         </button>
       </div>
@@ -35,7 +36,7 @@
     <!-- Key Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <!-- Total Rooms Card -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 p-6">
+      <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Rooms</p>
@@ -46,14 +47,14 @@
               <span class="font-medium">{{dashboardStats()?.availableRooms || defaultValue}}</span> Available
             </p>
           </div>
-          <div class="p-3 bg-blue-50 rounded-lg">
-            <mat-icon class="text-blue-600 !text-2xl">hotel</mat-icon>
+          <div class="p-3 border  border-outline-variant rounded-lg">
+            <mat-icon>hotel</mat-icon>
           </div>
         </div>
-      </div>
+      </mat-card>
 
       <!-- Current Occupancy Card -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 p-6">
+      <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Occupancy Rate</p>
@@ -64,14 +65,13 @@
               <span class="font-medium">{{dashboardStats()?.checkedInGuests || defaultValue}}</span> Guests
             </p>
           </div>
-          <div class="p-3 bg-emerald-50 rounded-lg">
-            <mat-icon class="text-emerald-600 !text-2xl">people</mat-icon>
+          <div class="p-3 border  border-outline-variant rounded-lg">
+            <mat-icon>people</mat-icon>
           </div>
         </div>
-      </div>
-
+      </mat-card>
       <!-- Today's Reservations Card -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 p-6">
+      <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Today's Check-ins</p>
@@ -82,35 +82,35 @@
               <span class="font-medium">{{dashboardStats()?.todayCheckouts || defaultValue}}</span> Check-outs
             </p>
           </div>
-          <div class="p-3 bg-purple-50 rounded-lg">
-            <mat-icon class="text-purple-600 !text-2xl">event_available</mat-icon>
+          <div class="p-3 border  border-outline-variant rounded-lg">
+            <mat-icon>event_available</mat-icon>
           </div>
         </div>
-      </div>
+      </mat-card>
 
       <!-- Revenue Card -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 p-6">
-        <div class="flex items-center justify-between">
-          <div>
+      <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6 overflow-hidden">
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0 flex-1">
             <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Today's Revenue</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2" [class.animate-pulse]="loading()">
-              {{currency}}{{(dashboardStats()?.todayRevenue | number:'1.0-0') || defaultValue}}
+            <p class="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mt-2 truncate" [class.animate-pulse]="loading()">
+              {{(dashboardStats()?.todayRevenue  | currency: currency) || defaultValue}}
             </p>
-            <p class="text-sm text-green-600 mt-1">
-              <span class="font-medium">{{currency}}{{(dashboardStats()?.monthlyRevenue | number:'1.0-0') || defaultValue}}</span> This Month
+            <p class="text-sm text-green-600 mt-1 truncate">
+              <span class="font-medium">{{(dashboardStats()?.monthlyRevenue | currency: currency) || defaultValue}}</span> This Month
             </p>
           </div>
-          <div class="p-3 bg-green-50 rounded-lg">
-            <mat-icon class="text-green-600 !text-2xl">trending_up</mat-icon>
+          <div class="p-3 border border-outline-variant rounded-lg flex-shrink-0">
+            <mat-icon>trending_up</mat-icon>
           </div>
         </div>
-      </div>
+      </mat-card>
     </div>
 
     <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Occupancy Chart -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6">
         <div class="flex items-center justify-between mb-6">
           <h3 class="text-lg font-semibold text-gray-800">Weekly Occupancy</h3>
           <div class="flex items-center space-x-2 text-sm text-gray-500">
@@ -127,10 +127,10 @@
             class="!h-full !w-full">
           </canvas>
         </div>
-      </div>
+      </mat-card>
 
       <!-- Revenue Chart -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6">
         <div class="flex items-center justify-between mb-6">
           <h3 class="text-lg font-semibold text-gray-800">Revenue Trend</h3>
           <div class="flex items-center space-x-2 text-sm text-gray-500">
@@ -147,11 +147,11 @@
             class="!h-full !w-full">
           </canvas>
         </div>
-      </div>
+      </mat-card>
     </div>
 
     <!-- Quick Actions Section -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <!-- <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6">
       <h3 class="text-lg font-semibold text-gray-800 mb-6">Quick Actions</h3>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <button
@@ -186,27 +186,28 @@
           <span class="!text-sm !font-medium !text-gray-700">Room Management</span>
         </button>
       </div>
-    </div>
+    </mat-card> -->
 
     <!-- Recent Activity Section -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6">
       <div class="flex items-center justify-between mb-6">
         <h3 class="text-lg font-semibold text-gray-800">Recent Activity</h3>
-        <button mat-button class="!text-blue-600 !text-sm">View All</button>
+        <button matButton>View All</button>
       </div>
 
-      <div class="space-y-4">
+      <mat-list>
         @for (activity of recentActivities(); track activity; let i = $index) {
-          <div class="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-            <div class="p-2 bg-blue-100 rounded-lg">
-              <mat-icon class="!text-blue-600 !text-lg">{{activity.icon}}</mat-icon>
+          <mat-list-item class="!h-auto !py-3">
+            <div matListItemIcon>
+              <mat-icon>{{activity.icon}}</mat-icon>
             </div>
-            <div class="flex-1">
-              <p class="text-sm font-medium text-gray-900">{{activity.title}}</p>
-              <p class="text-xs text-gray-500">{{activity.time}}</p>
-            </div>
-            <div class="text-xs text-gray-400">{{activity.type}}</div>
-          </div>
+            <span matListItemTitle class="text-gray-900">{{activity.title}}</span>
+            <span matListItemLine class="text-gray-500">{{activity.time}}</span>
+            <span matListItemMeta class="text-xs text-gray-400">{{activity.type}}</span>
+          </mat-list-item>
+          @if (i < recentActivities().length - 1) {
+            <mat-divider></mat-divider>
+          }
         }
 
         <!-- Placeholder when no data -->
@@ -216,11 +217,11 @@
             <p>Recent activity will appear here</p>
           </div>
         }
-      </div>
-    </div>
+      </mat-list>
+    </mat-card>
 
     <!-- System Status Footer -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+    <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <div class="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -230,7 +231,7 @@
           Last updated: {{lastUpdated() | date:'short'}}
         </div>
       </div>
-    </div>
+    </mat-card>
 
   </div>
 </div>

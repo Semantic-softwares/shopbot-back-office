@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -7,6 +7,7 @@ import { User } from '../models/user.model';
 import { SessionStorageService } from './session-storage.service';
 import { Role } from '../models/role.model';
 import { Permission } from '../models/permission.model';
+import { RolesService } from './roles.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,8 @@ export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
   private currentUserRole = new BehaviorSubject<Role | null>(null);
   private permissionCache: Map<string, boolean> = new Map();
+  private rolesService = inject(RolesService);
+
 
   constructor(
     private http: HttpClient,
@@ -48,6 +51,10 @@ export class AuthService {
     return this.currentUserRole.getValue();
   }
 
+  /**
+   * Check if user has a specific permission
+   * @param requiredPermission - Permission code (e.g., 'hotel.reservations.view') or array of codes
+   */
   hasPermission(requiredPermission: string | string[]): boolean {
     const userRole = this.currentUserRole.getValue();
     if (!userRole) return false;
@@ -60,63 +67,55 @@ export class AuthService {
     return this.checkSinglePermission(requiredPermission);
   }
 
-  private checkSinglePermission(permission: string): boolean {
+  private checkSinglePermission(permissionCode: string): boolean {
     // Check cache first
-    if (this.permissionCache.has(permission)) {
-      return this.permissionCache.get(permission) || false;
+    if (this.permissionCache.has(permissionCode)) {
+      return this.permissionCache.get(permissionCode) || false;
     }
 
     const userRole = this.currentUserRole.getValue();
-    if (!userRole) return false;
+    if (!userRole || !userRole.permissions) return false;
 
-    // Split permission string (e.g., "manage_user" becomes ["manage", "user"])
-    const [action, resource] = permission.toLowerCase().split('_');
+    // Check for exact permission match by code
+    const hasPermission = userRole.permissions.some(p => p.code === permissionCode);
 
-    // Check for exact permission match
-    const hasExactPermission = userRole.permissions.some(p => 
-      p.action.toLowerCase() === action &&
-      p.resource.toLowerCase() === resource
-    );
-
-    // Check for wildcard permissions (e.g., "manage_all" or "all_user")
-    const hasWildcardPermission = userRole.permissions.some(p => 
-      (p.action.toLowerCase() === 'all' && p.resource.toLowerCase() === resource) ||
-      (p.action.toLowerCase() === action && p.resource.toLowerCase() === 'all') ||
-      (p.action.toLowerCase() === 'all' && p.resource.toLowerCase() === 'all')
-    );
-
-    const result = hasExactPermission || hasWildcardPermission;
-    
     // Cache the result
-    this.permissionCache.set(permission, result);
+    this.permissionCache.set(permissionCode, hasPermission);
     
-    return result;
+    return hasPermission;
   }
 
+  /**
+   * Check if user has ALL of the specified permissions
+   */
   hasAllPermissions(permissions: string[]): boolean {
     return permissions.every(permission => this.hasPermission(permission));
   }
 
+  /**
+   * Check if user has ANY of the specified permissions
+   */
   hasAnyPermission(permissions: string[]): boolean {
     return permissions.some(permission => this.hasPermission(permission));
   }
 
-  getPermissionsByCategory(categoryName: string): Permission[] {
+  /**
+   * Get permissions by module
+   */
+  getPermissionsByModule(moduleName: string): Permission[] {
     const userRole = this.currentUserRole.getValue();
-    if (!userRole) return [];
+    if (!userRole || !userRole.permissions) return [];
 
     return userRole.permissions.filter(permission => 
-      permission.categoryId.name.toLowerCase() === categoryName.toLowerCase()
+      permission.module.toLowerCase() === moduleName.toLowerCase()
     );
   }
 
-  hasCategory(categoryName: string): boolean {
-    const userRole = this.currentUserRole.getValue();
-    if (!userRole) return false;
-
-    return userRole.permissions.some(permission => 
-      permission.categoryId.name.toLowerCase() === categoryName.toLowerCase()
-    );
+  /**
+   * Check if user has any permissions for a module
+   */
+  hasModuleAccess(moduleName: string): boolean {
+    return this.getPermissionsByModule(moduleName).length > 0;
   }
 
   clearPermissions() {
@@ -132,6 +131,7 @@ export class AuthService {
   login(email: string, password: string): Observable<User> {
     return this.http.post<{access_token: string, user: User}>(`${environment.apiUrl}/auth/login?user=merchant`, { email, password })
       .pipe(map(response => {
+        console.log(response.user);
         this.sessionStorage.setItem('currentUser', response.user);
         this.sessionStorage.setItem('auth_token', response.access_token);
         this.currentUserSubject.next(response.user);
@@ -140,13 +140,15 @@ export class AuthService {
   }
 
   signup(userData: Partial<User>): Observable<User> {
-    return this.http.post<{token: string, user: User}>(`${environment.apiUrl}/auth/signup`, userData)
+    return this.http.post<User>(`${environment.apiUrl}/merchants`, userData)
       .pipe(map(response => {
-        return response.user;
+        return response;
       }));
   }
 
   logout() {
+    // Clear role access from RolesService
+    this.rolesService.clearAccess();
     this.sessionStorage.removeItem('currentUser');
     this.sessionStorage.clearAll()
     this.currentUserSubject.next(null);

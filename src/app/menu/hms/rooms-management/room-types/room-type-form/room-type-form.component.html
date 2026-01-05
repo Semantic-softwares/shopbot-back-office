@@ -1,370 +1,441 @@
-<!-- Header -->
-<div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between items-center py-6">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-1">{{ formTitle() }}</h1>
-        <p class="text-sm text-gray-600">Configure room type details, pricing, and amenities</p>
-      </div>
-      <button 
-        type="button" 
-        (click)="onCancel()"
-        class="p-2 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-lg transition-all duration-200">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-  </div>
-</div>
+<app-page-header [title]="formTitle()" [subtitle]="isEditMode() ? 'Update room type information and settings' : 'Configure a new room type for your hotel'">
+  <ng-container actions>
+    <button mat-stroked-button (click)="onCancel()" [disabled]="saving()">
+      <mat-icon>close</mat-icon>
+      Cancel
+    </button>
+
+    <button mat-flat-button color="primary" type="submit" form="roomTypeForm" [disabled]="saving() || loading()">
+      @if (saving()) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        <mat-icon>save</mat-icon>
+      }
+      {{ submitButtonText() }}
+    </button>
+  </ng-container>
+</app-page-header>
 
 <!-- Loading State -->
 @if (loading()) {
-  <div class="flex justify-center items-center py-12 bg-white">
-    <mat-spinner diameter="40" class="!text-blue-600"></mat-spinner>
-    <span class="ml-3 text-gray-600">Loading room type...</span>
+  <div class="flex justify-center items-center py-16">
+    <mat-spinner diameter="40"></mat-spinner>
   </div>
 }
 
 <!-- Error State -->
-@if (error()) {
-  <div class="bg-red-50 border border-red-200 rounded-lg p-6 m-6 text-center">
-    <div class="w-16 h-16 bg-red-200 rounded-full flex items-center justify-center mx-auto mb-4">
-      <mat-icon class="text-4xl text-red-500">error</mat-icon>
-    </div>
-    <h3 class="text-lg font-semibold text-gray-900 mb-2">Error</h3>
-    <p class="text-gray-500 mb-6">{{ error() }}</p>
-    <button class="!bg-gradient-to-r !from-blue-600 !to-blue-700 hover:!from-blue-700 hover:!to-blue-800 !text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 inline-flex items-center gap-2" (click)="onCancel()">
-      <mat-icon class="text-lg">arrow_back</mat-icon>
-      Go Back
-    </button>
-  </div>
+@if (error() && !loading()) {
+  <mat-card appearance="outlined" class="m-6 bg-red-50!">
+    <mat-card-content class="p-6! text-center">
+      <div class="w-16 h-16 bg-red-200 rounded-full flex items-center justify-center mx-auto mb-4">
+        <mat-icon class="text-4xl text-red-500">error</mat-icon>
+      </div>
+      <h3 class="text-lg font-semibold text-red-900 mb-2">Error Loading Room Type</h3>
+      <p class="text-red-700 mb-4">{{ error() }}</p>
+      <button mat-flat-button color="warn" (click)="onCancel()">
+        <mat-icon>arrow_back</mat-icon>
+        Go Back
+      </button>
+    </mat-card-content>
+  </mat-card>
 }
 
-<!-- Form -->
+<!-- Form Content -->
 @if (!loading() && !error()) {
-  <div class="bg-gray-50 min-h-screen">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <form [formGroup]="roomTypeForm()" (ngSubmit)="onSubmit()" class="space-y-8">
+  <div class="max-w-4xl mx-auto py-8">
+    <form id="roomTypeForm" [formGroup]="roomTypeForm()" (ngSubmit)="onSubmit()" class="space-y-6">
 
-        <!-- Basic Information Card -->
-        <mat-card class="shadow-sm border border-gray-200">
-          <mat-card-header class="!bg-gradient-to-r !from-gray-50 !to-gray-100 !border-b !border-gray-200">
-            <mat-card-title class="!text-lg !font-semibold !text-gray-900 flex items-center gap-2">
-              <mat-icon class="text-blue-600">info</mat-icon>
-              Basic Information
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content class="!pt-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Room Type Name -->
-              <div class="md:col-span-2">
-                <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Room Type Name *</mat-label>
-                  <input matInput formControlName="name" placeholder="e.g., Deluxe Ocean View">
-                  <mat-icon matSuffix>hotel_class</mat-icon>
-                  @if (hasError('name', 'required')) {
-                    <mat-error>Room type name is required</mat-error>
-                  }
-                  @if (hasError('name', 'minlength')) {
-                    <mat-error>Name must be at least 2 characters</mat-error>
-                  }
-                  @if (hasError('name', 'maxlength')) {
-                    <mat-error>Name must not exceed 100 characters</mat-error>
-                  }
-                </mat-form-field>
-              </div>
-
-              <!-- Description -->
-              <div class="md:col-span-2">
-                <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Description</mat-label>
-                  <textarea matInput formControlName="description" rows="3" placeholder="Describe the room type features and highlights..."></textarea>
-                  <mat-icon matSuffix>description</mat-icon>
-                  @if (hasError('description', 'maxlength')) {
-                    <mat-error>Description must not exceed 500 characters</mat-error>
-                  }
-                </mat-form-field>
-              </div>
-
-              <!-- Base Price -->
-              <div>
-                <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Base Price per Night *</mat-label>
-                  <input matInput type="number" formControlName="basePrice" min="0" step="0.01">
-                  <span matPrefix>$</span>
-                  @if (hasError('basePrice', 'required')) {
-                    <mat-error>Base price is required</mat-error>
-                  }
-                  @if (hasError('basePrice', 'min')) {
-                    <mat-error>Price must be greater than 0</mat-error>
-                  }
-                </mat-form-field>
-              </div>
-
-              <!-- Room Size -->
-              <div>
-                <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Room Size</mat-label>
-                  <input matInput type="number" formControlName="size" min="0">
-                  <span matSuffix>sq ft</span>
-                  <mat-icon matSuffix>fullscreen</mat-icon>
-                </mat-form-field>
-              </div>
-
-              <!-- Bed Configuration -->
-              <div>
-                <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Bed Configuration</mat-label>
-                  <mat-select formControlName="bedConfiguration">
-                    <mat-option value="">Select bed configuration</mat-option>
-                    @for (config of bedConfigurations; track config) {
-                      <mat-option [value]="config">{{ config }}</mat-option>
-                    }
-                  </mat-select>
-                  <mat-icon matSuffix>hotel</mat-icon>
-                </mat-form-field>
-              </div>
-
-              <!-- Sort Order -->
-              <div>
-                <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Sort Order</mat-label>
-                  <input matInput type="number" formControlName="sortOrder" min="0">
-                  <mat-icon matSuffix>sort</mat-icon>
-                  <mat-hint>Lower numbers appear first</mat-hint>
-                </mat-form-field>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <!-- Capacity & Occupancy Card -->
-        <mat-card class="shadow-sm border border-gray-200">
-          <mat-card-header class="!bg-gradient-to-r !from-gray-50 !to-gray-100 !border-b !border-gray-200">
-            <mat-card-title class="!text-lg !font-semibold !text-gray-900 flex items-center gap-2">
-              <mat-icon class="text-green-600">people</mat-icon>
-              Capacity & Occupancy
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content class="!pt-6">
-            <div formGroupName="capacity" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <!-- Adults -->
-              <div>
-                <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Adults *</mat-label>
-                  <input matInput type="number" formControlName="adults" min="1" max="10" (change)="onCapacityChange()">
-                  <mat-icon matSuffix>person</mat-icon>
-                  @if (hasError('capacity.adults', 'required')) {
-                    <mat-error>Number of adults is required</mat-error>
-                  }
-                  @if (hasError('capacity.adults', 'min')) {
-                    <mat-error>At least 1 adult required</mat-error>
-                  }
-                  @if (hasError('capacity.adults', 'max')) {
-                    <mat-error>Maximum 10 adults allowed</mat-error>
-                  }
-                </mat-form-field>
-              </div>
-
-              <!-- Children -->
-              <div>
-                <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Children</mat-label>
-                  <input matInput type="number" formControlName="children" min="0" max="10" (change)="onCapacityChange()">
-                  <mat-icon matSuffix>child_care</mat-icon>
-                  @if (hasError('capacity.children', 'min')) {
-                    <mat-error>Cannot be negative</mat-error>
-                  }
-                  @if (hasError('capacity.children', 'max')) {
-                    <mat-error>Maximum 10 children allowed</mat-error>
-                  }
-                </mat-form-field>
-              </div>
-
-              <!-- Infants -->
-              <div>
-                <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Infants</mat-label>
-                  <input matInput type="number" formControlName="infants" min="0" max="5" (change)="onCapacityChange()">
-                  <mat-icon matSuffix>baby_changing_station</mat-icon>
-                  @if (hasError('capacity.infants', 'min')) {
-                    <mat-error>Cannot be negative</mat-error>
-                  }
-                  @if (hasError('capacity.infants', 'max')) {
-                    <mat-error>Maximum 5 infants allowed</mat-error>
-                  }
-                </mat-form-field>
-              </div>
+      <!-- Basic Information Section -->
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-blue-600">info</mat-icon>
+          <mat-card-title>Basic Information</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="p-6! space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Room Type Name -->
+            <div class="md:col-span-2">
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Room Type Name *</mat-label>
+                <input matInput formControlName="name" placeholder="e.g., Deluxe Ocean View">
+                <mat-icon matSuffix class="text-gray-400">hotel_class</mat-icon>
+                @if (hasError('name', 'required')) {
+                  <mat-error>Room type name is required</mat-error>
+                }
+                @if (hasError('name', 'minlength')) {
+                  <mat-error>Name must be at least 2 characters</mat-error>
+                }
+                @if (hasError('name', 'maxlength')) {
+                  <mat-error>Name must not exceed 100 characters</mat-error>
+                }
+              </mat-form-field>
             </div>
 
-            <!-- Total Capacity Display -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <div class="flex items-center gap-2 text-blue-800">
-                <mat-icon>info</mat-icon>
-                <span class="font-medium">Total Base Capacity: {{ totalCapacity() }} guests</span>
-              </div>
+            <!-- Description -->
+            <div class="md:col-span-2">
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description" rows="3" placeholder="Describe the room type features and highlights..."></textarea>
+                @if (hasError('description', 'maxlength')) {
+                  <mat-error>Description must not exceed 500 characters</mat-error>
+                }
+              </mat-form-field>
             </div>
 
-            <!-- Maximum Occupancy -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Maximum Occupancy *</mat-label>
-                  <input matInput type="number" formControlName="maxOccupancy" min="1" max="20">
-                  <mat-icon matSuffix>groups</mat-icon>
-                  <mat-hint>Total guests including extra beds</mat-hint>
-                  @if (hasError('maxOccupancy', 'required')) {
-                    <mat-error>Maximum occupancy is required</mat-error>
-                  }
-                  @if (hasError('maxOccupancy', 'min')) {
-                    <mat-error>At least 1 guest required</mat-error>
-                  }
-                  @if (hasError('maxOccupancy', 'max')) {
-                    <mat-error>Maximum 20 guests allowed</mat-error>
-                  }
-                </mat-form-field>
-              </div>
+            <!-- Base Price -->
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Base Price per Night *</mat-label>
+                <span matPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="basePrice" min="0" step="0.01">
+                @if (hasError('basePrice', 'required')) {
+                  <mat-error>Base price is required</mat-error>
+                }
+                @if (hasError('basePrice', 'min')) {
+                  <mat-error>Price must be greater than 0</mat-error>
+                }
+              </mat-form-field>
+            </div>
 
-              <!-- Active Status -->
-              <div class="flex items-center h-14">
-                <mat-checkbox formControlName="active" class="text-green-600">
+            <!-- Room Size -->
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Room Size (sq ft)</mat-label>
+                <input matInput type="number" formControlName="size" min="0">
+                <mat-icon matSuffix class="text-gray-400">fullscreen</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <!-- Bed Configuration -->
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Bed Configuration</mat-label>
+                <mat-select formControlName="bedConfiguration">
+                  <mat-option value="">Select bed configuration</mat-option>
+                  @for (config of bedConfigurations; track config) {
+                    <mat-option [value]="config">{{ config }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <!-- Sort Order -->
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Sort Order</mat-label>
+                <input matInput type="number" formControlName="sortOrder" min="0">
+                <mat-icon matSuffix class="text-gray-400">sort</mat-icon>
+                <mat-hint>Lower numbers appear first</mat-hint>
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Capacity & Occupancy Section -->
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-green-600">people</mat-icon>
+          <mat-card-title>Capacity & Occupancy</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="p-6! space-y-6">
+          <div formGroupName="capacity" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Adults -->
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Adults *</mat-label>
+                <input matInput type="number" formControlName="adults" min="1" max="10" (change)="onCapacityChange()">
+                <mat-icon matSuffix class="text-gray-400">person</mat-icon>
+                @if (hasError('capacity.adults', 'required')) {
+                  <mat-error>Number of adults is required</mat-error>
+                }
+                @if (hasError('capacity.adults', 'min')) {
+                  <mat-error>At least 1 adult required</mat-error>
+                }
+                @if (hasError('capacity.adults', 'max')) {
+                  <mat-error>Maximum 10 adults allowed</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <!-- Children -->
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Children</mat-label>
+                <input matInput type="number" formControlName="children" min="0" max="10" (change)="onCapacityChange()">
+                <mat-icon matSuffix class="text-gray-400">child_care</mat-icon>
+                @if (hasError('capacity.children', 'min')) {
+                  <mat-error>Cannot be negative</mat-error>
+                }
+                @if (hasError('capacity.children', 'max')) {
+                  <mat-error>Maximum 10 children allowed</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <!-- Infants -->
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Infants</mat-label>
+                <input matInput type="number" formControlName="infants" min="0" max="5" (change)="onCapacityChange()">
+                <mat-icon matSuffix class="text-gray-400">baby_changing_station</mat-icon>
+                @if (hasError('capacity.infants', 'min')) {
+                  <mat-error>Cannot be negative</mat-error>
+                }
+                @if (hasError('capacity.infants', 'max')) {
+                  <mat-error>Maximum 5 infants allowed</mat-error>
+                }
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Total Capacity Display -->
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-center gap-2 text-blue-800">
+              <mat-icon>info</mat-icon>
+              <span class="font-medium">Total Base Capacity: {{ totalCapacity() }} guests</span>
+            </div>
+          </div>
+
+          <!-- Maximum Occupancy -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Maximum Occupancy *</mat-label>
+                <input matInput type="number" formControlName="maxOccupancy" min="1" max="20">
+                <mat-icon matSuffix class="text-gray-400">groups</mat-icon>
+                <mat-hint>Total guests including extra beds</mat-hint>
+                @if (hasError('maxOccupancy', 'required')) {
+                  <mat-error>Maximum occupancy is required</mat-error>
+                }
+                @if (hasError('maxOccupancy', 'min')) {
+                  <mat-error>At least 1 guest required</mat-error>
+                }
+                @if (hasError('maxOccupancy', 'max')) {
+                  <mat-error>Maximum 20 guests allowed</mat-error>
+                }
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Room Status Section -->
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-purple-600">toggle_on</mat-icon>
+          <mat-card-title>Room Type Status</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="p-6! space-y-6">
+          <div class="flex items-center">
+            <mat-checkbox formControlName="active" class="text-green-600">
+              <span class="flex items-center gap-2">
+                <mat-icon class="text-lg text-gray-600">check_circle</mat-icon>
+                <span>
                   <span class="font-medium">Active Room Type</span>
-                  <div class="text-sm text-gray-500">Available for booking</div>
-                </mat-checkbox>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
+                  <span class="text-sm text-gray-500 ml-2">Available for booking</span>
+                </span>
+              </span>
+            </mat-checkbox>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
-        <!-- Room Features Card -->
-        <mat-card class="shadow-sm border border-gray-200">
-          <mat-card-header class="!bg-gradient-to-r !from-gray-50 !to-gray-100 !border-b !border-gray-200">
-            <mat-card-title class="!text-lg !font-semibold !text-gray-900 flex items-center gap-2">
-              <mat-icon class="text-purple-600">star</mat-icon>
-              Room Features
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content class="!pt-6">
-            <div formGroupName="features" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <mat-checkbox formControlName="hasPrivateBathroom">Private Bathroom</mat-checkbox>
-              <mat-checkbox formControlName="hasAirConditioning">Air Conditioning</mat-checkbox>
-              <mat-checkbox formControlName="hasWifi">WiFi</mat-checkbox>
-              <mat-checkbox formControlName="hasTv">Television</mat-checkbox>
-              <mat-checkbox formControlName="hasRefrigerator">Refrigerator</mat-checkbox>
-              <mat-checkbox formControlName="hasBalcony">Balcony</mat-checkbox>
-              <mat-checkbox formControlName="hasKitchenette">Kitchenette</mat-checkbox>
-              <mat-checkbox formControlName="hasWorkDesk">Work Desk</mat-checkbox>
-              <mat-checkbox formControlName="hasSafe">Safe</mat-checkbox>
-              <mat-checkbox formControlName="hasHairdryer">Hair Dryer</mat-checkbox>
-              <mat-checkbox formControlName="hasIroning">Iron & Board</mat-checkbox>
-              <mat-checkbox formControlName="hasSeatingArea">Seating Area</mat-checkbox>
+      <!-- Room Features Section -->
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-amber-600">star</mat-icon>
+          <mat-card-title>Room Features</mat-card-title>
+          <mat-card-subtitle>Select the features available in this room type</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="p-6! space-y-6">
+          <div formGroupName="features" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="flex items-center">
+              <mat-checkbox formControlName="hasPrivateBathroom" class="text-blue-600">
+                <span class="flex items-center gap-2">
+                  <mat-icon class="text-lg text-gray-600">bathroom</mat-icon>
+                  Private Bathroom
+                </span>
+              </mat-checkbox>
             </div>
-          </mat-card-content>
-        </mat-card>
+            
+            <div class="flex items-center">
+              <mat-checkbox formControlName="hasAirConditioning" class="text-blue-600">
+                <span class="flex items-center gap-2">
+                  <mat-icon class="text-lg text-gray-600">ac_unit</mat-icon>
+                  Air Conditioning
+                </span>
+              </mat-checkbox>
+            </div>
+            
+            <div class="flex items-center">
+              <mat-checkbox formControlName="hasWifi" class="text-blue-600">
+                <span class="flex items-center gap-2">
+                  <mat-icon class="text-lg text-gray-600">wifi</mat-icon>
+                  WiFi
+                </span>
+              </mat-checkbox>
+            </div>
+            
+            <div class="flex items-center">
+              <mat-checkbox formControlName="hasTv" class="text-blue-600">
+                <span class="flex items-center gap-2">
+                  <mat-icon class="text-lg text-gray-600">tv</mat-icon>
+                  Television
+                </span>
+              </mat-checkbox>
+            </div>
+            
+            <div class="flex items-center">
+              <mat-checkbox formControlName="hasRefrigerator" class="text-blue-600">
+                <span class="flex items-center gap-2">
+                  <mat-icon class="text-lg text-gray-600">kitchen</mat-icon>
+                  Refrigerator
+                </span>
+              </mat-checkbox>
+            </div>
+            
+            <div class="flex items-center">
+              <mat-checkbox formControlName="hasBalcony" class="text-blue-600">
+                <span class="flex items-center gap-2">
+                  <mat-icon class="text-lg text-gray-600">balcony</mat-icon>
+                  Balcony
+                </span>
+              </mat-checkbox>
+            </div>
+            
+            <div class="flex items-center">
+              <mat-checkbox formControlName="hasKitchenette" class="text-blue-600">
+                <span class="flex items-center gap-2">
+                  <mat-icon class="text-lg text-gray-600">countertops</mat-icon>
+                  Kitchenette
+                </span>
+              </mat-checkbox>
+            </div>
+            
+            <div class="flex items-center">
+              <mat-checkbox formControlName="hasWorkDesk" class="text-blue-600">
+                <span class="flex items-center gap-2">
+                  <mat-icon class="text-lg text-gray-600">desk</mat-icon>
+                  Work Desk
+                </span>
+              </mat-checkbox>
+            </div>
+            
+            <div class="flex items-center">
+              <mat-checkbox formControlName="hasSafe" class="text-blue-600">
+                <span class="flex items-center gap-2">
+                  <mat-icon class="text-lg text-gray-600">lock</mat-icon>
+                  Safe
+                </span>
+              </mat-checkbox>
+            </div>
+            
+            <div class="flex items-center">
+              <mat-checkbox formControlName="hasHairdryer" class="text-blue-600">
+                <span class="flex items-center gap-2">
+                  <mat-icon class="text-lg text-gray-600">dry</mat-icon>
+                  Hair Dryer
+                </span>
+              </mat-checkbox>
+            </div>
+            
+            <div class="flex items-center">
+              <mat-checkbox formControlName="hasIroning" class="text-blue-600">
+                <span class="flex items-center gap-2">
+                  <mat-icon class="text-lg text-gray-600">iron</mat-icon>
+                  Iron & Board
+                </span>
+              </mat-checkbox>
+            </div>
+            
+            <div class="flex items-center">
+              <mat-checkbox formControlName="hasSeatingArea" class="text-blue-600">
+                <span class="flex items-center gap-2">
+                  <mat-icon class="text-lg text-gray-600">weekend</mat-icon>
+                  Seating Area
+                </span>
+              </mat-checkbox>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
-        <!-- Amenities Card -->
-        <mat-card class="shadow-sm border border-gray-200">
-          <mat-card-header class="!bg-gradient-to-r !from-gray-50 !to-gray-100 !border-b !border-gray-200">
-            <mat-card-title class="!text-lg !font-semibold !text-gray-900 flex items-center gap-2">
-              <mat-icon class="text-orange-600">local_offer</mat-icon>
-              Amenities
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content class="!pt-6">
-            <!-- Common Amenities -->
-            <div class="mb-6">
-              <h4 class="text-md font-semibold text-gray-900 mb-4">Select Common Amenities</h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                @for (amenity of commonAmenities; track amenity) {
-                  <div class="flex items-center">
-                    <mat-checkbox 
-                      [checked]="isAmenitySelected(amenity)"
-                      (change)="onAmenityChange(amenity, $event.checked)">
-                      {{ amenity }}
-                    </mat-checkbox>
+      <!-- Amenities Section -->
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-indigo-600">room_service</mat-icon>
+          <mat-card-title>Amenities</mat-card-title>
+          <mat-card-subtitle>Select the amenities included with this room type</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="p-6! space-y-6">
+          <!-- Selected Amenities Display -->
+          @if (amenitiesFormArray.controls.length > 0 || customAmenitiesFormArray.controls.length > 0) {
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 mb-3">Selected Amenities ({{ amenitiesFormArray.controls.length + customAmenitiesFormArray.controls.length }})</h4>
+              <div class="flex flex-wrap gap-2">
+                @for (control of amenitiesFormArray.controls; track $index) {
+                  <div class="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                    <span>{{ control.value }}</span>
+                    <button type="button" (click)="onAmenityChange(control.value, false)" class="hover:text-blue-600">
+                      <mat-icon class="text-sm">close</mat-icon>
+                    </button>
+                  </div>
+                }
+                @for (control of customAmenitiesFormArray.controls; track $index) {
+                  <div class="flex items-center gap-2 bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                    <span>{{ control.value }}</span>
+                    <button type="button" (click)="removeCustomAmenity($index)" class="hover:text-purple-600">
+                      <mat-icon class="text-sm">close</mat-icon>
+                    </button>
                   </div>
                 }
               </div>
             </div>
+          }
 
-            <mat-divider class="!my-6"></mat-divider>
-
-            <!-- Custom Amenities -->
-            <div>
-              <h4 class="text-md font-semibold text-gray-900 mb-4">Custom Amenities</h4>
-              
-              <!-- Add Custom Amenity -->
-              <div class="flex gap-2 mb-4">
-                <mat-form-field appearance="outline" class="flex-1">
-                  <mat-label>Add Custom Amenity</mat-label>
-                  <input matInput #customAmenityInput placeholder="Enter custom amenity name">
-                  <mat-icon matSuffix>add</mat-icon>
-                </mat-form-field>
+          <!-- Common Amenities -->
+          <div>
+            <h4 class="text-sm font-medium text-gray-700 mb-3">Common Amenities</h4>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              @for (amenity of commonAmenities; track amenity) {
                 <button 
-                  type="button" 
-                  mat-raised-button 
-                  color="primary"
-                  (click)="addCustomAmenity(customAmenityInput.value); customAmenityInput.value = ''"
-                  class="h-14 !bg-gradient-to-r !from-blue-600 !to-blue-700 hover:!from-blue-700 hover:!to-blue-800">
-                  Add
+                  type="button"
+                  (click)="onAmenityChange(amenity, !isAmenitySelected(amenity))"
+                  [class]="isAmenitySelected(amenity) ? 
+                    'bg-blue-100 text-blue-800 border-blue-300' : 
+                    'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+                  class="flex items-center justify-center p-3 border rounded-lg text-sm font-medium transition-all duration-200">
+                  {{ amenity }}
                 </button>
-              </div>
-
-              <!-- Custom Amenities List -->
-              @if (customAmenitiesFormArray.controls.length > 0) {
-                <div class="space-y-2">
-                  @for (control of customAmenitiesFormArray.controls; track $index) {
-                    <div class="flex items-center gap-2 bg-gray-50 rounded-lg p-3 border border-gray-200">
-                      <mat-icon class="text-gray-400">local_offer</mat-icon>
-                      <span class="flex-1 font-medium text-gray-900">{{ control.value }}</span>
-                      <button 
-                        type="button" 
-                        mat-icon-button 
-                        color="warn"
-                        (click)="removeCustomAmenity($index)"
-                        class="!text-red-600 hover:!bg-red-50">
-                        <mat-icon>delete</mat-icon>
-                      </button>
-                    </div>
-                  }
-                </div>
-              } @else {
-                <div class="text-center py-8 text-gray-500">
-                  <mat-icon class="text-4xl text-gray-300 mb-2">local_offer</mat-icon>
-                  <p>No custom amenities added yet</p>
-                </div>
               }
             </div>
-          </mat-card-content>
-        </mat-card>
+          </div>
 
-        <!-- Action Buttons -->
-        <div class="flex gap-4 pt-6">
-          <button 
-            type="submit" 
-            mat-raised-button 
-            color="primary"
-            [disabled]="saving() || !roomTypeForm().valid"
-            class="!bg-gradient-to-r !from-blue-600 !to-blue-700 hover:!from-blue-700 hover:!to-blue-800 !text-white px-8 py-3 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-            @if (saving()) {
-              <mat-icon class="animate-spin mr-2">refresh</mat-icon>
-            } @else {
-              <mat-icon class="mr-2">{{ isEditMode() ? 'save' : 'add' }}</mat-icon>
-            }
-            {{ submitButtonText() }}
-          </button>
-          
-          <button 
-            type="button" 
-            mat-stroked-button 
-            (click)="onCancel()"
-            [disabled]="saving()"
-            class="border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 font-medium transition-all duration-200">
-            <mat-icon class="mr-2">cancel</mat-icon>
-            Cancel
-          </button>
-        </div>
+          <mat-divider class="!my-6"></mat-divider>
 
-      </form>
-    </div>
+          <!-- Custom Amenities -->
+          <div>
+            <h4 class="text-sm font-medium text-gray-700 mb-3">Add Custom Amenity</h4>
+            <div class="flex gap-2">
+              <mat-form-field appearance="outline" class="flex-1">
+                <mat-label>Custom Amenity Name</mat-label>
+                <input matInput #customAmenityInput placeholder="Enter custom amenity">
+              </mat-form-field>
+              <button 
+                type="button" 
+                mat-flat-button 
+                color="primary"
+                (click)="addCustomAmenity(customAmenityInput.value); customAmenityInput.value = ''"
+                class="h-14">
+                <mat-icon>add</mat-icon>
+                Add
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </form>
   </div>
 }

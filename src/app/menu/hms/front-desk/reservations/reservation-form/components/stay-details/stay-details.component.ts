@@ -30,6 +30,8 @@ import { AuthService } from '../../../../../../../shared/services/auth.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReservationFormService } from '../../../../../../../shared/services/reservation-form.service';
 import { distinctUntilChanged, tap } from 'rxjs';
+import { Reservation } from '../../../../../../../shared/models/reservation.model';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-stay-details',
@@ -52,11 +54,14 @@ import { distinctUntilChanged, tap } from 'rxjs';
   ], // Key step
 })
 export class StayDetailsComponent implements AfterViewInit {
+  private route = inject(ActivatedRoute);
   private reservationFormService = inject(ReservationFormService);
+  public reservation = input<Reservation | null>();
   public reservationForm = toSignal<FormGroup | null>(
     this.reservationFormService.form$,
     { initialValue: null }
   );
+  private id = signal(this.route.snapshot.paramMap.get('id'));
   private checkInDate = toSignal<Date | null>(
     this.reservationForm()!.get('checkInDate')!.valueChanges,
     { initialValue: this.reservationForm()!.get('checkInDate')!.value }
@@ -92,7 +97,8 @@ export class StayDetailsComponent implements AfterViewInit {
 
   // Display name for sales person
   salesPersonName = computed(() => {
-    const user = this.currentUser();
+    const user = this.isEditing() ? this.reservation()?.createdBy : this.currentUser();
+    console.log('user for salesPersonName:', user);
     if (user) {
       return user.name || '';
     }
@@ -101,23 +107,24 @@ export class StayDetailsComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     // Sync form values after view init to avoid ExpressionChangedAfterItHasBeenCheckedError
-
-    this.reservationForm()?.valueChanges
-    .pipe(
-    distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr))
-  ).subscribe((d) => {
-      this.reservationForm()?.patchValue(
-        {
-          createdBy: this.currentUser()?._id,
-          checkInDate: this.checkInDate(),
-          checkOutDate: this.checkOutDate(),
-          numberOfNights: this.numberOfNights(),
-        },
-        { emitEvent: false }
-      );
-    });
+    this.reservationForm()
+      ?.valueChanges.pipe(
+        distinctUntilChanged(
+          (prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)
+        )
+      )
+      .subscribe((d) => {
+        this.reservationForm()?.patchValue(
+          {
+            createdBy: this.reservation()?.createdBy?._id || this.currentUser()?._id,
+            checkInDate: this.checkInDate(),
+            checkOutDate: this.checkOutDate(),
+            numberOfNights: this.numberOfNights(),
+          },
+          { emitEvent: false }
+        );
+      });
   }
-
 
   onDateChange() {
     this.dateChanged.emit();

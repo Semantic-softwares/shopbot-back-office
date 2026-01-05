@@ -18,6 +18,7 @@ import { Subject, takeUntil, switchMap, tap, of } from 'rxjs';
 
 import { RoomsService } from '../../../../../shared/services/rooms.service';
 import { StoreStore } from '../../../../../shared/stores/store.store';
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { environment } from '../../../../../../environments/environment';
 import { 
   Room, 
@@ -50,7 +51,8 @@ import {
     MatCardModule,
     MatDividerModule,
     MatChipsModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    PageHeaderComponent
   ],
   templateUrl: './room-form.component.html'
 })

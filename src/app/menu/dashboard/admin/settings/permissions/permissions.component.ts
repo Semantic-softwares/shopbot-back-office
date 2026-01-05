@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, computed, inject, signal } from '@angular
 import { CommonModule } from '@angular/common';
 import { Permission } from '../../../../../shared/models/permission.model';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { PermissionService } from '../../../../shared/services/permission.service';
+import { RolesService } from '../../../../../shared/services/roles.service';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
@@ -33,13 +33,13 @@ import { ConfirmDialogComponent } from '../../../../../shared/components/confirm
   templateUrl: './permissions.component.html'
 })
 export class PermissionsComponent  {
-    private permissionService = inject(PermissionService);
+    private rolesService = inject(RolesService);
     private dialog = inject(MatDialog);
     private snackBar = inject(MatSnackBar);
     public permissions = rxResource({
-      loader: () => this.permissionService.getPermissions()
+      loader: () => this.rolesService.getPermissions()
     });
-    displayedColumns: string[] = ['name', 'action', 'resource', 'category', 'actions'];
+    displayedColumns: string[] = ['name', 'action', 'module', 'group', 'actions'];
     dataSource!: MatTableDataSource<Permission>;
     searchTerm = signal('');
   
@@ -48,7 +48,8 @@ export class PermissionsComponent  {
         const term = this.searchTerm().toLowerCase();
          return  this.permissions.value()!.filter(permission => 
             permission.name.toLowerCase().includes(term) ||
-            permission.action.toLowerCase().includes(term)
+            permission.action.toLowerCase().includes(term) ||
+            permission.module.toLowerCase().includes(term)
           );
       });
     
@@ -82,7 +83,7 @@ export class PermissionsComponent  {
 
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
-          this.permissionService.deletePermission(permission._id!)
+          this.rolesService.deletePermission(permission._id!)
             .subscribe({
               next: () => {
                 this.permissions.reload();

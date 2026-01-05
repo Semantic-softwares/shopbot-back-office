@@ -50,7 +50,19 @@
         Cancel
       </a>
       }
-    
+
+
+      <a matButton="outlined" (click)="payment()" [disabled]="isSubmitted()">
+        <mat-icon>payment</mat-icon>
+        Payment
+      </a>
+
+      @if (canChangeRooms() && isSingleBooking()) {
+      <button matButton="tonal" (click)="openRoomChangeDialog()" [disabled]="statusUpdating() || isSubmitted()">
+        <mat-icon>swap_horiz</mat-icon>
+        Change Room
+      </button>
+      }
 
       @if (reservation.value()?.status === ReservationStatus.PENDING || reservation.value()?.status ===
       ReservationStatus.RESERVED) {
@@ -58,6 +70,14 @@
         [disabled]="statusUpdating() || isSubmitted()">
         <mat-icon>verified</mat-icon>
         Confirm
+      </button>
+      }
+        @if (reservation.value()?.status === ReservationStatus.CHECKED_OUT || reservation.value()?.status ===
+      ReservationStatus.CANCELLED || reservation.value()?.status === ReservationStatus.NO_SHOW) {
+      <button matButton="outlined"  (click)="reopenReservation()"
+        [disabled]="statusUpdating() || isSubmitted()">
+        <mat-icon>redo</mat-icon>
+        Re-open
       </button>
       }
       @if (reservation.value()?.status === ReservationStatus.CONFIRMED) {
@@ -92,8 +112,6 @@
         Reserve
       </a>
       }
-
-
     </div>
   </div>
 </div>
@@ -137,7 +155,7 @@
         (guestSelected)="onGuestSelected($event)"></app-guest-details>
 
       <!-- Stay Details Component - Top Row Center -->
-      <app-stay-details [quickReservation]="quickReservation()" [isEditing]="isEditing()"></app-stay-details>
+      <app-stay-details [quickReservation]="quickReservation()" [isEditing]="isEditing()" [reservation]="reservation.value()"></app-stay-details>
 
       <!-- Payment Details Component - Top Row Right -->
       <payment-info [reservationForm]="reservationForm" />
@@ -154,12 +172,28 @@
       <!-- Row 2: Room Details Component - Only for Group Reservation -->
       <!-- <pre>{{reservation.value() | json}}</pre> -->
       <app-room-details class="lg:col-span-4" [reservation]="reservation.value()"
-        [selectedRoomIds]="selectedRoomIds()" />
+        [selectedRoomIds]="selectedRoomIds()" 
+        (roomChangeRequested)="openRoomChangeDialog($event)" />
       }
 
       <!-- Row 3: Special Requests & Notes - Full Width -->
       <app-special-requests class="lg:col-span-4" [reservationForm]="reservationForm" />
-      <!-- <pre>{{reservationForm.value | json}}</pre> -->
+
+      <!-- Row 4: Room Change History - Only shown in edit mode when there are room changes -->
+      @if (isEditing() && (reservation.value()?.roomChanges?.length ?? 0) > 0) {
+        <app-room-change-history 
+          class="lg:col-span-4" 
+          [reservation]="reservation.value()!"
+           />
+      }
+
+      <!-- Row 5: Payment Transactions - Only shown in edit mode -->
+      @if (isEditing()) {
+        <app-reservation-transactions 
+          class="lg:col-span-4" 
+          [reservation]="reservation.value()!"
+        />
+      }
     </div>
   </form>
 </div>

@@ -1,0 +1,246 @@
+<app-page-header 
+  title="Reservations" 
+  subtitle="Manage hotel reservations and guest bookings"
+  [showViewToggle]="true"
+  viewToggleRoute="/menu/hms/front-desk/reservations/view">
+  
+  <ng-container actions>
+    <button matButton="outlined" (click)="clearFilters()">
+      <mat-icon>clear</mat-icon>
+      Clear Filters
+    </button>
+
+    <button matButton="outlined" (click)="reloadData()">
+      <mat-icon class="mr-1">refresh</mat-icon>
+      Reload
+    </button>
+    
+    <button matButton="filled" (click)="createReservation()">
+      <mat-icon class="mr-1">add</mat-icon>
+      Create Reservation
+    </button>
+  </ng-container>
+  
+</app-page-header>
+
+<div class="min-h-screen flex flex-col ">
+  <!-- Calendar Controls Header -->
+  <div class="py-4 ">
+    <div class="flex justify-between items-center">
+      <div>
+        <div class="flex flex-wrap gap-4 mt-2">
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <mat-icon class="text-base">hotel</mat-icon>
+            <span>Total: <strong>{{ reservations.value()?.reservations?.length || 0 }}</strong></span>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <mat-icon class="text-base text-green-600">check_circle</mat-icon>
+            <span>Confirmed: <strong>{{ confirmedCount() || 0 }}</strong></span>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <mat-icon class="text-base text-purple-600">person</mat-icon>
+            <span>Checked In: <strong>{{ checkedInCount() || 0 }}</strong></span>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <mat-icon class="text-base text-orange-600">schedule</mat-icon>
+            <span>Pending: <strong>{{ pendingCount() || 0 }}</strong></span>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <mat-icon class="text-base text-red-600">cancel</mat-icon>
+            <span>Cancelled: <strong>{{ cancelledCount() || 0 }}</strong></span>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-3 items-center">
+        <!-- View Mode Menu Trigger -->
+        <button mat-stroked-button [matMenuTriggerFor]="viewMenu">
+           {{ viewMode() | titlecase }}
+          <mat-icon class="ml-1">expand_more</mat-icon>
+        </button>
+        <mat-menu #viewMenu="matMenu">
+          <button mat-menu-item (click)="onViewModeChange('weekly')">Weekly</button>
+          <button mat-menu-item (click)="onViewModeChange('monthly')">Monthly</button>
+        </mat-menu>
+        <!-- Status Filter Menu Trigger -->
+        <button mat-stroked-button [matMenuTriggerFor]="statusMenu">
+          Status: {{ selectedStatus() | titlecase }}
+          <mat-icon class="ml-1">expand_more</mat-icon>
+        </button>
+        <mat-menu #statusMenu="matMenu">
+          <button mat-menu-item (click)="onStatusChange('all')">All</button>
+          @for (s of reservationStatuses; track s) {
+            <button mat-menu-item (click)="onStatusChange(s)">{{ s | titlecase }}</button>
+          }
+        </mat-menu>
+        <button matButton="tonal" (click)="previousWeek()">
+          <mat-icon class="mr-1">chevron_left</mat-icon>
+          Previous
+        </button>
+        <button matButton color="warn">
+         {{getPeriodLabel()}}
+        </button>
+        <button matButton="tonal" (click)="nextWeek()">
+          Next
+          <mat-icon class="ml-1">chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar Table Container -->
+  <div class="flex-1 overflow-hidden flex flex-col min-h-96">
+    <div class="overflow-auto flex-1 relative min-h-80">
+      @if (reservations.isLoading()) {
+        <div class="absolute inset-0 z-50 flex items-center justify-center bg-white/60">
+          <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+        </div>
+      }
+      <table class="w-full border-collapse  overflow-hidden">
+        <tfoot>
+          <tr>
+            <td class="sticky left-0 z-10 w-48 border border-outline-variant px-4 py-2">
+              <div class="flex flex-col gap-1">
+                <span class="text-xs font-semibold text-gray-600 mb-1">Room Status</span>
+                @for (status of housekeepingStatuses; track status.key) {
+                  <div class="flex items-center gap-2">
+                    <span class="inline-block w-3 h-3 rounded-sm border-l-2" 
+                          [ngClass]="{
+                            'bg-green-100 border-l-green-500': status.key === 'clean',
+                            'bg-amber-100 border-l-amber-500': status.key === 'dirty',
+                            'bg-blue-100 border-l-blue-500': status.key === 'inspected',
+                            'bg-red-100 border-l-red-500': status.key === 'out_of_order'
+                          }"></span>
+                    <span class="text-xs text-gray-700">{{ status.label }}</span>
+                  </div>
+                }
+              </div>
+            </td>
+            <td class="border border-outline-variant px-4 py-2" [attr.colspan]="dateRange().length">
+              <div class="flex flex-col gap-2">
+                <span class="text-xs font-semibold text-gray-600">Reservation Status</span>
+                <div class="flex flex-wrap items-center gap-4">
+                  @for (s of reservationStatuses; track s) {
+                    <div class="flex items-center gap-2">
+                      <span class="inline-block w-3 h-3 rounded-sm" [ngClass]="getStatusColorClass(s)"></span>
+                      <span class="text-xs text-gray-700">{{ s | titlecase }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tfoot>
+        <thead>
+          <tr>
+            <th class="sticky left-0 top-0 z-30 w-48 bg-white border border-outline-variant text-center">
+              <span class="text-xs font-semibold text-gray-700 uppercase">Rooms</span>
+            </th>
+            @for (date of dateRange(); track date.key) {
+              <th class="sticky top-0 z-20 border border-outline-variant text-center transition-colors duration-150"
+                  [style.width.px]="cellWidthPx()"
+                  [class.bg-white]="hoveredDateKey() !== date.key"
+                  [class.bg-blue-500]="hoveredDateKey() === date.key"
+                  [class.text-white]="hoveredDateKey() === date.key">
+                <p class="text-xs font-semibold" [class.text-gray-600]="hoveredDateKey() !== date.key">{{ date.dayName }}</p>
+                <p class="text-sm font-bold" [class.text-gray-900]="hoveredDateKey() !== date.key">{{ date.day }}</p>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of roomsWithReservations(); track $index) {
+            @if (row.isGroup) {
+              <tr>
+                <td class="sticky left-0 z-10 w-48 border border-outline-variant px-4 py-2 text-left bg-gray-100">
+                  <span class="text-xs font-semibold text-gray-800">{{ row.roomTypeName }}</span>
+                </td>
+                @for (date of dateRange(); track date.key) {
+                  <td class="border border-outline-variant transition-colors duration-150" 
+                      [class.bg-gray-100]="hoveredDateKey() !== date.key"
+                      [class.bg-blue-100]="hoveredDateKey() === date.key"
+                      [style.width.px]="cellWidthPx()"
+                      (mouseenter)="hoveredDateKey.set(date.key)"
+                      (mouseleave)="hoveredDateKey.set(null)"></td>
+                }
+              </tr>
+            } @else {
+              <tr class="h-12">
+                <td class="sticky left-0 z-10 w-48 border border-outline-variant px-4 text-xs cursor-context-menu"
+                    [ngClass]="getHousekeepingStatusClass(row.housekeepingStatus)"
+                    [matTooltip]="'Housekeeping: ' + (row.housekeepingStatus | titlecase) + ' (Right-click to change)'"
+                    matTooltipPosition="right"
+                    [cdkContextMenuTriggerFor]="housekeepingMenu"
+                    [cdkContextMenuTriggerData]="{ roomId: row.roomId, currentStatus: row.housekeepingStatus }">
+                  <div class="flex items-center gap-2">
+                    <span>{{ row.roomName }}</span>
+                  </div>
+                </td>
+                @for (date of dateRange(); track date.key) {
+                  <td 
+                    class="border border-outline-variant relative overflow-visible select-none transition-colors duration-150"
+                    [class.bg-blue-100]="isCellInSelection(date, row) && !dragSelection().hasConflict"
+                    [class.bg-red-100]="isCellInSelection(date, row) && dragSelection().hasConflict"
+                    [class.bg-blue-50]="hoveredDateKey() === date.key && !isCellInSelection(date, row)"
+                    [class.cursor-pointer]="!hasReservationOnDate(row.roomId, date.date)"
+                    [class.cursor-not-allowed]="hasReservationOnDate(row.roomId, date.date)"
+                    [style.width.px]="cellWidthPx()"
+                    (mousedown)="onCellMouseDown($event, date, row)"
+                    (mouseenter)="onCellMouseEnter(date, row); hoveredDateKey.set(date.key)"
+                    (mouseleave)="hoveredDateKey.set(null)"
+                    (mouseup)="onCellMouseUp()"
+                  >
+                    @for (reservation of row.reservations; track $index) {
+                      @if (shouldRenderReservationFromDate(reservation, date)) {
+                        <div
+                          class="absolute left-0.5 right-0.5 border flex items-center text-white text-xs font-semibold overflow-hidden z-10 cursor-pointer"
+                          [ngClass]="getReservationStyle(reservation)"
+                          [style.top.%]="getReservationTopPercent(row.reservations, date, reservation)"
+                          [style.height.%]="getReservationHeightPercent(row.reservations, date)"
+                          [style.width.px]="getReservationWidth(reservation, date)"
+                          [matTooltip]="getReservationTooltip(reservation, row.roomName)"
+                          matTooltipPosition="above"
+                          (click)="openReservationPreview(reservation.reservation, row); $event.stopPropagation()"
+                          (mousedown)="$event.stopPropagation()"
+                        >
+                          <div class="truncate px-1">{{ getReservationBlockLabel(reservation) }} </div>
+                        </div>
+                      }
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Housekeeping Status Context Menu -->
+<ng-template #housekeepingMenu let-roomId="roomId" let-currentStatus="currentStatus">
+  <div class="bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[200px]" cdkMenu>
+    <div class="px-4 py-2 border-b border-gray-100">
+      <span class="text-xs font-semibold text-gray-500 uppercase">Update Housekeeping Status</span>
+    </div>
+    @for (status of housekeepingStatuses; track status.key) {
+      <button 
+        class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3 transition-colors"
+        [class.bg-gray-50]="currentStatus === status.key"
+        [class.font-semibold]="currentStatus === status.key"
+        cdkMenuItem
+        (cdkMenuItemTriggered)="updateHousekeepingStatus(roomId, status.key)">
+        <mat-icon class="text-base" [ngClass]="{
+          'text-green-600': status.key === 'clean',
+          'text-amber-600': status.key === 'dirty',
+          'text-blue-600': status.key === 'inspected',
+          'text-red-600': status.key === 'out_of_order'
+        }">{{ getHousekeepingStatusIcon(status.key) }}</mat-icon>
+        <span>{{ status.label }}</span>
+        @if (currentStatus === status.key) {
+          <mat-icon class="ml-auto text-base text-green-600">check</mat-icon>
+        }
+      </button>
+    }
+  </div>
+</ng-template>

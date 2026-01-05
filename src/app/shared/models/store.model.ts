@@ -3,6 +3,8 @@ import { User } from "./user.model";
 
 export interface Store {
     _id: string;
+    storeType?: 'restaurant' | 'hotel';
+    storeNumber?: string;
     bannerImage?: string;
     logo: string;
     name: string;

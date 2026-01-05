@@ -1,12 +1,24 @@
-import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData } from 'chart.js';
-import { Subject, takeUntil, forkJoin } from 'rxjs';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { forkJoin, map } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTableModule } from '@angular/material/table';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
 import { 
   GuestService, 
   GuestData, 
@@ -16,6 +28,14 @@ import {
 } from './guest.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
 import { ExportService } from '../../../../shared/services/export.service';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+
+// Currency symbol to ISO code mapping
+const currencySymbolToCode: Record<string, string> = {
+  '₦': 'NGN', '$': 'USD', '€': 'EUR', '£': 'GBP', '¥': 'JPY',
+  '₹': 'INR', '₽': 'RUB', '₩': 'KRW', '₴': 'UAH', '฿': 'THB',
+  'R$': 'BRL', '₫': 'VND', '₱': 'PHP', 'RM': 'MYR', 'Rp': 'IDR'
+};
 
 @Component({
   selector: 'app-guest-report',
@@ -27,36 +47,75 @@ import { ExportService } from '../../../../shared/services/export.service';
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatTableModule,
+    MatProgressSpinnerModule,
+    MatProgressBarModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatTooltipModule,
+    MatDividerModule,
+    PageHeaderComponent,
   ],
   templateUrl: './guest-report.component.html',
   styleUrl: './guest-report.component.scss',
 })
-export class GuestReportComponent implements OnInit, OnDestroy {
+export class GuestReportComponent {
   private fb = inject(FormBuilder);
   private guestService = inject(GuestService);
   private storeStore = inject(StoreStore);
   private exportService = inject(ExportService);
-  private destroy$ = new Subject<void>();
 
   // Export state
   isExporting = signal<boolean>(false);
 
   // Computed values
   selectedStore = computed(() => this.storeStore.selectedStore());
-  currency = computed(() => 
-    this.selectedStore()?.currencyCode || this.selectedStore()?.currency || 'USD'
-  );
+  currency = computed(() => {
+    const store = this.selectedStore();
+    const symbol = store?.currencyCode || store?.currency || 'USD';
+    return currencySymbolToCode[symbol] || symbol;
+  });
 
   // Form
   filterForm: FormGroup;
 
+  // Filter trigger for manual refresh
+  private filterTrigger = signal(0);
+
   // Signals
-  loading = signal<boolean>(false);
-  guestData = signal<GuestData[]>([]);
-  guestBreakdown = signal<GuestBreakdown[]>([]);
-  guestStats = signal<GuestStats | null>(null);
   error = signal<string | null>(null);
   lastUpdated = signal<Date>(new Date());
+
+  // rxResource for reactive data loading
+  private guestResource = rxResource({
+    params: () => ({
+      storeId: this.selectedStore()?._id || '',
+      filters: this.getFilters(),
+      trigger: this.filterTrigger()
+    }),
+    stream: ({ params }) => {
+      return forkJoin({
+        guestData: this.guestService.getGuestData(params.storeId, params.filters),
+        guestBreakdown: this.guestService.getGuestBreakdown(params.storeId, params.filters),
+        stats: this.guestService.getGuestStats(params.storeId, params.filters)
+      }).pipe(
+        map(result => {
+          this.lastUpdated.set(new Date());
+          return result;
+        })
+      );
+    }
+  });
+
+  // Computed signals from resource
+  loading = computed(() => this.guestResource.isLoading());
+  guestData = computed(() => this.guestResource.value()?.guestData ?? []);
+  guestBreakdown = computed(() => this.guestResource.value()?.guestBreakdown ?? []);
+  guestStats = computed(() => this.guestResource.value()?.stats ?? null);
 
   // Chart data computed signals
   guestTrendChartData = computed(() => {
@@ -176,6 +235,7 @@ export class GuestReportComponent implements OnInit, OnDestroy {
 
   // Table columns
   displayedColumns: string[] = ['date', 'totalGuests', 'newGuests', 'returningGuests', 'checkIns', 'checkOuts', 'averageStayDuration', 'occupancyRate'];
+  breakdownColumns: string[] = ['category', 'count', 'percentage', 'avgStay'];
 
   constructor() {
     this.filterForm = this.fb.group({
@@ -187,47 +247,8 @@ export class GuestReportComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit() {
-    this.loadData();
-    
-    // Subscribe to form changes
-    this.filterForm.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.loadData();
-      });
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   loadData() {
-    const storeId = this.selectedStore()?._id || '';
-    const filters = this.getFilters();
-    this.loading.set(true);
-    
-    forkJoin({
-      guestData: this.guestService.getGuestData(storeId, filters),
-      guestBreakdown: this.guestService.getGuestBreakdown(storeId, filters),
-      stats: this.guestService.getGuestStats(storeId, filters)
-    }).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: ({ guestData, guestBreakdown, stats }) => {
-        this.guestData.set(guestData);
-        this.guestBreakdown.set(guestBreakdown);
-        this.guestStats.set(stats);
-        this.lastUpdated.set(new Date());
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading data:', error);
-        this.error.set('Failed to load guest data. Please try again.');
-        this.loading.set(false);
-      }
-    });
+    this.filterTrigger.update(v => v + 1);
   }
 
   private getFilters(): GuestFilters {
@@ -329,9 +350,9 @@ export class GuestReportComponent implements OnInit, OnDestroy {
   }
 
   getGrowthIcon(growth: number): string {
-    if (growth > 0) return '↗️';
-    if (growth < 0) return '↘️';
-    return '➡️';
+    if (growth > 0) return 'trending_up';
+    if (growth < 0) return 'trending_down';
+    return 'trending_flat';
   }
 
   formatDate(dateStr: string): string {

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { reservationEditGuard } from '../../../../shared/guards/reservation-edit.guard';
+import { roleGuard } from '../../../../shared/guards/role.guard';
 
 export const reservationRoutes: Routes = [
   {
@@ -9,25 +9,20 @@ export const reservationRoutes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'list',
+        redirectTo: 'view',
         pathMatch: 'full',
       },
       {
-        path: 'list',
-        loadComponent: () =>
-          import('./reservations-list/reservations-list.component').then(
-            (c) => c.ReservationsListComponent
+        path: 'view',
+        loadChildren: () =>
+          import('./reservation-view/reservations-view.routes').then(
+            (c) => c.RESERVATION_VIEW_ROUTES
           ),
         title: 'Reservations - Hotel Management',
+        canActivate: [roleGuard],
+        data: { requiredPermission: 'hotel.reservations.view' }
       },
-      //   {
-      //     path: 'calendar',
-      //     loadComponent: () =>
-      //       import('./calendar/reservations-calendar.component').then(
-      //         (c) => c.ReservationsCalendarComponent
-      //       ),
-      //     title: 'Reservation Calendar - Hotel Management',
-      //   },
+       
       {
         path: 'create',
         loadComponent: () =>
@@ -35,6 +30,8 @@ export const reservationRoutes: Routes = [
             (c) => c.ReservationFormComponent
           ),
         title: 'New Reservation - Hotel Management',
+        canActivate: [roleGuard],
+        data: { requiredPermission: 'hotel.reservations.create' }
       },
       {
         path: 'edit/:id',
@@ -43,7 +40,8 @@ export const reservationRoutes: Routes = [
             (c) => c.ReservationFormComponent
           ),
         title: 'Edit Reservation - Hotel Management',
-        // canActivate: [reservationEditGuard],
+        canActivate: [roleGuard],
+        data: { requiredPermission: 'hotel.reservations.edit' }
       },
       {
         path: 'details/:id',
@@ -52,6 +50,8 @@ export const reservationRoutes: Routes = [
             (c) => c.ReservationDetailsComponent
           ),
         title: 'Reservation Details - Hotel Management',
+        canActivate: [roleGuard],
+        data: { requiredPermission: 'hotel.reservations.view' }
       },
 
     ],

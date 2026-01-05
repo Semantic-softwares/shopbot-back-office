@@ -157,10 +157,10 @@
 
 <!-- Dialog Actions -->
 <mat-dialog-actions align="end">
-  <button mat-stroked-button (click)="onCancel()">
+  <button matButton="outlined" (click)="onCancel()">
     Cancel
   </button>
-  <button mat-raised-button color="primary" (click)="onSave()" [disabled]="!pricingForm.valid">
+  <button matButton="filled" color="primary" (click)="onSave()" [disabled]="!pricingForm.valid">
     Save Changes
   </button>
 </mat-dialog-actions>

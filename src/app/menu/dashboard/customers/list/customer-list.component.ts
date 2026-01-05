@@ -102,7 +102,7 @@ export class CustomerListComponent {
   }
 
   deleteCustomer(customer: User) {
-    if (customer.role === 'Owner') {
+    if (customer.role?.name === 'Owner') {
       this.snackBar.open('Cannot delete an owner', 'Close', {
         duration: 3000,
         horizontalPosition: 'end',

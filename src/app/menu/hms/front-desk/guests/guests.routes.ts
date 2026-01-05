@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { roleGuard } from '../../../../shared/guards/role.guard';
 
 export const GUESTS_ROUTES: Routes = [
   {
@@ -17,6 +18,8 @@ export const GUESTS_ROUTES: Routes = [
           import('./list-guests/list-guests.component').then(
             (m) => m.ListGuestsComponent
           ),
+        canActivate: [roleGuard],
+        data: { requiredPermission: 'hotel.guests.view' }
       },
       {
         path: 'create',
@@ -24,6 +27,8 @@ export const GUESTS_ROUTES: Routes = [
           import('./guest-form/guest-form.component').then(
             (m) => m.GuestFormComponent
           ),
+        canActivate: [roleGuard],
+        data: { requiredPermission: 'hotel.guests.create' }
       },
       {
         path: 'edit/:id',
@@ -31,6 +36,8 @@ export const GUESTS_ROUTES: Routes = [
           import('./guest-form/guest-form.component').then(
             (m) => m.GuestFormComponent
           ),
+        canActivate: [roleGuard],
+        data: { requiredPermission: 'hotel.guests.edit' }
       },
       {
         path: 'details/:id',
@@ -38,6 +45,8 @@ export const GUESTS_ROUTES: Routes = [
           import('./guest-details/guest-details.component').then(
             (m) => m.GuestDetailsComponent
           ),
+        canActivate: [roleGuard],
+        data: { requiredPermission: 'hotel.guests.view' }
       },
       {
         path: '**',

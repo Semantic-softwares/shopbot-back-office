@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,9 +9,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subject, takeUntil } from 'rxjs';
+import { MatTabsModule } from '@angular/material/tabs';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { Subject, takeUntil, of } from 'rxjs';
 
 import { RoomsService } from '../../../../../shared/services/rooms.service';
+import { StoreStore } from '../../../../../shared/stores/store.store';
 import { 
   Room, 
   RoomType, 
@@ -20,6 +23,7 @@ import {
   RoomFeatures 
 } from '../../../../../shared/models/room.model';
 import { MatDivider } from "@angular/material/divider";
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 
 @Component({
   selector: 'app-room-details',
@@ -33,22 +37,42 @@ import { MatDivider } from "@angular/material/divider";
     MatProgressSpinnerModule,
     MatMenuModule,
     MatDialogModule,
-    MatDivider
+    MatDivider,
+    MatTabsModule,
+    PageHeaderComponent
 ],
   templateUrl: './room-details.component.html'
 })
-export class RoomDetailsComponent implements OnInit, OnDestroy {
+export class RoomDetailsComponent implements OnDestroy {
   private destroy$ = new Subject<void>();
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private roomsService = inject(RoomsService);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
+  private storeStore = inject(StoreStore);
 
-  // State signals
-  loading = signal<boolean>(false);
-  room = signal<Room | null>(null);
-  error = signal<string | null>(null);
+  // Room ID signal from route
+  roomId = signal<string | null>(this.route.snapshot.paramMap.get('id'));
+
+  // rxResource for loading room details
+  roomResource = rxResource({
+    params: () => ({ roomId: this.roomId() }),
+    stream: ({ params }) => {
+      if (!params.roomId) {
+        return of(null as Room | null);
+      }
+      return this.roomsService.getRoom(params.roomId);
+    }
+  });
+
+  // Computed properties from resource
+  room = computed<Room | null>(() => this.roomResource.value() ?? null);
+  loading = computed(() => this.roomResource.isLoading());
+  error = computed(() => this.roomResource.error() ? 'Failed to load room details' : null);
+
+  // Store currency
+  storeCurrency = computed(() => this.storeStore.selectedStore()?.currency || this.storeStore.selectedStore()?.currencyCode || 'USD');
 
   // Computed properties
   roomType = computed(() => {
@@ -103,38 +127,13 @@ export class RoomDetailsComponent implements OnInit, OnDestroy {
     return housekeepingConfigs[room.housekeepingStatus] || housekeepingConfigs.clean;
   });
 
-  ngOnInit(): void {
-    this.loadRoomDetails();
-  }
-
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-   loadRoomDetails(): void {
-    const roomId = this.route.snapshot.paramMap.get('id');
-    if (!roomId) {
-      this.router.navigate(['../'], { relativeTo: this.route });
-      return;
-    }
-
-    this.loading.set(true);
-    this.error.set(null);
-
-    this.roomsService.getRoom(roomId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (room) => {
-          this.room.set(room);
-          this.loading.set(false);
-        },
-        error: (error) => {
-          this.error.set('Failed to load room details');
-          this.loading.set(false);
-          this.showError('Failed to load room details: ' + (error.error?.message || error.message));
-        }
-      });
+  loadRoomDetails(): void {
+    this.roomResource.reload();
   }
 
   onBack(): void {
@@ -155,8 +154,8 @@ export class RoomDetailsComponent implements OnInit, OnDestroy {
     this.roomsService.updateRoomStatus(room._id!, status)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (updatedRoom) => {
-          this.room.set(updatedRoom);
+        next: () => {
+          this.roomResource.reload();
           this.showSuccess(`Room status updated to ${status}`);
         },
         error: (error) => {
@@ -172,8 +171,8 @@ export class RoomDetailsComponent implements OnInit, OnDestroy {
     this.roomsService.updateHousekeepingStatus(room._id!, status)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (updatedRoom) => {
-          this.room.set(updatedRoom);
+        next: () => {
+          this.roomResource.reload();
           this.showSuccess(`Housekeeping status updated to ${status}`);
         },
         error: (error) => {

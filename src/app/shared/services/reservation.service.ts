@@ -172,6 +172,17 @@ export class ReservationService {
     );
   }
 
+  // Get room change history for a reservation
+  getRoomChangeHistory(reservationId: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${reservationId}/room-changes`).pipe(
+      map(response => response.data || response),
+      catchError(error => {
+        console.error('Error fetching room change history:', error);
+        throw error;
+      })
+    );
+  }
+
   // Delete reservation
   deleteReservation(id: string): Observable<boolean> {
     this.loadingSubject.next(true);

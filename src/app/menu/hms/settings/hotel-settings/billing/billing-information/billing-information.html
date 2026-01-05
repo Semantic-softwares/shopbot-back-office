@@ -1,0 +1,83 @@
+@if (subscription()) {
+  <div class="mb-12">
+    <h2 class="text-sm font-semibold text-blue-600 mb-6">Billing Information</h2>
+
+    <!-- PAID/ACTIVE Subscription -->
+    @if (subscription()!.status === 'ACTIVE' && subscription()!.hasPaymentMethod) {
+      <!-- Billing Details List -->
+      <mat-card appearance="outlined">
+        <mat-list>
+          <mat-list-item>
+            <span matListItemTitle>Billing Card</span>
+            <span matListItemLine>{{ getCardDisplay() }}</span>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+
+          <mat-list-item>
+            <span matListItemTitle>Subscription Status</span>
+            <span matListItemLine>{{ getStatusLabel() }}</span>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+          
+          <mat-list-item>
+            <span matListItemTitle>Billing Email</span>
+            <span matListItemLine>{{ subscription()!.billingEmail }}</span>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+          
+          <mat-list-item>
+            <span matListItemTitle>Billing Country</span>
+            <span matListItemLine>{{ subscription()!.billingCountry }}</span>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+          
+          <mat-list-item>
+            <span matListItemTitle>Plan Renews</span>
+            <span matListItemLine>{{ subscription()!.nextBillingDate | date: 'MMMM d, y' }}</span>
+          </mat-list-item>
+        </mat-list>
+      </mat-card>
+    }
+
+    <!-- FREE TRIAL Subscription -->
+    @if (subscription()!.status === 'TRIAL') {
+      <!-- Trial Details List -->
+      <mat-card appearance="outlined" class="mb-6">
+        <mat-list>
+          <mat-list-item>
+            <span matListItemTitle>Trial Started</span>
+            <span matListItemLine>{{ subscription()!.trialStartDate | date: 'MMMM d, y' }}</span>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+          
+          <mat-list-item>
+            <span matListItemTitle>Trial Expires</span>
+            <span matListItemLine>{{ subscription()!.trialEndDate | date: 'MMMM d, y' }}</span>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+          
+          <mat-list-item>
+            <span matListItemTitle>Days Remaining</span>
+            <span matListItemLine class="text-blue-600 font-semibold">{{ getTrialDaysRemaining() }} days</span>
+          </mat-list-item>
+        </mat-list>
+      </mat-card>
+
+      <!-- Billing Details for Trial -->
+      <mat-card appearance="outlined">
+        <mat-list>
+          <mat-list-item>
+            <span matListItemTitle>Billing Email</span>
+            <span matListItemLine>{{ subscription()!.billingEmail }}</span>
+          </mat-list-item>
+          <mat-divider></mat-divider>
+          
+          <mat-list-item>
+            <span matListItemTitle>Billing Country</span>
+            <span matListItemLine>{{ subscription()!.billingCountry }}</span>
+          </mat-list-item>
+        </mat-list>
+      </mat-card>
+    }
+  </div>
+}

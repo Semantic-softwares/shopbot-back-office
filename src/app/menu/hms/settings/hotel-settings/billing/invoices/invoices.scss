@@ -1,0 +1,30 @@
+/* Invoices Component Styles */
+
+::ng-deep .mat-mdc-table {
+  background-color: white;
+
+  .mat-mdc-header-cell {
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .mat-mdc-cell {
+    color: #4b5563;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  tr:hover {
+    background-color: #f9fafb;
+  }
+}
+
+::ng-deep .mat-mdc-paginator {
+  background-color: white;
+  border-top: 1px solid #e5e7eb;
+  
+  .mat-mdc-paginator-container {
+    padding: 0 16px;
+    min-height: 64px;
+  }
+}
+

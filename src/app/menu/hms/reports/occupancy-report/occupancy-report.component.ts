@@ -1,9 +1,11 @@
-import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData } from 'chart.js';
-import { Subject, takeUntil, forkJoin } from 'rxjs';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { forkJoin, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { 
   OccupancyService, 
   OccupancyData, 
@@ -12,6 +14,21 @@ import {
   OccupancyFilters 
 } from '../../../../shared/services/occupancy.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTableModule } from '@angular/material/table';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-occupancy-report',
@@ -21,32 +38,89 @@ import { StoreStore } from '../../../../shared/stores/store.store';
     CurrencyPipe,
     ReactiveFormsModule,
     BaseChartDirective,
+    PageHeaderComponent,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatTableModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
+    MatMenuModule,
+    MatTooltipModule,
+    MatDividerModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   templateUrl: './occupancy-report.component.html',
   styleUrls: ['./occupancy-report.component.scss'],
 })
-export class OccupancyReportComponent implements OnInit, OnDestroy {
+export class OccupancyReportComponent {
   private fb = inject(FormBuilder);
   private occupancyService = inject(OccupancyService);
   private storeStore = inject(StoreStore);
-  private destroy$ = new Subject<void>();
 
   // Computed values
   selectedStore = computed(() => this.storeStore.selectedStore());
-  currency = computed(() => 
-    this.selectedStore()?.currencyCode || this.selectedStore()?.currency || 'USD'
-  );
+  
+  // Currency mapping for formatting
+  private currencySymbolToCode: Record<string, string> = {
+    '₦': 'NGN', '$': 'USD', '€': 'EUR', '£': 'GBP', '¥': 'JPY',
+    '₹': 'INR', '₽': 'RUB', '₩': 'KRW', '฿': 'THB', '₫': 'VND',
+    'R$': 'BRL', 'R': 'ZAR', 'CHF': 'CHF', 'kr': 'SEK', 'zł': 'PLN'
+  };
+
+  currency = computed(() => {
+    const store = this.selectedStore();
+    const currencyValue = store?.currency  ||store?.currencyCode || 'USD';
+    return this.currencySymbolToCode[currencyValue] || currencyValue;
+  });
+
+  // Filter signals
+  filterTrigger = signal(0);
 
   // Form
   filterForm: FormGroup;
 
   // Signals
-  loading = signal<boolean>(false);
-  occupancyData = signal<OccupancyData[]>([]);
-  roomStatuses = signal<RoomStatus[]>([]);
-  occupancyStats = signal<OccupancyStats | null>(null);
-  error = signal<string | null>(null);
   lastUpdated = signal<Date>(new Date());
+
+  // Filter params for rxResource
+  private filterParams = computed(() => {
+    this.filterTrigger(); // Trigger reload
+    return this.getFilters();
+  });
+
+  // rxResource for occupancy data
+  occupancyResource = rxResource({
+    params: this.filterParams,
+    stream: ({ params }) => {
+      return forkJoin({
+        occupancyData: this.occupancyService.getOccupancyData(params),
+        roomStatuses: this.occupancyService.getRoomStatuses(),
+        stats: this.occupancyService.getOccupancyStats(params)
+      }).pipe(
+        map(result => {
+          this.lastUpdated.set(new Date());
+          this.updateCharts(result.occupancyData);
+          return result;
+        }),
+        catchError(error => {
+          console.error('Error loading data:', error);
+          return of(null);
+        })
+      );
+    }
+  });
+
+  // Computed values from resource
+  loading = computed(() => this.occupancyResource.isLoading());
+  error = computed(() => this.occupancyResource.error() ? 'Failed to load occupancy data. Please try again.' : null);
+  occupancyData = computed(() => this.occupancyResource.value()?.occupancyData || []);
+  roomStatuses = computed(() => this.occupancyResource.value()?.roomStatuses || []);
+  occupancyStats = computed(() => this.occupancyResource.value()?.stats || null);
 
   // Chart data
   occupancyChartData = signal<ChartData<'line'>>({
@@ -189,54 +263,20 @@ export class OccupancyReportComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit() {
-    this.loadData();
-    
-    // Subscribe to form changes
-    this.filterForm.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.loadData();
-      });
-
-    // Subscribe to service loading state
-    this.occupancyService.loading$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(loading => this.loading.set(loading));
-
-    // Subscribe to service error state
-    this.occupancyService.error$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(error => this.error.set(error));
+  refreshData() {
+    this.filterTrigger.update(v => v + 1);
   }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+  onDateRangeChange() {
+    this.filterTrigger.update(v => v + 1);
   }
 
-  private loadData() {
-    const filters = this.getFilters();
-    
-    forkJoin({
-      occupancyData: this.occupancyService.getOccupancyData(filters),
-      roomStatuses: this.occupancyService.getRoomStatuses(),
-      stats: this.occupancyService.getOccupancyStats(filters)
-    }).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: ({ occupancyData, roomStatuses, stats }) => {
-        this.occupancyData.set(occupancyData);
-        this.roomStatuses.set(roomStatuses);
-        this.occupancyStats.set(stats);
-        this.updateCharts(occupancyData);
-        this.lastUpdated.set(new Date());
-      },
-      error: (error) => {
-        console.error('Error loading data:', error);
-        this.error.set('Failed to load occupancy data. Please try again.');
-      }
-    });
+  onFilterChange() {
+    this.filterTrigger.update(v => v + 1);
+  }
+
+  clearError() {
+    this.occupancyService.clearError();
   }
 
   private getFilters(): OccupancyFilters {
@@ -289,10 +329,6 @@ export class OccupancyReportComponent implements OnInit, OnDestroy {
     });
   }
 
-  onDateRangeChange() {
-    this.loadData();
-  }
-
   exportToCSV() {
     const filters = this.getFilters();
     this.occupancyService.exportToCSV(filters).subscribe({
@@ -306,7 +342,6 @@ export class OccupancyReportComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Export error:', error);
-        this.error.set('Failed to export CSV. Please try again.');
       }
     });
   }
@@ -324,18 +359,8 @@ export class OccupancyReportComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Export error:', error);
-        this.error.set('Failed to export PDF. Please try again.');
       }
     });
-  }
-
-  refreshData() {
-    this.loadData();
-  }
-
-  clearError() {
-    this.occupancyService.clearError();
-    this.error.set(null);
   }
 
   getRoomStatusClass(status: RoomStatus['status']): string {
@@ -356,15 +381,15 @@ export class OccupancyReportComponent implements OnInit, OnDestroy {
   getRoomStatusIcon(status: RoomStatus['status']): string {
     switch (status) {
       case 'occupied':
-        return '👤';
+        return 'person';
       case 'available':
-        return '✅';
+        return 'check_circle';
       case 'out-of-order':
-        return '🚫';
+        return 'block';
       case 'maintenance':
-        return '🔧';
+        return 'build';
       default:
-        return '❓';
+        return 'help';
     }
   }
 
@@ -404,8 +429,11 @@ export class OccupancyReportComponent implements OnInit, OnDestroy {
     return `${value.toFixed(1)}%`;
   }
 
-  formatDateTime(date: Date): string {
-    return date.toLocaleString('en-US', {
+  formatDateTime(date: Date | string | undefined | null): string {
+    if (!date) return 'N/A';
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    if (isNaN(dateObj.getTime())) return 'N/A';
+    return dateObj.toLocaleString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

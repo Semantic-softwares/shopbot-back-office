@@ -1,0 +1,59 @@
+<!-- Tailwind Navbar: flat at top, rounded/transparent on scroll -->
+<header [ngClass]="navbarTransparent() ? 'top-4' : 'top-0'" class="fixed inset-x-0 z-50 transition-all duration-300">
+  <div [ngClass]="navbarTransparent() ? 'mx-auto max-w-3xl' : 'mx-auto max-w-6xl'" class="px-4 transition-all duration-300 ease-in-out">
+    <nav [ngClass]="navbarTransparent() 
+      ? 'rounded-full border border-gray-200 bg-white/70 backdrop-blur shadow-lg'
+      : 'w-full rounded-none bg-transparent shadow-none'"
+      class="flex items-center justify-between px-3 sm:px-5 py-2 transition-all duration-300">
+      <!-- Brand -->
+      <div class="flex items-center gap-2">
+        <mat-icon class="text-indigo-600 text-3xl">apartment</mat-icon>
+        <span class="font-semibold text-lg text-gray-900">ShopBot</span>
+      </div>
+
+      <!-- Desktop Nav -->
+      <div class="hidden md:flex items-center gap-8 text-gray-900">
+        <button mat-button (click)="scrollToFeatures()" class="!text-gray-900">Features</button>
+        <button mat-button [matMenuTriggerFor]="productMenu" class="!text-gray-900">Products</button>
+        <mat-menu #productMenu="matMenu">
+          <button mat-menu-item (click)="scrollToMenuItems('menu-management')">Menu Management</button>
+          <button mat-menu-item (click)="scrollToMenuItems('pos-system')">POS System</button>
+          <button mat-menu-item (click)="scrollToMenuItems('reservations')">Reservations</button>
+        </mat-menu>
+        <button mat-button (click)="scrollToPricing()" class="!text-gray-900">Pricing</button>
+      </div>
+
+      <!-- Right actions -->
+      <div class="flex items-center gap-3">
+        <button mat-flat-button color="primary" (click)="navigateToSignup()">
+          Start now
+        </button>
+        <!-- Mobile menu toggle (hidden on md and up) -->
+        <div class="block md:hidden">
+          <button mat-icon-button (click)="toggleMobileMenu()">
+            <mat-icon>{{ mobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
+          </button>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Mobile Menu Dropdown -->
+  @if (mobileMenuOpen()) {
+  <div class="md:hidden bg-white shadow-lg">
+    <div class="max-w-6xl mx-auto px-6 py-4 space-y-1">
+      <button mat-button class="!w-full !justify-start !text-gray-900 !text-base" (click)="scrollToFeatures()">Features</button>
+      <button mat-button class="!w-full !justify-start !text-gray-900 !text-base" (click)="scrollToPricing()">Pricing</button>
+      <button mat-button class="!w-full !justify-start !text-gray-900 !text-base" [matMenuTriggerFor]="mobileProductMenu">Products</button>
+      <mat-menu #mobileProductMenu="matMenu">
+        <button mat-menu-item (click)="scrollToMenuItems('menu-management')">Menu Management</button>
+        <button mat-menu-item (click)="scrollToMenuItems('pos-system')">POS System</button>
+        <button mat-menu-item (click)="scrollToMenuItems('reservations')">Reservations</button>
+      </mat-menu>
+    </div>
+  </div>
+  }
+
+  <!-- Spacer: only needed when navbar is flat and fixed at the very top -->
+  <div [ngClass]="navbarTransparent() ? 'h-0' : 'h-16'"></div>
+</header>

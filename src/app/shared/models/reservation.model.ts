@@ -18,6 +18,7 @@ export interface Reservation {
   status: ReservationStatus;
   bookingSource?: BookingSource;
   pricing: ReservationPricing;
+  roomChanges?: any[];
   paymentInfo?: PaymentInfo;
   additionalGuests?: AdditionalGuest[]; // Array of additional guest references
   specialRequests?: string;
@@ -27,7 +28,7 @@ export interface Reservation {
   extensions?: ReservationExtension[];
   currentExtension?: CurrentExtension;
   confirmationNumber: string;
-  createdBy?: string;
+  createdBy?: string | any;
   lastModifiedBy?: string;
   createdAt: Date;
   updatedAt: Date;

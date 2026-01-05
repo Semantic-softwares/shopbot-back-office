@@ -1,0 +1,131 @@
+<div class="max-w-4xl mx-auto px-6 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold mb-2">Billing & Subscription</h1>
+    <p class="text-gray-600">Manage your subscription and billing information</p>
+  </div>
+
+  @if (reason() === 'subscription-expired') {
+    <div class="flex items-center gap-4 p-4 mb-6 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+      <mat-icon class="text-yellow-500">warning</mat-icon>
+      <span class="text-yellow-800">Your subscription has expired. Please renew to continue accessing the platform.</span>
+    </div>
+  }
+
+  @if (reason() === 'past-due') {
+    <div class="flex items-center gap-4 p-4 mb-6 bg-red-50 border-l-4 border-red-400 rounded">
+      <mat-icon class="text-red-500">error</mat-icon>
+      <span class="text-red-800">Your subscription payment is overdue. Please update your payment method.</span>
+    </div>
+  }
+
+  <div class="space-y-6">
+    <!-- Current Subscription Status -->
+    @if (currentSubscription(); as subscription) {
+      <mat-card class="shadow-md">
+        <mat-card-header class="pb-4 border-b">
+          <mat-card-title>Current Subscription</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div>
+              <label class="text-sm font-medium text-gray-600 block mb-2">Status</label>
+              <span class="text-lg font-semibold" 
+                [ngClass]="{
+                  'text-orange-600': subscription.status === 'TRIAL',
+                  'text-green-600': subscription.status === 'ACTIVE',
+                  'text-red-600': subscription.status === 'PAST_DUE' || subscription.status === 'EXPIRED',
+                  'text-gray-500': subscription.status !== 'TRIAL' && subscription.status !== 'ACTIVE' && subscription.status !== 'PAST_DUE' && subscription.status !== 'EXPIRED'
+                }">
+                {{ subscription.status | titlecase }}
+              </span>
+            </div>
+
+            @if (featureGating.isTrialActive()) {
+              <div>
+                <label class="text-sm font-medium text-gray-600 block mb-2">Trial Days Remaining</label>
+                <span class="text-lg font-semibold text-orange-600">{{ featureGating.trialDaysRemaining() }} days</span>
+              </div>
+            }
+
+            @if (subscription.status === 'ACTIVE') {
+              <div>
+                <label class="text-sm font-medium text-gray-600 block mb-2">Next Billing Date</label>
+                <span class="text-lg font-semibold">{{ subscription.nextBillingDate | date: 'MMM d, yyyy' }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            @if (featureGating.isTrialActive()) {
+              <button mat-raised-button color="primary" (click)="upgradeToPaid()" class="flex items-center gap-2">
+                <mat-icon class="text-base">credit_card</mat-icon>
+                Upgrade to Paid Plan
+              </button>
+            }
+
+            @if (subscription.status === 'PAST_DUE' || subscription.status === 'EXPIRED') {
+              <button mat-raised-button color="primary" (click)="renewSubscription()" class="flex items-center gap-2">
+                <mat-icon class="text-base">refresh</mat-icon>
+                Renew Subscription
+              </button>
+            }
+
+            @if (subscription.status === 'ACTIVE') {
+              <button mat-button (click)="manageBilling()" class="flex items-center gap-2">
+                <mat-icon class="text-base">settings</mat-icon>
+                Manage Billing
+              </button>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Upgrade Options -->
+    @if (featureGating.isTrialActive()) {
+      <mat-card class="shadow-md bg-gradient-to-r from-blue-50 to-indigo-50">
+        <mat-card-header class="pb-4 border-b">
+          <mat-card-title>Ready to upgrade?</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-6">
+          <p class="text-gray-700 mb-4">Choose your plan and start your subscription today.</p>
+          <button mat-raised-button color="primary" (click)="goToPricing()" class="flex items-center gap-2">
+            <mat-icon class="text-base">storefront</mat-icon>
+            View Pricing Plans
+          </button>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Invoices -->
+    @if (invoices(); as invoices) {
+      @if (invoices.length > 0) {
+        <mat-card class="shadow-md">
+          <mat-card-header class="pb-4 border-b">
+            <mat-card-title>Invoices</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="pt-6">
+            <div class="space-y-3">
+              @for (invoice of invoices; track invoice._id) {
+                <div class="flex justify-between items-center p-4 rounded-lg bg-gray-50 border-l-4 border-blue-400">
+                  <div class="flex gap-6">
+                    <span class="text-sm text-gray-600">{{ invoice.billingDate | date: 'MMM d, yyyy' }}</span>
+                    <span class="font-semibold text-gray-900">{{ invoice.amount | currency }}</span>
+                  </div>
+                  <span 
+                    [ngClass]="{
+                      'text-green-600 bg-green-100 px-3 py-1 rounded text-sm font-medium': invoice.status === 'PAID',
+                      'text-orange-600 bg-orange-100 px-3 py-1 rounded text-sm font-medium': invoice.status === 'PENDING',
+                      'text-red-600 bg-red-100 px-3 py-1 rounded text-sm font-medium': invoice.status === 'FAILED'
+                    }">
+                    {{ invoice.status | titlecase }}
+                  </span>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    }
+  </div>
+</div>
