@@ -98,7 +98,6 @@ export class StayDetailsComponent implements AfterViewInit {
   // Display name for sales person
   salesPersonName = computed(() => {
     const user = this.isEditing() ? this.reservation()?.createdBy : this.currentUser();
-    console.log('user for salesPersonName:', user);
     if (user) {
       return user.name || '';
     }
