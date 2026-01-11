@@ -1,0 +1,46 @@
+<h2 mat-dialog-title>Payment</h2>
+
+<mat-dialog-content>
+  <!-- Total Amount Display -->
+  <div class=" rounded-lg p-6 mb-6 text-center">
+    <p class="text-sm text-gray-600 mb-2">Total Amount:</p>
+    <p class="text-3xl font-bold text-gray-900">
+      {{ data.currency }} {{ data.totalAmount | number:'1.2-2' }}
+    </p>
+  </div>
+
+  <!-- Payment Method Selection -->
+  <div>
+    <mat-button-toggle-group 
+      [value]="selectedPaymentMethod()"
+      (change)="onPaymentMethodChange($event.value)">
+      @for (method of paymentMethods; track method.id) {
+        <mat-button-toggle 
+          [value]="method.id">
+         
+            <mat-icon>{{ method.icon }}</mat-icon>
+            <span>{{ method.name }}</span>
+          
+        </mat-button-toggle>
+      }
+    </mat-button-toggle-group>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="border-2 border-outline-variant">
+    <button 
+    matButton="outlined"
+    color="primary" 
+    
+    (click)="onSkipPayment()">
+    Skip Payment
+  </button>
+  <button 
+    matButton="filled" 
+    color="primary" 
+    
+    (click)="onConfirmPayment()">
+    Confirm Payment
+  </button>
+  
+</mat-dialog-actions>

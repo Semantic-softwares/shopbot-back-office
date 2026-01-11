@@ -1,0 +1,84 @@
+<mat-card appearance="outlined"
+    class="overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer h-full flex flex-col">
+    <!-- Product Image -->
+    <div class="relative aspect-square bg-gray-100 overflow-hidden">
+        @if (product().photos && product().photos!.length > 0) {
+        <img [src]="product().photos![0]" [alt]="product().name"
+            class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+        } @else {
+        <div class="w-full h-full flex items-center justify-center bg-gray-50">
+            <mat-icon class="!text-5xl !w-12 !h-12 text-gray-300">image</mat-icon>
+        </div>
+        }
+
+        <!-- Stock Badge -->
+        @if (isOutOfStock()) {
+        <div class="absolute top-2 right-2 px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-700">
+            Out of stock
+        </div>
+        } @else if (isLowStock()) {
+        <div class="absolute top-2 right-2 px-2 py-0.5 text-xs font-medium rounded-full bg-amber-100 text-amber-700">
+            Low: {{ product().qty }}
+        </div>
+        }
+    </div>
+
+    <!-- Product Info -->
+    <mat-card-content class="p-4 flex-1 flex flex-col">
+        <h3 class="font-medium text-gray-900 text-sm line-clamp-2 mt-2 min-h-[2.5rem] leading-5">
+            {{ product().name }}
+        </h3>
+
+        <!-- Price -->
+        <div class="flex items-center gap-2">
+            <span class="primary-text font-bold text-lg">
+                {{ product().price | currency: currency() : 'symbol' : '1.0-0' }}
+            </span>
+            @if (product().costPrice && product().costPrice! > product().price) {
+            <span class="text-gray-400 primary-text text-sm line-through">
+                {{ product().costPrice | currency: currency() : 'symbol' : '1.0-0' }}
+            </span>
+            }
+        </div>
+    </mat-card-content>
+
+    <!-- Action Buttons -->
+    <mat-card-actions class="p-2 border-t border-outline-variant">
+        @if (!hasOptions()) {
+            @if (isProductInCart()) {
+           
+                <!-- Quantity Controls -->
+                <div class="flex items-center gap-1 w-full justify-between">
+                    <button mat-mini-fab color="warn" class="!w-8 !h-8 !min-w-0" (click)="removeOrDeleteProduct(product())">
+                        <mat-icon class="!text-lg">remove</mat-icon>
+                    </button>
+                    <span class="w-8 text-center font-semibold text-gray-900">
+                        {{ productQuantity() }}
+                    </span>
+                    <!-- [disabled]="productQuantity() >= product().qty!" -->
+                    <button mat-mini-fab color="primary" class="!w-8 !h-8 !min-w-0"
+                        
+                        (click)="onAddToCart($event)">
+                        <mat-icon class="!text-lg">add</mat-icon>
+                    </button>
+                </div>
+           
+            } @else {
+            <!-- Add to Cart Button -->
+            <button matButton="outlined" color="primary" class="w-full" [disabled]="isOutOfStock()"
+                (click)="onAddToCart($event)">
+                <mat-icon>add_shopping_cart</mat-icon>
+                Add
+            </button>
+            }
+        } @else {
+        <!-- Has Options - Show Select Options Button -->
+            <button matButton="outlined" color="accent" class="w-full" [disabled]="isOutOfStock()"
+                (click)="onOpenOptions($event)">
+                <mat-icon>tune</mat-icon>
+                Options
+            </button>
+        
+        }
+    </mat-card-actions>
+</mat-card>

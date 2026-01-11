@@ -1,0 +1,94 @@
+<h2 mat-dialog-title class="flex items-center justify-between">
+  <span>Select Customer</span>
+  <button mat-stroked-button color="primary" (click)="openCreateCustomerDialog()">
+    <mat-icon>add</mat-icon>
+    New Customer
+  </button>
+</h2>
+
+<mat-dialog-content class="min-w-[450px]">
+  <!-- Search Input -->
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>Search Customer</mat-label>
+    <mat-icon matPrefix class="mr-2">search</mat-icon>
+    <input 
+      matInput 
+      [value]="searchQuery()"
+      (input)="onSearch($any($event.target).value)"
+      placeholder="Search by name, email or phone..."
+      autocomplete="off">
+    @if (loading()) {
+      <mat-spinner matSuffix diameter="20"></mat-spinner>
+    }
+  </mat-form-field>
+
+  <!-- Customer Results -->
+  <div class="customer-results mt-2">
+    @if (loading() && customers().length === 0) {
+      <div class="flex items-center justify-center p-8">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    } @else if (searchPerformed() && filteredCustomers().length === 0 && searchQuery().length >= 2) {
+      <div class="text-center p-6 bg-gray-50 rounded-lg">
+        <mat-icon class="text-gray-400 text-4xl">person_off</mat-icon>
+        <p class="text-gray-500 mt-2">No customers found matching "{{ searchQuery() }}"</p>
+        <button mat-stroked-button color="primary" class="mt-3" (click)="openCreateCustomerDialog()">
+          <mat-icon>add</mat-icon>
+          Create New Customer
+        </button>
+      </div>
+    } @else if (filteredCustomers().length > 0) {
+      <mat-list class="customer-list">
+        @for (customer of filteredCustomers(); track customer._id) {
+          <mat-list-item 
+            class="customer-item cursor-pointer hover:bg-gray-50 rounded-lg mb-1"
+            [class.bg-blue-50]="selectedCustomer()?._id === customer._id"
+            [class.border-blue-300]="selectedCustomer()?._id === customer._id"
+            (click)="onCustomerSelected(customer)">
+            <mat-icon matListItemIcon class="text-gray-500">person</mat-icon>
+            <div matListItemTitle class="font-medium">{{ customer.name || 'No Name' }}</div>
+            <div matListItemLine class="text-gray-500 text-sm">
+              {{ customer.email || customer.phoneNumber || 'No contact info' }}
+            </div>
+            @if (selectedCustomer()?._id === customer._id) {
+              <mat-icon matListItemMeta class="text-blue-500">check_circle</mat-icon>
+            }
+          </mat-list-item>
+        }
+      </mat-list>
+    } @else if (searchQuery().length < 2 && customers().length > 0) {
+      <div class="text-center p-4 text-gray-500 text-sm">
+        Type at least 2 characters to search
+      </div>
+    }
+  </div>
+
+  <!-- Show selected customer summary -->
+  @if (selectedCustomer()) {
+    <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <mat-icon class="text-green-600">check_circle</mat-icon>
+          <div>
+            <div class="font-medium text-green-800">{{ getCustomerDisplayName(selectedCustomer()) }}</div>
+            <div class="text-green-600 text-sm">
+              {{ getCustomerContact(selectedCustomer()) }}
+            </div>
+          </div>
+        </div>
+        <button mat-icon-button color="warn" (click)="removeCustomer()" matTooltip="Remove selection">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  @if (selectedCustomer()) {
+    <button mat-flat-button color="primary" (click)="confirmSelection()">
+      Confirm
+    </button>
+  }
+</mat-dialog-actions>

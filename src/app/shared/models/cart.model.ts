@@ -7,10 +7,11 @@ export interface Cart {
   products: Product[];
   quantity: number;
   active: boolean;
-  paymentMethod: PaymentMethod;
+  paymentMethod?: PaymentMethod | null;
   discount?: Discount;
   delivery?: number;
   note?: string;
+  user?: string;
   cartSummary?: CartSummary;
   createdAt?: Date;
   updatedAt?: Date;

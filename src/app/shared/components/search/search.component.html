@@ -1,0 +1,18 @@
+<mat-form-field class="w-full" appearance="outline">
+  @if (showLeftIcon()) {
+    <button mat-icon-button matPrefix (click)="onLeftTap($event)">
+      <mat-icon>{{ leftIcon() }}</mat-icon>
+    </button>
+  }
+  
+  <input matInput 
+         type="text" 
+         [placeholder]="searchText()" 
+         [(ngModel)]="filter">
+  
+  @if (showRightIcon() && filter().length > 0) {
+    <button mat-icon-button matSuffix (click)="onRightTap($event); clearFilter()">
+      <mat-icon>{{ rightIcon() }}</mat-icon>
+    </button>
+  }
+</mat-form-field>

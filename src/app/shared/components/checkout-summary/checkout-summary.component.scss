@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+/* Primary color from Material theme */
+.primary-text {
+  color: var(--mat-sys-primary);
+}
+
+.text-on-surface-variant {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.border-outline-variant {
+  border-color: var(--mat-sys-outline-variant);
+}

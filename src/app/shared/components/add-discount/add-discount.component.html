@@ -1,0 +1,76 @@
+<h2 mat-dialog-title>Apply Discount</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="discountForm">
+    <!-- Discount Type Toggle -->
+    <div class="toggle-section">
+      <mat-button-toggle-group formControlName="discountType" aria-label="Discount Type">
+        <mat-button-toggle value="Amount">
+          <mat-icon>attach_money</mat-icon>
+          Amount
+        </mat-button-toggle>
+        <mat-button-toggle value="Percentage">
+          <mat-icon>percent</mat-icon>
+          Percentage
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+
+    <!-- Value Field -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ valueLabel }}</mat-label>
+      <mat-icon matPrefix>{{ valueIcon }}</mat-icon>
+      @if (f['discountType'].value === 'Amount') {
+        <input 
+          matInput 
+          currencyMask
+          [options]="{ prefix: storeStore.selectedStore()?.currency + ' ' }"
+          formControlName="value" 
+          [placeholder]="valueLabel"
+        />
+      } @else {
+        <input 
+          matInput 
+          type="number" 
+          formControlName="value" 
+          [placeholder]="valueLabel"
+        />
+      }
+      @if (f['value'].hasError('required') && f['value'].touched) {
+        <mat-error>Value is required</mat-error>
+      }
+      @if (f['value'].hasError('min')) {
+        <mat-error>Value must be a positive number</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Reference Field -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Reference (Optional)</mat-label>
+      <mat-icon matPrefix>note</mat-icon>
+      <input 
+        matInput 
+        type="text" 
+        formControlName="reference" 
+        placeholder="Enter reference or reason"
+      />
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (data.discount?.value) {
+    <button mat-button color="warn" (click)="onRemoveDiscount()">
+      Remove Discount
+    </button>
+  }
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button 
+    mat-flat-button 
+    color="primary" 
+    (click)="onApply()" 
+    [disabled]="discountForm.invalid"
+  >
+    Apply
+  </button>
+</mat-dialog-actions>

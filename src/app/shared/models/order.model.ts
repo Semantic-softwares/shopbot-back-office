@@ -1,4 +1,5 @@
 import { Cart } from "./cart.model";
+import { Guest } from "./reservation.model";
 import { SalesType } from "./sale-type.model";
 import { Store } from "./store.model";
 import { Table } from "./table.model";
@@ -65,8 +66,8 @@ export interface Order {
   orderCancellationReason?: string;
   status?: Status[];
   reference?: string;
-  synced: boolean;
-  syncTimestamp: Date;
+  synced?: boolean;
+  syncTimestamp?: Date;
   total?: number;
   vendorCommissionAmount?: number;
   subTotal?: number;
@@ -84,6 +85,7 @@ export interface Order {
   type: string
   salesType?: SalesType;
   table?: Table;
+  guest?: Guest;
   receiver?: Receiver;
   gift?: boolean;
   deliveryTime?: DeliveryTime;
@@ -92,8 +94,9 @@ export interface Order {
   vendorIssue?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  staff?: User;
+  staff?: User | any;
   storeId?: string;
+  salesChannel?: SalesChannel;
 }
 
 export interface SearchFilter {
@@ -112,6 +115,12 @@ export enum OrderCategoryType {
   READY = "Ready",
   COMPLETE = "Complete",
   CANCEL = "Cancel",
+}
+
+export enum SalesChannel {
+  POINT_OF_SALE = "Point of Sale",
+  SHOPBOT = "Shopbot",
+  QRCODE = "Qrcode",
 }
 
 export interface StatusParams {

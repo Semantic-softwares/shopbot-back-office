@@ -1,0 +1,118 @@
+<!-- Dialog Title -->
+<h2 mat-dialog-title>{{ product.name }}</h2>
+
+<!-- Dialog Content -->
+<mat-dialog-content class="!pt-0">
+  <!-- Product description and price -->
+  <div class="mb-4">
+    <p class="text-sm text-gray-500 mb-2">{{ product.description }}</p>
+    <span class="text-lg font-semibold text-primary">
+      {{ product.price | currency: product.store?.currency || 'USD' }}
+    </span>
+  </div>
+
+  <!-- Variants/Options -->
+  @if (!variantStore.isLoading()) {
+    @for (variant of variantStore.selectedVariants(); track $index; let variantIndex = $index) {
+      <div class="mb-4">
+        <!-- Variant header -->
+        <div class="flex items-start justify-between mb-2">
+          <div>
+            <h3 class="text-base font-medium">{{ variant.name | titlecase }}</h3>
+            <p class="text-xs text-gray-500">
+              Choose {{ variant.atLeast === variant.atMost ? variant.atLeast : 'between ' + variant.atLeast + ' and ' + variant.atMost }}
+            </p>
+          </div>
+          <span 
+            class="px-2 py-0.5 text-xs font-medium rounded-full"
+            [class.bg-red-100]="variant.atLeast > 0 && variant.invalid"
+            [class.text-red-700]="variant.atLeast > 0 && variant.invalid"
+            [class.bg-green-100]="!variant.invalid"
+            [class.text-green-700]="!variant.invalid"
+            [class.bg-gray-100]="variant.atLeast === 0 && variant.invalid"
+            [class.text-gray-600]="variant.atLeast === 0 && variant.invalid"
+          >
+            {{ variant.atLeast > 0 ? 'Required' : 'Optional' }}
+          </span>
+        </div>
+
+        <!-- Options list using mat-selection-list -->
+        <mat-selection-list class="!py-0" [multiple]="true">
+          @for (option of variant.options; track $index; let optionIndex = $index) {
+            <mat-list-option
+              [selected]="option.selected"
+              [disabled]="!option.inStock"
+              (selectedChange)="checkedChange(variantIndex, optionIndex, $event)"
+              class="!h-auto !py-2"
+            >
+              <div class="flex items-center justify-between w-full">
+                <div>
+                  <span class="text-sm">{{ option.name | titlecase }}</span>
+                  @if (!option.inStock) {
+                    <span class="block text-xs text-red-500">Out of stock</span>
+                  }
+                </div>
+                
+                @if (option.inStock) {
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-600">
+                      +{{ option.price | currency: product.store?.currency  }}
+                    </span>
+                    @if (option.selected) {
+                      <div class="flex items-center gap-2">
+                        <button 
+                          matIconButton
+                          color="warn"
+                          (click)="decrease(variantIndex, optionIndex); $event.stopPropagation()"
+                          [disabled]="option.quantity <= 1"
+                        >
+                          <mat-icon>remove</mat-icon>
+                        </button>
+                        <span class="w-8 text-center text-lg font-semibold">{{ option.quantity }}</span>
+                        <button 
+                          matIconButton
+                          color="primary"
+                          (click)="increase(variantIndex, optionIndex); $event.stopPropagation()"
+                        >
+                          <mat-icon>add</mat-icon>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </mat-list-option>
+          }
+        </mat-selection-list>
+      </div>
+    }
+  } @else {
+    <div class="flex flex-col items-center justify-center py-8 gap-4">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p class="text-gray-500">Loading options...</p>
+    </div>
+  }
+</mat-dialog-content>
+
+<!-- Dialog Actions -->
+<mat-dialog-actions align="end" class="!px-6 !py-4 border-t border-outline-variant">
+  <div class="flex items-center gap-2 mr-auto">
+    <button mat-mini-fab color="primary" (click)="updateQuantityTotal('down')" [disabled]="quantity() <= 1">
+      <mat-icon>remove</mat-icon>
+    </button>
+    <span class="w-10 text-center text-xl font-semibold">{{ quantity() }}</span>
+    <button mat-mini-fab color="primary" (click)="updateQuantityTotal('up')">
+      <mat-icon>add</mat-icon>
+    </button>
+  </div>
+  
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button 
+    mat-flat-button 
+    color="primary"
+    [disabled]="!updateAreAllVariantsValid()"
+    (click)="submit()"
+  >
+    {{ isEditing() ? 'Update' : 'Add to Order' }}
+  </button>
+</mat-dialog-actions>

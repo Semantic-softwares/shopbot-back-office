@@ -1,0 +1,62 @@
+<h2 mat-dialog-title>Select Table</h2>
+
+<mat-dialog-content>
+  <!-- Search Field -->
+  <mat-form-field appearance="outline" class="w-full mb-4">
+    <mat-label>Search tables</mat-label>
+    <input 
+      matInput 
+      [value]="searchQuery()" 
+      (input)="onSearchChange($any($event.target).value)"
+      placeholder="Search by table name...">
+    <mat-icon matPrefix>search</mat-icon>
+  </mat-form-field>
+
+  <!-- Loading State -->
+  @if (tablesResource.isLoading()) {
+    <div class="flex items-center justify-center py-12">
+      <mat-spinner></mat-spinner>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (tablesResource.error()) {
+    <app-no-record 
+      icon="error_outline"
+      title="Failed to Load Tables"
+      message="Unable to load tables. Please try again.">
+    </app-no-record>
+  }
+
+  <!-- Tables Grid -->
+  @if (tablesResource.value() && !tablesResource.isLoading()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
+      @for (table of filteredTables; track $index) {
+        <div [class.opacity-50]="table.orderId" [class.pointer-events-none]="table.orderId">
+          <app-table-card 
+            [table]="table"
+            [hideActions]="true"
+            (tableClick)="onTableSelect($event)">
+          </app-table-card>
+        </div>
+      }
+    </div>
+
+    @if (filteredTables.length === 0) {
+        <app-no-record
+          icon="table_restaurant"
+          title="No Tables Found"
+          message="No tables match your search criteria.">
+        </app-no-record>
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (selectedTable()) {
+    <button mat-button color="warn" (click)="onRemoveSelection()">
+      Remove Selection
+    </button>
+  }
+  <button mat-button (click)="onCancel()">Cancel</button>
+</mat-dialog-actions>

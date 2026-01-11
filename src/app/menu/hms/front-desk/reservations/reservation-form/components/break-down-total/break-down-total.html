@@ -88,15 +88,56 @@
 
         <!-- Grand Total -->
         <mat-list-item class="py-4">
-            <span matListItemTitle>Grand Total</span>
-            <span matListItemMeta>
+            <span matListItemTitle class="font-bold text-lg">Grand Total</span>
+            <span matListItemMeta class="font-bold text-lg">
                 {{ breakdownGrandTotal() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
             </span>
         </mat-list-item>
 
+        <!-- Divider -->
+        <mat-divider></mat-divider>
+
+        <!-- Reservation Total (same as Grand Total, for clarity) -->
+        <mat-list-item class="py-4 bg-indigo-50">
+            <span matListItemTitle class="font-bold text-indigo-900">Reservation Total</span>
+            <span matListItemMeta class="font-bold text-indigo-900">
+                {{ breakdownGrandTotal() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+            </span>
+        </mat-list-item>
+
+        <!-- Orders Grand Total -->
+        @if (ordersGrandTotal() > 0) {
+          <mat-list-item class="py-4 bg-green-50">
+              <span matListItemTitle class="font-bold text-green-900 flex items-center gap-2">
+                <span class="text-sm">📦</span> Orders Total
+              </span>
+              <span matListItemMeta class="font-bold text-green-900">
+                  {{ ordersGrandTotal() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+              </span>
+          </mat-list-item>
+
+          <!-- Orders Paid -->
+          <mat-list-item class="py-2 pl-8">
+              <span matListItemTitle class="text-sm text-gray-700">Orders Paid</span>
+              <span matListItemMeta class="text-sm text-green-700">
+                  {{ ordersPaidAmount() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+              </span>
+          </mat-list-item>
+
+          <!-- Orders Balance -->
+          <mat-list-item class="py-2 pl-8 mb-2">
+              <span matListItemTitle class="text-sm text-gray-700">Orders Balance</span>
+              <span matListItemMeta class="text-sm" [class.text-red-700]="ordersBalanceAmount() > 0" [class.text-green-700]="ordersBalanceAmount() <= 0">
+                  {{ ordersBalanceAmount() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+              </span>
+          </mat-list-item>
+
+          <mat-divider></mat-divider>
+        }
+
         <!-- Paid Amount -->
         <mat-list-item class="py-4">
-            <span matListItemTitle =>Paid</span>
+            <span matListItemTitle >Paid</span>
             <span matListItemMeta >
                 {{ paidAmount() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}
             </span>

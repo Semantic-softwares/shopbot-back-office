@@ -1,0 +1,146 @@
+<div class=" p-6 min-h-full">
+  <!-- Header Section -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-4">
+      <!-- Search Field -->
+      <mat-form-field appearance="outline" class="w-80">
+        <mat-label>Search tables</mat-label>
+        <input matInput 
+               [value]="searchQuery()" 
+               (input)="onSearchChange($any($event.target).value)"
+               placeholder="Search by table name...">
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Status Filter -->
+      <mat-button-toggle-group 
+        [value]="tableStore.statusFilter()"
+        (change)="onStatusFilterChange($any($event.value))"
+        >
+        <mat-button-toggle value="all">
+          All ({{tableStore.tablesCount()}})
+        </mat-button-toggle>
+        <mat-button-toggle value="free">
+          Free ({{tableStore.freeTableCount()}})
+        </mat-button-toggle>
+        <mat-button-toggle value="occupied">
+          Occupied ({{tableStore.occupiedTableCount()}})
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+
+      <!-- View Toggle -->
+      <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($any($event.value))">
+        <mat-button-toggle value="grid">
+          <mat-icon>grid_view</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle value="list">
+          <mat-icon>view_list</mat-icon>
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+  </div>
+
+  <!-- Category Chips -->
+  <div class="mb-4">
+    <mat-chip-set>
+      <mat-chip 
+        [highlighted]="!tableCategoryStore.selectedTableCategory()"
+        (click)="clearCategoryFilter()"
+        class="cursor-pointer">
+        All Categories
+      </mat-chip>
+      @for (category of tableCategoryStore.tableCategories(); track category._id) {
+        <mat-chip 
+          [highlighted]="tableCategoryStore.selectedTableCategory()?._id === category._id"
+          (click)="onCategorySelect(category)"
+          class="cursor-pointer">
+          {{category.name}}
+        </mat-chip>
+      }
+    </mat-chip-set>
+  </div>
+
+  <!-- Grid View -->
+  @if (viewMode() === 'grid') {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      @for (table of tableStore.filteredTables(); track table._id) {
+        <app-table-card 
+          (addNewOrder)="onAddNewOrder($event)"
+          [table]="table" 
+          (completeOrder)="completeOrder($event)"
+          (clearOrder)="onClearOrder($event)"
+          (tableClick)="onTableClick($event)">
+        </app-table-card>
+      }
+    </div>
+
+    @if (tableStore.filteredTables().length === 0) {
+      <div class="text-center py-12 text-gray-500">
+        <mat-icon class="text-6xl mb-4">table_restaurant</mat-icon>
+        <p>No tables found</p>
+      </div>
+    }
+  }
+
+  <!-- List View -->
+  @if (viewMode() === 'list') {
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-0">
+        <table mat-table [dataSource]="tableStore.filteredTables()" class="w-full">
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef class="font-semibold">Table Name</th>
+            <td mat-cell *matCellDef="let table">{{table.name}}</td>
+          </ng-container>
+
+          <!-- Seats Column -->
+          <ng-container matColumnDef="seats">
+            <th mat-header-cell *matHeaderCellDef class="font-semibold">Seats</th>
+            <td mat-cell *matCellDef="let table">
+              <div class="flex items-center gap-2">
+                <mat-icon class="text-gray-500 text-sm">event_seat</mat-icon>
+                {{table.numberOfGuest}}
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Category Column -->
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef class="font-semibold">Category</th>
+            <td mat-cell *matCellDef="let table">
+              {{table.category?.name || 'N/A'}}
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef class="font-semibold">Status</th>
+            <td mat-cell *matCellDef="let table">
+              @if (table.order) {
+                <span class="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                  Occupied
+                </span>
+              } @else {
+                <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Available
+                </span>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50 cursor-pointer"></tr>
+        </table>
+
+        @if (tableStore.filteredTables().length === 0) {
+          <div class="text-center py-12 text-gray-500">
+            <mat-icon class="text-6xl mb-4">table_restaurant</mat-icon>
+            <p>No tables found</p>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

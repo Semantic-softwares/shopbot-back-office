@@ -1,15 +1,19 @@
 import { Component, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute, Router } from '@angular/router';
+import { MatTableModule } from '@angular/material/table';
+import { MatChipsModule } from '@angular/material/chips';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { OrderService } from '../../../../../shared/services/orders.service';
 import { StoreService } from '../../../../../shared/services/store.service';
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
+import { MatListModule } from "@angular/material/list";
 
 
 @Component({
@@ -23,8 +27,13 @@ import { StoreService } from '../../../../../shared/services/store.service';
     MatIconModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    MatMenuModule
-  ]
+    MatMenuModule,
+    MatTableModule,
+    MatChipsModule,
+    PageHeaderComponent,
+    MatListModule,
+    RouterModule
+]
 })
 export class ReceiptsDetailsComponent {
   private route = inject(ActivatedRoute);
@@ -32,6 +41,7 @@ export class ReceiptsDetailsComponent {
   private orderService = inject(OrderService);
   private storeService = inject(StoreService);
   private snackBar = inject(MatSnackBar);
+  private location = inject(Location);
 
   exporting = signal(false);
 
@@ -63,7 +73,7 @@ export class ReceiptsDetailsComponent {
   }
 
   goBack(): void {
-    this.router.navigate(['../menu/erp/reports/receipts/list']);
+    this.location.back();
   }
 
   async exportReceipt(): Promise<void> {
