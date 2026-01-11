@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, effect } from '@angular/core';
+import { Component, inject, signal, computed, effect, input } from '@angular/core';
 import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatListModule } from "@angular/material/list";
 import { StoreStore } from '../../../../../../../shared/stores/store.store';
@@ -7,6 +7,7 @@ import { MatInputModule } from "@angular/material/input";
 import { CurrencyMaskModule } from 'ng2-currency-mask';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReservationFormService } from '../../../../../../../shared/services/reservation-form.service';
+import { Reservation } from '../../../../../../../shared/models/reservation.model';
 
 @Component({
   selector: 'break-down-total',
@@ -15,6 +16,8 @@ import { ReservationFormService } from '../../../../../../../shared/services/res
   styleUrl: './break-down-total.scss',
 })
 export class BreakDownTotal {
+  reservation = input<Reservation | null>(null);
+  
   private reservationFormService = inject(ReservationFormService);
   public reservationForm = toSignal<FormGroup | null>(this.reservationFormService.form$, { initialValue: null });
   public storeStore = inject(StoreStore);
@@ -159,8 +162,35 @@ export class BreakDownTotal {
   });
 
   // Computed signal for balance
+  // Balance = Reservation Balance + Orders Balance
   public breakdownBalance = computed(() => {
-    return this.breakdownGrandTotal() - this.paidAmount();
+    const reservationBalance = this.breakdownGrandTotal() - this.paidAmount();
+    return reservationBalance;
+  });
+
+  // Computed signal for orders grand total
+  public ordersGrandTotal = computed(() => {
+    const res = this.reservation();
+    if (!res || !(res as any).orders) return 0;
+    
+    const orders = (res as any).orders as any[];
+    return orders.reduce((sum, order) => {
+      return sum + (order.total || order.orderCalculation?.totalPrice || 0);
+    }, 0);
+  });
+
+  // Computed signal for orders paid (from reservation pricing)
+  public ordersPaidAmount = computed(() => {
+    const res = this.reservation();
+    if (!res || !res.pricing) return 0;
+    return (res.pricing as any).ordersPaid || 0;
+  });
+
+  // Computed signal for orders balance (from reservation pricing)
+  public ordersBalanceAmount = computed(() => {
+    const res = this.reservation();
+    if (!res || !res.pricing) return 0;
+    return (res.pricing as any).ordersBalance || 0;
   });
 
   constructor() {

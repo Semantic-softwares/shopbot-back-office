@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>Add Delivery Fee</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="deliveryForm">
+    <!-- Delivery Fee Field -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Delivery Fee</mat-label>
+      <mat-icon matPrefix>local_shipping</mat-icon>
+      <input 
+        matInput 
+        currencyMask
+        [options]="{ prefix: storeStore.selectedStore()?.currency + ' ' }"
+        formControlName="deliveryFee" 
+        placeholder="Enter delivery fee"
+      />
+      @if (f['deliveryFee'].hasError('required') && f['deliveryFee'].touched) {
+        <mat-error>Delivery fee is required</mat-error>
+      }
+      @if (f['deliveryFee'].hasError('min')) {
+        <mat-error>Delivery fee must be a positive number</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (data.deliveryFee) {
+    <button mat-button color="warn" (click)="onRemoveDelivery()">
+      Remove Delivery
+    </button>
+  }
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button 
+    mat-flat-button 
+    color="primary" 
+    (click)="onApply()" 
+    [disabled]="deliveryForm.invalid"
+  >
+    Apply
+  </button>
+</mat-dialog-actions>

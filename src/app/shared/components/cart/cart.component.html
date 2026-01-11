@@ -1,0 +1,173 @@
+<div class="h-full flex flex-col">
+    <!-- Cart Header -->
+    <div class="p-4 border-b border-outline-variant">
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2">
+            <!-- Customer Selection -->
+            @if (selectedCustomer()) {
+            <button mat-stroked-button (click)="onSelectCustomer()"
+                [matTooltip]="selectedCustomer()?.name || selectedCustomer()?.email" class="!flex-1">
+                <mat-icon>person</mat-icon>
+                <span class="text-xs truncate max-w-[60px]">{{ selectedCustomer()?.name || 'Customer' }}</span>
+            </button>
+            } @else {
+            <button mat-stroked-button class="!flex-1" (click)="onSelectCustomer()">
+                <mat-icon>person</mat-icon>
+                <span class="text-xs">Customer</span>
+            </button>
+            }
+
+            <!-- Hotel Guest Selection -->
+            @if (selectedGuest()) {
+            <button mat-stroked-button (click)="onSelectGuest()"
+                [matTooltip]="guestService.getGuestName(selectedGuest())" class="!flex-1">
+                <mat-icon>hotel</mat-icon>
+                <span class="text-xs truncate max-w-[60px]">{{ guestService.getGuestName(selectedGuest()) }}</span>
+            </button>
+            } @else {
+            <button mat-stroked-button class="!flex-1" (click)="onSelectGuest()">
+                <mat-icon>hotel</mat-icon>
+                <span class="text-xs">Guest</span>
+            </button>
+            }
+
+            <!-- Table Selection -->
+            @if (tableStore.selectedTable()) {
+            <button matButton="outlined" (click)="onSelectTable()" [matTooltip]="tableStore.selectedTable()?.name" class="!flex-1">
+                <mat-icon>table_restaurant</mat-icon>
+                <span class="text-xs truncate max-w-[60px]">{{ tableStore.selectedTable()?.name }}</span>
+            </button>
+            } @else {
+            <button matButton="outlined"  (click)="onSelectTable()">
+                <mat-icon>table_restaurant</mat-icon>
+                <span class="text-xs">Table</span>
+            </button>
+            }
+        </div>
+    </div>
+
+
+    <!-- Cart Items -->
+    <div class="flex-1 overflow-auto p-4">
+        @if (!isEmpty()) {
+        <!-- Clear Cart Button -->
+        <div class="mb-3 flex justify-end">
+            <button mat-button color="warn" (click)="cancelSales()">
+                <mat-icon>delete_outline</mat-icon>
+                <span>Clear Cart</span>
+            </button>
+        </div>
+        }
+        <div class="space-y-3 h-full">
+            @for (product of cartStore.selectedCart()?.products; track $index) {
+            <mat-card appearance="outlined" class="p-3">
+                <div class="flex gap-3">
+                    <!-- Item Image -->
+                    <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                        @if (product.photos && product.photos.length > 0) {
+                        <img [src]="product.photos[0]" [alt]="product.name" class="w-full h-full object-cover">
+                        } @else {
+                        <div class="w-full h-full flex items-center justify-center">
+                            <mat-icon class="text-gray-300">image</mat-icon>
+                        </div>
+                        }
+                    </div>
+
+
+
+
+                    <!-- Item Details -->
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-medium text-sm truncate">{{ product.name }}</h4>
+                        <p class="primary-text font-semibold text-sm mt-0.5">
+                            {{ product.price | currency: currency() : 'symbol' : '1.0-0' }}
+                        </p>
+
+                        <!-- Selected Options -->
+                        @if (getOptionsDisplay(product).length > 0) {
+                        <p class="text-xs text-gray-500 mt-1 truncate">
+                            {{ getOptionsDisplay(product).join(', ') }}
+                        </p>
+                        }
+
+                        <!-- Quantity Controls -->
+                        <!-- [disabled]="product.qty !== undefined && product.quantity >= product.qty" -->
+                        <div class="flex items-center justify-between mt-2">
+                            <div class="flex items-center gap-2">
+                                <button mat-mini-fab color="warn" (click)="removeOrDeleteProduct(product)">
+                                    <mat-icon>remove</mat-icon>
+                                </button>
+                                <span class="w-8 text-center font-semibold text-lg">{{ product.quantity }}</span>
+                                <button mat-mini-fab color="primary" (click)="onAddToCart($event, product)">
+                                    <mat-icon>add</mat-icon>
+                                </button>
+                            </div>
+                            <span class="font-semibold">
+                                {{ getProductTotal(product) | currency: currency() : 'symbol' : '1.0-0' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Remove Button -->
+                    <button mat-icon-button color="warn" class="!w-8 !h-8 self-start"
+                        (click)="onRemoveItem(product._id!)">
+                        <mat-icon class="!text-lg">close</mat-icon>
+                    </button>
+                </div>
+            </mat-card>
+            } @empty {
+            <div class="flex flex-col items-center justify-center h-full min-h-[300px] text-gray-400">
+                <mat-icon class="!text-6xl !w-16 !h-16 mb-4">shopping_cart</mat-icon>
+                <p class="text-lg font-medium">Cart is empty</p>
+                <p class="text-sm">Add products to start an order</p>
+            </div>
+            }
+        </div>
+
+        <!-- Checkout Summary (inside scrollable area) -->
+        @if (!isEmpty()) {
+        <div class="mt-4">
+            <app-checkout-summary (cartSummary)="cartSummaryChange($event)" />
+        </div>
+        }
+    </div>
+
+    <!-- Fixed Bottom Action Buttons -->
+    <!-- @if (!isEmpty()) { -->
+    <div class="border-t border-outline-variant bg-white">
+        <!-- Discount, Delivery Row -->
+        <div class="flex items-center gap-2 p-3 border-b border-gray-100">
+            <button mat-stroked-button class="!flex-1" (click)="onApplyDiscount()">
+                <mat-icon>local_offer</mat-icon>
+                <span class="ml-1">Discount</span>
+            </button>
+            <button mat-stroked-button class="!flex-1" (click)="onApplyDelivery()">
+                <mat-icon>local_shipping</mat-icon>
+                <span class="ml-1">Delivery</span>
+            </button>
+        </div>
+
+        <!-- Main Checkout Button -->
+        <div class="p-3">
+            <button mat-flat-button color="primary" class="w-full !h-12 !text-base" (click)="onCheckout()">
+                Checkout {{ itemsCount() }} items ({{ cartStore.selectedCart()?.cartSummary?.totalCost || 0 | currency:
+                currency() : 'symbol' : '1.0-0' }})
+            </button>
+        </div>
+
+        <!-- Generate Bill & Pend Order Row -->
+        <div class="flex items-center gap-2 px-3 pb-3">
+            <button mat-stroked-button class="!flex-1" (click)="onGenerateBill()">
+                <mat-icon>receipt</mat-icon>
+                <span class="ml-1">Generate Bill</span>
+            </button>
+            <button mat-stroked-button color="warn"
+                [disabled]="!cartStore.isSelectedCart() && cartStore.selectedCart()?.products!.length < 1"
+                class="!flex-1" (click)="onPendOrder()">
+                <mat-icon>pause_circle</mat-icon>
+                <span class="ml-1">Pend Order</span>
+            </button>
+        </div>
+    </div>
+    <!-- } -->
+</div>

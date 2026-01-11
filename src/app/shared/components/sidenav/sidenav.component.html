@@ -1,0 +1,96 @@
+<mat-drawer-container [hasBackdrop]="isMobile()" class="h-full">
+
+  <mat-drawer [mode]="sidenavMode()" 
+    [opened]="opened()" 
+    (openedChange)="opened.set($event)"
+    class="w-[280px]">
+    <div class="flex flex-col h-full overflow-x-hidden">
+      <!-- Store Selector Header -->
+      @if (showStoreSelector() && storeInfo()) {
+        <mat-list class="pt-2">
+          <mat-list-item>
+            @if (storeInfo()?.logo) {
+              <a class="block mr-3" [routerLink]="settingsLink()">
+                <img [src]="storeInfo()?.logo" 
+                     class="w-10 h-10 rounded-full object-cover">
+              </a>
+            } @else {
+              <a class="block mr-3" [routerLink]="settingsLink()">
+                <mat-icon class="text-3xl w-10 h-10">{{ defaultIcon() }}</mat-icon>
+              </a>
+            }
+            
+            <h2 matListItemTitle [routerLink]="settingsLink()">{{ userInfo()?.roleName }}</h2>
+            <div matListItemLine [routerLink]="settingsLink()">{{ storeInfo()?.name }}</div>
+            
+            @if (stores().length > 1) {
+              <ng-container matListItemMeta>
+                <a mat-icon-button class="block" [matMenuTriggerFor]="storeMenu">
+                  <mat-icon>keyboard_arrow_down</mat-icon>
+                </a>
+              </ng-container>
+            }
+          </mat-list-item>
+          <mat-divider></mat-divider>
+        </mat-list>
+      }
+
+      <!-- Store menu -->
+      <mat-menu #storeMenu="matMenu">
+        @for (store of stores(); track store._id) {
+          <button mat-menu-item (click)="selectStore(store)">
+            {{ store.name }}
+          </button>
+        }
+      </mat-menu>
+
+      <!-- Navigation List -->
+      <mat-nav-list class="flex-1 overflow-y-auto overflow-x-hidden pt-2">
+        @if (isGrouped()) {
+          <!-- Grouped Navigation -->
+          @for (group of filteredNavItems(); track $index) {
+            @if (isNavGroup(group)) {
+              <div class="mb-1">
+                <div class="px-4 pt-4 pb-2">
+                  <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">{{ group.name }}</span>
+                </div>
+                @for (item of group.children; track item.link) {
+                  <a mat-list-item 
+                     class="!mx-2 !rounded-lg hover:!bg-gray-100"
+                     [routerLink]="item.link" 
+                     routerLinkActive="!bg-blue-50" 
+                     #rla="routerLinkActive"
+                     [activated]="rla.isActive">
+                    <mat-icon matListItemIcon class="material-icons-outlined !text-gray-500" [class.!text-blue-600]="rla.isActive">{{ item.icon }}</mat-icon>
+                    <span matListItemTitle class="!text-sm !font-medium text-gray-700" [class.!text-blue-600]="rla.isActive">{{ item.label }}</span>
+                  </a>
+                }
+              </div>
+            }
+          }
+        } @else {
+          <!-- Flat Navigation -->
+          <div class="py-1">
+            @for (item of filteredNavItems(); track $index) {
+              @if (!isNavGroup(item)) {
+                <a mat-list-item 
+                   class="!mx-2 !rounded-lg hover:!bg-gray-100"
+                   [routerLink]="item.link" 
+                   routerLinkActive="!bg-blue-50" 
+                   #rla="routerLinkActive"
+                   [activated]="rla.isActive">
+                  <mat-icon matListItemIcon class="material-icons-outlined !text-gray-500" [class.!text-blue-600]="rla.isActive">{{ item.icon }}</mat-icon>
+                  <span matListItemTitle class="!text-sm !font-medium text-gray-700" [class.!text-blue-600]="rla.isActive">{{ item.label }}</span>
+                </a>
+              }
+            }
+          </div>
+        }
+      </mat-nav-list>
+    </div>
+  </mat-drawer>
+
+  <mat-drawer-content class="flex flex-col">
+    <ng-content></ng-content>
+  </mat-drawer-content>
+</mat-drawer-container>

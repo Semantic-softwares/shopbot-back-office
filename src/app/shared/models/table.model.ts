@@ -8,7 +8,7 @@ export interface Table  {
     category: TableCategory | string | any;
     active: boolean;
     numberOfGuest: number;
-    orderId?: string;
+    orderId?: string | Order | null | any;
     store?: Store | null | string;
     order?: Order | null;
     storeId: string;

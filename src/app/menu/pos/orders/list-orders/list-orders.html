@@ -1,0 +1,278 @@
+<app-page-header title="Orders" subtitle="Manage and track all your orders">
+    <ng-container actions>
+        <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)" class="hidden md:flex">
+            <mat-button-toggle value="table">
+                <mat-icon>table_view</mat-icon>
+            </mat-button-toggle>
+            <mat-button-toggle value="grid">
+                <mat-icon>grid_view</mat-icon>
+            </mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <button mat-stroked-button (click)="clearFilters()">
+            <mat-icon>clear</mat-icon>
+            Clear Filters
+        </button>
+
+        <button matButton="outlined" (click)="reloadData()" [disabled]="ordersResource.isLoading()">
+            <mat-icon [class.animate-spin]="ordersResource.isLoading()">refresh</mat-icon>
+            Reload
+        </button>
+
+        <button matButton="filled" color="primary" (click)="startNewSale()">
+            <mat-icon>add_shopping_cart</mat-icon>
+            Start New Sale
+        </button>
+    </ng-container>
+</app-page-header>
+
+<div class="max-w-12xl py-6 px-4">
+    <!-- Main Card - Contains Filters and Content -->
+    <mat-card appearance="outlined" class="py-4">
+        <!-- Filters Section -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 px-4 mb-4">
+            <!-- Search -->
+            <mat-form-field appearance="outline">
+                <mat-label>Search</mat-label>
+                <input matInput [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)"
+                    placeholder="Order ID, customer name...">
+                <mat-icon matPrefix>search</mat-icon>
+            </mat-form-field>
+
+            <!-- Status Filter -->
+            <mat-form-field appearance="outline">
+                <mat-label>Status</mat-label>
+                <mat-select [value]="statusFilter()" (selectionChange)="statusFilter.set($event.value)">
+                    @for (option of statusOptions; track option.value) {
+                    <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Payment Filter -->
+            <mat-form-field appearance="outline">
+                <mat-label>Payment</mat-label>
+                <mat-select [value]="paymentFilter()" (selectionChange)="paymentFilter.set($event.value)">
+                    @for (option of paymentOptions; track option.value) {
+                    <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Date Range Filter -->
+            <mat-form-field appearance="outline">
+                <mat-label>Date Range</mat-label>
+                <mat-date-range-input [rangePicker]="dateRangePicker">
+                    <input matStartDate 
+                           placeholder="Start date" 
+                           [value]="startDate()"
+                           (dateChange)="onStartDateChange($event.value)">
+                    <input matEndDate 
+                           placeholder="End date"
+                           [value]="endDate()"
+                           (dateChange)="onEndDateChange($event.value)">
+                </mat-date-range-input>
+                <mat-datepicker-toggle matIconSuffix [for]="dateRangePicker"></mat-datepicker-toggle>
+                <mat-date-range-picker #dateRangePicker (closed)="onDateRangeClosed()"></mat-date-range-picker>
+            </mat-form-field>
+        </div>
+
+        <!-- Loading State -->
+        @if (ordersResource.isLoading()) {
+        <div class="flex items-center justify-center py-12">
+            <mat-spinner diameter="50"></mat-spinner>
+        </div>
+        }
+
+        <!-- Error State -->
+        @if (ordersResource.error() && !ordersResource.isLoading()) {
+        <app-no-record icon="error_outline" title="Failed to Load Orders" [message]="ordersResource.error()">
+            <button mat-flat-button color="primary" (click)="reloadData()">
+                Retry
+            </button>
+        </app-no-record>
+        }
+
+        <!-- Empty State -->
+        @if (!ordersResource.isLoading() && !ordersResource.error() && filteredOrders().length === 0) {
+        <app-no-record icon="receipt_long" title="No Orders Found"
+            message="No orders match your current filters. Try adjusting your search criteria.">
+        </app-no-record>
+        }
+
+        <!-- Table View Content -->
+        @if (!ordersResource.isLoading() && !ordersResource.error() && filteredOrders().length > 0 && viewMode() === 'table') {
+        <div class="overflow-x-auto hidden md:block">
+            <table mat-table [dataSource]="filteredOrders()" class="w-full">
+                <!-- Reference Column -->
+                <ng-container matColumnDef="reference">
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Order ID & Name</th>
+                    <td mat-cell *matCellDef="let order">
+                        <div class="flex flex-col">
+                            <span class="font-medium">#{{ order.reference }}</span>
+                            <span class="text-sm text-gray-600">{{ order.user?.name || order.user?.email || 'Guest'
+                                }}</span>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <!-- Total Column -->
+                <ng-container matColumnDef="total">
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Total</th>
+                    <td mat-cell *matCellDef="let order">
+                        <span class="font-semibold">{{ order.total | currency:currency():'symbol':'1.2-2' }}</span>
+                    </td>
+                </ng-container>
+
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Status</th>
+                    <td mat-cell *matCellDef="let order">
+                        <mat-chip [class]="getStatusColor(order.category)">
+                            {{ order.category }}
+                        </mat-chip>
+                    </td>
+                </ng-container>
+
+                <!-- Payment Method Column -->
+                <ng-container matColumnDef="payment">
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Payment Method</th>
+                    <td mat-cell *matCellDef="let order">
+                        <span class="text-sm">{{ order.payment || 'N/A' }}</span>
+                    </td>
+                </ng-container>
+
+                <!-- Payment Status Column -->
+                <ng-container matColumnDef="paymentStatus">
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Payment Status</th>
+                    <td mat-cell *matCellDef="let order">
+                        <mat-chip [class]="getPaymentStatusColor(order.paymentStatus)" class="text-xs">
+                            {{ order.paymentStatus }}
+                        </mat-chip>
+                    </td>
+                </ng-container>
+
+                <!-- Location Column -->
+                <ng-container matColumnDef="location">
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Location</th>
+                    <td mat-cell *matCellDef="let order">
+                        <span class="text-sm">{{ getLocationInfo(order) }}</span>
+                    </td>
+                </ng-container>
+
+                <!-- Date Column -->
+                <ng-container matColumnDef="date">
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Date</th>
+                    <td mat-cell *matCellDef="let order">
+                        <span class="text-sm">{{ order.createdAt | date:'short' }}</span>
+                    </td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Actions</th>
+                    <td mat-cell *matCellDef="let order">
+                        <button mat-icon-button [matMenuTriggerFor]="menu">
+                            <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #menu="matMenu">
+                            <button mat-menu-item (click)="viewOrder(order)">
+                                <mat-icon>visibility</mat-icon>
+                                <span>View</span>
+                            </button>
+                            <button mat-menu-item (click)="printOrder(order)">
+                                <mat-icon>print</mat-icon>
+                                <span>Print</span>
+                            </button>
+                            <button mat-menu-item (click)="editOrder(order)">
+                                <mat-icon>edit</mat-icon>
+                                <span>Edit</span>
+                            </button>
+                        </mat-menu>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <mat-paginator 
+            [length]="totalOrders()"
+            [pageSize]="pageSize()"
+            [pageIndex]="pageIndex()"
+            [pageSizeOptions]="[10, 25, 50, 100]"
+            (page)="onPageChange($event)"
+            showFirstLastButtons>
+        </mat-paginator>
+        }
+
+        <!-- Grid View Content -->
+        @if (!ordersResource.isLoading() && !ordersResource.error() && filteredOrders().length > 0 && viewMode() === 'grid') {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4">
+        @for (order of filteredOrders(); track order._id) {
+        <mat-card appearance="outlined" class="cursor-pointer hover:shadow-lg transition-shadow">
+            <mat-card-content class="p-4">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-lg">#{{ order.reference }}</h3>
+                        <p class="text-sm text-gray-600">{{ order.user?.name || order.user?.email || 'Guest' }}</p>
+                    </div>
+                    <button mat-icon-button [matMenuTriggerFor]="cardMenu">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #cardMenu="matMenu">
+                        <button mat-menu-item (click)="viewOrder(order)">
+                            <mat-icon>visibility</mat-icon>
+                            <span>View</span>
+                        </button>
+                        <button mat-menu-item (click)="printOrder(order)">
+                            <mat-icon>print</mat-icon>
+                            <span>Print</span>
+                        </button>
+                        <button mat-menu-item (click)="editOrder(order)">
+                            <mat-icon>edit</mat-icon>
+                            <span>Edit</span>
+                        </button>
+                    </mat-menu>
+                </div>
+
+                <!-- Total -->
+                <div class="mb-3">
+                    <span class="text-2xl font-bold">{{ order.total | currency:currency():'symbol':'1.2-2' }}</span>
+                </div>
+
+                <!-- Status & Payment -->
+                <div class="flex gap-2 mb-3">
+                    <mat-chip [class]="getStatusColor(order.category!)" class="text-xs">
+                        {{ order.category }}
+                    </mat-chip>
+                    <mat-chip [class]="getPaymentStatusColor(order.paymentStatus!)" class="text-xs">
+                        {{ order.paymentStatus }}
+                    </mat-chip>
+                </div>
+
+                <!-- Details -->
+                <div class="space-y-1 text-sm text-gray-600">
+                    <div class="flex items-center gap-2">
+                        <mat-icon class="text-base">payment</mat-icon>
+                        <span>{{ order.payment || 'N/A' }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <mat-icon class="text-base">location_on</mat-icon>
+                        <span>{{ getLocationInfo(order) }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <mat-icon class="text-base">schedule</mat-icon>
+                        <span>{{ order.createdAt | date:'short' }}</span>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+        }
+        </div>
+        }
+    </mat-card>
+</div>

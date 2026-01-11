@@ -14,6 +14,10 @@ export const MENU_ROUTES: Routes = [
       import('./dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
   },
   {
+    path: 'pos',
+    loadChildren: () => import('./pos/pos.routes').then((m) => m.DASHBOARD_POS_ROUTES),
+  },
+  {
     path: 'hms',
     loadChildren: () =>
       import('./hms/hms.routes').then((m) => m.DASHBOARD_HMS_ROUTES),
@@ -47,10 +51,10 @@ export const MENU_ROUTES: Routes = [
         'settings.store.view',
         'settings.store.edit',
         'settings.staff.view',
-        'settings.roles.view'
+        'settings.roles.view',
       ],
-      permissionMode: 'any'
-    }
+      permissionMode: 'any',
+    },
   },
   {
     path: 'menu',

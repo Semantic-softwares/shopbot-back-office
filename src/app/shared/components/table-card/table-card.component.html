@@ -1,0 +1,76 @@
+<mat-card 
+  appearance="outlined"
+  (click)="onTableClick()"
+  class="relative cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+  
+  <mat-card-content class="p-4">
+    <!-- Top Row: Category and Menu -->
+    <div class="flex items-center justify-between mb-4">
+      @if (table().category) {
+        <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
+          {{table().category.name}}
+        </span>
+      } @else {
+        <span></span>
+      }
+      @if (table().orderId) {
+      <button matIconButton [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item>
+          <mat-icon>receipt_long</mat-icon>
+          <span>View Bill</span>
+        </button>
+        
+        
+          <button mat-menu-item (click)="onClearOrder($event)">
+            <mat-icon>clear</mat-icon>
+            <span>Clear Order</span>
+          </button>
+        
+      </mat-menu>
+    }
+    </div>
+
+    <!-- Center: Status Chip, Name and Seats -->
+    <div class="flex flex-col items-center justify-center py-4">
+      <mat-chip class="!text-sm mb-3">
+        {{table().orderId ? 'Occupied' : 'Free'}}
+      </mat-chip>
+      <h3 class="text-lg font-bold text-gray-900">{{table().name}}</h3>
+      <span class="text-xs text-gray-600 mt-1">{{table().numberOfGuest}} seats</span>
+      @if (table().orderId) {
+        <span class="text-sm font-semibold mt-2" style="color: var(--mat-sys-primary);">
+          {{table().orderId.total | currency:currency():'symbol':'1.2-2'}}
+        </span>
+      }
+    </div>
+
+   
+  </mat-card-content>
+   <!-- Bottom: Action Button -->
+   @if (!hideActions()) {
+    <mat-card-actions class="mt-4 border-t border-outline-variant">
+      @if (table().orderId) {
+        <div class="flex gap-2 w-full">
+          <button mat-stroked-button class="flex-1 w-full" color="primary">
+            <mat-icon class="mr-2 !text-base">visibility</mat-icon>
+            View Order
+          </button>
+          @if (!isOrderCompleted) {
+            <button mat-flat-button class="flex-1 w-full" color="primary" (click)="onCompleteOrder($event)">
+              <mat-icon class="mr-2 !text-base">check_circle</mat-icon>
+              Complete
+            </button>
+          }
+        </div>
+      } @else {
+        <button matButton="filled" class="w-full" color="primary"  (click)="onAddNewOrder()">
+          <mat-icon>add</mat-icon>
+          Add new order
+        </button>
+      }
+    </mat-card-actions>
+   }
+</mat-card>

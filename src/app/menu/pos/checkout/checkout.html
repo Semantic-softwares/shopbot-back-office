@@ -1,0 +1,80 @@
+<div class="flex h-[calc(100vh-64px)]">
+  <!-- Left Panel - Products & Categories (70%) -->
+  <div class="w-[70%] h-full border-r border-gray-200 flex flex-col">
+    <!-- Header & Search -->
+    <div class="p-4 border-b border-outline-variant">
+      <app-search 
+        [filter]="searchFilter" 
+        (filterChange)="searchProduct($event)" 
+        [showRightIcon]="true"
+        (rightTap)="clearSearch()" 
+        searchText="Search by barcode or product">
+      </app-search>
+    </div>
+
+    <!-- Categories -->
+    <div class="px-4 py-3 border-b border-outline-variant">
+      <div class="flex items-center gap-3 overflow-x-auto scrollbar-hide">
+        @if (categoryStore.isLoading()) {
+          <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+          <mat-chip-listbox aria-label="Select a category" class="flex-nowrap">
+            @for (category of categoryStore.categories(); track category._id) {
+              <mat-chip-option 
+                [selected]="categoryStore.selectedCategory()?._id === category._id"
+                [disabled]="category.activate === false"
+                (click)="selectCategory(category)">
+                @if (category.icon) {
+                  <mat-icon matChipAvatar>{{ category.icon }}</mat-icon>
+                }
+                {{ category.name }}
+              </mat-chip-option>
+            }
+          </mat-chip-listbox>
+        }
+      </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="flex-1 p-4 overflow-auto">
+      @if (productStore.isLoading()) {
+        <div class="flex justify-center items-center h-full">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      } @else if (productStore.filteredProducts().length === 0) {
+        <div class="flex flex-col items-center justify-center h-full text-gray-400">
+          <mat-icon class="!text-6xl !w-16 !h-16 mb-4">inventory_2</mat-icon>
+          <p class="text-lg font-medium">No products found</p>
+          <p class="text-sm">Select a category or search for products</p>
+        </div>
+      } @else {
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          @for (product of productStore.filteredProducts(); track product._id) {
+            <app-product-card
+              [product]="product"
+              [cartQuantity]="getCartQuantity(product._id!)"
+              (addToCart)="addToCart({ product: $event, isEditing: false })"
+              (increment)="incrementQuantity($event)"
+              (decrement)="decrementQuantity($event)"
+              (openOptions)="openOptionsDialog($event)">
+            </app-product-card>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+    <!-- Right Panel - Cart & Checkout (30%) -->
+    <div class="w-[30%] h-full">
+      <app-cart
+        [items]="cartItems()"
+        [taxRate]="taxRate()"
+        (increment)="incrementQuantity($event)"
+        (decrement)="decrementQuantity($event)"
+        (removeItem)="removeFromCart($event)"
+        (clearCart)="clearCart()"
+        (addToCart)="addToCart({ product: $event, isEditing: false })"
+        (checkout)="checkout()">
+      </app-cart>
+    </div>
+</div>

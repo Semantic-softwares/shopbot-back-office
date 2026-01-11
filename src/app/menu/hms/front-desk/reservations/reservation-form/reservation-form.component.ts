@@ -65,6 +65,7 @@ import { PinAuthorizationDialogComponent, PinAuthorizationDialogData, PinAuthori
 import { RoomChangeDialogComponent, RoomChangeDialogData, RoomChangeResult } from '../room-change-dialog/room-change-dialog.component';
 import { RoomChangeHistoryComponent } from '../room-change-history/room-change-history.component';
 import { ReservationTransactionsComponent } from '../reservation-transactions/reservation-transactions.component';
+import { ReservationOrdersComponent } from '../reservation-orders/reservation-orders.component';
 
 @Component({
   selector: 'app-reservation-form',
@@ -89,6 +90,7 @@ import { ReservationTransactionsComponent } from '../reservation-transactions/re
     SpecialRequestsComponent,
     RoomChangeHistoryComponent,
     ReservationTransactionsComponent,
+    ReservationOrdersComponent,
   ],
   templateUrl: './reservation-form.component.html',
   styleUrls: ['./reservation-form.component.scss'],

@@ -194,6 +194,14 @@
           [reservation]="reservation.value()!"
         />
       }
+
+      <!-- Row 6: Orders - Only shown in edit mode -->
+      @if (isEditing()) {
+        <app-reservation-orders 
+          class="lg:col-span-4" 
+          [reservation]="reservation.value()!"
+        />
+      }
     </div>
   </form>
 </div>

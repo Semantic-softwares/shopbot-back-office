@@ -1,0 +1,34 @@
+::ng-deep {
+  .mat-mdc-table {
+    background: transparent;
+  }
+
+  .mat-mdc-header-row {
+    // background-color: #f9fafb;
+  }
+
+  .mat-mdc-header-cell {
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .mat-mdc-cell {
+    padding: 1rem 0.5rem;
+  }
+
+  tr.detail-row {
+    height: 0;
+  }
+
+  .order-detail {
+    overflow: hidden;
+  }
+
+  .mat-mdc-row:hover {
+    // background-color: #f9fafb;
+  }
+
+  .mat-mdc-list-item {
+    border: none !important;
+  }
+}

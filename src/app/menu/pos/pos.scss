@@ -1,0 +1,27 @@
+.hms-dashboard-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+mat-sidenav-container {
+  flex: 1;
+}
+
+mat-sidenav {
+  border-right: 1px solid #e0e0e0;
+}
+
+.active-sidebar-link {
+  background-color: var(--mat-sys-secondary-container) !important;
+  color: var(--mat-sys-on-tertiary-container) !important;
+  
+  mat-icon {
+    color: var(--mat-sys-on-secondary-container) !important;
+  }
+  
+  span {
+    color: var(--mat-sys-on-tertiary-container) !important;
+    font-weight: 600;
+  }
+}

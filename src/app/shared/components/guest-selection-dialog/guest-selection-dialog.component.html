@@ -1,0 +1,124 @@
+<h2 mat-dialog-title>Select Hotel Guest</h2>
+
+<mat-dialog-content class="min-w-[450px]">
+  <mat-tab-group (selectedTabChange)="onTabChange($event.index)" class="guest-tabs">
+    <!-- Search Guest Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="mr-2">search</mat-icon>
+        Search Guest
+      </ng-template>
+      <div class="pt-4">
+        <app-guest-search
+          label="Search Guest"
+          placeholder="Search by name, email or phone..."
+          (guestSelected)="onGuestSelected($event)"
+        />
+      </div>
+    </mat-tab>
+
+    <!-- Select by Room Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="mr-2">hotel</mat-icon>
+        Select by Room
+      </ng-template>
+      <div class="pt-4">
+        <!-- Room Selector -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Select Occupied Room</mat-label>
+          <mat-select (selectionChange)="onRoomSelected($event.value)">
+            @if (loadingRooms()) {
+              <mat-option disabled>
+                <div class="flex items-center gap-2">
+                  <mat-spinner diameter="20"></mat-spinner>
+                  <span>Loading rooms...</span>
+                </div>
+              </mat-option>
+            } @else if (occupiedRooms().length === 0) {
+              <mat-option disabled>No occupied rooms found</mat-option>
+            } @else {
+              @for (room of occupiedRooms(); track room._id) {
+                <mat-option [value]="room">
+                  <div class="flex items-center gap-2">
+                    <mat-icon class="text-primary">door_front</mat-icon>
+                    <span class="font-medium">Room {{ room.roomNumber }}</span>
+                    @if (room.currentGuest) {
+                      <span class="text-gray-500 text-sm">
+                        - {{ getRoomGuestName(room) }}
+                      </span>
+                    }
+                  </div>
+                </mat-option>
+              }
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Guests in Selected Room -->
+        @if (selectedRoom()) {
+          <div class="mt-4">
+            <h4 class="text-sm font-medium text-gray-600 mb-2">
+              Guests in Room {{ selectedRoom()?.roomNumber }}
+            </h4>
+            
+            @if (availableRoomGuests().length === 0) {
+              <div class="text-gray-500 text-sm p-4 bg-gray-50 rounded-lg text-center">
+                <mat-icon class="text-gray-400">person_off</mat-icon>
+                <p class="mt-2">No guest information available for this room</p>
+              </div>
+            } @else {
+              <mat-radio-group 
+                class="flex flex-col gap-2"
+                [value]="selectedGuest()"
+                (change)="onRoomGuestSelected($event.value)">
+                @for (guest of availableRoomGuests(); track guest._id) {
+                  <mat-radio-button [value]="guest" class="guest-radio-option">
+                    <div class="flex items-center gap-3 py-2">
+                      <mat-icon class="text-gray-500">person</mat-icon>
+                      <div>
+                        <div class="font-medium">{{ guestService.getGuestName(guest) }}</div>
+                        <div class="text-gray-500 text-sm">
+                          {{ guest.email || guest.phone || 'No contact info' }}
+                        </div>
+                      </div>
+                    </div>
+                  </mat-radio-button>
+                }
+              </mat-radio-group>
+            }
+          </div>
+        }
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- Show selected guest summary (for both modes) -->
+  @if (selectedGuest()) {
+    <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <mat-icon class="text-green-600">check_circle</mat-icon>
+          <div>
+            <div class="font-medium text-green-800">{{ guestService.getGuestName(selectedGuest()) }}</div>
+            <div class="text-green-600 text-sm">
+              {{ selectedGuest()?.email || selectedGuest()?.phone || 'No contact info' }}
+            </div>
+          </div>
+        </div>
+        <button mat-icon-button color="warn" (click)="removeGuest()" matTooltip="Remove selection">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  @if (selectedGuest()) {
+    <button mat-flat-button color="primary" (click)="confirmSelection()">
+      Confirm
+    </button>
+  }
+</mat-dialog-actions>
