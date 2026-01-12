@@ -121,6 +121,12 @@ export class DashboardComponent {
           link: './items/options',
           permission: 'view_company',
         },
+        {
+          icon: 'restaurant',
+          label: 'Stations',
+          link: './items/stations',
+          permission: 'view_company',
+        },
         // { icon: 'loyalty', label: 'Discount', link: './items/options', permission: 'view_company' },
       ],
     },
@@ -180,12 +186,12 @@ export class DashboardComponent {
         // { icon: 'security', label: 'Access Rights', link: './items/categories', permission: 'view_timeline' },
       ],
     },
-    // {
-    //   name:  'Application Settings',
-    //   children: [
-    //     { icon: 'settings', label: 'Settings', link: './settings', permission: 'view_company' },
-    //   ]
-    // },
+    {
+      name:  'Settings',
+      children: [
+        { icon: 'print', label: 'Print Jobs', link: './settings/print-jobs', permission: 'view_company' },
+      ]
+    },
   ];
 
   public openLink(link: string): void {

@@ -1,0 +1,197 @@
+<app-page-header 
+  title="Stations" 
+  subtitle="Manage kitchen stations and printers"
+  [showViewToggle]="false">
+  
+  <ng-container actions>
+    <button matButton="outlined" (click)="reloadData()">
+      <mat-icon class="mr-1">refresh</mat-icon>
+      Reload
+    </button>
+
+    <button matButton="filled" (click)="createStation()">
+      <mat-icon class="mr-1">add</mat-icon>
+      Create Station
+    </button>
+  </ng-container>
+</app-page-header>
+
+<!-- Stats Cards -->
+<div class="max-w-12xl py-6">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <div class="text-sm text-gray-600">Total Stations</div>
+        <div class="text-2xl font-bold">{{ totalStations() }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <div class="text-sm text-gray-600">Active</div>
+        <div class="text-2xl font-bold text-green-600">{{ activeStations() }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <div class="text-sm text-gray-600">Total Printers</div>
+        <div class="text-2xl font-bold">{{ totalPrinters() }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <div class="text-sm text-gray-600">Auto Print</div>
+        <div class="text-2xl font-bold text-blue-600">{{ autoPrintEnabled() }}</div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+
+<!-- Table Container -->
+<mat-card appearance="outlined" class="py-4">
+  @if (stations.hasValue()) {
+    @if (stations.value()!.length > 0) {
+      <table mat-table [dataSource]="stations.value()!" class="w-full">
+        
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let station">
+            <div class="font-medium">{{ station.name }}</div>
+            @if (station.description) {
+              <div class="text-sm text-gray-500">{{ station.description }}</div>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Type Column -->
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let station">
+            <mat-chip [class]="getStationTypeClass(station.type)">
+              {{ getStationTypeLabel(station.type) }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Printers Column -->
+        <ng-container matColumnDef="printers">
+          <th mat-header-cell *matHeaderCellDef>Printers</th>
+          <td mat-cell *matCellDef="let station">
+            <div class="flex items-center">
+              <mat-icon 
+                class="mr-2" 
+                [class.text-green-600]="getPrinterCount(station) > 0" 
+                [class.text-gray-400]="getPrinterCount(station) === 0">
+                print
+              </mat-icon>
+              <span>{{ getPrinterCount(station) }} active</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Auto Print Column -->
+        <ng-container matColumnDef="autoPrint">
+          <th mat-header-cell *matHeaderCellDef>Auto Print</th>
+          <td mat-cell *matCellDef="let station">
+            @if (station.settings?.autoPrint) {
+              <mat-icon class="text-green-600">check_circle</mat-icon>
+            } @else {
+              <mat-icon class="text-gray-400">cancel</mat-icon>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Active Column -->
+        <ng-container matColumnDef="active">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let station">
+            @if (station.active) {
+              <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                Active
+              </span>
+            } @else {
+              <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                Inactive
+              </span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let station">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu" (click)="$event.stopPropagation()">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="viewStation(station)">
+                <mat-icon>visibility</mat-icon>
+                <span>View Details</span>
+              </button>
+              <button mat-menu-item (click)="editStation(station)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="deleteStation(station)">
+                <mat-icon color="warn">delete</mat-icon>
+                <span>Delete Station</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <!-- Header and Row Definitions -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let station; columns: displayedColumns;" 
+            class="cursor-pointer hover:bg-gray-50" 
+            (click)="viewStation(station)"></tr>
+      </table>
+    }
+
+    @if (stations.value()!.length === 0) {
+      <div class="py-20 text-center">
+        <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+          <mat-icon class="text-4xl text-gray-400">restaurant</mat-icon>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">No stations found</h3>
+        <p class="text-gray-500 mb-6">
+          Get started by creating your first station to manage kitchen printers.
+        </p>
+        <button matButton="filled" color="primary" (click)="createStation()">
+          <mat-icon>add</mat-icon>
+          Create New Station
+        </button>
+      </div>
+    }
+  }
+
+  @if (stations.error()) {
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 m-4">
+      <div class="flex">
+        <mat-icon class="text-red-500 mr-2">error</mat-icon>
+        <div>
+          <h3 class="text-red-800 font-medium">Error loading stations</h3>
+          <p class="text-red-700 text-sm mt-1">{{ stations.error() }}</p>
+          <div class="mt-3 flex space-x-3">
+            <button mat-button color="warn" (click)="reloadData()" class="!text-red-600">
+              <mat-icon class="mr-1">refresh</mat-icon>
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (stations.isLoading()) {
+    <div class="flex items-center justify-center py-20">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  }
+</mat-card>

@@ -28,6 +28,7 @@ import { CategoryDialogComponent } from '../../categories/category-dialog/catego
 import { AddVariantsListComponent } from '../modals/add-variants-list/add-variants-list.component';
 import { NoRecordComponent } from '../../../../../shared/components/no-record/no-record.component';
 import { environment } from '../../../../../../environments/environment';
+import { ValidationErrorsDialogComponent } from '../../../../../shared/components/validation-errors-dialog/validation-errors-dialog.component';
 
 interface ProductUnit {
   value: string;
@@ -116,7 +117,7 @@ export class CreateProductComponent implements OnInit {
       station: [''],
       price: ['', Validators.required],
       costPrice: ['', Validators.required],
-      qty: ['', Validators.required],
+      qty: [''],
       initialStock: ['', Validators.required],
       criticalStock: ['', Validators.required],
       sku: [''],
@@ -298,6 +299,25 @@ export class CreateProductComponent implements OnInit {
 
   public onSubmit() {
     if (!this.productForm.valid) {
+      // Collect all invalid controls
+      const invalidControls: string[] = [];
+      Object.keys(this.productForm.controls).forEach(key => {
+        const control = this.productForm.get(key);
+        if (control && control.invalid) {
+          invalidControls.push(key);
+        }
+      });
+
+      // Show validation errors dialog
+      this.dialog.open(ValidationErrorsDialogComponent, {
+        width: '500px',
+        data: {
+          invalidControls,
+          title: 'Form Validation Errors',
+          message: 'Please fix the following errors before submitting:'
+        }
+      });
+      
       return;
     }
 

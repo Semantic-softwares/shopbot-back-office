@@ -14,9 +14,9 @@ export class StationsService {
     return this._httpClient.post<Station>(`${this.hostServer}/stations`, station);
   }
 
-  getStations(query: any): Observable<Station[]> {
-    return this._httpClient.get<any[]>(
-      `${this.hostServer}/stations`
+  getStations(storeId: string): Observable<Station[]> {
+    return this._httpClient.get<Station[]>(
+      `${this.hostServer}/stations/store/${storeId}/stations`
     );
   }
 

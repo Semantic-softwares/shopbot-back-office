@@ -1,0 +1,30 @@
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.printer-card {
+  border: 1px solid #e0e0e0;
+  padding: 16px;
+  background-color: #fafafa;
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.alert-info {
+  background-color: #e3f2fd;
+  border: 1px solid #90caf9;
+  color: #1976d2;
+}
+
+.gap-2 {
+  gap: 8px;
+}

@@ -38,6 +38,10 @@ export const DASHBOARD_ROUTES: Routes = [
             {
                 path: 'store-settings',
                 loadComponent: () => import('./store-settings/store-settings.component').then(m => m.StoreSettingsComponent)
+            },
+            {
+                path: 'settings',
+                loadChildren: () => import('./settings/settings.routes').then(m => m.SETTINGS_ROUTES)
             }
         ]
     }

@@ -1,0 +1,201 @@
+<app-page-header 
+  [title]="pageTitle()" 
+  [subtitle]="isEditMode() ? 'Update station configuration and printer settings' : 'Add a new station to manage kitchen printers'">
+  
+  <ng-container actions>
+    <button mat-stroked-button (click)="onCancel()">
+      <mat-icon>close</mat-icon>
+      Cancel
+    </button>
+
+    <button mat-flat-button color="primary" type="submit" form="stationForm" [disabled]="isSubmitting()">
+      @if (isSubmitting()) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        <mat-icon>save</mat-icon>
+      }
+      {{ submitButtonText() }}
+    </button>
+  </ng-container>
+</app-page-header>
+
+<div class="max-w-4xl mx-auto py-8">
+  <form id="stationForm" [formGroup]="stationForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    
+    <!-- Basic Information Section -->
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Basic Information</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="p-6! space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Station Name</mat-label>
+              <input matInput formControlName="name" placeholder="e.g., Main Kitchen" required />
+              <mat-icon matSuffix class="text-gray-400">restaurant</mat-icon>
+              @if (stationForm.get('name')?.hasError('required') && stationForm.get('name')?.touched) {
+                <mat-error>Station name is required</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Station Type</mat-label>
+              <mat-select formControlName="type" required>
+                @for (type of stationTypes; track type.value) {
+                  <mat-option [value]="type.value">{{ type.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="2" placeholder="Optional description"></textarea>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Print Settings Section -->
+    <mat-card appearance="outlined" formGroupName="settings">
+      <mat-card-header>
+        <mat-card-title>Print Settings</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="p-6! space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="flex items-center">
+            <mat-slide-toggle formControlName="autoPrint" color="primary">
+              <span class="flex items-center gap-2">
+                <mat-icon class="text-lg text-gray-600">print</mat-icon>
+                Auto Print Orders
+              </span>
+            </mat-slide-toggle>
+          </div>
+
+          <div>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Paper Size</mat-label>
+              <mat-select formControlName="paperSize">
+                @for (size of paperSizes; track size.value) {
+                  <mat-option [value]="size.value">{{ size.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Copies Per Order</mat-label>
+              <input matInput type="number" formControlName="copiesPerOrder" min="1" />
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="text-sm text-gray-600">
+          <mat-icon class="text-lg align-middle mr-1">info</mat-icon>
+          Automatically print when orders arrive at this station
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Printers Section -->
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Printers</mat-card-title>
+        <mat-card-subtitle>Configure network printers for this station</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="p-6! space-y-6">
+        <div formArrayName="printers">
+          @if (printers.length === 0) {
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+              <mat-icon class="text-4xl text-gray-400 mb-2">print_disabled</mat-icon>
+              <p class="text-gray-600 mb-4">No printers configured. Add at least one printer to enable printing.</p>
+              <button mat-raised-button color="primary" type="button" (click)="addPrinter()">
+                <mat-icon>add</mat-icon>
+                Add Printer
+              </button>
+            </div>
+          }
+
+          @for (printer of printers.controls; track $index) {
+            <mat-card appearance="outlined" class="mb-4" [formGroupName]="$index">
+              <mat-card-content class="p-4!">
+                <div class="flex items-start gap-4">
+                  <div class="flex-grow-1 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Printer Name</mat-label>
+                        <input matInput formControlName="name" placeholder="e.g., Kitchen Printer 1" required />
+                        <mat-icon matSuffix class="text-gray-400">print</mat-icon>
+                      </mat-form-field>
+
+                      <div class="grid grid-cols-3 gap-2">
+                        <mat-form-field appearance="outline" class="col-span-2">
+                          <mat-label>IP Address</mat-label>
+                          <input matInput formControlName="ipAddress" placeholder="192.168.1.100" required />
+                          @if (printer.get('ipAddress')?.hasError('pattern') && printer.get('ipAddress')?.touched) {
+                            <mat-error>Invalid IP address</mat-error>
+                          }
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                          <mat-label>Port</mat-label>
+                          <input matInput type="number" formControlName="port" />
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center">
+                      <mat-checkbox formControlName="enabled" color="primary">
+                        <span class="flex items-center gap-2">
+                          <mat-icon class="text-lg text-gray-600">check_circle</mat-icon>
+                          Enabled
+                        </span>
+                      </mat-checkbox>
+                    </div>
+                  </div>
+
+                  <button mat-icon-button color="warn" type="button" (click)="removePrinter($index)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+
+          @if (printers.length > 0) {
+            <button mat-stroked-button type="button" (click)="addPrinter()" class="w-full">
+              <mat-icon>add</mat-icon>
+              Add Another Printer
+            </button>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Status Section -->
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Station Status</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="p-6! space-y-6">
+        <div class="flex items-center">
+          <mat-slide-toggle formControlName="active" color="primary">
+            <span class="flex items-center gap-2">
+              <mat-icon class="text-lg text-gray-600">power_settings_new</mat-icon>
+              Station Active
+            </span>
+          </mat-slide-toggle>
+        </div>
+        <div class="text-sm text-gray-600">
+          <mat-icon class="text-lg align-middle mr-1">info</mat-icon>
+          Inactive stations will not receive print jobs
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </form>
+</div>

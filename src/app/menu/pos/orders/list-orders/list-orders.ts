@@ -21,12 +21,14 @@ import { NoRecordComponent } from '../../../../shared/components/no-record/no-re
 import { CartService } from '../../../../shared/services/cart.service';
 import { OrdersService } from '../../../../shared/services/order.service';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { PrintJobService } from '../../../../shared/services/print-job.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
 import { Order, OrderCategoryType, SalesChannel } from '../../../../shared/models';
 import { MatButtonToggleModule } from "@angular/material/button-toggle";
 import { CartStore } from '../../../../shared/stores/cart.store';
 import { OrderStore } from '../../../../shared/stores/order.store';
 import { SalesTypeStore } from '../../../../shared/stores/sale-type.store';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-list-orders',
@@ -64,6 +66,8 @@ export class ListOrders {
   private readonly orderStore = inject(OrderStore);
   private readonly router = inject(Router);
   private readonly saleTypeStore = inject(SalesTypeStore);
+  private readonly printJobService = inject(PrintJobService);
+  private readonly snackBar = inject(MatSnackBar);
   
 
   // Filter signals
@@ -229,8 +233,37 @@ export class ListOrders {
   }
 
   printOrder(order: Order): void {
-    // Print order
     console.log('Print order:', order);
+    
+    if (!order._id) {
+      this.snackBar.open('Invalid order data', 'Close', { duration: 3000 });
+      console.error('Invalid order data');
+      return;
+    }
+
+    // For printing, we use the order object directly but ensure it has the store currency
+    const orderWithCurrency = {
+      ...order,
+      store: {
+        ...order.store,
+        currency: this.storeStore.selectedStore()?.currency || order.store?.currency || 'NGN'
+      }
+    };
+    
+    this.sendToPrintJob(order._id, orderWithCurrency);
+  }
+
+  private sendToPrintJob(orderId: string, orderData: any): void {
+    this.printJobService.createPrintJobsForOrder(orderId, orderData).subscribe({
+      next: (response) => {
+        console.log('Print jobs created:', response);
+        this.snackBar.open(`${response.jobs.length} print job(s) created successfully`, 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        this.snackBar.open('Failed to create print jobs', 'Close', { duration: 3000 });
+        console.error('Error creating print jobs:', error);
+      }
+    });
   }
 
   
