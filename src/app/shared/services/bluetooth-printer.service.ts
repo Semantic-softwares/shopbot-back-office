@@ -77,6 +77,14 @@ export interface PrinterConfiguration {
   includeLogo: boolean;
   fontSize: number;
   lineSpacing: number;
+  // POS Receipt Settings
+  showNote?: boolean;
+  showTax?: boolean;
+  showStoreDetails?: boolean;
+  showSellerInfo?: boolean;
+  showCustomerName?: boolean;
+  printAfterFinish?: boolean;
+  disclaimer?: string;
 }
 
 @Injectable({

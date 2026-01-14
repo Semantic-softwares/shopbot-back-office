@@ -232,7 +232,7 @@ export class ListOrders {
     this.router.navigate(['/menu/pos/orders', order._id, 'details']);
   }
 
-  printOrder(order: Order): void {
+  async printOrder(order: Order): Promise<void> {
     console.log('Print order:', order);
     
     if (!order._id) {
@@ -241,75 +241,93 @@ export class ListOrders {
       return;
     }
 
-    // For printing, we use the order object directly but ensure it has the store currency
-    const orderWithCurrency = {
-      ...order,
-      store: {
-        ...order.store,
-        currency: this.storeStore.selectedStore()?.currency || order.store?.currency || 'NGN'
-      }
-    };
-    
-    this.sendToPrintJob(order._id, orderWithCurrency);
-  }
-
-  private sendToPrintJob(orderId: string, orderData: any): void {
-    this.printJobService.createPrintJobsForOrder(orderId, orderData).subscribe({
-      next: (response) => {
-        console.log('Print jobs created:', response);
-        this.snackBar.open(`${response.jobs.length} print job(s) created successfully`, 'Close', { duration: 3000 });
-      },
-      error: (error) => {
-        this.snackBar.open('Failed to create print jobs', 'Close', { duration: 3000 });
-        console.error('Error creating print jobs:', error);
-      }
-    });
-  }
-
-  
-  public editOrder(order: Order): void {
-    console.log('Editing order:', order);
-    
     if (!order.cart?._id) {
+      this.snackBar.open('Invalid cart data', 'Close', { duration: 3000 });
       console.error('Invalid cart data');
       return;
     }
 
-    // Check if carts are loaded in the store
-    const carts = this.cartStore.carts();
-    
-    if (carts.length > 0) {
-      // Carts are loaded, try to select from store
-      this.cartStore.selectCart(order.cart._id);
-      const selectedCart = this.cartStore.selectedCart();
-      
-      if (selectedCart) {
-        // Cart found in store, proceed with editing
-        console.log('Using cart from store:', selectedCart);
-        this.orderStore.selectOrder(order);
-         this.saleTypeStore.setSelectedSaleType(order.type, true)
-        this.saleTypeStore.startEditing();
-        this.router.navigate(['/menu/pos/checkout']);
-        return;
+    // Show loading snackbar
+    const loadingSnackBar = this.snackBar.open('Loading order data...', '', {
+      duration: 0,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+    });
+
+    // Load the structured cart before printing
+    this.cartService.loadCart(order.cart._id).subscribe({
+      next: async (cart) => {
+        try {
+          // Create order with structured cart
+          const orderData = {
+            ...order,
+            cart,
+          };
+          
+          console.log('Printing order via PrintJobService:', orderData);
+          
+          // Dismiss loading snackbar
+          loadingSnackBar.dismiss();
+          
+          // Print via PrintJobService which handles both Bluetooth and backend print jobs
+          const result = await this.printJobService.printOrderReceipt(orderData);
+          
+          // Show appropriate success message based on printer connection
+          if (result.isPrinterConnected) {
+            this.snackBar.open('✅ Order printed successfully', 'Close', { duration: 3000 });
+          } else {
+            this.snackBar.open('📋 Print job created - Receipt will print at counter', 'Close', { 
+              duration: 5000,
+              panelClass: ['info-snackbar']
+            });
+          }
+        } catch (error: any) {
+          console.error('Failed to print order:', error);
+          loadingSnackBar.dismiss();
+          this.snackBar.open(`Print failed: ${error.message}`, 'Close', { duration: 5000 });
+        }
+      },
+      error: (error) => {
+        loadingSnackBar.dismiss();
+        this.snackBar.open('Failed to load cart for printing', 'Close', { duration: 3000 });
+        console.error('Error loading cart:', error);
       }
+    });
+  }
+
+  public editOrder(order: Order): void {
+    if (!order.cart?._id) {
+      this.snackBar.open('Invalid cart data', 'Close', { duration: 3000 });
+      console.error('Invalid cart data');
+      return;
     }
-    
-    // Carts are empty or cart not found in store, fetch from backend
-    this.cartService.getCartByIdRestructured(order.cart._id).subscribe({
-      next: (restructuredCart) => {        
-        // Add the cart to the store's carts array
-        const updatedCarts = [...this.cartStore.carts(), restructuredCart];
-        this.cartStore.updateCarts(updatedCarts);
-        this.cartStore.setCart(restructuredCart);
+
+    // Show loading snackbar
+    const loadingSnackBar = this.snackBar.open('Loading order for editing...', '', {
+      duration: 0,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+    });
+
+    this.cartService.loadCart(order.cart._id).subscribe({
+      next: (cart) => {
+        // Dismiss loading snackbar
+        loadingSnackBar.dismiss();
         
+        // Cart loaded successfully, proceed with editing
         this.orderStore.selectOrder(order);
         this.saleTypeStore.setSelectedSaleType(order.type, true);
         this.saleTypeStore.startEditing();
         this.router.navigate(['/menu/pos/checkout']);
       },
       error: (error) => {
-         this.saleTypeStore.stopEditing()
-        console.error('Error fetching cart:', error);
+        // Dismiss loading and show error
+        loadingSnackBar.dismiss();
+        this.snackBar.open('Failed to load order for editing', 'Close', { duration: 3000 });
+        console.error('Error loading cart:', error);
+        
+        // Cart loading failed
+        this.saleTypeStore.stopEditing();
       }
     });
   }

@@ -1,0 +1,39 @@
+.receipt-paper {
+  width: 100%;
+  max-width: 100%;
+}
+
+// Print styles
+@media print {
+  ::ng-deep {
+    mat-dialog-container {
+      box-shadow: none !important;
+      max-width: 80mm !important;
+    }
+    
+    h2[mat-dialog-title],
+    mat-dialog-actions,
+    .print\:hidden {
+      display: none !important;
+    }
+
+    mat-dialog-content {
+      max-height: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    .receipt-paper {
+      padding: 10mm !important;
+      max-width: 80mm !important;
+      width: 80mm !important;
+      font-size: 11px !important;
+    }
+
+    // Ensure good contrast for printing
+    .text-gray-600,
+    .text-gray-700 {
+      color: #000 !important;
+    }
+  }
+}

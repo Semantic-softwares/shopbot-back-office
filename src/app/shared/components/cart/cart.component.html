@@ -150,18 +150,18 @@
         <!-- Main Checkout Button -->
         <div class="p-3">
             <button mat-flat-button color="primary" class="w-full !h-12 !text-base" (click)="onCheckout()">
-                Checkout {{ itemsCount() }} items ({{ cartStore.selectedCart()?.cartSummary?.totalCost || 0 | currency:
+                Checkout {{ itemsCount() }} items ({{ (this.cartSummary()?.totalCost || 0 )| currency:
                 currency() : 'symbol' : '1.0-0' }})
             </button>
         </div>
 
         <!-- Generate Bill & Pend Order Row -->
         <div class="flex items-center gap-2 px-3 pb-3">
-            <button mat-stroked-button class="!flex-1" (click)="onGenerateBill()">
+            <button mat-stroked-button class="!flex-1" [disabled]="true" (click)="onGenerateBill()">
                 <mat-icon>receipt</mat-icon>
                 <span class="ml-1">Generate Bill</span>
             </button>
-            <button mat-stroked-button color="warn"
+            <button mat-stroked-button color="warn" 
                 [disabled]="!cartStore.isSelectedCart() && cartStore.selectedCart()?.products!.length < 1"
                 class="!flex-1" (click)="onPendOrder()">
                 <mat-icon>pause_circle</mat-icon>

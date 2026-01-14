@@ -25,3 +25,26 @@ mat-sidenav {
     font-weight: 600;
   }
 }
+
+// Bottom navigation active state
+.active-bottom-nav {
+  background-color: var(--mat-sys-secondary-container) !important;
+  
+  mat-icon {
+    color: var(--mat-sys-on-secondary-container) !important;
+  }
+  
+  span {
+    color: var(--mat-sys-on-tertiary-container) !important;
+    font-weight: 600;
+  }
+}
+
+// Bottom navigation hover state
+.bottom-nav-item:hover {
+  background-color: var(--mat-sys-surface-variant) !important;
+}
+
+.bg-sys-secondary-container {
+  background-color: var(--mat-sys-background) !important;
+}

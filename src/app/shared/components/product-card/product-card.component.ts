@@ -4,6 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Product, Option } from '../../models';
 import { StoreStore } from '../../stores/store.store';
 import { CartStore } from '../../stores/cart.store';
@@ -28,6 +29,7 @@ export class ProductCardComponent {
   private cartStore = inject(CartStore);
   private variantStore = inject(VariantStore);
   private dialog = inject(MatDialog);
+  private breakpointObserver = inject(BreakpointObserver);
 
   // Inputs
   product = input.required<Product>();
@@ -116,14 +118,19 @@ export class ProductCardComponent {
       isEditing,
     };
     
-
     const dialogRef = this.dialog.open(ProductOptionsComponent, {
       width: '100%',
       maxWidth: '500px',
-      maxHeight: '90vh',
+      // maxHeight: '90vh',
       panelClass: 'product-options-dialog-panel',
       data: dialogData,
     });
+
+    // Check if mobile and update size to full screen
+    const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
+    if (isMobile) {
+      dialogRef.updateSize('100vw', '100vh');
+    }
 
     dialogRef.afterClosed().subscribe((result: ProductOptionsDialogResult | undefined) => {
       if (result) {

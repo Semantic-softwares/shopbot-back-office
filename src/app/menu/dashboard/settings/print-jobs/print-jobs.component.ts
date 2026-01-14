@@ -198,7 +198,10 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
     // Listen for new print jobs
     const newJobSub = this.socketService.on<any>('printJob:created').subscribe({
       next: async (data) => {
-        console.log('New print job created:', data);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('📡 [SOCKET EVENT] printJob:created');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('📦 Socket Data:', data);
         
         this.snackBar.open(`New print job created for Order #${data.orderNumber || 'N/A'}`, 'View', {
           duration: 5000,
@@ -206,6 +209,9 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
           verticalPosition: 'top',
         });
         this.loadData(); // Reload data
+
+        // Auto-print if conditions are met
+        await this.handleAutoPrint(data);
       },
     });
 
@@ -232,6 +238,91 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
     });
 
     this.socketSubscriptions.push(newJobSub, completedSub, failedSub);
+  }
+
+  /**
+   * Handle auto-printing based on store settings and conditions
+   */
+  private async handleAutoPrint(data: any): Promise<void> {
+    try {
+      console.log('🔍 [AUTO-PRINT] Checking auto-print conditions');
+      
+      // Extract print job data
+      const printJob = data.printJob || data;
+      
+      if (!printJob) {
+        console.warn('⚠️ [AUTO-PRINT] No print job data');
+        return;
+      }
+
+      console.log('✓ Print Job ID:', printJob._id);
+      console.log('✓ Job Status:', printJob.status);
+
+      // Check if order exists
+      const order = printJob.order;
+      if (!order || typeof order !== 'object') {
+        console.warn('⚠️ [AUTO-PRINT] No order object in print job');
+        return;
+      }
+
+      console.log('✓ Order ID:', order._id);
+      console.log('✓ Order Category:', order.category);
+      console.log('✓ Payment Status:', order.paymentStatus);
+
+      // Check if order is complete and paid
+      const isComplete = order.category === 'Complete';
+      const isPaid = order.paymentStatus === 'Paid';
+
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('🔍 [ORDER VALIDATION]');
+      console.log('  Complete:', isComplete ? '✅' : '❌');
+      console.log('  Paid:', isPaid ? '✅' : '❌');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+      if (!isComplete || !isPaid) {
+        console.log('⏭️ [AUTO-PRINT] Skipped - Order not complete or not paid');
+        return;
+      }
+
+      // Check store setting for auto-print
+      const printAfterFinish = this.storeStore.selectedStore()?.posSettings?.receiptSettings?.printAfterFinish ?? true;
+      console.log('🔍 [STORE SETTING] printAfterFinish:', printAfterFinish);
+
+      if (!printAfterFinish) {
+        console.log('⏭️ [AUTO-PRINT] Skipped - Store setting printAfterFinish is disabled');
+        return;
+      }
+
+      // Check if Bluetooth printer is connected
+      const printerConnected = this.bluetoothPrinterService.isConnected();
+      console.log('🖨️ [PRINTER CHECK] Bluetooth connected:', printerConnected ? '✅' : '❌');
+      
+      if (!printerConnected) {
+        console.log('⏭️ [AUTO-PRINT] Skipped - Bluetooth printer not connected');
+        return;
+      }
+
+      // All conditions met - auto-print ONLY via direct Bluetooth
+      // NOTE: Do NOT create a new print job here - the socket event already indicates
+      // a job exists. Creating another would cause an infinite loop.
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('🖨️ [AUTO-PRINTING] Receipt via Bluetooth...');
+      console.log('  Order:', order.reference || order._id);
+      console.log('  Store:', order.store?.name || 'N/A');
+      console.log('  Total:', order.total);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      
+      // Generate receipt and send directly to Bluetooth printer
+      // Do NOT call printOrderReceipt as it would create another job
+      const receiptData = this.printJobService.generateOrderReceipt(order);
+      await this.bluetoothPrinterService.sendToPrinter(receiptData);
+      
+      console.log('✅ [AUTO-PRINT] Printed directly via Bluetooth');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+    } catch (error) {
+      console.error('❌ [AUTO-PRINT] Failed:', error);
+    }
   }
 
   private updateJobStatus(jobId: string, status: string, error?: string) {
@@ -425,11 +516,14 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
       // Update job status to printing
       this.updateJobStatus(job._id, 'processing');
 
-      // Generate receipt data
-      const receiptData = this.generatePrintJobReceipt(job);
-      
-      // Send to printer
-      await this.bluetoothPrinterService.sendToPrinter(receiptData);
+      // Extract order from job
+      const order = typeof job.order === 'object' ? job.order : null;
+      if (!order) {
+        throw new Error('No order found in print job');
+      }
+
+      // Print using PrintJobService
+      const result = await this.printJobService.printOrderReceipt(order);
 
       // Update job status to printed
       this.updateJobStatus(job._id, 'printed');
@@ -449,253 +543,44 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private formatCurrency(amount: number, currencyCode: string): string {
-    // Format number with thousand separators and 2 decimal places
-    const formatted = amount.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-    
-    return `${currencyCode} ${formatted}`;
-  }
-
-  private generatePrintJobReceipt(job: PrintJob): string {
-    // Get ESC/POS commands
-    const COMMANDS = {
-      INIT: '\x1B\x40',
-      ALIGN_CENTER: '\x1B\x61\x01',
-      ALIGN_LEFT: '\x1B\x61\x00',
-      TEXT_DOUBLE_SIZE: '\x1B\x21\x30',
-      TEXT_NORMAL: '\x1B\x21\x00',
-      BOLD_ON: '\x1B\x45\x01',
-      BOLD_OFF: '\x1B\x45\x00',
-      FEED_LINE: '\x0A',
-      CUT_PAPER: '\x1D\x56\x00',
-    };
-
-    console.log('=== PRINT JOB DEBUG ===');
-    console.log('Full job object:', job);
-    
-    // Get order object (should be full order with all data)
-    const order = typeof job.order === 'object' ? job.order : null;
-    console.log('Order object exists:', !!order);
-    console.log('Order cart products:', order ? (order as any).cart?.products : null);
-    
-    if (!order) {
-      console.error('❌ No order object found in print job');
-      return COMMANDS.INIT + 'ERROR: No order data\n' + COMMANDS.CUT_PAPER;
-    }
-
-    // Generate receipt
-    let receipt = '';
-    
-    // Initialize
-    receipt += COMMANDS.INIT;
-    
-    // Header with store info
-    receipt += COMMANDS.ALIGN_CENTER;
-    receipt += COMMANDS.TEXT_DOUBLE_SIZE;
-    receipt += COMMANDS.BOLD_ON;
-    
-    const store = (order as any).store;
-    if (store && store.name) {
-      receipt += `${store.name}\n`;
-    }
-    
-    receipt += 'KITCHEN ORDER\n';
-    receipt += COMMANDS.BOLD_OFF;
-    receipt += COMMANDS.TEXT_NORMAL;
-    
-    receipt += COMMANDS.ALIGN_LEFT;
-    receipt += '================================\n';
-    
-    // Order info
-    receipt += COMMANDS.BOLD_ON;
-    receipt += `Order: #${(order as any).reference || (order as any)._id}\n`;
-    receipt += COMMANDS.BOLD_OFF;
-    receipt += `Station: ${this.getStationName(job.station)}\n`;
-    receipt += `Time: ${this.formatDate((order as any).createdAt || new Date())}\n`;
-    
-    // Order type
-    if ((order as any).type) {
-      receipt += `Type: ${(order as any).type}\n`;
-    }
-    
-    // Sales channel
-    if ((order as any).salesChannel) {
-      receipt += `Channel: ${(order as any).salesChannel}\n`;
-    }
-    
-    // Table info
-    if ((order as any).table) {
-      const table = (order as any).table;
-      receipt += `Table: ${table.number || table.name || table}\n`;
-    }
-    
-    // Guest/Customer info
-    if ((order as any).guest) {
-      const guest = (order as any).guest;
-      if (guest.name) receipt += `Guest: ${guest.name}\n`;
-      if (guest.room) receipt += `Room: ${guest.room}\n`;
-    }
-    
-    // Staff/Server info
-    if ((order as any).staff) {
-      const staff = (order as any).staff;
-      const staffName = staff.name || staff.firstName || staff;
-      receipt += `Server: ${staffName}\n`;
-    }
-    
-    receipt += '================================\n';
-    
-    // Items from order.cart.products
-    const products = (order as any).cart?.products || [];
-    
-    if (products.length > 0) {
-      receipt += COMMANDS.BOLD_ON;
-      receipt += 'ITEMS:\n';
-      receipt += COMMANDS.BOLD_OFF;
-      
-      products.forEach((product: any, index: number) => {
-        console.log(`  Product ${index + 1}:`, product);
-        
-        const productName = product.name;
-        const quantity = product.quantity || 1;
-        const price = product.price || 0;
-        
-        // Get store currency code (e.g., "NGN", "USD")
-        const currency = store?.currencyCode || 'USD';
-        
-        receipt += `${quantity}x ${productName}`;
-        if (price > 0) {
-          receipt += ` - ${this.formatCurrency(price, currency)}`;
-        }
-        receipt += '\n';
-        
-        // Add options/modifiers with prices and quantities
-        if (product.options && Array.isArray(product.options) && product.options.length > 0) {
-          product.options.forEach((opt: any) => {
-            // Handle both flat and nested option structures
-            if (opt.options && Array.isArray(opt.options)) {
-              // Nested structure (option group with items)
-              opt.options.forEach((optItem: any) => {
-                if (optItem.selected) {
-                  const optName = optItem.name;
-                  const optQty = optItem.quantity || 1;
-                  const optPrice = optItem.price || 0;
-                  
-                  receipt += `   + ${optQty}x ${optName}`;
-                  if (optPrice > 0) {
-                    receipt += ` (${this.formatCurrency(optPrice, currency)})`;
-                  }
-                  receipt += '\n';
-                }
-              });
-            } else {
-              // Flat structure
-              const optName = opt.optionItemName || opt.name || opt;
-              const optQty = opt.quantity || 1;
-              const optPrice = opt.price || 0;
-              
-              if (optQty > 1) {
-                receipt += `   + ${optQty}x ${optName}`;
-              } else {
-                receipt += `   + ${optName}`;
-              }
-              
-              if (optPrice > 0) {
-                receipt += ` (${this.formatCurrency(optPrice, currency)})`;
-              }
-              receipt += '\n';
-            }
-          });
-        }
-        
-        // Add product notes
-        if (product.notes) {
-          receipt += `   Note: ${product.notes}\n`;
-        }
-        
-        receipt += '\n';
+  /**
+   * Public method to print any order directly via Bluetooth
+   * @param order - The order object to print
+   */
+  public async printOrder(order: any): Promise<void> {
+    if (!this.isBluetoothConnected()) {
+      this.snackBar.open('Please connect to a Bluetooth printer first', 'Close', {
+        duration: 3000,
+        panelClass: ['error-snackbar'],
       });
-    } else {
-      console.log('✗ No products found in order.cart.products');
-      receipt += 'No items in order\n';
+      throw new Error('Bluetooth printer not connected');
     }
-    
-    receipt += '================================\n';
-    
-    // Order financial summary
-    const subtotal = (order as any).subTotal || (order as any).subtotal;
-    const tax = (order as any).tax;
-    const discount = (order as any).discount;
-    const shippingFee = (order as any).shippingFee;
-    const serviceFee = (order as any).serviceFee;
-    const total = (order as any).total;
-    const currency = store?.currencyCode || 'USD';
-    
-    receipt += COMMANDS.BOLD_ON;
-    receipt += 'ORDER SUMMARY:\n';
-    receipt += COMMANDS.BOLD_OFF;
-    
-    if (subtotal !== undefined) {
-      receipt += `Subtotal:            ${this.formatCurrency(subtotal, currency)}\n`;
+
+    try {
+      // Print using PrintJobService
+      const result = await this.printJobService.printOrderReceipt(order);
+      
+      if (result.isPrinterConnected) {
+        this.snackBar.open('✅ Order printed successfully', 'Close', {
+          duration: 3000,
+          panelClass: ['success-snackbar'],
+        });
+      } else {
+        this.snackBar.open('📋 Print job created - Receipt will print at counter', 'Close', {
+          duration: 5000,
+          panelClass: ['success-snackbar'],
+        });
+      }
+    } catch (error: any) {
+      console.error('❌ [PRINT ORDER] Failed:', error);
+      this.snackBar.open(`Print failed: ${error.message}`, 'Close', {
+        duration: 5000,
+        panelClass: ['error-snackbar'],
+      });
+      throw error;
     }
-    
-    if (tax && tax > 0) {
-      receipt += `Tax:                 ${this.formatCurrency(tax, currency)}\n`;
-    }
-    
-    if (discount && discount > 0) {
-      receipt += `Discount:           -${this.formatCurrency(discount, currency)}\n`;
-    }
-    
-    if (shippingFee && shippingFee > 0) {
-      receipt += `Shipping:            ${this.formatCurrency(shippingFee, currency)}\n`;
-    }
-    
-    if (serviceFee && serviceFee > 0) {
-      receipt += `Service Fee:         ${this.formatCurrency(serviceFee, currency)}\n`;
-    }
-    
-    if (total !== undefined) {
-      receipt += '--------------------------------\n';
-      receipt += COMMANDS.BOLD_ON;
-      receipt += `TOTAL:               ${this.formatCurrency(total, currency)}\n`;
-      receipt += COMMANDS.BOLD_OFF;
-    }
-    
-    // Payment info
-    if ((order as any).payment) {
-      receipt += `Payment: ${(order as any).payment}\n`;
-    }
-    
-    if ((order as any).paymentStatus) {
-      receipt += `Status: ${(order as any).paymentStatus}\n`;
-    }
-    
-    receipt += '================================\n';
-    
-    // Order notes
-    if ((order as any).note || (order as any).orderInstruction) {
-      receipt += COMMANDS.BOLD_ON;
-      receipt += 'NOTES:\n';
-      receipt += COMMANDS.BOLD_OFF;
-      receipt += `${(order as any).note || (order as any).orderInstruction}\n`;
-      receipt += '================================\n';
-    }
-    
-    receipt += COMMANDS.ALIGN_CENTER;
-    receipt += `Job #${job._id.substring(job._id.length - 6)}\n`;
-    receipt += COMMANDS.FEED_LINE;
-    receipt += COMMANDS.FEED_LINE;
-    
-    // Cut paper
-    receipt += COMMANDS.CUT_PAPER;
-    
-    console.log('=== END DEBUG ===');
-    return receipt;
   }
+
 
   public async testBluetoothPrint() {
     if (!this.isBluetoothConnected()) {

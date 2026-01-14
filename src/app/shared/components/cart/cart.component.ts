@@ -6,6 +6,7 @@ import {
   inject,
   signal,
   OnDestroy,
+  Optional,
 } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -13,8 +14,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import {
   Product,
   Option,
@@ -97,10 +99,12 @@ export class CartComponent implements OnDestroy {
   public readonly guestService = inject(GuestService);
   public readonly saleTypeStore = inject(SalesTypeStore);
   private readonly dialog = inject(MatDialog);
+  private readonly breakpointObserver = inject(BreakpointObserver);
+  @Optional() private readonly dialogRef = inject(MatDialogRef<CartComponent>, { optional: true });
   private readonly snackBar = inject(MatSnackBar);
   private readonly orderStore = inject(OrderStore);
   private selectedUser = this.accountService.currentUserValue;
-  public cartSummary!: CartSummary;
+  public cartSummary = signal<CartSummary | null>(null);
   // Selected buyer state
   selectedGuest = signal<Guest | null>(null);
   selectedCustomer = signal<User | null>(null);
@@ -192,6 +196,13 @@ export class CartComponent implements OnDestroy {
 
   public onAddToCart(event: Event, product: Product): void {
     event.stopPropagation();
+    
+    // Only call incrementProductQuantity if in dialog (mobile)
+    // On desktop, the parent component handles the increment via the emitted event
+    if (this.dialogRef) {
+      this.cartStore.incrementProductQuantity(product._id);
+    }
+    
     this.addToCart.emit(product);
   }
 
@@ -291,7 +302,13 @@ export class CartComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.resetSalesSection();
+    // Only reset cart on desktop when component is destroyed
+    // On mobile (in dialog), preserve cart so user can continue shopping
+    const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
+    
+    if (!isMobile && !this.dialogRef) {
+      this.resetSalesSection();
+    }
   }
 
   // Cart action buttons
@@ -566,13 +583,13 @@ export class CartComponent implements OnDestroy {
   }
 
   public cartSummaryChange(summary: CartSummary): void {
-    this.cartSummary = summary;
+    this.cartSummary.set(summary);
   }
 
   public onCheckout(): void {
     // Open payment dialog before proceeding with checkout
     const dialogData: PaymentDialogData = {
-      totalAmount: this.cartSummary?.totalCost || 0,
+      totalAmount: this.cartSummary()?.totalCost || 0,
       currency: this.currency(),
     };
 
@@ -640,7 +657,7 @@ export class CartComponent implements OnDestroy {
   }
 
   // Payment method is optional - can always be updated later
-  this.cartStore.updateCartSummary(this.cartSummary);
+  this.cartStore.updateCartSummary(this.cartSummary()!);
   
   // CHECK EDITING STATE BEFORE any operations that might reset it
   const isEditingOrder = this.saleTypeStore.isEditing();
@@ -660,7 +677,7 @@ export class CartComponent implements OnDestroy {
     // Update cart summary before sending
     const updatedCart = {
       ...selectedCart,
-      cartSummary: this.cartSummary,
+      cartSummary: this.cartSummary() ?? undefined,
     };
 
     const updates = {
@@ -671,11 +688,11 @@ export class CartComponent implements OnDestroy {
       salesType: selectedSaleType,
       type: selectedSaleType.id,
       payment: selectedCart?.paymentMethod?.name,
-      total: this.cartSummary.totalCost,
-      subTotal: this.cartSummary.subtotal,
-      discount: this.cartSummary.discount,
-      tax: this.cartSummary.tax,
-      shippingFee: this.cartSummary.deliveryFee,
+      total: this.cartSummary()!.totalCost,
+      subTotal: this.cartSummary()!.subtotal,
+      discount: this.cartSummary()!.discount,
+      tax: this.cartSummary()!.tax,
+      shippingFee: this.cartSummary()!.deliveryFee,
       paymentStatus: selectedCart?.paymentMethod?.name ? 'Paid' : 'Unpaid',
       note: selectedCart?.note,
       vendorCommissionAmount: 0,
@@ -709,11 +726,11 @@ export class CartComponent implements OnDestroy {
       type: selectedSaleType.id,
       payment: selectedCart.paymentMethod?.name,
       salesChannel: SalesChannel.POINT_OF_SALE,
-      total: this.cartSummary.totalCost,
-      subTotal: this.cartSummary.subtotal,
-      discount: this.cartSummary.discount,
-      tax: this.cartSummary.tax,
-      shippingFee: this.cartSummary.deliveryFee,
+      total: this.cartSummary()!.totalCost,
+      subTotal: this.cartSummary()!.subtotal,
+      discount: this.cartSummary()!.discount,
+      tax: this.cartSummary()!.tax,
+      shippingFee: this.cartSummary()!.deliveryFee,
       paymentStatus: selectedCart.paymentMethod?.name ? 'Paid' : 'Unpaid',
       note: selectedCart.note,
       orderInstruction: selectedCart.note,
@@ -747,5 +764,10 @@ export class CartComponent implements OnDestroy {
     this.orderStore.selectOrder(currentOrder);
   }
   this.resetSalesSection();
+  
+  // Close the dialog on mobile after successful order creation/update
+  if (this.dialogRef) {
+    this.dialogRef.close();
+  }
 }
 }

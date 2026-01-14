@@ -2,9 +2,9 @@
 <h2 mat-dialog-title>{{ product.name }}</h2>
 
 <!-- Dialog Content -->
-<mat-dialog-content class="!pt-0">
+<mat-dialog-content>
   <!-- Product description and price -->
-  <div class="mb-4">
+  <div class="mb-4 pt-4">
     <p class="text-sm text-gray-500 mb-2">{{ product.description }}</p>
     <span class="text-lg font-semibold text-primary">
       {{ product.price | currency: product.store?.currency || 'USD' }}
@@ -86,6 +86,16 @@
         </mat-selection-list>
       </div>
     }
+
+    <div class="flex items-center gap-2 mr-auto">
+    <button mat-mini-fab color="primary" (click)="updateQuantityTotal('down')" [disabled]="quantity() <= 1">
+      <mat-icon>remove</mat-icon>
+    </button>
+    <span class="w-10 text-center text-xl font-semibold">{{ quantity() }}</span>
+    <button mat-mini-fab color="primary" (click)="updateQuantityTotal('up')">
+      <mat-icon>add</mat-icon>
+    </button>
+  </div>
   } @else {
     <div class="flex flex-col items-center justify-center py-8 gap-4">
       <mat-spinner diameter="40"></mat-spinner>
@@ -95,16 +105,8 @@
 </mat-dialog-content>
 
 <!-- Dialog Actions -->
-<mat-dialog-actions align="end" class="!px-6 !py-4 border-t border-outline-variant">
-  <div class="flex items-center gap-2 mr-auto">
-    <button mat-mini-fab color="primary" (click)="updateQuantityTotal('down')" [disabled]="quantity() <= 1">
-      <mat-icon>remove</mat-icon>
-    </button>
-    <span class="w-10 text-center text-xl font-semibold">{{ quantity() }}</span>
-    <button mat-mini-fab color="primary" (click)="updateQuantityTotal('up')">
-      <mat-icon>add</mat-icon>
-    </button>
-  </div>
+<mat-dialog-actions align="end" class=" border-t border-outline-variant">
+  
   
   <button mat-button mat-dialog-close>Cancel</button>
   <button 
