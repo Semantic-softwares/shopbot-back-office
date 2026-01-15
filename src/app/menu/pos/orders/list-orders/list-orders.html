@@ -1,6 +1,7 @@
 <app-page-header title="Orders" subtitle="Manage and track all your orders">
     <ng-container actions>
-        <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)" class="hidden md:flex">
+        @if (!isMobile()) {
+        <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)">
             <mat-button-toggle value="table">
                 <mat-icon>table_view</mat-icon>
             </mat-button-toggle>
@@ -8,23 +9,40 @@
                 <mat-icon>grid_view</mat-icon>
             </mat-button-toggle>
         </mat-button-toggle-group>
+        }
 
         <button mat-stroked-button (click)="clearFilters()">
             <mat-icon>clear</mat-icon>
             Clear Filters
         </button>
 
+        @if (isMobile()) {
+        <button mat-icon-button (click)="reloadData()" [disabled]="ordersResource.isLoading()">
+            <mat-icon [class.animate-spin]="ordersResource.isLoading()">refresh</mat-icon>
+        </button>
+        } @else {
         <button matButton="outlined" (click)="reloadData()" [disabled]="ordersResource.isLoading()">
             <mat-icon [class.animate-spin]="ordersResource.isLoading()">refresh</mat-icon>
             Reload
         </button>
+        }
 
+        @if (!isMobile()) {
         <button matButton="filled" color="primary" (click)="startNewSale()">
             <mat-icon>add_shopping_cart</mat-icon>
             Start New Sale
         </button>
+        }
     </ng-container>
 </app-page-header>
+
+<!-- Extended FAB for Start New Sale (Mobile Only) -->
+<button mat-fab extended color="primary"
+    class="!fixed !bottom-[88px] !right-4 !z-[60] md:!hidden"
+    (click)="startNewSale()">
+    <mat-icon>add_shopping_cart</mat-icon>
+    Start Sale
+</button>
 
 <div class="max-w-12xl py-6 px-4">
     <!-- Main Card - Contains Filters and Content -->
@@ -210,7 +228,7 @@
 
         <!-- Grid View Content -->
         @if (!ordersResource.isLoading() && !ordersResource.error() && filteredOrders().length > 0 && viewMode() === 'grid') {
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 pb-24 md:pb-4">
         @for (order of filteredOrders(); track order._id) {
         <mat-card appearance="outlined" class="cursor-pointer hover:shadow-lg transition-shadow">
             <mat-card-content class="p-4">

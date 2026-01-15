@@ -29,6 +29,7 @@ import { CartStore } from '../../../../shared/stores/cart.store';
 import { OrderStore } from '../../../../shared/stores/order.store';
 import { SalesTypeStore } from '../../../../shared/stores/sale-type.store';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-list-orders',
@@ -68,6 +69,7 @@ export class ListOrders {
   private readonly saleTypeStore = inject(SalesTypeStore);
   private readonly printJobService = inject(PrintJobService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly breakpointObserver = inject(BreakpointObserver);
   
 
   // Filter signals
@@ -82,7 +84,23 @@ export class ListOrders {
   private tempStartDate: Date | null = null;
   private tempEndDate: Date | null = null;
   
+  // Mobile detection using BreakpointObserver
+  isMobile = signal(false);
+  
+  // View mode - grid default on mobile, table on desktop
   viewMode = signal<'table' | 'grid'>('table');
+  
+  constructor() {
+    // Initialize mobile detection
+    this.breakpointObserver.observe([Breakpoints.XSmall, Breakpoints.Small])
+      .subscribe(result => {
+        this.isMobile.set(result.matches);
+        // Set grid view on mobile, table on desktop
+        if (result.matches) {
+          this.viewMode.set('grid');
+        }
+      });
+  }
   
   // Pagination signals
   pageSize = signal(15);

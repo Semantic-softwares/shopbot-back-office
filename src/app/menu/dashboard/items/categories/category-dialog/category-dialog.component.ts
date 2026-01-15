@@ -53,7 +53,7 @@ export class CategoryDialogComponent implements OnInit {
   public categoryForm = this.fb.group({
     _id: [''],
     name: ['', Validators.required],
-    icon: ['', Validators.required],
+    icon: ['Restaurant', Validators.required],
     color: ['', Validators.required],
     store: [this.storeStore.selectedStore()?._id, Validators.required],
     published: [true],
