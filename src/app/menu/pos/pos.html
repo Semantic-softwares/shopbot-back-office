@@ -1,26 +1,47 @@
 <div class="hms-dashboard-container">
   <app-toolbar 
     [title]="'Point of Sale'"
+    [showMenuButton]="false"
     (menuToggle)="toggleSidenav()">
   </app-toolbar>
 
   <mat-sidenav-container>
-    <mat-sidenav [mode]="isMobile() ? 'over' : 'side'" [opened]="opened()" class="!w-[6em] !rounded-[0px]">
-      <nav class="flex flex-col gap-2 py-4">
-        @for (item of navItems(); track item.link) {
-          <a [routerLink]="item.link" routerLinkActive="active-sidebar-link" #rla="routerLinkActive"
-            class="flex flex-col items-center justify-center gap-1 py-3 px-2 hover:bg-gray-100 transition-colors cursor-pointer rounded-lg mx-2">
-            <mat-icon class="material-icons-outlined !text-[24px]">{{item.icon}}</mat-icon>
-            <span class="text-[11px] font-medium text-center leading-tight">{{item.label}}</span>
-          </a>
-        }
-      </nav>
-    </mat-sidenav>
+    <!-- Desktop Side Navigation (hidden on mobile) -->
+    @if (!isMobile()) {
+      <mat-sidenav mode="side" [opened]="opened()" class="!w-[6em] !rounded-[0px]">
+        <nav class="flex flex-col gap-2 py-4">
+          @for (item of navItems(); track item.link) {
+            <a [routerLink]="item.link" routerLinkActive="active-sidebar-link" #rla="routerLinkActive"
+              class="flex flex-col items-center justify-center gap-1 py-3 px-2 hover:bg-gray-100 transition-colors cursor-pointer rounded-lg mx-2">
+              <mat-icon class="material-icons-outlined !text-[24px]">{{item.icon}}</mat-icon>
+              <span class="text-[11px] font-medium text-center leading-tight">{{item.label}}</span>
+            </a>
+          }
+        </nav>
+      </mat-sidenav>
+    }
 
     <mat-sidenav-content>
-      <div class="h-screen">
+      <div class="h-screen pb-16 md:pb-0">
         <router-outlet></router-outlet>
       </div>
     </mat-sidenav-content>
   </mat-sidenav-container>
+
+  <!-- Mobile Bottom Navigation -->
+  <div class="fixed bottom-0 left-0 z-50 w-full h-16 bg-white border-t border-gray-200 md:hidden" style="background-color: var(--mat-sys-surface); border-color: var(--mat-sys-outline-variant);">
+    <div class="grid h-full max-w-lg grid-cols-3 mx-auto font-medium">
+      @for (item of navItems(); track item.link) {
+        <a [routerLink]="item.link" routerLinkActive="active-bottom-nav" #rla="routerLinkActive"
+          class="bottom-nav-item inline-flex flex-col items-center justify-center px-5 transition-colors">
+          <mat-icon class="!w-6 !h-6 !text-[24px] mb-1">
+            {{item.icon}}
+          </mat-icon>
+          <span class="text-xs">
+            {{item.label}}
+          </span>
+        </a>
+      }
+    </div>
+  </div>
 </div>

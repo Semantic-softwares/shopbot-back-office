@@ -77,6 +77,14 @@ export interface PrinterConfiguration {
   includeLogo: boolean;
   fontSize: number;
   lineSpacing: number;
+  // POS Receipt Settings
+  showNote?: boolean;
+  showTax?: boolean;
+  showStoreDetails?: boolean;
+  showSellerInfo?: boolean;
+  showCustomerName?: boolean;
+  printAfterFinish?: boolean;
+  disclaimer?: string;
 }
 
 @Injectable({
@@ -183,11 +191,55 @@ export class BluetoothPrinterService {
     }
   };
 
-  constructor() {}
+  constructor() {
+    // Restore connection state from localStorage on service initialization
+    this.restoreConnectionState();
+  }
 
   // Check if Web Bluetooth is supported
   isBluetoothSupported(): boolean {
-    return 'bluetooth' in navigator;
+    return ('bluetooth' in navigator) 
+  }
+
+  // Check if printer is currently connected
+  isConnected(): boolean {
+    return this.connectedPrinter !== null && 
+           this.connectedPrinter.server !== undefined &&
+           this.connectedPrinter.server.connected;
+  }
+
+  // Get connected printer info
+  getConnectedPrinter(): PrinterDevice | null {
+    if (this.isConnected()) {
+      return this.connectedPrinter;
+    }
+    return null;
+  }
+
+  // Save connection state to localStorage
+  private saveConnectionState(): void {
+    if (this.connectedPrinter?.device) {
+      localStorage.setItem('bluetoothPrinterConnected', 'true');
+      localStorage.setItem('bluetoothPrinterName', this.connectedPrinter.device.name || 'Unknown');
+      localStorage.setItem('bluetoothPrinterId', this.connectedPrinter.device.id);
+    }
+  }
+
+  // Restore connection state from localStorage
+  private restoreConnectionState(): void {
+    const wasConnected = localStorage.getItem('bluetoothPrinterConnected') === 'true';
+    if (wasConnected) {
+      const printerName = localStorage.getItem('bluetoothPrinterName');
+      console.log(`Previous Bluetooth printer connection detected: ${printerName}`);
+      console.log('Note: Reconnection requires user interaction due to Web Bluetooth security');
+    }
+  }
+
+  // Clear connection state from localStorage
+  private clearConnectionState(): void {
+    localStorage.removeItem('bluetoothPrinterConnected');
+    localStorage.removeItem('bluetoothPrinterName');
+    localStorage.removeItem('bluetoothPrinterId');
   }
 
   // Connect to Bluetooth printer
@@ -260,6 +312,18 @@ export class BluetoothPrinterService {
         isConnected: true
       };
 
+      // Save connection state
+      this.saveConnectionState();
+
+      // Listen for disconnection events
+      device.addEventListener('gattserverdisconnected', () => {
+        console.log('Printer disconnected');
+        this.clearConnectionState();
+        if (this.connectedPrinter) {
+          this.connectedPrinter.isConnected = false;
+        }
+      });
+
       console.log('Successfully connected to printer:', device.name);
       return this.connectedPrinter;
 
@@ -275,17 +339,13 @@ export class BluetoothPrinterService {
       this.connectedPrinter.server.disconnect();
       this.connectedPrinter.isConnected = false;
       this.connectedPrinter = null;
+      this.clearConnectionState();
       console.log('Disconnected from printer');
     }
   }
 
-  // Check if printer is connected
-  isConnected(): boolean {
-    return this.connectedPrinter?.isConnected || false;
-  }
-
-  // Send raw data to printer
-  private async sendToPrinter(data: string | Uint8Array): Promise<void> {
+  // Send raw data to printer (public for external use)
+  public async sendToPrinter(data: string | Uint8Array): Promise<void> {
     if (!this.connectedPrinter?.characteristic) {
       throw new Error('Printer not connected');
     }

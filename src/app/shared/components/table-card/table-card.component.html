@@ -18,7 +18,7 @@
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu #menu="matMenu">
-        <button mat-menu-item>
+        <button mat-menu-item (click)="onViewBill($event)">
           <mat-icon>receipt_long</mat-icon>
           <span>View Bill</span>
         </button>
@@ -54,7 +54,7 @@
     <mat-card-actions class="mt-4 border-t border-outline-variant">
       @if (table().orderId) {
         <div class="flex gap-2 w-full">
-          <button mat-stroked-button class="flex-1 w-full" color="primary">
+          <button matButton="outlined" (click)="onViewOrder($event)" class="flex-1 w-full" color="primary">
             <mat-icon class="mr-2 !text-base">visibility</mat-icon>
             View Order
           </button>

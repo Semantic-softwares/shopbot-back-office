@@ -3,3 +3,20 @@
   height: 100%;
   overflow: auto;
 }
+
+/* Hide scrollbar */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Chip listbox no wrap */
+mat-chip-listbox {
+  ::ng-deep .mdc-evolution-chip-set__chips {
+    flex-wrap: nowrap;
+  }
+}

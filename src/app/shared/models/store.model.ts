@@ -30,7 +30,20 @@ export interface Store {
     updateProgress: StoreUpdateProgress;
     staffs: Employee[];
     tax?: number;
-    useBarcodeScanner: boolean;
+    posSettings?: {
+      requireOrdersPaymentBeforeCheckout?: boolean;
+      useBarcodeScanner?: boolean;
+      receiptSettings?: {
+        showNote?: boolean;
+        showTax?: boolean;
+        showStoreDetails?: boolean;
+        showSellerInfo?: boolean;
+        showCustomerName?: boolean;
+        printAfterFinish?: boolean;
+        footerMessage?: string;
+        disclaimer?: string;
+      };
+    };
     hotelSettings?: HotelSettings;
   };
   

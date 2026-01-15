@@ -34,6 +34,10 @@ export const DASHBOARD_ITEMS_ROUTES: Routes = [
       {
         path: 'options',
         loadComponent: () => import('./options/options.component').then(m => m.OptionsComponent)
+      },
+      {
+       path: 'stations',
+       loadChildren: () => import('./stations/stations.routes').then(m => m.DASHBOARD_STATIONS_ROUTES)
       }
     ],
   },

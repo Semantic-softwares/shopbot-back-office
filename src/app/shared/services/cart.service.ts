@@ -1,16 +1,19 @@
 import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+import { Observable, of } from "rxjs";
+import { catchError, tap } from "rxjs/operators";
 import { Cart, CartSummary } from "../models/cart.model";
 import {  Option } from "../models/product.model";
 import { Store } from "../models";
 import { environment } from "../../../environments/environment";
+import { CartStore } from "../stores/cart.store";
 
 @Injectable({
   providedIn: "root",
 })
 export class CartService {
   private readonly _httpClient = inject(HttpClient);
+  private readonly cartStore = inject(CartStore);
   private hostServer = environment.apiUrl;
 
   public getStoreCartsRestructured(storeId: string): Observable<Cart[]> {
@@ -115,5 +118,41 @@ export class CartService {
     } else {
       return 0;
     }
+  }
+
+  /**
+   * Loads cart from store if available, otherwise fetches from backend
+   * @param cartId - The cart ID to load
+   * @returns Observable<Cart> - The loaded cart
+   */
+  public loadCart(cartId: string): Observable<Cart> {
+    // Check if carts are loaded in the store
+    const carts = this.cartStore.carts();
+    
+    if (carts.length > 0) {
+      // Carts are loaded, try to select from store
+      this.cartStore.selectCart(cartId);
+      const selectedCart = this.cartStore.selectedCart();
+      
+      if (selectedCart) {
+        // Cart found in store, return it as observable
+        console.log('Using cart from store:', selectedCart);
+        return of(selectedCart);
+      }
+    }
+    
+    // Carts are empty or cart not found in store, fetch from backend
+    return this.getCartByIdRestructured(cartId).pipe(
+      tap((restructuredCart) => {
+        // Add the cart to the store's carts array
+        const updatedCarts = [...this.cartStore.carts(), restructuredCart];
+        this.cartStore.updateCarts(updatedCarts);
+        this.cartStore.setCart(restructuredCart);
+      }),
+      catchError((error) => {
+        console.error('Error fetching cart:', error);
+        throw error;
+      })
+    );
   }
 }

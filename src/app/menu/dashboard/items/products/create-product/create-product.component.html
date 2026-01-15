@@ -48,12 +48,19 @@
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>Station</mat-label>
             <mat-select formControlName="station">
-              @for (station of stations.value(); track $index) {
+              <mat-option [value]="null">
+                None
+              </mat-option>
+              @for (station of stations.value(); track station._id) {
                 <mat-option [value]="station._id">
-                  {{station.name}}
+                  {{station.name}} 
+                  @if (station.type) {
+                    <span class="text-gray-500 text-sm">({{station.type}})</span>
+                  }
                 </mat-option>
               }
             </mat-select>
+            <mat-hint>Select the kitchen station where this product is prepared</mat-hint>
           </mat-form-field>
 
           <!-- Image Upload Section -->
@@ -205,7 +212,7 @@
 
       <div class="flex justify-end gap-4 pt-6 border-t border-gray-200">
         <button mat-stroked-button type="button" routerLink="/dashboard/items/products">Cancel</button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="!productForm.valid || isSubmitting()">
+        <button mat-raised-button color="primary" type="submit" [disabled]="isSubmitting()">
           @if (isSubmitting()) {
             <mat-spinner diameter="20" class="mr-2"></mat-spinner>
           }

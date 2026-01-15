@@ -1,0 +1,180 @@
+<app-page-header 
+  [title]="station()?.name || 'Station Details'" 
+  [subtitle]="'Manage station configuration and printers'"
+  [showViewToggle]="false">
+  
+  <ng-container actions>
+    <button matButton="outlined" (click)="goBack()">
+      <mat-icon class="mr-1">arrow_back</mat-icon>
+      Back to Stations
+    </button>
+
+    <button matButton="outlined" (click)="editStation()" [disabled]="!station()">
+      <mat-icon class="mr-1">edit</mat-icon>
+      Edit Station
+    </button>
+
+    <button matButton="outlined" color="warn" (click)="deleteStation()" [disabled]="!station()">
+      <mat-icon class="mr-1">delete</mat-icon>
+      Delete
+    </button>
+  </ng-container>
+</app-page-header>
+
+@if (loading()) {
+  <div class="flex items-center justify-center py-20">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+}
+
+@if (error()) {
+  <div class="bg-red-50 border border-red-200 rounded-lg p-4 m-4">
+    <div class="flex">
+      <mat-icon class="text-red-500 mr-2">error</mat-icon>
+      <div>
+        <h3 class="text-red-800 font-medium">Error loading station</h3>
+        <p class="text-red-700 text-sm mt-1">{{ error() }}</p>
+        <button mat-button color="warn" (click)="goBack()" class="!text-red-600 mt-2">
+          Go Back
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (station() && !loading()) {
+  <div class="max-w-7xl py-6 space-y-6">
+    <!-- Basic Information Card -->
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Basic Information</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Station Name</label>
+            <p class="text-lg font-semibold">{{ station()!.name }}</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <mat-chip [class]="getStationTypeClass(station()!.type)">
+              {{ getStationTypeLabel(station()!.type) }}
+            </mat-chip>
+          </div>
+
+          @if (station()!.description) {
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <p class="text-gray-600">{{ station()!.description }}</p>
+            </div>
+          }
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            @if (station()!.active) {
+              <span class="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">
+                Active
+              </span>
+            } @else {
+              <span class="px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-800">
+                Inactive
+              </span>
+            }
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Print Settings Card -->
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Print Settings</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Auto Print</label>
+            <div class="flex items-center mt-2">
+              @if (station()!.settings?.autoPrint) {
+                <mat-icon class="text-green-600 mr-2">check_circle</mat-icon>
+                <span class="text-green-600 font-medium">Enabled</span>
+              } @else {
+                <mat-icon class="text-gray-400 mr-2">cancel</mat-icon>
+                <span class="text-gray-600">Disabled</span>
+              }
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Paper Size</label>
+            <p class="text-lg">{{ station()!.settings?.paperSize || '80mm' }}</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Copies Per Order</label>
+            <p class="text-lg">{{ station()!.settings?.copiesPerOrder || 1 }}</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Printers Card -->
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Printers</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="p-6">
+        @if (station()!.printers && station()!.printers!.length > 0) {
+          <div class="space-y-4">
+            @for (printer of station()!.printers; track printer.id) {
+              <div class="border rounded-lg p-4 bg-gray-50">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center mb-2">
+                      <mat-icon class="mr-2" [class]="getPrinterStatusClass(printer.status || 'unknown')">
+                        print
+                      </mat-icon>
+                      <h4 class="font-semibold text-lg">{{ printer.name }}</h4>
+                      @if (printer.enabled) {
+                        <span class="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                          Enabled
+                        </span>
+                      } @else {
+                        <span class="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                          Disabled
+                        </span>
+                      }
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span class="text-gray-600">IP Address:</span>
+                        <span class="ml-2 font-mono">{{ printer.ipAddress }}</span>
+                      </div>
+                      <div>
+                        <span class="text-gray-600">Port:</span>
+                        <span class="ml-2 font-mono">{{ printer.port }}</span>
+                      </div>
+                      <div>
+                        <span class="text-gray-600">Status:</span>
+                        <span class="ml-2 capitalize" [class]="getPrinterStatusClass(printer.status || 'unknown')">
+                          {{ printer.status || 'unknown' }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="text-center py-8 text-gray-500">
+            <mat-icon class="text-4xl mb-2">print_disabled</mat-icon>
+            <p>No printers configured for this station</p>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+}

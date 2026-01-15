@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ViewChild } from '@angular/core';
 import { TableStore } from '../../../shared/stores/table.store';
 import { TableCategoryStore } from '../../../shared/stores/table-category.store';
 import { CommonModule } from '@angular/common';
@@ -23,6 +23,7 @@ import {
   PaymentDialogData,
   PaymentDialogResult
 } from '../../../shared/components/payment-dialog/payment-dialog.component';
+import { SearchComponent } from '../../../shared/components/search/search.component';
 
 @Component({
   selector: 'app-tables',
@@ -37,12 +38,14 @@ import {
     MatInputModule,
     MatButtonToggleModule,
     FormsModule,
-    TableCardComponent
+    TableCardComponent,
+    SearchComponent
   ],
   templateUrl: './tables.html',
   styleUrl: './tables.scss',
 })
 export class Tables {
+  public searchFilter: string = "";
   public readonly tableStore = inject(TableStore);
   public readonly tableCategoryStore = inject(TableCategoryStore);
   public readonly saleTypeStore = inject(SalesTypeStore);
@@ -53,12 +56,18 @@ export class Tables {
   public readonly route = inject(ActivatedRoute);
   public viewMode = signal<'grid' | 'list'>('grid');
   public searchQuery = signal('');
-  
+  @ViewChild("searchComponent") searchComponent!: SearchComponent;
   displayedColumns: string[] = ['name', 'seats', 'category', 'status'];
+
 
   onSearchChange(query: string): void {
     this.searchQuery.set(query);
     this.tableStore.updateSearchQuery(query);
+  }
+
+  public clearSearch(): void {
+    this.searchQuery.set('');
+    this.searchComponent.clearFilter()
   }
 
   onStatusFilterChange(status: 'all' | 'free' | 'occupied'): void {
@@ -144,5 +153,11 @@ export class Tables {
           });
       }
     });
+  }
+
+  public viewOrder(table: Table): void {
+    if (table.orderId?._id) {
+      this.router.navigate(['/menu/pos/orders', table.orderId._id, 'details']);
+    }
   }
 }

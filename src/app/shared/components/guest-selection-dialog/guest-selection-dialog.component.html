@@ -1,7 +1,7 @@
 <h2 mat-dialog-title>Select Hotel Guest</h2>
 
-<mat-dialog-content class="min-w-[450px]">
-  <mat-tab-group (selectedTabChange)="onTabChange($event.index)" class="guest-tabs">
+<mat-dialog-content >
+  <mat-tab-group (selectedTabChange)="onTabChange($event.index)">
     <!-- Search Guest Tab -->
     <mat-tab>
       <ng-template mat-tab-label>
@@ -117,7 +117,7 @@
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>Cancel</button>
   @if (selectedGuest()) {
-    <button mat-flat-button color="primary" (click)="confirmSelection()">
+    <button matButton="filled" color="primary" (click)="confirmSelection()">
       Confirm
     </button>
   }

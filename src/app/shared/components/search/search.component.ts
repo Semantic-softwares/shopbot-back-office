@@ -42,6 +42,7 @@ export class SearchComponent {
   }
 
   clearFilter(): void {
+    console.log('Clearing search filter');
     this.filter.set('');
   }
 }
