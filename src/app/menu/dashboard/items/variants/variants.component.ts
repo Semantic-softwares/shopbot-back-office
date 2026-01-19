@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormsModule } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
@@ -18,6 +19,7 @@ import { ProductService } from '../../../../shared/services/product.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
 import { NoRecordComponent } from '../../../../shared/components/no-record/no-record.component';
 import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { VariantDialogComponent } from './variant-dialog/variant-dialog.component';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -39,13 +41,15 @@ import { rxResource } from '@angular/core/rxjs-interop';
     MatIconModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
+    PageHeaderComponent,
     NoRecordComponent,
     FormsModule,
     MatSlideToggleModule
 ]
 })
 export class VariantsComponent {
-  displayedColumns: string[] = ['name', 'atLeast', 'atMost', 'published', 'actions'];
+  displayedColumns: string[] = ['name', 'atLeast', 'atMost', 'options', 'published', 'actions'];
   dataSource!: MatTableDataSource<any>;
   searchText: string = '';
   
@@ -83,7 +87,7 @@ export class VariantsComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
+      if (result?.success || result === true) {
         this.variants.reload();
       }
     });
@@ -99,7 +103,8 @@ export class VariantsComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
+      if (result?.success || result === true) {
+        console.log('Reloading variants after edit');
         this.variants.reload();
       }
     });
@@ -141,5 +146,9 @@ export class VariantsComponent {
         });
       }
     });
+  }
+
+  reloadVariants() {
+    this.variants.reload();
   }
 }

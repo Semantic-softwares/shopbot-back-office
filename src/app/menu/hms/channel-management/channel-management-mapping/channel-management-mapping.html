@@ -1,0 +1,370 @@
+<div class="max-w-12xl">
+  <!-- Header -->
+  <app-page-header
+    title="Channel Management"
+    subtitle="Connect Chicken Republic to distribution channels and start receiving bookings from OTAs"
+    class="mb-8"
+  ></app-page-header>
+
+  <!-- Loading State -->
+  @if (isLoadingStatus()) {
+    <div class="flex items-center justify-center py-20">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  } @else {
+    <!-- Warning: Invalid Property Type -->
+    @if (!isHotelProperty()) {
+      <mat-card appearance="outlined">
+        <mat-card-content class="flex items-center gap-4 py-4">
+          <mat-icon class="text-red-600 text-4xl">warning</mat-icon>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-red-900">Property Type Required</h3>
+            <p class="text-red-700 mb-2">
+              Channel management requires a valid property type. Your property type is currently set to "{{ propertyType() }}".
+            </p>
+            <p class="text-sm text-red-600">
+              Please select a valid property type (hotel, resort, guesthouse, etc.) in Step 1 below to enable Channex integration.
+            </p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Status Banner -->
+    @if (isSetupComplete()) {
+      <mat-card appearance="outlined" class="mb-3">
+        <mat-card-content class="flex items-center gap-4 py-4">
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-green-900">Channel Manager Active</h3>
+            <p class="text-green-700">
+              Your property is synced and ready to receive bookings from distribution channels.
+            </p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <mat-card  appearance="outlined" class="mb-3">
+        <mat-card-content class="flex items-center gap-4 py-4">
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold ">Setup Required</h3>
+            <p>
+              Complete the setup steps below to start receiving bookings from OTAs.
+            </p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+    <!-- Setup Steps (Material Stepper) -->
+    <mat-horizontal-stepper [linear]="true" [selectedIndex]="currentStep()" (selectionChange)="onStepSelectionChange($event)" class="mb-8">
+      <mat-step [completed]="channexStatus()?.channex?.syncStatus === 'synced'">
+        <ng-template matStepLabel>Step 1: Sync Property</ng-template>
+        <mat-card class="my-4" appearance="outlined">
+          <mat-card-content>
+            <!-- Step 1 content -->
+            @if (channexStatus()?.channex?.syncStatus === 'synced') {
+              <div class="space-y-3">
+                <div class="flex justify-between items-center text-sm">
+                  <span class="text-gray-600">Property ID:</span>
+                  <span class="font-mono text-gray-900">
+                    {{ channexStatus()?.channex?.propertyId }}
+                  </span>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                  <span class="text-gray-600">Last Synced:</span>
+                  <span class="text-gray-900">
+                    {{ channexStatus()?.channex?.lastSyncAt | date: 'MMM d, y h:mm a' }}
+                  </span>
+                </div>
+                <button 
+                  matButton="filled" 
+                  color="primary" 
+                  
+                  (click)="syncStore()"
+                  [disabled]="isSyncingStore()"
+                >
+                  <mat-icon>refresh</mat-icon>
+                  Re-sync Property
+                </button>
+              </div>
+            } @else {
+              <form [formGroup]="syncPropertyForm" class=" my-4 space-y-4">
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Property Type</mat-label>
+                  <mat-select formControlName="propertyType">
+                    <mat-option value="hotel">Hotel</mat-option>
+                    <mat-option value="hostel">Hostel</mat-option>
+                    <mat-option value="apartment">Apartment</mat-option>
+                    <mat-option value="guesthouse">Guest House</mat-option>
+                    <mat-option value="resort">Resort</mat-option>
+                    <mat-option value="motel">Motel</mat-option>
+                    <mat-option value="villa">Villa</mat-option>
+                    <mat-option value="boutique_hotel">Boutique Hotel</mat-option>
+                    <mat-option value="bed_and_breakfast">Bed & Breakfast</mat-option>
+                    <mat-option value="lodge">Lodge</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Check-in Time</mat-label>
+                    <input matInput type="time" formControlName="checkInTime">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Check-out Time</mat-label>
+                    <input matInput type="time" formControlName="checkOutTime">
+                  </mat-form-field>
+                </div>
+
+                <button 
+                  matButton="filled"
+                  color="primary" 
+                 
+                  (click)="syncStore()"
+                  [disabled]="isSyncingStore() || syncPropertyForm.invalid || !isHotelProperty()"
+                  [matTooltip]="!isHotelProperty() ? 'Please select a valid property type to sync with Channex' : ''"
+                >
+                 {{isSyncingStore() ? "Please wait..." : "Sync Property to Channex"}}
+                  
+                </button>
+              </form>
+            }
+          </mat-card-content>
+        </mat-card>
+      </mat-step>
+
+      <mat-step [completed]="(channexStatus()?.roomMappings?.length || 0) >= (channexStatus()?.totalRoomTypes || 0) && (channexStatus()?.totalRoomTypes || 0) > 0">
+        <ng-template matStepLabel>Step 2: Sync Room Types</ng-template>
+        <mat-card class="my-4" appearance="outlined">
+          <mat-card-content>
+            <!-- Step 2 content -->
+            <div class="space-y-3">
+              @if (roomTypes().length === 0) {
+                <div class="text-center py-8 text-gray-500">
+                  <mat-icon class="text-4xl mb-2">meeting_room</mat-icon>
+                  <p>No room types found. Please create room types first.</p>
+                </div>
+              } @else {
+                <div class="mb-4">
+                  <button 
+                    matButton="filled" 
+                    color="primary" 
+                    (click)="syncAllRoomTypes()"
+                  >
+                    <mat-icon>sync</mat-icon>
+                    Sync All Room Types
+                  </button>
+                </div>
+
+                <mat-divider class="my-4"></mat-divider>
+
+                <mat-nav-list class="max-h-96 overflow-y-auto">
+                  @for (roomType of roomTypes(); track roomType._id || roomType.id) {
+                    <mat-list-item>
+                      <mat-icon matListItemIcon class="text-gray-600">meeting_room</mat-icon>
+                      <div matListItemTitle class="truncate font-medium text-gray-900">{{ roomType.name }}</div>
+                      <div matListItemLine class="text-sm text-gray-500">{{ roomType.description || 'No description' }}</div>
+
+                      <div class="ml-auto flex items-center gap-2" matListItemMeta>
+                        @if (isRoomTypeSynced(roomType._id || roomType.id || '')) {
+                          <mat-chip color="primary" selected>
+                            Synced
+                          </mat-chip>
+                        } @else if (isRoomTypeSyncing(roomType._id || roomType.id || '')) {
+                          <mat-spinner diameter="24"></mat-spinner>
+                        } @else {
+                          <button
+                            matButton="outlined"
+                            color="primary"
+                            (click)="syncRoomType(roomType._id || roomType.id || '', roomType.name)"
+                          >
+                            <mat-icon>sync</mat-icon>
+                            Sync
+                          </button>
+                        }
+                      </div>
+                    </mat-list-item>
+                  }
+                </mat-nav-list>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </mat-step>
+
+      <mat-step [optional]="true">
+        <ng-template matStepLabel>Step 3: Push Availability</ng-template>
+        <mat-card appearance="outlined" class="my-4">
+          <mat-card-content>
+            <!-- Step 3 content -->
+            <form [formGroup]="availabilityForm" class="space-y-4">
+              <p class="text-sm text-gray-600 mb-4">
+                Choose the date range for which to publish availability and rates to distribution channels.
+              </p>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Start Date</mat-label>
+                <input matInput [matDatepicker]="startPicker" formControlName="startDate">
+                <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+                <mat-datepicker #startPicker></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>End Date</mat-label>
+                <input matInput [matDatepicker]="endPicker" formControlName="endDate">
+                <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+                <mat-datepicker #endPicker></mat-datepicker>
+              </mat-form-field>
+
+              <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                <div class="flex items-start gap-2">
+                  <mat-icon class="text-blue-600 text-base mt-0.5">info</mat-icon>
+                  <p class="text-sm text-blue-900">
+                    This will push your current room availability, rates, and restrictions for the selected date range.
+                  </p>
+                </div>
+              </div>
+
+              <button 
+                matButton="filled"
+                color="primary" 
+                
+                (click)="pushAvailability()"
+                [disabled]="isPushingAvailability() || availabilityForm.invalid"
+              >
+              {{isPushingAvailability() ? 'Pushing Availability...' : 'Push Availability'}}
+               
+              </button>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      </mat-step>
+
+      <mat-step
+        [completed]="(channexStatus()?.channex?.syncStatus === 'synced') && ((channexStatus()?.roomMappings?.length || 0) >= (channexStatus()?.totalRoomTypes || 0) && (channexStatus()?.totalRoomTypes || 0) > 0)"
+      >
+        <ng-template matStepLabel>Step 4: Connect Channels</ng-template>
+        <mat-card appearance="outlined" class="my-4">
+          <mat-card-content>
+            <!-- Step 4 content (connect iframe or button) -->
+            <div class="space-y-4">
+              @if (!channelIframeUrl()) {
+                <p class="text-sm text-gray-600 mb-4">
+                  Your property is ready! Click below to connect to OTA channels and start receiving bookings.
+                </p>
+
+                <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                  <div class="flex items-start gap-2">
+                    <mat-icon class="text-blue-600 text-base mt-0.5">info</mat-icon>
+                    <div class="text-sm text-blue-900">
+                      <p class="font-medium mb-1">Connect OTA Channels</p>
+                      <p>You'll be able to connect to Booking.com, Airbnb, Expedia, and other major booking platforms. 
+                      The connection process is secure and managed by Channex.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button matButton="filled"
+                  color="primary"
+                  (click)="connectChannels()"
+                  [disabled]="isLoadingIframe()"
+                >
+                  {{isLoadingIframe() ? 'Connecting...' : 'Connect to OTA Channels'}}
+                  
+                </button>
+
+                @if (channexStatus()?.channex?.connectedChannels && channexStatus()?.channex?.connectedChannels!.length > 0) {
+                  <mat-divider class="my-4"></mat-divider>
+                  <h4 class="font-semibold text-gray-900 mb-3">Connected Channels</h4>
+                  <div class="space-y-2">
+                    @for (channel of channexStatus()?.channex?.connectedChannels; track channel.channelId) {
+                      <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                        <div class="flex items-center gap-3">
+                          <mat-icon class="text-green-600">check_circle</mat-icon>
+                          <div>
+                            <p class="font-medium text-gray-900">{{ channel.channelName }}</p>
+                            <p class="text-sm text-gray-500">
+                              Connected {{ channel.connectedAt | date: 'short' }}
+                            </p>
+                          </div>
+                        </div>
+                        <mat-chip class="bg-green-100 text-green-800">
+                          {{ channel.status }}
+                        </mat-chip>
+                      </div>
+                    }
+                  </div>
+                }
+              } @else {
+                <div class="relative">
+                  <div class="flex justify-between items-center mb-3">
+                    <h4 class="font-semibold text-gray-900">Connect Your Channels</h4>
+                    <button 
+                      matButton
+                      (click)="closeIframe()"
+                      matTooltip="Close"
+                    >
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+
+                  <div class="border border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm">
+                    <iframe
+                      [src]="channelIframeUrl() | sanitizeUrl"
+                      (load)="onIframeLoad()"
+                      class="w-full h-[600px] border-0"
+                      sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+                    ></iframe>
+                  </div>
+
+                  <div class="mt-3 text-sm text-gray-500 text-center">
+                    <mat-icon class="text-base align-middle mr-1">info</mat-icon>
+                    Use the interface above to connect and configure your OTA channels
+                  </div>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </mat-step>
+
+    </mat-horizontal-stepper>
+      
+
+
+    <!-- Current Status Section -->
+    @if (channexStatus()) {
+      <mat-card appearance="outlined" class="mt-8">
+        <mat-card-header>
+          <mat-card-title class="text-xl font-semibold">Current Status</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class=" p-4 rounded-lg">
+              <p class="text-sm text-gray-600 mb-1">Sync Status</p>
+              <p class="text-lg font-semibold text-gray-900">
+                {{ channexStatus()?.channex?.syncStatus || 'Not Synced' }}
+              </p>
+            </div>
+            <div class=" p-4 rounded-lg">
+              <p class="text-sm text-gray-600 mb-1">Room Types Synced</p>
+              <p class="text-lg font-semibold text-gray-900">
+                {{ channexStatus()?.roomMappings?.length || 0 }} / {{ channexStatus()?.totalRoomTypes || 0 }}
+              </p>
+            </div>
+            <div class=" p-4 rounded-lg">
+              <p class="text-sm text-gray-600 mb-1">Last Sync</p>
+              <p class="text-lg font-semibold text-gray-900">
+                @if (channexStatus()?.channex?.lastSyncAt) {
+                  {{ channexStatus()?.channex?.lastSyncAt | date: 'short' }}
+                } @else {
+                  Never
+                }
+              </p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  }
+</div>

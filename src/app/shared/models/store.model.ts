@@ -4,6 +4,7 @@ import { User } from "./user.model";
 export interface Store {
     _id: string;
     storeType?: 'restaurant' | 'hotel';
+    propertyType?: 'hotel' | 'hostel' | 'apartment' | 'guesthouse' | 'resort' | 'motel' | 'villa' | 'boutique_hotel' | 'bed_and_breakfast' | 'lodge';
     storeNumber?: string;
     bannerImage?: string;
     logo: string;
@@ -45,6 +46,7 @@ export interface Store {
       };
     };
     hotelSettings?: HotelSettings;
+    channex?: ChannexIntegration;
   };
   
   export interface DeliverySettings {
@@ -163,6 +165,33 @@ export interface HotelSettings {
     guestFeedbackRequest: boolean;
     smsNotifications: boolean;
     pushNotifications: boolean;
+  };
+}
+
+export interface ChannexIntegration {
+  propertyId?: string;
+  syncEnabled?: boolean;
+  lastSyncAt?: Date | string;
+  syncStatus?: 'not_synced' | 'syncing' | 'synced' | 'error';
+  syncErrors?: Array<{
+    message: string;
+    code?: string;
+    occurredAt: Date | string;
+  }>;
+  oneTimeKey?: string;
+  oneTimeKeyExpiry?: Date | string;
+  channelsConnected?: boolean;
+  connectedChannels?: Array<{
+    channelId: string;
+    channelName: string;
+    connectedAt: Date | string;
+    status: 'active' | 'disconnected' | 'error';
+  }>;
+  metadata?: {
+    channelManager: string;
+    propertyType: string;
+    currency: string;
+    timezone: string;
   };
 }
   

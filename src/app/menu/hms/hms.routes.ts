@@ -51,6 +51,17 @@ export const DASHBOARD_HMS_ROUTES: Routes = [
                 }
             },
             {
+                path: 'channel-management',
+                loadChildren: () => import('./channel-management/channel-management.routes').then(m => m.DASHBOARD_CHANNEL_ROUTES),
+                canActivate: [roleGuard],
+                data: {
+                    requiredPermissions: [
+                        'hotel.reservations.view',
+                    ],
+                    permissionMode: 'any'
+                }
+            },
+            {
                 path: 'reports',
                 loadChildren: () => import('./reports/reports.routes').then(m => m.DASHBOARD_HMS_REPORTS_ROUTES),
                 canActivate: [roleGuard],

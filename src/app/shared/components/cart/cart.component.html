@@ -1,35 +1,30 @@
 <div class="h-full flex flex-col">
     <!-- Cart Header -->
-    <div class="p-4 border-b border-outline-variant">
+    <div class="border-b border-outline-variant">
         <!-- Action Buttons -->
-        <div class="flex items-center gap-2">
-            <!-- Customer Selection -->
-            @if (selectedCustomer()) {
-            <button mat-stroked-button (click)="onSelectCustomer()"
-                [matTooltip]="selectedCustomer()?.name || selectedCustomer()?.email" class="!flex-1">
+        <div class="flex items-center gap-2 p-2">
+            <!-- Customer/Guest Selection Menu -->
+            <button matButton="outlined" class="!flex-1" [matMenuTriggerFor]="buyerMenu">
                 <mat-icon>person</mat-icon>
-                <span class="text-xs truncate max-w-[60px]">{{ selectedCustomer()?.name || 'Customer' }}</span>
+                <span class="text-xs">{{ selectedBuyerName() }}</span>
             </button>
-            } @else {
-            <button mat-stroked-button class="!flex-1" (click)="onSelectCustomer()">
-                <mat-icon>person</mat-icon>
-                <span class="text-xs">Customer</span>
-            </button>
-            }
-
-            <!-- Hotel Guest Selection -->
-            @if (selectedGuest()) {
-            <button mat-stroked-button (click)="onSelectGuest()"
-                [matTooltip]="guestService.getGuestName(selectedGuest())" class="!flex-1">
-                <mat-icon>hotel</mat-icon>
-                <span class="text-xs truncate max-w-[60px]">{{ guestService.getGuestName(selectedGuest()) }}</span>
-            </button>
-            } @else {
-            <button mat-stroked-button class="!flex-1" (click)="onSelectGuest()">
-                <mat-icon>hotel</mat-icon>
-                <span class="text-xs">Guest</span>
-            </button>
-            }
+            <mat-menu #buyerMenu="matMenu">
+                <button mat-menu-item (click)="openCustomerSelectionDialog()">
+                    <mat-icon>person</mat-icon>
+                    <span>Customer</span>
+                </button>
+                <button mat-menu-item (click)="openGuestSelectionDialog()">
+                    <mat-icon>hotel</mat-icon>
+                    <span>Guest</span>
+                </button>
+                @if (selectedCustomer() || selectedGuest()) {
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="clearBuyerSelection()">
+                    <mat-icon>close</mat-icon>
+                    <span>Clear Selection</span>
+                </button>
+                }
+            </mat-menu>
 
             <!-- Table Selection -->
             @if (tableStore.selectedTable()) {
@@ -43,12 +38,19 @@
                 <span class="text-xs">Table</span>
             </button>
             }
+
+            <!-- Close Button (Mobile only) -->
+            @if (isMobile()) {
+            <button matIconButton (click)="closeCart()" title="Close cart">
+                <mat-icon>close</mat-icon>
+            </button>
+            }
         </div>
     </div>
 
 
     <!-- Cart Items -->
-    <div class="flex-1 overflow-auto p-4">
+    <div class="flex-1 overflow-auto p-2">
         @if (!isEmpty()) {
         <!-- Clear Cart Button -->
         <div class="mb-3 flex justify-end">
@@ -58,7 +60,7 @@
             </button>
         </div>
         }
-        <div class="space-y-3 h-full">
+        <div class="space-y-3">
             @for (product of cartStore.selectedCart()?.products; track $index) {
             <mat-card appearance="outlined" class="p-3">
                 <div class="flex gap-3">
@@ -72,9 +74,6 @@
                         </div>
                         }
                     </div>
-
-
-
 
                     <!-- Item Details -->
                     <div class="flex-1 min-w-0">
@@ -123,25 +122,24 @@
             </div>
             }
         </div>
+    </div>
 
-        <!-- Checkout Summary (inside scrollable area) -->
+    <!-- Checkout Summary & Fixed Bottom Action Buttons -->
+    <div class="border-t border-outline-variant">
+        <!-- Checkout Summary -->
         @if (!isEmpty()) {
-        <div class="mt-4">
+        <div class="border-b border-gray-100 p-2">
             <app-checkout-summary (cartSummary)="cartSummaryChange($event)" />
         </div>
         }
-    </div>
 
-    <!-- Fixed Bottom Action Buttons -->
-    <!-- @if (!isEmpty()) { -->
-    <div class="border-t border-outline-variant bg-white">
         <!-- Discount, Delivery Row -->
-        <div class="flex items-center gap-2 p-3 border-b border-gray-100">
-            <button mat-stroked-button class="!flex-1" (click)="onApplyDiscount()">
+        <div class="flex items-center gap-2 p-2 border-b border-gray-100">
+            <button matButton="outlined" class="!flex-1" (click)="onApplyDiscount()">
                 <mat-icon>local_offer</mat-icon>
                 <span class="ml-1">Discount</span>
             </button>
-            <button mat-stroked-button class="!flex-1" (click)="onApplyDelivery()">
+            <button matButton="outlined" class="!flex-1" (click)="onApplyDelivery()">
                 <mat-icon>local_shipping</mat-icon>
                 <span class="ml-1">Delivery</span>
             </button>
@@ -149,7 +147,7 @@
 
         <!-- Main Checkout Button -->
         <div class="p-3">
-            <button mat-flat-button color="primary" class="w-full !h-12 !text-base" (click)="onCheckout()">
+            <button matButton="filled" color="primary" class="w-full !h-12 !text-base" (click)="onCheckout()">
                 Checkout {{ itemsCount() }} items ({{ (this.cartSummary()?.totalCost || 0 )| currency:
                 currency() : 'symbol' : '1.0-0' }})
             </button>
@@ -169,5 +167,4 @@
             </button>
         </div> -->
     </div>
-    <!-- } -->
 </div>

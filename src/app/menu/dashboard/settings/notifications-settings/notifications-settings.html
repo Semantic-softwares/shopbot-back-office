@@ -1,0 +1,114 @@
+<div class="py-6">
+          <form [formGroup]="notificationSettingsForm" (ngSubmit)="saveNotificationSettings()">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              
+              <!-- Guest Notifications Card -->
+              <mat-card appearance="outlined">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar class="text-red-600 !flex !items-center !justify-center">person</mat-icon>
+                  <mat-card-title>Guest Notifications</mat-card-title>
+                </mat-card-header>
+                <mat-card-content class="pt-4 space-y-6">
+                  <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <label class="text-sm font-medium text-gray-700">Reservation Confirmation</label>
+                        <p class="text-xs text-gray-500">Send confirmation emails for new reservations</p>
+                      </div>
+                      <mat-slide-toggle formControlName="reservationConfirmation" color="primary"></mat-slide-toggle>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <label class="text-sm font-medium text-gray-700">Check-in Reminder</label>
+                        <p class="text-xs text-gray-500">Remind guests about upcoming check-ins</p>
+                      </div>
+                      <mat-slide-toggle formControlName="checkInReminder" color="primary"></mat-slide-toggle>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <label class="text-sm font-medium text-gray-700">Check-out Reminder</label>
+                        <p class="text-xs text-gray-500">Remind guests about check-out times</p>
+                      </div>
+                      <mat-slide-toggle formControlName="checkOutReminder" color="primary"></mat-slide-toggle>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <label class="text-sm font-medium text-gray-700">Payment Confirmation</label>
+                        <p class="text-xs text-gray-500">Send receipts for payments</p>
+                      </div>
+                      <mat-slide-toggle formControlName="paymentConfirmation" color="primary"></mat-slide-toggle>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <label class="text-sm font-medium text-gray-700">Cancellation Notice</label>
+                        <p class="text-xs text-gray-500">Notify guests about cancellations</p>
+                      </div>
+                      <mat-slide-toggle formControlName="cancellationNotice" color="primary"></mat-slide-toggle>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <label class="text-sm font-medium text-gray-700">Feedback Request</label>
+                        <p class="text-xs text-gray-500">Request feedback after checkout</p>
+                      </div>
+                      <mat-slide-toggle formControlName="guestFeedbackRequest" color="primary"></mat-slide-toggle>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <!-- Communication Channels Card -->
+              <mat-card appearance="outlined">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar class="text-green-600 !flex !items-center !justify-center">communication</mat-icon>
+                  <mat-card-title>Communication Channels</mat-card-title>
+                </mat-card-header>
+                <mat-card-content class="pt-4 space-y-6">
+                  <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <label class="text-sm font-medium text-gray-700">SMS Notifications</label>
+                        <p class="text-xs text-gray-500">Send important updates via SMS</p>
+                      </div>
+                      <mat-slide-toggle formControlName="smsNotifications" color="primary"></mat-slide-toggle>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <label class="text-sm font-medium text-gray-700">Push Notifications</label>
+                        <p class="text-xs text-gray-500">Send real-time browser notifications</p>
+                      </div>
+                      <mat-slide-toggle formControlName="pushNotifications" color="primary"></mat-slide-toggle>
+                    </div>
+                  </div>
+
+                  <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <h5 class="font-semibold text-green-900 mb-2 flex items-center gap-2">
+                      <mat-icon class="text-green-600">tips_and_updates</mat-icon>
+                      Best Practices
+                    </h5>
+                    <ul class="text-sm text-green-800 space-y-1">
+                      <li>• Keep notifications relevant and timely</li>
+                      <li>• Avoid overwhelming guests with messages</li>
+                      <li>• Test notification content before enabling</li>
+                      <li>• Respect guest communication preferences</li>
+                    </ul>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    matButton="filled"
+                    color="primary"
+                    [disabled]="saving()"
+                    class="w-full">
+                    {{saving() ? 'Saving...' : 'Save Notification Settings'}}
+                  </button>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </form>
+        </div>

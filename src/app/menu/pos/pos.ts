@@ -7,6 +7,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { map } from 'rxjs/operators';
 import { Store } from '../../shared/models';
 import { AuthService } from '../../shared/services/auth.service';
 import { RolesService } from '../../shared/services/roles.service';
@@ -30,10 +32,21 @@ export class Pos {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
+  private breakpointObserver = inject(BreakpointObserver);
   public storeStore = inject(StoreStore);
   public rolesService = inject(RolesService);
-  public isMobile = signal(window.innerWidth < 768);
-  public opened = signal(true);
+
+  public isMobile = toSignal(
+    this.breakpointObserver.observe([Breakpoints.Handset, Breakpoints.Small, Breakpoints.Medium, Breakpoints.Tablet]).pipe(
+      map(result => result.matches)
+    ),
+    { initialValue: false }
+  );
+
+  public opened = computed(() =>
+    !this.isMobile()
+  );
+
   public currentUser = toSignal(this.authService.currentUser, {
     initialValue: null,
   });
@@ -64,7 +77,7 @@ export class Pos {
   }
 
   toggleSidenav() {
-    this.opened.set(!this.opened());
+    // Sidebar is not toggleable on mobile/tablet - only visible on desktop
   }
 
   goToProfile() {

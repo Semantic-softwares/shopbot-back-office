@@ -1,6 +1,6 @@
-<div class="flex h-[calc(100vh-64px)] md:h-[calc(100vh-64px)]">
-  <!-- Left Panel - Products & Categories (Full width on mobile, 70% on desktop) -->
-  <div class="w-full md:w-[70%] h-full md:border-r border-gray-200 flex flex-col">
+<div class="flex h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)]">
+  <!-- Left Panel - Products & Categories (Full width on mobile/tablet, 70% on desktop) -->
+  <div class="w-full lg:w-[70%] h-full lg:border-r border-gray-200 flex flex-col">
     <!-- Header & Search -->
     <div class="p-4 border-b border-outline-variant">
       <div class="flex items-center gap-3">
@@ -14,7 +14,7 @@
             searchText="Search by barcode or product">
           </app-search>
         </div>
-        <div class="hidden md:flex items-center gap-2 shrink-0">
+        <div class="hidden lg:flex items-center gap-2 shrink-0">
           <span class="text-sm text-gray-600 whitespace-nowrap">Barcode Scanner</span>
           <mat-slide-toggle
             [checked]="storeStore.selectedStore()?.posSettings?.useBarcodeScanner ?? false"
@@ -49,7 +49,7 @@
     </div>
 
     <!-- Products Grid -->
-    <div class="flex-1 p-4 overflow-auto pb-20 md:pb-4">
+    <div class="flex-1 p-4 overflow-auto pb-20 lg:pb-4">
       @if (productStore.isLoading()) {
         <div class="flex justify-center items-center h-full">
           <mat-spinner diameter="40"></mat-spinner>
@@ -61,7 +61,7 @@
           <p class="text-sm">Select a category or search for products</p>
         </div>
       } @else {
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 lg:gap-4">
           @for (product of productStore.filteredProducts(); track product._id) {
             <app-product-card
               [product]="product"
@@ -77,8 +77,8 @@
     </div>
   </div>
 
-    <!-- Right Panel - Cart & Checkout (Hidden on mobile, 30% on desktop) -->
-    <div class="hidden md:block md:w-[30%] h-full">
+    <!-- Right Panel - Cart & Checkout (Hidden on mobile/tablet, 30% on desktop) -->
+    <div class="hidden lg:block lg:w-[30%] h-full">
       <app-cart
         [items]="cartItems()"
         [taxRate]="taxRate()"
@@ -92,11 +92,11 @@
     </div>
 </div>
 
-<!-- Floating Cart Button (Mobile Only) -->
+<!-- Floating Cart Button (Mobile & Tablet) -->
 <button 
   mat-fab
   color="primary"
-  class="!fixed !bottom-[88px] !right-4 !z-[60] md:!hidden"
+  class="!fixed !bottom-[88px] !right-4 !z-[60] lg:!hidden"
   [matBadge]="cartStore.selectedCart()?.products?.length || 0"
   [matBadgeHidden]="!cartStore.selectedCart()?.products?.length"
   matBadgeColor="warn"

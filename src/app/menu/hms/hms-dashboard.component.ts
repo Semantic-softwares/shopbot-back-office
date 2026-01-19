@@ -81,6 +81,35 @@ export class HmsDashboardComponent {
         },
       ],
     },
+       {
+      name: 'Channel Management',
+      children: [
+        {
+          icon: 'sync_alt',
+          label: 'Mappings',
+          link: './channel-management/mappings',
+          permissions: ['hotel.guests.view', 'hotel.guests.create'],
+        },
+        {
+          icon: 'rate_review',
+          label: 'Inventory & Rates',
+          link: './channel-management/inventory-rates',
+          permissions: ['hotel.reservations.view', 'hotel.reservations.create'],
+        },
+        {
+          icon: 'meeting_room',
+          label: 'Update Room',
+          link: './channel-management/update-room',
+          permissions: ['hotel.reservations.checkin', 'hotel.reservations.checkout'],
+        },
+        {
+          icon: 'live_tv',
+          label: 'Live Booking',
+          link: './channel-management/live-booking',
+          permissions: ['hotel.guests.view', 'hotel.guests.create'],
+        },
+      ],
+    },
     {
       name: 'Room Management',
       children: [

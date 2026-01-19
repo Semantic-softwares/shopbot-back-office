@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -18,8 +19,10 @@ import { tap } from 'rxjs';
 import { ProductService } from '../../../../shared/services/product.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
 import { NoRecordComponent } from '../../../../shared/components/no-record/no-record.component';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { OptionDialogComponent } from './option-dialog/option-dialog.component';
+import { ConvertToFoodDialogComponent } from './convert-to-food-dialog/convert-to-food-dialog.component';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { OptionItem } from '../../../../shared/models';
@@ -40,7 +43,9 @@ import { OptionItem } from '../../../../shared/models';
     MatIconModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     NoRecordComponent,
+    PageHeaderComponent,
     FormsModule,
     MatSlideToggleModule
   ]
@@ -103,6 +108,24 @@ export class OptionsComponent {
     });
   }
 
+  convertToFood(option: OptionItem) {
+    const dialogRef = this.dialog.open(ConvertToFoodDialogComponent, {
+      width: '500px',
+      data: { option }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.snackBar.open('Option converted to product successfully!', 'Close', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top'
+        });
+        this.options.reload();
+      }
+    });
+  }
+
   deleteOption(option: OptionItem) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '350px',
@@ -140,4 +163,9 @@ export class OptionsComponent {
       }
     });
   }
+
+  reloadOptions() {
+    this.options.reload();
+  }
 }
+

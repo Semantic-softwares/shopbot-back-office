@@ -153,14 +153,22 @@ export const StoreStore = signalStore(
         function updateStore(updatedStore: Partial<Store>): void {
           const selectedStore = store.selectedStore();
           if (!selectedStore) return;
-            patchState(store, {
-              selectedStore: {
-                ...selectedStore,
-                ...updatedStore,
-                _id: selectedStore._id, // Ensure _id is always present and defined
-              } as Store,
-            });
-          
+          const newSelectedStore: Store = {
+            ...selectedStore,
+            ...updatedStore,
+            _id: selectedStore._id,
+          } as Store;
+
+          // Persist to local storage via service and patch state
+          try {
+            storeService.saveStoreLocally(newSelectedStore);
+          } catch (e) {
+            // ignore local storage errors
+          }
+
+          patchState(store, {
+            selectedStore: newSelectedStore,
+          });
         };
 
       function updateLogoPath(paths: [] |  null): void {

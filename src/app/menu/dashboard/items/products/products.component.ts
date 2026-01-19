@@ -11,8 +11,10 @@ import { MatCardModule } from '@angular/material/card';
 import { Router } from '@angular/router';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { ProductService } from '../../../../shared/services/product.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
@@ -40,8 +42,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatCardModule,
     MatMenuModule,
     MatIconModule,
+    MatTooltipModule,
     MatProgressSpinnerModule,
     MatSlideToggleModule,
+    PageHeaderComponent,
     NoRecordComponent
 ],
 })
@@ -166,5 +170,9 @@ export class ProductsComponent {
         });
       }
     });
+  }
+
+  reloadProducts() {
+    this.dataSource.reload();
   }
 }

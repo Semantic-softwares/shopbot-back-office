@@ -1,5 +1,5 @@
 <div class="dashboard-container">
-  <app-toolbar (menuToggle)="toggleSidenav()"></app-toolbar>
+  <app-toolbar title="ERP" (menuToggle)="toggleSidenav()"></app-toolbar>
 
   <mat-sidenav-container>
     <mat-sidenav [mode]="isMobile() ? 'over' : 'side'" [opened]="opened()" class="!w-[20em] !rounded-[0px] px-2">
@@ -15,7 +15,7 @@
             </a>
           }
             
-          <h2 matListItemTitle [routerLink]="['store-settings']">{{currentUser()?.role }}</h2>
+          <h2 matListItemTitle [routerLink]="['store-settings']">{{currentUser()?.role?.name }}</h2>
           <div matListItemLine [routerLink]="['store-settings']">{{storeStore.selectedStore()?.name}}</div>
           <a matListItemMeta mat-icon-button class="block" [matMenuTriggerFor]="menu">
             <mat-icon>keyboard_arrow_down</mat-icon>
@@ -33,7 +33,7 @@
 
       <mat-nav-list>
         <mat-accordion multi>
-          @for (link of navItems; track $index) {
+          @for (link of navItems(); track $index) {
           <!-- link.name === 'Reports' -->
           <mat-expansion-panel class="mat-elevation-z0" [expanded]="true">
             <mat-expansion-panel-header>

@@ -109,7 +109,7 @@ export class AddVariantsListComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
+      if (result?.success || result === true) {
         this.variants.reload();
       }
     });

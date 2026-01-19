@@ -15,8 +15,10 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import { MatButtonModule } from "@angular/material/button";
 import { MatBadgeModule } from "@angular/material/badge";
-import { MatDialog, MatDialogModule } from "@angular/material/dialog";
+import { MatBottomSheet, MatBottomSheetModule } from "@angular/material/bottom-sheet";
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'checkout',
@@ -32,7 +34,7 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
     MatSlideToggleModule,
     MatButtonModule,
     MatBadgeModule,
-    MatDialogModule
+    MatBottomSheetModule
   ],
   templateUrl: './checkout.html',
   styleUrl: './checkout.scss',
@@ -42,8 +44,16 @@ export class Checkout {
   public storeStore = inject(StoreStore);
   public productStore = inject(ProductsStore);
   public cartStore = inject(CartStore);
-  private dialog = inject(MatDialog);
+  private bottomSheet = inject(MatBottomSheet);
   private breakpointObserver = inject(BreakpointObserver);
+
+  public isMobile = toSignal(
+    this.breakpointObserver.observe([Breakpoints.XSmall, Breakpoints.Small]).pipe(
+      map(result => result.matches)
+    ),
+    { initialValue: false }
+  );
+
   public searchFilter: string = "";
   @ViewChild("searchComponent") searchComponent!: SearchComponent;
 
@@ -69,14 +79,6 @@ export class Checkout {
     }
   }
 
-  //  public tapProduct(product: Product, isEditing: boolean): void {
-  //   const options = product?.options as Option[];
-  //   if (options.length > 0) {
-  //     this.openOptions(product, isEditing);
-  //   } else {
-  //     this.addToCart({ product, isEditing });
-  //   }
-  // }
 
   public selectCategory(item: Category): void {
     this.categoryStore.selectCategory(item);
@@ -115,7 +117,6 @@ export class Checkout {
   }
 
   public addToCart(args: { product: Product; isEditing: boolean }): void {
-    console.log('Adding to cart:', args.product.name, 'Editing:', args.isEditing);
     this.createCart();
     this.cartStore.addToCart(
       this.cartStore.selectedCart()!._id,
@@ -180,19 +181,11 @@ export class Checkout {
     // TODO: Implement checkout flow
   }
 
-  // Open cart in full-screen modal on mobile
+  // Open cart in bottom sheet on mobile
   openCartModal(): void {
-    const dialogRef = this.dialog.open(CartComponent, {
-      width: '100%',
-      maxWidth: '500px',
-      maxHeight: '90vh',
+    this.bottomSheet.open(CartComponent, {
+      panelClass: 'cart-bottom-sheet',
     });
-
-    // Check if mobile and update size to full screen
-    const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
-    if (isMobile) {
-      dialogRef.updateSize('100vw', '100vh');
-    }
   }
 
   openOptionsDialog(product: Product): void {

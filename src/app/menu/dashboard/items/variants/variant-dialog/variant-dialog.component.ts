@@ -90,11 +90,12 @@ export class VariantDialogComponent {
       this.variantForm.patchValue(data.variant);
       // Load existing options for this variant
       if (data.variant._id) {
-        this.productService.getGroupOptionItems(data.variant._id).subscribe({
-          next: (options) => {
-            this.selectedOptions = options;
-          },
-        });
+       this.selectedOptions = data.variant.options
+        // this.productService.getGroupOptionItems(data.variant._id).subscribe({
+        //   next: (options) => {
+        //     this.selectedOptions = options;
+        //   },
+        // });
       }
     }
   }
