@@ -1,80 +1,90 @@
 <!-- Page Header -->
 <app-page-header 
   title="Rates & Availability" 
-  description="Manage room rates and availability by date for Channex distribution">
+  description="Manage room rates, availability, and restrictions for Channex distribution">
+  <ng-container actions>
+    <!-- Action Buttons -->
+  <button 
+    matButton="outlined"
+    (click)="resetChanges()"
+    [disabled]="!getHasUnsavedChanges()"
+    class="text-gray-700">
+    <mat-icon matButtonIcon>refresh</mat-icon>
+    Reset
+  </button>
+
+  @if (getIsSaving()) {
+    <button 
+      matButton="filled"
+      color="primary"
+      disabled
+      class="relative">
+      <mat-icon matButtonIcon>hourglass_empty</mat-icon>
+      Saving...
+    </button>
+  } @else {
+    <button 
+      matButton="filled"
+      color="primary"
+      (click)="saveChanges()"
+      [disabled]="!getHasUnsavedChanges()">
+      <mat-icon matButtonIcon>save</mat-icon>
+      Save
+    </button>
+  }
+
+  </ng-container>
 </app-page-header>
 
-<div class=" space-y-6">
-  <!-- Date Range Selection Card -->
-  <mat-card appearance="outlined">
-    <mat-card-header class="border-b border-gray-200 px-6 py-4">
-      <h3 class="text-lg font-semibold text-gray-900">Date Range Selection</h3>
-    </mat-card-header>
 
-    <mat-card-content class="p-6 space-y-4">
-      <!-- Quick Select Buttons -->
-      <div class="flex flex-wrap gap-2 my-4">
-        <button 
-          mat-stroked-button 
-          (click)="selectDateRange(7)"
-          class="text-sm">
-          7 Days
-        </button>
-        <button 
-          mat-stroked-button 
-          (click)="selectDateRange(14)"
-          class="text-sm">
-          14 Days
-        </button>
-        <button 
-          mat-stroked-button 
-          (click)="selectDateRange(30)"
-          class="text-sm">
-          30 Days
-        </button>
-      </div>
+<div class="space-y-6">
+  <!-- Hidden Date Range Form (for date picker functionality) -->
+  <form [formGroup]="dateRangeForm" class="hidden">
+    <input 
+      matInput 
+      #startDateInput
+      [matDatepicker]="startPicker"
+      formControlName="startDate">
+    <mat-datepicker #startPicker></mat-datepicker>
 
-      <!-- Custom Date Range Form -->
-      <form [formGroup]="dateRangeForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <!-- Start Date -->
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Start Date</mat-label>
-          <input 
-            matInput 
-            [matDatepicker]="startPicker"
-            formControlName="startDate">
-          <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
-          <mat-datepicker #startPicker></mat-datepicker>
-        </mat-form-field>
+    <input 
+      matInput 
+      #endDateInput
+      [matDatepicker]="endPicker"
+      formControlName="endDate">
+    <mat-datepicker #endPicker></mat-datepicker>
+  </form>
 
-        <!-- End Date -->
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>End Date</mat-label>
-          <input 
-            matInput 
-            [matDatepicker]="endPicker"
-            formControlName="endDate">
-          <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
-          <mat-datepicker #endPicker></mat-datepicker>
-        </mat-form-field>
+  <!-- Channex Sync Warning -->
+  @if (!getIsStoreChannexSynced()) {
+    <mat-card appearance="outlined" class="border-l-4 border-orange-500 bg-orange-50">
+      <mat-card-content class="p-6">
+        <div class="flex items-start gap-4">
+          <mat-icon class="text-orange-600 mt-1">warning</mat-icon>
+          <div class="flex-1">
+            <h3 class="font-semibold text-orange-900 mb-2">Channex Setup Required</h3>
+            <p class="text-orange-800 text-sm mb-4">
+              {{ getChannexSyncError() }}
+            </p>
+            <button 
+              mat-raised-button 
+              color="warn"
+              routerLink="/admin/channel-management"
+              class="text-sm">
+              <mat-icon>settings</mat-icon>
+              Go to Channel Management
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
 
-        <!-- Currency Selection -->
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Currency</mat-label>
-          <mat-select [value]="getSelectedCurrency()">
-            <mat-option value="NGN">NGN (₦)</mat-option>
-            <mat-option value="USD">USD ($)</mat-option>
-            <mat-option value="EUR">EUR (€)</mat-option>
-            <mat-option value="GBP">GBP (£)</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </form>
-    </mat-card-content>
-  </mat-card>
 
   <!-- Calendar View Card -->
   <mat-card appearance="outlined">
-    <mat-card-header class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+    <div class="border-b border-outline-variant mb-2 p-3 flex items-center justify-between gap-4">
+      <!-- Date Range Navigation (Left) -->
       <div class="flex items-center gap-4">
         <button 
           mat-icon-button 
@@ -83,7 +93,8 @@
           <mat-icon>chevron_left</mat-icon>
         </button>
 
-        <span class="font-medium text-gray-700 whitespace-nowrap">
+        <span class="font-medium text-gray-700 whitespace-nowrap cursor-pointer hover:bg-gray-100 px-3 py-1 rounded transition-colors"
+              (click)="openDatePicker()">
           {{ (getCalendarDates()[0] | date:'MMM d') }} - {{ (getCalendarDates()[getCalendarDates().length - 1] | date:'MMM d, yyyy') }}
         </span>
 
@@ -95,17 +106,23 @@
         </button>
       </div>
 
-      <div class="flex items-center gap-2">
-        <button 
-          mat-icon-button 
-          (click)="toggleEditMode()"
-          matTooltip="Toggle edit mode">
-          <mat-icon>{{ getEditMode() ? 'lock_open' : 'lock' }}</mat-icon>
-        </button>
-      </div>
-    </mat-card-header>
+      <!-- Restrictions Filter Dropdown (Right) -->
+      <mat-form-field appearance="outline" class="min-w-72">
+        <mat-label>Show Restrictions</mat-label>
+        <mat-select 
+          [value]="getSelectedRestrictions()"
+          (selectionChange)="onRestrictionsChange($event.value)"
+          multiple>
+          @for (restriction of getAvailableRestrictions(); track restriction.value) {
+            <mat-option [value]="restriction.value">
+              {{ restriction.label }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
 
-    <mat-card-content class="p-6">
+    <mat-card-content class="px-0! pb-2!">
       <!-- Loading State -->
       @if (getIsLoading()) {
         <div class="flex items-center justify-center py-12">
@@ -122,93 +139,232 @@
         </div>
       }
 
+      <!-- ARI Loading State -->
+      @if (getIsLoadingARI()) {
+        <div class="flex items-center justify-center py-4 bg-blue-50 border border-blue-200 rounded-md gap-3 mb-4">
+          <mat-spinner diameter="20"></mat-spinner>
+          <span class="text-sm text-blue-700">Loading rates and availability from Channex...</span>
+        </div>
+      }
+
+      <!-- ARI Error State -->
+      @if (getARILoadError()) {
+        <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 text-yellow-700 mb-4">
+          <p class="font-medium text-sm">⚠ {{ getARILoadError() }}</p>
+          <p class="text-xs mt-1">Displaying cached data. Please refresh or contact support if the issue persists.</p>
+        </div>
+      }
+
       <!-- Calendar Grid -->
       @if (!getIsLoading() && !getError() && getCalendarDates().length > 0) {
-        <div class="overflow-x-auto">
-          <table class="min-w-full border-collapse border border-gray-200">
-          <!-- Header Row with Dates -->
-          <thead>
-            <tr class="bg-gray-50 border-b border-gray-200">
-              <th class="px-4 py-3 text-left font-semibold text-gray-700 border-r border-gray-200 sticky left-0 bg-gray-50 w-48">
-                Room Type
-              </th>
-
-              <!-- Date Column Headers -->
-              @for (date of getCalendarDates(); track $index) {
-                <th 
-                  class="px-3 py-2 text-center font-medium text-gray-600 text-xs whitespace-nowrap border-r border-gray-200">
-                  <div class="font-semibold text-gray-900">{{ date | date:'EEE' }}</div>
-                  <div class="text-gray-500">{{ date | date:'d' }}</div>
+        <div class="relative overflow-x-auto">
+          <!-- Table -->
+          <table class="w-full border-collapse  ">
+            <!-- Header Row -->
+            <thead>
+              <tr class="border-b border-gray-200">
+                <th class="sticky left-0 border-r border-gray-200 w-56 text-left font-semibold text-gray-700 px-4 py-3 bg-[var(--mat-sys-surface)]">
+                  Room Type / Rate Plan
                 </th>
+                @for (date of getCalendarDates(); track $index) {
+                  <th class="text-center font-medium text-gray-600 text-xs whitespace-nowrap border-r border-gray-200 px-3 py-2 min-w-24">
+                    <div class="font-semibold text-gray-900">{{ date | date:'EEE' }}</div>
+                    <div class="text-gray-500">{{ date | date:'d MMM' }}</div>
+                  </th>
+                }
+                <th class="sticky right-0 border-l border-gray-200 w-16 text-center font-semibold text-gray-700 px-4 py-3 bg-[var(--mat-sys-surface)]">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+
+            <!-- Body Rows - Room Type Groups -->
+            <tbody>
+              @for (group of getRoomTypeGroups(); track group.roomType.id) {
+                <!-- Room Type Row (Parent) -->
+                <tr class="border-b border-gray-300 hover:bg-blue-100">
+                  <td class="sticky left-0 border-r border-gray-300 px-4 py-3 bg-[var(--mat-sys-surface)]">
+                    <div class="text-sm font-bold text-gray-900">{{ group.roomType.name }}</div>
+                    <div class="text-xs text-gray-600 mt-1">
+                      Availability {{ group.roomType.totalInventory > 0 ? '(Total: ' + group.roomType.totalInventory + ')' : '' }}
+                    </div>
+                  </td>
+                  @for (date of getCalendarDates(); track $index) {
+                    <td class="px-3 py-3 border-r border-gray-200 text-center cursor-pointer hover:bg-blue-100 transition-colors"
+                        (click)="openAvailabilityOverride(group.roomType, date)">
+                      <span class="text-sm font-semibold text-blue-900">
+                        {{ group.availability.get(getDateString(date)) || '-' }}
+                      </span>
+                    </td>
+                  }
+                  <!-- Actions cell for room type row -->
+                  <td class="sticky right-0 border-l border-gray-300 px-4 py-3 text-center bg-[var(--mat-sys-surface)]">
+                    <button 
+                      mat-icon-button 
+                      [matMenuTriggerFor]="roomTypeMenu"
+                      class="text-gray-600 hover:text-gray-900"
+                      matTooltip="Room type options">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #roomTypeMenu="matMenu">
+                      <button 
+                        mat-menu-item 
+                        (click)="createRatePlan(group.roomType.id, group.roomType.name)">
+                        <mat-icon>add_circle_outline</mat-icon>
+                        <span>Create Rate Plan</span>
+                      </button>
+                    </mat-menu>
+                  </td>
+                </tr>
+
+                <!-- Rate Plan Rows (Children) -->
+                @if (group.ratePlans.length > 0) {
+                  @for (ratePlan of group.ratePlans; track ratePlan.id) {
+                    <!-- Rate Row -->
+                    @if (isRestrictionSelected('rate')) {
+                      <tr class="border-b border-gray-200 hover:bg-amber-50">
+                        <td class="sticky left-0 border-r border-gray-200 px-6 py-3 pl-8 bg-[var(--mat-sys-surface)]">
+                          <div class="text-sm font-medium text-gray-700">{{ ratePlan.name }}</div>
+                          <div class="text-xs text-gray-500 mt-0.5">Rate</div>
+                        </td>
+                        @for (date of getCalendarDates(); track getDateString(date)) {
+                          <td class="px-3 py-3 border-r border-gray-200 text-center cursor-pointer hover:bg-orange-50 transition-colors"
+                              (click)="openRatePlanValueOverride(ratePlan, group.roomType, date)">
+                            <!-- View mode: show rate or status -->
+                            @if (getRateForRatePlan(ratePlan.id, date)) {
+                              @if (isStopSellForRatePlan(ratePlan.id, date)) {
+                                <!-- Stop sell: show rate with red background and tooltip -->
+                                <span 
+                                  class="text-sm font-semibold text-white bg-red-500 px-2 py-1 rounded inline-block"
+                                  [matTooltip]="'Stop Sell enabled - Rate: ' + (getRateForRatePlan(ratePlan.id, date) | number:'1.0-2')">
+                                  {{ getRateForRatePlan(ratePlan.id, date) | number:'1.0-2' }}
+                                </span>
+                              } @else {
+                                <!-- Normal rate display -->
+                                <span class="text-sm font-semibold text-gray-900">
+                                  {{ getRateForRatePlan(ratePlan.id, date) | number:'1.0-2' }}
+                                </span>
+                              }
+                            } @else {
+                              <span class="text-xs text-gray-400">No rate</span>
+                            }
+                          </td>
+                        }
+                        <!-- Empty actions cell for rate plan rows -->
+                        <td class="sticky right-0 border-l border-gray-200 px-4 py-3 bg-[var(--mat-sys-surface)]"></td>
+                      </tr>
+                    }
+
+                    <!-- Availability Row -->
+                    @if (isRestrictionSelected('availability')) {
+                      <tr class="border-b border-gray-200">
+                        <td class="sticky left-0 border-r border-gray-200 px-6 py-2 pl-8 bg-[var(--mat-sys-surface)]">
+                          <div class="text-xs font-medium text-gray-600">Availability</div>
+                        </td>
+                        @for (date of getCalendarDates(); track getDateString(date)) {
+                          <td class="px-3 py-2 border-r border-gray-200 text-center text-xs cursor-pointer hover:bg-gray-100"
+                              (click)="openRatePlanValueOverride(ratePlan, group.roomType, date, 'availability')">
+                            <span class="text-gray-700 font-medium">{{ getARIForRatePlan(ratePlan.id, date)?.availability || '-' }}</span>
+                          </td>
+                        }
+                        <td class="sticky right-0 border-l border-gray-200 px-4 py-2 bg-[var(--mat-sys-surface)]"></td>
+                      </tr>
+                    }
+
+                    <!-- CTA (Closed To Arrival) Row -->
+                    @if (isRestrictionSelected('cta')) {
+                      <tr class="border-b border-gray-200">
+                        <td class="sticky left-0 border-r border-gray-200 px-6 py-2 pl-8 bg-[var(--mat-sys-surface)]">
+                          <div class="text-xs font-medium text-gray-600">CTA</div>
+                        </td>
+                        @for (date of getCalendarDates(); track getDateString(date)) {
+                          <td class="px-3 py-2 border-r border-gray-200 text-center text-xs cursor-pointer hover:bg-gray-100"
+                              (click)="openRatePlanValueOverride(ratePlan, group.roomType, date, 'cta')">
+                            @if (isClosedToArrivalForRatePlan(ratePlan.id, date)) {
+                              <span class="inline-block bg-red-200 text-red-800 px-2 py-0.5 rounded">✓</span>
+                            } @else {
+                              <span class="text-gray-400">-</span>
+                            }
+                          </td>
+                        }
+                        <td class="sticky right-0 border-l border-gray-200 px-4 py-2 bg-[var(--mat-sys-surface)]"></td>
+                      </tr>
+                    }
+
+                    <!-- CTD (Closed To Departure) Row -->
+                    @if (isRestrictionSelected('ctd')) {
+                      <tr class="border-b border-gray-200">
+                        <td class="sticky left-0 border-r border-gray-200 px-6 py-2 pl-8 bg-[var(--mat-sys-surface)]">
+                          <div class="text-xs font-medium text-gray-600">CTD</div>
+                        </td>
+                        @for (date of getCalendarDates(); track getDateString(date)) {
+                          <td class="px-3 py-2 border-r border-gray-200 text-center text-xs cursor-pointer hover:bg-gray-100"
+                              (click)="openRatePlanValueOverride(ratePlan, group.roomType, date, 'ctd')">
+                            @if (isClosedToDepartureForRatePlan(ratePlan.id, date)) {
+                              <span class="inline-block bg-red-200 text-red-800 px-2 py-0.5 rounded">✓</span>
+                            } @else {
+                              <span class="text-gray-400">-</span>
+                            }
+                          </td>
+                        }
+                        <td class="sticky right-0 border-l border-gray-200 px-4 py-2 bg-[var(--mat-sys-surface)]"></td>
+                      </tr>
+                    }
+
+                    <!-- Min Stay Row -->
+                    @if (isRestrictionSelected('min-stay')) {
+                      <tr class="border-b border-gray-200">
+                        <td class="sticky left-0 border-r border-gray-200 px-6 py-2 pl-8 bg-[var(--mat-sys-surface)]">
+                          <div class="text-xs font-medium text-gray-600">Min Stay</div>
+                        </td>
+                        @for (date of getCalendarDates(); track getDateString(date)) {
+                          <td class="px-3 py-2 border-r border-gray-200 text-center text-xs cursor-pointer hover:bg-gray-100"
+                              (click)="openRatePlanValueOverride(ratePlan, group.roomType, date, 'min-stay')">
+                            <span class="text-gray-700 font-medium">{{ getARIForRatePlan(ratePlan.id, date)?.minStay || '-' }}</span>
+                          </td>
+                        }
+                        <td class="sticky right-0 border-l border-gray-200 px-4 py-2 bg-[var(--mat-sys-surface)]"></td>
+                      </tr>
+                    }
+
+                    <!-- Max Stay Row -->
+                    @if (isRestrictionSelected('max-stay')) {
+                      <tr class="border-b border-gray-200">
+                        <td class="sticky left-0 border-r border-gray-200 px-6 py-2 pl-8 bg-[var(--mat-sys-surface)]">
+                          <div class="text-xs font-medium text-gray-600">Max Stay</div>
+                        </td>
+                        @for (date of getCalendarDates(); track getDateString(date)) {
+                          <td class="px-3 py-2 border-r border-gray-200 text-center text-xs cursor-pointer hover:bg-gray-100"
+                              (click)="openRatePlanValueOverride(ratePlan, group.roomType, date, 'max-stay')">
+                            <span class="text-gray-700 font-medium">{{ getARIForRatePlan(ratePlan.id, date)?.maxStay || '-' }}</span>
+                          </td>
+                        }
+                        <td class="sticky right-0 border-l border-gray-200 px-4 py-2 bg-[var(--mat-sys-surface)]"></td>
+                      </tr>
+                    }
+
+                    <!-- Stop Sell Row -->
+                    @if (isRestrictionSelected('stop-sell')) {
+                      <tr class="border-b border-gray-200">
+                        <td class="sticky left-0 border-r border-gray-200 px-6 py-2 pl-8 bg-[var(--mat-sys-surface)]">
+                          <div class="text-xs font-medium text-gray-600">Stop Sell</div>
+                        </td>
+                        @for (date of getCalendarDates(); track getDateString(date)) {
+                          <td class="px-3 py-2 border-r border-gray-200 text-center text-xs cursor-pointer hover:bg-gray-100"
+                              (click)="openRatePlanValueOverride(ratePlan, group.roomType, date, 'stop-sell')">
+                            @if (isStopSellForRatePlan(ratePlan.id, date)) {
+                              <span class="inline-block bg-red-500 text-white px-2 py-0.5 rounded">✓</span>
+                            } @else {
+                              <span class="text-gray-400">-</span>
+                            }
+                          </td>
+                        }
+                        <td class="sticky right-0 border-l border-gray-200 px-4 py-2 bg-[var(--mat-sys-surface)]"></td>
+                      </tr>
+                    }
+                  }
+                }
               }
-            </tr>
-          </thead>
-
-          <!-- Room Type Rows -->
-          <tbody>
-            @for (roomType of getRoomTypes(); track roomType._id || roomType.id || '') {
-              <!-- Rates Row -->
-              <tr class="border-b border-gray-200 hover:bg-blue-50" [class.bg-blue-50]="getEditMode()">
-                <td class="px-4 py-3 font-medium text-gray-900 border-r border-gray-200 sticky left-0 bg-white">
-                  <div class="text-sm font-semibold">{{ roomType.name }}</div>
-                  <div class="text-xs text-gray-500 mt-1">Rate {{ getCurrencySymbol(getSelectedCurrency()) }}</div>
-                </td>
-
-                <!-- Rate Cells -->
-                @for (date of getCalendarDates(); track $index) {
-                  <td 
-                    class="px-2 py-2 border-r border-gray-200 text-center">
-                    @if (getEditMode()) {
-                      <input 
-                        type="number" 
-                        min="0" 
-                        step="0.01"
-                        [value]="getRate(roomType._id || roomType.id || '', date) | number:'1.0-2'"
-                        (change)="updateRate(roomType._id || roomType.id || '', date, +$event.target.value)"
-                        placeholder="0"
-                        class="w-16 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-center">
-                    }
-
-                    @if (!getEditMode()) {
-                      <span class="text-sm font-medium text-gray-900">
-                        {{ getRate(roomType._id || roomType.id || '', date) | number:'1.0-2' }}
-                      </span>
-                    }
-                  </td>
-                }
-              </tr>
-
-              <!-- Availability Row -->
-              <tr class="border-b border-gray-200 bg-gray-50" [class.bg-blue-100]="getEditMode()">
-                <td class="px-4 py-2 border-r border-gray-200 sticky left-0 bg-gray-50">
-                  <div class="text-xs text-gray-600">Availability</div>
-                </td>
-
-                <!-- Availability Cells -->
-                @for (date of getCalendarDates(); track $index) {
-                  <td 
-                    class="px-2 py-2 border-r border-gray-200 text-center">
-                    @if (getEditMode()) {
-                      <input 
-                        type="number" 
-                        min="0" 
-                        step="1"
-                        [value]="getAvailability(roomType._id || roomType.id || '', date)"
-                        (change)="updateAvailability(roomType._id || roomType.id || '', date, +$event.target.value)"
-                        placeholder="0"
-                        class="w-16 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-center">
-                    }
-
-                    @if (!getEditMode()) {
-                      <span class="text-sm font-medium text-gray-600">
-                        {{ getAvailability(roomType._id || roomType.id || '', date) }}
-                      </span>
-                    }
-                  </td>
-                }
-              </tr>
-            }
-          </tbody>
           </table>
         </div>
       }
@@ -223,34 +379,33 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- Action Buttons -->
-  <div class="flex gap-3 justify-end">
-    <button 
-      mat-stroked-button 
-      (click)="resetChanges()"
-      [disabled]="!getEditMode() || getIsSaving()"
-      class="text-gray-700">
-      <mat-icon matButtonIcon>clear</mat-icon>
-      Reset
-    </button>
-
-    <button 
-      matButton="filled"
-      color="primary"
-      (click)="saveChanges()"
-      [disabled]="!getEditMode() || getIsSaving()"
-      class="relative">
-      {{getIsSaving() ? 'Saving...' : 'Save Changes' }}
-    </button>
-  </div>
-
-  <!-- Status Message -->
+    <!-- Status Message -->
   @if (getSaveStatus() === 'success') {
     <div class="bg-green-50 border border-green-200 rounded-md p-4 text-green-700 flex items-center gap-3 animate-in fade-in duration-300">
       <mat-icon class="text-green-600">check_circle</mat-icon>
       <div>
-        <p class="font-medium">Rates synced successfully</p>
+        <p class="font-medium">Rates & restrictions synced successfully</p>
         <p class="text-sm">Your changes have been pushed to Channex and will be distributed to OTA partners.</p>
+      </div>
+    </div>
+  }
+
+  <!-- Warnings Message -->
+  @if (getSaveWarnings().length > 0) {
+    <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 text-yellow-700 animate-in fade-in duration-300">
+      <div class="flex items-start gap-3">
+        <mat-icon class="text-yellow-600 mt-1">warning</mat-icon>
+        <div class="flex-1">
+          <p class="font-medium mb-2">Sync completed with warnings</p>
+          <ul class="text-sm space-y-1">
+            @for (warning of getSaveWarnings(); track warning) {
+              <li class="flex items-start gap-2">
+                <span class="text-yellow-600 mt-1">•</span>
+                <span>{{ warning }}</span>
+              </li>
+            }
+          </ul>
+        </div>
       </div>
     </div>
   }
@@ -259,8 +414,9 @@
     <div class="bg-red-50 border border-red-200 rounded-md p-4 text-red-700 flex items-center gap-3 animate-in fade-in duration-300">
       <mat-icon class="text-red-600">error</mat-icon>
       <div>
-        <p class="font-medium">Failed to sync rates</p>
+        <p class="font-medium">Failed to sync rates & restrictions</p>
         <p class="text-sm">Please check your connection and try again.</p>
       </div>
     </div>
   }
+</div>

@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { HotelSettings, Room, RoomType, Guest, Reservation } from '../models/hotel.models';
+import {  Room, RoomType, Guest, Reservation } from '../models/hotel.models';
+import { HotelSettings } from '../models';
 
 @Injectable({
   providedIn: 'root'

@@ -1,0 +1,605 @@
+<app-page-header 
+  title="Booking Details"
+  subtitle="View complete booking information and guest details"
+>
+  <ng-container actions>
+    @if (!bookingResource.isLoading() && booking()) {
+      @if (hasUnassignedRooms()) {
+        <button matButton="tonal" color="primary" (click)="openAssignRoomDialog()">
+          <mat-icon>bed</mat-icon>
+          Assign Rooms
+        </button>
+      }
+      <button matButton="outlined" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Bookings
+      </button>
+    }
+  </ng-container>
+</app-page-header>
+
+<!-- Loading State -->
+@if (bookingResource.isLoading()) {
+  <div class="flex justify-center items-center py-16">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+}
+
+<!-- Error State -->
+@if (bookingResource.error()) {
+  <div class="container py-8">
+    <mat-card appearance="outlined" class="max-w-md mx-auto">
+      <mat-card-content class="py-12!">
+        <div class="flex flex-col items-center text-center gap-4">
+          <mat-icon class="text-red-500 text-5xl!">error</mat-icon>
+          <h3 class="text-lg font-semibold text-gray-900">Failed to Load Booking</h3>
+          <p class="text-gray-600">{{ bookingResource.error()?.message }}</p>
+          <button matButton="outlined" color="primary" (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+            Go Back
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+}
+
+<!-- Booking Details Content -->
+@if (!bookingResource.isLoading() && booking()) {
+  <div class="container py-8">
+    <!-- Booking Header Overview -->
+    <div class="mb-6">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ booking()?.unique_id }}</h2>
+      <div class="flex items-center gap-2 mb-4">
+        <mat-chip 
+          [color]="getStatusChip(booking()?.status).color"
+          selected
+        >
+          {{ getStatusChip(booking()?.status).label | uppercase }}
+        </mat-chip>
+        <mat-chip 
+          [ngClass]="getPaymentStatus(booking()) === 'Paid' ? 'bg-green-100! text-green-800!' : getPaymentStatus(booking()) === 'Prepaid' ? 'bg-blue-100! text-blue-800!' : 'bg-amber-100! text-amber-800!'"
+        >
+          {{ getPaymentStatus(booking()) }}
+        </mat-chip>
+      </div>
+    </div>
+
+    <!-- Tabbed Content -->
+    <mat-tab-group 
+      [selectedIndex]="selectedTabIndex()"
+      (selectedIndexChange)="selectedTabIndex.set($event)"
+      class="booking-tabs"
+    >
+      <!-- Info Tab -->
+      <mat-tab label="Info">
+        <ng-template mat-tab-label>
+          <mat-icon class="mr-2">info</mat-icon>
+          Info
+        </ng-template>
+        
+        <div class="pt-6">
+          <!-- Guest Information, Stay Period, Occupancy -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Guest Information Card -->
+            <mat-card appearance="outlined">
+              <mat-card-header>
+                <mat-card-title>Guest Information</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <mat-list>
+                  <mat-list-item>
+                    <span matListItemTitle>Name</span>
+                    <span matListItemMeta>{{ customerName() }}</span>
+                  </mat-list-item>
+                  <mat-list-item>
+                    <span matListItemTitle>Email</span>
+                    <span matListItemMeta>
+                      @if (booking()?.customer?.mail) {
+                        <a href="mailto:{{ booking()?.customer?.mail }}" class="text-blue-600 hover:underline">
+                          {{ booking()?.customer?.mail }}
+                        </a>
+                      } @else {
+                        N/A
+                      }
+                    </span>
+                  </mat-list-item>
+                  <mat-list-item>
+                    <span matListItemTitle>Phone</span>
+                    <span matListItemMeta>
+                      @if (booking()?.customer?.phone) {
+                        <a href="tel:{{ booking()?.customer?.phone }}" class="text-blue-600 hover:underline">
+                          {{ booking()?.customer?.phone }}
+                        </a>
+                      } @else {
+                        N/A
+                      }
+                    </span>
+                  </mat-list-item>
+                  <mat-list-item>
+                    <span matListItemTitle>Country</span>
+                    <span matListItemMeta>{{ booking()?.customer?.country || 'N/A' }}</span>
+                  </mat-list-item>
+                </mat-list>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Stay Period & Occupancy Stack -->
+            <div class="space-y-6">
+              <!-- Stay Period -->
+              <mat-card appearance="outlined">
+                <mat-card-header>
+                  <mat-card-title>Stay Period</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <mat-list>
+                    <mat-list-item>
+                      <span matListItemTitle>Check-in</span>
+                      <span matListItemMeta>{{ formatDate(booking()?.arrival_date) || 'N/A' }}</span>
+                    </mat-list-item>
+                    <mat-list-item>
+                      <span matListItemTitle>Check-out</span>
+                      <span matListItemMeta>{{ formatDate(booking()?.departure_date) || 'N/A' }}</span>
+                    </mat-list-item>
+                    <mat-list-item>
+                      <span matListItemTitle>Nights</span>
+                      <span matListItemMeta class="text-lg font-bold">
+                        {{ calculateNights(booking()?.arrival_date, booking()?.departure_date) || 'N/A' }}
+                      </span>
+                    </mat-list-item>
+                  </mat-list>
+                </mat-card-content>
+              </mat-card>
+
+              <!-- Occupancy -->
+              <mat-card appearance="outlined">
+                <mat-card-header>
+                  <mat-card-title>Occupancy</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="grid grid-cols-3 gap-3">
+                    <div class="text-center">
+                      <div class="text-2xl font-bold text-purple-600">{{ booking()?.occupancy?.adults || 0 }}</div>
+                      <div class="text-xs text-gray-600 mt-2">Adults</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="text-2xl font-bold text-pink-600">{{ booking()?.occupancy?.children || 0 }}</div>
+                      <div class="text-xs text-gray-600 mt-2">Children</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="text-2xl font-bold text-amber-600">{{ booking()?.rooms?.length || 0 }}</div>
+                      <div class="text-xs text-gray-600 mt-2">Rooms</div>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+
+          <!-- OTA & Payment Info Cards -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- OTA Information Card -->
+            <mat-card appearance="outlined">
+              <mat-card-header>
+                <mat-card-title>OTA Information</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <mat-list>
+                  <mat-list-item>
+                    <span matListItemTitle>OTA Provider</span>
+                    <span matListItemMeta>{{ booking()?.ota_name || 'N/A' }}</span>
+                  </mat-list-item>
+                  <mat-list-item>
+                    <span matListItemTitle>Booking ID</span>
+                    <span matListItemMeta class="break-all">{{ booking()?.ota_reservation_code || 'N/A' }}</span>
+                  </mat-list-item>
+                  <mat-list-item>
+                    <span matListItemTitle>OTA Commission</span>
+                    <span matListItemMeta>
+                      @if (booking()?.ota_commission) {
+                        {{ formatCurrency(booking()?.ota_commission, booking()?.currency) }}
+                      } @else {
+                        N/A
+                      }
+                    </span>
+                  </mat-list-item>
+                  <mat-list-item>
+                    <span matListItemTitle>Received At</span>
+                    <span matListItemMeta>{{ booking()?.inserted_at ? (booking()?.inserted_at | slice:0:10) : 'N/A' }}</span>
+                  </mat-list-item>
+                </mat-list>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Payment Information Card -->
+            <mat-card appearance="outlined">
+              <mat-card-header>
+                <mat-card-title>Payment Information</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <mat-list>
+                  <mat-list-item>
+                    <span matListItemTitle>Total Amount</span>
+                    <span matListItemMeta class="text-lg font-bold">{{ formatCurrency(booking()?.amount, booking()?.currency) }}</span>
+                  </mat-list-item>
+                  <mat-list-item>
+                    <span matListItemTitle>Payment Collect</span>
+                    <span matListItemMeta>
+                      @if (booking()?.payment_collect === 'ota') {
+                        <span class="text-green-600 font-semibold">OTA (Pre-paid)</span>
+                      } @else if (booking()?.payment_collect === 'property') {
+                        <span class="text-amber-600 font-semibold">Property (On arrival)</span>
+                      } @else {
+                        <span class="text-gray-600">Not specified</span>
+                      }
+                    </span>
+                  </mat-list-item>
+                  @if (booking()?.payment_type) {
+                    <mat-list-item>
+                      <span matListItemTitle>Payment Method</span>
+                      <span matListItemMeta>
+                        @if (booking()?.payment_type === 'credit_card') {
+                          <span>Credit Card</span>
+                        } @else if (booking()?.payment_type === 'bank_transfer') {
+                          <span>Bank Transfer</span>
+                        } @else {
+                          <span>{{ booking()?.payment_type }}</span>
+                        }
+                      </span>
+                    </mat-list-item>
+                  }
+                  @if (booking()?.guarantee) {
+                    <mat-list-item>
+                      <span matListItemTitle>Payment Guarantee</span>
+                      <span matListItemMeta>{{ booking()?.guarantee?.card_number || 'Card on file' }}</span>
+                    </mat-list-item>
+                  }
+                </mat-list>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <!-- Rooms & Pricing -->
+          <mat-card class="mb-6 p-2" appearance="outlined">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <mat-icon class="text-blue-600">bed</mat-icon>
+              Room Details
+            </h3>
+            @if (booking()?.rooms && booking()?.rooms.length > 0) {
+              <mat-accordion class="space-y-2">
+                @for (room of booking()?.rooms; track room.booking_room_id; let i = $index) {
+                  <mat-expansion-panel appearance="outlined">
+                    <mat-expansion-panel-header>
+                      <mat-panel-title>
+                        <div class="flex items-center justify-between w-full pr-4">
+                          <div class="flex items-center gap-3">
+                            <mat-icon class="text-blue-600">door_front</mat-icon>
+                            <span class="font-semibold">{{ getRoomTypeName(room?.room_type_id) }}</span>
+                          </div>
+                          <span class="text-lg font-bold text-blue-600">
+                            {{ formatCurrency(room?.amount, booking()?.currency) }}
+                          </span>
+                        </div>
+                      </mat-panel-title>
+                      <mat-panel-description>
+                        {{ formatDate(room?.checkin_date) }} → {{ formatDate(room?.checkout_date) }}
+                      </mat-panel-description>
+                    </mat-expansion-panel-header>
+
+                    <div class="space-y-6 py-4">
+                      <!-- Room Details Grid -->
+                      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pb-4 border-b">
+                        <div>
+                          <span class="text-xs text-gray-600 font-semibold">ADULTS</span>
+                          <div class="font-bold text-gray-900 mt-1">{{ room?.occupancy?.adults || 0 }}</div>
+                        </div>
+                        <div>
+                          <span class="text-xs text-gray-600 font-semibold">CHILDREN</span>
+                          <div class="font-bold text-gray-900 mt-1">{{ room?.occupancy?.children || 0 }}</div>
+                        </div>
+                        <div>
+                          <span class="text-xs text-gray-600 font-semibold">INFANTS</span>
+                          <div class="font-bold text-gray-900 mt-1">{{ room?.occupancy?.infants || 0 }}</div>
+                        </div>
+                        @if (room?.occupancy?.ages && room?.occupancy?.ages.length > 0) {
+                          <div>
+                            <span class="text-xs text-gray-600 font-semibold">CHILDREN AGES</span>
+                            <div class="font-bold text-gray-900 mt-1">{{ room?.occupancy?.ages?.join(', ') }}</div>
+                          </div>
+                        }
+                      </div>
+
+                      <!-- Daily Price Breakdown in Mat-List -->
+                      @if (room?.days && (room?.days | keyvalue)!.length > 0) {
+                        <div>
+                          <h4 class="text-sm font-semibold text-gray-700 mb-3">Price Breakdown</h4>
+                          <mat-list class="pricing-list">
+                            @for (day of room?.days | keyvalue; track day.key) {
+                              <mat-list-item>
+                                <span matListItemTitle>{{ day.key }}</span>
+                                <span matListItemMeta class="font-semibold text-gray-900">
+                                  {{ formatCurrency(day.value, booking()?.currency) }}
+                                </span>
+                              </mat-list-item>
+                            }
+                            <mat-divider></mat-divider>
+                            <mat-list-item class="font-semibold">
+                              <span matListItemTitle>Subtotal</span>
+                              <span matListItemMeta class="font-bold text-blue-600 text-lg">
+                                {{ formatCurrency(room?.amount, booking()?.currency) }}
+                              </span>
+                            </mat-list-item>
+                          </mat-list>
+                        </div>
+                      }
+
+                      <!-- Meal Plan if present -->
+                      @if (room?.meta?.meal_plan) {
+                        <div class="bg-green-50 rounded p-3 border border-green-200">
+                          <h5 class="text-sm font-semibold text-green-900 mb-2">Meal Plan</h5>
+                          <p class="text-sm text-green-800">{{ room?.meta?.meal_plan }}</p>
+                        </div>
+                      }
+
+                      <!-- Taxes if present -->
+                      @if (room?.taxes && room?.taxes.length > 0) {
+                        <div>
+                          <h5 class="text-sm font-semibold text-gray-700 mb-3">Taxes & Fees</h5>
+                          <div class="space-y-2">
+                            @for (tax of room?.taxes; track tax.name) {
+                              <div class="flex items-center justify-between bg-amber-50 p-3 rounded">
+                                <div>
+                                  <div class="text-sm font-medium text-gray-900">{{ tax.name }}</div>
+                                  <div class="text-xs text-gray-600">
+                                    @if (tax.is_inclusive) {
+                                      <span class="text-green-600">(Included)</span>
+                                    } @else {
+                                      <span class="text-amber-600">(Extra)</span>
+                                    }
+                                  </div>
+                                </div>
+                                <div class="font-semibold text-gray-900">
+                                  {{ formatCurrency(tax.total_price, booking()?.currency) }}
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+
+                      <!-- Guests if present -->
+                      @if (room?.guests && room?.guests.length > 0) {
+                        <div class="pt-2 border-t">
+                          <h5 class="text-sm font-semibold text-gray-700 mb-2">Guests</h5>
+                          <div class="space-y-1 text-sm">
+                            @for (guest of room?.guests; track guest.name) {
+                              <div class="text-gray-700">
+                                {{ guest.name }} {{ guest.surname }}
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </mat-expansion-panel>
+                }
+              </mat-accordion>
+            } @else {
+              <div class="text-center py-8 text-gray-600">
+                No room information available
+              </div>
+            }
+        </mat-card>
+
+          <!-- Price Summary -->
+          <mat-card appearance="outlined">
+            <mat-card-header>
+              <mat-card-title>Price Summary</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <mat-list>
+                <mat-list-item>
+                  <span matListItemTitle>Rooms Total</span>
+                  <span matListItemLine class="text-right font-semibold">
+                    {{ formatCurrency(getTotalRoomPrice(booking()), booking()?.currency) }}
+                  </span>
+                </mat-list-item>
+                @if (getTotalTaxes(booking()) > 0) {
+                  <mat-list-item>
+                    <span matListItemTitle>Taxes & Fees</span>
+                    <span matListItemLine class="text-right font-semibold">
+                      {{ formatCurrency(getTotalTaxes(booking()), booking()?.currency) }}
+                    </span>
+                  </mat-list-item>
+                }
+                @if (booking()?.ota_commission) {
+                  <mat-list-item class="text-amber-700">
+                    <span matListItemTitle>OTA Commission</span>
+                    <span matListItemLine class="text-right font-semibold">
+                      -{{ formatCurrency(booking()?.ota_commission, booking()?.currency) }}
+                    </span>
+                  </mat-list-item>
+                }
+                <mat-divider></mat-divider>
+                <mat-list-item>
+                  <span matListItemTitle class="text-lg font-bold">Total Amount</span>
+                  <span matListItemLine class="text-right text-lg font-bold text-blue-600">
+                    {{ formatCurrency(booking()?.amount, booking()?.currency) }}
+                  </span>
+                </mat-list-item>
+              </mat-list>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Additional Information -->
+          @if (booking()?.notes || booking()?.services || booking()?.guarantee) {
+            <mat-card appearance="outlined" class="mt-6">
+              <mat-card-header>
+                <mat-card-title>Additional Information</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="space-y-6">
+                  @if (booking()?.notes) {
+                    <div>
+                      <h4 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <mat-icon class="text-base">note</mat-icon>
+                        Guest Notes
+                      </h4>
+                      <div class="bg-gray-50 rounded p-4 text-sm text-gray-700 whitespace-pre-wrap">
+                        {{ booking()?.notes }}
+                      </div>
+                    </div>
+                  }
+
+                  @if (booking()?.services && booking()?.services.length > 0) {
+                    <div>
+                      <h4 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <mat-icon class="text-base">room_service</mat-icon>
+                        Services
+                      </h4>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        @for (service of booking()?.services; track service.name) {
+                          <div class="bg-purple-50 rounded p-3 text-sm">
+                            <div class="font-medium text-gray-900">{{ service.name }}</div>
+                            <div class="text-gray-700 text-xs mt-1">
+                              {{ service.nights || 1 }} night{{ (service.nights || 1) > 1 ? 's' : '' }} × 
+                              {{ service.persons || 1 }} person{{ (service.persons || 1) > 1 ? 's' : '' }}
+                              - {{ formatCurrency(service.total_price, booking()?.currency) }}
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  @if (booking()?.guarantee) {
+                    <div>
+                      <h4 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <mat-icon class="text-base">credit_card</mat-icon>
+                        Payment Guarantee
+                      </h4>
+                      <mat-list>
+                        <mat-list-item>
+                          <span matListItemTitle>Card Number</span>
+                          <span matListItemLine>{{ booking()?.guarantee?.card_number }}</span>
+                        </mat-list-item>
+                        <mat-list-item>
+                          <span matListItemTitle>Card Type</span>
+                          <span matListItemLine>{{ booking()?.guarantee?.card_type }}</span>
+                        </mat-list-item>
+                        <mat-list-item>
+                          <span matListItemTitle>Cardholder</span>
+                          <span matListItemLine>{{ booking()?.guarantee?.cardholder_name }}</span>
+                        </mat-list-item>
+                        <mat-list-item>
+                          <span matListItemTitle>Expiration</span>
+                          <span matListItemLine>{{ booking()?.guarantee?.expiration_date }}</span>
+                        </mat-list-item>
+                        @if (booking()?.guarantee?.is_virtual) {
+                          <mat-list-item>
+                            <span matListItemTitle>Type</span>
+                            <mat-chip class="bg-blue-100! text-blue-800!" matListItemLine>Virtual Card</mat-chip>
+                          </mat-list-item>
+                        }
+                      </mat-list>
+                    </div>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- Timeline Tab (Events) -->
+      <mat-tab label="Timeline">
+        <ng-template mat-tab-label>
+          <mat-icon class="mr-2">timeline</mat-icon>
+          Timeline
+        </ng-template>
+        
+        <div class="pt-6">
+          <!-- Loading State for Events -->
+          @if (bookingEventsResource.isLoading()) {
+            <div class="flex justify-center items-center py-12">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          }
+
+          <!-- Events Content -->
+          @if (!bookingEventsResource.isLoading() && bookingEvents().length > 0) {
+            <div class="space-y-4">
+              @for (event of bookingEvents(); track event.id) {
+                <div class="flex gap-4">
+                  <!-- Timeline Icon -->
+                  <div class="flex flex-col items-center">
+                    <div class="rounded-full p-2 bg-blue-100">
+                      <mat-icon class="text-blue-600 text-base">{{ getEventIcon(event.attributes.event) }}</mat-icon>
+                    </div>
+                    @if (!$last) {
+                      <div class="w-0.5 h-12 bg-gray-300 mt-2"></div>
+                    }
+                  </div>
+
+                  <!-- Timeline Content -->
+                  <div class="flex-1 pb-6">
+                    <div class="flex items-start justify-between">
+                      <div>
+                        <h4 class="font-semibold text-gray-900">{{ getEventLabel(event.attributes.event) }}</h4>
+                        <p class="text-sm text-gray-600 mt-1">
+                          {{ formatDateTime(event.attributes.inserted_at) }}
+                        </p>
+                      </div>
+                      @if (event.attributes.user_name) {
+                        <div class="text-sm text-gray-600 text-right">
+                          <div>{{ event.attributes.user_name }}</div>
+                          @if (event.attributes.user_email) {
+                            <div class="text-xs text-gray-500">{{ event.attributes.user_email }}</div>
+                          }
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Event Details -->
+                    @if (event.attributes.notes && (event.attributes.notes | keyvalue)!.length > 0) {
+                      <div class="mt-3 bg-gray-50 rounded p-3 text-sm space-y-2">
+                        @for (note of event.attributes.notes | keyvalue; track note.key) {
+                          <div>
+                            <span class="text-gray-600">{{ note.key | titlecase }}:</span>
+                            @if (isBoolean(note.value)) {
+                              <span class="font-semibold text-gray-900">
+                                @if (note.value) { Yes } @else { No }
+                              </span>
+                            } @else {
+                              <span class="font-semibold text-gray-900">{{ note.value }}</span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
+
+                    <!-- IP Address if present -->
+                    @if (event.attributes.ip_address) {
+                      <div class="mt-2 text-xs text-gray-500">
+                        <mat-icon class="align-text-bottom text-base">public</mat-icon>
+                        {{ event.attributes.ip_address }}
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Empty State -->
+          @if (!bookingEventsResource.isLoading() && bookingEvents().length === 0) {
+            <div class="text-center py-12 text-gray-600">
+              <mat-icon class="text-5xl! text-gray-400 mb-4">history</mat-icon>
+              <p>No events available</p>
+            </div>
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+}

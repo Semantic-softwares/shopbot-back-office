@@ -1,0 +1,99 @@
+<h2 mat-dialog-title class="flex items-center gap-2">
+  <mat-icon class="text-blue-600">bed</mat-icon>
+  Assign Rooms to Booking
+</h2>
+
+<mat-dialog-content class="max-h-[70vh] overflow-y-auto">
+  @if (availableRoomsLoading()) {
+    <div class="flex justify-center items-center py-12">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (availableRoomsByType().size === 0) {
+    <div class="text-center py-8 text-gray-600">
+      <mat-icon class="text-4xl! text-gray-400 mb-2">no_rooms</mat-icon>
+      <p>No available rooms found</p>
+    </div>
+  } @else {
+    <form [formGroup]="assignmentForm" class="space-y-4">
+      @for (otaRoom of data.rooms; track $index; let i = $index) {
+        <mat-card appearance="outlined" class="p-4 space-y-2">
+          <!-- Room Header -->
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3 flex-1">
+              <div class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-semibold text-sm">
+                {{ i + 1 }}
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900 flex items-center gap-2">
+                  <mat-icon class="text-base text-blue-600">door_front</mat-icon>
+                  {{ getRoomTypeName(otaRoom?.room_type_id) }}
+                </h3>
+                <p class="text-xs text-gray-600 mt-1">
+                  {{ formatGuestNames(otaRoom.guests) }}
+                </p>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm text-gray-600">Price</div>
+              <div class="text-lg font-semibold text-blue-600">
+                {{ otaRoom.amount | currency: data.currency }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Room Selection Dropdown -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Select Available Room</mat-label>
+            <mat-select [formControlName]="'room_' + i">
+              @if ((getAvailableRoomsForType(otaRoom?.room_type_id) || []).length === 0) {
+                <mat-option disabled>No available rooms</mat-option>
+              } @else {
+                @for (room of getAvailableRoomsForType(otaRoom?.room_type_id); track room._id) {
+                  <mat-option [value]="room._id">
+                    <span class="font-semibold">{{ room.roomNumber }}</span>
+                    <span class="text-gray-600 ml-2">- {{ room.roomType?.name || 'Standard' }}</span>
+                  </mat-option>
+                }
+              }
+            </mat-select>
+            @if (assignmentForm.get('room_' + i)?.invalid && assignmentForm.get('room_' + i)?.touched) {
+              <mat-error>Please select a room</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Room Details -->
+          @if (assignmentForm.get('room_' + i)?.value) {
+            @for (availRoom of getAvailableRoomsForType(otaRoom?.room_type_id); track availRoom._id) {
+              @if (availRoom._id === assignmentForm.get('room_' + i)?.value) {
+                <div class="mt-3 pt-3 border-t border-gray-200 text-sm text-gray-600">
+                  <div class="flex justify-between">
+                    <span>Room Type:</span>
+                    <span class="font-medium">{{ availRoom.roomType?.name }}</span>
+                  </div>
+                  @if (availRoom.floor) {
+                    <div class="flex justify-between mt-1">
+                      <span>Floor:</span>
+                      <span class="font-medium">{{ availRoom.floor }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            }
+          }
+        </mat-card>
+      }
+    </form>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="gap-2">
+  <button matButton (click)="cancel()">Cancel</button>
+  <button
+    matButton="filled"
+    color="primary"
+    [disabled]="!isFormValid() || submitting()"
+    (click)="submit()"
+  >
+    {{submitting() ? 'Assigning...' : 'Assign Rooms'}}
+  </button>
+</mat-dialog-actions>

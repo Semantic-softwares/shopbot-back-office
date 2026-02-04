@@ -57,8 +57,7 @@ interface SetupStep {
     MatSelectModule,
     MatDatepickerModule, SanitizeUrlPipe, SanitizeUrlPipe,
     PageHeaderComponent,
-    MatListModule,
-    MatDialogClose
+    MatListModule
 ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './channel-management-mapping.html',
@@ -104,13 +103,6 @@ export class ChannelManagementMapping implements OnInit {
     },
     {
       id: 3,
-      title: 'Push Availability',
-      description: 'Send your availability and rates',
-      status: 'pending',
-      icon: 'event_available',
-    },
-    {
-      id: 4,
       title: 'Connect Channels',
       description: 'Link to Booking.com, Airbnb, etc.',
       status: 'pending',
@@ -173,8 +165,8 @@ export class ChannelManagementMapping implements OnInit {
     const idx = event?.selectedIndex ?? 0;
     this.setCurrentStep(idx);
 
-    // If user navigated to Step 4 (index 3) and there are connected channels, auto-open iframe
-    if (idx === 3) {
+    // If user navigated to Step 3 (index 2) and there are connected channels, auto-open iframe
+    if (idx === 2) {
       const connected = this.channexStatus()?.channex?.connectedChannels;
       if (connected && connected.length > 0 && !this.channelIframeUrl()) {
         this.connectChannels();
@@ -474,7 +466,7 @@ export class ChannelManagementMapping implements OnInit {
     if (!storeId) return;
 
     this.isLoadingIframe.set(true);
-    this.updateStepStatus(3, 'in-progress');
+    this.updateStepStatus(2, 'in-progress');
 
     this.channexService.getChannelConnectionKey(storeId).subscribe({
       next: (response) => {
@@ -485,7 +477,7 @@ export class ChannelManagementMapping implements OnInit {
       },
       error: (error) => {
         this.isLoadingIframe.set(false);
-        this.updateStepStatus(3, 'error', error.error?.message || 'Failed to load channel connection');
+        this.updateStepStatus(2, 'error', error.error?.message || 'Failed to load channel connection');
         this.showError(error.error?.message || 'Failed to load channel connection');
       },
     });
@@ -561,6 +553,10 @@ export class ChannelManagementMapping implements OnInit {
    */
   private updateStepStatus(stepIndex: number, status: StepStatus, errorMessage?: string): void {
     const steps = this.setupSteps();
+    if (stepIndex < 0 || stepIndex >= steps.length) {
+      console.warn(`Invalid step index: ${stepIndex}`);
+      return;
+    }
     steps[stepIndex].status = status;
     if (errorMessage) {
       steps[stepIndex].errorMessage = errorMessage;

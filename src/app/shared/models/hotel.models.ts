@@ -51,6 +51,7 @@ export interface RoomType {
   amenities: string[];
   images: string[];
   isActive: boolean;
+  channexRoomTypeId?: string; // Channex integration
   createdAt?: Date;
   updatedAt?: Date;
 }

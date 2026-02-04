@@ -18,6 +18,14 @@ export const DASHBOARD_CHANNEL_ROUTES: Routes = [
         path: 'inventory-rates',
         loadComponent: () => import('./inventory-rates/inventory-rates.component').then(m => m.InventoryRatesComponent)
       },
+      {
+        path: 'settings',
+        loadChildren: () => import('./channel-manager-settings/channel-manager-settings.routes').then(m => m.CHANNEL_MANAGER_SETTINGS_ROUTES)
+      },
+      {
+        path: 'live-booking',
+        loadChildren: () => import('./live-booking/live-booking.route').then(m => m.DASHBOARD_LIVE_BOOKING_ROUTES)
+      },
     ]
   }
 ];

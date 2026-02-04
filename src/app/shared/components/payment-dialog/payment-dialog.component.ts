@@ -35,7 +35,7 @@ export class PaymentDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<PaymentDialogComponent>);
   readonly data = inject<PaymentDialogData>(MAT_DIALOG_DATA);
 
-  selectedPaymentMethod = signal<string>('cash');
+  selectedPaymentMethod = signal<string>('');
 
   paymentMethods = [
     { id: 'POS', name: 'POS Terminal', icon: 'credit_card' },

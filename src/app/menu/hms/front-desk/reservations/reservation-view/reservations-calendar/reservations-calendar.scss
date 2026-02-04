@@ -1,0 +1,185 @@
+// Calendar layout (single scroll surface with sticky header + left column)
+:host {
+  display: block;
+}
+
+.calendar-scroll {
+  position: relative;
+  overflow: auto;
+  max-height: 100%;
+}
+
+// Scrollbar styling
+.calendar-scroll::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.calendar-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.calendar-scroll::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.calendar-scroll::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.calendar-row {
+  display: flex;
+  align-items: stretch;
+}
+
+.calendar-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.calendar-left {
+  position: sticky;
+  left: 0;
+  z-index: 25;
+  background: #fff;
+  border-right: 1px solid #e5e7eb;
+  min-width: 12rem;
+  max-width: 12rem;
+  display: flex;
+  align-items: center;
+}
+
+.calendar-cell-left {
+  padding: 0 1rem;
+}
+
+.calendar-header-cell {
+  height: 56px;
+}
+
+.calendar-group {
+  background: #f3f4f6;
+}
+
+.calendar-group .calendar-left {
+  background: #f3f4f6;
+}
+
+.calendar-group-cell {
+  height: 32px;
+}
+
+.calendar-room-cell {
+  height: 48px;
+}
+
+.calendar-row-cells {
+  display: flex;
+}
+
+.calendar-cell {
+  flex: 0 0 auto;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #f1f5f9;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-cell-header {
+  height: 56px;
+  flex-direction: column;
+  justify-content: center;
+  user-select: none;
+}
+
+.calendar-cell-group {
+  height: 32px;
+  background: #f3f4f6;
+}
+
+.calendar-cell-room {
+  height: 48px;
+  align-items: stretch;
+  overflow: visible;
+}
+
+.reservation-block {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  z-index: 10;
+}
+
+.reservation-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 0 6px;
+  overflow: hidden;
+}
+
+.reservation-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.reservation-nights {
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0 4px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.reservation-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reservation-source {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 2px;
+}
+
+.reservation-source-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  font-size: 14px;
+  line-height: 14px;
+}
+
+.reservation-block:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 20;
+}

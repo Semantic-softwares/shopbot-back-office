@@ -105,16 +105,17 @@ export class MenuComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // Connect to socket on component init
     const storeId = this.storeStore.selectedStore()?._id;
-    if (storeId) {
+    console.log('🔌 [MENU] Menu component ngOnInit - Store ID:', storeId);
+    
+    if (storeId && !this.socketService.isConnected()) {
+      console.log('🔌 [MENU] Connecting socket...');
       this.socketService.connect(storeId);
-      console.log('🔌 Socket connected on menu component init');
     }
   }
 
   ngOnDestroy() {
-    // Disconnect socket when component is destroyed
-    // this.socketService.disconnect();
-    console.log('🔌 Socket disconnected on menu component destroy');
+    // Socket listeners are now managed by SocketService - no cleanup needed here
+    // This ensures they persist across component navigation
   }
 
   navigateToModule(moduleType: 'erp' | 'hotel' | 'pos'): void {

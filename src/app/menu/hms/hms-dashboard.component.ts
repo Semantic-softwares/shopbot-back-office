@@ -97,9 +97,9 @@ export class HmsDashboardComponent {
           permissions: ['hotel.reservations.view', 'hotel.reservations.create'],
         },
         {
-          icon: 'meeting_room',
-          label: 'Update Room',
-          link: './channel-management/update-room',
+          icon: 'tv_options_input_settings',
+          label: 'Settings',
+          link: './channel-management/settings',
           permissions: ['hotel.reservations.checkin', 'hotel.reservations.checkout'],
         },
         {

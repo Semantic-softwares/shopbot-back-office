@@ -1,4 +1,4 @@
-import { Component, inject, signal, ViewChild } from '@angular/core';
+import { Component, inject, signal, ViewChild, OnInit } from '@angular/core';
 import { TableStore } from '../../../shared/stores/table.store';
 import { TableCategoryStore } from '../../../shared/stores/table-category.store';
 import { CommonModule } from '@angular/common';
@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { TableCardComponent } from '../../../shared/components/table-card/table-card.component';
@@ -24,6 +25,7 @@ import {
   PaymentDialogResult
 } from '../../../shared/components/payment-dialog/payment-dialog.component';
 import { SearchComponent } from '../../../shared/components/search/search.component';
+import { NoRecordComponent } from '../../../shared/components/no-record/no-record.component';
 
 @Component({
   selector: 'app-tables',
@@ -37,14 +39,16 @@ import { SearchComponent } from '../../../shared/components/search/search.compon
     MatFormFieldModule,
     MatInputModule,
     MatButtonToggleModule,
+    MatProgressSpinnerModule,
     FormsModule,
     TableCardComponent,
-    SearchComponent
+    SearchComponent,
+    NoRecordComponent
   ],
   templateUrl: './tables.html',
   styleUrl: './tables.scss',
 })
-export class Tables {
+export class Tables implements OnInit {
   public searchFilter: string = "";
   public readonly tableStore = inject(TableStore);
   public readonly tableCategoryStore = inject(TableCategoryStore);
@@ -59,6 +63,13 @@ export class Tables {
   @ViewChild("searchComponent") searchComponent!: SearchComponent;
   displayedColumns: string[] = ['name', 'seats', 'category', 'status'];
 
+  ngOnInit(): void {
+    // Reload tables whenever visiting this component
+    const selectedStore = this.storeStore.selectedStore();
+    if (selectedStore?._id) {
+      this.tableStore.getTables$(selectedStore._id);
+    }
+  }
 
   onSearchChange(query: string): void {
     this.searchQuery.set(query);

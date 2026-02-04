@@ -5,12 +5,12 @@
   <div class=" rounded-lg p-6 mb-6 text-center">
     <p class="text-sm text-gray-600 mb-2">Total Amount:</p>
     <p class="text-3xl font-bold text-gray-900">
-      {{ data.currency }} {{ data.totalAmount | number:'1.2-2' }}
+      {{ data.totalAmount | number:'1.2-2' }}
     </p>
   </div>
 
   <!-- Payment Method Selection -->
-  <div>
+
     <mat-button-toggle-group 
       [value]="selectedPaymentMethod()"
       (change)="onPaymentMethodChange($event.value)">
@@ -24,7 +24,7 @@
         </mat-button-toggle>
       }
     </mat-button-toggle-group>
-  </div>
+  
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="border-2 border-outline-variant">
@@ -38,7 +38,7 @@
   <button 
     matButton="filled" 
     color="primary" 
-    
+    [disabled]="!selectedPaymentMethod()"
     (click)="onConfirmPayment()">
     Confirm Payment
   </button>

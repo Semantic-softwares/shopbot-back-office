@@ -1,0 +1,255 @@
+<!-- Page Header -->
+<app-page-header
+  [title]="isEditing ? 'Edit Tax Set' : 'Create Tax Set'"
+  [subtitle]="isEditing ? 'Update the tax set details' : 'Create a new tax set'">
+  <ng-container actions>
+    <a
+      matButton="outlined"
+      type="button"
+      (click)="cancel()"
+      [disabled]="isSaving"
+      class="px-8"
+    >
+      Cancel
+    </a>
+    <button
+      matButton="filled"
+      color="primary"
+      (click)="saveTaxSet()"
+      [disabled]="isSaving || !taxSetForm.valid"
+      class="px-4"
+    >
+      @if (isSaving) {
+        Saving...
+      } @else {
+        {{ isEditing ? 'Update Tax Set' : 'Create Tax Set' }}
+      }
+    </button>
+  </ng-container>
+</app-page-header>
+
+<!-- Form Card -->
+<mat-card appearance="outlined" class="mt-6">
+  <mat-card-header class="mb-3">
+    <mat-card-title class="text-xl font-bold text-gray-900">Tax Set Details</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content class="pt-6">
+    <form [formGroup]="taxSetForm" (ngSubmit)="saveTaxSet()" class="space-y-6">
+      <!-- Basic Information -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Title -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Tax Set Title</mat-label>
+          <input matInput formControlName="title" placeholder="e.g., Standard Tax Set" />
+          <mat-hint>Give your tax set a clear title</mat-hint>
+          @if (taxSetForm.get('title')?.hasError('required')) {
+            <mat-error>Tax set title is required</mat-error>
+          }
+          @if (taxSetForm.get('title')?.hasError('minlength')) {
+            <mat-error>Title must be at least 3 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Currency -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Currency</mat-label>
+          <input matInput formControlName="currency" placeholder="e.g., USD" maxlength="3" />
+          <mat-hint>ISO 4217 currency code</mat-hint>
+          @if (taxSetForm.get('currency')?.hasError('required')) {
+            <mat-error>Currency is required</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Taxes Section -->
+      <mat-card appearance="outlined">
+        <mat-card-header class="mb-3 flex items-center justify-between">
+          <mat-card-title class="text-lg font-semibold text-gray-900">Taxes</mat-card-title>
+          <button
+            type="button"
+            mat-icon-button
+            (click)="addTax()"
+            matTooltip="Add tax"
+            class="text-blue-600"
+          >
+            <mat-icon>add</mat-icon>
+          </button>
+        </mat-card-header>
+
+        <mat-card-content class="pt-6">
+          @if (taxesLength === 0) {
+            <p class="text-gray-500 text-center py-4">No taxes added yet. Click the + button to add a tax.</p>
+          }
+          
+          @if (taxesLength > 0) {
+            <div class="space-y-4 mb-6">
+              <div formArrayName="taxes" cdkDropList (cdkDropListDropped)="dropTax($event)">
+                @for (taxControl of taxesArray.controls; track $index) {
+                  <div [formGroupName]="$index" class="p-4 border border-outline-variant rounded-lg  mb-3" cdkDrag>
+                    <div class="flex items-start justify-between mb-4">
+                      <div class="flex items-center gap-3 flex-1">
+                        <mat-icon cdkDragHandle class="cursor-move text-gray-400">drag_indicator</mat-icon>
+                        <div>
+                          <h4 class="font-semibold text-gray-900">Group #{{ $index + 1 }}</h4>
+                          <p class="text-sm text-gray-600">{{ getTaxTitle($index) }}</p>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <button
+                          type="button"
+                          mat-icon-button
+                          (click)="removeTax($index)"
+                          class="text-gray-400 hover:text-red-600"
+                          matTooltip="Remove"
+                        >
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-sm">
+                      <div class="flex items-center gap-4">
+                        <div>
+                          <span class="text-gray-500">Title:</span>
+                          <span class="font-medium text-gray-900 ml-1">{{ getTaxTitle($index) }}</span>
+                        </div>
+                        <div>
+                          <span class="text-gray-500">Inclusive:</span>
+                          <span class="font-medium text-gray-900 ml-1">-</span>
+                        </div>
+                      </div>
+                      <div>
+                        <span class="text-gray-500">Rate:</span>
+                        <span class="font-semibold text-gray-900 ml-1">{{ getTaxRate($index) }}%</span>
+                      </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2 italic">
+                      Tax Group {{ $index + 1 }} is calculated first and the sum is used for next group
+                    </p>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Tax Calculator -->
+            
+            <h3 class="font-semibold text-gray-900 mb-4">Tax calculator</h3>
+            <div class="space-y-4  p-4 rounded-lg border border-outline-variant">
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Sell date :</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="sell_date" />
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
+
+              <!-- Multiple Net Prices -->
+              <div formArrayName="net_prices" class="space-y-3">
+                @for (priceControl of netPricesArray.controls; track $index) {
+                  <div class="flex items-center gap-2">
+                    <mat-form-field appearance="outline" class="flex-1">
+                      <mat-label>Net price :</mat-label>
+                      <input matInput type="number" [formControlName]="$index" placeholder="0" min="0" step="0.01" />
+                    </mat-form-field>
+                    <div class="flex gap-1">
+                      @if ($index === netPricesArray.length - 1) {
+                        <button
+                          type="button"
+                          mat-icon-button
+                          (click)="addNetPrice()"
+                          matTooltip="Add Date"
+                          class="text-blue-600"
+                        >
+                          <mat-icon>add_circle</mat-icon>
+                        </button>
+                      }
+                      @if (netPricesArray.length > 1) {
+                        <button
+                          type="button"
+                          mat-icon-button
+                          (click)="removeNetPrice($index)"
+                          matTooltip="Remove Date"
+                          class="text-red-600"
+                        >
+                          <mat-icon>remove_circle</mat-icon>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+
+           
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Associated Rate Plans Section -->
+      <mat-card appearance="outlined" class="bg-gray-50">
+        <mat-card-header class="mb-3">
+          <mat-card-title class="text-lg font-semibold text-gray-900">Associated Rate Plans</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content class="pt-6">
+          @if (isLoadingRoomTypes()) {
+            <div class="flex items-center justify-center py-8">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          } @else if (roomTypesWithPlans().length === 0) {
+            <p class="text-gray-500 text-center py-4">No room types found for this property.</p>
+          } @else {
+            <div class="space-y-4">
+              <!-- Select All -->
+              <div class="pb-4 border-b border-gray-200">
+                <mat-checkbox
+                  [checked]="areAllRoomTypesSelected()"
+                  [indeterminate]="areSomeRoomTypesPartiallySelected()"
+                  (change)="toggleAllRoomTypes($event.checked)"
+                  class="font-semibold text-gray-900"
+                >
+                  Select All Rates
+                </mat-checkbox>
+              </div>
+
+              <!-- Room Types and Rate Plans -->
+              @for (roomType of roomTypesWithPlans(); track roomType.id) {
+                <div class="ml-0">
+                  <!-- Room Type Header -->
+                  <div class="flex items-center gap-3 py-2">
+                    <mat-checkbox
+                      [checked]="isRoomTypeFullySelected(roomType)"
+                      [indeterminate]="isRoomTypePartiallySelected(roomType)"
+                      (change)="toggleRoomTypeRatePlans(roomType, $event.checked)"
+                      class="flex-shrink-0"
+                    ></mat-checkbox>
+                    <span class="font-semibold text-gray-900 flex-1">{{ roomType.title }}</span>
+                    <span class="text-sm text-gray-500 bg-gray-200 px-3 py-1 rounded-full">
+                      {{ roomType.ratePlans.length }}
+                    </span>
+                  </div>
+
+                  <!-- Rate Plans for this Room Type -->
+                  @if (roomType.ratePlans.length > 0) {
+                    <div class="ml-8 space-y-2 mb-3">
+                      @for (ratePlan of roomType.ratePlans; track ratePlan.id) {
+                        <div class="flex items-center gap-3">
+                          <mat-checkbox
+                            [checked]="isRatePlanSelected(ratePlan.id)"
+                            (change)="onRatePlanCheckboxChange(ratePlan.id, $event)"
+                            class="flex-shrink-0"
+                          ></mat-checkbox>
+                          <span class="text-gray-700">{{ ratePlan.title }}</span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </form>
+  </mat-card-content>
+</mat-card>

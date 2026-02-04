@@ -1,0 +1,285 @@
+  <!-- Page Header -->
+  <app-page-header
+    [title]="isEditing ? 'Edit Hotel Policy' : 'Create Hotel Policy'"
+    [subtitle]="isEditing ? 'Update the policy details' : 'Create a new hotel policy'">
+    <ng-container actions>
+        <a
+            matButton="outlined"
+            type="button"
+            (click)="cancel()"
+            [disabled]="isSaving"
+            class="px-8"
+          >
+            Cancel
+    </a>
+        <button
+            matButton="filled"
+            color="primary"
+            (click)="savePolicy()"
+            [disabled]="isSaving || !policyForm.valid"
+            class="px-4"
+        >
+            @if (isSaving) {
+            Saving...
+            } @else {
+            {{ isEditing ? 'Update Policy' : 'Create Policy' }}
+            }
+        </button>   
+    </ng-container>
+  ></app-page-header>
+
+  <!-- Form Card -->
+  <mat-card appearance="outlined" class="mt-6">
+    <mat-card-header class="mb-3">
+      <mat-card-title class="text-xl font-bold text-gray-900">Policy Details</mat-card-title>
+    </mat-card-header>
+   
+    <mat-card-content class="pt-6">
+      <form [formGroup]="policyForm" (ngSubmit)="savePolicy()" class="space-y-6">
+        <!-- Basic Information -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Title -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Policy Title</mat-label>
+            <input matInput formControlName="title" placeholder="e.g., Standard Policy" />
+            <mat-hint>Give your policy a clear title</mat-hint>
+            @if (policyForm.get('title')?.hasError('required')) {
+              <mat-error>Policy title is required</mat-error>
+            }
+            @if (policyForm.get('title')?.hasError('minlength')) {
+              <mat-error>Title must be at least 3 characters</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Currency -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Currency</mat-label>
+            <input matInput formControlName="currency" placeholder="e.g., USD" maxlength="3" />
+            <mat-hint>ISO 4217 currency code</mat-hint>
+            @if (policyForm.get('currency')?.hasError('required')) {
+              <mat-error>Currency is required</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Guest & Time Information -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Max Guests -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Max Guests</mat-label>
+            <input matInput type="number" formControlName="max_count_of_guests" min="1" />
+            <mat-hint>Maximum number of guests allowed</mat-hint>
+            @if (policyForm.get('max_count_of_guests')?.hasError('required')) {
+              <mat-error>Max guests is required</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Adults Only -->
+          <div class="flex items-center">
+            <mat-checkbox formControlName="is_adults_only" class="py-2">
+              <span class="ml-2">Adults Only</span>
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <!-- Check-in & Check-out Times -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Check-in From Time -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Check-in From</mat-label>
+            <input matInput type="time" formControlName="checkin_from_time" />
+            <mat-hint>Check-in start time</mat-hint>
+          </mat-form-field>
+
+          <!-- Check-in To Time -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Check-in To</mat-label>
+            <input matInput type="time" formControlName="checkin_to_time" />
+            <mat-hint>Check-in end time</mat-hint>
+          </mat-form-field>
+
+          <!-- Check-out From Time -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Check-out From</mat-label>
+            <input matInput type="time" formControlName="checkout_from_time" />
+            <mat-hint>Check-out start time</mat-hint>
+          </mat-form-field>
+
+          <!-- Check-out To Time -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Check-out To</mat-label>
+            <input matInput type="time" formControlName="checkout_to_time" />
+            <mat-hint>Check-out end time</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <!-- Internet Settings -->
+        <mat-card appearance="outlined" class="bg-gray-50">
+          <mat-card-header class="mb-3">
+            <mat-card-title class="text-lg font-semibold text-gray-900">Internet Settings</mat-card-title>
+          </mat-card-header>
+         
+          <mat-card-content class="pt-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Internet Access Type -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Internet Access Type</mat-label>
+                <mat-select formControlName="internet_access_type">
+                  @for (type of internetAccessTypes; track type) {
+                    <mat-option [value]="type">{{ type | titlecase }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Internet Access Coverage -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Coverage</mat-label>
+                <mat-select formControlName="internet_access_coverage">
+                  @for (coverage of internetAccessCoverages; track coverage) {
+                    <mat-option [value]="coverage">{{ coverage | titlecase }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Internet Cost -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Cost (Optional)</mat-label>
+                <input matInput type="number" formControlName="internet_access_cost" step="0.01" placeholder="0.00" />
+                <mat-hint>Leave blank if free</mat-hint>
+              </mat-form-field>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Parking Settings -->
+        <mat-card appearance="outlined" class="bg-gray-50">
+          <mat-card-header  class="mb-3">
+            <mat-card-title class="text-lg font-semibold text-gray-900">Parking Settings</mat-card-title>
+          </mat-card-header>
+         
+          <mat-card-content class="pt-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Parking Type -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Parking Type</mat-label>
+                <mat-select formControlName="parking_type">
+                  @for (type of parkingTypes; track type) {
+                    <mat-option [value]="type">{{ type | titlecase }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Parking Reservation -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Reservation Required</mat-label>
+                <mat-select formControlName="parking_reservation">
+                  @for (res of parkingReservations; track res) {
+                    <mat-option [value]="res">{{ res | titlecase }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Parking Private -->
+              <div class="flex items-center">
+                <mat-checkbox formControlName="parking_is_private" class="py-2">
+                  <span class="ml-2">Private Parking</span>
+                </mat-checkbox>
+              </div>
+
+              <!-- Parking Cost -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Cost (Optional)</mat-label>
+                <input matInput type="number" formControlName="parking_cost" step="0.01" placeholder="0.00" />
+                <mat-hint>Leave blank if free</mat-hint>
+              </mat-form-field>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Pets Settings -->
+        <mat-card appearance="outlined" class="bg-gray-50">
+          <mat-card-header class="mb-3" class="mb-3">
+            <mat-card-title class="text-lg font-semibold text-gray-900">Pets Policy</mat-card-title>
+          </mat-card-header>
+         
+          <mat-card-content class="pt-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Pets Policy -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Pets Policy</mat-label>
+                <mat-select formControlName="pets_policy">
+                  @for (policy of petsPolicies; track policy) {
+                    <mat-option [value]="policy">{{ policy | titlecase }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Non-refundable Fee -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Non-refundable Fee</mat-label>
+                <input matInput type="number" formControlName="pets_non_refundable_fee" step="0.01" placeholder="0.00" />
+              </mat-form-field>
+
+              <!-- Refundable Deposit -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Refundable Deposit</mat-label>
+                <input matInput type="number" formControlName="pets_refundable_deposit" step="0.01" placeholder="0.00" />
+              </mat-form-field>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Smoking Policy -->
+        <mat-card appearance="outlined" class="bg-gray-50">
+          <mat-card-header class="mb-3">
+            <mat-card-title class="text-lg font-semibold text-gray-900">Smoking Policy</mat-card-title>
+          </mat-card-header>
+         
+          <mat-card-content class="pt-6">
+            <mat-form-field appearance="outline" class="w-full md:w-1/2">
+              <mat-label>Smoking Policy</mat-label>
+              <mat-select formControlName="smoking_policy">
+                @for (policy of smokingPolicies; track policy) {
+                  <mat-option [value]="policy">{{ policy | titlecase }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Cleaning & Hygiene Settings -->
+        <mat-card appearance="outlined" class="bg-gray-50">
+          <mat-card-header class="mb-3">
+            <mat-card-title class="text-lg font-semibold text-gray-900">Cleaning & Hygiene</mat-card-title>
+          </mat-card-header>
+         
+          <mat-card-content class="pt-6">
+            <div class="space-y-4">
+              <!-- Enhanced Cleaning Practices -->
+              <div class="flex items-center">
+                <mat-checkbox formControlName="enhanced_cleaning_practices" class="py-2">
+                  <span class="ml-2">Enhanced Cleaning Practices</span>
+                </mat-checkbox>
+              </div>
+
+              <!-- Cleaning Practices Description -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Cleaning Practices Description</mat-label>
+                <textarea matInput formControlName="cleaning_practices_description" rows="4" placeholder="Describe your cleaning practices..."></textarea>
+                <mat-hint>Optional: Details about your cleaning procedures</mat-hint>
+              </mat-form-field>
+
+              <!-- Partner Hygiene Link -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Partner Hygiene Link</mat-label>
+                <input matInput formControlName="partner_hygiene_link" type="url" placeholder="https://example.com/hygiene" />
+                <mat-hint>Optional: Link to partner hygiene certification or information</mat-hint>
+              </mat-form-field>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+

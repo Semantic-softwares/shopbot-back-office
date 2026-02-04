@@ -43,6 +43,7 @@ export interface RoomType {
   features: RoomFeatures;
   active: boolean;
   sortOrder: number;
+  channexRoomTypeId?: string; // Channex integration
   createdAt?: string;
   updatedAt?: string;
 }

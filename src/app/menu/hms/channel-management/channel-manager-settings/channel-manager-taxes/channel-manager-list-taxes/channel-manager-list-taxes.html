@@ -1,0 +1,97 @@
+<!-- Page Header -->
+<app-page-header
+  title="Taxes"
+  subtitle="Manage all taxes for your property">
+  <ng-container actions>
+    <button
+      matButton="filled"
+      color="primary"
+      (click)="createTax()"
+      [disabled]="isLoading()"
+      class="px-4"
+    >
+      <mat-icon class="mr-2">add</mat-icon>
+      Create Tax
+    </button>
+  </ng-container>
+</app-page-header>
+
+<!-- Taxes Table -->
+<mat-card appearance="outlined" class="mt-6">
+  <mat-card-content class="pt-6">
+    @if (isLoading()) {
+      <div class="flex items-center justify-center py-8">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    } @else if (taxes().length === 0) {
+      <div class="text-center py-8">
+        <p class="text-gray-500 mb-4">No taxes found</p>
+        <button matButton color="primary" (click)="createTax()">
+          Create Tax
+        </button>
+      </div>
+    } @else {
+      <table mat-table [dataSource]="taxes()" class="w-full">
+        <!-- Title Column -->
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef>Title</th>
+          <td mat-cell *matCellDef="let tax">
+            <span class="font-medium text-gray-900">{{ tax.title }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Type Column -->
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let tax">
+            <span class="text-gray-700 capitalize">{{ tax.type || '-' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Rate Column -->
+        <ng-container matColumnDef="rate">
+          <th mat-header-cell *matHeaderCellDef>Rate</th>
+          <td mat-cell *matCellDef="let tax">
+            <span class="text-gray-700">{{ tax.rate || '-' }}%</span>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="text-right">Actions</th>
+          <td mat-cell *matCellDef="let tax" class="text-right">
+            <button
+              mat-icon-button
+              [matMenuTriggerFor]="menu"
+              matTooltip="More options"
+              class="text-gray-600"
+            >
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button
+                mat-menu-item
+                (click)="editTax(tax)"
+                class="text-blue-600"
+              >
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button
+                mat-menu-item
+                (click)="deleteTax(tax)"
+                class="text-red-600"
+              >
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    }
+  </mat-card-content>
+</mat-card>
