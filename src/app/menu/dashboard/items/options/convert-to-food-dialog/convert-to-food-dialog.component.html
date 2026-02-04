@@ -1,0 +1,102 @@
+
+  <h2 mat-dialog-title class="mb-4">{{ data.option.name }}</h2>
+
+  <mat-dialog-content>
+    @if (menus.isLoading()) {
+      <div class="flex items-center justify-center py-8">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    } @else if (menus.error()) {
+      <div class="text-red-600 p-4 bg-red-50 rounded">
+        Error loading menus. Please try again.
+      </div>
+    } @else {
+      <form [formGroup]="form" class="space-y-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Menu</mat-label>
+          <mat-select formControlName="menuId">
+            @if (menus.hasValue() && menus.value()) {
+              @for (menu of menus.value(); track menu._id) {
+                <mat-option [value]="menu._id">{{ menu.name }}</mat-option>
+              }
+            }
+          </mat-select>
+          @if (form.get('menuId')?.hasError('required')) {
+            <mat-error>Please select a menu</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="grid grid-cols-2 gap-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Cost Price</mat-label>
+            <span matPrefix>{{ storeStore.selectedStore()?.currency }}&nbsp;</span>
+            <input matInput 
+              currencyMask
+              [options]="{ prefix: storeStore.selectedStore()?.currency }"
+              step="0.01"
+              formControlName="costPrice">
+            @if (form.get('costPrice')?.hasError('required')) {
+              <mat-error>Cost price is required</mat-error>
+            }
+            @if (form.get('costPrice')?.hasError('min')) {
+              <mat-error>Cost price must be 0 or greater</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Selling Price</mat-label>
+            <span matPrefix>{{ storeStore.selectedStore()?.currency }}&nbsp;</span>
+            <input matInput 
+              currencyMask
+              [options]="{ prefix: storeStore.selectedStore()?.currency }"
+              step="0.01"
+              formControlName="sellingPrice">
+            @if (form.get('sellingPrice')?.hasError('required')) {
+              <mat-error>Selling price is required</mat-error>
+            }
+            @if (form.get('sellingPrice')?.hasError('min')) {
+              <mat-error>Selling price must be 0 or greater</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Quantity</mat-label>
+            <input matInput type="number" min="1" step="1" formControlName="quantity">
+            @if (form.get('quantity')?.hasError('required')) {
+              <mat-error>Quantity is required</mat-error>
+            }
+            @if (form.get('quantity')?.hasError('min')) {
+              <mat-error>Quantity must be at least 1</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="active">
+              <mat-option [value]="true">Active</mat-option>
+              <mat-option [value]="false">Inactive</mat-option>
+            </mat-select>
+            @if (form.get('active')?.hasError('required')) {
+              <mat-error>Status is required</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </form>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="mt-6 pt-4 border-t">
+    <button mat-button (click)="onCancel()" [disabled]="loading()">
+      Cancel
+    </button>
+    <button 
+      matButton="filled" 
+      color="primary" 
+      (click)="onSubmit()" 
+      [disabled]="form.invalid || loading()">
+      {{loading() ? 'Converting...' : 'Convert'}}
+    </button>
+  </mat-dialog-actions>
+

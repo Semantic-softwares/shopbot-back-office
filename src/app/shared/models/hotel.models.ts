@@ -1,4 +1,4 @@
-export interface HotelSettings {
+export interface HotelPropertySettings {
   _id?: string;
   store: string;
   hotelName: string;
@@ -51,6 +51,7 @@ export interface RoomType {
   amenities: string[];
   images: string[];
   isActive: boolean;
+  channexRoomTypeId?: string; // Channex integration
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -193,4 +194,82 @@ export interface Reservation {
   lastModifiedBy?: string;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+// Inventory & Rates Management
+export interface LengthOfStayDiscount {
+  nights: number;
+  percentage: number;
+}
+
+export interface PricingRules {
+  minStay: number;
+  minStayEnabled: boolean;
+  losDiscounts: LengthOfStayDiscount[];
+  occupancyPricingEnabled: boolean;
+}
+
+export interface BlackoutDate {
+  id: string;
+  startDate: Date;
+  endDate: Date;
+  reason: string;
+}
+
+export interface RoomInventory {
+  [roomTypeId: string]: number;
+}
+
+export interface RoomRates {
+  [roomTypeId: string]: number;
+}
+
+export interface BookingRestrictions {
+  closedToArrival: boolean;
+  closedToDeparture: boolean;
+  stopSales: boolean;
+}
+
+export interface InventoryAndRatesData {
+  store: string;
+  inventory: RoomInventory;
+  rates: RoomRates;
+  currency: string;
+  pricingRules: PricingRules;
+  restrictions: BookingRestrictions;
+  blackoutDates: BlackoutDate[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+// Calendar-based Rate Management
+export interface DateRateEntry {
+  date: string; // ISO format: YYYY-MM-DD
+  roomTypeId: string;
+  rate: number;
+  availability: number;
+}
+
+export interface RateUpdatePayload {
+  storeId: string;
+  startDate: string; // ISO format: YYYY-MM-DD
+  endDate: string; // ISO format: YYYY-MM-DD
+  rates: DateRateEntry[];
+  currency: string;
+}
+
+export interface CalendarDateRange {
+  startDate: Date;
+  endDate: Date;
+}
+
+export interface RoomTypeRate {
+  roomTypeId: string;
+  roomTypeName: string;
+  rates: {
+    [date: string]: number; // ISO date -> rate
+  };
+  availabilities: {
+    [date: string]: number; // ISO date -> availability count
+  };
 }

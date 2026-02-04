@@ -1,6 +1,5 @@
 <div class=" min-h-full">
   <!-- Header Section -->
-
   <div class="p-4 border-b border-outline-variant">
     <div class="flex items-center gap-3">
       <div class="flex-1">
@@ -28,10 +27,6 @@
     </div>
   </div>
 
-
-
-
-
   <!-- Category Chips -->
   <div class="px-4 py-3 border-b border-outline-variant mb-4">
     <div class="flex items-center gap-3 overflow-x-auto scrollbar-hide">
@@ -50,19 +45,27 @@
     </div>
   </div>
 
-  <!-- Tables Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-4 gap-4">
-    @for (table of tableStore.filteredTables(); track table._id) {
-    <app-table-card (addNewOrder)="onAddNewOrder($event)" [table]="table" (viewOrder)="viewOrder($event)"
-      (completeOrder)="completeOrder($event)" (clearOrder)="onClearOrder($event)" (tableClick)="onTableClick($event)">
-    </app-table-card>
-    }
-  </div>
+  <!-- Loading State -->
+  @if (tableStore.isLoading()) {
+    <div class="flex justify-center items-center py-16">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  }
 
-  @if (tableStore.filteredTables().length === 0) {
-  <div class="text-center py-12 text-gray-500">
-    <mat-icon class="text-6xl mb-4">table_restaurant</mat-icon>
-    <p>No tables found</p>
-  </div>
+  <!-- Tables Grid -->
+  @if (!tableStore.isLoading()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-4 gap-4">
+      @for (table of tableStore.filteredTables(); track table._id) {
+      <app-table-card (addNewOrder)="onAddNewOrder($event)" [table]="table" (viewOrder)="viewOrder($event)"
+        (completeOrder)="completeOrder($event)" (clearOrder)="onClearOrder($event)" (tableClick)="onTableClick($event)">
+      </app-table-card>
+      }
+    </div>
+
+    @if (tableStore.filteredTables().length === 0) {
+      <div class="px-4 py-8">
+        <app-no-record icon="table_restaurant" title="No Tables Found" message="There are no tables to display at this time."></app-no-record>
+      </div>
+    }
   }
 </div>

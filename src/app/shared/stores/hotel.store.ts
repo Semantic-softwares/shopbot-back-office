@@ -1,6 +1,7 @@
 import { Injectable, computed, signal, inject } from '@angular/core';
 import { HotelService } from '../services/hotel.service';
-import { HotelSettings, Room, RoomType, Guest, Reservation } from '../models/hotel.models';
+import { Room, RoomType, Guest, Reservation } from '../models/hotel.models';
+import { HotelSettings } from '../models/store.model';
 import { StoreStore } from './store.store';
 
 @Injectable({

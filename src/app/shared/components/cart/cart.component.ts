@@ -14,16 +14,18 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
+import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
 import {
   Product,
   Option,
   User,
   OrderCategoryType,
   SalesTypeId,
-  PaymentMethod,
   SalesChannel,
 } from '../../models';
 import { Guest } from '../../models/reservation.model';
@@ -67,6 +69,7 @@ import { objectId, generateReference } from '../../constants/identity.constant';
 import { CartSummary } from '../../../shared/models/cart.model';
 import { AuthService } from '../../services/auth.service';
 import { OrderStore } from '../../stores/order.store';
+import { MatDividerModule } from "@angular/material/divider";
 
 export interface CartItem {
   product: Product;
@@ -86,7 +89,8 @@ export interface CartItem {
     MatMenuModule,
     MatTooltipModule,
     CheckoutSummaryComponent,
-  ],
+    MatDividerModule
+],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.scss',
 })
@@ -100,7 +104,7 @@ export class CartComponent implements OnDestroy {
   public readonly saleTypeStore = inject(SalesTypeStore);
   private readonly dialog = inject(MatDialog);
   private readonly breakpointObserver = inject(BreakpointObserver);
-  @Optional() private readonly dialogRef = inject(MatDialogRef<CartComponent>, { optional: true });
+  @Optional() private readonly bottomSheetRef = inject(MatBottomSheetRef<CartComponent>, { optional: true });
   private readonly snackBar = inject(MatSnackBar);
   private readonly orderStore = inject(OrderStore);
   private selectedUser = this.accountService.currentUserValue;
@@ -119,7 +123,7 @@ export class CartComponent implements OnDestroy {
     if (customer) {
       return customer.name || customer.email || 'Customer';
     }
-    return 'Select Buyer';
+    return 'Buyer';
   });
 
   hasSelectedBuyer = computed(
@@ -150,6 +154,13 @@ export class CartComponent implements OnDestroy {
     this.cartStore
       .selectedCart()
       ?.products.reduce((sum, item) => sum + item.quantity, 0)
+  );
+
+  isMobile = toSignal(
+    this.breakpointObserver.observe([Breakpoints.XSmall, Breakpoints.Small]).pipe(
+      map(result => result.matches)
+    ),
+    { initialValue: false }
   );
 
   public cartItemTap(product: Product) {
@@ -197,9 +208,9 @@ export class CartComponent implements OnDestroy {
   public onAddToCart(event: Event, product: Product): void {
     event.stopPropagation();
     
-    // Only call incrementProductQuantity if in dialog (mobile)
+    // Only call incrementProductQuantity if in bottom sheet (mobile)
     // On desktop, the parent component handles the increment via the emitted event
-    if (this.dialogRef) {
+    if (this.bottomSheetRef) {
       this.cartStore.incrementProductQuantity(product._id);
     }
     
@@ -303,11 +314,18 @@ export class CartComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     // Only reset cart on desktop when component is destroyed
-    // On mobile (in dialog), preserve cart so user can continue shopping
+    // On mobile (in bottom sheet), preserve cart so user can continue shopping
     const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
     
-    if (!isMobile && !this.dialogRef) {
+    if (!isMobile && !this.bottomSheetRef) {
       this.resetSalesSection();
+    }
+  }
+
+  // Close cart bottom sheet (mobile)
+  closeCart(): void {
+    if (this.bottomSheetRef) {
+      this.bottomSheetRef.dismiss();
     }
   }
 
@@ -765,9 +783,9 @@ export class CartComponent implements OnDestroy {
   }
   this.resetSalesSection();
   
-  // Close the dialog on mobile after successful order creation/update
-  if (this.dialogRef) {
-    this.dialogRef.close();
+  // Close the bottom sheet on mobile after successful order creation/update
+  if (this.bottomSheetRef) {
+    this.bottomSheetRef.dismiss();
   }
 }
 }

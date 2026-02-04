@@ -1,0 +1,152 @@
+<div class="py-6">
+  <div class="grid grid-cols-1 gap-6">
+    <!-- Receipt Settings Card -->
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="text-blue-600 !flex !items-center !justify-center">receipt</mat-icon>
+        <mat-card-title>Receipt Settings</mat-card-title>
+        <mat-card-subtitle>Configure how receipts are displayed and printed</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="pt-4">
+        @if (loading()) {
+          <div class="flex items-center justify-center py-8">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+        } @else {
+          <form [formGroup]="posSettingsForm" (ngSubmit)="saveReceiptSettings()">
+            <div class="space-y-6">
+              <!-- Payment Before Checkout -->
+              <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <label class="text-sm font-semibold text-gray-900">Require Payment Before Checkout</label>
+                    <p class="text-xs text-gray-600 mt-1">Customers must complete payment before checking out</p>
+                  </div>
+                  <mat-slide-toggle 
+                    formControlName="requireOrdersPaymentBeforeCheckout" 
+                    color="primary">
+                  </mat-slide-toggle>
+                </div>
+              </div>
+
+              <!-- Receipt Settings Group -->
+              <div formGroupName="receiptSettings" class="space-y-4">
+                <h3 class="font-semibold text-gray-900 mb-4">Receipt Content</h3>
+
+                <!-- Show Note -->
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div>
+                    <label class="text-sm font-medium text-gray-700">Show Notes</label>
+                    <p class="text-xs text-gray-600">Display special notes on receipts</p>
+                  </div>
+                  <mat-slide-toggle formControlName="showNote" color="primary"></mat-slide-toggle>
+                </div>
+
+                <!-- Show Tax -->
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div>
+                    <label class="text-sm font-medium text-gray-700">Show Tax</label>
+                    <p class="text-xs text-gray-600">Display tax breakdown on receipts</p>
+                  </div>
+                  <mat-slide-toggle formControlName="showTax" color="primary"></mat-slide-toggle>
+                </div>
+
+                <!-- Show Store Details -->
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div>
+                    <label class="text-sm font-medium text-gray-700">Show Store Details</label>
+                    <p class="text-xs text-gray-600">Display store name and address</p>
+                  </div>
+                  <mat-slide-toggle formControlName="showStoreDetails" color="primary"></mat-slide-toggle>
+                </div>
+
+                <!-- Show Seller Info -->
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div>
+                    <label class="text-sm font-medium text-gray-700">Show Seller Info</label>
+                    <p class="text-xs text-gray-600">Display staff/seller information</p>
+                  </div>
+                  <mat-slide-toggle formControlName="showSellerInfo" color="primary"></mat-slide-toggle>
+                </div>
+
+                <!-- Show Customer Name -->
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div>
+                    <label class="text-sm font-medium text-gray-700">Show Customer Name</label>
+                    <p class="text-xs text-gray-600">Display customer information on receipts</p>
+                  </div>
+                  <mat-slide-toggle formControlName="showCustomerName" color="primary"></mat-slide-toggle>
+                </div>
+
+                <!-- Print After Finish -->
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div>
+                    <label class="text-sm font-medium text-gray-700">Auto Print After Order Complete</label>
+                    <p class="text-xs text-gray-600">Automatically print receipt when order is completed</p>
+                  </div>
+                  <mat-slide-toggle formControlName="printAfterFinish" color="primary"></mat-slide-toggle>
+                </div>
+
+                <!-- Footer Message -->
+                <div>
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Footer Message</mat-label>
+                    <textarea matInput formControlName="footerMessage" rows="2" placeholder="Thank you for your patronage"></textarea>
+                    <mat-icon matSuffix>message</mat-icon>
+                  </mat-form-field>
+                  <p class="text-xs text-gray-500 mt-1">Message displayed at the bottom of receipts</p>
+                </div>
+
+                <!-- Disclaimer -->
+                <div>
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Disclaimer (Optional)</mat-label>
+                    <textarea matInput formControlName="disclaimer" rows="2" placeholder="Enter any disclaimer text..."></textarea>
+                    <mat-icon matSuffix>info</mat-icon>
+                  </mat-form-field>
+                  <p class="text-xs text-gray-500 mt-1">Optional legal disclaimer to include on receipts</p>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex gap-3 pt-4 border-t border-gray-200">
+                <button 
+                  type="submit" 
+                  mat-raised-button 
+                  color="primary"
+                  [disabled]="posSettingsForm.invalid || saving()"
+                  class="flex-1">
+                  <mat-icon class="mr-2">save</mat-icon>
+                  {{ saving() ? 'Saving...' : 'Save Settings' }}
+                </button>
+                <button 
+                  type="button" 
+                  mat-stroked-button 
+                  (click)="resetForm()"
+                  [disabled]="saving()"
+                  class="flex-1">
+                  <mat-icon class="mr-2">refresh</mat-icon>
+                  Reset
+                </button>
+              </div>
+            </div>
+          </form>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Info Box -->
+    <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <h5 class="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+        <mat-icon class="text-blue-600">info</mat-icon>
+        Receipt Configuration Guide
+      </h5>
+      <ul class="text-sm text-blue-800 space-y-1">
+        <li>• These settings control how receipts appear to customers</li>
+        <li>• Toggle options ON/OFF to show or hide information on receipts</li>
+        <li>• Custom footer and disclaimer text will appear at the bottom</li>
+        <li>• Changes take effect immediately for new transactions</li>
+      </ul>
+    </div>
+  </div>
+</div>

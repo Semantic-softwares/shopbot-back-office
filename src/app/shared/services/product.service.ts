@@ -151,4 +151,14 @@ export class ProductService  {
 
     return this._httpClient.get<Product[]>(`${this.hostServer}/foods/search/autocomplete`, { params });
   }
+
+  /**
+   * Convert option item to food/product
+   *
+   * @param foodData
+   * @returns {Observable<Product>}
+   */
+  convertOptionToFood(foodData: any): Observable<Product> {
+    return this._httpClient.post<Product>(`${this.hostServer}/foods/option/convert`, foodData);
+  }
 }

@@ -407,4 +407,13 @@ export class RoomsService {
   setError(error: string | null): void {
     this.errorSignal.set(error);
   }
+
+  /**
+   * Assign rooms to an OTA booking
+   */
+  assignRoomsToBooking(bookingId: string, roomAssignments: any[]): Observable<any> {
+    return this.http.post(`${this.baseUrl}/reservations/${bookingId}/assign-rooms`, {
+      assignments: roomAssignments,
+    });
+  }
 }

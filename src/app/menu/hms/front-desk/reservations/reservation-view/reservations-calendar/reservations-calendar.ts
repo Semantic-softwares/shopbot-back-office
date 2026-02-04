@@ -218,6 +218,22 @@ export class ReservationsCalendar implements OnInit {
       return !excluded.has(r.status);
     });
 
+    // Separate assigned reservations from unassigned OTA reservations
+    // A reservation is "assigned" if it has rooms with actual room._id assignments
+    const assignedReservations = filteredReservations.filter((r: any) => {
+      if (!r.rooms || r.rooms.length === 0) return false;
+      // Check if at least one room has a room._id (actual assignment)
+      return r.rooms.some((room: any) => room?.room?._id);
+    });
+
+    // OTA unassigned reservations: have channex data but rooms only have roomType (no room._id)
+    const unassignedOTAReservations = filteredReservations.filter((r: any) => {
+      if (!r.channex?.bookingId) return false;
+      if (!r.rooms || r.rooms.length === 0) return true; // OTA with no rooms array
+      // If all rooms lack room._id, it's unassigned OTA
+      return r.rooms.every((room: any) => !room?.room?._id);
+    });
+
     // Map typeId -> typeName from API
     const typesById = new Map<string, string>();
     for (const t of types as any[]) {
@@ -250,16 +266,57 @@ export class ReservationsCalendar implements OnInit {
       if (!orderedKeys.includes(key)) orderedKeys.push(key);
     }
 
+    // Build group of unassigned OTA reservations by room type (for integration into sections)
+    const otaByRoomType = new Map<string, any[]>();
+    
+    if (unassignedOTAReservations.length > 0) {
+      for (const ota of unassignedOTAReservations) {
+        const roomsArray = ota.rooms || [];
+        
+        if (roomsArray.length > 0) {
+          for (const roomEntry of roomsArray) {
+            const rtId = typeof roomEntry.roomType === 'string' ? roomEntry.roomType : roomEntry.roomType?._id;
+            const rtName = typesById.get(rtId) || 'Unknown Room Type';
+            const key = `${rtId}`;
+            
+            if (!otaByRoomType.has(key)) {
+              otaByRoomType.set(key, []);
+            }
+            
+            // Check if this OTA is already added for this room type to avoid duplicates
+            const existingIndex = otaByRoomType.get(key)!.findIndex((r: any) => r._id === ota._id);
+            if (existingIndex === -1) {
+              otaByRoomType.get(key)!.push({
+                ...ota,
+                _requiredRoomTypeName: rtName,
+                _requiredRoomTypeId: rtId,
+              });
+            }
+          }
+        } else {
+          // Fallback: if no room type info, add to a generic OTA section
+          if (!otaByRoomType.has('unknown-ota')) {
+            otaByRoomType.set('unknown-ota', []);
+          }
+          otaByRoomType.get('unknown-ota')!.push(ota);
+        }
+      }
+    }
+
     // Build interleaved array of group headers + room rows
     const result: Array<any> = [];
+    
+    // Build all room type sections (assigned rooms + OTA unassigned within same section)
     for (const key of orderedKeys) {
       const group = groupsMap.get(key);
       if (!group) continue;
       result.push({ isGroup: true, roomTypeName: group.typeName });
+      
+      // Add assigned physical rooms for this type
       for (const room of group.rooms) {
         // Build per-room stays using the room's own assignment dates (stayPeriod.from/to)
         const stays: RoomStay[] = [];
-        for (const r of filteredReservations as any[]) {
+        for (const r of assignedReservations as any[]) {
           if (!r?.rooms) continue;
           const matchingAssignments = r.rooms.filter((rr: any) => rr?.room?._id === room._id);
           if (!matchingAssignments?.length) continue;
@@ -293,7 +350,69 @@ export class ReservationsCalendar implements OnInit {
           reservations: stays,
         });
       }
+      
+      // Add OTA unassigned row for this room type (if any)
+      const otaList = otaByRoomType.get(key);
+      if (otaList && otaList.length > 0) {
+        const roomTypeName = otaList[0]._requiredRoomTypeName || 'Unknown Room Type';
+        
+        // Create a virtual "room row" for unassigned OTA reservations of this type
+        const otaStays: RoomStay[] = otaList.map((r: any) => ({
+          reservationId: r._id,
+          roomAssignmentId: undefined,
+          checkInDate: r.checkInDate,
+          checkOutDate: r.checkOutDate,
+          guest: r.guest,
+          status: r.status,
+          bookingType: r.bookingType,
+          confirmationNumber: r.confirmationNumber,
+          reservation: r,
+        }));
+
+        result.push({
+          isGroup: false,
+          roomId: `unassigned-ota-${key}`,
+          roomName: `OTA Unassigned - ${roomTypeName}`,
+          roomTypeId: key !== 'unknown-ota' ? key : null,
+          roomTypeName: `OTA - ${roomTypeName}`,
+          capacity: 0,
+          housekeepingStatus: 'clean',
+          isOTAUnassigned: true, // Flag to indicate this is an OTA unassigned row
+          reservations: otaStays,
+        });
+      }
     }
+    
+    // Handle OTA with unknown room types (if any exist after the above loop)
+    const unknownOTA = otaByRoomType.get('unknown-ota');
+    if (unknownOTA && unknownOTA.length > 0) {
+      result.push({ isGroup: true, roomTypeName: 'OTA - Unassigned' });
+      
+      const otaStays: RoomStay[] = unknownOTA.map((r: any) => ({
+        reservationId: r._id,
+        roomAssignmentId: undefined,
+        checkInDate: r.checkInDate,
+        checkOutDate: r.checkOutDate,
+        guest: r.guest,
+        status: r.status,
+        bookingType: r.bookingType,
+        confirmationNumber: r.confirmationNumber,
+        reservation: r,
+      }));
+
+      result.push({
+        isGroup: false,
+        roomId: `unassigned-ota-unknown`,
+        roomName: `OTA Unassigned`,
+        roomTypeId: null,
+        roomTypeName: 'OTA - Unassigned',
+        capacity: 0,
+        housekeepingStatus: 'clean',
+        isOTAUnassigned: true,
+        reservations: otaStays,
+      });
+    }
+
     return result;
   });
 
@@ -442,10 +561,17 @@ export class ReservationsCalendar implements OnInit {
    */
   private parseDateOnly(dateInput: string | Date): Date {
     if (dateInput instanceof Date) {
-      return new Date(dateInput.getFullYear(), dateInput.getMonth(), dateInput.getDate());
+      const isoDate = dateInput.toISOString().split('T')[0];
+      const [year, month, day] = isoDate.split('-').map(Number);
+      return new Date(year, month - 1, day);
     }
     // For ISO strings, extract the date portion directly to avoid timezone shifts
     const dateStr = String(dateInput);
+    // Handle plain YYYY-MM-DD format explicitly
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [year, month, day] = dateStr.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    }
     if (dateStr.includes('T') || dateStr.includes('Z')) {
       // ISO format: "2026-01-04T00:00:00.000Z" - extract "2026-01-04"
       const datePart = dateStr.split('T')[0];
@@ -459,7 +585,7 @@ export class ReservationsCalendar implements OnInit {
 
   /**
    * Calculate the width in pixels of the reservation block based on duration
-   * Note: The checkout date is exclusive - guest checks out on that day but doesn't occupy the room
+   * Note: Calendar display is inclusive of the checkout date for visual continuity
    */
   getReservationWidth(reservation: any, date: DateRange): number {
     const cellWidth = this.cellWidthPx();
@@ -469,38 +595,48 @@ export class ReservationsCalendar implements OnInit {
     const checkOutNorm = this.parseDateOnly(reservation.checkOutDate);
     const compareDateNorm = this.parseDateOnly(date.date);
 
-    // If current cell date is before the check-in, nothing to render
-    if (compareDateNorm < checkInNorm) return 0;
-
-    // Start drawing from the later of the cell date or the check-in
-    const startDate = compareDateNorm > checkInNorm ? compareDateNorm : checkInNorm;
-
-    // The checkout date is exclusive (guest doesn't occupy room on checkout day)
-    // So we draw up to checkOut - 1 day as the last occupied cell
-    const lastOccupiedDate = new Date(checkOutNorm);
-    lastOccupiedDate.setDate(lastOccupiedDate.getDate() - 1);
-
-    // Clamp the end to the visible range
-    const dates = this.dateRange();
-    let endDate = lastOccupiedDate;
-    if (Array.isArray(dates) && dates.length > 0) {
-      const lastVisible = this.parseDateOnly(dates[dates.length - 1].date);
-      endDate = endDate < lastVisible ? endDate : lastVisible;
+    // Check if we should render from this date
+    if (!this.shouldRenderReservationFromDate(reservation, date)) {
+      return 0;
     }
 
-    // Calculate duration in days (inclusive of both start and end)
-    const msPerDay = 1000 * 60 * 60 * 24;
-    const durationDays = Math.round((endDate.getTime() - startDate.getTime()) / msPerDay) + 1;
+    // Determine where rendering actually starts
+    let renderStartDate = checkInNorm;
     
-    if (durationDays <= 0) return 0;
+    // If this reservation started before the visible range, start from the first visible date
+    const dates = this.dateRange();
+    if (Array.isArray(dates) && dates.length > 0) {
+      const firstVisible = this.parseDateOnly(dates[0].date);
+      if (checkInNorm < firstVisible && checkOutNorm > firstVisible) {
+        renderStartDate = firstVisible;
+      }
+    }
 
-    // Width calculation:
-    // Each cell is cellWidth px + 1px border (shared/collapsed with adjacent cell)
-    // For N cells: N * cellWidth + (N-1) * 1px for internal borders
-    // Subtract a small amount to prevent overflow into next cell
+    // For display, include the checkout date so the block reaches the checkout cell
+    const lastOccupiedDate = new Date(checkOutNorm);
+
+    // Determine the end date for width calculation (clamped to visible range)
+    let renderEndDate = lastOccupiedDate;
+    if (Array.isArray(dates) && dates.length > 0) {
+      const lastVisible = this.parseDateOnly(dates[dates.length - 1].date);
+      if (lastOccupiedDate > lastVisible) {
+        renderEndDate = lastVisible;
+      }
+    }
+
+    // Calculate number of cells: from renderStartDate to renderEndDate (inclusive on both sides)
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const cellCount = Math.floor((renderEndDate.getTime() - renderStartDate.getTime()) / msPerDay) + 1;
+    
+    if (cellCount <= 0) return 0;
+
+    // Width = (cellCount * cellWidth) - padding to fit within cells
+    // With flexbox layout, we need to be more precise
+    const padding = 8; // 4px left + 4px right for inner padding
     const borderWidth = 1;
-    const width = (durationDays * cellWidth) + ((durationDays - 1) * borderWidth) - 2;
-    return Math.max(width, cellWidth - 4); // Minimum width of one cell minus padding
+    const width = (cellCount * cellWidth) - padding;
+    
+    return Math.max(width, cellWidth - padding);
   }
 
   /**
@@ -703,6 +839,63 @@ export class ReservationsCalendar implements OnInit {
     return `${prefix} ${name}`;
   }
 
+  /** Nights label for reservation block */
+  public getReservationNightsLabel(reservation: any): string {
+    const checkIn = this.parseDateOnly(reservation.checkInDate);
+    const checkOut = this.parseDateOnly(reservation.checkOutDate);
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const nights = Math.max(1, Math.round((checkOut.getTime() - checkIn.getTime()) / msPerDay));
+    return `${nights} night${nights === 1 ? '' : 's'}`;
+  }
+
+  /** Booking source label for badge */
+  public getBookingSourceLabel(reservation: any): string {
+    const source = String(reservation?.bookingSource || reservation?.reservation?.bookingSource || '').toLowerCase();
+    const map: Record<string, string> = {
+      'booking.com': 'Booking.com',
+      expedia: 'Expedia',
+      agoda: 'Agoda',
+      airbnb: 'Airbnb',
+      direct: 'Direct',
+      phone: 'Phone',
+      online: 'Online',
+      walk_in: 'Walk-in',
+      travel_agent: 'Agent',
+      corporate: 'Corporate',
+    };
+    return map[source] || 'Direct';
+  }
+
+  /** Booking source logo URL (null for icon fallback) */
+  public getBookingSourceLogoUrl(reservation: any): string | null {
+    const source = String(reservation?.bookingSource || reservation?.reservation?.bookingSource || '').toLowerCase();
+    const map: Record<string, string> = {
+      airbnb: 'https://cdn.brandfetch.io/idkuvXnjOH/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1717146459610',
+      agoda: 'https://cdn.brandfetch.io/idrJbkwvG0/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1724730098837',
+      expedia: 'https://cdn.brandfetch.io/idAGaivHFH/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1740983477322',
+      'booking.com': 'https://cdn.brandfetch.io/id9mEmLNcV/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1725855381233',
+    };
+    return map[source] || null;
+  }
+
+  /** Booking source background color */
+  public getBookingSourceColor(reservation: any): string {
+    const source = String(reservation?.bookingSource || reservation?.reservation?.bookingSource || '').toLowerCase();
+    const map: Record<string, string> = {
+      'booking.com': '#003580',
+      expedia: '#002F6C',
+      airbnb: '#FF5A5F',
+      agoda: '#5C2D91',
+      walk_in: '#16A34A',
+      direct: '#4B5563',
+      phone: '#0EA5E9',
+      online: '#6366F1',
+      travel_agent: '#7C3AED',
+      corporate: '#334155',
+    };
+    return map[source] || '#4B5563';
+  }
+
   /** Open reservation preview dialog with the full reservation object */
   openReservationPreview(reservation: any, row: any) {
     if (!reservation) return;
@@ -730,6 +923,35 @@ export class ReservationsCalendar implements OnInit {
     });
   }
 
+  /** Check if room type has OTA unassigned bookings during a date range */
+  private hasOTAUnassignedConflictInRange(roomTypeId: string, startDate: Date, endDate: Date): boolean {
+    const rooms = this.roomsWithReservations();
+    const start = this.parseDateOnly(startDate);
+    const end = this.parseDateOnly(endDate);
+    
+    // Find all OTA unassigned rows for this room type
+    const otaRows = rooms.filter((r: any) => 
+      r.isOTAUnassigned && r.roomTypeId === roomTypeId && r.reservations
+    );
+    
+    if (otaRows.length === 0) return false;
+    
+    // Check if any OTA booking overlaps with the selected date range
+    for (const otaRow of otaRows) {
+      for (const otaRes of otaRow.reservations) {
+        const otaCheckIn = this.parseDateOnly(otaRes.checkInDate);
+        const otaCheckOut = this.parseDateOnly(otaRes.checkOutDate);
+        
+        // Check if date ranges overlap: start < otaCheckOut AND end >= otaCheckIn
+        if (start < otaCheckOut && end >= otaCheckIn) {
+          return true; // Conflict detected
+        }
+      }
+    }
+    
+    return false;
+  }
+
   /** Check if any date in a range has conflicts */
   public hasConflictInRange(roomId: string, startDate: Date, endDate: Date): boolean {
     const start = new Date(Math.min(startDate.getTime(), endDate.getTime()));
@@ -744,13 +966,23 @@ export class ReservationsCalendar implements OnInit {
       }
       current.setDate(current.getDate() + 1);
     }
+    
+    // Also check for OTA unassigned bookings for the same room type
+    const rooms = this.roomsWithReservations();
+    const roomRow = rooms.find((r: any) => !r.isGroup && r.roomId === roomId);
+    if (roomRow && roomRow.roomTypeId) {
+      if (this.hasOTAUnassignedConflictInRange(roomRow.roomTypeId, start, end)) {
+        return true;
+      }
+    }
+    
     return false;
   }
 
   /** Start drag selection on mousedown */
   public onCellMouseDown(event: MouseEvent, date: DateRange, row: any): void {
-    // Only start if it's a room row (not a group header)
-    if (row.isGroup) return;
+    // Only start if it's a room row (not a group header) and not an OTA unassigned row
+    if (row.isGroup || row.isOTAUnassigned) return;
     
     // Prevent text selection during drag
     event.preventDefault();

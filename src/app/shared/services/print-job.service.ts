@@ -365,4 +365,90 @@ export class PrintJobService {
     if (!date) return '-';
     return new Date(date).toLocaleString();
   }
+
+  /**
+   * Handle auto-printing based on store settings and conditions
+   * Called when a new print job is created
+   */
+  public async handleAutoPrint(data: any): Promise<void> {
+    try {
+      console.log('🔍 [AUTO-PRINT] Checking auto-print conditions');
+      
+      // Extract print job data
+      const printJob = data.printJob || data;
+      
+      if (!printJob) {
+        console.warn('⚠️ [AUTO-PRINT] No print job data');
+        return;
+      }
+
+      console.log('✓ Print Job ID:', printJob._id);
+      console.log('✓ Job Status:', printJob.status);
+
+      // Check if order exists
+      const order = printJob.order;
+      if (!order || typeof order !== 'object') {
+        console.warn('⚠️ [AUTO-PRINT] No order object in print job');
+        return;
+      }
+
+      console.log('✓ Order ID:', order._id);
+      console.log('✓ Order Category:', order.category);
+      console.log('✓ Payment Status:', order.paymentStatus);
+
+      // Check if order is complete and paid
+      const isComplete = order.category === 'Complete';
+      const isPaid = order.paymentStatus === 'Paid';
+
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('🔍 [ORDER VALIDATION]');
+      console.log('  Complete:', isComplete ? '✅' : '❌');
+      console.log('  Paid:', isPaid ? '✅' : '❌');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+      // if (!isComplete || !isPaid) {
+      //   console.log('⏭️ [AUTO-PRINT] Skipped - Order not complete or not paid');
+      //   return;
+      // }
+
+      // Check store setting for auto-print
+      const printAfterFinish = this.storeStore.selectedStore()?.posSettings?.receiptSettings?.printAfterFinish ?? true;
+      console.log('🔍 [STORE SETTING] printAfterFinish:', printAfterFinish);
+
+      if (!printAfterFinish) {
+        console.log('⏭️ [AUTO-PRINT] Skipped - Store setting printAfterFinish is disabled');
+        return;
+      }
+
+      // Check if Bluetooth printer is connected
+      const printerConnected = this.bluetoothPrinterService.isConnected();
+      console.log('🖨️ [PRINTER CHECK] Bluetooth connected:', printerConnected ? '✅' : '❌');
+      
+      if (!printerConnected) {
+        console.log('⏭️ [AUTO-PRINT] Skipped - Bluetooth printer not connected');
+        return;
+      }
+
+      // All conditions met - auto-print ONLY via direct Bluetooth
+      // NOTE: Do NOT create a new print job here - the socket event already indicates
+      // a job exists. Creating another would cause an infinite loop.
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('🖨️ [AUTO-PRINTING] Receipt via Bluetooth...');
+      console.log('  Order:', order.reference || order._id);
+      console.log('  Store:', order.store?.name || 'N/A');
+      console.log('  Total:', order.total);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      
+      // Generate receipt and send directly to Bluetooth printer
+      // Do NOT call printOrderReceipt as it would create another job
+      const receiptData = this.generateOrderReceipt(order);
+      await this.bluetoothPrinterService.sendToPrinter(receiptData);
+      
+      console.log('✅ [AUTO-PRINT] Printed directly via Bluetooth');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+    } catch (error) {
+      console.error('❌ [AUTO-PRINT] Failed:', error);
+    }
+  }
 }

@@ -1,0 +1,178 @@
+<!-- Dialog Header -->
+  <h2 mat-dialog-title class="m-0">
+    {{ isEditing() ? 'Edit Tax' : 'Create Tax' }}
+  </h2>
+ 
+
+<!-- Dialog Content -->
+<mat-dialog-content class="space-y-4">
+  <form [formGroup]="taxForm" class="space-y-4">
+    <!-- Title -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" placeholder="e.g., City Tax" />
+      @if (taxForm.get('title')?.hasError('required')) {
+        <mat-error>Title is required</mat-error>
+      }
+      @if (taxForm.get('title')?.hasError('minlength')) {
+        <mat-error>Title must be at least 3 characters</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Is Inclusive -->
+    <div class="flex items-center gap-4">
+      <span class="text-sm font-medium text-gray-700">Is inclusive:</span>
+      <mat-button-toggle-group
+        [value]="taxForm.get('is_inclusive')?.value ? 'exclusive' : 'inclusive'"
+        (change)="taxForm.get('is_inclusive')?.setValue($event.value === 'exclusive')"
+        aria-label="Is inclusive option"
+      >
+        <mat-button-toggle value="inclusive">Inclusive</mat-button-toggle>
+        <mat-button-toggle value="exclusive">Exclusive</mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+
+    <!-- Logic -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Logic</mat-label>
+      <mat-select formControlName="logic">
+        <mat-option value="percent">Percent</mat-option>
+        <mat-option value="absolute">Absolute</mat-option>
+        <mat-option value="per_booking">Per Booking</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Type -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="type">
+        <mat-option value="fee">Fee</mat-option>
+        <mat-option value="tax">Tax</mat-option>
+        <mat-option value="city_tax">City Tax</mat-option>
+      </mat-select>
+      @if (taxForm.get('type')?.hasError('required')) {
+        <mat-error>Type is required</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Currency -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Currency</mat-label>
+      <input matInput formControlName="currency" placeholder="e.g., NGN" maxlength="3" />
+      @if (taxForm.get('currency')?.hasError('required')) {
+        <mat-error>Currency is required</mat-error>
+      }
+      @if (taxForm.get('currency')?.hasError('minlength') || taxForm.get('currency')?.hasError('maxlength')) {
+        <mat-error>Currency must be 3 characters</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Rate -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Rate</mat-label>
+      <input matInput type="number" formControlName="rate" placeholder="e.g., 10" />
+      @if (taxForm.get('rate')?.hasError('required')) {
+        <mat-error>Rate is required</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Additional Information Section -->
+    <mat-expansion-panel [expanded]="additionalInfoExpanded()">
+      <mat-expansion-panel-header>
+        <mat-panel-title>Additional Information</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <div class="space-y-4 pt-4">
+        <!-- Max Nights -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Max nights</mat-label>
+          <input matInput type="number" formControlName="max_nights" placeholder="e.g., 30" />
+        </mat-form-field>
+
+        <!-- Skip Nights -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Skip nights</mat-label>
+          <input matInput type="number" formControlName="skip_nights" placeholder="e.g., 0" />
+        </mat-form-field>
+      </div>
+    </mat-expansion-panel>
+
+    <!-- Applicable Dates Section -->
+    <mat-expansion-panel [expanded]="applicableDatesExpanded()">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Applicable Dates
+        </mat-panel-title>
+        <mat-panel-description>
+          <button
+            type="button"
+            mat-icon-button
+            (click)="addDateRange(); $event.stopPropagation()"
+            class="text-blue-600"
+          >
+            <mat-icon>add_circle</mat-icon>
+          </button>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div formArrayName="applicable_date_ranges" class="space-y-4 pt-4">
+        @for (range of dateRangesArray.controls; track $index) {
+          <div [formGroupName]="$index" class="p-4 border border-gray-200 rounded-lg">
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-medium text-gray-900">Date range {{ $index + 1 }}</span>
+              <button
+                type="button"
+                mat-icon-button
+                (click)="removeDateRange($index)"
+                class="text-red-600"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+
+            <div class="space-y-3">
+              <!-- Applicable After -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Applicable after :</mat-label>
+                <input matInput [matDatepicker]="pickerAfter" formControlName="after" />
+                <mat-datepicker-toggle matIconSuffix [for]="pickerAfter"></mat-datepicker-toggle>
+                <mat-datepicker #pickerAfter></mat-datepicker>
+              </mat-form-field>
+
+              <!-- Applicable Before -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Applicable before :</mat-label>
+                <input matInput [matDatepicker]="pickerBefore" formControlName="before" />
+                <mat-datepicker-toggle matIconSuffix [for]="pickerBefore"></mat-datepicker-toggle>
+                <mat-datepicker #pickerBefore></mat-datepicker>
+              </mat-form-field>
+            </div>
+          </div>
+        }
+      </div>
+    </mat-expansion-panel>
+  </form>
+</mat-dialog-content>
+
+<!-- Dialog Actions -->
+<mat-dialog-actions class="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+  <button
+    matButton
+    (click)="cancel()"
+    [disabled]="isSaving()"
+  >
+    Cancel
+  </button>
+  <button
+    matButton="filled"
+    color="primary"
+    (click)="saveTax()"
+    [disabled]="isSaving() || !taxForm.valid"
+  >
+    @if (isSaving()) {
+      Saving...
+    } @else {
+      {{ isEditing() ? 'Update Tax' : 'Create Tax' }}
+    }
+  </button>
+</mat-dialog-actions>

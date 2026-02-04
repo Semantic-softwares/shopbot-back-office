@@ -22,8 +22,6 @@ import { PrintJob, PrintJobStats } from '../../../../shared/models/print-job.mod
 import { Station } from '../../../../shared/models/station.model';
 import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { BluetoothPrinterService } from '../../../../shared/services/bluetooth-printer.service';
-import { Subscription } from 'rxjs';
-import { Store } from '../../../../shared/models';
 
 @Component({
   selector: 'app-print-jobs',
@@ -109,18 +107,13 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
     'actions',
   ];
 
-  // Socket subscriptions
-  private socketSubscriptions: Subscription[] = [];
-
   ngOnInit() {
     this.loadData();
-    this.setupSocketListeners();
     this.checkBluetoothConnection();
   }
 
   ngOnDestroy() {
-    this.socketSubscriptions.forEach((sub) => sub.unsubscribe());
-    // Don't disconnect Bluetooth printer - keep connection persistent
+    // Don't unsubscribe from socket listeners - they are global in menu.component
   }
 
   private checkBluetoothConnection() {
@@ -194,135 +187,14 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
     });
   }
 
-  private setupSocketListeners() {
-    // Listen for new print jobs
-    const newJobSub = this.socketService.on<any>('printJob:created').subscribe({
-      next: async (data) => {
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('📡 [SOCKET EVENT] printJob:created');
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('📦 Socket Data:', data);
-        
-        this.snackBar.open(`New print job created for Order #${data.orderNumber || 'N/A'}`, 'View', {
-          duration: 5000,
-          horizontalPosition: 'end',
-          verticalPosition: 'top',
-        });
-        this.loadData(); // Reload data
-
-        // Auto-print if conditions are met
-        await this.handleAutoPrint(data);
-      },
-    });
-
-    // Listen for completed jobs
-    const completedSub = this.socketService.on<any>('printJob:completed').subscribe({
-      next: (data) => {
-        console.log('Print job completed:', data);
-        this.updateJobStatus(data.jobId, 'printed');
-      },
-    });
-
-    // Listen for failed jobs
-    const failedSub = this.socketService.on<any>('printJob:failed').subscribe({
-      next: (data) => {
-        console.log('Print job failed:', data);
-        this.snackBar.open(`Print job failed: ${data.error}`, 'Close', {
-          duration: 5000,
-          horizontalPosition: 'end',
-          verticalPosition: 'top',
-          panelClass: ['error-snackbar'],
-        });
-        this.updateJobStatus(data.jobId, 'failed', data.error);
-      },
-    });
-
-    this.socketSubscriptions.push(newJobSub, completedSub, failedSub);
-  }
 
   /**
    * Handle auto-printing based on store settings and conditions
+   * THIS METHOD HAS BEEN MOVED TO PrintJobService - See handleAutoPrint()
+   * It is now called globally from menu.component when 'printJob:created' event is received
    */
   private async handleAutoPrint(data: any): Promise<void> {
-    try {
-      console.log('🔍 [AUTO-PRINT] Checking auto-print conditions');
-      
-      // Extract print job data
-      const printJob = data.printJob || data;
-      
-      if (!printJob) {
-        console.warn('⚠️ [AUTO-PRINT] No print job data');
-        return;
-      }
-
-      console.log('✓ Print Job ID:', printJob._id);
-      console.log('✓ Job Status:', printJob.status);
-
-      // Check if order exists
-      const order = printJob.order;
-      if (!order || typeof order !== 'object') {
-        console.warn('⚠️ [AUTO-PRINT] No order object in print job');
-        return;
-      }
-
-      console.log('✓ Order ID:', order._id);
-      console.log('✓ Order Category:', order.category);
-      console.log('✓ Payment Status:', order.paymentStatus);
-
-      // Check if order is complete and paid
-      const isComplete = order.category === 'Complete';
-      const isPaid = order.paymentStatus === 'Paid';
-
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log('🔍 [ORDER VALIDATION]');
-      console.log('  Complete:', isComplete ? '✅' : '❌');
-      console.log('  Paid:', isPaid ? '✅' : '❌');
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-
-      if (!isComplete || !isPaid) {
-        console.log('⏭️ [AUTO-PRINT] Skipped - Order not complete or not paid');
-        return;
-      }
-
-      // Check store setting for auto-print
-      const printAfterFinish = this.storeStore.selectedStore()?.posSettings?.receiptSettings?.printAfterFinish ?? true;
-      console.log('🔍 [STORE SETTING] printAfterFinish:', printAfterFinish);
-
-      if (!printAfterFinish) {
-        console.log('⏭️ [AUTO-PRINT] Skipped - Store setting printAfterFinish is disabled');
-        return;
-      }
-
-      // Check if Bluetooth printer is connected
-      const printerConnected = this.bluetoothPrinterService.isConnected();
-      console.log('🖨️ [PRINTER CHECK] Bluetooth connected:', printerConnected ? '✅' : '❌');
-      
-      if (!printerConnected) {
-        console.log('⏭️ [AUTO-PRINT] Skipped - Bluetooth printer not connected');
-        return;
-      }
-
-      // All conditions met - auto-print ONLY via direct Bluetooth
-      // NOTE: Do NOT create a new print job here - the socket event already indicates
-      // a job exists. Creating another would cause an infinite loop.
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log('🖨️ [AUTO-PRINTING] Receipt via Bluetooth...');
-      console.log('  Order:', order.reference || order._id);
-      console.log('  Store:', order.store?.name || 'N/A');
-      console.log('  Total:', order.total);
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      
-      // Generate receipt and send directly to Bluetooth printer
-      // Do NOT call printOrderReceipt as it would create another job
-      const receiptData = this.printJobService.generateOrderReceipt(order);
-      await this.bluetoothPrinterService.sendToPrinter(receiptData);
-      
-      console.log('✅ [AUTO-PRINT] Printed directly via Bluetooth');
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-
-    } catch (error) {
-      console.error('❌ [AUTO-PRINT] Failed:', error);
-    }
+    // Method moved to PrintJobService - use printJobService.handleAutoPrint() instead
   }
 
   private updateJobStatus(jobId: string, status: string, error?: string) {

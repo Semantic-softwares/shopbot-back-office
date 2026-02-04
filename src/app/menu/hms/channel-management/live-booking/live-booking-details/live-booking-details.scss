@@ -1,0 +1,44 @@
+:host {
+  display: block;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+mat-card {
+  &[appearance='outlined'] {
+    --mdc-theme-surface: rgb(255, 255, 255);
+  }
+}
+
+mat-card-header {
+  margin-bottom: 1rem;
+}
+
+/* Loading and error states */
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 300px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+
+  mat-card-content {
+    padding: 1rem !important;
+  }
+
+  .grid {
+    gap: 1rem;
+  }
+}

@@ -1,17 +1,16 @@
-<div class="p-6">
-  <h2 mat-dialog-title class="text-xl font-bold mb-4">
-    {{ data.isEdit ? 'Edit Variant' : 'Create New Variant' }}
-  </h2>
-
-  <form [formGroup]="variantForm" (ngSubmit)="onSubmit()">
+<h2 mat-dialog-title class="mb-4">
+  {{ data.isEdit ? 'Edit Variant' : 'Create New Variant' }}
+</h2>
+<mat-dialog-content>
+  <form [formGroup]="variantForm">
     <div class="space-y-4">
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Name</mat-label>
         <input matInput formControlName="name" placeholder="Enter variant name">
         @if (variantForm.get('name')?.hasError('required')) {
-          <mat-error>
-            Name is required
-          </mat-error>
+        <mat-error>
+          Name is required
+        </mat-error>
         }
       </mat-form-field>
 
@@ -20,14 +19,14 @@
           <mat-label>At Least</mat-label>
           <input matInput type="number" formControlName="atLeast" min="0">
           @if (variantForm.get('atLeast')?.hasError('required')) {
-            <mat-error>
-              At Least value is required
-            </mat-error>
+          <mat-error>
+            At Least value is required
+          </mat-error>
           }
           @if (variantForm.get('atLeast')?.hasError('min')) {
-            <mat-error>
-              Value must be 0 or greater
-            </mat-error>
+          <mat-error>
+            Value must be 0 or greater
+          </mat-error>
           }
         </mat-form-field>
 
@@ -35,19 +34,19 @@
           <mat-label>At Most</mat-label>
           <input matInput type="number" formControlName="atMost" min="0">
           @if (variantForm.get('atMost')?.hasError('required')) {
-            <mat-error>
-              At Most value is required
-            </mat-error>
+          <mat-error>
+            At Most value is required
+          </mat-error>
           }
           @if (variantForm.get('atMost')?.hasError('min')) {
-            <mat-error>
-              Value must be 0 or greater
-            </mat-error>
+          <mat-error>
+            Value must be 0 or greater
+          </mat-error>
           }
         </mat-form-field>
       </div>
 
-      <div class="bg-gray-50  rounded-lg space-y-4">
+      <div class="rounded-lg space-y-4">
         <div class="flex items-center justify-between mb-2">
           <h3 class="text-lg font-medium">Options</h3>
         </div>
@@ -71,8 +70,7 @@
               In Stock
             </mat-slide-toggle>
 
-            <a mat-stroked-button color="primary" type="button"
-              [disabled]="!newOptionForm.valid"
+            <a mat-stroked-button color="primary" type="button" [disabled]="!newOptionForm.valid"
               (click)="addNewOption()">
               <mat-icon class="mr-2">add</mat-icon>
               Add Option
@@ -82,38 +80,40 @@
 
         <!-- Selected Options List -->
         @if (selectedOptions.length > 0) {
-          <div class="mt-4 space-y-2">
-            <h4 class="text-sm font-medium text-gray-700">Added Options:</h4>
-            @for (option of selectedOptions; track option._id) {
-              <div class="flex items-center justify-between p-2 bg-white rounded border border-gray-200">
-                <div>
-                  <span class="font-medium">{{option.name}}</span>
-                  <span class="ml-2 text-sm text-gray-500">{{option.price | currency: storeStore.selectedStore()?.currency}}</span>
-                </div>
-                <a mat-icon-button color="warn" (click)="removeOption(option)">
-                  <mat-icon>close</mat-icon>
-                </a>
-              </div>
-            }
+        <div class="mt-4 space-y-2">
+          <h4 class="text-sm font-medium text-gray-700">Added Options:</h4>
+          @for (option of selectedOptions; track option._id) {
+          <div class="flex items-center justify-between p-2 bg-white rounded border border-gray-200">
+            <div>
+              <span class="font-medium">{{option.name}}</span>
+              <span class="ml-2 text-sm text-gray-500">{{option.price | currency:
+                storeStore.selectedStore()?.currency}}</span>
+            </div>
+            <a mat-icon-button color="warn" (click)="removeOption(option)">
+              <mat-icon>close</mat-icon>
+            </a>
           </div>
+          }
+        </div>
         }
       </div>
 
-      <div class="flex items-center py-4 bg-gray-50 rounded-lg">
+      <div class="flex items-center py-4  rounded-lg">
         <mat-slide-toggle formControlName="enabled" color="primary">
           Published
         </mat-slide-toggle>
       </div>
     </div>
 
-    <div class="flex justify-end space-x-2 mt-6 pt-4 border-t border-gray-200">
-      <button mat-button type="button" (click)="onCancel()">Cancel</button>
-      <button mat-raised-button color="primary" type="submit" [disabled]="!variantForm.valid || isSubmitting()">
-        @if (isSubmitting()) {
-          <mat-spinner diameter="20" class="mr-2"></mat-spinner>
-        }
-        {{data.isEdit ? 'Update' : 'Create'}}
-      </button>
-    </div>
+
   </form>
-</div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button matButton (click)="onCancel()">Cancel</button>
+  <button matButton="filled" color="primary" (click)="onSubmit()" type="submit"
+    [disabled]="!variantForm.valid || isSubmitting()">
+
+    {{data.isEdit ? 'Update' : 'Create'}}
+  </button>
+</mat-dialog-actions>

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,6 +10,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { GuestService } from '../../../../../../shared/services/guest.service';
 import { ReservationService } from '../../../../../../shared/services/reservation.service';
 import { StoreStore } from '../../../../../../shared/stores/store.store';
+import { HotelStore } from '../../../../../../shared/stores/hotel.store';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RoomChangeDialogComponent, RoomChangeDialogData, RoomChangeResult } from '../../room-change-dialog/room-change-dialog.component';
 
@@ -21,7 +22,7 @@ interface ReservationPreviewData {
 @Component({
   selector: 'app-reservation-preview-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, MatIconModule, MatButtonModule, MatDividerModule, MatChipsModule, MatListModule, RouterLink],
+  imports: [CommonModule, MatDialogModule, MatIconModule, MatButtonModule, MatDividerModule, MatChipsModule, MatListModule],
   templateUrl: './reservation-preview-dialog.component.html',
 })
 export class ReservationPreviewDialogComponent {
@@ -32,10 +33,17 @@ export class ReservationPreviewDialogComponent {
   private reservationService = inject(ReservationService);
   private snackBar = inject(MatSnackBar);
   public storeStore = inject(StoreStore);
+  private hotelStore = inject(HotelStore);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   public reservation = signal(this.data.reservation);
+
+  private roomTypesLoader = effect(() => {
+    if (this.hotelStore.roomTypes().length === 0) {
+      void this.hotelStore.loadRoomTypes();
+    }
+  });
 
   /** Get the specific room assignment based on room id passed, or first room */
   public roomAssignment = computed(() => {
@@ -44,6 +52,21 @@ export class ReservationPreviewDialogComponent {
       return rooms.find((rr: any) => rr?.room?._id === this.data.room?.id) || rooms[0];
     }
     return rooms[0];
+  });
+
+  /** Whether any room is assigned */
+  public hasRoomAssignment = computed(() => {
+    const rooms = this.reservation()?.rooms || [];
+    return rooms.some((rr: any) => rr?.room?._id);
+  });
+
+  /** OTA unassigned booking flag */
+  public isOtaUnassigned = computed(() => {
+    const res = this.reservation();
+    const rooms = res?.rooms || [];
+    if (!res?.channex?.bookingId) return false;
+    if (!rooms.length) return true;
+    return rooms.every((rr: any) => !rr?.room?._id);
   });
 
   /** Get the assigned guest from room assignment, fallback to reservation guest */
@@ -61,7 +84,14 @@ export class ReservationPreviewDialogComponent {
   public openReservation(): void {
     this.close();
     // Navigate from reservations/view/calendar to reservations/edit/:id
-    this.router.navigate(['../../../edit', this.reservation()?._id], { relativeTo: this.route });
+    const res = this.reservation();
+    const bookingId = res?.channex?.bookingId;
+    if (bookingId && this.isOtaUnassigned()) {
+      this.router.navigate(['/menu', 'hms', 'channel-management', 'live-booking', bookingId, 'details']);
+      return;
+    }
+    this.router.navigate(['/menu', 'hms', 'front-desk', 'reservations', 'edit', this.reservation()?._id]);
+
   }
 
   /** Room check-in from stayPeriod or reservation checkInDate */
@@ -79,24 +109,99 @@ export class ReservationPreviewDialogComponent {
   /** Room type name */
   public roomTypeName = computed(() => {
     const rr = this.roomAssignment();
-    const roomType = rr?.room?.roomType;
-    if (typeof roomType === 'object' && roomType?.name) {
-      return roomType.name;
-    }
-    return '—';
+    const roomType = rr?.room?.roomType || rr?.roomType;
+    if (typeof roomType === 'object' && roomType?.name) return roomType.name;
+    if (typeof roomType === 'string') return 'Unassigned';
+    return this.isOtaUnassigned() ? 'Unassigned' : '—';
   });
 
   /** Room number */
   public roomNumber = computed(() => {
     const rr = this.roomAssignment();
-    return rr?.room?.roomNumber || '—';
+    return rr?.room?.roomNumber || (this.isOtaUnassigned() ? 'Unassigned' : '—');
   });
 
   /** Room name (e.g., "JIMMY CARTER") */
   public roomName = computed(() => {
     const rr = this.roomAssignment();
-    return rr?.room?.name || '—';
+    return rr?.room?.name || (this.isOtaUnassigned() ? 'Unassigned' : '—');
   });
+
+  private getChannexBookingPayload(): any {
+    const raw = this.reservation()?.channex?.rawWebhookData;
+    if (!raw) return null;
+    return raw?.data || raw;
+  }
+
+  public otaRooms = computed<any[]>(() => {
+    const raw = this.getChannexBookingPayload();
+    const attributes = raw?.attributes || raw?.data?.attributes || raw;
+    const rooms = attributes?.rooms || raw?.rooms || [];
+    return Array.isArray(rooms) ? rooms : [];
+  });
+
+  public otaRoomTypes = computed<any[]>(() => {
+    const raw = this.getChannexBookingPayload();
+    const relationships = raw?.relationships || raw?.data?.relationships || raw;
+    const types = relationships?.room_types?.data || raw?.room_types || [];
+    return Array.isArray(types) ? types : [types];
+  });
+
+  private roomTypesById = computed(() => {
+    const types = this.hotelStore.roomTypes();
+    const map = new Map<string, string>();
+    for (const type of types || []) {
+      if (type?._id) map.set(type._id, type.name || 'Room');
+    }
+    return map;
+  });
+
+  public getOtaRoomTypeName(room: any, index: number): string {
+    const pmsRoomTypeId = this.reservation()?.rooms?.[index]?.roomType;
+    const pmsName = pmsRoomTypeId ? this.roomTypesById().get(pmsRoomTypeId) : undefined;
+    if (pmsName) return pmsName;
+
+    const roomTypeId = room?.room_type_id || room?.room_type?.id || room?.room_type?.room_type_id;
+    if (!roomTypeId) return 'Room';
+    const types = this.otaRoomTypes();
+    const roomType = types.find((type: any) => (type?.id || type?.attributes?.id) === roomTypeId);
+    return roomType?.attributes?.title || roomType?.attributes?.name || 'Room';
+  }
+
+  public getOtaRoomPrice(room: any): number {
+    const raw = room?.amount ?? room?.total_price ?? room?.price ?? room?.rate ?? 0;
+    const parsed = Number(raw);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+
+  public getOtaRoomCheckIn(room: any): string | Date | undefined {
+    return room?.checkin_date || room?.check_in || room?.arrival_date || this.reservation()?.checkInDate;
+  }
+
+  public getOtaRoomCheckOut(room: any): string | Date | undefined {
+    return room?.checkout_date || room?.check_out || room?.departure_date || this.reservation()?.checkOutDate;
+  }
+
+  public getRoomTypeLabel(room: any): string {
+    const roomType = room?.room?.roomType || room?.roomType;
+    if (typeof roomType === 'object' && roomType?.name) return roomType.name as string;
+    if (typeof roomType === 'string' && roomType.length > 0) return roomType;
+    return this.isOtaUnassigned() ? 'Unassigned' : '—';
+  }
+
+  public getRoomPrice(room: any): number {
+    const raw = room?.pricing?.total ?? room?.pricing?.amount ?? room?.pricing?.price ?? room?.total ?? 0;
+    const parsed = Number(raw);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+
+  public getRoomCheckIn(room: any): string | Date | undefined {
+    return room?.stayPeriod?.from || this.reservation()?.checkInDate;
+  }
+
+  public getRoomCheckOut(room: any): string | Date | undefined {
+    return room?.stayPeriod?.to || this.reservation()?.checkOutDate;
+  }
 
   /** Number of guests in this room (adults + children) */
   public roomGuestsCount = computed(() => {
@@ -117,6 +222,27 @@ export class ReservationPreviewDialogComponent {
   public amountPaid = computed(() => {
     const pricing = this.reservation()?.pricing;
     return pricing?.paid || 0;
+  });
+
+  /** Booking currency (prefer Channex currency) */
+  public bookingCurrency = computed(() => {
+    const res = this.reservation();
+    const channexCurrency = res?.channex?.rawWebhookData?.attributes?.currency;
+    return channexCurrency || this.storeStore.selectedStore()?.currency || 'USD';
+  });
+
+  /** Booking amount (prefer Channex amount) */
+  public bookingAmount = computed(() => {
+    const res = this.reservation();
+    const channexAmount = res?.channex?.rawWebhookData?.attributes?.amount;
+    const parsed = channexAmount ? Number(channexAmount) : undefined;
+    if (typeof parsed === 'number' && !Number.isNaN(parsed)) return parsed;
+    return res?.pricing?.total || 0;
+  });
+
+  /** Booking balance (booking amount - amount paid) */
+  public bookingBalance = computed(() => {
+    return Math.max(0, this.bookingAmount() - this.amountPaid());
   });
 
   /** Balance = Room Total - Amount Paid */

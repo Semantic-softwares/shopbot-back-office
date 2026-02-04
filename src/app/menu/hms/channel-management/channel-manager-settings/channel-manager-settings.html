@@ -1,0 +1,41 @@
+<!-- Header Section -->
+<app-page-header 
+  title="Channel Manager Property" 
+  subtitle="Configure and manage your channel manager settings for seamless integration with various online travel agencies (OTAs).">
+
+</app-page-header>
+
+<!-- Loading State -->
+@if (loading()) {
+  <div class="flex justify-center items-center py-12 bg-white">
+    <mat-spinner diameter="40" class="!text-blue-600"></mat-spinner>
+    <span class="ml-3 text-gray-600">Loading settings...</span>
+  </div>
+}
+
+<!-- Main Content -->
+@if (!loading()) {
+  <div class="py-8">
+    
+    <!-- Navigation Tabs -->
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel" mat-stretch-tabs="false" mat-align-tabs="start" class="settings-nav mb-6">
+      @for (link of navLinks; track link.path) {
+        <a mat-tab-link
+           [routerLink]="link.path"
+           routerLinkActive
+           #rla="routerLinkActive"
+           [active]="rla.isActive">
+          <div class="flex items-center gap-2">
+            <mat-icon [class]="link.iconColor">{{ link.icon }}</mat-icon>
+            <span>{{ link.label }}</span>
+          </div>
+        </a>
+      }
+    </nav>
+
+    <!-- Router Outlet for Child Components -->
+    <mat-tab-nav-panel #tabPanel>
+      <router-outlet />
+    </mat-tab-nav-panel>
+  </div>
+}

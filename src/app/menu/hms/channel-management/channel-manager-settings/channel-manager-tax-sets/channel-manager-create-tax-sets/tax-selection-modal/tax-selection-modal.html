@@ -1,0 +1,54 @@
+  <h2 mat-dialog-title>Add Tax</h2>
+
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-8">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else {
+    <mat-dialog-content class="mt-6">
+      @if (availableTaxes().length === 0) {
+        <p class="text-gray-500 text-center py-4">All taxes have been added to this tax set.</p>
+      } @else {
+        <form [formGroup]="form">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Select Tax</mat-label>
+            <mat-select formControlName="taxId">
+              @for (tax of availableTaxes(); track tax.id) {
+                <mat-option [value]="tax.id">{{ tax.title }}</mat-option>
+              }
+            </mat-select>
+            @if (form.get('taxId')?.hasError('required')) {
+              <mat-error>Please select a tax</mat-error>
+            }
+          </mat-form-field>
+        </form>
+      }
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end" class="gap-2">
+      <button
+        matButton
+        (click)="cancel()"
+        [disabled]="isLoading()"
+      >
+        Cancel
+      </button>
+      <button
+        matButton
+        color="primary"
+        (click)="createNewTax()"
+        [disabled]="isLoading()"
+      >
+        <mat-icon class="mr-1">add</mat-icon>
+        Create Tax
+      </button>
+      <button
+        matButton="filled"
+        color="primary"
+        (click)="selectTax()"
+        [disabled]="!form.valid || isLoading() || availableTaxes().length === 0"
+      >
+        Select
+      </button>
+    </mat-dialog-actions>
+  }

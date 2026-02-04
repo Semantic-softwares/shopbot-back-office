@@ -1,0 +1,19 @@
+:host {
+  display: block;
+}
+
+mat-card {
+  margin-bottom: 0;
+}
+
+mat-form-field {
+  display: block;
+}
+
+// Ensure mat-spinner is properly sized in the button
+button mat-spinner {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+

@@ -1,0 +1,279 @@
+  <app-page-header 
+  title="General Settings" 
+  description="">
+  <ng-container actions>
+  <button
+          matButton="outlined"
+          type="button"
+          (click)="resetForm()"
+          [disabled]="isSaving() || propertyResource.isLoading()"
+          class="px-8"
+        >
+          Reset
+        </button>
+        <button
+          matButton="filled"
+          color="primary"
+          type="submit"
+          [disabled]="isSaving() || propertyResource.isLoading()"
+          class="px-8"
+          (click)="saveSettings()"
+        >
+          {{isSaving() ? 'Saving...' : 'Save Settings'}}
+          
+        </button>
+
+  </ng-container>
+</app-page-header>
+  
+  <!-- Loading State Overlay -->
+  @if (propertyResource.isLoading()) {
+    <div class="absolute inset-0 flex justify-center items-center bg-white/50 rounded-lg z-50">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (propertyResource.error()) {
+    <app-no-record
+      icon="error_outline"
+      title="Failed to Load Settings"
+      [message]="propertyResource.error()?.message || 'Unable to load property settings. Please try again.'"
+    ></app-no-record>
+  }
+
+  <!-- Settings Form -->
+
+    <form [formGroup]="settingsForm"  class="space-y-6">
+      <!-- Price Setting -->
+      <mat-card appearance="outlined">
+        <mat-card-header class="mb-3">
+          <mat-card-title class="text-xl font-bold text-gray-900">Price Setting</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Min Price -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Min Price</mat-label>
+              <input
+                matInput
+                type="number"
+                formControlName="min_price"
+                placeholder="10.00"
+                step="0.01"
+              />
+              <mat-hint>Minimum price for this property</mat-hint>
+              @if (settingsForm.get('min_price')?.hasError('min')) {
+                <mat-error>Minimum price must be greater than 0</mat-error>
+              }
+            </mat-form-field>
+
+            <!-- Max Price -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Max Price</mat-label>
+              <input
+                matInput
+                type="number"
+                formControlName="max_price"
+                placeholder="5000.00"
+                step="0.01"
+              />
+              <mat-hint>Maximum price for this property</mat-hint>
+              @if (settingsForm.get('max_price')?.hasError('min')) {
+                <mat-error>Maximum price must be greater than 0</mat-error>
+              }
+            </mat-form-field>
+          </div>
+          <p class="text-sm text-gray-600 mt-4">
+            Here you can manage the minimum and maximum price for the property
+          </p>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Automatic Availability Update Settings -->
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title class="text-xl font-bold text-gray-900">
+            Automatic Availability Update Settings
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-6">
+          <p class="text-sm text-gray-700 mb-6">
+            Here you will decide what should happen when a New, Modified or Cancelled booking happens. If the
+            availability will change automatically or the PMS will control these changes.
+          </p>
+
+          <div class="space-y-4">
+            <!-- New Booking -->
+            <div class="flex items-start justify-between p-4  rounded-lg">
+              <div class="flex-1">
+                <label class="font-semibold text-gray-900 block mb-1">New booking</label>
+                <p class="text-xs text-gray-600">
+                  This option cannot be disabled for safety reasons. Channex will reduce the availability automatically
+                  after any new booking. Imported bookings are not affected
+                </p>
+              </div>
+              <mat-checkbox
+                formControlName="allow_availability_autoupdate_on_confirmation"
+                
+                class="ml-4 mt-1"
+              ></mat-checkbox>
+            </div>
+
+            <!-- Modified Booking -->
+            <div class="flex items-start justify-between p-4  rounded-lg">
+              <div class="flex-1">
+                <label class="font-semibold text-gray-900 block mb-1">Modified booking</label>
+                <p class="text-xs text-gray-600">
+                  If selected, for any modified bookings created the availability will be automatically adjusted
+                </p>
+              </div>
+              <mat-checkbox formControlName="allow_availability_autoupdate_on_modification" class="ml-4 mt-1"></mat-checkbox>
+            </div>
+
+            <!-- Cancelled Booking -->
+            <div class="flex items-start justify-between p-4  rounded-lg">
+              <div class="flex-1">
+                <label class="font-semibold text-gray-900 block mb-1">Cancelled booking</label>
+                <p class="text-xs text-gray-600">
+                  If selected, for any cancelled bookings the availability will be positively adjusted
+                </p>
+              </div>
+              <mat-checkbox formControlName="allow_availability_autoupdate_on_cancellation" class="ml-4 mt-1"></mat-checkbox>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Inventory Days -->
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title class="text-xl font-bold text-gray-900">Inventory Days</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-6">
+          <mat-form-field appearance="outline" class="w-full md:w-1/2">
+            <mat-label>Inventory Days</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="state_length"
+              placeholder="500"
+              step="1"
+              min="100"
+              max="730"
+            />
+            <mat-hint>Set the length of the inventory table in number of days. Min: 100, Max: 730</mat-hint>
+            @if (settingsForm.get('state_length')?.hasError('min')) {
+              <mat-error>Minimum value is 100 days</mat-error>
+            }
+            @if (settingsForm.get('state_length')?.hasError('max')) {
+              <mat-error>Maximum value is 730 days</mat-error>
+            }
+          </mat-form-field>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Minimum Stay Settings -->
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title class="text-xl font-bold text-gray-900">Minimum Stay Settings</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-6">
+          <p class="text-sm text-gray-700 mb-6">
+            Here you can simplify the user experience for your user by using only one kind of minimum stay.
+          </p>
+          <p class="text-xs text-gray-600 mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded">
+            Note: Changing these settings will remove all values from the unused min stay type. Please full sync from
+            PMS after any changes here and check.
+          </p>
+
+          <mat-form-field appearance="outline" class="w-full md:w-1/2">
+            <mat-label>Minimum Stay Settings</mat-label>
+            <mat-select formControlName="min_stay_type">
+              <mat-option value="both">Both</mat-option>
+              <mat-option value="arrival">Arrival</mat-option>
+              <mat-option value="through">Through</mat-option>
+            </mat-select>
+            <mat-hint>Select which type of minimum stay you want to use</mat-hint>
+          </mat-form-field>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Cut-off Time Settings -->
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title class="text-xl font-bold text-gray-900">Cut-off Time</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-6">
+          <p class="text-sm text-gray-700 mb-6">Control when to stop sales for same day reservations</p>
+          <p class="text-xs text-gray-600 mb-6">
+            We will use the property timezone, when the time is reached all availability will be 0 for the current day
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Cut-off Time -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Cut-off Time</mat-label>
+              <input matInput type="time" formControlName="cut_off_time" />
+              <mat-hint>Set the cut-off time (30-minute steps)</mat-hint>
+            </mat-form-field>
+
+            <!-- Cut-off Days -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Cut-off Days</mat-label>
+              <input matInput type="number" formControlName="cut_off_days" min="0" step="1" />
+              <mat-hint>Number of days to close from the cut-off time</mat-hint>
+              @if (settingsForm.get('cut_off_days')?.hasError('min')) {
+                <mat-error>Days must be 0 or greater</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Max Days Advance -->
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title class="text-xl font-bold text-gray-900">Max Days Advance</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-6">
+          <p class="text-sm text-gray-700 mb-6">Close Availability for some dates in future.</p>
+          <p class="text-xs text-gray-600 mb-6">
+            Please, keep in mind, Availability will not be opened automatically.
+          </p>
+
+          <div class="space-y-4">
+            <div class="flex items-center gap-4">
+              <mat-slide-toggle formControlName="max_day_advance_enabled" class="m-0">
+                <span class="font-semibold text-gray-900">Enable</span>
+              </mat-slide-toggle>
+            </div>
+
+            @if (settingsForm.get('max_day_advance_enabled')?.value) {
+              <mat-form-field appearance="outline" class="w-full md:w-1/2">
+                <mat-label>Max Days Advance</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  formControlName="max_day_advance"
+                  min="1"
+                  placeholder="30"
+                  step="1"
+                />
+                <mat-hint>Number of days opened for sale (e.g., 30 for next 30 days)</mat-hint>
+                @if (settingsForm.get('max_day_advance')?.hasError('min')) {
+                  <mat-error>Days must be at least 1</mat-error>
+                }
+              </mat-form-field>
+              <p class="text-xs text-amber-700 p-3 bg-amber-50 border border-amber-200 rounded">
+                ⚠️ Warning: When you apply max_day_advance, we override existed Availability values to 0 and can't restore
+                it without Full Sync.
+              </p>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+     
+    </form>
+  
