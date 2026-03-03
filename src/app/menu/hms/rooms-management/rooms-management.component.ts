@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,21 +11,22 @@ import { MatToolbarModule } from '@angular/material/toolbar';
   standalone: true,
   imports: [
     RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
     MatTabsModule,
     MatIconModule,
     MatButtonModule,
-    MatToolbarModule
+    MatToolbarModule,
 ],
   templateUrl: './rooms-management.component.html',
   styleUrl: './rooms-management.component.scss',
 })
 export class RoomsManagementComponent {
-  
-  isRoomsActive(): boolean {
-    return location.pathname.includes('/rooms') && !location.pathname.includes('/room-types');
-  }
 
-  isRoomTypesActive(): boolean {
-    return location.pathname.includes('/room-types');
-  }
+  readonly tabs = [
+    { label: 'Rooms', link: 'rooms', icon: 'meeting_room' },
+    { label: 'Room Types', link: 'room-types', icon: 'category' },
+    { label: 'Rate Plans', link: 'rate-plans', icon: 'price_change' },
+    { label: 'Inventory', link: 'inventory', icon: 'calendar_month' },
+  ];
 }

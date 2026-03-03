@@ -32,8 +32,19 @@ import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatListModule } from '@angular/material/list';
 import { RoomsService } from '../../../../../../../shared/services/rooms.service';
+import { RateInventoryService, StayRates, NightRate, RateInventoryRecord, RatePlan } from '../../../../../../../shared/services/rate-inventory.service';
 import { StoreStore } from '../../../../../../../shared/stores/store.store';
 import { Room, RoomType } from '../../../../../../../shared/models/room.model';
+
+export interface RoomRateInfo {
+  originalPrice: number;       // Base price from room/roomType
+  inventoryRate: number;       // Average rate from inventory API
+  totalRate: number;           // Total from inventory
+  hasRatePlan: boolean;        // Whether a rate plan affected the price
+  hasVaryingRates: boolean;    // Whether nightly rates differ
+  nights: NightRate[];         // Per-night breakdown
+  numberOfNights: number;
+}
 import { CurrencyMaskModule } from 'ng2-currency-mask';
 import { GuestFormModalComponent } from '../../../../../../../shared/components/guest-form-modal/guest-form-modal.component';
 import { PriceEditDialogComponent } from '../price-edit-dialog/price-edit-dialog.component';
@@ -41,7 +52,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { BreakDownTotal } from '../break-down-total/break-down-total';
 import { ReservationFormService } from '../../../../../../../shared/services/reservation-form.service';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
-import { tap } from 'rxjs';
+import { switchMap, forkJoin, map, of, catchError } from 'rxjs';
 import { Reservation } from '../../../../../../../shared/models/reservation.model';
 import { GuestService } from '../../../../../../../shared/services/guest.service';
 
@@ -74,11 +85,15 @@ import { GuestService } from '../../../../../../../shared/services/guest.service
 })
 export class RoomDetailsComponent {
   private roomsService = inject(RoomsService);
+  private rateInventoryService = inject(RateInventoryService);
   private guestService = inject(GuestService);
   public storeStore = inject(StoreStore);
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
+
+  // Map of roomTypeId -> StayRates for inventory-based pricing
+  private inventoryRatesMap = signal<Record<string, StayRates>>({});
 
   // Inputs
   private reservationFormService = inject(ReservationFormService);
@@ -87,12 +102,29 @@ export class RoomDetailsComponent {
     { initialValue: null }
   );
   public selectedRoomIds = input<string[]>([]);
+  public ratePlanId = input<string>('');
   public reservation = input<Reservation | null>(null);
   roomAssigned = output<any>();
   roomChangeRequested = output<number>();
+  hasRestrictions = output<boolean>();
   assigningRoomId = signal<string | null>(null);
   filteredRooms = signal<Room[]>([]);
   assignedGuests = signal<Map<string, any>>(new Map()); // Store guest objects by ID
+
+  // Per-room rate plan details (index -> rate info)
+  roomRateDetails = signal<Record<number, RoomRateInfo>>({});
+  loadingRoomRates = signal<Record<number, boolean>>({});
+
+  // Per-room restriction issues (index -> issues array)
+  roomRestrictionIssues = signal<Record<number, Array<{ date: string; type: string; detail: string }>>>({});
+  loadingRoomRestrictions = signal<Record<number, boolean>>({});
+
+  // Per-room rate plans (index -> RatePlan[])
+  roomRatePlans = signal<Record<number, RatePlan[]>>({});
+  loadingRoomRatePlans = signal<Record<number, boolean>>({});
+
+  // Guard flag to prevent feedback loop when auto-adjusting reservation dates from room changes
+  private isAdjustingReservationDates = false;
 
   // Computed signal to check if we're in edit mode
   public isEditMode = computed(() => !!this.reservation());
@@ -109,8 +141,58 @@ export class RoomDetailsComponent {
     params: () => ({ roomIds: this.selectedRoomIds() }),
     stream: ({ params }) => {
       return this.roomsService.getRoomsByIds(params.roomIds!).pipe(
-        tap((rooms) => {
-          this.populateRoomsFormArray2(rooms);
+        switchMap((rooms) => {
+          // For new reservations, fetch inventory rates for all unique room types
+          const reservation = this.reservation();
+          if (reservation) {
+            // Edit mode: use existing pricing, no need to fetch rates
+            this.populateRoomsFormArray2(rooms);
+            return of(rooms);
+          }
+
+          const storeId = this.storeStore.selectedStore()?._id;
+          const form = this.reservationForm();
+          const checkIn = form?.get('checkInDate')?.value;
+          const checkOut = form?.get('checkOutDate')?.value;
+
+          if (!storeId || !checkIn || !checkOut) {
+            this.populateRoomsFormArray2(rooms);
+            return of(rooms);
+          }
+
+          // Get unique room type IDs
+          const roomTypeIds = new Set<string>();
+          rooms.forEach((room: any) => {
+            const rtId = typeof room.roomType === 'object' ? room.roomType?._id : room.roomType;
+            if (rtId) roomTypeIds.add(rtId);
+          });
+
+          if (roomTypeIds.size === 0) {
+            this.populateRoomsFormArray2(rooms);
+            return of(rooms);
+          }
+
+          const checkInStr = this.formatLocalDate(new Date(checkIn));
+          const checkOutStr = this.formatLocalDate(new Date(checkOut));
+
+          // Fetch rates for each unique room type
+          const rateRequests: Record<string, ReturnType<RateInventoryService['getRatesForStay']>> = {};
+          const ratePlan = this.ratePlanId() || undefined;
+          roomTypeIds.forEach((rtId) => {
+            rateRequests[rtId] = this.rateInventoryService.getRatesForStay(storeId, rtId, checkInStr, checkOutStr, ratePlan);
+          });
+
+          return forkJoin(rateRequests).pipe(
+            map((ratesMap) => {
+              this.inventoryRatesMap.set(ratesMap);
+              this.populateRoomsFormArray2(rooms);
+              return rooms;
+            }),
+            catchError(() => {
+              this.populateRoomsFormArray2(rooms);
+              return of(rooms);
+            })
+          );
         })
       );
     },
@@ -123,6 +205,9 @@ export class RoomDetailsComponent {
     },
   });
 
+  // Track whether the rate-fetch effect has already run for the current rooms
+
+
   // Effect to reload room data when reservation changes
   constructor() {
     effect(() => {
@@ -134,6 +219,143 @@ export class RoomDetailsComponent {
         this.selectedRooms.reload();
       }
     });
+
+    // Listen for reservation-level date changes and re-fetch inventory rates for ALL rooms
+    const form = this.reservationForm();
+    if (form) {
+      form.get('checkInDate')?.valueChanges.subscribe((newCheckIn) => {
+        this.onReservationDatesChanged(newCheckIn, form.get('checkOutDate')?.value);
+      });
+      form.get('checkOutDate')?.valueChanges.subscribe((newCheckOut) => {
+        this.onReservationDatesChanged(form.get('checkInDate')?.value, newCheckOut);
+      });
+    }
+  }
+
+  /**
+   * Fetch inventory restriction records for a specific room row.
+   * Validates stop-sell, CTA, CTD, min/max stay — same logic as quick-reservation modal.
+   */
+  fetchRoomRestrictions(
+    index: number,
+    roomTypeId: string,
+    checkIn: Date,
+    checkOut: Date,
+  ): void {
+    const storeId = this.storeStore.selectedStore()?._id;
+    if (!storeId) return;
+
+    const checkInStr = this.formatLocalDate(new Date(checkIn));
+    const checkOutStr = this.formatLocalDate(new Date(checkOut));
+    // Extend end date by 1 day to include checkout date for CTD checking
+    const extendedEnd = new Date(checkOut);
+    extendedEnd.setDate(extendedEnd.getDate() + 1);
+    const extendedEndStr = this.formatLocalDate(extendedEnd);
+
+    const nights = this.calculateNumberOfNights(checkIn, checkOut);
+    if (nights <= 0) {
+      this.roomRestrictionIssues.update((prev) => {
+        const updated = { ...prev };
+        delete updated[index];
+        return updated;
+      });
+      this.hasRestrictions.emit(false);
+      return;
+    }
+
+    // Use per-room ratePlanId from the form, fall back to global input
+    const roomsArray = this.getRoomsFormArray();
+    const ratePlan = roomsArray?.at(index)?.get('ratePlanId')?.value || this.ratePlanId() || undefined;
+    this.loadingRoomRestrictions.update((prev) => ({ ...prev, [index]: true }));
+
+    this.rateInventoryService
+      .getInventory(storeId, roomTypeId, checkInStr, extendedEndStr, ratePlan)
+      .pipe(catchError(() => of([])))
+      .subscribe((records: RateInventoryRecord[]) => {
+        const issues: Array<{ date: string; type: string; detail: string }> = [];
+
+        for (const record of records) {
+          const dateStr = typeof record.date === 'string' ? record.date.split('T')[0] : '';
+          const r = record.restrictions;
+          if (!r) continue;
+
+          if (r.stopSell && dateStr !== checkOutStr) {
+            issues.push({ date: dateStr, type: 'stop-sell', detail: 'Stop Sell — date closed for bookings' });
+          }
+          if (r.closedToArrival && dateStr === checkInStr) {
+            issues.push({ date: dateStr, type: 'cta', detail: 'Closed to Arrival — cannot check in on this date' });
+          }
+          if (r.closedToDeparture && dateStr === checkOutStr) {
+            issues.push({ date: dateStr, type: 'ctd', detail: 'Closed to Departure — cannot check out on this date' });
+          }
+          if (r.minStay && r.minStay > 1 && nights < r.minStay && !issues.find(i => i.type === 'min-stay')) {
+            issues.push({ date: dateStr, type: 'min-stay', detail: `Minimum stay is ${r.minStay} nights` });
+          }
+          if (r.maxStay && r.maxStay < 365 && nights > r.maxStay && !issues.find(i => i.type === 'max-stay')) {
+            issues.push({ date: dateStr, type: 'max-stay', detail: `Maximum stay is ${r.maxStay} nights` });
+          }
+        }
+
+        this.roomRestrictionIssues.update((prev) => ({
+          ...prev,
+          [index]: issues,
+        }));
+        this.loadingRoomRestrictions.update((prev) => ({ ...prev, [index]: false }));
+
+        // Check if ANY room has restriction issues and emit to parent
+        const updatedIssues = { ...this.roomRestrictionIssues(), [index]: issues };
+        const anyRestricted = Object.values(updatedIssues).some((arr) => arr && arr.length > 0);
+        this.hasRestrictions.emit(anyRestricted);
+      });
+  }
+
+  /**
+   * When reservation-level check-in or check-out dates change,
+   * update all rooms' stay periods and re-fetch inventory rates + restrictions for each.
+   */
+  private onReservationDatesChanged(checkIn: Date | null, checkOut: Date | null): void {
+    // Skip when reservation dates are being auto-adjusted from room stay period changes
+    if (this.isAdjustingReservationDates) return;
+    if (!checkIn || !checkOut) return;
+
+    const roomsArray = this.getRoomsFormArray();
+    if (!roomsArray || roomsArray.length === 0) return;
+
+    const nights = this.calculateNumberOfNights(checkIn, checkOut);
+
+    for (let i = 0; i < roomsArray.length; i++) {
+      const roomControl = roomsArray.at(i);
+      if (!roomControl) continue;
+
+      // Update stay period dates
+      roomControl.patchValue(
+        {
+          stayPeriod: {
+            from: checkIn,
+            to: checkOut,
+            numberOfNights: nights,
+          },
+        },
+        { emitEvent: false }
+      );
+
+      // Re-fetch inventory rates for this room
+      const roomTypeId = roomControl.get('roomType')?.value;
+      if (!roomTypeId) continue;
+
+      // Determine base price for fallback
+      const room = this.rooms.value()?.find((r) => r._id === roomControl.get('room')?.value);
+      let baseRoomPrice = 0;
+      if (room?.priceOverride) {
+        baseRoomPrice = room.priceOverride;
+      } else if (typeof room?.roomType === 'object' && room.roomType?.basePrice) {
+        baseRoomPrice = room.roomType.basePrice;
+      }
+
+      this.fetchAndApplyRoomRate(i, roomTypeId, baseRoomPrice, checkIn, checkOut);
+      // Also fetch restrictions for this room
+      this.fetchRoomRestrictions(i, roomTypeId, checkIn, checkOut);
+    }
   }
 
   public isRoomsReadyForAssignment = computed(() => {
@@ -236,6 +458,7 @@ export class RoomDetailsComponent {
             room: [{value:room.room._id || room.room, disabled: this.isEditMode()}, [Validators.required]],
             roomNumber: [room.room?.roomNumber || '', []],
             roomType: [{value: room?.roomType || room?.room?.roomType?._id, disabled: this.isEditMode()}, []],
+            ratePlanId: [{value: room?.ratePlanId || this.ratePlanId() || null, disabled: this.isEditMode()}],
             assignedGuest: [assignedGuestId, [Validators.required]],
             status: [room.status || 'reserved', [Validators.required]],
             assignedGuestName: [assignedGuestName, [Validators.required]],
@@ -284,24 +507,84 @@ export class RoomDetailsComponent {
           // NEW MODE: room is a plain Room object, use createRoomFormGroup
           console.log('[RoomDetails] NEW mode - using createRoomFormGroup for room:', room._id);
           roomForm = this.createRoomFormGroup(room);
+
+          // Populate rate details from inventoryRatesMap for the initial load
+          const rtId = typeof room.roomType === 'object' ? room.roomType?._id : room.roomType;
+          const ratesForType = rtId ? this.inventoryRatesMap()?.[rtId] : null;
+          if (ratesForType) {
+            let basePrice = 0;
+            if (room.priceOverride) {
+              basePrice = room.priceOverride;
+            } else if (typeof room.roomType === 'object' && room.roomType?.basePrice) {
+              basePrice = room.roomType.basePrice;
+            }
+            const hasRatePlanEffect = ratesForType.nights?.some(
+              (n: NightRate) => n.source === 'rate_plan_day_of_week' ||
+                     n.source === 'rate_plan_seasonal' ||
+                     n.source === 'rate_plan_base'
+            ) ?? false;
+            const uniqueRates = new Set(ratesForType.nights?.map((n: NightRate) => n.rate) ?? []);
+            this.roomRateDetails.update((prev) => ({
+              ...prev,
+              [index]: {
+                originalPrice: basePrice,
+                inventoryRate: ratesForType.averageRate,
+                totalRate: ratesForType.totalRate,
+                hasRatePlan: hasRatePlanEffect,
+                hasVaryingRates: uniqueRates.size > 1,
+                nights: ratesForType.nights || [],
+                numberOfNights: ratesForType.numberOfNights,
+              },
+            }));
+          }
         }
         
         roomsArray.push(roomForm);
         console.log(`[RoomDetails] Room ${index} added to form array. Current array length:`, roomsArray.length);
+
+        // Fetch rate plans for this room's room type
+        const rtId = isEditMode
+          ? (room?.roomType || room?.room?.roomType?._id)
+          : (typeof room.roomType === 'object' ? room.roomType?._id : room.roomType);
+        if (rtId) {
+          this.fetchRatePlansForRoom(index, rtId);
+        }
     });
 
     // Update the parent reservation form with the populated rooms array
     console.log('[RoomDetails] populateRoomsFormArray2 completed. Final array length:', roomsArray.length);
     this.reservationForm()?.patchValue({ rooms: roomsArray }, { emitEvent: false });
+
+    // Auto-fetch rate breakdown for all rooms (both new & edit mode)
+    // For new mode, roomRateDetails is already populated from inventoryRatesMap above for rooms that had rates.
+    // For edit mode (or rooms missing rates in new mode), fetch on-demand.
+    setTimeout(() => {
+      for (let i = 0; i < roomsArray.length; i++) {
+        if (!this.roomRateDetails()[i]) {
+          this.viewRateInfo(i);
+        }
+      }
+    }, 0);
+
 }
 
   /**
    * Create a room form group based on the schema structure
    */
   createRoomFormGroup(room: Room, roomData?: any) {
-    // Determine the room price: use priceOverride if available, otherwise use room type base price
+    // Determine the room price:
+    // Priority: 1) existing reservation data, 2) inventory rate, 3) room priceOverride, 4) roomType basePrice
+    const roomTypeId = typeof room.roomType === 'object' ? room.roomType?._id : room.roomType;
+    const inventoryRates = roomTypeId ? this.inventoryRatesMap()?.[roomTypeId] : null;
+
     let roomPrice = roomData?.pricing?.pricePerNight;
-    if (!roomPrice) {
+    let initialTotalPrice = 0;
+
+    if (!roomPrice && inventoryRates?.averageRate) {
+      // Use inventory average rate as pricePerNight, total from inventory
+      roomPrice = inventoryRates.averageRate;
+      initialTotalPrice = inventoryRates.totalRate;
+    } else if (!roomPrice) {
       if (room.priceOverride) {
         roomPrice = room.priceOverride;
       } else if (
@@ -329,8 +612,10 @@ export class RoomDetailsComponent {
       defaultCheckOut
     );
 
-    // Calculate initial total price based on price per night and number of nights
-    const initialTotalPrice = roomPrice * initialNights;
+    // Calculate initial total price: use inventory total if available, otherwise price × nights
+    if (!initialTotalPrice) {
+      initialTotalPrice = roomPrice * initialNights;
+    }
     return this.fb.group({
       room: [roomData?.room || room._id || '', [Validators.required]], // Room ID
       roomNumber: [roomData?.roomNumber || room.roomNumber || ''], // Store room number for display
@@ -344,6 +629,7 @@ export class RoomDetailsComponent {
           '',
         [Validators.required],
       ], // Room Type ID
+      ratePlanId: [roomData?.ratePlanId || this.ratePlanId() || null], // Per-room rate plan
 
       // Stay period for this room
       stayPeriod: this.fb.group({
@@ -445,7 +731,43 @@ export class RoomDetailsComponent {
     const roomsArray = this.getRoomsFormArray();
     if (roomsArray) {
       roomsArray.removeAt(index);
+
+      // Re-index room rate details, restriction issues, and rate plans after removal
+      this.reindexRoomSignalsAfterRemoval(index);
+
+      // Auto-adjust reservation dates since the removed room may have been
+      // the only one covering a boundary date
+      if (roomsArray.length > 0) {
+        this.updateReservationDatesFromRooms();
+      }
     }
+  }
+
+  /**
+   * Re-index per-room signal maps after a room is removed.
+   * Shifts entries above the removed index down by one.
+   */
+  private reindexRoomSignalsAfterRemoval(removedIndex: number): void {
+    const reindex = <T>(map: Record<number, T>): Record<number, T> => {
+      const result: Record<number, T> = {};
+      for (const [key, value] of Object.entries(map)) {
+        const idx = Number(key);
+        if (idx < removedIndex) {
+          result[idx] = value;
+        } else if (idx > removedIndex) {
+          result[idx - 1] = value;
+        }
+        // idx === removedIndex is skipped (removed)
+      }
+      return result;
+    };
+
+    this.roomRateDetails.update(reindex);
+    this.loadingRoomRates.update(reindex);
+    this.roomRestrictionIssues.update(reindex);
+    this.loadingRoomRestrictions.update(reindex);
+    this.roomRatePlans.update(reindex);
+    this.loadingRoomRatePlans.update(reindex);
   }
 
   /**
@@ -481,6 +803,83 @@ export class RoomDetailsComponent {
     // Reset the room selection to empty state when room type changes
     const currentRoom = roomsArray.at(index)?.get('room');
     currentRoom?.reset();
+
+    // Reset rate plan for this room
+    roomsArray.at(index)?.get('ratePlanId')?.setValue(null);
+
+    // Clear rate details for this room index
+    const details = { ...this.roomRateDetails() };
+    delete details[index];
+    this.roomRateDetails.set(details);
+
+    // Clear restriction issues for this room
+    this.roomRestrictionIssues.update((prev) => {
+      const updated = { ...prev };
+      delete updated[index];
+      return updated;
+    });
+
+    // Fetch rate plans for the new room type
+    if (roomTypeId) {
+      this.fetchRatePlansForRoom(index, roomTypeId);
+    } else {
+      this.roomRatePlans.update((prev) => {
+        const updated = { ...prev };
+        delete updated[index];
+        return updated;
+      });
+    }
+  }
+
+  /**
+   * Fetch available rate plans for a room type and store them per-room index.
+   */
+  fetchRatePlansForRoom(index: number, roomTypeId: string): void {
+    const storeId = this.storeStore.selectedStore()?._id;
+    if (!storeId || !roomTypeId) return;
+
+    this.loadingRoomRatePlans.update((prev) => ({ ...prev, [index]: true }));
+
+    this.rateInventoryService
+      .getRatePlansByRoomType(storeId, roomTypeId)
+      .pipe(catchError(() => of([])))
+      .subscribe((plans: RatePlan[]) => {
+        this.roomRatePlans.update((prev) => ({ ...prev, [index]: plans }));
+        this.loadingRoomRatePlans.update((prev) => ({ ...prev, [index]: false }));
+      });
+  }
+
+  /**
+   * Handle rate plan change for a specific room row.
+   * Re-fetches inventory rates and restrictions using the new rate plan.
+   */
+  onRatePlanChange(index: number, ratePlanId: string): void {
+    const roomsArray = this.getRoomsFormArray();
+    if (!roomsArray) return;
+
+    const roomControl = roomsArray.at(index);
+    if (!roomControl) return;
+
+    const roomTypeId = roomControl.get('roomType')?.value;
+    if (!roomTypeId) return;
+
+    const form = this.reservationForm();
+    const checkIn = roomControl.get('stayPeriod')?.get('from')?.value || form?.get('checkInDate')?.value;
+    const checkOut = roomControl.get('stayPeriod')?.get('to')?.value || form?.get('checkOutDate')?.value;
+    if (!checkIn || !checkOut) return;
+
+    // Determine base price for fallback
+    const room = this.rooms.value()?.find((r) => r._id === roomControl.get('room')?.value);
+    let baseRoomPrice = 0;
+    if (room?.priceOverride) {
+      baseRoomPrice = room.priceOverride;
+    } else if (typeof room?.roomType === 'object' && room.roomType?.basePrice) {
+      baseRoomPrice = room.roomType.basePrice;
+    }
+
+    // Re-fetch rates and restrictions with the new rate plan
+    this.fetchAndApplyRoomRate(index, roomTypeId, baseRoomPrice, new Date(checkIn), new Date(checkOut));
+    this.fetchRoomRestrictions(index, roomTypeId, new Date(checkIn), new Date(checkOut));
   }
 
   /**
@@ -652,44 +1051,48 @@ export class RoomDetailsComponent {
       if (roomsArray) {
         const roomControl = roomsArray.at(index);
 
-        // Determine room price from priceOverride or room type base price
-        let roomPrice = 0;
+        // Determine base room price from priceOverride or room type base price
+        let baseRoomPrice = 0;
         if (selectedRoom.priceOverride) {
-          roomPrice = selectedRoom.priceOverride;
+          baseRoomPrice = selectedRoom.priceOverride;
         } else if (
           typeof selectedRoom.roomType === 'object' &&
           selectedRoom.roomType?.basePrice
         ) {
-          roomPrice = selectedRoom.roomType.basePrice;
+          baseRoomPrice = selectedRoom.roomType.basePrice;
         }
 
-        // Get the number of nights from stay period
+        // Update room number immediately
+        roomControl?.patchValue({ roomNumber: selectedRoom.roomNumber || '' });
+
+        // Get the room type ID for inventory lookup
+        const roomTypeId = typeof selectedRoom.roomType === 'object'
+          ? selectedRoom.roomType?._id
+          : selectedRoom.roomType;
+
+        // Set base price first, then fetch inventory rates
         const stayPeriodForm = roomControl?.get('stayPeriod');
-        const numberOfNights =
-          stayPeriodForm?.get('numberOfNights')?.value || 1;
+        const numberOfNights = stayPeriodForm?.get('numberOfNights')?.value || 1;
+        const baseTotalPrice = baseRoomPrice * numberOfNights;
 
-        // Calculate total price based on room price and number of nights
-        const totalPrice = roomPrice * numberOfNights;
-
-        // Update room details and pricing
+        // Set base price as fallback immediately
         roomControl?.patchValue({
-          roomNumber: selectedRoom.roomNumber || '',
           pricing: {
-            pricePerNight: roomPrice,
-            totalPrice: totalPrice,
+            pricePerNight: baseRoomPrice,
+            totalPrice: baseTotalPrice,
             discount: 0,
-            subtotal: totalPrice,
+            subtotal: baseTotalPrice,
             taxes: 0,
             discountType: 'amount',
-            fees: {
-              serviceFee: 0,
-              cleaningFee: 0,
-              resortFee: 0,
-              other: 0,
-            },
-            total: totalPrice,
+            fees: { serviceFee: 0, cleaningFee: 0, resortFee: 0, other: 0 },
+            total: baseTotalPrice,
           },
         });
+
+        // Fetch inventory rates and update if available
+        if (roomTypeId) {
+          this.fetchAndApplyRoomRate(index, roomTypeId, baseRoomPrice);
+        }
       }
     }
   }
@@ -807,26 +1210,10 @@ export class RoomDetailsComponent {
     // Calculate and update numberOfNights
     const nights = this.calculateNumberOfNights(checkInDate, checkOutDate);
 
-    // Get the pricing form and calculate total price
-    const pricingForm = roomControl?.get('pricing');
-    const pricePerNight = pricingForm?.get('pricePerNight')?.value || 0;
-    const totalPrice = pricePerNight * nights;
-
     stayPeriodForm.patchValue(
-      {
-        numberOfNights: nights,
-      },
+      { numberOfNights: nights },
       { emitEvent: false }
-    ); // Prevent infinite loop
-
-    pricingForm?.patchValue(
-      {
-        totalPrice: totalPrice,
-        subtotal: totalPrice,
-        total: totalPrice,
-      },
-      { emitEvent: true }
-    ); // Emit event so breakdown listens
+    );
 
     // Get the room data
     const room = this.rooms.value()!.find((r) => r._id === roomId);
@@ -887,58 +1274,312 @@ export class RoomDetailsComponent {
           return;
         }
 
-        // Room is available - now update reservation dates based on all rooms
+        // Room is available - fetch inventory rates and update pricing
+        const roomTypeId = typeof room.roomType === 'object' ? room.roomType?._id : room.roomType;
+        let baseRoomPrice = 0;
+        if (room.priceOverride) {
+          baseRoomPrice = room.priceOverride;
+        } else if (typeof room.roomType === 'object' && room.roomType?.basePrice) {
+          baseRoomPrice = room.roomType.basePrice;
+        }
+
+        if (roomTypeId) {
+          this.fetchAndApplyRoomRate(index, roomTypeId, baseRoomPrice, checkInDate, checkOutDate);
+          // Validate inventory restrictions for this room with its new dates
+          this.fetchRoomRestrictions(index, roomTypeId, checkInDate, checkOutDate);
+        } else {
+          // No room type — just update with base price
+          const pricingForm = roomControl?.get('pricing');
+          const totalPrice = baseRoomPrice * nights;
+          pricingForm?.patchValue({
+            pricePerNight: baseRoomPrice,
+            totalPrice, subtotal: totalPrice, total: totalPrice,
+          }, { emitEvent: true });
+        }
+
+        // Auto-adjust reservation dates to cover all rooms (no empty/gap dates)
         this.updateReservationDatesFromRooms();
       }
     );
   }
 
   /**
-   * Update reservation dates based on the earliest check-in and latest check-out from all rooms
+   * Fetch inventory rates for a specific room row and apply pricing.
+   * Also stores rate plan details for display in the template.
    */
-  private updateReservationDatesFromRooms() {
-    // const roomsArray = this.getRoomsFormArray();
-    // if (!roomsArray || roomsArray.length === 0) return;
-    // let earliestCheckIn: Date | null = null;
-    // let latestCheckOut: Date | null = null;
-    // // Find the earliest check-in and latest check-out dates from all rooms
-    // roomsArray.controls.forEach((control) => {
-    //   const stayPeriodForm = control.get('stayPeriod');
-    //   if (stayPeriodForm) {
-    //     const fromDate = stayPeriodForm.get('from')?.value;
-    //     const toDate = stayPeriodForm.get('to')?.value;
-    //     if (fromDate) {
-    //       const from = new Date(fromDate);
-    //       if (!earliestCheckIn || from < earliestCheckIn) {
-    //         earliestCheckIn = from;
-    //       }
-    //     }
-    //     if (toDate) {
-    //       const to = new Date(toDate);
-    //       if (!latestCheckOut || to > latestCheckOut) {
-    //         latestCheckOut = to;
-    //       }
-    //     }
-    //   }
-    // });
-    // // Update reservation dates if we found any valid dates
-    // const reservationForm = this.reservationForm();
-    // if (reservationForm && earliestCheckIn && latestCheckOut) {
-    //   reservationForm.patchValue({
-    //     checkInDate: earliestCheckIn,
-    //     checkOutDate: latestCheckOut,
-    //   });
-    //   this.snackBar.open(
-    //     'Reservation dates updated based on room selections',
-    //     'Close',
-    //     {
-    //       duration: 3000,
-    //       horizontalPosition: 'end',
-    //       verticalPosition: 'top',
-    //       panelClass: ['success-snackbar'],
-    //     }
-    //   );
-    // }
+  fetchAndApplyRoomRate(
+    index: number,
+    roomTypeId: string,
+    baseRoomPrice: number,
+    overrideCheckIn?: Date,
+    overrideCheckOut?: Date,
+  ): void {
+    const storeId = this.storeStore.selectedStore()?._id;
+    const form = this.reservationForm();
+    const checkIn = overrideCheckIn || form?.get('checkInDate')?.value;
+    const checkOut = overrideCheckOut || form?.get('checkOutDate')?.value;
+
+    if (!storeId || !checkIn || !checkOut) return;
+
+    const checkInStr = this.formatLocalDate(new Date(checkIn));
+    const checkOutStr = this.formatLocalDate(new Date(checkOut));
+    // Use per-room ratePlanId from the form, fall back to global input
+    const roomsArray = this.getRoomsFormArray();
+    const ratePlan = roomsArray?.at(index)?.get('ratePlanId')?.value || this.ratePlanId() || undefined;
+
+    // Set loading state
+    this.loadingRoomRates.update((prev) => ({ ...prev, [index]: true }));
+
+    this.rateInventoryService
+      .getRatesForStay(storeId, roomTypeId, checkInStr, checkOutStr, ratePlan)
+      .subscribe({
+        next: (rates: StayRates) => {
+          const roomsArray = this.getRoomsFormArray();
+          if (!roomsArray) return;
+
+          const roomControl = roomsArray.at(index);
+          if (!roomControl) return;
+
+          // Determine if a rate plan affected the price
+          const hasRatePlanEffect = rates.nights?.some(
+            (n) => n.source === 'rate_plan_day_of_week' ||
+                   n.source === 'rate_plan_seasonal' ||
+                   n.source === 'rate_plan_base'
+          ) ?? false;
+
+          // Check if rates vary by night
+          const uniqueRates = new Set(rates.nights?.map((n) => n.rate) ?? []);
+          const hasVaryingRates = uniqueRates.size > 1;
+
+          // Store rate details for this room
+          this.roomRateDetails.update((prev) => ({
+            ...prev,
+            [index]: {
+              originalPrice: baseRoomPrice,
+              inventoryRate: rates.averageRate,
+              totalRate: rates.totalRate,
+              hasRatePlan: hasRatePlanEffect,
+              hasVaryingRates,
+              nights: rates.nights || [],
+              numberOfNights: rates.numberOfNights,
+            },
+          }));
+
+          // Update form pricing
+          roomControl.patchValue({
+            pricing: {
+              pricePerNight: rates.averageRate,
+              totalPrice: rates.totalRate,
+              subtotal: rates.totalRate,
+              total: rates.totalRate,
+            },
+          });
+
+          this.loadingRoomRates.update((prev) => ({ ...prev, [index]: false }));
+        },
+        error: () => {
+          // On error, fall back to base price
+          const roomsArray = this.getRoomsFormArray();
+          const roomControl = roomsArray?.at(index);
+          const nights = roomControl?.get('stayPeriod')?.get('numberOfNights')?.value || 1;
+          const totalPrice = baseRoomPrice * nights;
+
+          roomControl?.patchValue({
+            pricing: {
+              pricePerNight: baseRoomPrice,
+              totalPrice,
+              subtotal: totalPrice,
+              total: totalPrice,
+            },
+          });
+
+          // Clear rate details on error
+          this.roomRateDetails.update((prev) => {
+            const updated = { ...prev };
+            delete updated[index];
+            return updated;
+          });
+
+          this.loadingRoomRates.update((prev) => ({ ...prev, [index]: false }));
+        },
+      });
+  }
+
+  /**
+   * On-demand fetch of rate plan info for a room row (display only, no price changes).
+   * Called when user clicks "View rate info" link in edit mode.
+   */
+  viewRateInfo(index: number): void {
+    const roomsArray = this.getRoomsFormArray();
+    if (!roomsArray) return;
+
+    const roomControl = roomsArray.at(index);
+    if (!roomControl) return;
+
+    const storeId = this.storeStore.selectedStore()?._id;
+    const roomTypeId = roomControl.get('roomType')?.value;
+    if (!storeId || !roomTypeId) return;
+
+    const stayFrom = roomControl.get('stayPeriod')?.get('from')?.value;
+    const stayTo = roomControl.get('stayPeriod')?.get('to')?.value;
+    const form = this.reservationForm();
+    const checkIn = stayFrom || form?.get('checkInDate')?.value;
+    const checkOut = stayTo || form?.get('checkOutDate')?.value;
+    if (!checkIn || !checkOut) return;
+
+    // Determine base price from current form value
+    const baseRoomPrice = roomControl.get('pricing')?.get('pricePerNight')?.value || 0;
+
+    const checkInStr = this.formatLocalDate(new Date(checkIn));
+    const checkOutStr = this.formatLocalDate(new Date(checkOut));
+    // Use per-room ratePlanId from the form, fall back to global input
+    const ratePlan = roomControl.get('ratePlanId')?.value || this.ratePlanId() || undefined;
+
+    this.loadingRoomRates.update((prev) => ({ ...prev, [index]: true }));
+
+    // Also fetch restrictions for this room on initial load
+    this.fetchRoomRestrictions(index, roomTypeId, new Date(checkIn), new Date(checkOut));
+
+    this.rateInventoryService
+      .getRatesForStay(storeId, roomTypeId, checkInStr, checkOutStr, ratePlan)
+      .subscribe({
+        next: (rates: StayRates) => {
+          const hasRatePlanEffect = rates.nights?.some(
+            (n) => n.source === 'rate_plan_day_of_week' ||
+                   n.source === 'rate_plan_seasonal' ||
+                   n.source === 'rate_plan_base'
+          ) ?? false;
+          const uniqueRates = new Set(rates.nights?.map((n) => n.rate) ?? []);
+
+          this.roomRateDetails.update((prev) => ({
+            ...prev,
+            [index]: {
+              originalPrice: baseRoomPrice,
+              inventoryRate: rates.averageRate,
+              totalRate: rates.totalRate,
+              hasRatePlan: hasRatePlanEffect,
+              hasVaryingRates: uniqueRates.size > 1,
+              nights: rates.nights || [],
+              numberOfNights: rates.numberOfNights,
+            },
+          }));
+
+          this.loadingRoomRates.update((prev) => ({ ...prev, [index]: false }));
+        },
+        error: () => {
+          this.loadingRoomRates.update((prev) => ({ ...prev, [index]: false }));
+        },
+      });
+  }
+
+  /**
+   * Hide the rate info panel for a room row.
+   */
+  hideRateInfo(index: number): void {
+    this.roomRateDetails.update((prev) => {
+      const updated = { ...prev };
+      delete updated[index];
+      return updated;
+    });
+  }
+
+  /**
+   * Auto-adjust reservation check-in/check-out to exactly cover all rooms.
+   * Computes the earliest room check-in and latest room check-out.
+   * If the reservation dates are wider than needed (gaps with no room occupying),
+   * shrink them. Then re-validate inventory restrictions for every room.
+   */
+  private updateReservationDatesFromRooms(): void {
+    const roomsArray = this.getRoomsFormArray();
+    if (!roomsArray || roomsArray.length === 0) return;
+
+    let earliestCheckIn: Date | null = null;
+    let latestCheckOut: Date | null = null;
+
+    // Find the earliest check-in and latest check-out dates from all rooms
+    for (let i = 0; i < roomsArray.length; i++) {
+      const stayPeriodForm = roomsArray.at(i)?.get('stayPeriod');
+      if (!stayPeriodForm) continue;
+
+      const fromDate = stayPeriodForm.get('from')?.value;
+      const toDate = stayPeriodForm.get('to')?.value;
+
+      if (fromDate) {
+        const from = new Date(fromDate);
+        from.setHours(0, 0, 0, 0);
+        if (!earliestCheckIn || from < earliestCheckIn) {
+          earliestCheckIn = from;
+        }
+      }
+      if (toDate) {
+        const to = new Date(toDate);
+        to.setHours(0, 0, 0, 0);
+        if (!latestCheckOut || to > latestCheckOut) {
+          latestCheckOut = to;
+        }
+      }
+    }
+
+    if (!earliestCheckIn || !latestCheckOut) return;
+
+    const reservationForm = this.reservationForm();
+    if (!reservationForm) return;
+
+    const currentCheckIn = new Date(reservationForm.get('checkInDate')?.value);
+    const currentCheckOut = new Date(reservationForm.get('checkOutDate')?.value);
+    currentCheckIn.setHours(0, 0, 0, 0);
+    currentCheckOut.setHours(0, 0, 0, 0);
+
+    // Only adjust if the reservation dates differ from room coverage
+    const needsAdjustment =
+      earliestCheckIn.getTime() !== currentCheckIn.getTime() ||
+      latestCheckOut.getTime() !== currentCheckOut.getTime();
+
+    if (!needsAdjustment) return;
+
+    // Set guard flag so onReservationDatesChanged doesn't overwrite room dates
+    this.isAdjustingReservationDates = true;
+
+    const nights = this.calculateNumberOfNights(earliestCheckIn, latestCheckOut);
+    reservationForm.patchValue({
+      checkInDate: earliestCheckIn,
+      checkOutDate: latestCheckOut,
+      numberOfNights: nights,
+    });
+
+    // Clear guard after a tick (after valueChanges listeners have fired)
+    setTimeout(() => {
+      this.isAdjustingReservationDates = false;
+    }, 0);
+
+    // Re-validate inventory restrictions for ALL rooms against their own stay periods
+    for (let i = 0; i < roomsArray.length; i++) {
+      const roomControl = roomsArray.at(i);
+      if (!roomControl) continue;
+
+      const roomTypeId = roomControl.get('roomType')?.value;
+      const stayFrom = roomControl.get('stayPeriod')?.get('from')?.value;
+      const stayTo = roomControl.get('stayPeriod')?.get('to')?.value;
+
+      if (roomTypeId && stayFrom && stayTo) {
+        this.fetchRoomRestrictions(i, roomTypeId, new Date(stayFrom), new Date(stayTo));
+      }
+    }
+
+    // Build a readable date range string for the notification
+    const fromStr = this.formatLocalDate(earliestCheckIn);
+    const toStr = this.formatLocalDate(latestCheckOut);
+
+    this.snackBar.open(
+      `Reservation dates auto-adjusted to ${fromStr} → ${toStr} (${nights} night${nights !== 1 ? 's' : ''})`,
+      'Close',
+      {
+        duration: 5000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top',
+        panelClass: ['info-snackbar'],
+      }
+    );
   }
 
   /**
@@ -956,9 +1597,9 @@ export class RoomDetailsComponent {
         return;
       }
 
-      // Format dates as ISO strings for the API
-      const checkIn = new Date(checkInDate).toISOString().split('T')[0];
-      const checkOut = new Date(checkOutDate).toISOString().split('T')[0];
+      // Format dates using local time (not UTC) to avoid timezone shifts
+      const checkIn = this.formatLocalDate(new Date(checkInDate));
+      const checkOut = this.formatLocalDate(new Date(checkOutDate));
 
       // Call the RoomsService to get available rooms for this date range
       this.roomsService
@@ -1069,5 +1710,17 @@ export class RoomDetailsComponent {
           return sum;
       }
     }, 0);
+  }
+
+  /**
+   * Format a Date to 'YYYY-MM-DD' using local time (not UTC).
+   * Avoids timezone shift that toISOString() causes.
+   */
+  private formatLocalDate(date: Date): string {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

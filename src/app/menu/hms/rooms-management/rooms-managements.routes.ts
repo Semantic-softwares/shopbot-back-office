@@ -29,6 +29,24 @@ export const ROOMS_MANAGEMENT_ROUTES: Routes = [
           requiredPermissions: ['hotel.roomtypes.view', 'hotel.roomtypes.create', 'hotel.roomtypes.edit', 'hotel.roomtypes.delete'],
           permissionMode: 'any'
         }
+      },
+      {
+        path: 'rate-plans',
+        loadChildren: () => import('./rate-plans/rate-plans.routes').then(m => m.RATE_PLANS_ROUTES),
+        canActivate: [roleGuard],
+        data: {
+          requiredPermissions: ['hotel.rooms.view', 'hotel.rooms.edit'],
+          permissionMode: 'any'
+        }
+      },
+      {
+        path: 'inventory',
+        loadChildren: () => import('./inventory/inventory.routes').then(m => m.INVENTORY_ROUTES),
+        canActivate: [roleGuard],
+        data: {
+          requiredPermissions: ['hotel.rooms.view', 'hotel.rooms.edit'],
+          permissionMode: 'any'
+        }
       }
     ]
   }

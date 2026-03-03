@@ -80,15 +80,33 @@
         <ng-container matColumnDef="printers">
           <th mat-header-cell *matHeaderCellDef>Printers</th>
           <td mat-cell *matCellDef="let station">
-            <div class="flex items-center">
-              <mat-icon 
-                class="mr-2" 
-                [class.text-green-600]="getPrinterCount(station) > 0" 
-                [class.text-gray-400]="getPrinterCount(station) === 0">
-                print
-              </mat-icon>
-              <span>{{ getPrinterCount(station) }} active</span>
-            </div>
+            @if (getPrinterCount(station) > 0) {
+              <div class="space-y-2">
+                <div class="flex items-center">
+                  <mat-icon class="mr-2 text-green-600">print</mat-icon>
+                  <span class="font-medium">{{ getPrinterCount(station) }} active</span>
+                </div>
+                <div class="space-y-1">
+                  @for (printer of station.printers; track printer._id) {
+                    <div class="text-xs bg-gray-100 rounded px-2 py-1 flex items-center justify-between">
+                      <span class="truncate flex-1">{{ printer.name }}</span>
+                      <mat-icon 
+                        class="text-xs ml-2"
+                        [class.text-green-600]="printer.status === 'online'"
+                        [class.text-red-600]="printer.status === 'offline'"
+                        [class.text-gray-400]="!printer.status || printer.status === 'unknown'">
+                        {{ printer.status === 'online' ? 'check_circle' : (printer.status === 'offline' ? 'cancel' : 'help') }}
+                      </mat-icon>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="flex items-center text-gray-400">
+                <mat-icon class="mr-2">print_disabled</mat-icon>
+                <span>No printers</span>
+              </div>
+            }
           </td>
         </ng-container>
 

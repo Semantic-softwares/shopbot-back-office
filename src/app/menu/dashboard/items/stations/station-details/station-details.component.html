@@ -127,42 +127,52 @@
       <mat-card-content class="p-6">
         @if (station()!.printers && station()!.printers!.length > 0) {
           <div class="space-y-4">
-            @for (printer of station()!.printers; track printer.id) {
+            @for (printer of station()!.printers; track $index) {
               <div class="border rounded-lg p-4 bg-gray-50">
-                <div class="flex items-start justify-between">
-                  <div class="flex-1">
-                    <div class="flex items-center mb-2">
-                      <mat-icon class="mr-2" [class]="getPrinterStatusClass(printer.status || 'unknown')">
-                        print
-                      </mat-icon>
+                <div class="flex items-start justify-between mb-3">
+                  <div class="flex items-center flex-1">
+                    <mat-icon [class]="getPrinterStatusClass(printer.status || 'unknown')" class="mr-3 text-lg">
+                      {{ getPrinterStatusIcon(printer.status || 'unknown') }}
+                    </mat-icon>
+                    <div>
                       <h4 class="font-semibold text-lg">{{ printer.name }}</h4>
-                      @if (printer.enabled) {
-                        <span class="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                          Enabled
-                        </span>
-                      } @else {
-                        <span class="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-                          Disabled
-                        </span>
-                      }
+                      <p class="text-sm text-gray-600">{{ getConnectionTypeLabel(printer.connectionType) }}</p>
                     </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <span class="text-gray-600">IP Address:</span>
-                        <span class="ml-2 font-mono">{{ printer.ipAddress }}</span>
+                  </div>
+                  <div class="flex gap-2">
+                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                      {{ printer.role | uppercase }}
+                    </span>
+                    <span 
+                      class="px-2 py-1 text-xs font-medium rounded-full"
+                      [class]="printer.status === 'online' ? 'bg-green-100 text-green-800' : (printer.status === 'offline' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800')">
+                      {{ printer.status || 'unknown' | titlecase }}
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span class="text-gray-600 font-medium">Connection Details:</span>
+                    <p class="mt-1 font-mono text-gray-900">{{ getPrinterConnectionDetails(printer) }}</p>
+                  </div>
+                  
+                  <div>
+                    <span class="text-gray-600 font-medium">Capabilities:</span>
+                    @if (printer.capabilities) {
+                      <div class="mt-1 flex gap-2 flex-wrap">
+                        <span class="px-2 py-0.5 text-xs bg-gray-200 rounded">{{ printer.capabilities.paperWidth }}mm</span>
+                        @if (printer.capabilities.supportsQr) {
+                          <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">QR</span>
+                        }
+                        @if (printer.capabilities.supportsLogo) {
+                          <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">Logo</span>
+                        }
+                        @if (printer.capabilities.supportsCut) {
+                          <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">Cut</span>
+                        }
                       </div>
-                      <div>
-                        <span class="text-gray-600">Port:</span>
-                        <span class="ml-2 font-mono">{{ printer.port }}</span>
-                      </div>
-                      <div>
-                        <span class="text-gray-600">Status:</span>
-                        <span class="ml-2 capitalize" [class]="getPrinterStatusClass(printer.status || 'unknown')">
-                          {{ printer.status || 'unknown' }}
-                        </span>
-                      </div>
-                    </div>
+                    }
                   </div>
                 </div>
               </div>

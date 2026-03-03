@@ -246,6 +246,34 @@ export class RoomsService {
   }
 
   /**
+   * Get available rooms for a specific Channex room type UUID within a date range.
+   * Resolves the Channex UUID on the backend and checks only reservation date conflicts.
+   */
+  getAvailableRoomsByChannexType(params: {
+    storeId: string;
+    channexRoomTypeId: string;
+    checkInDate: string;
+    checkOutDate: string;
+    roomTypeName?: string;
+  }): Observable<any[]> {
+    let httpParams = new HttpParams()
+      .set('checkIn', params.checkInDate)
+      .set('checkOut', params.checkOutDate)
+      .set('channexRoomTypeId', params.channexRoomTypeId);
+
+    if (params.roomTypeName) {
+      httpParams = httpParams.set('roomTypeName', params.roomTypeName);
+    }
+
+    return this.http.get<{ success: boolean; data: any[] }>(
+      `${this.baseUrl}/rooms/${params.storeId}/availability-by-type`,
+      { params: httpParams },
+    ).pipe(
+      map(response => response.data || [])
+    );
+  }
+
+  /**
    * Get room statistics
    */
   getRoomStats(storeId: string): Observable<RoomStats> {
@@ -411,9 +439,29 @@ export class RoomsService {
   /**
    * Assign rooms to an OTA booking
    */
-  assignRoomsToBooking(bookingId: string, roomAssignments: any[]): Observable<any> {
-    return this.http.post(`${this.baseUrl}/reservations/${bookingId}/assign-rooms`, {
-      assignments: roomAssignments,
-    });
+  assignRoomsToBooking(
+    bookingId: string,
+    roomAssignments: Array<{
+      otaRoomIndex: number;
+      roomId: string;
+      guests: Array<{
+        name: string;
+        surname: string;
+        email?: string;
+        phone?: string;
+        country?: string;
+      }>;
+    }>,
+    currencyConversion?: {
+      bookingCurrency: string;
+      storeCurrency: string;
+      conversionRate: number;
+    },
+  ): Observable<any> {
+    const body: any = { assignments: roomAssignments };
+    if (currencyConversion) {
+      body.currencyConversion = currencyConversion;
+    }
+    return this.http.post(`${this.baseUrl}/reservations/${bookingId}/assign-rooms`, body);
   }
 }

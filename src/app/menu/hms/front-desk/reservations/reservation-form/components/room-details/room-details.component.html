@@ -33,8 +33,8 @@
                     <!-- Room Rows -->
                     @for (room of getRoomsFormArray()?.controls || []; let i = $index; track i) {
                     <div [formGroupName]="i"
-                        class="grid gap-3 p-3 border-b border-gray-200 items-center text-xs hover:bg-gray-50"
-                        style="grid-template-columns: 1.2fr 1fr 1.2fr 1fr 1fr 1.2fr 0.8fr;">
+                        class="grid gap-3 p-3 border-b border-gray-200 items-start text-xs hover:bg-gray-50"
+                        style="grid-template-columns: 1.2fr 1fr 1fr 1.2fr 1fr 1fr 1.5fr 0.8fr;">
 
                         <!-- Room Type Select -->
                         <div>
@@ -48,6 +48,32 @@
                                     </mat-option>
                                     }
                                 </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Rate Plan Select -->
+                        <div>
+                            <mat-form-field class="w-full" appearance="outline">
+                                <mat-label>Rate Plan</mat-label>
+                                @if (loadingRoomRatePlans()[i]) {
+                                <mat-select class="text-xs" disabled>
+                                    <mat-option value="">Loading...</mat-option>
+                                </mat-select>
+                                } @else {
+                                <mat-select formControlName="ratePlanId" class="text-xs"
+                                    (selectionChange)="onRatePlanChange(i, $event.value)">
+                                    <mat-option value="">-- Default --</mat-option>
+                                    @for (plan of roomRatePlans()[i] || []; track plan._id) {
+                                    <mat-option [value]="plan._id">
+                                        {{ plan.name }}
+                                        @if (plan.isDefault) { <span class="text-[9px] text-gray-400">(default)</span> }
+                                    </mat-option>
+                                    }
+                                </mat-select>
+                                }
+                                @if ((roomRatePlans()[i] || []).length === 0 && !loadingRoomRatePlans()[i] && getRoomsFormArray()?.at(i)?.get('roomType')?.value) {
+                                <mat-hint class="text-yellow-600">No rate plans found</mat-hint>
+                                }
                             </mat-form-field>
                         </div>
 
@@ -121,6 +147,32 @@
                                 <mat-error>Check-out date is required</mat-error>
                                 }
                             </mat-form-field>
+
+                            <!-- Per-Room Restriction Warnings (Stop-Sell, CTA, CTD, Min/Max Stay) -->
+                            @if (loadingRoomRestrictions()[i]) {
+                            <div class="flex items-center gap-1 mt-1">
+                                <mat-spinner diameter="14"></mat-spinner>
+                                <span class="text-[10px] text-yellow-600">Checking restrictions...</span>
+                            </div>
+                            } @else if (roomRestrictionIssues()[i]; as issues) {
+                                @if (issues.length > 0) {
+                                <div class="mt-1 rounded border border-red-300 bg-red-50 px-2 py-1.5 text-[10px] leading-tight">
+                                    <div class="flex items-center gap-1 text-red-700 font-medium mb-0.5">
+                                        <mat-icon class="text-[12px] h-3 w-3 text-red-600">block</mat-icon>
+                                        <span>Booking Restricted</span>
+                                    </div>
+                                    @for (issue of issues; track issue.date + issue.type) {
+                                    <div class="flex items-start gap-1 text-red-600">
+                                        <mat-icon class="text-[10px] h-2.5 w-2.5 mt-0.5 shrink-0">warning</mat-icon>
+                                        <span><strong>{{ issue.date | date: 'EEE, MMM d' }}:</strong> {{ issue.detail }}</span>
+                                    </div>
+                                    }
+                                    <div class="mt-1 pt-1 border-t border-red-200 text-red-500">
+                                        Cannot book this room for the selected dates.
+                                    </div>
+                                </div>
+                                }
+                            }
                         </div>
 
                         <!-- Price -->
@@ -141,6 +193,81 @@
                                     }}
                                 </mat-hint>
                             </mat-form-field>
+
+                            <!-- Rate Plan Info: clickable link to fetch on demand -->
+                            @if (loadingRoomRates()[i]) {
+                            <div class="flex items-center gap-1 mt-1">
+                                <mat-spinner diameter="14"></mat-spinner>
+                                <span class="text-[10px] text-gray-400">Loading rates...</span>
+                            </div>
+                            } @else if (roomRateDetails()[i]; as rateInfo) {
+                            <!-- Rate info panel (auto-loaded) -->
+                            <div class="mt-1 rounded border px-2 py-1.5 text-[10px] leading-tight"
+                                [class]="rateInfo.hasRatePlan ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'">
+                                <div class="flex justify-between items-center mb-0.5">
+                                    @if (rateInfo.hasRatePlan) {
+                                    <div class="flex items-center gap-1 text-green-700 font-medium">
+                                        <mat-icon class="text-[12px] h-3 w-3">local_offer</mat-icon>
+                                        <span>Rate plan applied</span>
+                                    </div>
+                                    } @else {
+                                    <span class="text-gray-500 font-medium">Nightly rate breakdown</span>
+                                    }
+                                    <button type="button" class="text-gray-400 hover:text-gray-600 cursor-pointer"
+                                        (click)="hideRateInfo(i)" matTooltip="Hide breakdown">
+                                        <mat-icon class="text-[12px] h-3 w-3">close</mat-icon>
+                                    </button>
+                                </div>
+                                @if (rateInfo.hasRatePlan) {
+                                <div class="flex items-center gap-1 text-gray-500">
+                                    <span>Base:</span>
+                                    <span class="line-through">{{ rateInfo.originalPrice | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}/night</span>
+                                    <span class="text-green-700 font-semibold">→ {{ rateInfo.inventoryRate | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}/night</span>
+                                </div>
+                                } @else {
+                                <div class="flex items-center gap-1 text-gray-500">
+                                    <span>{{ rateInfo.inventoryRate | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}/night × {{ rateInfo.numberOfNights }} nights</span>
+                                </div>
+                                }
+                                <!-- Always show per-night breakdown -->
+                                @if (rateInfo.nights && rateInfo.nights.length > 0) {
+                                <div class="mt-1 border-t border-gray-200 pt-1">
+                                    <div class="text-gray-500 font-medium mb-0.5">Per-night:</div>
+                                    @for (night of rateInfo.nights; track night.date) {
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">{{ night.date | date: 'EEE, MMM d' }}</span>
+                                        <span [class]="night.source === 'rate_plan_day_of_week' || night.source === 'inventory' ? 'text-green-600 font-semibold' : 'text-gray-600'">
+                                            {{ night.rate | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                                            @if (night.source === 'rate_plan_day_of_week') {
+                                            <span class="text-[8px]">★</span>
+                                            } @else if (night.source === 'inventory') {
+                                            <span class="text-[8px] text-blue-500">●</span>
+                                            }
+                                        </span>
+                                    </div>
+                                    }
+                                    <div class="flex justify-between mt-1 border-t border-gray-200 pt-1 font-semibold text-gray-700">
+                                        <span>Total ({{ rateInfo.numberOfNights }} nights)</span>
+                                        <span>{{ rateInfo.totalRate | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}</span>
+                                    </div>
+                                </div>
+                                }
+                                <!-- Legend -->
+                                <div class="flex items-center gap-3 mt-1 text-[9px] text-gray-400">
+                                    @if (rateInfo.hasRatePlan) {
+                                    <span><span class="text-green-600">★</span> Day-of-week rate</span>
+                                    }
+                                    <span><span class="text-blue-500">●</span> Inventory rate</span>
+                                </div>
+                            </div>
+                            } @else {
+                            <!-- Manual fetch link (fallback if auto-fetch failed or not triggered) -->
+                            <a class="mt-1 inline-flex items-center gap-1 text-[10px] text-blue-600 hover:text-blue-800 cursor-pointer"
+                               (click)="viewRateInfo(i)">
+                                <mat-icon class="text-[12px] h-3 w-3">info_outline</mat-icon>
+                                <span>View rate info</span>
+                            </a>
+                            }
                         </div>
 
                         <!-- Actions: Change Room & Delete -->

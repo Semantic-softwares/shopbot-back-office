@@ -12,22 +12,26 @@
       }
     </div>
 
-    <!-- Actions Section -->
-    <div class="mt-5 flex lg:mt-0 lg:ml-4 space-x-3 items-center">
-      <!-- View Toggle (built-in) -->
-      @if (showViewToggle) {
-        <mat-button-toggle-group [value]="currentView" (change)="onViewChange($event.value)" hideSingleSelectionIndicator>
-          <mat-button-toggle value="calendar">
-            <mat-icon>calendar_month</mat-icon>
-          </mat-button-toggle>
-          <mat-button-toggle value="list">
-            <mat-icon>list</mat-icon>
-          </mat-button-toggle>
-        </mat-button-toggle-group>
-      }
-      
-      <!-- Additional Actions (Content Projection) -->
-      <ng-content select="[actions]"></ng-content>
-    </div>
+    <!-- Actions Section (hidden on mobile when hideActions is set) -->
+    @if (!hideActions) {
+      <div class="mt-5 flex lg:mt-0 lg:ml-4 items-center overflow-x-auto scrollbar-hide">
+        <div class="flex items-center space-x-3 flex-nowrap">
+          <!-- View Toggle (built-in) -->
+          @if (showViewToggle) {
+            <mat-button-toggle-group [value]="currentView" (change)="onViewChange($event.value)" hideSingleSelectionIndicator class="shrink-0">
+              <mat-button-toggle value="calendar">
+                <mat-icon>calendar_month</mat-icon>
+              </mat-button-toggle>
+              <mat-button-toggle value="list">
+                <mat-icon>list</mat-icon>
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+          }
+          
+          <!-- Additional Actions (Content Projection) -->
+          <ng-content select="[actions]"></ng-content>
+        </div>
+      </div>
+    }
   </div>
 </div>

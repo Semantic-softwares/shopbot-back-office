@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { PrintJob, PrintJobStats } from '../models/print-job.model';
 import { StoreStore } from '../stores/store.store';
 import { BluetoothPrinterService } from './bluetooth-printer.service';
+import { NetworkPrinterService } from './network-printer.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +14,7 @@ export class PrintJobService {
   private http = inject(HttpClient);
   private storeStore = inject(StoreStore);
   private bluetoothPrinterService = inject(BluetoothPrinterService);
+  private networkPrinterService = inject(NetworkPrinterService);
   private apiUrl = `${environment.apiUrl}/print-jobs`;
 
   // ESC/POS Commands
@@ -69,13 +71,15 @@ export class PrintJobService {
   /**
    * Generate ESC/POS receipt data from order
    * @param order - The order object containing all order details
+   * @param paperWidth - Paper width in mm (58 or 80). Defaults to 80 if not specified
    * @returns ESC/POS formatted receipt string
    */
-  public generateOrderReceipt(order: any): string {
+  public generateOrderReceipt(order: any, paperWidth: number = 80): string {
     console.log('=== GENERATE RECEIPT ===');
     console.log('Order ID:', order._id);
     console.log('Order Reference:', order.reference);
     console.log('Order cart products:', order.cart?.products?.length || 0);
+    console.log('Paper Width:', paperWidth, 'mm');
     
     if (!order) {
       console.error('❌ No order provided');
@@ -115,7 +119,7 @@ export class PrintJobService {
     }
     
     receipt += this.COMMANDS.ALIGN_LEFT;
-    receipt += '================================\n';
+    receipt += this.generateSeparator(paperWidth);
     
     // Order info
     receipt += this.COMMANDS.BOLD_ON;
@@ -157,7 +161,7 @@ export class PrintJobService {
       }
     }
     
-    receipt += '================================\n';
+    receipt += this.generateSeparator(paperWidth);
     
     // Items from order.cart.products
     const products = order.cart?.products || [];
@@ -226,7 +230,7 @@ export class PrintJobService {
       receipt += 'No items in order\n';
     }
     
-    receipt += '================================\n';
+    receipt += this.generateSeparator(paperWidth);
     
     // Order financial summary
     const subtotal = order.subTotal || order.subtotal;
@@ -276,7 +280,7 @@ export class PrintJobService {
       receipt += `Status: ${order.paymentStatus}\n`;
     }
     
-    receipt += '================================\n';
+    receipt += this.generateSeparator(paperWidth);
     
     // Order notes (if enabled)
     if (showNote && (order.note || order.orderInstruction)) {
@@ -284,7 +288,7 @@ export class PrintJobService {
       receipt += 'NOTES:\n';
       receipt += this.COMMANDS.BOLD_OFF;
       receipt += `${order.note || order.orderInstruction}\n`;
-      receipt += '================================\n';
+      receipt += this.generateSeparator(paperWidth);
     }
     
     receipt += this.COMMANDS.ALIGN_CENTER;
@@ -324,16 +328,23 @@ export class PrintJobService {
   public async printOrderReceipt(order: any): Promise<{ isPrinterConnected: boolean }> {
     const isPrinterConnected = this.bluetoothPrinterService.isConnected();
     
+    // Get printer's paper width from order or default to 80mm
+    const paperWidth = order?.printer?.capabilities?.paperWidth || 80;
+    
     if (isPrinterConnected) {
       console.log('📱 [PRINT] Printer connected - Printing directly via Bluetooth');
       try {
-        // Generate receipt from order
-        const receiptData = this.generateOrderReceipt(order);
+        // Generate receipt from order with printer's paper width
+        const receiptData = this.generateOrderReceipt(order, paperWidth);
         
         // Send to printer via Bluetooth service
         await this.bluetoothPrinterService.sendToPrinter(receiptData);
         
         console.log('✅ [PRINT] Direct print completed');
+        
+        // Also send to network printer service (background, non-blocking)
+        this.sendToNetworkPrinter(receiptData, order);
+        
         return { isPrinterConnected: true };
       } catch (error: any) {
         console.error('❌ [PRINT] Direct print failed:', error);
@@ -367,6 +378,29 @@ export class PrintJobService {
   }
 
   /**
+   * Send receipt data to network printer service
+   * @param receiptData - ESC/POS formatted receipt data
+   * @param order - Order object for metadata
+   */
+  private sendToNetworkPrinter(receiptData: string, order?: any): void {
+    try {
+      this.networkPrinterService
+        .sendToPrinter(receiptData, undefined, order?._id, order?.reference)
+        .subscribe({
+          next: (response: any) => {
+            console.log('✅ [NETWORK PRINTER] Print job sent successfully:', response);
+          },
+          error: (err: any) => {
+            console.warn('⚠️ [NETWORK PRINTER] Failed to send to network printer:', err.message);
+            // Don't throw - network printer is optional, Bluetooth is primary
+          },
+        });
+    } catch (error: any) {
+      console.warn('⚠️ [NETWORK PRINTER] Error preparing print job:', error.message);
+    }
+  }
+
+  /**
    * Handle auto-printing based on store settings and conditions
    * Called when a new print job is created
    */
@@ -396,21 +430,8 @@ export class PrintJobService {
       console.log('✓ Order Category:', order.category);
       console.log('✓ Payment Status:', order.paymentStatus);
 
-      // Check if order is complete and paid
-      const isComplete = order.category === 'Complete';
-      const isPaid = order.paymentStatus === 'Paid';
-
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log('🔍 [ORDER VALIDATION]');
-      console.log('  Complete:', isComplete ? '✅' : '❌');
-      console.log('  Paid:', isPaid ? '✅' : '❌');
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-
-      // if (!isComplete || !isPaid) {
-      //   console.log('⏭️ [AUTO-PRINT] Skipped - Order not complete or not paid');
-      //   return;
-      // }
-
+   
+    
       // Check store setting for auto-print
       const printAfterFinish = this.storeStore.selectedStore()?.posSettings?.receiptSettings?.printAfterFinish ?? true;
       console.log('🔍 [STORE SETTING] printAfterFinish:', printAfterFinish);
@@ -426,7 +447,7 @@ export class PrintJobService {
       
       if (!printerConnected) {
         console.log('⏭️ [AUTO-PRINT] Skipped - Bluetooth printer not connected');
-        return;
+        // return;
       }
 
       // All conditions met - auto-print ONLY via direct Bluetooth
@@ -441,14 +462,31 @@ export class PrintJobService {
       
       // Generate receipt and send directly to Bluetooth printer
       // Do NOT call printOrderReceipt as it would create another job
-      const receiptData = this.generateOrderReceipt(order);
-      await this.bluetoothPrinterService.sendToPrinter(receiptData);
+      const paperWidth = order?.printer?.capabilities?.paperWidth || 80;
+      const receiptData = this.generateOrderReceipt(order, paperWidth);
+      // await this.bluetoothPrinterService.sendToPrinter(receiptData);
       
       console.log('✅ [AUTO-PRINT] Printed directly via Bluetooth');
+      
+      // Also send to network printer service (background, non-blocking)
+      this.sendToNetworkPrinter(receiptData, order);
+      
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
     } catch (error) {
       console.error('❌ [AUTO-PRINT] Failed:', error);
     }
+  }
+
+  /**
+   * Generate a separator line based on paper width
+   * 58mm = ~31 characters, 80mm = ~42 characters
+   * @param paperWidth Paper width in mm (58 or 80)
+   * @returns Separator string with newline
+   */
+  private generateSeparator(paperWidth: number = 80): string {
+    const separatorLength = paperWidth === 58 ? 31 : 42;
+    const separator = '='.repeat(separatorLength) + '\n';
+    return separator;
   }
 }

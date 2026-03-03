@@ -1,0 +1,44 @@
+<div class="bg-white border-t border-gray-200 p-4">
+  <form [formGroup]="messageForm" (ngSubmit)="onSendClick()" class="flex">
+    <!-- Message Input Field with Prefix and Suffix Buttons -->
+    <mat-form-field appearance="outline" class="flex-1">
+      <!-- Attachment Button (Prefix) -->
+      <button
+        matPrefix
+        mat-icon-button
+        type="button"
+        (click)="onAttachmentClick()"
+        matTooltip="Add attachment"
+        [disabled]="isDisabled || isSending"
+        class="text-gray-600 hover:text-gray-900"
+      >
+        <mat-icon>attach_file</mat-icon>
+      </button>
+
+      <!-- Message Input -->
+      <input
+        matInput
+        formControlName="messageText"
+        [disabled]="isDisabled || isSending"
+        (keydown)="onKeyDown($event)"
+        placeholder="Type a message... (Ctrl+Enter to send)"
+      />
+
+      <!-- Send Button (Suffix) -->
+      <button
+        matSuffix
+        mat-icon-button
+        matTooltip="Send message (Ctrl+Enter)"
+        color="primary"
+        type="submit"
+        [disabled]="isSending || messageForm.invalid || isDisabled"
+      >
+        @if (isSending) {
+          <mat-icon class="animate-spin">hourglass_empty</mat-icon>
+        } @else {
+          <mat-icon>send</mat-icon>
+        }
+      </button>
+    </mat-form-field>
+  </form>
+</div>

@@ -1,0 +1,164 @@
+<app-page-header
+  title="Printers"
+  subtitle="Manage all printers for your store">
+  <ng-container actions>
+    <button 
+      matButton="outlined"
+      (click)="reload()"
+      [disabled]="isLoading()"
+      matTooltip="Refresh printer list">
+      <mat-icon>refresh</mat-icon>
+      Reload
+    </button>
+    <button 
+      matButton="filled" 
+      color="primary" 
+      (click)="openCreatePrinterDialog()">
+      <mat-icon>add</mat-icon>
+      Add New Printer
+    </button>
+  </ng-container>
+</app-page-header>
+
+<div class="space-y-6 py-8">
+
+  <!-- Error State -->
+  @if (error()) {
+    <app-no-record
+      icon="error"
+      title="Failed to load printers"
+      message="{{ error()?.message || 'An error occurred while loading printers' }}">
+    </app-no-record>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-12">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && !error() && printers().length === 0) {
+    <app-no-record
+      icon="print_disabled"
+      title="No Printers Configured"
+      message="Get started by adding your first printer">
+    </app-no-record>
+  }
+
+  <!-- Printers Table -->
+  @if (!isLoading() && !error() && printers().length > 0) {
+    <div class="overflow-x-auto border border-gray-200 rounded-lg">
+      <table mat-table [dataSource]="printers()" class="w-full">
+        
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>
+            Printer Name
+          </th>
+          <td mat-cell *matCellDef="let printer">
+            <div class="flex items-center gap-2">
+              <mat-icon class="text-gray-400">print</mat-icon>
+              {{ printer.name }}
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Connection Type Column -->
+        <ng-container matColumnDef="connectionType">
+          <th mat-header-cell *matHeaderCellDef >
+            Connection Type
+          </th>
+          <td mat-cell *matCellDef="let printer" class="px-6 py-4">
+            <mat-chip [highlighted]="printer.connectionType === 'network'">
+              {{ getConnectionTypeLabel(printer.connectionType) }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Role Column -->
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef >
+            Role
+          </th>
+          <td mat-cell *matCellDef="let printer" class="px-6 py-4">
+            <mat-chip 
+              [highlighted]="printer.role === 'master'"
+              [disabled]="true">
+              {{ getRoleLabel(printer.role) }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef >
+            Status
+          </th>
+          <td mat-cell *matCellDef="let printer" class="px-6 py-4">
+            <div class="flex items-center gap-2">
+              <mat-icon [ngClass]="getStatusColor(printer.status)" class="text-lg">
+                {{ getStatusIcon(printer.status) }}
+              </mat-icon>
+              <span class="capitalize text-sm font-medium text-gray-700">
+                {{ printer.status }}
+              </span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Capabilities Column -->
+        <ng-container matColumnDef="capabilities">
+          <th mat-header-cell *matHeaderCellDef >
+            Capabilities
+          </th>
+          <td mat-cell *matCellDef="let printer" class="px-6 py-4">
+            <div class="flex items-center gap-2">
+              <mat-icon class="text-gray-400 text-lg" [matTooltip]="'Paper Width: ' + printer.capabilities.paperWidth + 'mm'">
+                description
+              </mat-icon>
+              @if (printer.capabilities.supportsQr) {
+                <mat-icon class="text-blue-500 text-lg" matTooltip="QR Code Support">qr_code_2</mat-icon>
+              }
+              @if (printer.capabilities.supportsLogo) {
+                <mat-icon class="text-blue-500 text-lg" matTooltip="Logo Support">image</mat-icon>
+              }
+              @if (printer.capabilities.supportsCut) {
+                <mat-icon class="text-blue-500 text-lg" matTooltip="Paper Cut Support">content_cut</mat-icon>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>
+            Actions
+          </th>
+          <td mat-cell *matCellDef="let printer" class="px-6 py-4 text-right">
+            <button 
+              mat-icon-button 
+              matTooltip="Edit"
+              (click)="openEditPrinterDialog(printer)"
+              color="primary">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button 
+              mat-icon-button 
+              matTooltip="Delete"
+              (click)="deletePrinter(printer._id!)"
+              color="warn">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- Header and Row Definitions -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let printer; columns: displayedColumns;" ></tr>
+      </table>
+    </div>
+  }
+
+</div>

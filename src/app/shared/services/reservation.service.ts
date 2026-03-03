@@ -80,6 +80,14 @@ export class ReservationService {
   }
 
   // Get reservation by ID
+  findByChannexBookingId(channexBookingId: string): Observable<{ success: boolean; data: Reservation | null }> {
+    return this.http.get<{ success: boolean; data: Reservation | null }>(
+      `${this.baseUrl}/by-channex-booking/${channexBookingId}`
+    ).pipe(
+      catchError(() => of({ success: false, data: null }))
+    );
+  }
+
   getReservationById(id: string): Observable<Reservation | null> {
     this.loadingSubject.next(true);
     this.errorSubject.next(null);

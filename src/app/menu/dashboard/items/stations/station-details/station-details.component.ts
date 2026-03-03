@@ -133,4 +133,42 @@ export class StationDetailsComponent implements OnInit {
     };
     return classes[status] || classes['unknown'];
   }
+
+  getConnectionTypeLabel(type: string): string {
+    const types: Record<string, string> = {
+      network: 'Network (TCP/IP)',
+      'usb-os': 'USB (OS Device)',
+      'usb-raw': 'USB (Raw)',
+      bluetooth: 'Bluetooth',
+    };
+    return types[type] || type;
+  }
+
+  getPrinterConnectionDetails(printer: any): string {
+    if (!printer.connection) return 'No connection details';
+    
+    switch (printer.connectionType) {
+      case 'network':
+        return `${printer.connection.ip}:${printer.connection.port}`;
+      case 'usb-os':
+        return printer.connection.deviceName || 'Device';
+      case 'usb-raw':
+        return `Vendor: ${printer.connection.vendorId}, Product: ${printer.connection.productId}`;
+      case 'bluetooth':
+        return `MAC: ${printer.connection.macAddress}`;
+      default:
+        return 'Unknown';
+    }
+  }
+
+  getPrinterStatusIcon(status: string): string {
+    switch (status) {
+      case 'online':
+        return 'check_circle';
+      case 'offline':
+        return 'error';
+      default:
+        return 'help';
+    }
+  }
 }

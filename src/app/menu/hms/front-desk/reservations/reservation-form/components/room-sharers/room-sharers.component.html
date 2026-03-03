@@ -7,10 +7,62 @@
           Room Sharers
         </mat-card-title>
         <mat-card-subtitle>
-          @if (roomsResource.hasValue()) {
-          <pre>Selected Room: {{ roomsResource.value()!.name}} ({{ roomsResource.value()!.roomNumber}}) - {{roomsResource.value()!.priceOverride | currency: storeStore.selectedStore()?.currency}} </pre>
-          }
+          <!-- Room Type / Room / Rate Plan selectors -->
+          <div class="flex items-center gap-3 mt-2 flex-wrap">
+            <!-- Room Type Dropdown -->
+            <mat-form-field appearance="outline" class="min-w-[180px] w-[180px]" subscriptSizing="dynamic">
+              <mat-label>Room Type</mat-label>
+              <mat-select [value]="selectedRoomTypeId()" (selectionChange)="onRoomTypeChange($event.value)"
+                [disabled]="isEditing()">
+                <mat-option value="">-- Select --</mat-option>
+                @for (rt of roomTypesResource.value() || []; track rt._id) {
+                  <mat-option [value]="rt._id">{{ rt.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
 
+            <!-- Room Dropdown -->
+            <mat-form-field appearance="outline" class="min-w-[180px] w-[180px]" subscriptSizing="dynamic">
+              <mat-label>Room</mat-label>
+              <mat-select [value]="selectedRoomId()" (selectionChange)="onRoomChange($event.value)"
+                [disabled]="isEditing() || !selectedRoomTypeId()">
+                <mat-option value="">-- Select --</mat-option>
+                @for (room of filteredRooms(); track room._id) {
+                  <mat-option [value]="room._id">
+                    {{ room.name || room.roomNumber }}
+                    @if (room.priceOverride) {
+                      <span class="text-xs text-gray-500 ml-1">({{ room.priceOverride | currency: storeStore.selectedStore()?.currency }})</span>
+                    }
+                  </mat-option>
+                }
+              </mat-select>
+              @if (!selectedRoomTypeId()) {
+                <mat-hint>Select a room type first</mat-hint>
+              }
+            </mat-form-field>
+
+            <!-- Rate Plan Dropdown -->
+            <mat-form-field appearance="outline" class="min-w-[180px] w-[180px]" subscriptSizing="dynamic">
+              <mat-label>Rate Plan</mat-label>
+              <mat-select [value]="selectedRatePlanId()" (selectionChange)="onRatePlanChangeHeader($event.value)"
+                [disabled]="isEditing() || !selectedRoomTypeId()">
+                <mat-option value="">-- Default --</mat-option>
+                @if (loadingRatePlans()) {
+                  <mat-option disabled>Loading...</mat-option>
+                } @else {
+                  @for (plan of ratePlans(); track plan._id) {
+                    <mat-option [value]="plan._id">
+                      {{ plan.name }}
+                      @if (plan.isDefault) { <span class="text-xs text-gray-400 ml-1">(default)</span> }
+                    </mat-option>
+                  }
+                }
+              </mat-select>
+              @if (!selectedRoomTypeId()) {
+                <mat-hint>Select a room type first</mat-hint>
+              }
+            </mat-form-field>
+          </div>
         </mat-card-subtitle>
       </div>
       <!-- actions  -->
@@ -65,8 +117,7 @@
             <!-- Date Range Picker -->
             <mat-form-field appearance="outline" class="min-w-[220px] w-[220px]">
               <mat-label>Check-in to Check-out</mat-label>
-              <mat-date-range-input [rangePicker]="picker" [min]="getReservationMinDate()"
-                [max]="getReservationMaxDate()">
+              <mat-date-range-input [rangePicker]="picker">
                 <input matStartDate formControlName="checkInDate" placeholder="Start date" />
                 <input matEndDate formControlName="checkOutDate" placeholder="End date" />
               </mat-date-range-input>
@@ -102,6 +153,96 @@
           <p class="text-sm">No guests added yet</p>
         </div>
         }
+
+        <!-- Restriction Warnings (Stop-Sell, CTA, CTD, Min/Max Stay) -->
+        @if (loadingRestrictions()) {
+        <div class="mt-4 mb-2 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm">
+            <div class="flex items-center gap-2 text-yellow-600">
+                <mat-spinner diameter="16"></mat-spinner>
+                <span>Checking restrictions...</span>
+            </div>
+        </div>
+        } @else if (restrictionIssues(); as issues) {
+        <div class="mt-4 mb-2 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm">
+            <div class="flex items-center gap-2 text-red-700 font-medium mb-2">
+                <mat-icon class="text-base! text-red-600">block</mat-icon>
+                <span>Booking Restricted</span>
+            </div>
+            <div class="space-y-1">
+                @for (issue of issues; track issue.date + issue.type) {
+                <div class="flex items-start gap-2 text-xs text-red-600">
+                    <mat-icon class="text-sm! mt-0.5 shrink-0">warning</mat-icon>
+                    <span>
+                        <strong>{{ issue.date | date: 'EEE, MMM d' }}:</strong> {{ issue.detail }}
+                    </span>
+                </div>
+                }
+            </div>
+            <div class="mt-2 pt-2 border-t border-red-200 text-xs text-red-500">
+                This booking cannot proceed while restrictions are active for the selected dates.
+            </div>
+        </div>
+        }
+
+        <!-- Per-Night Rate Breakdown (Inventory-based) — hidden for Channex/OTA bookings -->
+        @if (!isChannexBooking()) {
+        @if (loadingRates()) {
+        <div class="mt-4 mb-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
+            <div class="flex items-center gap-2 text-gray-400">
+                <mat-spinner diameter="16"></mat-spinner>
+                <span>Updating rates for new dates...</span>
+            </div>
+        </div>
+        } @else if (rateBreakdown(); as breakdown) {
+        <div class="mt-4 mb-2 rounded-lg border px-4 py-3 text-sm leading-relaxed"
+            [class]="breakdown.hasRatePlan ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'">
+            <div class="flex items-center gap-2 mb-2">
+                @if (breakdown.hasRatePlan) {
+                <mat-icon class="text-green-600 text-base h-4 w-4">local_offer</mat-icon>
+                <span class="font-semibold text-green-700">Rate Plan Applied — Nightly Breakdown</span>
+                } @else {
+                <mat-icon class="text-blue-600 text-base h-4 w-4">calendar_today</mat-icon>
+                <span class="font-semibold text-gray-700">Nightly Rate Breakdown</span>
+                }
+            </div>
+            @if (breakdown.hasRatePlan) {
+            <div class="text-xs text-gray-500 mb-2">
+                Avg: <span class="font-semibold text-green-700">{{ breakdown.averageRate | currency:storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}</span>/night
+            </div>
+            } @else {
+            <div class="text-xs text-gray-500 mb-2">
+                {{ breakdown.averageRate | currency:storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}/night × {{ breakdown.numberOfNights }} nights
+            </div>
+            }
+            <div class="border-t border-gray-200 pt-2 space-y-1">
+                @for (night of breakdown.nights; track night.date) {
+                <div class="flex justify-between text-xs">
+                    <span class="text-gray-500">{{ night.date | date: 'EEE, MMM d' }}</span>
+                    <span [class]="night.source === 'rate_plan_day_of_week' || night.source === 'inventory' ? 'text-green-600 font-semibold' : 'text-gray-700'">
+                        {{ night.rate | currency:storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}
+                        @if (night.source === 'rate_plan_day_of_week') {
+                        <span class="text-[9px]">★</span>
+                        } @else if (night.source === 'inventory') {
+                        <span class="text-[9px] text-blue-500">●</span>
+                        }
+                    </span>
+                </div>
+                }
+                <div class="flex justify-between pt-2 border-t border-gray-200 font-semibold text-sm text-gray-800">
+                    <span>Total ({{ breakdown.numberOfNights }} nights)</span>
+                    <span>{{ breakdown.totalRate | currency:storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}</span>
+                </div>
+            </div>
+            <!-- Legend -->
+            <div class="flex items-center gap-3 mt-2 text-[10px] text-gray-400">
+                @if (breakdown.hasRatePlan) {
+                <span><span class="text-green-600">★</span> Day-of-week rate</span>
+                }
+                <span><span class="text-blue-500">●</span> Inventory rate</span>
+            </div>
+        </div>
+        }
+        } <!-- end: hide rate breakdown for Channex bookings -->
 
         @if (roomsResource.hasValue()) {
         <break-down-total [reservation]="reservation()" />

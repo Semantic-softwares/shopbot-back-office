@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import {
@@ -19,8 +20,10 @@ import {
   Validators,
 } from '@angular/forms';
 import { StationsService } from '../../../../../shared/services/station.service';
+import { PrinterService, Printer } from '../../../../../shared/services/printer.service';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
+import { PrinterFormModalComponent } from '../../../settings/printers/printer-form-modal/printer-form-modal.component';
 
 @Component({
   selector: 'app-create-station',
@@ -41,19 +44,23 @@ import { PageHeaderComponent } from '../../../../../shared/components/page-heade
     MatSlideToggleModule,
     MatCheckboxModule,
     RouterModule,
-  ],
+],
 })
 export class CreateStationComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private stationsService = inject(StationsService);
+  private printerService = inject(PrinterService);
   public storeStore = inject(StoreStore);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
   private fb = inject(FormBuilder);
 
   public isSubmitting = signal(false);
   public isEditMode = signal(false);
   public stationId = signal<string | null>(null);
+  public availablePrinters = signal<Printer[]>([]);
+  public loadingPrinters = signal(false);
 
   public pageTitle = computed(() =>
     this.isEditMode() ? 'Edit Station' : 'Create Station'
@@ -94,6 +101,11 @@ export class CreateStationComponent implements OnInit {
   }
 
   ngOnInit() {
+    const storeId = this.storeStore.selectedStore()?._id;
+    if (storeId) {
+      this.loadAvailablePrinters(storeId);
+    }
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEditMode.set(true);
@@ -102,21 +114,27 @@ export class CreateStationComponent implements OnInit {
     }
   }
 
+  private loadAvailablePrinters(storeId: string) {
+    this.loadingPrinters.set(true);
+    this.printerService.findByStore(storeId).subscribe({
+      next: (printers) => {
+        this.availablePrinters.set(printers);
+        this.loadingPrinters.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading printers:', error);
+        this.loadingPrinters.set(false);
+      },
+    });
+  }
+
   get printers(): FormArray {
     return this.stationForm.get('printers') as FormArray;
   }
 
-  createPrinterFormGroup(printer?: any): FormGroup {
+  createPrinterFormGroup(printerId?: string): FormGroup {
     return this.fb.group({
-      id: [printer?.id || this.generatePrinterId()],
-      name: [printer?.name || '', Validators.required],
-      ipAddress: [
-        printer?.ipAddress || '',
-        [Validators.required, Validators.pattern(/^(\d{1,3}\.){3}\d{1,3}$/)],
-      ],
-      port: [printer?.port || 9100, Validators.required],
-      enabled: [printer?.enabled !== undefined ? printer.enabled : true],
-      status: [printer?.status || 'offline'],
+      printerId: [printerId || '', Validators.required],
     });
   }
 
@@ -128,8 +146,21 @@ export class CreateStationComponent implements OnInit {
     this.printers.removeAt(index);
   }
 
-  generatePrinterId(): string {
-    return `printer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  getPrinterDetails(printerId: string): Printer | undefined {
+    return this.availablePrinters().find((p) => p._id === printerId);
+  }
+
+  isPrinterSelected(printerId: string): boolean {
+    return this.printers.value.some((p: any) => p.printerId === printerId);
+  }
+
+  togglePrinter(printerId: string) {
+    const index = this.printers.value.findIndex((p: any) => p.printerId === printerId);
+    if (index >= 0) {
+      this.removePrinter(index);
+    } else {
+      this.printers.push(this.createPrinterFormGroup(printerId));
+    }
   }
 
   private loadStation(id: string) {
@@ -149,8 +180,8 @@ export class CreateStationComponent implements OnInit {
 
         // Load printers
         if (station.printers && station.printers.length > 0) {
-          station.printers.forEach((printer: any) => {
-            this.printers.push(this.createPrinterFormGroup(printer));
+          (station.printers as any[]).forEach((printer) => {
+            this.printers.push(this.createPrinterFormGroup(printer._id));
           });
         }
       },
@@ -171,11 +202,19 @@ export class CreateStationComponent implements OnInit {
 
     this.isSubmitting.set(true);
     const formValue = this.stationForm.getRawValue();
+    
+    // Extract printer IDs from the printers array
+    const printerIds = formValue.printers.map((p: any) => p.printerId);
+    const stationData = {
+      ...formValue,
+      printers: printerIds,
+    };
+
     const stationId = this.stationId();
 
     const request$ = this.isEditMode()
-      ? this.stationsService.updateStation(stationId!, formValue)
-      : this.stationsService.createStation(formValue);
+      ? this.stationsService.updateStation(stationId!, stationData)
+      : this.stationsService.createStation(stationData);
 
     request$.subscribe({
       next: (response) => {
@@ -207,5 +246,22 @@ export class CreateStationComponent implements OnInit {
 
   onCancel() {
     this.router.navigate(['/menu/erp/items/stations']);
+  }
+
+  openCreatePrinterDialog() {
+    const dialogRef = this.dialog.open(PrinterFormModalComponent, {
+      width: '600px',
+      disableClose: false,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Refresh available printers after creation
+        const storeId = this.storeStore.selectedStore()?._id;
+        if (storeId) {
+          this.loadAvailablePrinters(storeId);
+        }
+      }
+    });
   }
 }

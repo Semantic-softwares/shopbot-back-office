@@ -1,4 +1,4 @@
-<mat-toolbar class="flex justify-between mat-elevation-z12 shadow-lg border-b border-gray-200"  color="primary">
+<mat-toolbar class="flex justify-between  border-b border-outline-variant"  color="primary">
       <div class="flex items-center gap-2">
         @if (showMenuButton()) {
           <button mat-icon-button (click)="menuToggle.emit()">
@@ -17,11 +17,81 @@
         }
       </div>
 
-      <div>
-        <button mat-button [matMenuTriggerFor]="userMenu" class="flex items-center gap-2">
-          <mat-icon>arrow_drop_down</mat-icon>
-          <span>{{currentUser()?.name}}</span>
+      <div class="flex items-center gap-1">
+        <!-- Notification Bell -->
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="notificationMenu"
+          (menuOpened)="onNotificationMenuOpened()"
+          matTooltip="Notifications"
+          class="relative"
+        >
+          <mat-icon
+            [matBadge]="badgeText()"
+            [matBadgeHidden]="badgeHidden()"
+            matBadgeColor="warn"
+            matBadgeSize="small"
+          >notifications</mat-icon>
         </button>
+
+        <!-- Notification Dropdown -->
+        <mat-menu #notificationMenu="matMenu" class="notification-menu" xPosition="before">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-gray-200" (click)="$event.stopPropagation()">
+            <span class="text-sm font-semibold text-gray-800">Notifications</span>
+            @if (unreadCount() > 0) {
+              <button
+                mat-button
+                class="!text-xs !min-w-0 !px-2 !py-0 text-primary"
+                (click)="markAllAsRead(); $event.stopPropagation()"
+              >
+                Mark all read
+              </button>
+            }
+          </div>
+
+          @if (isLoadingNotifications()) {
+            <div class="flex justify-center py-6" (click)="$event.stopPropagation()">
+              <mat-icon class="animate-spin text-gray-400">refresh</mat-icon>
+            </div>
+          } @else if (notifications().length === 0) {
+            <div class="flex flex-col items-center py-6 px-4" (click)="$event.stopPropagation()">
+              <mat-icon class="text-gray-300 !text-4xl mb-2">notifications_none</mat-icon>
+              <span class="text-sm text-gray-400">No notifications yet</span>
+            </div>
+          } @else {
+            @for (notification of notifications(); track notification._id) {
+              <button
+                mat-menu-item
+                class="!h-auto !py-2 !whitespace-normal"
+                [class.bg-blue-50]="!notification.isRead"
+                (click)="onNotificationClick(notification)"
+              >
+                <div class="flex items-start gap-3 w-72">
+                  <mat-icon class="!text-lg mt-0.5" [class.text-primary]="!notification.isRead" [class.text-gray-400]="notification.isRead">
+                    {{ getNotificationIcon(notification.eventType) }}
+                  </mat-icon>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-1">
+                      @if (!notification.isRead) {
+                        <span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>
+                      }
+                      <span class="text-sm font-medium text-gray-800 truncate">{{ notification.title }}</span>
+                    </div>
+                    @if (notification.body) {
+                      <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">{{ notification.body }}</p>
+                    }
+                    <span class="text-xs text-gray-400 mt-0.5 block">{{ formatTimeAgo(notification.createdAt) }}</span>
+                  </div>
+                </div>
+              </button>
+            }
+          }
+        </mat-menu>
+
+        <!-- User Menu -->
+        <span class="avatar-circle" [matMenuTriggerFor]="userMenu" matTooltip="{{ currentUser()?.name }}">
+          {{ userInitials() }}
+        </span>
         <mat-menu #userMenu="matMenu">
           <button mat-menu-item (click)="goToProfile()">
             <mat-icon>menu</mat-icon>

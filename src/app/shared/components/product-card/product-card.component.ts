@@ -78,6 +78,7 @@ export class ProductCardComponent {
   });
 
   onAddToCart(event: Event): void {
+    console.log('Add to cart clicked for product:', this.product());
     event.stopPropagation();
     this.addToCart.emit(this.product());
   }

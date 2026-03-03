@@ -1,1 +1,16 @@
-<router-outlet></router-outlet>
+<nav mat-tab-nav-bar [tabPanel]="tabPanel" class="mb-4">
+  @for (tab of tabs; track tab.link) {
+    <a mat-tab-link
+       [routerLink]="tab.link"
+       routerLinkActive
+       #rla="routerLinkActive"
+       [active]="rla.isActive">
+      <mat-icon class="mr-2 text-lg!">{{ tab.icon }}</mat-icon>
+      {{ tab.label }}
+    </a>
+  }
+</nav>
+
+<mat-tab-nav-panel #tabPanel>
+  <router-outlet></router-outlet>
+</mat-tab-nav-panel>

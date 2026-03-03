@@ -1,60 +1,206 @@
-<h2 mat-dialog-title>Change Room</h2>
+<h2 mat-dialog-title class="flex items-center gap-2">
+  <mat-icon>swap_horiz</mat-icon>
+  Change Room
+</h2>
 
-<mat-dialog-content>
-  @if (loadingRooms()) {
+<mat-dialog-content class="min-w-[480px]">
+  @if (loadingRoomTypes()) {
     <div class="flex justify-center py-8">
       <mat-spinner diameter="40"></mat-spinner>
     </div>
   } @else {
     <form [formGroup]="roomChangeForm" class="flex flex-col gap-4">
-      
+
       <!-- Current Room Info -->
-      <div class="bg-gray-100 rounded-lg p-4">
-        <div class="text-sm text-gray-500 mb-1">Current Room</div>
+      <div class="bg-gray-100 rounded-lg p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="text-xs text-gray-500 uppercase tracking-wide">Current Room</div>
+          <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">
+            {{ currentRoomDetails().roomTypeName }}
+          </span>
+        </div>
         <div class="flex items-center justify-between">
           <div>
             <span class="text-xl font-bold">{{ currentRoomDetails().roomNumber }}</span>
             <span class="text-gray-600 ml-2">{{ currentRoomDetails().roomName }}</span>
           </div>
           <div class="text-right">
-            <div class="text-sm text-gray-500">{{ currentRoomDetails().roomTypeName }}</div>
-            <div class="font-semibold">{{ currentRoomDetails().rate | currency: data.currency }}/night</div>
+            <div class="text-sm font-semibold">{{ currentRoomCost() | currency: data.currency }}</div>
+            <div class="text-xs text-gray-500">{{ roomNights() }} night(s)</div>
           </div>
         </div>
+
+        <!-- Current Room Nightly Rate Breakdown -->
+        @if (loadingCurrentRates()) {
+          <div class="flex items-center gap-2 text-xs text-gray-500">
+            <mat-spinner diameter="14"></mat-spinner>
+            Loading rate breakdown...
+          </div>
+        } @else if (currentRoomRates()?.nights; as nights) {
+          <div class="border-t border-gray-200 pt-2 space-y-1">
+            <div class="text-xs font-medium text-gray-500 uppercase tracking-wide">Nightly Rate Breakdown</div>
+            @for (night of nights; track night.date) {
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-600">{{ night.date }}</span>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-medium">{{ night.rate | currency: data.currency }}</span>
+                  @if (night.source !== 'base_price') {
+                    <span class="text-[10px] text-blue-600 bg-blue-50 px-1 py-0.5 rounded">{{ night.source }}</span>
+                  }
+                </div>
+              </div>
+            }
+            <div class="flex justify-between text-xs font-semibold border-t border-gray-300 pt-1 mt-1">
+              <span>Total</span>
+              <span>{{ currentRoomRates()!.totalRate | currency: data.currency }}</span>
+            </div>
+            <div class="flex justify-between text-xs text-gray-500">
+              <span>Avg/night</span>
+              <span>{{ currentRoomRates()!.averageRate | currency: data.currency }}</span>
+            </div>
+          </div>
+        } @else {
+          <div class="text-xs text-gray-500 border-t border-gray-200 pt-2">
+            Rate: {{ currentRoomDetails().rate | currency: data.currency }}/night × {{ roomNights() }} = {{ currentRoomCost() | currency: data.currency }}
+          </div>
+        }
       </div>
 
-      <!-- New Room Selection -->
+      <!-- Step 1: Room Type -->
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Select New Room</mat-label>
-        <mat-select formControlName="newRoom">
-          @for (room of availableRooms(); track room._id) {
-            <mat-option [value]="room">
-              <div class="flex justify-between items-center w-full">
-                <span>
-                  <strong>{{ room.roomNumber }}</strong> - {{ room.name }}
-                  <span class="text-gray-500 text-sm ml-1">({{ room.roomType?.name }})</span>
-                </span>
-                <span class="text-green-600 font-medium">
-                  {{ getRoomRate(room) | currency: data.currency }}/night
-                </span>
-              </div>
+        <mat-label>Room Type</mat-label>
+        <mat-select formControlName="roomType" (selectionChange)="onRoomTypeChange($event.value)">
+          @for (type of roomTypes(); track type._id) {
+            <mat-option [value]="type._id">
+              {{ type.name }}
             </mat-option>
           }
-          @empty {
-            <mat-option disabled>No rooms available</mat-option>
-          }
         </mat-select>
-        @if (roomChangeForm.get('newRoom')?.hasError('required')) {
-          <mat-error>Please select a room</mat-error>
+        @if (roomChangeForm.get('roomType')?.hasError('required')) {
+          <mat-error>Room type is required</mat-error>
         }
       </mat-form-field>
+
+      <!-- Step 2: Rate Plan -->
+      @if (roomChangeForm.get('roomType')?.value) {
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Rate Plan</mat-label>
+          <mat-select formControlName="ratePlanId" (selectionChange)="onRatePlanChange($event.value)">
+            <mat-option [value]="null">Default (Base Rate)</mat-option>
+            @if (loadingRatePlans()) {
+              <mat-option disabled>
+                <div class="flex items-center gap-2">
+                  <mat-spinner diameter="16"></mat-spinner>
+                  Loading rate plans...
+                </div>
+              </mat-option>
+            } @else {
+              @for (plan of ratePlans(); track plan._id) {
+                <mat-option [value]="plan._id">
+                  {{ plan.name }}
+                </mat-option>
+              }
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
+      <!-- New Rate Breakdown (shown after room type selected and rates loaded) -->
+      @if (roomChangeForm.get('roomType')?.value) {
+        @if (loadingRates()) {
+          <div class="flex items-center gap-2 text-sm text-blue-600 p-2">
+            <mat-spinner diameter="16"></mat-spinner>
+            Fetching inventory rates...
+          </div>
+        } @else if (inventoryRates(); as rates) {
+          <div class="bg-green-50 border border-green-200 rounded-lg p-3 space-y-1">
+            <div class="text-xs font-medium text-green-700 uppercase tracking-wide">New Nightly Rate Breakdown</div>
+            @for (night of rates.nights; track night.date) {
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-600">{{ night.date }}</span>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-medium">{{ night.rate | currency: data.currency }}</span>
+                  @if (night.source !== 'base_price') {
+                    <span class="text-[10px] text-green-600 bg-green-100 px-1 py-0.5 rounded">{{ night.source }}</span>
+                  }
+                </div>
+              </div>
+            }
+            <div class="flex justify-between text-xs font-semibold border-t border-green-300 pt-1 mt-1">
+              <span>Total</span>
+              <span>{{ rates.totalRate | currency: data.currency }}</span>
+            </div>
+            <div class="flex justify-between text-xs text-gray-500">
+              <span>Avg/night</span>
+              <span>{{ rates.averageRate | currency: data.currency }}</span>
+            </div>
+          </div>
+        }
+      }
+
+      <!-- Restriction Warnings -->
+      @if (loadingRestrictions()) {
+        <div class="flex items-center gap-2 text-sm text-blue-600 p-2">
+          <mat-spinner diameter="16"></mat-spinner>
+          Checking restrictions...
+        </div>
+      } @else if (hasRestrictionIssues()) {
+        <div class="bg-red-50 border border-red-200 rounded-lg p-3 space-y-1">
+          <div class="flex items-center gap-1 text-red-700 font-medium text-sm">
+            <mat-icon class="text-base">block</mat-icon>
+            Booking Restricted
+          </div>
+          @for (issue of restrictionIssues(); track issue.date + issue.type) {
+            <div class="text-xs text-red-600 flex items-start gap-1 ml-6">
+              <span class="font-medium">{{ issue.date }}:</span>
+              <span>{{ issue.detail }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Step 3: Available Room -->
+      @if (roomChangeForm.get('roomType')?.value) {
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Select New Room</mat-label>
+          <mat-select formControlName="newRoom">
+            @if (loadingRooms()) {
+              <mat-option disabled>
+                <div class="flex items-center gap-2">
+                  <mat-spinner diameter="16"></mat-spinner>
+                  Loading available rooms...
+                </div>
+              </mat-option>
+            } @else {
+              @for (room of availableRooms(); track room._id) {
+                <mat-option [value]="room">
+                  <div class="flex justify-between items-center w-full">
+                    <span>
+                      <strong>{{ room.roomNumber }}</strong> - {{ room.name }}
+                    </span>
+                    <span class="text-gray-500 text-sm ml-2">
+                      Floor {{ room.floor || '—' }}
+                    </span>
+                  </div>
+                </mat-option>
+              }
+              @if (availableRooms().length === 0) {
+                <mat-option disabled>No available rooms for this type</mat-option>
+              }
+            }
+          </mat-select>
+          @if (roomChangeForm.get('newRoom')?.hasError('required')) {
+            <mat-error>Please select a room</mat-error>
+          }
+        </mat-form-field>
+      }
 
       <!-- Reason -->
       <mat-form-field appearance="outline" class="w-full">
         <mat-label>Reason for Change</mat-label>
-        <textarea 
-          matInput 
-          formControlName="reason" 
+        <textarea
+          matInput
+          formControlName="reason"
           rows="2"
           placeholder="e.g., Guest requested upgrade, maintenance issue..."></textarea>
         @if (roomChangeForm.get('reason')?.hasError('required')) {
@@ -65,37 +211,37 @@
         }
       </mat-form-field>
 
-      <!-- Pricing Summary (only shown when room selected) -->
-      @if (selectedNewRoom()) {
+      <!-- Pricing Summary (only when room selected and rates loaded) -->
+      @if (selectedNewRoom() && !loadingRates()) {
         <mat-divider></mat-divider>
-        
+
         <div class="space-y-2">
           <div class="text-sm font-medium text-gray-700">Pricing Summary</div>
-          
+
           @if (isMidStayChange()) {
-            <div class="text-xs text-blue-600 bg-blue-50 p-2 rounded">
-              <mat-icon class="text-sm align-middle mr-1">info</mat-icon>
+            <div class="text-xs text-blue-600 bg-blue-50 p-2 rounded flex items-center gap-1">
+              <mat-icon class="text-sm">info</mat-icon>
               Mid-stay change: {{ nightsConsumed() }} night(s) consumed, {{ nightsRemaining() }} remaining
             </div>
           }
-          
+
           <mat-list dense>
             <mat-list-item>
-              <span matListItemTitle>Current Rate</span>
-              <span matListItemMeta>{{ currentRoomDetails().rate | currency: data.currency }}/night</span>
+              <span matListItemTitle>Current Total ({{ roomNights() }} nights)</span>
+              <span matListItemMeta>{{ currentRoomCost() | currency: data.currency }}</span>
             </mat-list-item>
             <mat-list-item>
-              <span matListItemTitle>New Rate</span>
+              <span matListItemTitle>New Rate (avg)</span>
               <span matListItemMeta>{{ newRoomRate() | currency: data.currency }}/night</span>
             </mat-list-item>
             <mat-list-item>
-              <span matListItemTitle>Nights ({{ data.numberOfNights }})</span>
-              <span matListItemMeta>{{ currentRoomCost() | currency: data.currency }}</span>
+              <span matListItemTitle>New Total ({{ roomNights() }} nights)</span>
+              <span matListItemMeta class="font-semibold">{{ newRoomTotal() | currency: data.currency }}</span>
             </mat-list-item>
             <mat-divider></mat-divider>
             <mat-list-item>
               <span matListItemTitle class="font-bold">Difference</span>
-              <span matListItemMeta 
+              <span matListItemMeta
                     [class.text-red-600]="priceDifference() > 0"
                     [class.text-green-600]="priceDifference() < 0"
                     class="font-bold">
@@ -105,14 +251,14 @@
           </mat-list>
 
           @if (priceDifference() > 0) {
-            <div class="text-sm text-red-600 bg-red-50 p-2 rounded">
-              <mat-icon class="text-sm align-middle mr-1">warning</mat-icon>
+            <div class="text-sm text-red-600 bg-red-50 p-2 rounded flex items-center gap-1">
+              <mat-icon class="text-sm">warning</mat-icon>
               Additional payment of {{ priceDifference() | currency: data.currency }} required
             </div>
           }
           @if (priceDifference() < 0) {
-            <div class="text-sm text-green-600 bg-green-50 p-2 rounded">
-              <mat-icon class="text-sm align-middle mr-1">savings</mat-icon>
+            <div class="text-sm text-green-600 bg-green-50 p-2 rounded flex items-center gap-1">
+              <mat-icon class="text-sm">savings</mat-icon>
               Refund of {{ Math.abs(priceDifference()) | currency: data.currency }} will be applied
             </div>
           }
@@ -124,10 +270,17 @@
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()" [disabled]="submitting()">Cancel</button>
-  <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="!canSubmit()">
+  <button mat-flat-button color="primary"
+          (click)="onSubmit()"
+          [disabled]="!canSubmit()"
+          [matTooltip]="hasRestrictionIssues() ? 'Cannot proceed — booking restrictions apply' : ''">
     @if (submitting()) {
       <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
     }
-    Change Room
+    @if (hasRestrictionIssues()) {
+      <mat-icon class="mr-1">block</mat-icon> Restricted
+    } @else {
+      Change Room
+    }
   </button>
 </mat-dialog-actions>

@@ -1,0 +1,295 @@
+<app-page-header title="Rate & Availability Calendar" subtitle="Manage per-date rates via rate plans and room availability">
+  <ng-container actions>
+    <button matButton="outlined" (click)="openBulkSetDialog()">
+      <mat-icon>date_range</mat-icon>
+      Bulk Set Rates
+    </button>
+    @if (isChannexConnected()) {
+      <button matButton="filled" color="primary" (click)="syncToChannex()" [disabled]="syncing()">
+        <mat-icon>cloud_upload</mat-icon> {{ syncing() ? "Syncing…" : "Sync to Channex" }}
+      </button>
+    }
+    <button matButton="outlined" (click)="discardChanges()" [disabled]="!hasUnsavedChanges()">
+      <mat-icon>refresh</mat-icon>
+      Reset
+    </button>
+    @if (saving()) {
+      <button matButton="filled" color="primary" disabled>
+        <mat-icon>hourglass_empty</mat-icon>
+        Saving...
+      </button>
+    } @else {
+      <button matButton="filled" color="primary" (click)="saveAllChanges()" [disabled]="!hasUnsavedChanges()">
+        <mat-icon>save</mat-icon>
+        Save
+      </button>
+    }
+    <button matButton="outlined" (click)="loadData()">
+      <mat-icon>refresh</mat-icon>
+      Reload
+    </button>
+  </ng-container>
+</app-page-header>
+
+<!-- Navigation Bar -->
+<div class="max-w-12xl py-4">
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-3!">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <!-- Date Navigation -->
+        <div class="flex items-center gap-2">
+          <button mat-icon-button (click)="navigatePrev()" matTooltip="Previous period">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <button mat-stroked-button (click)="navigateToday()">Today</button>
+          <button mat-icon-button (click)="navigateNext()" matTooltip="Next period">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+          <span class="font-semibold text-gray-800 ml-2">{{ monthLabel() }}</span>
+        </div>
+
+        <!-- Days Toggle -->
+        <div class="flex items-center gap-1">
+          <mat-chip-set>
+            <mat-chip [highlighted]="daysToShow() === 7" (click)="setDaysToShow(7)">7 days</mat-chip>
+            <mat-chip [highlighted]="daysToShow() === 14" (click)="setDaysToShow(14)">14 days</mat-chip>
+            <mat-chip [highlighted]="daysToShow() === 30" (click)="setDaysToShow(30)">30 days</mat-chip>
+          </mat-chip-set>
+        </div>
+
+        <!-- Legend -->
+        <div class="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
+          <span class="flex items-center gap-1">
+            <span class="w-3 h-3 bg-blue-50 border border-blue-200 rounded"></span> Availability
+          </span>
+          <span class="flex items-center gap-1">
+            <span class="w-3 h-3 bg-green-100 border border-green-300 rounded"></span> Has rate
+          </span>
+          <span class="flex items-center gap-1">
+            <span class="w-3 h-3 bg-gray-100 border border-gray-300 rounded"></span> No rate
+          </span>
+          <span class="flex items-center gap-1">
+            <span class="w-3 h-3 bg-red-100 border border-red-300 rounded"></span> Stop sell
+          </span>
+          <span class="flex items-center gap-1">
+            <span class="w-3 h-3 bg-yellow-50 border border-yellow-300 rounded"></span> Modified
+          </span>
+          <span class="flex items-center gap-1">
+            <span class="restriction-badge-legend cta-badge">CTA</span> Closed to Arrival
+          </span>
+          <span class="flex items-center gap-1">
+            <span class="restriction-badge-legend ctd-badge">CTD</span> Closed to Departure
+          </span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<!-- Loading -->
+@if (loading()) {
+  <div class="flex justify-center py-12">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+}
+
+<!-- Unsaved Changes Banner -->
+@if (hasUnsavedChanges()) {
+  <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-4 flex items-center justify-between gap-4 animate-in fade-in duration-300">
+    <div class="flex items-center gap-3">
+      <mat-icon class="text-yellow-600">warning</mat-icon>
+      <span class="text-sm font-medium text-yellow-800">
+        You have {{ pendingChanges().size }} unsaved change(s). Click <strong>Save</strong> to persist them.
+      </span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button matButton="outlined" class="text-sm!" (click)="discardChanges()">Discard</button>
+      <button matButton="filled" color="primary" class="text-sm!" (click)="saveAllChanges()" [disabled]="saving()">
+        @if (saving()) {
+          Saving...
+        } @else {
+          Save All
+        }
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Calendar Grid -->
+@if (!loading() && roomTypes().length > 0) {
+  <mat-card appearance="outlined" class="overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="inventory-grid">
+        <!-- Header: dates -->
+        <thead>
+          <tr>
+            <th class="room-type-header">Room Type / Rate Plan</th>
+            @for (day of calendarDays(); track day.dateStr) {
+              <th class="day-header"
+                  [class.weekend]="day.isWeekend"
+                  [class.today]="day.isToday">
+                <div class="text-[10px] text-gray-500 uppercase">{{ day.dayOfWeek }}</div>
+                <div class="text-sm font-semibold" [class.text-indigo-600]="day.isToday">{{ day.dayNum }}</div>
+              </th>
+            }
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (rt of roomTypes(); track rt._id) {
+            <!-- Room Type Header Row — Availability -->
+            <tr class="room-type-group-header">
+              <td class="room-type-cell room-type-name-cell">
+                <div class="flex items-center justify-between gap-2">
+                  <div>
+                    <div class="font-semibold text-sm text-gray-800">{{ rt.name }}</div>
+                    <div class="text-xs text-gray-500">
+                      {{ rt.totalRooms }} rooms · Base: {{ rt.basePrice | currency: storeCurrency() }}
+                    </div>
+                  </div>
+                  <button mat-icon-button class="scale-75" (click)="openCreateRatePlanDialog(rt)" matTooltip="Create rate plan">
+                    <mat-icon class="text-base">add_circle_outline</mat-icon>
+                  </button>
+                </div>
+              </td>
+
+              <!-- Availability cells -->
+              @for (day of calendarDays(); track day.dateStr) {
+                <td class="avail-cell"
+                    [class.weekend]="day.isWeekend"
+                    [class.today]="day.isToday"
+                    [class.stop-sell]="isStopSell(rt._id, day.dateStr)"
+                    [class.modified]="hasPendingAvailChange(rt._id, day.dateStr)"
+                    (click)="openAvailabilityOverride(rt._id, day.dateStr)">
+
+                    @if (getAvailability(rt._id, day.dateStr) !== null) {
+                      <div class="avail-display">
+                        <div class="text-xs font-semibold"
+                             [class.text-green-600]="(getAvailability(rt._id, day.dateStr) ?? 0) > 2"
+                             [class.text-amber-600]="(getAvailability(rt._id, day.dateStr) ?? 0) > 0 && (getAvailability(rt._id, day.dateStr) ?? 0) <= 2"
+                             [class.text-red-600]="getAvailability(rt._id, day.dateStr) === 0">
+                          {{ getAvailability(rt._id, day.dateStr) }} left
+                        </div>
+                      </div>
+                    } @else {
+                      <div class="empty-cell">
+                        <span class="text-[10px] text-gray-400">—</span>
+                      </div>
+                    }
+                    <!-- Restriction badges for availability row -->
+                    @if (isStopSell(rt._id, day.dateStr)) {
+                      <span class="restriction-badge stop-sell-badge" matTooltip="Stop Sell">✕</span>
+                    }
+                </td>
+              }
+            </tr>
+
+            <!-- Rate Plan Sub-Rows -->
+            @for (rp of rt.ratePlans; track rp._id) {
+              <tr class="rate-plan-row">
+                <td class="room-type-cell rate-plan-name-cell">
+                  <div class="flex items-center gap-2 pl-4">
+                    <mat-icon class="text-sm! text-gray-400">subdirectory_arrow_right</mat-icon>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-xs font-medium text-gray-700 truncate">{{ rp.name }}</div>
+                      <div class="text-[10px] text-gray-400">
+                        PMS: {{ rp.baseRate | currency: storeCurrency() }}
+                        @if (rp.otaBaseRate != null) {
+                          · OTA: {{ rp.otaBaseRate | currency: storeCurrency() }}
+                        }
+                        @if (rp.isDefault) {
+                          <span class="ml-1 text-indigo-500 font-semibold">DEFAULT</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Rate cells for this rate plan -->
+                @for (day of calendarDays(); track day.dateStr) {
+                  <td class="rate-cell"
+                      [class.weekend]="day.isWeekend"
+                      [class.today]="day.isToday"
+                      [class.has-rate]="hasRateForPlan(rt._id, rp._id, day.dateStr)"
+                      [class.stop-sell]="isRatePlanStopSell(rt._id, rp._id, day.dateStr)"
+                      [class.modified]="hasPendingChange(rt._id, rp._id, day.dateStr)"
+                      (click)="openRatePlanOverride(rt._id, rp._id, day.dateStr)">
+
+                      <!-- Display mode -->
+                      @if (hasRateForPlan(rt._id, rp._id, day.dateStr)) {
+                        <div class="rate-display">
+                          <div class="text-xs font-semibold text-gray-800">
+                            {{ getCellRate(rt._id, rp._id, day.dateStr) | currency: storeCurrency(): 'symbol-narrow':'1.0-0' }}
+                          </div>
+                          @if (isChannexConnected() && getCellOtaRate(rt._id, rp._id, day.dateStr) !== null) {
+                            <div class="text-[10px] font-medium text-indigo-600" matTooltip="OTA / Channex rate">
+                              OTA {{ getCellOtaRate(rt._id, rp._id, day.dateStr) | currency: storeCurrency(): 'symbol-narrow':'1.0-0' }}
+                            </div>
+                          }
+                        </div>
+                        @if (getCellSource(rt._id, rp._id, day.dateStr); as source) {
+                          @if (getSourceIcon(source); as icon) {
+                            <mat-icon class="source-icon" [matTooltip]="source">{{ icon }}</mat-icon>
+                          }
+                        }
+                      } @else {
+                        <div class="empty-cell">
+                          <mat-icon class="text-gray-300 text-base!">add</mat-icon>
+                        </div>
+                      }
+
+                      <!-- Restriction badges -->
+                      <div class="restriction-badges">
+                        @if (isRatePlanStopSell(rt._id, rp._id, day.dateStr)) {
+                          <span class="restriction-badge stop-sell-badge" matTooltip="Stop Sell">✕</span>
+                        }
+                        @if (isRatePlanCTA(rt._id, rp._id, day.dateStr)) {
+                          <span class="restriction-badge cta-badge" matTooltip="Closed to Arrival">CTA</span>
+                        }
+                        @if (isRatePlanCTD(rt._id, rp._id, day.dateStr)) {
+                          <span class="restriction-badge ctd-badge" matTooltip="Closed to Departure">CTD</span>
+                        }
+                        @if (getCellMinStay(rt._id, rp._id, day.dateStr); as ms) {
+                          <span class="restriction-badge min-stay-badge" matTooltip="Min stay {{ ms }} nights">{{ ms }}n</span>
+                        }
+                      </div>
+                  </td>
+                }
+              </tr>
+            }
+
+            <!-- No Rate Plans message -->
+            @if (rt.ratePlans.length === 0) {
+              <tr class="rate-plan-row">
+                <td class="room-type-cell rate-plan-name-cell" [attr.colspan]="calendarDays().length + 1">
+                  <div class="flex items-center gap-2 pl-4 py-2 text-gray-400 text-xs">
+                    <mat-icon class="text-sm!">warning</mat-icon>
+                    No rate plans configured for this room type.
+                    <button mat-button class="text-xs! text-indigo-600" (click)="openCreateRatePlanDialog(rt)">
+                      <mat-icon class="text-sm!">add</mat-icon> Create Rate Plan
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </mat-card>
+}
+
+<!-- Empty State -->
+@if (!loading() && roomTypes().length === 0) {
+  <mat-card appearance="outlined" class="py-16">
+    <div class="flex flex-col items-center justify-center text-center gap-4">
+      <div class="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center">
+        <mat-icon class="text-indigo-400 text-3xl!">calendar_month</mat-icon>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold text-gray-800">No Room Types Found</h3>
+        <p class="text-sm text-gray-500 mt-1">Create room types first, then manage their daily rates and availability here.</p>
+      </div>
+    </div>
+  </mat-card>
+}

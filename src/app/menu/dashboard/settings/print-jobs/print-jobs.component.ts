@@ -188,14 +188,6 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
   }
 
 
-  /**
-   * Handle auto-printing based on store settings and conditions
-   * THIS METHOD HAS BEEN MOVED TO PrintJobService - See handleAutoPrint()
-   * It is now called globally from menu.component when 'printJob:created' event is received
-   */
-  private async handleAutoPrint(data: any): Promise<void> {
-    // Method moved to PrintJobService - use printJobService.handleAutoPrint() instead
-  }
 
   private updateJobStatus(jobId: string, status: string, error?: string) {
     const jobs = this.printJobs();
@@ -305,7 +297,12 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
     return colors[status] || '';
   }
 
-  public getStationName(station: Station | string): string {
+  public getStationName(station: Station | string | null): string {
+    // Handle null stations (master print jobs)
+    if (!station) {
+      return 'Master Receipt';
+    }
+    
     if (typeof station === 'string') {
       const found = this.stations().find((s) => s._id === station);
       return found ? found.name : 'Unknown';

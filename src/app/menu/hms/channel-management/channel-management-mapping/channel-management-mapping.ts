@@ -125,11 +125,9 @@ export class ChannelManagementMapping implements OnInit {
 
   // Forms
   protected syncPropertyForm: FormGroup;
-  protected availabilityForm: FormGroup;
 
   // Computed states
   protected isSyncingStore = this.channexService.isSyncingStore;
-  protected isPushingAvailability = this.channexService.isPushingAvailability;
 
   constructor() {
     // Initialize forms
@@ -137,15 +135,6 @@ export class ChannelManagementMapping implements OnInit {
       propertyType: [this.propertyType() || 'hotel', Validators.required],
       checkInTime: ['15:00', Validators.required],
       checkOutTime: ['11:00', Validators.required],
-    });
-
-    const today = new Date();
-    const oneYearLater = new Date();
-    oneYearLater.setFullYear(today.getFullYear() + 1);
-
-    this.availabilityForm = this.fb.group({
-      startDate: [today, Validators.required],
-      endDate: [oneYearLater, Validators.required],
     });
   }
 
@@ -193,11 +182,11 @@ export class ChannelManagementMapping implements OnInit {
           // ignore quota issues
         }
         this.updateStepsBasedOnStatus(response.data);
-        // If user is currently on Step 4 and there are connected channels, auto-open iframe
+        // If user is currently on Step 3 and there are connected channels, auto-open iframe
         try {
           const idx = this.currentStep();
           const connected = response.data.channex?.connectedChannels;
-          if (idx === 3 && connected && connected.length > 0 && !this.channelIframeUrl()) {
+          if (idx === 2 && connected && connected.length > 0 && !this.channelIframeUrl()) {
             this.connectChannels();
           }
         } catch (e) {
@@ -249,12 +238,6 @@ export class ChannelManagementMapping implements OnInit {
     if (status.roomMappings && status.roomMappings.length > 0) {
       steps[1].status = 'completed';
       this.setCurrentStepIfHigher(2);
-    }
-
-    // Step 3: Availability (assume completed if room types are synced)
-    if (status.roomMappings && status.roomMappings.length > 0) {
-      steps[2].status = 'completed';
-      this.setCurrentStepIfHigher(3);
     }
 
     this.setupSteps.set([...steps]);
@@ -428,35 +411,6 @@ export class ChannelManagementMapping implements OnInit {
     this.loadChannexStatus();
   }
 
-  /**
-   * Push availability to Channex
-   */
-  protected pushAvailability(): void {
-    const storeId = this.storeId();
-    if (!storeId || this.availabilityForm.invalid) return;
-
-    this.updateStepStatus(2, 'in-progress');
-
-    const startDate = this.availabilityForm.value.startDate as Date;
-    const endDate = this.availabilityForm.value.endDate as Date;
-
-    const data = {
-      startDate: startDate.toISOString().split('T')[0],
-      endDate: endDate.toISOString().split('T')[0],
-    };
-
-    this.channexService.pushAvailability(storeId, data).subscribe({
-      next: (response) => {
-        this.updateStepStatus(2, 'completed');
-        this.setCurrentStep(3);
-        this.showSuccess(response.message);
-      },
-      error: (error) => {
-        this.updateStepStatus(2, 'error', error.error?.message || 'Failed to push availability');
-        this.showError(error.error?.message || 'Failed to push availability');
-      },
-    });
-  }
 
   /**
    * Get channel connection key and display iframe

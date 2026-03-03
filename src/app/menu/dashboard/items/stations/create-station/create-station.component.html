@@ -106,74 +106,84 @@
     <mat-card appearance="outlined">
       <mat-card-header>
         <mat-card-title>Printers</mat-card-title>
-        <mat-card-subtitle>Configure network printers for this station</mat-card-subtitle>
+        <mat-card-subtitle>Select printers to assign to this station</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content class="p-6! space-y-6">
-        <div formArrayName="printers">
-          @if (printers.length === 0) {
-            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-              <mat-icon class="text-4xl text-gray-400 mb-2">print_disabled</mat-icon>
-              <p class="text-gray-600 mb-4">No printers configured. Add at least one printer to enable printing.</p>
-              <button mat-raised-button color="primary" type="button" (click)="addPrinter()">
-                <mat-icon>add</mat-icon>
-                Add Printer
-              </button>
-            </div>
-          }
+        @if (loadingPrinters()) {
+          <div class="flex items-center justify-center py-8">
+            <mat-spinner diameter="40"></mat-spinner>
+            <span class="ml-4 text-gray-600">Loading printers...</span>
+          </div>
+        } @else {
+          <div formArrayName="printers" class="space-y-4">
+            @if (availablePrinters().length === 0) {
+              <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <mat-icon class="text-4xl text-gray-400 mb-2">print_disabled</mat-icon>
+                <p class="text-gray-600 mb-4">No printers available. Create a printer first.</p>
+                <a matButton="outlined" color="primary" (click)="openCreatePrinterDialog()">
+                  <mat-icon>add</mat-icon>
+                  Create New Printer
+                </a>
+              </div>
+            } @else {
+              @if (printers.length === 0) {
+                <div class="text-center py-4 text-gray-600">
+                  <p class="mb-4">No printers selected. Choose printers below or add new ones.</p>
+                </div>
+              }
 
-          @for (printer of printers.controls; track $index) {
-            <mat-card appearance="outlined" class="mb-4" [formGroupName]="$index">
-              <mat-card-content class="p-4!">
-                <div class="flex items-start gap-4">
-                  <div class="flex-grow-1 space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Printer Name</mat-label>
-                        <input matInput formControlName="name" placeholder="e.g., Kitchen Printer 1" required />
-                        <mat-icon matSuffix class="text-gray-400">print</mat-icon>
-                      </mat-form-field>
-
-                      <div class="grid grid-cols-3 gap-2">
-                        <mat-form-field appearance="outline" class="col-span-2">
-                          <mat-label>IP Address</mat-label>
-                          <input matInput formControlName="ipAddress" placeholder="192.168.1.100" required />
-                          @if (printer.get('ipAddress')?.hasError('pattern') && printer.get('ipAddress')?.touched) {
-                            <mat-error>Invalid IP address</mat-error>
-                          }
-                        </mat-form-field>
-
-                        <mat-form-field appearance="outline">
-                          <mat-label>Port</mat-label>
-                          <input matInput type="number" formControlName="port" />
-                        </mat-form-field>
-                      </div>
-                    </div>
-
-                    <div class="flex items-center">
-                      <mat-checkbox formControlName="enabled" color="primary">
-                        <span class="flex items-center gap-2">
-                          <mat-icon class="text-lg text-gray-600">check_circle</mat-icon>
-                          Enabled
-                        </span>
+              <div class="space-y-3 mb-4">
+                <label class="text-sm font-semibold text-gray-700">Select Printers for This Station</label>
+                @for (printer of availablePrinters(); track printer._id) {
+                  @if (printer._id) {
+                    <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                      <mat-checkbox 
+                        [checked]="isPrinterSelected(printer._id)"
+                        (change)="togglePrinter(printer._id)"
+                        color="primary">
                       </mat-checkbox>
+                      <div class="flex-grow ml-3">
+                        <div class="font-medium text-gray-900">{{ printer.name }}</div>
+                        <div class="text-xs text-gray-500">
+                          {{ printer.connectionType | uppercase }} 
+                          @if (printer.connectionType === 'network' && printer.connection.ip) {
+                            • {{ printer.connection.ip }}:{{ printer.connection.port }}
+                          }
+                        </div>
+                      </div>
+                      <mat-icon 
+                        [ngClass]="{'text-green-500': printer.status === 'online', 'text-red-500': printer.status === 'offline', 'text-gray-400': printer.status === 'unknown'}"
+                        class="ml-2">
+                        {{ printer.status === 'online' ? 'check_circle' : 'error_circle' }}
+                      </mat-icon>
+                    </div>
+                  }
+                }
+              </div>
+
+              <!-- @if (printers.length > 0) {
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div class="flex gap-3">
+                    <mat-icon class="text-blue-600 mt-0.5">info</mat-icon>
+                    <div>
+                      <div class="font-semibold text-blue-900">{{ printers.length }} Printer(s) Selected</div>
+                      @for (printer of printers.controls; track $index) {
+                        <div class="text-sm text-blue-800">
+                          • {{ getPrinterDetails(printer.get('printerId')?.value)?.name }}
+                        </div>
+                      }
                     </div>
                   </div>
-
-                  <button mat-icon-button color="warn" type="button" (click)="removePrinter($index)">
-                    <mat-icon>delete</mat-icon>
-                  </button>
                 </div>
-              </mat-card-content>
-            </mat-card>
-          }
+              } -->
 
-          @if (printers.length > 0) {
-            <button mat-stroked-button type="button" (click)="addPrinter()" class="w-full">
-              <mat-icon>add</mat-icon>
-              Add Another Printer
-            </button>
-          }
-        </div>
+              <a matButton="outlined" color="primary" (click)="openCreatePrinterDialog()">
+                <mat-icon>add</mat-icon>
+                Create New Printer
+              </a>
+            }
+          </div>
+        }
       </mat-card-content>
     </mat-card>
 

@@ -22,6 +22,7 @@ import { LiveBookingService } from '../../../../../shared/services/live-booking.
 import { BookingEvent, Property } from '../../../../../shared/models/live-booking.model';
 import { AssignRoomDialogComponent } from '../assign-room-dialog/assign-room-dialog.component';
 import { StoreStore } from '../../../../../shared/stores/store.store';
+import { ReservationService } from '../../../../../shared/services/reservation.service';
 
 @Component({
   selector: 'app-live-booking-details',
@@ -52,9 +53,36 @@ export class LiveBookingDetails {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   private storeStore = inject(StoreStore);
+  private reservationService = inject(ReservationService);
 
   bookingId = signal<string>('');
   selectedTabIndex = signal<number>(0);
+
+  // Resource to look up existing PMS reservation by Channex booking ID
+  pmsReservationResource = rxResource({
+    params: () => {
+      const id = this.bookingId();
+      return id ? { id } : null;
+    },
+    stream: ({ params }) => {
+      if (!params) return of(null);
+      return this.reservationService.findByChannexBookingId(params.id);
+    },
+  });
+
+  // Computed: existing PMS reservation (if found)
+  pmsReservation = computed(() => {
+    const result = this.pmsReservationResource.value();
+    return result?.success ? result.data : null;
+  });
+
+  // Computed: whether this booking is already assigned in PMS
+  isAssignedInPms = computed(() => {
+    const reservation = this.pmsReservation();
+    if (!reservation) return false;
+    // Check if at least one room has an actual room assigned
+    return reservation.rooms?.some((r: any) => r.room != null) ?? false;
+  });
 
   // Resource to load booking details
   bookingResource = rxResource({
@@ -295,6 +323,15 @@ export class LiveBookingDetails {
   }
 
   /**
+   * Navigate to the PMS reservation details page
+   */
+  openPmsReservation(): void {
+    const reservation = this.pmsReservation();
+    if (!reservation?._id) return;
+    this.router.navigate(['/menu/hms/front-desk/reservations/edit', reservation._id]);
+  }
+
+  /**
    * Open assign room dialog for OTA bookings without assigned rooms
    */
   openAssignRoomDialog(): void {
@@ -316,6 +353,8 @@ export class LiveBookingDetails {
         rooms: booking.rooms || [],
         roomTypes: this.roomTypes(),
         currency: booking.currency || 'USD',
+        storeCurrency: this.storeStore.selectedStore()?.currencyCode || this.storeStore.selectedStore()?.currency || 'NGN',
+        storeTax: this.storeStore.selectedStore()?.tax || 0,
         storeId: this.storeStore.selectedStore()?._id || '',
       },
     });
@@ -323,8 +362,9 @@ export class LiveBookingDetails {
     dialogRef.afterClosed().subscribe((result) => {
       if (result?.success) {
         this.snackBar.open('Rooms assigned successfully', 'Close', { duration: 5000 });
-        // Refresh booking details
+        // Refresh booking details and PMS reservation lookup
         void this.bookingResource.reload();
+        void this.pmsReservationResource.reload();
       }
     });
   }

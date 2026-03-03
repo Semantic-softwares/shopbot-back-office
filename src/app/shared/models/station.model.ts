@@ -1,13 +1,32 @@
 import { Store } from "./store.model";
 
+export interface PrinterConnection {
+    ip?: string;
+    port?: number;
+    deviceName?: string;
+    vendorId?: string;
+    productId?: string;
+    macAddress?: string;
+}
+
+export interface PrinterCapabilities {
+    paperWidth: '58' | '80';
+    supportsQr: boolean;
+    supportsLogo: boolean;
+    supportsCut: boolean;
+}
+
 export interface Printer {
-    id: string;
+    _id: string;
     name: string;
-    ipAddress: string;
-    port: number;
-    enabled: boolean;
-    status?: 'online' | 'offline' | 'error';
-    lastSeen?: Date;
+    store: string;
+    connectionType: 'network' | 'usb-os' | 'usb-raw' | 'bluetooth';
+    connection: PrinterConnection;
+    role: 'station' | 'master' | 'backup';
+    capabilities: PrinterCapabilities;
+    status: 'online' | 'offline' | 'unknown';
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export interface StationSettings {

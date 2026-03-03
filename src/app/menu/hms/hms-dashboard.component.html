@@ -1,64 +1,63 @@
 <div class="hms-dashboard-container">
-  <app-toolbar 
-    [title]="'Hotel Management System'"
-    (menuToggle)="toggleSidenav()">
-  </app-toolbar>
+  
 
   <mat-sidenav-container>
-    <mat-sidenav [mode]="isMobile() ? 'over' : 'side'" [opened]="opened()" class="!w-[20em] !rounded-[0px] px-2">
-      <mat-list>
-        <mat-list-item>
-          @if (storeStore.selectedStore()?.logo) {
-            <a matListItemIcon class="block !mr-6" [routerLink]="['../settings']">
-            <img [routerLink]="['../settings']" [src]="storeStore.selectedStore()?.logo" class="!w-full !min-w-10 !mr-5 !max-w-100 h-10 rounded-full object-cover">
+    <!-- Icon-based Sidebar Navigation -->
+    <mat-sidenav [mode]="isMobile() ? 'over' : 'side'" [opened]="opened()" class="!w-[60px] !rounded-[0px] flex flex-col">
+      <!-- Navigation Icons -->
+      <nav class="flex-1 flex flex-col items-center gap-1 py-3">
+        @for (item of navItems(); track $index) {
+          @if (hasSingleChild(item)) {
+            <!-- Single child - navigate directly -->
+            <a
+              [routerLink]="item.children[0].link"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: false }"
+              [matTooltip]="item.children[0].label"
+              matTooltipPosition="right"
+              (click)="closeSidenavOnMobile()"
+              class="nav-item"
+            >
+              <mat-icon>{{ getFirstChildIcon(item) }}</mat-icon>
             </a>
           } @else {
-            <a matListItemIcon class="block">
-              <mat-icon>hotel</mat-icon>
+            <!-- Multiple children - open menu -->
+            <a
+              [matMenuTriggerFor]="menu"
+              [matTooltip]="item.name"
+              matTooltipPosition="right"
+              [class.active]="isNavItemActive(item)"
+              class="nav-item"
+            >
+              <mat-icon>{{ getFirstChildIcon(item) }}</mat-icon>
             </a>
-          }
-            
-          <h2 matListItemTitle [routerLink]="['../settings']">{{currentUser()?.role?.name }}</h2>
-          <div matListItemLine [routerLink]="['../settings']">{{storeStore.selectedStore()?.name}} - Hotel</div>
-          <a matListItemMeta mat-icon-button class="block" [matMenuTriggerFor]="menu">
-            <mat-icon>keyboard_arrow_down</mat-icon>
-          </a>
-         
-        </mat-list-item>
-        <mat-divider></mat-divider>
-      </mat-list>
-      <mat-menu #menu="matMenu">
-        @for (store of storeStore.stores(); track $index) {
-          <button mat-menu-item (click)="selectStore(store)" [disabled]="store._id === storeStore.selectedStore()?._id"> {{store.name}}</button>
-        }
-      </mat-menu>
 
-      <mat-nav-list>
-        <mat-accordion multi>
-          @for (link of navItems(); track $index) {
-          <mat-expansion-panel class="mat-elevation-z0" [expanded]="true">
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                <span class="flex items-center">
-                  {{link?.name}}
-                </span>
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            @for (item of link.children; track $index) {
-            <a mat-list-item [routerLink]="item.link" routerLinkActive="active-link" #rla="routerLinkActive"
-              [activated]="rla.isActive">
-              <mat-icon matListItemIcon class="material-icons-outlined">{{item.icon}}</mat-icon>
-              <span matListItemTitle>{{item.label}}</span>
-            </a>
-            }
-          </mat-expansion-panel>
+            <mat-menu #menu="matMenu">
+              <div class="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">{{ item.name }}</div>
+              <mat-divider></mat-divider>
+              @for (child of item.children; track $index) {
+                <a
+                  mat-menu-item
+                  [routerLink]="child.link"
+                  routerLinkActive="active-menu-item"
+                  (click)="closeSidenavOnMobile()"
+                >
+                  <mat-icon>{{ child.icon }}</mat-icon>
+                  <span>{{ child.label }}</span>
+                </a>
+              }
+            </mat-menu>
           }
-        </mat-accordion>
-      </mat-nav-list>
+        }
+      </nav>
     </mat-sidenav>
 
     <mat-sidenav-content>
-      <div class="p-4  h-screen">
+      <app-toolbar 
+    [title]="!isMobile() ? 'Property Management System' : 'PMS'"
+    (menuToggle)="toggleSidenav()">
+  </app-toolbar>
+      <div class="h-[calc(100vh-64px)] overflow-scroll">
         <router-outlet></router-outlet>
       </div>
     </mat-sidenav-content>

@@ -4,7 +4,12 @@
 >
   <ng-container actions>
     @if (!bookingResource.isLoading() && booking()) {
-      @if (hasUnassignedRooms()) {
+      @if (isAssignedInPms() && pmsReservation()) {
+        <button matButton="tonal" color="primary" (click)="openPmsReservation()">
+          <mat-icon>open_in_new</mat-icon>
+          View Reservation
+        </button>
+      } @else if (hasUnassignedRooms()) {
         <button matButton="tonal" color="primary" (click)="openAssignRoomDialog()">
           <mat-icon>bed</mat-icon>
           Assign Rooms

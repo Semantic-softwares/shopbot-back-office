@@ -3,19 +3,25 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
 import { CdkMenuModule } from '@angular/cdk/menu';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { QuickReservationModalComponent, QuickReservationData, QuickReservationDialogData } from '../../quick-reservation-modal/quick-reservation-modal.component';
 import { ReservationPreviewDialogComponent } from '../reservation-preview-dialog/reservation-preview-dialog.component';
 import { StoreStore } from '../../../../../../shared/stores/store.store';
 import { ReservationService } from '../../../../../../shared/services/reservation.service';
 import { RoomsService } from '../../../../../../shared/services/rooms.service';
+import { RateInventoryService } from '../../../../../../shared/services/rate-inventory.service';
+import type { InventoryGrid, AvailabilityCell, RateInventoryRecord } from '../../../../../../shared/services/rate-inventory.service';
 import { PageHeaderComponent } from '../../../../../../shared/components/page-header/page-header.component';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
+import { CurrencyPipe } from '@angular/common';
+import { map } from 'rxjs/operators';
 import type { Reservation, ReservationStatus } from '../../../../../../shared/models/reservation.model';
 
 interface DateRange {
@@ -65,11 +71,13 @@ interface DragSelection {
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
+    MatDividerModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatDialogModule,
     CdkMenuModule,
     PageHeaderComponent,
+    CurrencyPipe,
   ],
   templateUrl: './reservations-calendar.html',
   styleUrl: './reservations-calendar.scss',
@@ -78,9 +86,20 @@ export class ReservationsCalendar implements OnInit {
   public storeStore = inject(StoreStore);
   public reservationService = inject(ReservationService);
   public roomService = inject(RoomsService);
+  private rateInventoryService = inject(RateInventoryService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private dialog = inject(MatDialog);
+  private breakpointObserver = inject(BreakpointObserver);
+
+  // Responsive: mobile detection via CDK BreakpointObserver → signal
+  public isMobile = toSignal(
+    this.breakpointObserver.observe([
+      Breakpoints.XSmall,
+      Breakpoints.Small,
+    ]).pipe(map(result => result.matches)),
+    { initialValue: false },
+  );
 
   // Signals
   public viewMode = signal<'weekly' | 'monthly'>('monthly');
@@ -142,7 +161,7 @@ export class ReservationsCalendar implements OnInit {
         const d = new Date(start);
         d.setDate(d.getDate() + i);
         dates.push({
-          key: d.toISOString().slice(0, 10),
+          key: this.formatLocalDate(d),
           day: d.getDate(),
           dayName: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()],
           date: new Date(d),
@@ -156,7 +175,7 @@ export class ReservationsCalendar implements OnInit {
       for (let i = 0; i < daysInMonth; i++) {
         const d = new Date(year, month, i + 1);
         dates.push({
-          key: d.toISOString().slice(0, 10),
+          key: this.formatLocalDate(d),
           day: d.getDate(),
           dayName: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()],
           date: new Date(d),
@@ -197,6 +216,132 @@ export class ReservationsCalendar implements OnInit {
     stream: ({ params }) =>
       this.roomService.getRoomTypes(params.storeId!),
   });
+
+  // Inventory grid: rates, availability, restrictions per room type per date
+  public inventoryGrid = rxResource({
+    params: () => {
+      const storeId = this.storeStore.selectedStore()?._id;
+      const mode = this.viewMode();
+      const start = this.alignStartOfPeriod(this.startDate(), mode);
+      const { dateFrom, dateTo } = this.getPeriodDateRangeStrings(start, mode);
+      return { storeId, dateFrom, dateTo };
+    },
+    stream: ({ params }) =>
+      this.rateInventoryService.getInventoryGrid(params.storeId!, params.dateFrom, params.dateTo),
+  });
+
+  /**
+   * Pre-computed lookup: cellInfoMap[roomTypeId][dateKey] = { rate, availability, restrictions, isDisabled, disableReason }
+   * Consumed by template for per-cell rate display and disable state.
+   */
+  public cellInfoMap = computed(() => {
+    const grid = this.inventoryGrid.value();
+    const map: Record<string, Record<string, CellInfo>> = {};
+    if (!grid?.grid) return map;
+
+    for (const roomTypeId of Object.keys(grid.grid)) {
+      map[roomTypeId] = {};
+      const rtGrid = grid.grid[roomTypeId];
+      const availabilityGrid = rtGrid?.['_availability'] || {};
+
+      // Find the first rate plan key to read rates from
+      const ratePlanKeys = Object.keys(rtGrid).filter(k => k !== '_availability');
+
+      for (const date of this.dateRange()) {
+        const dateKey = date.key;
+
+        // Availability + restrictions from the shared _availability bucket
+        const avail = availabilityGrid[dateKey] as AvailabilityCell | undefined;
+        const availability = avail?.availability ?? null;
+        const restrictions = avail?.restrictions ?? null;
+
+        // Rate: pick from the first rate plan that has data for this date
+        let rate: number | null = null;
+        for (const rpKey of ratePlanKeys) {
+          const record = rtGrid[rpKey]?.[dateKey] as RateInventoryRecord | undefined;
+          if (record?.rate != null && record.rate > 0) {
+            rate = record.rate;
+            break;
+          }
+        }
+
+        // Determine if cell should be disabled
+        let isDisabled = false;
+        let disableReason = '';
+
+        if (restrictions?.stopSell) {
+          isDisabled = true;
+          disableReason = 'Stop sell';
+        } else if (availability !== null && availability <= 0) {
+          isDisabled = true;
+          disableReason = 'Sold out';
+        } else if (restrictions?.closedToArrival) {
+          // Only disables as a check-in date, but we flag it
+          disableReason = 'CTA';
+        } else if (restrictions?.closedToDeparture) {
+          disableReason = 'CTD';
+        }
+
+        map[roomTypeId][dateKey] = {
+          rate,
+          availability,
+          restrictions,
+          isDisabled,
+          disableReason,
+        };
+      }
+    }
+    return map;
+  });
+
+  /** Get cell info for a specific room type + date */
+  public getCellInfo(roomTypeId: string | null, dateKey: string): CellInfo | null {
+    if (!roomTypeId) return null;
+    return this.cellInfoMap()?.[roomTypeId]?.[dateKey] ?? null;
+  }
+
+  /** Check if a cell is disabled (stop sell or sold out) */
+  public isCellDisabled(roomTypeId: string | null, dateKey: string): boolean {
+    const info = this.getCellInfo(roomTypeId, dateKey);
+    return info?.isDisabled ?? false;
+  }
+
+  /** Check if a cell is closed to arrival */
+  public isCellClosedToArrival(roomTypeId: string | null, dateKey: string): boolean {
+    const info = this.getCellInfo(roomTypeId, dateKey);
+    return info?.restrictions?.closedToArrival ?? false;
+  }
+
+  /** Check if a cell is closed to departure */
+  public isCellClosedToDeparture(roomTypeId: string | null, dateKey: string): boolean {
+    const info = this.getCellInfo(roomTypeId, dateKey);
+    return info?.restrictions?.closedToDeparture ?? false;
+  }
+
+  /** Get formatted rate for display */
+  public getCellRate(roomTypeId: string | null, dateKey: string): number | null {
+    return this.getCellInfo(roomTypeId, dateKey)?.rate ?? null;
+  }
+
+  /** Get availability count */
+  public getCellAvailability(roomTypeId: string | null, dateKey: string): number | null {
+    return this.getCellInfo(roomTypeId, dateKey)?.availability ?? null;
+  }
+
+  /** Get tooltip for disabled/restricted cells */
+  public getCellRestrictionTooltip(roomTypeId: string | null, dateKey: string): string {
+    const info = this.getCellInfo(roomTypeId, dateKey);
+    if (!info) return '';
+    const parts: string[] = [];
+    if (info.restrictions?.stopSell) parts.push('Stop Sell');
+    if (info.availability !== null && info.availability <= 0) parts.push('Sold Out');
+    if (info.restrictions?.closedToArrival) parts.push('Closed to Arrival');
+    if (info.restrictions?.closedToDeparture) parts.push('Closed to Departure');
+    if (info.restrictions?.minStay && info.restrictions.minStay > 1) parts.push(`Min Stay: ${info.restrictions.minStay}`);
+    if (info.restrictions?.maxStay && info.restrictions.maxStay < 365) parts.push(`Max Stay: ${info.restrictions.maxStay}`);
+    if (info.availability !== null && info.availability > 0) parts.push(`${info.availability} available`);
+    return parts.join(' · ');
+  }
 
   // Computed signal for grouped rooms with reservations
   public roomsWithReservations = computed(() => {
@@ -310,7 +455,7 @@ export class ReservationsCalendar implements OnInit {
     for (const key of orderedKeys) {
       const group = groupsMap.get(key);
       if (!group) continue;
-      result.push({ isGroup: true, roomTypeName: group.typeName });
+      result.push({ isGroup: true, roomTypeName: group.typeName, roomTypeId: key });
       
       // Add assigned physical rooms for this type
       for (const room of group.rooms) {
@@ -386,7 +531,7 @@ export class ReservationsCalendar implements OnInit {
     // Handle OTA with unknown room types (if any exist after the above loop)
     const unknownOTA = otaByRoomType.get('unknown-ota');
     if (unknownOTA && unknownOTA.length > 0) {
-      result.push({ isGroup: true, roomTypeName: 'OTA - Unassigned' });
+      result.push({ isGroup: true, roomTypeName: 'OTA - Unassigned', roomTypeId: null });
       
       const otaStays: RoomStay[] = unknownOTA.map((r: any) => ({
         reservationId: r._id,
@@ -450,6 +595,7 @@ export class ReservationsCalendar implements OnInit {
 
   reloadData() {
     this.reservations.reload();
+    this.inventoryGrid.reload();
   }
 
   clearFilters() {
@@ -561,25 +707,18 @@ export class ReservationsCalendar implements OnInit {
    */
   private parseDateOnly(dateInput: string | Date): Date {
     if (dateInput instanceof Date) {
-      const isoDate = dateInput.toISOString().split('T')[0];
-      const [year, month, day] = isoDate.split('-').map(Number);
-      return new Date(year, month - 1, day);
+      return new Date(dateInput.getFullYear(), dateInput.getMonth(), dateInput.getDate());
     }
-    // For ISO strings, extract the date portion directly to avoid timezone shifts
     const dateStr = String(dateInput);
-    // Handle plain YYYY-MM-DD format explicitly
+    // Handle plain YYYY-MM-DD format explicitly (no timezone ambiguity)
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       const [year, month, day] = dateStr.split('-').map(Number);
       return new Date(year, month - 1, day);
     }
-    if (dateStr.includes('T') || dateStr.includes('Z')) {
-      // ISO format: "2026-01-04T00:00:00.000Z" - extract "2026-01-04"
-      const datePart = dateStr.split('T')[0];
-      const [year, month, day] = datePart.split('-').map(Number);
-      return new Date(year, month - 1, day);
-    }
-    // Fallback for other formats
-    const d = new Date(dateInput);
+    // For ISO strings like "2026-03-03T23:00:00.000Z", parse into Date object
+    // and extract LOCAL date components. This correctly interprets the date
+    // in the user's timezone (e.g. 23:00 UTC = 00:00 WAT on the next day).
+    const d = new Date(dateStr);
     return new Date(d.getFullYear(), d.getMonth(), d.getDate());
   }
 
@@ -612,29 +751,33 @@ export class ReservationsCalendar implements OnInit {
       }
     }
 
-    // For display, include the checkout date so the block reaches the checkout cell
+    // The last occupied night is the day BEFORE checkout
     const lastOccupiedDate = new Date(checkOutNorm);
+    lastOccupiedDate.setDate(lastOccupiedDate.getDate() - 1);
 
     // Determine the end date for width calculation (clamped to visible range)
     let renderEndDate = lastOccupiedDate;
+    let checkoutVisible = false;
     if (Array.isArray(dates) && dates.length > 0) {
       const lastVisible = this.parseDateOnly(dates[dates.length - 1].date);
       if (lastOccupiedDate > lastVisible) {
         renderEndDate = lastVisible;
       }
+      // Check if checkout date itself is within the visible range
+      checkoutVisible = checkOutNorm.getTime() <= lastVisible.getTime()
+        && checkOutNorm.getTime() > renderStartDate.getTime();
     }
 
-    // Calculate number of cells: from renderStartDate to renderEndDate (inclusive on both sides)
+    // Calculate number of occupied night cells
     const msPerDay = 1000 * 60 * 60 * 24;
     const cellCount = Math.floor((renderEndDate.getTime() - renderStartDate.getTime()) / msPerDay) + 1;
     
     if (cellCount <= 0) return 0;
 
-    // Width = (cellCount * cellWidth) - padding to fit within cells
-    // With flexbox layout, we need to be more precise
+    // Width = occupied nights + half cell for checkout day (guest departs that morning)
     const padding = 8; // 4px left + 4px right for inner padding
-    const borderWidth = 1;
-    const width = (cellCount * cellWidth) - padding;
+    const checkoutExtension = checkoutVisible ? Math.floor(cellWidth / 2) : 0;
+    const width = (cellCount * cellWidth) + checkoutExtension - padding;
     
     return Math.max(width, cellWidth - padding);
   }
@@ -729,6 +872,11 @@ export class ReservationsCalendar implements OnInit {
     this.selectedStatus.set(status);
   }
 
+  /** Navigate to list or calendar view */
+  navigateToView(view: 'list' | 'calendar') {
+    this.router.navigate(['/menu/hms/front-desk/reservations/view', view]);
+  }
+
   /** Helper: align a date to the start of its period */
   private alignStartOfPeriod(date: Date, mode: 'weekly' | 'monthly') {
     const d = new Date(date);
@@ -753,8 +901,8 @@ export class ReservationsCalendar implements OnInit {
       endDay = new Date(startDay.getFullYear(), startDay.getMonth() + 1, 0);
       endDay.setHours(0, 0, 0, 0);
     }
-    const df = startDay.toISOString().split('T')[0];
-    const dt = endDay.toISOString().split('T')[0];
+    const df = this.formatLocalDate(startDay);
+    const dt = this.formatLocalDate(endDay);
     return { dateFrom: df, dateTo: dt };
   }
 
@@ -984,6 +1132,12 @@ export class ReservationsCalendar implements OnInit {
     // Only start if it's a room row (not a group header) and not an OTA unassigned row
     if (row.isGroup || row.isOTAUnassigned) return;
     
+    // Block selection on disabled cells (stop sell, sold out)
+    if (this.isCellDisabled(row.roomTypeId, date.key)) return;
+
+    // Block starting a reservation on a date closed to arrival
+    if (this.isCellClosedToArrival(row.roomTypeId, date.key)) return;
+    
     // Prevent text selection during drag
     event.preventDefault();
 
@@ -1016,17 +1170,38 @@ export class ReservationsCalendar implements OnInit {
     if (row.roomId !== selection.roomId) return;
 
     const newEndDate = new Date(date.date);
-    const hasConflict = this.hasConflictInRange(
+    let hasConflict = this.hasConflictInRange(
       selection.roomId!,
       selection.startDate!,
       newEndDate
     );
+
+    // Also check for disabled cells (stop sell / sold out) in the drag range
+    if (!hasConflict && row.roomTypeId) {
+      hasConflict = this.hasDisabledCellInRange(row.roomTypeId, selection.startDate!, newEndDate);
+    }
 
     this.dragSelection.update(s => ({
       ...s,
       endDate: newEndDate,
       hasConflict,
     }));
+  }
+
+  /** Check if any date in a range has a disabled cell (stop sell / sold out) */
+  private hasDisabledCellInRange(roomTypeId: string, startDate: Date, endDate: Date): boolean {
+    const start = new Date(Math.min(startDate.getTime(), endDate.getTime()));
+    const end = new Date(Math.max(startDate.getTime(), endDate.getTime()));
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+
+    const current = new Date(start);
+    while (current <= end) {
+      const key = this.formatLocalDate(current);
+      if (this.isCellDisabled(roomTypeId, key)) return true;
+      current.setDate(current.getDate() + 1);
+    }
+    return false;
   }
 
   /** Complete selection on mouseup */
@@ -1143,4 +1318,31 @@ export class ReservationsCalendar implements OnInit {
     }
   }
 
+  /**
+   * Format a Date to 'YYYY-MM-DD' using local time (not UTC).
+   * Avoids timezone shift that toISOString() causes.
+   */
+  private formatLocalDate(date: Date): string {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+}
+
+/** Per-cell inventory info for a room type on a specific date */
+interface CellInfo {
+  rate: number | null;
+  availability: number | null;
+  restrictions: {
+    minStay?: number;
+    maxStay?: number;
+    closedToArrival?: boolean;
+    closedToDeparture?: boolean;
+    stopSell?: boolean;
+  } | null;
+  isDisabled: boolean;
+  disableReason: string;
 }

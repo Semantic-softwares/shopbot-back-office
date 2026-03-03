@@ -136,11 +136,11 @@ export class ReservationsListComponent {
 
     // Add date filters
     if (this.dateFromFilter()) {
-      params.dateFrom = new Date(this.dateFromFilter()!).toISOString().split('T')[0];
+      params.dateFrom = this.formatLocalDate(new Date(this.dateFromFilter()!));
     }
 
     if (this.dateToFilter()) {
-      params.dateTo = new Date(this.dateToFilter()!).toISOString().split('T')[0];
+      params.dateTo = this.formatLocalDate(new Date(this.dateToFilter()!));
     }
     
     return params;
@@ -387,7 +387,7 @@ export class ReservationsListComponent {
     }
 
     const dialogRef = this.dialog.open(RoomChangeDialogComponent, {
-      width: '500px',
+      width: '560px',
       maxWidth: '95vw',
       disableClose: true,
       data: {
@@ -400,7 +400,8 @@ export class ReservationsListComponent {
         actualCheckInDate: reservation.actualCheckInDate 
           ? new Date(reservation.actualCheckInDate).toISOString() 
           : undefined,
-        reservationStatus: reservation.status
+        reservationStatus: reservation.status,
+        storeId: this.storeStore.selectedStore()?._id || '',
       } as RoomChangeDialogData
     });
 
@@ -1012,7 +1013,7 @@ export class ReservationsListComponent {
 
   private generateExportFilename(): string {
     const now = new Date();
-    const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const dateStr = this.formatLocalDate(now); // YYYY-MM-DD
     const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
     
     let filename = `reservations_${dateStr}_${timeStr}`;
@@ -1074,5 +1075,17 @@ export class ReservationsListComponent {
   getEffectiveTotal(reservation: Reservation): number {
     // The pricing.total already includes approved extension costs (updated by backend)
     return reservation.pricing?.total || 0;
+  }
+
+  /**
+   * Format a Date to 'YYYY-MM-DD' using local time (not UTC).
+   * Avoids timezone shift that toISOString() causes.
+   */
+  private formatLocalDate(date: Date): string {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

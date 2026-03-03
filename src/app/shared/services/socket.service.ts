@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { SessionStorageService } from './session-storage.service';
 import { PrintJobService } from './print-job.service';
@@ -15,6 +15,17 @@ export class SocketService {
   private printJobService = inject(PrintJobService);
   private snackBar = inject(MatSnackBar);
   private globalListenersSetup = false;
+
+  /** Subject for hotel notifications — components can subscribe */
+  private hotelNotificationSubject = new Subject<any>();
+  readonly hotelNotification$ = this.hotelNotificationSubject.asObservable();
+
+  /** Subject for real-time guest messages — messaging component subscribes */
+  private hotelMessageSubject = new Subject<any>();
+  readonly hotelMessage$ = this.hotelMessageSubject.asObservable();
+
+  /** Audio element for notification sound */
+  private notificationAudio: HTMLAudioElement | null = null;
 
   connect(storeId: string): void {
     if (this.socket?.connected) {
@@ -36,6 +47,7 @@ export class SocketService {
       // Setup global listeners after socket is connected
       if (!this.globalListenersSetup) {
         this.setupGlobalPrintJobListeners();
+        this.setupGlobalHotelNotificationListeners();
         this.globalListenersSetup = true;
       }
     });
@@ -171,5 +183,68 @@ export class SocketService {
         }
       );
     });
+  }
+
+  /**
+   * Global hotel notification listeners — registered ONCE when socket connects.
+   * Pushes events to subjects so any component can subscribe without duplicates.
+   */
+  private setupGlobalHotelNotificationListeners(): void {
+    console.log('🎧 [SOCKET SERVICE] Setting up global hotel notification listeners');
+
+    // Generic hotel notification (all event types)
+    this.socket?.on('hotel:notification', (data: any) => {
+      console.log('🏨 [GLOBAL SOCKET] hotel:notification EVENT RECEIVED');
+      console.log('Notification:', data?.notification?.title);
+
+      this.hotelNotificationSubject.next(data);
+
+      // Play notification sound
+      this.playNotificationSound();
+    });
+
+    // Real-time message push (for chat window)
+    this.socket?.on('hotel:message', (data: any) => {
+      console.log('💬 [GLOBAL SOCKET] hotel:message EVENT RECEIVED');
+      console.log('Thread:', data?.threadId, 'Sender:', data?.sender);
+
+      this.hotelMessageSubject.next(data);
+
+      // Play sound for incoming guest messages
+      if (data?.sender === 'guest') {
+        this.playNotificationSound();
+      }
+    });
+
+    // Booking-specific events
+    this.socket?.on('hotel:booking_new', (data: any) => {
+      console.log('🆕 [GLOBAL SOCKET] hotel:booking_new EVENT RECEIVED');
+      this.playNotificationSound();
+    });
+
+    this.socket?.on('hotel:booking_cancellation', (data: any) => {
+      console.log('❌ [GLOBAL SOCKET] hotel:booking_cancellation EVENT RECEIVED');
+      this.playNotificationSound();
+    });
+  }
+
+  /**
+   * Play a notification sound. Lazily creates the Audio element.
+   * Falls back gracefully if the sound file is missing or audio is blocked.
+   */
+  private playNotificationSound(): void {
+    try {
+      if (!this.notificationAudio) {
+        this.notificationAudio = new Audio('assets/sounds/notification.wav');
+        this.notificationAudio.volume = 0.5;
+      }
+      this.notificationAudio.currentTime = 0;
+      this.notificationAudio.play().catch((err) => {
+        // Browser may block autoplay until user interaction
+        console.warn('🔇 [SOUND] Could not play notification sound:', err.message);
+      });
+    } catch (err) {
+      console.warn('🔇 [SOUND] Notification sound not available');
+    }
   }
 }

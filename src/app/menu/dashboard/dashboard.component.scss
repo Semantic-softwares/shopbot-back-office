@@ -6,53 +6,65 @@
 .dashboard-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
-}
-
-mat-toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  height: 100vh;
 }
 
 mat-sidenav-container {
   flex: 1;
-  height: 100%;
 }
 
 mat-sidenav {
-  box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+  border-right: 1px solid #e5e7eb;
+  overflow-x: hidden;
 }
 
-.mat-expansion-panel-spacing {
-  margin: 0px 0px;
+mat-sidenav-content {
+  overflow: hidden;
 }
 
-.mat-expansion-panel-body {
-  padding: 0 24px 0px;
-}
-
-.mat-sidenav-content {
+// ── Nav item (icon only) ──
+.nav-item {
   display: flex;
-  flex-direction: column;
-}
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  color: #6b7280;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
 
-.content {
-  flex: 1;
-}
-
-.active-link {
-  background: rgba(0, 0, 0, 0.04);
-  color: #1976d2;
-  
   mat-icon {
-    color: #1976d2;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    transition: color 0.15s ease;
   }
 
-  
+  &:hover {
+    background-color: #f3f4f6;
+    color: #374151;
+  }
+
+  // Active state (applied by routerLinkActive or [class.active])
+  &.active {
+    background-color: var(--mat-sys-primary-container, #e8def8);
+    color: var(--mat-sys-on-primary-container, #1d192b);
+
+    mat-icon {
+      color: var(--mat-sys-on-primary-container, #1d192b);
+    }
+  }
 }
 
-.mdc-list-item__content {
-  margin-left: 5px !important;
- }
+// Active item inside dropdown menu
+.active-menu-item {
+  background-color: var(--mat-sys-primary-container, #e8def8) !important;
+  color: var(--mat-sys-on-primary-container, #1d192b) !important;
+
+  mat-icon {
+    color: var(--mat-sys-on-primary-container, #1d192b) !important;
+  }
+}
 

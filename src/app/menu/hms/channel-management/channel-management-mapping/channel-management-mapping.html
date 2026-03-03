@@ -192,58 +192,10 @@
         </mat-card>
       </mat-step>
 
-      <mat-step [optional]="true">
-        <ng-template matStepLabel>Step 3: Push Availability</ng-template>
-        <mat-card appearance="outlined" class="my-4">
-          <mat-card-content>
-            <!-- Step 3 content -->
-            <form [formGroup]="availabilityForm" class="space-y-4">
-              <p class="text-sm text-gray-600 mb-4">
-                Choose the date range for which to publish availability and rates to distribution channels.
-              </p>
-
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Start Date</mat-label>
-                <input matInput [matDatepicker]="startPicker" formControlName="startDate">
-                <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
-                <mat-datepicker #startPicker></mat-datepicker>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>End Date</mat-label>
-                <input matInput [matDatepicker]="endPicker" formControlName="endDate">
-                <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
-                <mat-datepicker #endPicker></mat-datepicker>
-              </mat-form-field>
-
-              <div class="bg-blue-50 p-4 rounded-lg mb-4">
-                <div class="flex items-start gap-2">
-                  <mat-icon class="text-blue-600 text-base mt-0.5">info</mat-icon>
-                  <p class="text-sm text-blue-900">
-                    This will push your current room availability, rates, and restrictions for the selected date range.
-                  </p>
-                </div>
-              </div>
-
-              <button 
-                matButton="filled"
-                color="primary" 
-                
-                (click)="pushAvailability()"
-                [disabled]="isPushingAvailability() || availabilityForm.invalid"
-              >
-              {{isPushingAvailability() ? 'Pushing Availability...' : 'Push Availability'}}
-               
-              </button>
-            </form>
-          </mat-card-content>
-        </mat-card>
-      </mat-step>
-
       <mat-step
         [completed]="(channexStatus()?.channex?.syncStatus === 'synced') && ((channexStatus()?.roomMappings?.length || 0) >= (channexStatus()?.totalRoomTypes || 0) && (channexStatus()?.totalRoomTypes || 0) > 0)"
       >
-        <ng-template matStepLabel>Step 4: Connect Channels</ng-template>
+        <ng-template matStepLabel>Step 3: Connect Channels</ng-template>
         <mat-card appearance="outlined" class="my-4">
           <mat-card-content>
             <!-- Step 4 content (connect iframe or button) -->

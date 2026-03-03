@@ -1521,7 +1521,7 @@ export class ReservationDetailsComponent implements OnInit {
     }
 
     const dialogRef = this.dialog.open(RoomChangeDialogComponent, {
-      width: '500px',
+      width: '560px',
       maxWidth: '95vw',
       disableClose: true,
       data: {
@@ -1531,11 +1531,11 @@ export class ReservationDetailsComponent implements OnInit {
         checkOutDate: new Date(reservation.checkOutDate).toISOString(),
         numberOfNights: reservation.numberOfNights,
         currency: this.storeStore.selectedStore()?.currency || 'USD',
-        // Include actual check-in date and status for mid-stay pricing calculations
         actualCheckInDate: reservation.actualCheckInDate 
           ? new Date(reservation.actualCheckInDate).toISOString() 
           : undefined,
-        reservationStatus: reservation.status
+        reservationStatus: reservation.status,
+        storeId: this.storeStore.selectedStore()?._id || '',
       } as RoomChangeDialogData
     });
 
