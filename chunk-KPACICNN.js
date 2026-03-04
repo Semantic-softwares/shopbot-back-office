@@ -1,0 +1,1 @@
+import"./chunk-GAL4ENT6.js";var o=[{path:"",loadComponent:()=>import("./chunk-ZRFFAMOK.js").then(t=>t.RatePlansComponent),children:[{path:"",redirectTo:"list",pathMatch:"full"},{path:"list",loadComponent:()=>import("./chunk-ZFHVTXB5.js").then(t=>t.RatePlansListComponent)}]}];export{o as RATE_PLANS_ROUTES};
