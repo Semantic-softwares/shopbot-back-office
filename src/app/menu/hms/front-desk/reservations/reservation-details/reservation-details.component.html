@@ -930,52 +930,5 @@
     }
   </div>
 
-  <!-- Print Actions -->
-  <button 
-    mat-menu-item 
-    (click)="printReservation()"
-    [disabled]="printing() || statusUpdating()"
-    class="!text-gray-700 hover:!bg-blue-50 hover:!text-blue-700 !transition-colors">
-    @if (printing()) {
-      <mat-icon class="mr-3 !text-blue-600 animate-spin">print</mat-icon>
-    } @else {
-      <mat-icon class="mr-3 !text-blue-600">print</mat-icon>
-    }
-    <span>{{ printing() ? 'Printing...' : 'Print Reservation' }}</span>
-  </button>
-
-  <button 
-    mat-menu-item 
-    (click)="testPrint()"
-    [disabled]="printing() || statusUpdating() || !printerConnected()"
-    class="!text-gray-700 hover:!bg-green-50 hover:!text-green-700 !transition-colors">
-    <mat-icon class="mr-3 !text-green-600">check_circle</mat-icon>
-    <span>Test Print</span>
-  </button>
-
-  <div class="px-3 py-2 border-t border-gray-100 mt-1">
-    @if (printerConnected()) {
-      <button 
-        mat-menu-item 
-        (click)="disconnectFromPrinter()"
-        [disabled]="printing() || statusUpdating()"
-        class="!text-gray-700 hover:!bg-red-50 hover:!text-red-700 !transition-colors w-full">
-        <mat-icon class="mr-3 !text-red-600">bluetooth_disabled</mat-icon>
-        <span>Disconnect Printer</span>
-      </button>
-    } @else {
-      <button 
-        mat-menu-item 
-        (click)="connectToPrinter()"
-        [disabled]="printing() || statusUpdating()"
-        class="!text-gray-700 hover:!bg-blue-50 hover:!text-blue-700 !transition-colors w-full">
-        <mat-icon class="mr-3 !text-blue-600">bluetooth</mat-icon>
-        <span>Connect to Printer</span>
-      </button>
-    }
-  </div>
-
-  <div class="px-3 py-2 text-xs text-gray-600 bg-gray-50 border-t border-gray-100 mt-1">
-    🖨️ Uses Bluetooth thermal printers with ESC/POS commands
-  </div>
+  
 </mat-menu>

@@ -153,10 +153,7 @@ export class SocketService {
         }
       );
 
-      // Auto-print if conditions are met
-      this.printJobService.handleAutoPrint(data).catch((err) => {
-        console.error('❌ [AUTO-PRINT] Error:', err);
-      });
+      
     });
 
     // Listen for completed jobs

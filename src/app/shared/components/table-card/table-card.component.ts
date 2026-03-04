@@ -41,6 +41,8 @@ export class TableCardComponent {
   completeOrder = output<Table>();
   clearOrder = output<Table>();
   viewOrder = output<Table>();
+  printOrder = output<Table>();
+  editOrder = output<Table>();
 
   isLoadingBill = signal(false);
 
@@ -54,8 +56,15 @@ export class TableCardComponent {
     this.tableClick.emit(this.table());
   }
 
+  
+
   onAddNewOrder(): void {
     this.addNewOrder.emit(this.table());
+  }
+
+  onEditOrder(event: Event): void {
+    event.stopPropagation();
+    this.editOrder.emit(this.table());
   }
 
   onCompleteOrder(event: Event): void {
@@ -71,6 +80,11 @@ export class TableCardComponent {
   onViewOrder(event: Event): void {
     event.stopPropagation();
     this.viewOrder.emit(this.table());
+  }
+
+  onPrintOrder(event: Event): void {
+    event.stopPropagation();
+    this.printOrder.emit(this.table());
   }
 
   public onViewBill(event: Event): void {

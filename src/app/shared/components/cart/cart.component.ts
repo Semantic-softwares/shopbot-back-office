@@ -287,6 +287,7 @@ export class CartComponent implements OnDestroy {
     this.selectedCustomer.set(null);
     this.selectedGuest.set(null);
     this.clearCart.emit();
+    this.cartSummary.set(null);
   }
 
   public cancelSales(): void {

@@ -177,15 +177,7 @@
   <button matButton (click)="close()" [disabled]="isPrinting()">
     Close
   </button>
-  <button matButton="filled" color="primary" (click)="print()" [disabled]="isPrinting()">
-    <ng-container>
-      @if (isPrinting()) {
-        <mat-icon class="animate-spin">refresh</mat-icon>
-        Printing...
-      } @else {
-        <mat-icon>print</mat-icon>
-        Print
-      }
-    </ng-container>
+  <button matButton="filled" (click)="print()" [disabled]="isPrinting()">
+    <mat-icon>print</mat-icon> Print
   </button>
 </mat-dialog-actions>

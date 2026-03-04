@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { PrintJob, PrintJobStats } from '../models/print-job.model';
 import { StoreStore } from '../stores/store.store';
-import { BluetoothPrinterService } from './bluetooth-printer.service';
 import { NetworkPrinterService } from './network-printer.service';
 
 @Injectable({
@@ -13,7 +12,6 @@ import { NetworkPrinterService } from './network-printer.service';
 export class PrintJobService {
   private http = inject(HttpClient);
   private storeStore = inject(StoreStore);
-  private bluetoothPrinterService = inject(BluetoothPrinterService);
   private networkPrinterService = inject(NetworkPrinterService);
   private apiUrl = `${environment.apiUrl}/print-jobs`;
 
@@ -66,6 +64,22 @@ export class PrintJobService {
     return this.http.post<{ success: boolean; jobs: PrintJob[] }>(`${this.apiUrl}/create-for-order`, {
       orderData
     });
+  }
+
+  /**
+   * Print an order by sending it to the backend to create print jobs.
+   * The backend fetches the full order, groups items by station, generates
+   * ESC/POS receipts, and creates print jobs for each printer.
+   * The Electron print-service app polls and prints them automatically.
+   *
+   * @param orderId - The MongoDB order ID
+   * @returns Observable with the created print jobs
+   */
+  printOrder(orderId: string): Observable<{ success: boolean; jobs: PrintJob[]; message: string }> {
+    return this.http.post<{ success: boolean; jobs: PrintJob[]; message: string }>(
+      `${this.apiUrl}/print-order`,
+      { orderId },
+    );
   }
 
   /**
@@ -317,52 +331,7 @@ export class PrintJobService {
     return receipt;
   }
 
-  /**
-   * Smart print method that:
-   * 1. Checks if Bluetooth printer is connected
-   * 2. If connected → Print directly via Bluetooth
-   * 3. If NOT connected → Create backend print job for master system
-   * @param order - The order object to print
-   * @returns Object with isPrinterConnected flag
-   */
-  public async printOrderReceipt(order: any): Promise<{ isPrinterConnected: boolean }> {
-    const isPrinterConnected = this.bluetoothPrinterService.isConnected();
-    
-    // Get printer's paper width from order or default to 80mm
-    const paperWidth = order?.printer?.capabilities?.paperWidth || 80;
-    
-    if (isPrinterConnected) {
-      console.log('📱 [PRINT] Printer connected - Printing directly via Bluetooth');
-      try {
-        // Generate receipt from order with printer's paper width
-        const receiptData = this.generateOrderReceipt(order, paperWidth);
-        
-        // Send to printer via Bluetooth service
-        await this.bluetoothPrinterService.sendToPrinter(receiptData);
-        
-        console.log('✅ [PRINT] Direct print completed');
-        
-        // Also send to network printer service (background, non-blocking)
-        this.sendToNetworkPrinter(receiptData, order);
-        
-        return { isPrinterConnected: true };
-      } catch (error: any) {
-        console.error('❌ [PRINT] Direct print failed:', error);
-        throw error;
-      }
-    } else {
-      console.log('📡 [PRINT] No printer connected - Creating backend print job');
-      try {
-        // Create backend print job for master system to pick up
-        const result = await this.createPrintJobsForOrder(order).toPromise();
-        console.log('✅ [PRINT] Print job created - Master system will print:', result);
-        return { isPrinterConnected: false };
-      } catch (error: any) {
-        console.error('❌ [PRINT] Failed to create print job:', error);
-        throw new Error('Failed to create print job. Please try again.');
-      }
-    }
-  }
+
 
   private formatCurrency(amount: number, currencyCode: string): string {
     const formatted = amount.toLocaleString('en-US', {
@@ -400,84 +369,7 @@ export class PrintJobService {
     }
   }
 
-  /**
-   * Handle auto-printing based on store settings and conditions
-   * Called when a new print job is created
-   */
-  public async handleAutoPrint(data: any): Promise<void> {
-    try {
-      console.log('🔍 [AUTO-PRINT] Checking auto-print conditions');
-      
-      // Extract print job data
-      const printJob = data.printJob || data;
-      
-      if (!printJob) {
-        console.warn('⚠️ [AUTO-PRINT] No print job data');
-        return;
-      }
-
-      console.log('✓ Print Job ID:', printJob._id);
-      console.log('✓ Job Status:', printJob.status);
-
-      // Check if order exists
-      const order = printJob.order;
-      if (!order || typeof order !== 'object') {
-        console.warn('⚠️ [AUTO-PRINT] No order object in print job');
-        return;
-      }
-
-      console.log('✓ Order ID:', order._id);
-      console.log('✓ Order Category:', order.category);
-      console.log('✓ Payment Status:', order.paymentStatus);
-
-   
-    
-      // Check store setting for auto-print
-      const printAfterFinish = this.storeStore.selectedStore()?.posSettings?.receiptSettings?.printAfterFinish ?? true;
-      console.log('🔍 [STORE SETTING] printAfterFinish:', printAfterFinish);
-
-      if (!printAfterFinish) {
-        console.log('⏭️ [AUTO-PRINT] Skipped - Store setting printAfterFinish is disabled');
-        return;
-      }
-
-      // Check if Bluetooth printer is connected
-      const printerConnected = this.bluetoothPrinterService.isConnected();
-      console.log('🖨️ [PRINTER CHECK] Bluetooth connected:', printerConnected ? '✅' : '❌');
-      
-      if (!printerConnected) {
-        console.log('⏭️ [AUTO-PRINT] Skipped - Bluetooth printer not connected');
-        // return;
-      }
-
-      // All conditions met - auto-print ONLY via direct Bluetooth
-      // NOTE: Do NOT create a new print job here - the socket event already indicates
-      // a job exists. Creating another would cause an infinite loop.
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log('🖨️ [AUTO-PRINTING] Receipt via Bluetooth...');
-      console.log('  Order:', order.reference || order._id);
-      console.log('  Store:', order.store?.name || 'N/A');
-      console.log('  Total:', order.total);
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      
-      // Generate receipt and send directly to Bluetooth printer
-      // Do NOT call printOrderReceipt as it would create another job
-      const paperWidth = order?.printer?.capabilities?.paperWidth || 80;
-      const receiptData = this.generateOrderReceipt(order, paperWidth);
-      // await this.bluetoothPrinterService.sendToPrinter(receiptData);
-      
-      console.log('✅ [AUTO-PRINT] Printed directly via Bluetooth');
-      
-      // Also send to network printer service (background, non-blocking)
-      this.sendToNetworkPrinter(receiptData, order);
-      
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-
-    } catch (error) {
-      console.error('❌ [AUTO-PRINT] Failed:', error);
-    }
-  }
-
+ 
   /**
    * Generate a separator line based on paper width
    * 58mm = ~31 characters, 80mm = ~42 characters

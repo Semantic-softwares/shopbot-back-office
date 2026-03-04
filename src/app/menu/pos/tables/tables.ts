@@ -26,6 +26,9 @@ import {
 } from '../../../shared/components/payment-dialog/payment-dialog.component';
 import { SearchComponent } from '../../../shared/components/search/search.component';
 import { NoRecordComponent } from '../../../shared/components/no-record/no-record.component';
+import { PrintJobService } from '../../../shared/services/print-job.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { CartService } from '../../../shared/services/cart.service';
 
 @Component({
   selector: 'app-tables',
@@ -56,7 +59,10 @@ export class Tables implements OnInit {
   public readonly orderStore = inject(OrderStore);
   public readonly storeStore = inject(StoreStore);
   private readonly dialog = inject(MatDialog);
+  private readonly printJobService = inject(PrintJobService);
+  private readonly snackBar = inject(MatSnackBar);
   public readonly router = inject(Router);
+  public readonly cartService = inject(CartService);
   public readonly route = inject(ActivatedRoute);
   public viewMode = signal<'grid' | 'list'>('grid');
   public searchQuery = signal('');
@@ -105,6 +111,8 @@ export class Tables implements OnInit {
      this.saleTypeStore.setSelectedSaleType(SalesTypeId.TABLE);
      this.router.navigate(['checkout'], { relativeTo: this.route });
   }
+
+  
 
   onClearOrder(table: Table): void {
     if (table.orderId) {
@@ -157,14 +165,80 @@ export class Tables implements OnInit {
             this.orderStore.deleteSelectedOrder();
             this.tableStore.clearSelectedTable();
             this.saleTypeStore.setDefaultSaleType();
-            // this.printOrder(order);
-            // if (!this.isTablet) {
-            //     this.back();
-            // }
+            // Auto-print the completed order
+            if (order?._id) {
+              this.printJobService.printOrder(order._id).subscribe({
+                next: (res) => {
+                  this.snackBar.open('Print job created successfully', 'Close', { duration: 3000 });
+                },
+                error: (err) => {
+                  console.error('Failed to create print job:', err);
+                  this.snackBar.open('Failed to create print job', 'Close', { duration: 3000 });
+                },
+              });
+            }
           });
       }
     });
   }
+
+  public printOrder(table: Table): void {
+    const orderId = table.orderId?._id;
+    if (!orderId) {
+      this.snackBar.open('No order found for this table', 'Close', { duration: 3000 });
+      return;
+    }
+    const loadingSnackBar = this.snackBar.open('Sending to printer...', '', { duration: 0 });
+    this.printJobService.printOrder(orderId).subscribe({
+      next: (res) => {
+        loadingSnackBar.dismiss();
+        this.snackBar.open(res.message || 'Print job created successfully', 'Close', { duration: 3000 });
+      },
+      error: (err) => {
+        loadingSnackBar.dismiss();
+        console.error('Failed to create print job:', err);
+        this.snackBar.open('Failed to create print job', 'Close', { duration: 3000 });
+      },
+    });
+  }
+
+
+  public onEditOrder(table: Table): void {
+      if (!table?.orderId?.cart) {
+        this.snackBar.open('Invalid cart data', 'Close', { duration: 3000 });
+        console.error('Invalid cart data');
+        return;
+      }
+  
+      // Show loading snackbar
+      const loadingSnackBar = this.snackBar.open('Loading order for editing...', '', {
+        duration: 0,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+      });
+  
+      this.cartService.loadCart(table.orderId.cart).subscribe({
+        next: (cart) => {
+          // Dismiss loading snackbar
+          loadingSnackBar.dismiss();
+          
+          // Cart loaded successfully, proceed with editing
+          this.orderStore.selectOrder(table?.orderId!);
+          this.saleTypeStore.setSelectedSaleType(SalesTypeId.TABLE, true);
+          this.saleTypeStore.startEditing();
+          this.router.navigate(['/menu/pos/checkout']);
+        },
+        error: (error) => {
+          // Dismiss loading and show error
+          loadingSnackBar.dismiss();
+          this.snackBar.open('Failed to load order for editing', 'Close', { duration: 3000 });
+          console.error('Error loading cart:', error);
+          
+          // Cart loading failed
+          this.saleTypeStore.stopEditing();
+        }
+      });
+    }
 
   public viewOrder(table: Table): void {
     if (table.orderId?._id) {

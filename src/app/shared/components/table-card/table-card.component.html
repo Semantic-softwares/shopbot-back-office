@@ -22,13 +22,20 @@
           <mat-icon>receipt_long</mat-icon>
           <span>View Bill</span>
         </button>
-        
-        
+        <button mat-menu-item (click)="onPrintOrder($event)">
+          <mat-icon>print</mat-icon>
+          <span>Print Order</span>
+        </button>
           <button mat-menu-item (click)="onClearOrder($event)">
             <mat-icon>clear</mat-icon>
             <span>Clear Order</span>
           </button>
-        
+          @if (!isOrderCompleted) {
+            <button mat-menu-item (click)="onEditOrder($event)">
+              <mat-icon>edit</mat-icon>
+              <span>Edit Order</span>
+            </button>
+          }
       </mat-menu>
     }
     </div>
@@ -59,7 +66,7 @@
             View Order
           </button>
           @if (!isOrderCompleted) {
-            <button mat-flat-button class="flex-1 w-full" color="primary" (click)="onCompleteOrder($event)">
+            <button matButton="filled" class="flex-1 w-full" color="primary" (click)="onCompleteOrder($event)">
               <mat-icon class="mr-2 !text-base">check_circle</mat-icon>
               Complete
             </button>
