@@ -198,7 +198,6 @@ export class CartComponent implements OnDestroy {
   }
 
   isEmpty = computed(() => {
-    console.log('Cart products length:', this.cartStore.selectedCart());
     return (
       !this.cartStore.selectedCart() ||
       this.cartStore.selectedCart()?.products.length === 0
@@ -288,6 +287,7 @@ export class CartComponent implements OnDestroy {
     this.selectedCustomer.set(null);
     this.selectedGuest.set(null);
     this.clearCart.emit();
+    this.cartSummary.set(null);
   }
 
   public cancelSales(): void {
@@ -664,7 +664,6 @@ export class CartComponent implements OnDestroy {
     return;
   }
 
-  console.log('Selected sale type:', selectedSaleType!.id);
   if (!selectedSaleType) {
     this.snackBar.open('Please select a sale type', 'Close', {
       duration: 3000,

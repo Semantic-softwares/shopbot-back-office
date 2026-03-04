@@ -26,6 +26,10 @@ export const DASHBOARD_CHANNEL_ROUTES: Routes = [
         path: 'live-booking',
         loadChildren: () => import('./live-booking/live-booking.route').then(m => m.DASHBOARD_LIVE_BOOKING_ROUTES)
       },
+      {
+        path: 'messaging',
+        loadChildren: () => import('./messaging/messaging.routes').then(m => m.MESSAGING_ROUTES)
+      },
     ]
   }
 ];

@@ -21,7 +21,6 @@ import { StoreStore } from '../../../../shared/stores/store.store';
 import { PrintJob, PrintJobStats } from '../../../../shared/models/print-job.model';
 import { Station } from '../../../../shared/models/station.model';
 import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
-import { BluetoothPrinterService } from '../../../../shared/services/bluetooth-printer.service';
 
 @Component({
   selector: 'app-print-jobs',
@@ -51,7 +50,6 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
   private storeStore = inject(StoreStore);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
-  private bluetoothPrinterService = inject(BluetoothPrinterService);
   // State
   public printJobs = signal<PrintJob[]>([]);
   public stations = signal<Station[]>([]);
@@ -69,7 +67,6 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
   public isBluetoothConnected = signal(false);
   public isBluetoothConnecting = signal(false);
   public connectedPrinterName = signal<string | null>(null);
-  public bluetoothSupported = signal(this.bluetoothPrinterService.isBluetoothSupported());
 
   // Filters
   public selectedStatus = signal<string>('all');
@@ -109,43 +106,13 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadData();
-    this.checkBluetoothConnection();
   }
 
   ngOnDestroy() {
     // Don't unsubscribe from socket listeners - they are global in menu.component
   }
 
-  private checkBluetoothConnection() {
-    // Check if Bluetooth printer is already connected in memory (same session)
-    const printer = this.bluetoothPrinterService.getConnectedPrinter();
-    if (printer && printer.isConnected) {
-      this.isBluetoothConnected.set(true);
-      this.connectedPrinterName.set(printer.device.name || 'Unknown Printer');
-      console.log('Active Bluetooth printer connection found:', printer.device.name);
-    } else {
-      // Check if there was a previous connection (from localStorage)
-      const wasConnected = localStorage.getItem('bluetoothPrinterConnected') === 'true';
-      const printerName = localStorage.getItem('bluetoothPrinterName');
-      
-      if (wasConnected && printerName) {
-        // Show notification to reconnect
-        const snackBarRef = this.snackBar.open(
-          `Reconnect to ${printerName}?`,
-          'Connect',
-          {
-            duration: 10000,
-            horizontalPosition: 'end',
-            verticalPosition: 'top',
-          }
-        );
 
-        snackBarRef.onAction().subscribe(() => {
-          this.connectBluetoothPrinter();
-        });
-      }
-    }
-  }
 
   private loadData() {
     const storeId = this.storeStore.selectedStore()?._id;
@@ -188,14 +155,6 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
   }
 
 
-  /**
-   * Handle auto-printing based on store settings and conditions
-   * THIS METHOD HAS BEEN MOVED TO PrintJobService - See handleAutoPrint()
-   * It is now called globally from menu.component when 'printJob:created' event is received
-   */
-  private async handleAutoPrint(data: any): Promise<void> {
-    // Method moved to PrintJobService - use printJobService.handleAutoPrint() instead
-  }
 
   private updateJobStatus(jobId: string, status: string, error?: string) {
     const jobs = this.printJobs();
@@ -305,7 +264,12 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
     return colors[status] || '';
   }
 
-  public getStationName(station: Station | string): string {
+  public getStationName(station: Station | string | null): string {
+    // Handle null stations (master print jobs)
+    if (!station) {
+      return 'Master Receipt';
+    }
+    
     if (typeof station === 'string') {
       const found = this.stations().find((s) => s._id === station);
       return found ? found.name : 'Unknown';
@@ -323,166 +287,5 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
   public formatDate(date: Date | string | undefined): string {
     if (!date) return '-';
     return new Date(date).toLocaleString();
-  }
-
-  // Bluetooth Printer Methods
-  public async connectBluetoothPrinter() {
-    if (!this.bluetoothSupported()) {
-      this.snackBar.open('Web Bluetooth is not supported in this browser', 'Close', {
-        duration: 5000,
-        panelClass: ['error-snackbar'],
-      });
-      return;
-    }
-
-    this.isBluetoothConnecting.set(true);
-    
-    try {
-      const device = await this.bluetoothPrinterService.connectToPrinter();
-      this.isBluetoothConnected.set(true);
-      this.connectedPrinterName.set(device.device.name || 'Unknown Printer');
-      
-      this.snackBar.open(`Connected to ${device.device.name || 'printer'}`, 'Close', {
-        duration: 3000,
-        panelClass: ['success-snackbar'],
-      });
-    } catch (error: any) {
-      console.error('Failed to connect to Bluetooth printer:', error);
-      this.snackBar.open(`Failed to connect: ${error.message}`, 'Close', {
-        duration: 5000,
-        panelClass: ['error-snackbar'],
-      });
-    } finally {
-      this.isBluetoothConnecting.set(false);
-    }
-  }
-
-  public async disconnectBluetoothPrinter() {
-    try {
-      await this.bluetoothPrinterService.disconnectPrinter();
-      this.isBluetoothConnected.set(false);
-      this.connectedPrinterName.set(null);
-      
-      this.snackBar.open('Disconnected from printer', 'Close', {
-        duration: 3000,
-      });
-    } catch (error: any) {
-      console.error('Failed to disconnect:', error);
-      this.snackBar.open(`Failed to disconnect: ${error.message}`, 'Close', {
-        duration: 3000,
-        panelClass: ['error-snackbar'],
-      });
-    }
-  }
-
-  public async printJobViaBluetooth(job: PrintJob) {
-    if (!this.isBluetoothConnected()) {
-      this.snackBar.open('Please connect to a Bluetooth printer first', 'Close', {
-        duration: 3000,
-        panelClass: ['error-snackbar'],
-      });
-      return;
-    }
-
-    try {
-      // Update job status to printing
-      this.updateJobStatus(job._id, 'processing');
-
-      // Extract order from job
-      const order = typeof job.order === 'object' ? job.order : null;
-      if (!order) {
-        throw new Error('No order found in print job');
-      }
-
-      // Print using PrintJobService
-      const result = await this.printJobService.printOrderReceipt(order);
-
-      // Update job status to printed
-      this.updateJobStatus(job._id, 'printed');
-      
-      this.snackBar.open('Print job sent successfully', 'Close', {
-        duration: 3000,
-        panelClass: ['success-snackbar'],
-      });
-    } catch (error: any) {
-      console.error('Failed to print via Bluetooth:', error);
-      this.updateJobStatus(job._id, 'failed', error.message);
-      
-      this.snackBar.open(`Print failed: ${error.message}`, 'Close', {
-        duration: 5000,
-        panelClass: ['error-snackbar'],
-      });
-    }
-  }
-
-  /**
-   * Public method to print any order directly via Bluetooth
-   * @param order - The order object to print
-   */
-  public async printOrder(order: any): Promise<void> {
-    if (!this.isBluetoothConnected()) {
-      this.snackBar.open('Please connect to a Bluetooth printer first', 'Close', {
-        duration: 3000,
-        panelClass: ['error-snackbar'],
-      });
-      throw new Error('Bluetooth printer not connected');
-    }
-
-    try {
-      // Print using PrintJobService
-      const result = await this.printJobService.printOrderReceipt(order);
-      
-      if (result.isPrinterConnected) {
-        this.snackBar.open('✅ Order printed successfully', 'Close', {
-          duration: 3000,
-          panelClass: ['success-snackbar'],
-        });
-      } else {
-        this.snackBar.open('📋 Print job created - Receipt will print at counter', 'Close', {
-          duration: 5000,
-          panelClass: ['success-snackbar'],
-        });
-      }
-    } catch (error: any) {
-      console.error('❌ [PRINT ORDER] Failed:', error);
-      this.snackBar.open(`Print failed: ${error.message}`, 'Close', {
-        duration: 5000,
-        panelClass: ['error-snackbar'],
-      });
-      throw error;
-    }
-  }
-
-
-  public async testBluetoothPrint() {
-    if (!this.isBluetoothConnected()) {
-      this.snackBar.open('Please connect to a Bluetooth printer first', 'Close', {
-        duration: 3000,
-        panelClass: ['error-snackbar'],
-      });
-      return;
-    }
-
-    try {
-      await this.bluetoothPrinterService.testPrint({
-        paperSize: '80mm',
-        printQuality: 'normal',
-        autocut: true,
-        fontSize: 12,
-        lineSpacing: 1.2,
-        includeLogo: false,
-      });
-      
-      this.snackBar.open('Test print sent successfully', 'Close', {
-        duration: 3000,
-        panelClass: ['success-snackbar'],
-      });
-    } catch (error: any) {
-      console.error('Test print failed:', error);
-      this.snackBar.open(`Test print failed: ${error.message}`, 'Close', {
-        duration: 5000,
-        panelClass: ['error-snackbar'],
-      });
-    }
   }
 }

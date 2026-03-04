@@ -23,6 +23,10 @@ export const SETTINGS_ROUTES: Routes = [
         path: 'receipt',
         loadComponent: () => import('./receipt-settings/receipt-settings').then(m => m.ReceiptSettings)
       },
+      {
+        path: 'printers',
+        loadChildren: () => import('./printers/printers.routes').then(m => m.PRINTERS_ROUTES)
+      },
       // {
       //   path: 'notification',
       //   loadComponent: () => import('./notifications-settings/notifications-settings').then(m => m.NotificationsSettings)

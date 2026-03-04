@@ -117,6 +117,7 @@ export class Checkout {
   }
 
   public addToCart(args: { product: Product; isEditing: boolean }): void {
+    console.log(args.product, 'added to cart. Editing:', args.isEditing);
     this.createCart();
     this.cartStore.addToCart(
       this.cartStore.selectedCart()!._id,

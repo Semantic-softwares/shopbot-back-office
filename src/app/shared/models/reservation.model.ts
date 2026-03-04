@@ -30,6 +30,21 @@ export interface Reservation {
   confirmationNumber: string;
   createdBy?: string | any;
   lastModifiedBy?: string;
+  channex?: {
+    bookingId?: string;
+    propertyId?: string;
+    syncStatus?: string;
+    lastSyncAt?: string;
+    channelType?: string;
+    rawWebhookData?: any;
+    roomCount?: number;
+  };
+  currencyConversion?: {
+    bookingCurrency?: string;
+    storeCurrency?: string;
+    conversionRate?: number;
+    convertedAt?: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -97,6 +112,8 @@ export interface Room {
 export interface ReservationRoom {
   room: Room | string;
   assignedGuest?: Guest | string; // Required for group bookings
+  roomType?: string; // Room Type ID
+  ratePlanId?: string; // Rate plan used for pricing
   guests: {
     adults: number;
     children: number;
@@ -287,7 +304,7 @@ export type BookingSource =
   | 'phone' 
   | 'online' 
   | 'walk_in' 
-  | 'booking_com' 
+  | 'booking.com' 
   | 'expedia' 
   | 'airbnb'
   | 'travel_agent'
@@ -322,6 +339,7 @@ export interface CreateReservationDto {
   }[];
   rooms: {
     room: string; // Schema expects 'room' not 'roomId'
+    ratePlanId?: string; // Rate plan used for pricing
     guests: { adults: number; children: number };
   }[];
   checkInDate: Date;
@@ -349,6 +367,7 @@ export interface UpdateReservationDto {
   }[];
   rooms?: {
     room: string; // Updated to match schema
+    ratePlanId?: string; // Rate plan used for pricing
     guests: { adults: number; children: number };
   }[];
   checkInDate?: Date;

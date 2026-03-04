@@ -11,6 +11,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { map } from 'rxjs/operators';
 import { StoreStore } from '../../shared/stores/store.store';
@@ -43,6 +44,7 @@ interface NavSection {
     RouterModule,
     MatExpansionModule,
     MatDividerModule,
+    MatTooltipModule,
     ToolbarComponent
 ],
   templateUrl: './dashboard.component.html',
@@ -313,5 +315,47 @@ export class DashboardComponent {
     console.log('Selected store:', store);
     this.storeStore.setSelectedStore(store);
     window.location.reload();
+  }
+
+  /**
+   * Check if a nav section has only one child
+   */
+  public hasSingleChild(item: NavSection): boolean {
+    return item.children?.length === 1;
+  }
+
+  /**
+   * Get the first child's icon for the sidebar icon
+   */
+  public getFirstChildIcon(item: NavSection): string {
+    return item.children?.[0]?.icon || 'folder';
+  }
+
+  /**
+   * Check if any child of a nav item matches the active route.
+   * Uses createUrlTree to resolve relative links and startsWith
+   * to support deep nested routes.
+   */
+  public isNavItemActive(item: NavSection): boolean {
+    if (!item.children || item.children.length === 0) {
+      return false;
+    }
+    const currentUrl = this.router.url.split('?')[0].split('#')[0];
+    return item.children.some((child) => {
+      const resolved = this.router.createUrlTree(
+        [child.link],
+        { relativeTo: this.route }
+      ).toString();
+      return currentUrl.startsWith(resolved);
+    });
+  }
+
+  /**
+   * Close sidenav on mobile after navigation
+   */
+  public closeSidenavOnMobile(): void {
+    if (this.isMobile()) {
+      this.userToggledOpen.set(false);
+    }
   }
 }

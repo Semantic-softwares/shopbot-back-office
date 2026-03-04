@@ -6,7 +6,7 @@
 .calendar-scroll {
   position: relative;
   overflow: auto;
-  max-height: 100%;
+  height: 100%;
 }
 
 // Scrollbar styling
@@ -182,4 +182,84 @@
 .reservation-block:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   z-index: 20;
+}
+
+// ─── Inventory / Restriction cell overlays ─────────────────────────────
+
+// Disabled room cell (sold out or stop-sell)
+.cell-disabled {
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.03),
+    rgba(0, 0, 0, 0.03) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  opacity: 0.7;
+}
+
+// Disabled group header cell
+.cell-disabled-group {
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.04),
+    rgba(0, 0, 0, 0.04) 4px,
+    transparent 4px,
+    transparent 8px
+  ) !important;
+}
+
+// Faint rate label inside room cells
+.cell-rate-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 500;
+  color: rgba(107, 114, 128, 0.5); // gray-500 at 50 %
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+.cell-rate-disabled {
+  color: rgba(156, 163, 175, 0.35); // gray-400 at 35 %
+}
+
+// Group header — inline flex for availability + badges
+.cell-group-info {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  justify-content: center;
+}
+
+// Availability number
+.cell-availability {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+// Restriction badges (SS, CTA, CTD)
+.cell-restriction-badge {
+  font-size: 7px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 1px 3px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+// Subtle left-border for CTA / CTD on room cells (non-disabled)
+.cell-cta {
+  border-left: 2px solid rgba(245, 158, 11, 0.45); // amber-500
+}
+
+.cell-ctd {
+  border-left: 2px solid rgba(139, 92, 246, 0.45); // violet-500
 }

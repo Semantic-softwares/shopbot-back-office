@@ -1,1 +1,22 @@
-// Empty styles - component uses Tailwind classes
+:host {
+  display: block;
+}
+
+// Hide scrollbar but keep scroll functionality on the actions bar
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// Ensure projected action buttons don't shrink on mobile
+::ng-deep [actions] {
+  display: contents;
+
+  > * {
+    flex-shrink: 0;
+  }
+}

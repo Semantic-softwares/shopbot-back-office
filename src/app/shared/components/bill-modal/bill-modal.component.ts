@@ -47,43 +47,8 @@ export class BillModalComponent {
     this.dialogRef.close();
   }
 
-  async print(): Promise<void> {
-    // Set printing state
-    this.isPrinting.set(true);
-
-    try {
-      // Print via PrintJobService which handles both Bluetooth and backend print jobs
-      const result = await this.printJobService.printOrderReceipt(this.order());
-
-      // Show appropriate success message based on printer connection
-      if (result.isPrinterConnected) {
-        this.snackBar.open('✅ Order printed successfully', 'Close', {
-          duration: 3000,
-        });
-      } else {
-        this.snackBar.open(
-          '📋 Print job created - Receipt will print at counter',
-          'Close',
-          {
-            duration: 5000,
-            panelClass: ['info-snackbar'],
-          }
-        );
-      }
-      this.close();
-    } catch (error: any) {
-      console.error('Print failed:', error);
-      this.snackBar.open(`Print failed: ${error.message}`, 'Close', {
-        duration: 5000,
-        panelClass: ['error-snackbar'],
-      });
-    } finally {
-      this.isPrinting.set(false);
-    }
-  }
-
   public currency = computed(
-    () => this.storeStore.selectedStore()?.currency || '₦'
+    () => this.storeStore.selectedStore()?.currency || '₦',
   );
 
   /**
@@ -113,7 +78,7 @@ export class BillModalComponent {
    * Get all selected options for a product in a flattened format
    */
   getOptionsDisplay(
-    product: any
+    product: any,
   ): Array<{ name: string; quantity: number; price: number }> {
     if (!product.options || product.options.length === 0) return [];
 
@@ -165,6 +130,27 @@ export class BillModalComponent {
     return optionsCost;
   }
 
+  async print() {
+    this.isPrinting.set(true);
+    if (this.order()?._id) {
+      this.printJobService.printOrder(this.order()._id).subscribe({
+        next: (res) => {
+          this.snackBar.open('Print job created successfully', 'Close', {
+            duration: 3000,
+          });
+          this.isPrinting.set(false);
+          this.close();
+        },
+        error: (err) => {
+          console.error('Failed to create print job:', err);
+          this.snackBar.open('Failed to create print job', 'Close', {
+            duration: 3000,
+          });
+          this.isPrinting.set(false);
+        },
+      });
+    }
+  }
   /**
    * Format date to readable string
    */

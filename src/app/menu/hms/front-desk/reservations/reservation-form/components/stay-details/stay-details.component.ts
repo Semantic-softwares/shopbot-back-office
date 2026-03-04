@@ -106,19 +106,20 @@ export class StayDetailsComponent implements AfterViewInit {
   });
 
   ngAfterViewInit() {
-    // Sync form values after view init to avoid ExpressionChangedAfterItHasBeenCheckedError
+    // Sync derived form values after view init to avoid ExpressionChangedAfterItHasBeenCheckedError.
+    // NOTE: Do NOT patch checkInDate/checkOutDate here — those form controls are the source of truth.
+    // Re-patching them from toSignal() creates a race condition that overwrites programmatic
+    // updates (e.g. auto-adjustment from room stay period changes) before the signals propagate.
     this.reservationForm()
       ?.valueChanges.pipe(
         distinctUntilChanged(
           (prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)
         )
       )
-      .subscribe((d) => {
+      .subscribe(() => {
         this.reservationForm()?.patchValue(
           {
             createdBy: this.reservation()?.createdBy?._id || this.currentUser()?._id,
-            checkInDate: this.checkInDate(),
-            checkOutDate: this.checkOutDate(),
             numberOfNights: this.numberOfNights(),
           },
           { emitEvent: false }

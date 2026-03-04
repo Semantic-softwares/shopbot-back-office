@@ -6,37 +6,7 @@
     <mat-icon>refresh</mat-icon>
     Reload
   </button>
-  
-  @if (bluetoothSupported()) {
-    @if (!isBluetoothConnected()) {
-      <button 
-        mat-flat-button 
-        color="primary" 
-        (click)="connectBluetoothPrinter()"
-        [disabled]="isBluetoothConnecting()">
-        <mat-icon>bluetooth</mat-icon>
-        {{ isBluetoothConnecting() ? 'Connecting...' : 'Connect Printer' }}
-      </button>
-    } @else {
-      <button 
-        mat-stroked-button 
-        color="accent"
-        [matMenuTriggerFor]="printerMenu">
-        <mat-icon>bluetooth_connected</mat-icon>
-        {{ connectedPrinterName() }}
-      </button>
-      <mat-menu #printerMenu="matMenu">
-        <button mat-menu-item (click)="testBluetoothPrint()">
-          <mat-icon>print</mat-icon>
-          <span>Test Print</span>
-        </button>
-        <button mat-menu-item (click)="disconnectBluetoothPrinter()">
-          <mat-icon>bluetooth_disabled</mat-icon>
-          <span>Disconnect</span>
-        </button>
-      </mat-menu>
-    }
-  }
+
   </ng-container>
 </app-page-header>
 
@@ -245,12 +215,7 @@
                   <mat-icon>more_vert</mat-icon>
                 </button>
                 <mat-menu #menu="matMenu">
-                  @if (isBluetoothConnected()) {
-                    <button mat-menu-item (click)="printJobViaBluetooth(job)">
-                      <mat-icon>bluetooth</mat-icon>
-                      <span>Print via Bluetooth</span>
-                    </button>
-                  }
+                  
                   @if (job.status === 'failed' || job.status === 'pending') {
                     <button mat-menu-item (click)="retryJob(job)">
                       <mat-icon>refresh</mat-icon>

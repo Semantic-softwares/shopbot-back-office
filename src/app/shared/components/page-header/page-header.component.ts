@@ -17,7 +17,8 @@ export class PageHeaderComponent {
   @Input() title = '';
   @Input() subtitle = '';
   @Input() showViewToggle = false;
-  @Input() viewToggleRoute = ''; // Base route for view toggle, e.g., '/menu/hms/front-desk/reservations/view'
+  @Input() viewToggleRoute = '';
+  @Input() hideActions = false; // Base route for view toggle, e.g., '/menu/hms/front-desk/reservations/view'
 
   get currentView(): string {
     const url = this.router.url;

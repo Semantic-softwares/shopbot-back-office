@@ -292,7 +292,7 @@ export class ReservationPreviewDialogComponent {
     }
 
     const changeDialogRef = this.dialog.open(RoomChangeDialogComponent, {
-      width: '500px',
+      width: '560px',
       maxWidth: '95vw',
       disableClose: true,
       data: {
@@ -305,7 +305,8 @@ export class ReservationPreviewDialogComponent {
         actualCheckInDate: reservation.actualCheckInDate 
           ? new Date(reservation.actualCheckInDate).toISOString() 
           : undefined,
-        reservationStatus: reservation.status
+        reservationStatus: reservation.status,
+        storeId: this.storeStore.selectedStore()?._id || '',
       } as RoomChangeDialogData
     });
 

@@ -65,17 +65,33 @@ export class OccupancyReportComponent {
   // Computed values
   selectedStore = computed(() => this.storeStore.selectedStore());
   
-  // Currency mapping for formatting
+  // Currency mapping for formatting (symbol → ISO 4217 code)
   private currencySymbolToCode: Record<string, string> = {
     '₦': 'NGN', '$': 'USD', '€': 'EUR', '£': 'GBP', '¥': 'JPY',
     '₹': 'INR', '₽': 'RUB', '₩': 'KRW', '฿': 'THB', '₫': 'VND',
-    'R$': 'BRL', 'R': 'ZAR', 'CHF': 'CHF', 'kr': 'SEK', 'zł': 'PLN'
+    'R$': 'BRL', 'R': 'ZAR', 'CHF': 'CHF', 'kr': 'SEK', 'zł': 'PLN',
+    'RS': 'MUR', 'Rs': 'MUR'
   };
 
   currency = computed(() => {
     const store = this.selectedStore();
-    const currencyValue = store?.currency  ||store?.currencyCode || 'USD';
-    return this.currencySymbolToCode[currencyValue] || currencyValue;
+    // Prefer currencyCode (likely ISO 4217), then map the symbol, then raw values
+    const candidates = [
+      store?.currencyCode,
+      store?.currency ? this.currencySymbolToCode[store.currency] : undefined,
+      store?.currency,
+      'USD'
+    ];
+    for (const candidate of candidates) {
+      if (!candidate) continue;
+      try {
+        new Intl.NumberFormat('en-US', { style: 'currency', currency: candidate });
+        return candidate;
+      } catch {
+        // not a valid ISO 4217 code, try next
+      }
+    }
+    return 'USD';
   });
 
   // Filter signals

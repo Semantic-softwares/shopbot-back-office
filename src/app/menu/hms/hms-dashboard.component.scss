@@ -8,53 +8,58 @@ mat-sidenav-container {
   flex: 1;
 }
 
+// Icon-based sidebar styling
 mat-sidenav {
-  // background: #fff;
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid #e5e7eb;
+  overflow-x: hidden;
 }
 
-.active-link {
-  background-color: #e3f2fd;
-  color: #1976d2;
-  
+mat-sidenav-content {
+  overflow: hidden;
+}
+
+// ── Nav item (icon only) ──
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  color: #6b7280; // gray-500
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
   mat-icon {
-    color: #1976d2;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    transition: color 0.15s ease;
   }
-}
 
-mat-nav-list {
-  padding-top: 0;
-}
-
-mat-expansion-panel {
-  box-shadow: none !important;
-  border: none;
-  
-  &::ng-deep .mat-expansion-panel-header {
-    padding: 0 16px;
-    height: 48px;
-    font-weight: 500;
-    color: #333;
+  &:hover {
+    background-color: #f3f4f6; // gray-100
+    color: #374151;           // gray-700
   }
-  
-  &::ng-deep .mat-expansion-panel-body {
-    padding: 0;
-  }
-}
 
-mat-list-item {
-  &.active-link {
-    background-color: #e3f2fd;
-    border-radius: 8px;
-    margin: 4px 8px;
-    
-    &::ng-deep .mat-list-item-content {
-      padding: 0 12px;
+  // Active state (applied by routerLinkActive or [class.active])
+  &.active {
+    background-color: var(--mat-sys-primary-container, #e8def8);
+    color: var(--mat-sys-on-primary-container, #1d192b);
+
+    mat-icon {
+      color: var(--mat-sys-on-primary-container, #1d192b);
     }
   }
-  
-  &::ng-deep .mat-list-item-content {
-    padding: 0 16px;
-    border-radius: 8px;
+}
+
+// Active item inside dropdown menu
+.active-menu-item {
+  background-color: var(--mat-sys-primary-container, #e8def8) !important;
+  color: var(--mat-sys-on-primary-container, #1d192b) !important;
+
+  mat-icon {
+    color: var(--mat-sys-on-primary-container, #1d192b) !important;
   }
 }

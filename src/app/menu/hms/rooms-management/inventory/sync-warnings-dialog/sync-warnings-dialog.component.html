@@ -1,0 +1,85 @@
+<h2 mat-dialog-title class="flex items-center gap-2">
+  <mat-icon class="text-amber-500">warning</mat-icon>
+  Channex Sync Results
+</h2>
+
+<mat-dialog-content class="max-h-[60vh]">
+  <!-- Summary -->
+  <div class="flex flex-wrap gap-4 mb-4 p-3 bg-gray-50 rounded-lg text-sm">
+    <div class="flex items-center gap-1">
+      <mat-icon class="text-green-600 !text-[18px] !w-[18px] !h-[18px]">check_circle</mat-icon>
+      <span>{{ data.availabilityCount }} availability synced</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <mat-icon class="text-green-600 !text-[18px] !w-[18px] !h-[18px]">check_circle</mat-icon>
+      <span>{{ data.restrictionsCount }} rate records synced</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <mat-icon class="text-amber-500 !text-[18px] !w-[18px] !h-[18px]">warning</mat-icon>
+      <span class="font-medium">{{ data.warnings.length }} warning(s) from {{ groupedWarnings().length }} issue(s)</span>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Grouped warnings -->
+  <div class="mt-3 space-y-3">
+    @for (group of groupedWarnings(); track group.type + group.message) {
+      <div class="border rounded-lg overflow-hidden"
+           [class]="group.type.includes('error') ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'">
+        <!-- Header -->
+        <div class="flex items-start gap-3 p-3">
+          <mat-icon class="!text-[22px] !w-[22px] !h-[22px] mt-0.5 shrink-0"
+                    [class]="group.type.includes('error') ? 'text-red-600' : 'text-amber-600'">
+            {{ group.icon }}
+          </mat-icon>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-semibold text-sm"
+                    [class]="group.type.includes('error') ? 'text-red-800' : 'text-amber-800'">
+                {{ group.label }}
+              </span>
+              <span class="text-xs px-2 py-0.5 rounded-full font-medium"
+                    [class]="group.type.includes('error') ? 'bg-red-200 text-red-700' : 'bg-amber-200 text-amber-700'">
+                {{ group.count }}×
+              </span>
+            </div>
+            <p class="text-sm mt-1 break-words"
+               [class]="group.type.includes('error') ? 'text-red-700' : 'text-amber-700'">
+              {{ group.message }}
+            </p>
+
+            <!-- Details -->
+            <div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-600">
+              @if (group.dates.length > 0) {
+                <span class="flex items-center gap-1">
+                  <mat-icon class="!text-[14px] !w-[14px] !h-[14px]">calendar_today</mat-icon>
+                  {{ getDateRange(group.dates) }}
+                  @if (group.dates.length > 2) {
+                    <span class="text-gray-400">({{ group.dates.length }} dates)</span>
+                  }
+                </span>
+              }
+              @if (group.ratePlanIds.length > 0) {
+                <span class="flex items-center gap-1">
+                  <mat-icon class="!text-[14px] !w-[14px] !h-[14px]">receipt_long</mat-icon>
+                  {{ group.ratePlanIds.length }} rate plan(s)
+                </span>
+              }
+              @if (group.sampleRate !== undefined) {
+                <span class="flex items-center gap-1">
+                  <mat-icon class="!text-[14px] !w-[14px] !h-[14px]">payments</mat-icon>
+                  Sample rate sent: {{ group.sampleRate | number:'1.2-2' }}
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

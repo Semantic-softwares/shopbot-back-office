@@ -62,7 +62,7 @@ export class ListStationsComponent {
   );
   totalPrinters = computed(() => 
     this.stations.value()?.reduce((sum, s) => 
-      sum + (s.printers?.filter(p => p.enabled).length || 0), 0) || 0
+      sum + (s.printers?.length || 0), 0) || 0
   );
   autoPrintEnabled = computed(() => 
     this.stations.value()?.filter(s => s.settings?.autoPrint).length || 0
@@ -117,7 +117,7 @@ export class ListStationsComponent {
   }
 
   getPrinterCount(station: Station): number {
-    return station.printers?.filter(p => p.enabled)?.length || 0;
+    return station.printers?.length || 0;
   }
 
   getStationTypeLabel(type: string): string {

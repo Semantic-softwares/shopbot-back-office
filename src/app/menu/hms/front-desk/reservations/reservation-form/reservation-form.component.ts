@@ -117,6 +117,7 @@ export class ReservationFormComponent implements OnDestroy {
   );
   public statusUpdating = signal(false);
   public exportingPDF = signal(false);
+  public hasRestrictionIssues = signal(false);
 
 
   // Expose enum to template
@@ -403,8 +404,8 @@ export class ReservationFormComponent implements OnDestroy {
 
   private getAvailableRooms(params: { checkIn: Date; checkOut: Date }) {
     const storeId = this.storeStore.selectedStore()?._id;
-    const checkInDate = new Date(params.checkIn).toISOString().split('T')[0];
-    const checkOutDate = new Date(params.checkOut).toISOString().split('T')[0];
+    const checkInDate = this.formatLocalDate(new Date(params.checkIn));
+    const checkOutDate = this.formatLocalDate(new Date(params.checkOut));
 
     if (!checkInDate || !checkOutDate || !storeId) {
       return of<AvailableRoom[]>([]);
@@ -613,6 +614,37 @@ export class ReservationFormComponent implements OnDestroy {
     }
 
     const formData = this.reservationForm.getRawValue();
+
+    // Normalize dates to YYYY-MM-DD strings to prevent timezone shift during JSON serialization.
+    // Without this, Date objects serialize as ISO strings (e.g. "2026-03-03T23:00:00.000Z" for
+    // March 4 in UTC+1), causing the backend to store the wrong calendar date.
+    if (formData.checkInDate) {
+      (formData as any).checkInDate = this.formatLocalDate(new Date(formData.checkInDate));
+    }
+    if (formData.checkOutDate) {
+      (formData as any).checkOutDate = this.formatLocalDate(new Date(formData.checkOutDate));
+    }
+
+    // Clean rooms: convert empty-string ratePlanId to null (Mongoose can't cast '' to ObjectId)
+    // Also normalize stayPeriod dates to YYYY-MM-DD strings
+    if (formData.rooms && Array.isArray(formData.rooms)) {
+      formData.rooms = formData.rooms.map((room: any) => ({
+        ...room,
+        ratePlanId: room.ratePlanId || null,
+        stayPeriod: room.stayPeriod ? {
+          from: room.stayPeriod.from ? this.formatLocalDate(new Date(room.stayPeriod.from)) : room.stayPeriod.from,
+          to: room.stayPeriod.to ? this.formatLocalDate(new Date(room.stayPeriod.to)) : room.stayPeriod.to,
+        } : room.stayPeriod,
+      }));
+    }
+
+    // Debug: verify ratePlanId is being sent
+    console.log('[ReservationForm] onSubmit rooms payload:', formData.rooms?.map((r: any) => ({
+      room: r.room,
+      roomType: r.roomType,
+      ratePlanId: r.ratePlanId,
+    })));
+
     const store = this.storeStore.selectedStore();
 
     if (!store?._id) {
@@ -669,7 +701,7 @@ export class ReservationFormComponent implements OnDestroy {
     if (!reservationId) return;
 
     this.reservationService
-      .updateReservation(reservationId, this.reservationForm.getRawValue())
+      .updateReservation(reservationId, data)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (reservation) => {
@@ -1014,13 +1046,13 @@ export class ReservationFormComponent implements OnDestroy {
     }
 
     const dialogRef = this.dialog.open(RoomChangeDialogComponent, {
-      width: '500px',
+      width: '560px',
       maxWidth: '95vw',
       disableClose: true,
       data: {
         reservationId: reservationData._id,
         currentRooms: reservationData.rooms,
-        currentRoomIndex: roomIndex, // Pass the room index if provided
+        currentRoomIndex: roomIndex,
         checkInDate: new Date(reservationData.checkInDate).toISOString(),
         checkOutDate: new Date(reservationData.checkOutDate).toISOString(),
         numberOfNights: reservationData.numberOfNights,
@@ -1028,7 +1060,8 @@ export class ReservationFormComponent implements OnDestroy {
         actualCheckInDate: reservationData.actualCheckInDate 
           ? new Date(reservationData.actualCheckInDate).toISOString() 
           : undefined,
-        reservationStatus: reservationData.status
+        reservationStatus: reservationData.status,
+        storeId: this.storeStore.selectedStore()?._id || '',
       } as RoomChangeDialogData
     });
 
@@ -1056,5 +1089,15 @@ export class ReservationFormComponent implements OnDestroy {
 
   clearError() {}
 
-
+  /**
+   * Format a Date to 'YYYY-MM-DD' using local time (not UTC).
+   * Avoids timezone shift that toISOString() causes.
+   */
+  private formatLocalDate(date: Date): string {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
 }

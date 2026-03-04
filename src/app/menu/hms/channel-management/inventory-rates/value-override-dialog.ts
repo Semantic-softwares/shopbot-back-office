@@ -21,6 +21,7 @@ interface ValueOverrideData {
   currentToggleValue?: boolean;
   // All ARI data fields
   ariRate?: number | null;
+  ariOtaRate?: number | null;
   ariAvailability?: number | null;
   ariMinStay?: number | null;
   ariMaxStay?: number | null;
@@ -92,8 +93,32 @@ interface ValueOverrideData {
           </mat-form-field>
         }
 
-        <!-- Value Input (for Rate, Min Stay, Max Stay) -->
-        @if (isNumericRestriction()) {
+        <!-- Rate + OTA Rate (shown together when restriction type is 'rate') -->
+        @if (isRateRestriction()) {
+          <div class="grid grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>PMS Rate</mat-label>
+              <input 
+                matInput 
+                type="number" 
+                formControlName="value"
+                placeholder="PMS Rate"
+                min="0">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>OTA Rate</mat-label>
+              <input 
+                matInput 
+                type="number" 
+                formControlName="otaRateValue"
+                placeholder="OTA Rate"
+                min="0">
+            </mat-form-field>
+          </div>
+        }
+
+        <!-- Value Input (for Min Stay, Max Stay, Availability) -->
+        @if (isNumericRestriction() && !isRateRestriction()) {
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>{{ getValueLabel() }}</mat-label>
             <input 
@@ -149,8 +174,14 @@ export class ValueOverrideDialogComponent {
     endDate: [this.data.endDate || this.data.startDate, Validators.required],
     restrictionType: [this.restrictionType, Validators.required],
     value: [this.getInitialValue(), ''],
+    otaRateValue: [this.data.ariOtaRate ?? null as number | null, ''],
     toggleValue: [this.getInitialToggleValue(), false],
   });
+
+  public isRateRestriction(): boolean {
+    const type = this.form.get('restrictionType')?.value as string;
+    return type === 'rate';
+  }
 
   private getInitialValue(): number | null {
     switch (this.restrictionType) {
@@ -231,6 +262,11 @@ export class ValueOverrideDialogComponent {
       const newToggle = this.getToggleForRestrictionType(type);
       this.form.get('toggleValue')?.setValue(newToggle);
     }
+
+    // Reset OTA rate when switching to 'rate'
+    if (type === 'rate') {
+      this.form.get('otaRateValue')?.setValue(this.data.ariOtaRate ?? null);
+    }
     
     // Clear validators and set appropriate ones
     const valueControl = this.form.get('value');
@@ -281,12 +317,19 @@ export class ValueOverrideDialogComponent {
       const type = this.form.get('restrictionType')?.value as string;
       const isToggle = ['cta', 'ctd', 'stop-sell'].includes(type);
 
-      this.dialogRef.close({
+      const result: any = {
         startDate: this.form.value.startDate,
         endDate: this.form.value.endDate,
         restrictionType: this.form.value.restrictionType,
         value: isToggle ? this.form.value.toggleValue : this.form.value.value,
-      });
+      };
+
+      // Include OTA rate when restriction type is 'rate'
+      if (type === 'rate') {
+        result.otaRateValue = this.form.value.otaRateValue;
+      }
+
+      this.dialogRef.close(result);
     }
   }
 }

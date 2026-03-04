@@ -35,6 +35,7 @@ export class SettingsComponent {
     { path: 'info', label: 'Store Info', icon: 'business', iconColor: 'text-blue-600' },
     { path: 'receipt', label: 'Receipt', icon: 'print', iconColor: 'text-green-600' },
     { path: 'print-jobs', label: 'Print Jobs', icon: 'print', iconColor: 'text-green-600' },
+    { path: 'printers', label: 'Printers', icon: 'print', iconColor: 'text-purple-600' },
     // { path: 'notification', label: 'Notifications', icon: 'notifications', iconColor: 'text-red-600' },
     { path: 'team', label: 'Staff', icon: 'people', iconColor: 'text-purple-600' },
   ];

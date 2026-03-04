@@ -1,0 +1,23 @@
+:host {
+  display: block;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th {
+  background-color: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+td {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+mat-chip {
+  &[highlighted] {
+    background-color: #dbeafe;
+    color: #0369a1;
+  }
+}

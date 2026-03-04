@@ -11,6 +11,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { StoreStore } from '../../shared/stores/store.store';
 import { Store } from '../../shared/models';
 import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.component';
@@ -29,6 +30,7 @@ import { RolesService } from '../../shared/services/roles.service';
     RouterModule,
     MatExpansionModule,
     MatDividerModule,
+    MatTooltipModule,
     ToolbarComponent
 ],
   templateUrl: './hms-dashboard.component.html',
@@ -108,6 +110,12 @@ export class HmsDashboardComponent {
           link: './channel-management/live-booking',
           permissions: ['hotel.guests.view', 'hotel.guests.create'],
         },
+        {
+          icon: 'mail',
+          label: 'Messages',
+          link: './channel-management/messaging',
+          permissions: ['hotel.guests.view', 'hotel.guests.create'],
+        },
       ],
     },
     {
@@ -124,6 +132,18 @@ export class HmsDashboardComponent {
           label: 'Room Types',
           link: './rooms-management/room-types',
           permissions: ['hotel.roomtypes.view', 'hotel.roomtypes.create'],
+        },
+        {
+          icon: 'price_change',
+          label: 'Rate Plans',
+          link: './rooms-management/rate-plans',
+          permissions: ['hotel.rooms.view', 'hotel.rooms.edit'],
+        },
+        {
+          icon: 'calendar_month',
+          label: 'Inventory Calendar',
+          link: './rooms-management/inventory',
+          permissions: ['hotel.rooms.view', 'hotel.rooms.edit'],
         },
       ],
     },
@@ -192,5 +212,66 @@ export class HmsDashboardComponent {
     console.log('Selected store:', store);
     this.storeStore.setSelectedStore(store);
     window.location.reload();
+  }
+
+  /**
+   * Get the first child icon for a nav item (for display on icon-based nav)
+   */
+  public getFirstChildIcon(item: any): string {
+    return item.children && item.children.length > 0 ? item.children[0].icon : 'folder';
+  }
+
+  /**
+   * Check if any child of a nav item is on the active route.
+   * Resolves relative links (e.g. "./front-desk/reservations") against
+   * the activated route so deep nested paths still match.
+   */
+  public isNavItemActive(item: any): boolean {
+    if (!item.children || item.children.length === 0) {
+      return false;
+    }
+    const currentUrl = this.router.url.split('?')[0].split('#')[0];
+    return item.children.some((child: any) => {
+      // Resolve the relative link to an absolute path
+      const resolved = this.router.createUrlTree(
+        [child.link],
+        { relativeTo: this.route }
+      ).toString();
+      return currentUrl.startsWith(resolved);
+    });
+  }
+
+  /**
+   * Check if a nav item has only one child
+   */
+  public hasSingleChild(item: any): boolean {
+    return item.children && item.children.length === 1;
+  }
+
+  /**
+   * Navigate to the first (and only) child of a nav item
+   */
+  public navigateToSingleChild(item: any): void {
+    if (this.hasSingleChild(item)) {
+      this.router.navigate([item.children[0].link], { relativeTo: this.route });
+      this.closeSidenavOnMobile();
+    }
+  }
+
+  /**
+   * Close sidenav on mobile after navigation
+   */
+  public closeSidenavOnMobile(): void {
+    if (this.isMobile()) {
+      this.opened.set(false);
+    }
+  }
+
+  /**
+   * Logout the user
+   */
+  public logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/auth']);
   }
 }

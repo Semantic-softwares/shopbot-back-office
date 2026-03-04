@@ -1,0 +1,285 @@
+:host {
+  display: block;
+  padding: 0 1rem 2rem;
+}
+
+.inventory-grid {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.8125rem;
+
+  th, td {
+    border-bottom: 1px solid #e5e7eb;
+    border-right: 1px solid #e5e7eb;
+  }
+}
+
+/* Sticky room type column */
+.room-type-header,
+.room-type-cell {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: #fff;
+  min-width: 200px;
+  max-width: 250px;
+  padding: 0.5rem 0.75rem;
+  border-right: 2px solid #d1d5db !important;
+}
+
+.room-type-header {
+  z-index: 3;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #6b7280;
+  padding: 0.75rem;
+  background: #f9fafb;
+}
+
+/* Room type name row — slightly different background */
+.room-type-name-cell {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+/* Rate plan sub-row label */
+.rate-plan-name-cell {
+  background: #fff;
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+}
+
+/* Day headers */
+.day-header {
+  text-align: center;
+  padding: 0.5rem 0.25rem;
+  min-width: 70px;
+  background: #f9fafb;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+
+  &.weekend {
+    background: #fef3c7;
+  }
+
+  &.today {
+    background: #e0e7ff;
+  }
+}
+
+/* Availability cells (room type row) */
+.avail-cell {
+  text-align: center;
+  padding: 0.375rem;
+  min-width: 70px;
+  height: 48px;
+  vertical-align: middle;
+  cursor: pointer;
+  position: relative;
+  background: #f0f9ff;
+  transition: background-color 0.15s;
+
+  &:hover {
+    background: #e0f2fe;
+  }
+
+  &.weekend {
+    background: #fef9ee;
+    &:hover { background: #fef3c7; }
+  }
+
+  &.today {
+    background: #eef2ff;
+    &:hover { background: #e0e7ff; }
+  }
+
+  &.stop-sell {
+    background: #fef2f2 !important;
+    &:hover { background: #fee2e2 !important; }
+  }
+}
+
+.avail-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+/* Room type group header row */
+.room-type-group-header {
+  td {
+    border-bottom: 1px solid #e2e8f0;
+  }
+}
+
+/* Rate plan row */
+.rate-plan-row {
+  td {
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  &:last-child td {
+    border-bottom: 2px solid #e2e8f0;
+  }
+}
+
+/* Rate cells (rate plan rows) */
+.rate-cell {
+  text-align: center;
+  padding: 0.375rem;
+  min-width: 70px;
+  height: 52px;
+  vertical-align: middle;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.15s;
+
+  &:hover {
+    background: #f0f4ff;
+  }
+
+  &.weekend {
+    background: #fffbeb;
+
+    &:hover {
+      background: #fef3c7;
+    }
+  }
+
+  &.today {
+    background: #eef2ff;
+
+    &:hover {
+      background: #e0e7ff;
+    }
+  }
+
+  &.has-rate {
+    background: #f0fdf4;
+
+    &.weekend {
+      background: #fefce8;
+    }
+
+    &.today {
+      background: #eef2ff;
+    }
+
+    &:hover {
+      background: #dcfce7;
+    }
+  }
+
+  &.stop-sell {
+    background: #fef2f2 !important;
+
+    &:hover {
+      background: #fee2e2 !important;
+    }
+  }
+}
+
+/* Display mode */
+.rate-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.empty-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* Source icon */
+.source-icon {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px !important;
+  width: 12px !important;
+  height: 12px !important;
+  color: #9ca3af;
+}
+
+/* ── Restriction Badges ── */
+.restriction-badges {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1px;
+}
+
+.restriction-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  font-weight: 700;
+  line-height: 1;
+  border-radius: 3px;
+  padding: 1px 3px;
+  letter-spacing: 0.02em;
+  position: relative;
+}
+
+.stop-sell-badge {
+  background: #fca5a5;
+  color: #991b1b;
+}
+
+.cta-badge {
+  background: #fde68a;
+  color: #92400e;
+}
+
+.ctd-badge {
+  background: #c4b5fd;
+  color: #4c1d95;
+}
+
+.min-stay-badge {
+  background: #bae6fd;
+  color: #0c4a6e;
+}
+
+/* Legend badge styles */
+.restriction-badge-legend {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
+  border-radius: 3px;
+  padding: 2px 4px;
+  letter-spacing: 0.02em;
+
+  &.cta-badge {
+    background: #fde68a;
+    color: #92400e;
+  }
+
+  &.ctd-badge {
+    background: #c4b5fd;
+    color: #4c1d95;
+  }
+}
+
+/* Modified (unsaved) cell indicator */
+.modified {
+  background: #fef9c3 !important;
+  border-bottom: 2px solid #facc15 !important;
+
+  &:hover {
+    background: #fef08a !important;
+  }
+}

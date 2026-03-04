@@ -18,7 +18,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ReservationService } from '../../../../../shared/services/reservation.service';
 import { ExtensionPaymentDialogComponent, ExtensionPaymentData, ExtensionPaymentResult } from '../extension-payment-dialog/extension-payment-dialog.component';
-import { BluetoothPrinterService } from '../../../../../shared/services/bluetooth-printer.service';
 import { Reservation } from '../../../../../shared/models/reservation.model';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { CheckInConfirmationDialogComponent, CheckInDialogData } from '../check-in-confirmation-dialog/check-in-confirmation-dialog.component';
@@ -55,7 +54,6 @@ export class ReservationDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private location = inject(Location);
   private reservationService = inject(ReservationService);
-  private bluetoothPrinterService = inject(BluetoothPrinterService);
   public storeStore = inject(StoreStore);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
@@ -183,8 +181,6 @@ export class ReservationDetailsComponent implements OnInit {
       this.error.set('No reservation ID provided');
     }
 
-    // Check if printer is already connected
-    this.printerConnected.set(this.bluetoothPrinterService.isConnected());
   }
 
   private async loadReservation(id: string): Promise<void> {
@@ -1079,132 +1075,6 @@ export class ReservationDetailsComponent implements OnInit {
     }
   }
 
-  // Bluetooth printing functionality
-  async connectToPrinter(): Promise<void> {
-    if (!this.bluetoothPrinterService.isBluetoothSupported()) {
-      this.snackBar.open('Web Bluetooth is not supported in this browser', 'Close', { 
-        duration: 5000,
-        panelClass: ['error-snackbar']
-      });
-      return;
-    }
-
-    try {
-      this.statusUpdating.set(true);
-      await this.bluetoothPrinterService.connectToPrinter();
-      this.printerConnected.set(true);
-      
-      const deviceInfo = this.bluetoothPrinterService.getConnectedDeviceInfo();
-      this.snackBar.open(
-        `Connected to printer: ${deviceInfo?.name || 'Unknown Printer'}`, 
-        'Close', 
-        { duration: 3000 }
-      );
-    } catch (error) {
-      console.error('Error connecting to printer:', error);
-      this.printerConnected.set(false);
-      
-      const errorMessage = error instanceof Error ? error.message : 'Failed to connect to printer';
-      this.snackBar.open(errorMessage, 'Close', { 
-        duration: 5000,
-        panelClass: ['error-snackbar']
-      });
-    } finally {
-      this.statusUpdating.set(false);
-    }
-  }
-
-  async disconnectFromPrinter(): Promise<void> {
-    try {
-      await this.bluetoothPrinterService.disconnectPrinter();
-      this.printerConnected.set(false);
-      this.snackBar.open('Disconnected from printer', 'Close', { duration: 3000 });
-    } catch (error) {
-      console.error('Error disconnecting from printer:', error);
-      this.snackBar.open('Failed to disconnect from printer', 'Close', { 
-        duration: 3000,
-        panelClass: ['error-snackbar']
-      });
-    }
-  }
-
-  async printReservation(): Promise<void> {
-    const reservation = this.reservation();
-    if (!reservation) return;
-
-    // Check if printer is connected
-    if (!this.bluetoothPrinterService.isConnected()) {
-      // Ask user if they want to connect
-      const connectFirst = confirm('Printer not connected. Would you like to connect to a printer first?');
-      if (connectFirst) {
-        try {
-          await this.connectToPrinter();
-          if (!this.bluetoothPrinterService.isConnected()) {
-            return; // User cancelled or connection failed
-          }
-        } catch (error) {
-          return; // Connection failed
-        }
-      } else {
-        return; // User chose not to connect
-      }
-    }
-
-    this.printing.set(true);
-
-    try {
-      const store = this.storeStore.selectedStore();
-      await this.bluetoothPrinterService.printReservation(reservation, store);
-      
-      this.snackBar.open('Reservation printed successfully', 'Close', { 
-        duration: 3000 
-      });
-    } catch (error) {
-      console.error('Error printing reservation:', error);
-      
-      const errorMessage = error instanceof Error ? error.message : 'Failed to print reservation';
-      this.snackBar.open(errorMessage, 'Close', { 
-        duration: 5000,
-        panelClass: ['error-snackbar']
-      });
-      
-      // If printing failed due to connection issue, update connection status
-      if (errorMessage.includes('not connected')) {
-        this.printerConnected.set(false);
-      }
-    } finally {
-      this.printing.set(false);
-    }
-  }
-
-  async testPrint(): Promise<void> {
-    if (!this.bluetoothPrinterService.isConnected()) {
-      this.snackBar.open('Please connect to a printer first', 'Close', { 
-        duration: 3000,
-        panelClass: ['error-snackbar']
-      });
-      return;
-    }
-
-    this.printing.set(true);
-
-    try {
-      await this.bluetoothPrinterService.testPrint();
-      this.snackBar.open('Test print completed successfully', 'Close', { 
-        duration: 3000 
-      });
-    } catch (error) {
-      console.error('Error during test print:', error);
-      
-      const errorMessage = error instanceof Error ? error.message : 'Test print failed';
-      this.snackBar.open(errorMessage, 'Close', { 
-        duration: 5000,
-        panelClass: ['error-snackbar']
-      });
-    } finally {
-      this.printing.set(false);
-    }
-  }
 
   // PDF Export functionality
   async exportReservationToPDF(): Promise<void> {
@@ -1521,7 +1391,7 @@ export class ReservationDetailsComponent implements OnInit {
     }
 
     const dialogRef = this.dialog.open(RoomChangeDialogComponent, {
-      width: '500px',
+      width: '560px',
       maxWidth: '95vw',
       disableClose: true,
       data: {
@@ -1531,11 +1401,11 @@ export class ReservationDetailsComponent implements OnInit {
         checkOutDate: new Date(reservation.checkOutDate).toISOString(),
         numberOfNights: reservation.numberOfNights,
         currency: this.storeStore.selectedStore()?.currency || 'USD',
-        // Include actual check-in date and status for mid-stay pricing calculations
         actualCheckInDate: reservation.actualCheckInDate 
           ? new Date(reservation.actualCheckInDate).toISOString() 
           : undefined,
-        reservationStatus: reservation.status
+        reservationStatus: reservation.status,
+        storeId: this.storeStore.selectedStore()?._id || '',
       } as RoomChangeDialogData
     });
 

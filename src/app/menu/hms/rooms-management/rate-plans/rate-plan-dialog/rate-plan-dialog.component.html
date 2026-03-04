@@ -1,0 +1,109 @@
+<h2 mat-dialog-title class="flex items-center gap-2">
+  <mat-icon class="text-indigo-600">price_change</mat-icon>
+  {{ isEdit() ? 'Edit' : 'Create' }} Rate Plan
+</h2>
+
+<mat-dialog-content class="min-w-[500px]">
+  <form [formGroup]="form" class="flex flex-col gap-4 pt-2">
+
+    <!-- Basic Info -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Plan Name</mat-label>
+        <input matInput formControlName="name" placeholder="e.g. Standard Rate" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Room Type</mat-label>
+        <mat-select formControlName="roomType">
+          @for (rt of data.roomTypes; track rt._id) {
+            <mat-option [value]="rt._id">{{ rt.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Description</mat-label>
+      <input matInput formControlName="description" placeholder="Optional description" />
+    </mat-form-field>
+
+    <!-- Base Rates -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>PMS Base Rate ({{ data.storeCurrency }}/night)</mat-label>
+        <input matInput type="number" formControlName="baseRate" />
+        <mat-hint>Default nightly rate for PMS / direct bookings</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>OTA Base Rate ({{ data.storeCurrency }}/night)</mat-label>
+        <input matInput type="number" formControlName="otaBaseRate" />
+        <mat-hint>Rate synced to OTA channels (leave empty to use PMS rate)</mat-hint>
+      </mat-form-field>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Day-of-Week Overrides -->
+    <div>
+      <h3 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
+        <mat-icon class="text-base">calendar_view_week</mat-icon>
+        Day-of-Week Rate Overrides
+      </h3>
+      <p class="text-xs text-gray-500 mb-3">Leave blank to use the base rate for that day</p>
+
+      <div class="grid grid-cols-7 gap-2">
+        @for (day of dayLabels; track day.key) {
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>{{ day.label }}</mat-label>
+            <input matInput type="number" [formControlName]="day.key" />
+          </mat-form-field>
+        }
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Restrictions -->
+    <div>
+      <h3 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
+        <mat-icon class="text-base">rule</mat-icon>
+        Stay Restrictions
+      </h3>
+      <div class="grid grid-cols-2 gap-4">
+        <mat-form-field appearance="outline">
+          <mat-label>Min Stay (nights)</mat-label>
+          <input matInput type="number" formControlName="minStay" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Max Stay (nights)</mat-label>
+          <input matInput type="number" formControlName="maxStay" />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Flags -->
+    <div class="flex items-center gap-6">
+      <mat-checkbox formControlName="isDefault" color="primary">
+        Default rate plan for this room type
+      </mat-checkbox>
+      <mat-checkbox formControlName="active" color="primary">
+        Active
+      </mat-checkbox>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="gap-2 p-4!">
+  <button mat-stroked-button (click)="cancel()" [disabled]="saving()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="save()" [disabled]="form.invalid || saving()">
+    @if (saving()) {
+      <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+    }
+    {{ isEdit() ? 'Update' : 'Create' }} Rate Plan
+  </button>
+</mat-dialog-actions>

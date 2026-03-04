@@ -56,8 +56,8 @@
   @if (!tableStore.isLoading()) {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-4 gap-4">
       @for (table of tableStore.filteredTables(); track table._id) {
-      <app-table-card (addNewOrder)="onAddNewOrder($event)" [table]="table" (viewOrder)="viewOrder($event)"
-        (completeOrder)="completeOrder($event)" (clearOrder)="onClearOrder($event)" (tableClick)="onTableClick($event)">
+      <app-table-card (addNewOrder)="onAddNewOrder($event)" [table]="table" (editOrder)="onEditOrder($event)" (viewOrder)="viewOrder($event)" 
+        (completeOrder)="completeOrder($event)" (clearOrder)="onClearOrder($event)" (printOrder)="printOrder($event)" (tableClick)="onTableClick($event)">
       </app-table-card>
       }
     </div>

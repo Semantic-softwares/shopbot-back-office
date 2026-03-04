@@ -14,6 +14,46 @@
       <p>No available rooms found</p>
     </div>
   } @else {
+    <!-- Currency Conversion Banner -->
+    @if (needsConversion()) {
+      <mat-card appearance="outlined" class="mb-4 border-amber-300! bg-amber-50!">
+        <mat-card-content class="p-4!">
+          <div class="flex items-start gap-3">
+            <mat-icon class="text-amber-600 mt-0.5">currency_exchange</mat-icon>
+            <div class="flex-1">
+              <h4 class="font-semibold text-gray-900 mb-1">Currency Conversion Required</h4>
+              <p class="text-sm text-gray-600 mb-3">
+                This booking is in <span class="font-semibold text-blue-700">{{ bookingCurrencyCode() }}</span>
+                but your store uses <span class="font-semibold text-green-700">{{ storeCurrencyCode() }}</span>.
+                Enter the conversion rate to calculate local amounts.
+              </p>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Conversion Rate (1 {{ bookingCurrencyCode() }} = ? {{ storeCurrencyCode() }})</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [formControl]="conversionRateControl"
+                  placeholder="e.g. 1750.50"
+                  min="0.0001"
+                  step="0.01"
+                />
+                <mat-icon matPrefix class="text-gray-500">swap_horiz</mat-icon>
+                @if (conversionRateControl.invalid && conversionRateControl.touched) {
+                  <mat-error>A valid conversion rate is required</mat-error>
+                }
+                @if (conversionRate() > 0) {
+                  <mat-hint>
+                    1 {{ bookingCurrencyCode() }} = {{ conversionRate() | number:'1.2-4' }} {{ storeCurrencyCode() }}
+                  </mat-hint>
+                }
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
     <form [formGroup]="assignmentForm" class="space-y-4">
       @for (otaRoom of data.rooms; track $index; let i = $index) {
         <mat-card appearance="outlined" class="p-4 space-y-2">
@@ -31,13 +71,30 @@
                 <p class="text-xs text-gray-600 mt-1">
                   {{ formatGuestNames(otaRoom.guests) }}
                 </p>
+                @if (otaRoom.guests?.[0]?.email) {
+                  <p class="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                    <mat-icon class="text-xs!">email</mat-icon>
+                    {{ otaRoom.guests[0].email }}
+                  </p>
+                }
+                @if (otaRoom.guests?.[0]?.phone) {
+                  <p class="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                    <mat-icon class="text-xs!">phone</mat-icon>
+                    {{ otaRoom.guests[0].phone }}
+                  </p>
+                }
               </div>
             </div>
             <div class="text-right">
-              <div class="text-sm text-gray-600">Price</div>
+              <div class="text-sm text-gray-600">Price ({{ bookingCurrencyCode() }})</div>
               <div class="text-lg font-semibold text-blue-600">
                 {{ otaRoom.amount | currency: data.currency }}
               </div>
+              @if (needsConversion() && conversionRate() > 0) {
+                <div class="text-sm font-medium text-green-600">
+                  ≈ {{ toLocal(otaRoom.amount) | currency: storeCurrencyCode() }}
+                </div>
+              }
             </div>
           </div>
 
@@ -83,6 +140,51 @@
         </mat-card>
       }
     </form>
+
+    <!-- Totals Summary -->
+    @if (needsConversion() && conversionRate() > 0) {
+      <mat-card appearance="outlined" class="mt-4 bg-gray-50!">
+        <mat-card-content class="p-4!">
+          <h4 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+            <mat-icon class="text-base">receipt_long</mat-icon>
+            Conversion Summary
+          </h4>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Subtotal ({{ bookingCurrencyCode() }})</span>
+              <span class="font-medium">{{ bookingSubtotal() | currency: data.currency }}</span>
+            </div>
+            @if (bookingTax() > 0) {
+              <div class="flex justify-between">
+                <span class="text-gray-600">Taxes ({{ bookingCurrencyCode() }})</span>
+                <span class="font-medium">{{ bookingTax() | currency: data.currency }}</span>
+              </div>
+            }
+            <div class="flex justify-between font-semibold text-gray-900 border-t border-gray-300 pt-2">
+              <span>Total ({{ bookingCurrencyCode() }})</span>
+              <span>{{ bookingTotal() | currency: data.currency }}</span>
+            </div>
+
+            <div class="border-t border-dashed border-gray-300 my-2"></div>
+
+            <div class="flex justify-between text-green-700">
+              <span>Subtotal ({{ storeCurrencyCode() }})</span>
+              <span class="font-medium">{{ localSubtotal() | currency: storeCurrencyCode() }}</span>
+            </div>
+            @if (localTax() > 0) {
+              <div class="flex justify-between text-green-700">
+                <span>Taxes ({{ storeCurrencyCode() }})</span>
+                <span class="font-medium">{{ localTax() | currency: storeCurrencyCode() }}</span>
+              </div>
+            }
+            <div class="flex justify-between font-bold text-green-800 text-base border-t border-green-300 pt-2">
+              <span>Total ({{ storeCurrencyCode() }})</span>
+              <span>{{ localTotal() | currency: storeCurrencyCode() }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
   }
 </mat-dialog-content>
 

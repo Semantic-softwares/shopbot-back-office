@@ -2,3 +2,39 @@
 .mat-toolbar {
   z-index: 1000;
 }
+
+/* Avatar trigger */
+.avatar-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #7c4dff;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  user-select: none;
+  margin-left: 4px;
+}
+
+/* Notification dropdown */
+::ng-deep .notification-menu {
+  max-height: 420px;
+  overflow-y: auto;
+
+  .mat-mdc-menu-content {
+    padding: 0 !important;
+  }
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

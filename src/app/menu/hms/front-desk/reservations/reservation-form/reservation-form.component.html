@@ -52,7 +52,7 @@
       }
 
 
-      <a matButton="outlined" (click)="payment()" [disabled]="isSubmitted()">
+      <a matButton="outlined" (click)="payment()" [disabled]="isSubmitted() || hasRestrictionIssues()">
         <mat-icon>payment</mat-icon>
         Payment
       </a>
@@ -67,7 +67,7 @@
       @if (reservation.value()?.status === ReservationStatus.PENDING || reservation.value()?.status ===
       ReservationStatus.RESERVED) {
       <button matButton="outlined" (click)="updateReservationStatus(ReservationStatus.CONFIRMED)"
-        [disabled]="statusUpdating() || isSubmitted()">
+        [disabled]="statusUpdating() || isSubmitted() || hasRestrictionIssues()">
         <mat-icon>verified</mat-icon>
         Confirm
       </button>
@@ -82,20 +82,20 @@
       }
       @if (reservation.value()?.status === ReservationStatus.CONFIRMED) {
       <button matButton="outlined" (click)="updateReservationStatus(ReservationStatus.CHECKED_IN)"
-        [disabled]="statusUpdating()">
+        [disabled]="statusUpdating() || hasRestrictionIssues()">
         <mat-icon>check_circle_outline</mat-icon>
         Check-in
       </button>
       }
       @if (reservation.value()?.status === ReservationStatus.CHECKED_IN) {
       <button matButton="outlined" (click)="updateReservationStatus(ReservationStatus.CHECKED_OUT)"
-        [disabled]="statusUpdating()">
+        [disabled]="statusUpdating() || hasRestrictionIssues()">
         <mat-icon>logout</mat-icon>
         Check-out
       </button>
       }
 
-      <button matButton="filled" color="primary" type="submit" (click)="onSubmit()" [disabled]="isSubmitted()">
+      <button matButton="filled" color="primary" type="submit" (click)="onSubmit()" [disabled]="isSubmitted() || hasRestrictionIssues()">
         <mat-icon>save</mat-icon>
         Save
       </button>
@@ -103,11 +103,11 @@
 
       } @else {
       
-      <a matButton="outlined" (click)="payment()" [disabled]="isSubmitted()">
+      <a matButton="outlined" (click)="payment()" [disabled]="isSubmitted() || hasRestrictionIssues()">
         <mat-icon>payment</mat-icon>
         Payment
       </a>
-      <a matButton="filled" (click)="onSubmit()" [disabled]="isSubmitted()" color="primary">
+      <a matButton="filled" (click)="onSubmit()" [disabled]="isSubmitted() || hasRestrictionIssues()" color="primary">
         <mat-icon>event</mat-icon>
         Reserve
       </a>
@@ -167,13 +167,16 @@
       <app-room-sharers class="lg:col-span-4" [(selectedGuest)]="selectedGuest"
         (selectedGuestChange)="onSelectedGuestChange($event)" [quickReservation]="quickReservation()"
         [reservation]="reservation.value()" (sharerAdded)="onAddSharer()" (sharerEdited)="onEditSharer($event)"
-        (sharerDeleted)="onDeleteSharer($event)"></app-room-sharers>
+        (sharerDeleted)="onDeleteSharer($event)"
+        (hasRestrictions)="hasRestrictionIssues.set($event)"></app-room-sharers>
       } @else {
       <!-- Row 2: Room Details Component - Only for Group Reservation -->
       <!-- <pre>{{reservation.value() | json}}</pre> -->
       <app-room-details class="lg:col-span-4" [reservation]="reservation.value()"
-        [selectedRoomIds]="selectedRoomIds()" 
-        (roomChangeRequested)="openRoomChangeDialog($event)" />
+        [selectedRoomIds]="selectedRoomIds()"
+        [ratePlanId]="quickReservation()?.ratePlanId || ''"
+        (roomChangeRequested)="openRoomChangeDialog($event)"
+        (hasRestrictions)="hasRestrictionIssues.set($event)" />
       }
 
       <!-- Row 3: Special Requests & Notes - Full Width -->

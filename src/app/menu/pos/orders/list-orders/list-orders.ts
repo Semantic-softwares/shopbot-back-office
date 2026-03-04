@@ -251,65 +251,31 @@ export class ListOrders {
   }
 
   async printOrder(order: Order): Promise<void> {
-    console.log('Print order:', order);
-    
     if (!order._id) {
       this.snackBar.open('Invalid order data', 'Close', { duration: 3000 });
-      console.error('Invalid order data');
       return;
     }
 
-    if (!order.cart?._id) {
-      this.snackBar.open('Invalid cart data', 'Close', { duration: 3000 });
-      console.error('Invalid cart data');
-      return;
-    }
-
-    // Show loading snackbar
-    const loadingSnackBar = this.snackBar.open('Loading order data...', '', {
+    const loadingSnackBar = this.snackBar.open('Sending to printer...', '', {
       duration: 0,
       horizontalPosition: 'center',
       verticalPosition: 'bottom',
     });
 
-    // Load the structured cart before printing
-    this.cartService.loadCart(order.cart._id).subscribe({
-      next: async (cart) => {
-        try {
-          // Create order with structured cart
-          const orderData = {
-            ...order,
-            cart,
-          };
-          
-          console.log('Printing order via PrintJobService:', orderData);
-          
-          // Dismiss loading snackbar
-          loadingSnackBar.dismiss();
-          
-          // Print via PrintJobService which handles both Bluetooth and backend print jobs
-          const result = await this.printJobService.printOrderReceipt(orderData);
-          
-          // Show appropriate success message based on printer connection
-          if (result.isPrinterConnected) {
-            this.snackBar.open('✅ Order printed successfully', 'Close', { duration: 3000 });
-          } else {
-            this.snackBar.open('📋 Print job created - Receipt will print at counter', 'Close', { 
-              duration: 5000,
-              panelClass: ['info-snackbar']
-            });
-          }
-        } catch (error: any) {
-          console.error('Failed to print order:', error);
-          loadingSnackBar.dismiss();
-          this.snackBar.open(`Print failed: ${error.message}`, 'Close', { duration: 5000 });
+    this.printJobService.printOrder(order._id).subscribe({
+      next: (response) => {
+        loadingSnackBar.dismiss();
+        if (response.success) {
+          this.snackBar.open(response.message || 'Print job created', 'OK', { duration: 3000 });
+        } else {
+          this.snackBar.open('Failed to create print job', 'Close', { duration: 5000 });
         }
       },
       error: (error) => {
         loadingSnackBar.dismiss();
-        this.snackBar.open('Failed to load cart for printing', 'Close', { duration: 3000 });
-        console.error('Error loading cart:', error);
-      }
+        this.snackBar.open(`Print failed: ${error.error?.error || error.message}`, 'Close', { duration: 5000 });
+        console.error('Print order error:', error);
+      },
     });
   }
 
