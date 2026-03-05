@@ -41,6 +41,8 @@ export interface Store {
         showSellerInfo?: boolean;
         showCustomerName?: boolean;
         printAfterFinish?: boolean;
+        useCustomBusinessName?: boolean;
+        businessName?: string;
         footerMessage?: string;
         disclaimer?: string;
       };

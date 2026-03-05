@@ -124,7 +124,10 @@ export class PrintJobService {
       
       const store = order.store;
       if (store && store.name) {
-        receipt += `${store.name}\n`;
+        const displayName = (receiptSettings?.useCustomBusinessName && receiptSettings?.businessName)
+          ? receiptSettings.businessName
+          : store.name;
+        receipt += `${displayName}\n`;
       }
       
       receipt += 'KITCHEN ORDER\n';

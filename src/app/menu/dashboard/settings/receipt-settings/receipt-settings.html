@@ -1,12 +1,37 @@
-<div class="py-6">
+<div class="px-4">
   <div class="grid grid-cols-1 gap-6">
+    <!-- Header with action buttons -->
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <mat-icon class="text-blue-600">receipt</mat-icon>
+        <div>
+          <h2 class="text-base font-semibold text-gray-900 m-0">Receipt Settings</h2>
+          <p class="text-xs text-gray-500 m-0">Configure how receipts are displayed and printed</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button 
+          type="button" 
+          mat-stroked-button 
+          (click)="resetForm()"
+          [disabled]="saving()">
+          <mat-icon class="mr-1">refresh</mat-icon>
+          Reset
+        </button>
+        <button 
+          type="button" 
+          mat-flat-button 
+          color="primary"
+          [disabled]="posSettingsForm.invalid || saving()"
+          (click)="saveReceiptSettings()">
+          <mat-icon class="mr-1">save</mat-icon>
+          {{ saving() ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </div>
+
     <!-- Receipt Settings Card -->
     <mat-card appearance="outlined">
-      <mat-card-header>
-        <mat-icon mat-card-avatar class="text-blue-600 !flex !items-center !justify-center">receipt</mat-icon>
-        <mat-card-title>Receipt Settings</mat-card-title>
-        <mat-card-subtitle>Configure how receipts are displayed and printed</mat-card-subtitle>
-      </mat-card-header>
       <mat-card-content class="pt-4">
         @if (loading()) {
           <div class="flex items-center justify-center py-8">
@@ -87,6 +112,25 @@
                   <mat-slide-toggle formControlName="printAfterFinish" color="primary"></mat-slide-toggle>
                 </div>
 
+                <!-- Custom Business Name -->
+                <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-3">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <label class="text-sm font-medium text-gray-700">Use Custom Business Name</label>
+                      <p class="text-xs text-gray-600">Display a different business name on receipts instead of the store name</p>
+                    </div>
+                    <mat-slide-toggle formControlName="useCustomBusinessName" color="primary"></mat-slide-toggle>
+                  </div>
+                  @if (posSettingsForm.get('receiptSettings.useCustomBusinessName')?.value) {
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Business Name</mat-label>
+                      <input matInput formControlName="businessName" placeholder="Enter business name for receipts">
+                      <mat-icon matSuffix>storefront</mat-icon>
+                    </mat-form-field>
+                    <p class="text-xs text-gray-500">This name will appear on receipts instead of the store name</p>
+                  }
+                </div>
+
                 <!-- Footer Message -->
                 <div>
                   <mat-form-field appearance="outline" class="w-full">
@@ -108,27 +152,7 @@
                 </div>
               </div>
 
-              <!-- Action Buttons -->
-              <div class="flex gap-3 pt-4 border-t border-gray-200">
-                <button 
-                  type="submit" 
-                  mat-raised-button 
-                  color="primary"
-                  [disabled]="posSettingsForm.invalid || saving()"
-                  class="flex-1">
-                  <mat-icon class="mr-2">save</mat-icon>
-                  {{ saving() ? 'Saving...' : 'Save Settings' }}
-                </button>
-                <button 
-                  type="button" 
-                  mat-stroked-button 
-                  (click)="resetForm()"
-                  [disabled]="saving()"
-                  class="flex-1">
-                  <mat-icon class="mr-2">refresh</mat-icon>
-                  Reset
-                </button>
-              </div>
+
             </div>
           </form>
         }
