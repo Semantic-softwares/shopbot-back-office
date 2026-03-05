@@ -1,0 +1,43 @@
+@if (shouldShow) {
+  <div class="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96">
+    <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-4">
+      <div class="flex items-start gap-3">
+        <div class="flex-shrink-0 w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+          <mat-icon class="text-indigo-600">install_mobile</mat-icon>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="text-sm font-semibold text-gray-900 m-0">Install Shopbot</h3>
+
+          @if (installService.canInstall()) {
+            <p class="text-xs text-gray-600 mt-1 mb-3">
+              Install the app on your device for quick access and a better experience.
+            </p>
+            <div class="flex items-center gap-2">
+              <button mat-flat-button color="primary" (click)="onInstall()" class="text-xs">
+                <mat-icon class="mr-1">download</mat-icon>
+                Install
+              </button>
+              <button mat-stroked-button (click)="onDismiss()" class="text-xs">
+                Not now
+              </button>
+            </div>
+          }
+
+          @if (installService.showIosInstall() && !installService.canInstall()) {
+            <p class="text-xs text-gray-600 mt-1 mb-2">
+              To install, tap
+              <mat-icon class="align-middle text-base">ios_share</mat-icon>
+              then <strong>"Add to Home Screen"</strong>.
+            </p>
+            <button mat-stroked-button (click)="onDismiss()" class="text-xs">
+              Got it
+            </button>
+          }
+        </div>
+        <button mat-icon-button (click)="onDismiss()" class="flex-shrink-0 -mt-1 -mr-1">
+          <mat-icon class="text-gray-400 text-base">close</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+}
