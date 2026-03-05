@@ -48,6 +48,11 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
     return true;
   }
 
+  // Admins always have full access
+  if (rolesService.isAdmin()) {
+    return true;
+  }
+
   // Build permissions array
   const permissions: string[] = requiredPermissions || (requiredPermission ? [requiredPermission] : []);
 

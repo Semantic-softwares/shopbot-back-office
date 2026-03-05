@@ -75,8 +75,27 @@ export class MenuComponent implements OnInit, OnDestroy {
     'hotel.housekeeping.complete',
   ];
 
-  // POS module permissions (requires at least one ERP permission)
-  private readonly POS_PERMISSIONS = this.ERP_PERMISSIONS;
+  // POS module permissions
+  private readonly POS_PERMISSIONS = [
+    'pos.sales.view',
+    'pos.sales.create',
+    'pos.sales.edit',
+    'pos.sales.void',
+    'pos.sales.refund',
+    'pos.sales.discount',
+    'pos.tables.view',
+    'pos.tables.manage',
+    'pos.tables.create',
+    'pos.tables.edit',
+    'pos.tables.delete',
+    'pos.checkout.process',
+    'pos.checkout.split',
+    'pos.kitchen.view',
+    'pos.kitchen.manage',
+    'pos.printing.receipt',
+    'pos.printing.kitchen',
+    'pos.printing.manage',
+  ];
 
   // Menu visibility computed signals
   canAccessERP = computed(() => 

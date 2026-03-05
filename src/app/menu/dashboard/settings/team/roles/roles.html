@@ -1,9 +1,16 @@
-<div class="flex flex-col h-[calc(100vh-200px)]">
-  <!-- Back Button -->
-  <div class="mb-4">
+<div class="flex flex-col h-[calc(100vh-200px)] px-4">
+  <!-- Header with Back Button and Sync -->
+  <div class="mb-4 flex items-center justify-between">
     <button mat-button (click)="location.back()">
       <mat-icon>arrow_back</mat-icon>
       Back
+    </button>
+    <button matButton="outlined"
+      (click)="syncPermissions()"
+      [disabled]="syncing()"
+      matTooltip="Sync latest permissions and update admin roles (e.g., add new POS permissions)">
+      <mat-icon>sync</mat-icon>
+      {{  syncing() ? 'Syncing...' : 'Sync Permissions' }}
     </button>
   </div>
 
