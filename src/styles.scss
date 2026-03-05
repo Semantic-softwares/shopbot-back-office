@@ -24,3 +24,18 @@ html {
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
+// PWA update notification snackbar
+.pwa-update-snackbar {
+  .mdc-snackbar__surface {
+    background-color: #3f51b5 !important;
+  }
+  .mdc-snackbar__label {
+    color: white !important;
+    font-weight: 500;
+  }
+  .mat-mdc-button.mat-mdc-snack-bar-action {
+    color: #ffd740 !important;
+    font-weight: 600;
+  }
+}
+

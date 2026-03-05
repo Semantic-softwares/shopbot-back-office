@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection, isDevMode } from '@angular/core';
 import {  provideRouter, withHashLocation } from '@angular/router';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { routes } from './app.routes';
@@ -9,6 +9,7 @@ import { subscriptionInterceptor } from './shared/interceptors/subscription.inte
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { MAT_ICON_DEFAULT_OPTIONS } from '@angular/material/icon';
 import { progressInterceptor } from 'ngx-progressbar/http';
+import { provideServiceWorker } from '@angular/service-worker';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -27,6 +28,9 @@ export const appConfig: ApplicationConfig = {
       withInterceptorsFromDi(),
       withInterceptors([authInterceptor, subscriptionInterceptor, progressInterceptor])
     ), 
-    provideCharts(withDefaultRegisterables())
+    provideCharts(withDefaultRegisterables()), provideServiceWorker('ngsw-worker.js', {
+            enabled: !isDevMode(),
+            registrationStrategy: 'registerWhenStable:30000'
+          })
   ],
 };
