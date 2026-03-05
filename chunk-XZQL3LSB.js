@@ -1,0 +1,1 @@
+import"./chunk-GAL4ENT6.js";var t=[{path:"",redirectTo:"home",pathMatch:"full"},{path:"home",loadComponent:()=>import("./chunk-XQZZKHCS.js").then(o=>o.Home)},{path:"downloads",loadComponent:()=>import("./chunk-WDPYEC5B.js").then(o=>o.Downloads)},{path:"features/:slug",loadComponent:()=>import("./chunk-FYX5PVHQ.js").then(o=>o.FeatureDetailComponent)}];export{t as WEBSITE_ROUTES};
