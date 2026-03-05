@@ -1,1 +1,0 @@
-import"./chunk-GAL4ENT6.js";var t=[{path:"",loadComponent:()=>import("./chunk-ZCS4M2JR.js").then(o=>o.ListRestockComponent)},{path:"add",loadComponent:()=>import("./chunk-XMJWMPHN.js").then(o=>o.RestockComponent)},{path:"edit/:id",loadComponent:()=>import("./chunk-XMJWMPHN.js").then(o=>o.RestockComponent)}];export{t as RESTOCK_ROUTES};
