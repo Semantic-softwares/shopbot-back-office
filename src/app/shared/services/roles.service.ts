@@ -306,6 +306,14 @@ export class RolesService {
   }
 
   /**
+   * Sync permissions and update existing admin roles to include new permissions (e.g., POS).
+   * Safe for existing stores — only adds new permissions, never removes.
+   */
+  syncPermissionsAndRoles(): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.hostServer}/permissions/sync`, {});
+  }
+
+  /**
    * Create a new permission
    */
   createPermission(permission: Partial<Permission>): Observable<Permission> {

@@ -23,11 +23,15 @@ export const roleResolver: ResolveFn<Role | null> = () => {
         const permissions = role.permissions
           .filter(p => p.isActive)
           .map(p => p.code);
+        // isAdmin is only true for actual admin roles, NOT all administrative (global) roles.
+        // isAdministrative means "global role, not tied to a store" — POS Manager, Cashier, etc. are also administrative.
+        const adminRoleNames = ['super admin', 'admin'];
+        const isAdmin = adminRoleNames.includes(role.name.toLowerCase());
         // Update signals and storage with fresh data
         roleService.setAccess({
           role,
           permissions,
-          isAdmin: role.isAdministrative
+          isAdmin,
         });
       }
     })
