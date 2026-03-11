@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
+    RouterLink,
   ],
   templateUrl: './header.html',
   styleUrl: './header.scss',
@@ -58,5 +59,20 @@ export class HeaderComponent implements OnInit {
 
   navigateToSignup(): void {
     this.router.navigate(['/auth/signup']);
+  }
+
+  navigateToDownloads(): void {
+    this.mobileMenuOpen.set(false);
+    this.router.navigate(['/downloads']);
+  }
+
+  navigateHome(): void {
+    this.mobileMenuOpen.set(false);
+    this.router.navigate(['/home']);
+  }
+
+  navigateToFeature(slug: string): void {
+    this.mobileMenuOpen.set(false);
+    this.router.navigate(['/features', slug]);
   }
 }

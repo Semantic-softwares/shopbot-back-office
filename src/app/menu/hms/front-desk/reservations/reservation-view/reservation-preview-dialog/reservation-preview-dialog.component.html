@@ -8,6 +8,9 @@
     <mat-chip class="capitalize" color="primary">{{ statusLabel() }}</mat-chip>
    <mat-chip class="capitalize">{{ reservationType() }}</mat-chip>
    <mat-chip>{{ confirmationNumber() }}</mat-chip>
+   @if (isModified()) {
+     <mat-chip color="warn">Modified</mat-chip>
+   }
 </mat-chip-set>
 
   <!-- Stay Information (from room assignment) -->

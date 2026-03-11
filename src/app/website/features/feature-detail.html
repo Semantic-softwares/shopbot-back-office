@@ -1,0 +1,180 @@
+<app-header />
+
+@if (feature(); as feat) {
+<!-- Hero Section -->
+<section class="relative pt-32 pb-20 overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-br from-gray-50 to-white -z-10"></div>
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div>
+        <div class="flex items-center gap-3 mb-6">
+          <div class="flex items-center justify-center w-14 h-14 rounded-2xl" [ngClass]="feat.bgColor">
+            <mat-icon [ngClass]="feat.color" class="!text-3xl !w-8 !h-8">{{ feat.icon }}</mat-icon>
+          </div>
+          <span class="text-sm font-semibold uppercase tracking-wider text-gray-500">{{ feat.subtitle }}</span>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">{{ feat.title }}</h1>
+        <p class="text-xl text-gray-600 leading-relaxed mb-8">{{ feat.heroDescription }}</p>
+        <div class="flex flex-wrap gap-4">
+          <button mat-flat-button color="primary" class="!rounded-full !px-8 !py-3 !text-base" (click)="navigateToSignup()">
+            Get Started Free
+          </button>
+          <button mat-stroked-button class="!rounded-full !px-8 !py-3 !text-base" routerLink="/home">
+            ← Back to Home
+          </button>
+        </div>
+      </div>
+      <div class="relative">
+        <div class="bg-gray-100 rounded-2xl border border-gray-200 shadow-xl aspect-video flex items-center justify-center">
+          <div class="text-center p-8">
+            <mat-icon class="!text-6xl !w-16 !h-16 text-gray-300 mb-4">desktop_windows</mat-icon>
+            <p class="text-gray-400 font-medium">{{ feat.screenshotPlaceholder }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Key Highlights -->
+<section class="py-20 bg-white">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Key Highlights</h2>
+      <p class="text-lg text-gray-600">Everything you need, built right in</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      @for (item of feat.highlights; track item.title) {
+      <mat-card appearance="outlined" class="hover:shadow-lg transition-shadow h-full">
+        <mat-card-content class="p-6">
+          <div class="flex items-center justify-center w-12 h-12 rounded-xl mb-4 mx-auto" [ngClass]="feat.bgColor">
+            <mat-icon [ngClass]="feat.color" class="!text-2xl !w-6 !h-6">{{ item.icon }}</mat-icon>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">{{ item.title }}</h3>
+          <p class="text-gray-600 text-sm text-center leading-relaxed">{{ item.description }}</p>
+        </mat-card-content>
+      </mat-card>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-20 bg-gray-50">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div>
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Why Choose ShopBot {{ feat.title }}?</h2>
+        <p class="text-lg text-gray-600 mb-8">Built for hospitality professionals who demand the best tools for their business.</p>
+        <ul class="space-y-4">
+          @for (benefit of feat.benefits; track benefit) {
+          <li class="flex items-start gap-3">
+            <mat-icon class="text-green-500 !text-xl mt-0.5 shrink-0">check_circle</mat-icon>
+            <span class="text-gray-700">{{ benefit }}</span>
+          </li>
+          }
+        </ul>
+      </div>
+      <div class="relative">
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-lg aspect-square flex items-center justify-center">
+          <div class="text-center p-8">
+            <mat-icon class="!text-6xl !w-16 !h-16 text-gray-300 mb-4">{{ feat.icon }}</mat-icon>
+            <p class="text-gray-400 font-medium">Feature Screenshot</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Deep Dive Sections -->
+<section class="py-20 bg-white">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Deep Dive</h2>
+      <p class="text-lg text-gray-600">Explore the powerful capabilities in detail</p>
+    </div>
+    <div class="space-y-8">
+      @for (section of feat.detailSections; track section.title; let i = $index) {
+      <div class="grid lg:grid-cols-2 gap-8 items-center" [ngClass]="{ 'lg:flex-row-reverse': i % 2 !== 0 }">
+        @if (i % 2 === 0) {
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <div class="flex items-center justify-center w-10 h-10 rounded-xl" [ngClass]="feat.bgColor">
+              <mat-icon [ngClass]="feat.color">{{ section.icon }}</mat-icon>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900">{{ section.title }}</h3>
+          </div>
+          <p class="text-gray-600 leading-relaxed text-lg">{{ section.description }}</p>
+        </div>
+        <div class="bg-gray-100 rounded-2xl border border-gray-200 aspect-video flex items-center justify-center">
+          <div class="text-center p-6">
+            <mat-icon class="!text-5xl !w-12 !h-12 text-gray-300 mb-3">{{ section.icon }}</mat-icon>
+            <p class="text-gray-400 text-sm">{{ section.title }} Preview</p>
+          </div>
+        </div>
+        } @else {
+        <div class="bg-gray-100 rounded-2xl border border-gray-200 aspect-video flex items-center justify-center lg:order-first">
+          <div class="text-center p-6">
+            <mat-icon class="!text-5xl !w-12 !h-12 text-gray-300 mb-3">{{ section.icon }}</mat-icon>
+            <p class="text-gray-400 text-sm">{{ section.title }} Preview</p>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <div class="flex items-center justify-center w-10 h-10 rounded-xl" [ngClass]="feat.bgColor">
+              <mat-icon [ngClass]="feat.color">{{ section.icon }}</mat-icon>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900">{{ section.title }}</h3>
+          </div>
+          <p class="text-gray-600 leading-relaxed text-lg">{{ section.description }}</p>
+        </div>
+        }
+      </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-gradient-to-r from-indigo-600 to-indigo-800">
+  <div class="max-w-4xl mx-auto px-6 text-center">
+    <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Transform Your Operations?</h2>
+    <p class="text-xl text-indigo-100 mb-8">Start using {{ feat.title }} today — free for 14 days, no credit card required.</p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <button mat-flat-button class="!bg-white !text-indigo-700 !rounded-full !px-8 !py-3 !text-base !font-semibold" (click)="navigateToSignup()">
+        Start Free Trial
+      </button>
+      <button mat-stroked-button class="!border-white !text-white !rounded-full !px-8 !py-3 !text-base" routerLink="/home">
+        Learn More
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Other Features Grid -->
+<section class="py-20 bg-gray-50">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">Explore More Features</h2>
+      <p class="text-lg text-gray-600">ShopBot is a complete hospitality platform</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+      @for (other of otherFeatures(); track other.slug) {
+      <a [routerLink]="['/features', other.slug]" class="group block">
+        <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1 h-full">
+          <mat-card-content class="p-5">
+            <div class="flex items-center justify-center w-10 h-10 rounded-xl mx-auto mb-3" [ngClass]="other.bgColor">
+              <mat-icon [ngClass]="other.color">{{ other.icon }}</mat-icon>
+            </div>
+            <h3 class="text-sm font-bold text-gray-900 text-center">{{ other.title }}</h3>
+          </mat-card-content>
+        </mat-card>
+      </a>
+      }
+    </div>
+  </div>
+</section>
+}
+
+<app-footer />

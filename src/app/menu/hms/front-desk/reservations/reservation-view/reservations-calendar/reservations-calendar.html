@@ -204,7 +204,12 @@
                         (mousedown)="$event.stopPropagation()">
                         <div class="reservation-content">
                           <div class="reservation-text">
-                            <span class="reservation-nights">{{ getReservationNightsLabel(reservation) }}</span>
+                            <div class="reservation-meta">
+                              <span class="reservation-nights">{{ getReservationNightsLabel(reservation) }}</span>
+                              @if (isReservationModified(reservation)) {
+                                <span class="reservation-modified">MOD</span>
+                              }
+                            </div>
                             <span class="reservation-name">{{ getReservationBlockLabel(reservation) }}</span>
                           </div>
                           <div class="reservation-source">

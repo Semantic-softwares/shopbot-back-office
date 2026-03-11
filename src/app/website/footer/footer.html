@@ -4,8 +4,8 @@
     <div class="grid md:grid-cols-4 gap-10">
       <div>
         <div class="flex items-center gap-2 mb-4">
-          <mat-icon class="text-indigo-600 text-3xl">apartment</mat-icon>
-          <span class="font-bold text-xl text-gray-900">ShopBot</span>
+          <img src="assets/logo/logo_512.png" alt="Shopbot Logo" class="h-9 w-9">
+          <span class="font-bold text-xl" style="color: #6750a4;">Shopbot</span>
         </div>
         <p class="text-gray-600 leading-relaxed">
           Powerful hotel management platform for modern teams. Manage reservations, staff, billing and insights in one place.
@@ -21,9 +21,15 @@
         <h4 class="font-semibold text-gray-900 mb-4">Product</h4>
         <ul class="space-y-3 text-gray-600">
           <li><a href="#features" class="hover:text-gray-900">Features</a></li>
-          <li><a (click)="scrollToMenuItems('menu-management')" class="hover:text-gray-900 cursor-pointer">Menu Management</a></li>
-          <li><a (click)="scrollToMenuItems('pos-system')" class="hover:text-gray-900 cursor-pointer">POS System</a></li>
-          <li><a (click)="scrollToMenuItems('reservations')" class="hover:text-gray-900 cursor-pointer">Reservations</a></li>
+          <li><a routerLink="/features/pms" class="hover:text-gray-900 cursor-pointer">Property Management</a></li>
+          <li><a routerLink="/features/pos" class="hover:text-gray-900 cursor-pointer">POS - Food & Beverage</a></li>
+          <li><a routerLink="/features/accounting" class="hover:text-gray-900 cursor-pointer">Accounting & Expenses</a></li>
+          <li><a routerLink="/features/inventory" class="hover:text-gray-900 cursor-pointer">Purchasing & Inventory</a></li>
+          <li><a routerLink="/features/housekeeping" class="hover:text-gray-900 cursor-pointer">Housekeeping</a></li>
+          <li><a routerLink="/features/reporting" class="hover:text-gray-900 cursor-pointer">Reporting & Analytics</a></li>
+          <li><a routerLink="/features/booking-engine" class="hover:text-gray-900 cursor-pointer">Booking Engine</a></li>
+          <li><a routerLink="/features/channel-manager" class="hover:text-gray-900 cursor-pointer">Channel Manager</a></li>
+          <li><a routerLink="/downloads" class="hover:text-gray-900">Printer Agent</a></li>
         </ul>
       </div>
 

@@ -36,87 +36,129 @@
   <div class="max-w-6xl mx-auto px-6">
     <div class="text-center mb-16">
       <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Powerful Features</h2>
-      <p class="text-xl text-gray-600">Everything you need to run your hotel successfully</p>
+      <p class="text-xl text-gray-600">Everything you need to run your hospitality business</p>
     </div>
 
-    <div class="grid md:grid-cols-3 gap-8">
-      <!-- Feature 1 -->
-      <mat-card appearance="outlined" class="hover:shadow-xl transition-shadow">
-        <mat-card-content class="p-8">
-          <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-100 mx-auto mb-6">
-            <mat-icon class="text-blue-600 text-4xl">calendar_today</mat-icon>
-          </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-3 text-center">Reservation Management</h3>
-          <p class="text-gray-600 text-center leading-relaxed">
-            Manage bookings effortlessly with our intuitive calendar interface. Track availability, modify reservations, and handle cancellations.
-          </p>
-        </mat-card-content>
-      </mat-card>
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- PMS -->
+      <a routerLink="/features/pms" class="group block">
+        <mat-card appearance="outlined" class="hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1 h-full">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-100 mx-auto mb-5">
+              <mat-icon class="text-blue-600 !text-3xl !w-8 !h-8">hotel</mat-icon>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Property Management</h3>
+            <p class="text-gray-600 text-center text-sm leading-relaxed">
+              Manage rooms, bookings, and reservations all in one place.
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </a>
 
-      <!-- Feature 2 -->
-      <mat-card appearance="outlined" class="hover:shadow-xl transition-shadow">
-        <mat-card-content class="p-8">
-          <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-green-100 mx-auto mb-6">
-            <mat-icon class="text-green-600 text-4xl">people</mat-icon>
-          </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-3 text-center">Staff Management</h3>
-          <p class="text-gray-600 text-center leading-relaxed">
-            Schedule staff, track timesheets, and manage roles. Keep your team organized and efficient.
-          </p>
-        </mat-card-content>
-      </mat-card>
+      <!-- POS -->
+      <a routerLink="/features/pos" class="group block">
+        <mat-card appearance="outlined" class="hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1 h-full">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-green-100 mx-auto mb-5">
+              <mat-icon class="text-green-600 !text-3xl !w-8 !h-8">point_of_sale</mat-icon>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">POS - Food & Beverage</h3>
+            <p class="text-gray-600 text-center text-sm leading-relaxed">
+              Fast and reliable point-of-sale for restaurants, bars, and cafes.
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </a>
 
-      <!-- Feature 3 -->
-      <mat-card appearance="outlined" class="hover:shadow-xl transition-shadow">
-        <mat-card-content class="p-8">
-          <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-purple-100 mx-auto mb-6">
-            <mat-icon class="text-purple-600 text-4xl">payment</mat-icon>
-          </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-3 text-center">Billing & Payments</h3>
-          <p class="text-gray-600 text-center leading-relaxed">
-            Process payments securely, generate invoices, and manage subscriptions with ease.
-          </p>
-        </mat-card-content>
-      </mat-card>
+      <!-- Accounting -->
+      <a routerLink="/features/accounting" class="group block">
+        <mat-card appearance="outlined" class="hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1 h-full">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-purple-100 mx-auto mb-5">
+              <mat-icon class="text-purple-600 !text-3xl !w-8 !h-8">account_balance</mat-icon>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Accounting & Expenses</h3>
+            <p class="text-gray-600 text-center text-sm leading-relaxed">
+              Track income, expenses, and generate financial reports.
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </a>
 
-      <!-- Feature 4 -->
-      <mat-card appearance="outlined" class="hover:shadow-xl transition-shadow">
-        <mat-card-content class="p-8">
-          <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-orange-100 mx-auto mb-6">
-            <mat-icon class="text-orange-600 text-4xl">analytics</mat-icon>
-          </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-3 text-center">Analytics & Reports</h3>
-          <p class="text-gray-600 text-center leading-relaxed">
-            Gain insights with real-time analytics and detailed reports to make informed decisions.
-          </p>
-        </mat-card-content>
-      </mat-card>
+      <!-- Inventory -->
+      <a routerLink="/features/inventory" class="group block">
+        <mat-card appearance="outlined" class="hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1 h-full">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-orange-100 mx-auto mb-5">
+              <mat-icon class="text-orange-600 !text-3xl !w-8 !h-8">inventory_2</mat-icon>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Purchasing & Inventory</h3>
+            <p class="text-gray-600 text-center text-sm leading-relaxed">
+              Keep stock in check and never run out of essentials.
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </a>
 
-      <!-- Feature 5 -->
-      <mat-card appearance="outlined" class="hover:shadow-xl transition-shadow">
-        <mat-card-content class="p-8">
-          <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-red-100 mx-auto mb-6">
-            <mat-icon class="text-red-600 text-4xl">security</mat-icon>
-          </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-3 text-center">Security & Compliance</h3>
-          <p class="text-gray-600 text-center leading-relaxed">
-            Enterprise-grade security with encrypted data and compliance with international standards.
-          </p>
-        </mat-card-content>
-      </mat-card>
+      <!-- Housekeeping -->
+      <a routerLink="/features/housekeeping" class="group block">
+        <mat-card appearance="outlined" class="hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1 h-full">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-teal-100 mx-auto mb-5">
+              <mat-icon class="text-teal-600 !text-3xl !w-8 !h-8">cleaning_services</mat-icon>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Housekeeping</h3>
+            <p class="text-gray-600 text-center text-sm leading-relaxed">
+              Schedule cleaning and maintenance to keep your property flawless.
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </a>
 
-      <!-- Feature 6 -->
-      <mat-card appearance="outlined" class="hover:shadow-xl transition-shadow">
-        <mat-card-content class="p-8">
-          <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-teal-100 mx-auto mb-6">
-            <mat-icon class="text-teal-600 text-4xl">support_agent</mat-icon>
-          </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-3 text-center">24/7 Support</h3>
-          <p class="text-gray-600 text-center leading-relaxed">
-            Get help whenever you need it with our dedicated support team available round the clock.
-          </p>
-        </mat-card-content>
-      </mat-card>
+      <!-- Reporting -->
+      <a routerLink="/features/reporting" class="group block">
+        <mat-card appearance="outlined" class="hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1 h-full">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-red-100 mx-auto mb-5">
+              <mat-icon class="text-red-600 !text-3xl !w-8 !h-8">analytics</mat-icon>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Reporting & Analytics</h3>
+            <p class="text-gray-600 text-center text-sm leading-relaxed">
+              Gain insights from data to improve operations and revenue.
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </a>
+
+      <!-- Booking Engine -->
+      <a routerLink="/features/booking-engine" class="group block">
+        <mat-card appearance="outlined" class="hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1 h-full">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-100 mx-auto mb-5">
+              <mat-icon class="text-indigo-600 !text-3xl !w-8 !h-8">language</mat-icon>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Booking Engine</h3>
+            <p class="text-gray-600 text-center text-sm leading-relaxed">
+              Accept direct bookings online and manage reservations easily.
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </a>
+
+      <!-- Channel Manager -->
+      <a routerLink="/features/channel-manager" class="group block">
+        <mat-card appearance="outlined" class="hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1 h-full">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-100 mx-auto mb-5">
+              <mat-icon class="text-amber-600 !text-3xl !w-8 !h-8">sync</mat-icon>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Channel Manager</h3>
+            <p class="text-gray-600 text-center text-sm leading-relaxed">
+              Sync rates and availability across all online channels.
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </a>
     </div>
   </div>
 </section>

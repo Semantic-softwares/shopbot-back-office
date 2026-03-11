@@ -274,13 +274,6 @@
           (click)="onSubmit()"
           [disabled]="!canSubmit()"
           [matTooltip]="hasRestrictionIssues() ? 'Cannot proceed — booking restrictions apply' : ''">
-    @if (submitting()) {
-      <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
-    }
-    @if (hasRestrictionIssues()) {
-      <mat-icon class="mr-1">block</mat-icon> Restricted
-    } @else {
-      Change Room
-    }
+          {{ hasRestrictionIssues() ? 'Restricted' : 'Change Room' }}
   </button>
 </mat-dialog-actions>

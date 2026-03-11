@@ -6,21 +6,43 @@
       : 'w-full rounded-none bg-transparent shadow-none'"
       class="flex items-center justify-between px-3 sm:px-5 py-2 transition-all duration-300">
       <!-- Brand -->
-      <div class="flex items-center gap-2">
-        <mat-icon class="text-indigo-600 text-3xl">apartment</mat-icon>
-        <span class="font-semibold text-lg text-gray-900">ShopBot</span>
-      </div>
+      <a routerLink="/home" class="flex items-center gap-2 cursor-pointer no-underline">
+        <img src="assets/logo/logo_512.png" alt="Shopbot Logo" class="h-8 w-8">
+        <span class="font-semibold text-lg" style="color: #6750a4;">Shopbot</span>
+      </a>
 
       <!-- Desktop Nav -->
       <div class="hidden md:flex items-center gap-8 text-gray-900">
         <button mat-button (click)="scrollToFeatures()" class="!text-gray-900">Features</button>
         <button mat-button [matMenuTriggerFor]="productMenu" class="!text-gray-900">Products</button>
         <mat-menu #productMenu="matMenu">
-          <button mat-menu-item (click)="scrollToMenuItems('menu-management')">Menu Management</button>
-          <button mat-menu-item (click)="scrollToMenuItems('pos-system')">POS System</button>
-          <button mat-menu-item (click)="scrollToMenuItems('reservations')">Reservations</button>
+          <button mat-menu-item (click)="navigateToFeature('pms')">
+            <mat-icon>hotel</mat-icon> Property Management
+          </button>
+          <button mat-menu-item (click)="navigateToFeature('pos')">
+            <mat-icon>point_of_sale</mat-icon> POS - Food & Beverage
+          </button>
+          <button mat-menu-item (click)="navigateToFeature('accounting')">
+            <mat-icon>account_balance</mat-icon> Accounting & Expenses
+          </button>
+          <button mat-menu-item (click)="navigateToFeature('inventory')">
+            <mat-icon>inventory_2</mat-icon> Purchasing & Inventory
+          </button>
+          <button mat-menu-item (click)="navigateToFeature('housekeeping')">
+            <mat-icon>cleaning_services</mat-icon> Housekeeping
+          </button>
+          <button mat-menu-item (click)="navigateToFeature('reporting')">
+            <mat-icon>analytics</mat-icon> Reporting & Analytics
+          </button>
+          <button mat-menu-item (click)="navigateToFeature('booking-engine')">
+            <mat-icon>language</mat-icon> Booking Engine
+          </button>
+          <button mat-menu-item (click)="navigateToFeature('channel-manager')">
+            <mat-icon>sync</mat-icon> Channel Manager
+          </button>
         </mat-menu>
         <button mat-button (click)="scrollToPricing()" class="!text-gray-900">Pricing</button>
+        <button mat-button (click)="navigateToDownloads()" class="!text-gray-900">Downloads</button>
       </div>
 
       <!-- Right actions -->
@@ -44,11 +66,33 @@
     <div class="max-w-6xl mx-auto px-6 py-4 space-y-1">
       <button mat-button class="!w-full !justify-start !text-gray-900 !text-base" (click)="scrollToFeatures()">Features</button>
       <button mat-button class="!w-full !justify-start !text-gray-900 !text-base" (click)="scrollToPricing()">Pricing</button>
+      <button mat-button class="!w-full !justify-start !text-gray-900 !text-base" (click)="navigateToDownloads()">Downloads</button>
       <button mat-button class="!w-full !justify-start !text-gray-900 !text-base" [matMenuTriggerFor]="mobileProductMenu">Products</button>
       <mat-menu #mobileProductMenu="matMenu">
-        <button mat-menu-item (click)="scrollToMenuItems('menu-management')">Menu Management</button>
-        <button mat-menu-item (click)="scrollToMenuItems('pos-system')">POS System</button>
-        <button mat-menu-item (click)="scrollToMenuItems('reservations')">Reservations</button>
+        <button mat-menu-item (click)="navigateToFeature('pms')">
+          <mat-icon>hotel</mat-icon> Property Management
+        </button>
+        <button mat-menu-item (click)="navigateToFeature('pos')">
+          <mat-icon>point_of_sale</mat-icon> POS - Food & Beverage
+        </button>
+        <button mat-menu-item (click)="navigateToFeature('accounting')">
+          <mat-icon>account_balance</mat-icon> Accounting & Expenses
+        </button>
+        <button mat-menu-item (click)="navigateToFeature('inventory')">
+          <mat-icon>inventory_2</mat-icon> Purchasing & Inventory
+        </button>
+        <button mat-menu-item (click)="navigateToFeature('housekeeping')">
+          <mat-icon>cleaning_services</mat-icon> Housekeeping
+        </button>
+        <button mat-menu-item (click)="navigateToFeature('reporting')">
+          <mat-icon>analytics</mat-icon> Reporting & Analytics
+        </button>
+        <button mat-menu-item (click)="navigateToFeature('booking-engine')">
+          <mat-icon>language</mat-icon> Booking Engine
+        </button>
+        <button mat-menu-item (click)="navigateToFeature('channel-manager')">
+          <mat-icon>sync</mat-icon> Channel Manager
+        </button>
       </mat-menu>
     </div>
   </div>

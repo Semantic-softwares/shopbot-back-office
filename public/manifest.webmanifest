@@ -4,7 +4,7 @@
   "description": "Shopbot Back Office - POS, ERP & Hotel Management",
   "display": "standalone",
   "orientation": "any",
-  "theme_color": "#3f51b5",
+  "theme_color": "#6750a4",
   "background_color": "#ffffff",
   "scope": "./",
   "start_url": "./",

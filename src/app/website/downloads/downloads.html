@@ -1,0 +1,294 @@
+<app-header></app-header>
+
+<!-- Hero Section -->
+<section class="pt-28 pb-12">
+  <div class="max-w-4xl mx-auto px-6 text-center">
+    <div class="flex items-center justify-center mb-6">
+      <div class="flex items-center justify-center w-20 h-20 rounded-2xl bg-indigo-100">
+        <mat-icon class="icon-xl text-indigo-600">print</mat-icon>
+      </div>
+    </div>
+    <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-gray-900">
+      Download ShopBot Printer Agent
+    </h1>
+    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
+      Connect your receipt printers to ShopBot. Install the Printer Agent on your computer to
+      enable automatic receipt printing via USB or Bluetooth.
+    </p>
+  </div>
+</section>
+
+<!-- Loading State -->
+@if (isLoading()) {
+  <section class="py-20">
+    <div class="flex flex-col items-center justify-center gap-4">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p class="text-gray-500">Fetching latest releases…</p>
+    </div>
+  </section>
+}
+
+<!-- Error State -->
+@if (error()) {
+  <section class="py-20">
+    <div class="max-w-lg mx-auto text-center">
+      <mat-icon class="icon-xxl text-red-400 mb-4">cloud_off</mat-icon>
+      <h3 class="text-xl font-semibold text-gray-900 mb-2">Unable to Load Releases</h3>
+      <p class="text-gray-600 mb-6">{{ error() }}</p>
+      <button mat-flat-button color="primary" (click)="loadReleases()">
+        <mat-icon class="mr-2">refresh</mat-icon>
+        Try Again
+      </button>
+    </div>
+  </section>
+}
+
+<!-- Latest Release - Recommended Download -->
+@if (!isLoading() && !error() && latestRelease()) {
+  <section class="pb-16">
+    <div class="max-w-4xl mx-auto px-6">
+
+      <!-- OS-detected recommended download -->
+      <mat-card class="recommended-card overflow-hidden">
+        <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-8 py-5 flex items-center justify-between">
+          <div class="flex items-center gap-3 text-white">
+            <mat-icon class="icon-md">{{ platformIcon() }}</mat-icon>
+            <div>
+              <h2 class="text-xl font-bold">Recommended for {{ platformLabel() }}</h2>
+              <p class="text-indigo-200 text-sm">We detected your operating system</p>
+            </div>
+          </div>
+          <span class="bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium">
+            {{ latestRelease()?.version }}
+          </span>
+        </div>
+
+        <mat-card-content class="p-8">
+          @if (recommendedAsset()) {
+            <div class="flex flex-col sm:flex-row items-center gap-6">
+              <div class="flex-1">
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">
+                  {{ recommendedAsset()?.label }}
+                </h3>
+                <p class="text-sm text-gray-500">
+                  {{ recommendedAsset()?.fileName }} · {{ formatBytes(recommendedAsset()!.size) }}
+                  · {{ formatDate(latestRelease()!.publishedAt) }}
+                </p>
+              </div>
+              <a
+                [href]="recommendedAsset()?.downloadUrl"
+                mat-flat-button
+                color="primary"
+                class="!py-3 !px-8 !text-base"
+              >
+                <mat-icon class="mr-2">download</mat-icon>
+                Download for {{ platformLabel() }}
+              </a>
+            </div>
+          } @else {
+            <div class="text-center py-4">
+              <p class="text-gray-600">
+                No {{ platformLabel() }} build available for this release. Check the downloads below.
+              </p>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- All downloads for latest release -->
+      @if (otherLatestAssets().length > 0) {
+        <div class="mt-8">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Other Downloads for {{ latestRelease()?.version }}</h3>
+          <div class="grid sm:grid-cols-2 gap-4">
+            @for (asset of otherLatestAssets(); track asset.downloadUrl) {
+              <mat-card appearance="outlined" class="hover:shadow-md transition-shadow">
+                <mat-card-content class="p-5">
+                  <div class="flex items-center gap-4">
+                    <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100">
+                      <mat-icon class="text-gray-600">{{ getPlatformIcon(asset.platform) }}</mat-icon>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="font-medium text-gray-900 truncate">{{ asset.label }}</p>
+                      <p class="text-xs text-gray-500">{{ asset.fileName }} · {{ formatBytes(asset.size) }}</p>
+                    </div>
+                    <a
+                      [href]="asset.downloadUrl"
+                      mat-icon-button
+                      matTooltip="Download"
+                      aria-label="Download {{ asset.label }}"
+                    >
+                      <mat-icon>download</mat-icon>
+                    </a>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- System Requirements -->
+  <section class="py-12 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-6">
+      <h2 class="text-2xl font-bold text-gray-900 mb-8 text-center">System Requirements</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <mat-card appearance="outlined">
+          <mat-card-content class="p-6 text-center">
+            <mat-icon class="icon-lg text-blue-600 mb-3">desktop_windows</mat-icon>
+            <h4 class="font-semibold text-gray-900 mb-2">Windows</h4>
+            <ul class="text-sm text-gray-600 space-y-1">
+              <li>Windows 10 or later</li>
+              <li>64-bit (x64)</li>
+              <li>4 GB RAM minimum</li>
+            </ul>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined">
+          <mat-card-content class="p-6 text-center">
+            <mat-icon class="icon-lg text-gray-800 mb-3">laptop_mac</mat-icon>
+            <h4 class="font-semibold text-gray-900 mb-2">macOS</h4>
+            <ul class="text-sm text-gray-600 space-y-1">
+              <li>macOS 10.15 (Catalina) or later</li>
+              <li>Apple Silicon &amp; Intel</li>
+              <li>4 GB RAM minimum</li>
+            </ul>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined">
+          <mat-card-content class="p-6 text-center">
+            <mat-icon class="icon-lg text-orange-600 mb-3">computer</mat-icon>
+            <h4 class="font-semibold text-gray-900 mb-2">Linux</h4>
+            <ul class="text-sm text-gray-600 space-y-1">
+              <li>Ubuntu 18.04+ / Fedora 32+</li>
+              <li>64-bit (x64)</li>
+              <li>4 GB RAM minimum</li>
+            </ul>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </section>
+
+  <!-- Older Releases -->
+  @if (olderReleases().length > 0) {
+    <section class="py-16">
+      <div class="max-w-4xl mx-auto px-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Previous Versions</h2>
+        <p class="text-gray-600 mb-8">
+          Need an older version? You can download previous releases below.
+        </p>
+
+        <div class="space-y-4">
+          @for (release of olderReleases(); track release.version) {
+            <mat-expansion-panel class="!shadow-none !border !border-gray-200 !rounded-lg">
+              <mat-expansion-panel-header class="!py-5">
+                <mat-panel-title class="!text-base !font-semibold !text-gray-900">
+                  {{ release.name }}
+                </mat-panel-title>
+                <mat-panel-description class="!text-sm !text-gray-500">
+                  {{ formatDate(release.publishedAt) }}
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+
+              <div class="pb-4">
+                @if (release.body) {
+                  <p class="text-sm text-gray-600 mb-4 whitespace-pre-line">{{ release.body }}</p>
+                }
+
+                @for (platform of getUniquePlatforms(release); track platform) {
+                  <div class="mb-4">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                      <mat-icon class="icon-sm">{{ getPlatformIcon(platform) }}</mat-icon>
+                      {{ getPlatformLabel(platform) }}
+                    </h4>
+                    <div class="space-y-2">
+                      @for (asset of getAssetsForPlatform(release, platform); track asset.downloadUrl) {
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                          <div class="min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">{{ asset.fileName }}</p>
+                            <p class="text-xs text-gray-500">{{ asset.label }} · {{ formatBytes(asset.size) }}</p>
+                          </div>
+                          <a
+                            [href]="asset.downloadUrl"
+                            mat-button
+                            color="primary"
+                            class="!ml-4 flex-shrink-0"
+                          >
+                            <mat-icon class="mr-1">download</mat-icon>
+                            Download
+                          </a>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+
+                @if (release.assets.length === 0) {
+                  <p class="text-sm text-gray-500 italic">No downloadable assets for this release.</p>
+                }
+              </div>
+            </mat-expansion-panel>
+          }
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Installation Help -->
+  <section class="py-16 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-6">
+      <h2 class="text-2xl font-bold text-gray-900 mb-8 text-center">Quick Setup Guide</h2>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="flex items-center justify-center w-14 h-14 rounded-full bg-indigo-100 mx-auto mb-4">
+            <span class="text-xl font-bold text-indigo-600">1</span>
+          </div>
+          <h4 class="font-semibold text-gray-900 mb-2">Download &amp; Install</h4>
+          <p class="text-sm text-gray-600">
+            Download the installer for your OS and run the setup wizard. The app will install automatically.
+          </p>
+        </div>
+
+        <div class="text-center">
+          <div class="flex items-center justify-center w-14 h-14 rounded-full bg-indigo-100 mx-auto mb-4">
+            <span class="text-xl font-bold text-indigo-600">2</span>
+          </div>
+          <h4 class="font-semibold text-gray-900 mb-2">Connect Your Printer</h4>
+          <p class="text-sm text-gray-600">
+            Plug in your USB receipt printer or pair via Bluetooth. The agent will detect it automatically.
+          </p>
+        </div>
+
+        <div class="text-center">
+          <div class="flex items-center justify-center w-14 h-14 rounded-full bg-indigo-100 mx-auto mb-4">
+            <span class="text-xl font-bold text-indigo-600">3</span>
+          </div>
+          <h4 class="font-semibold text-gray-900 mb-2">Sign In &amp; Print</h4>
+          <p class="text-sm text-gray-600">
+            Log in with your ShopBot account. Receipts will print automatically when orders are completed.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+}
+
+<!-- Empty State (no releases at all) -->
+@if (!isLoading() && !error() && releases().length === 0) {
+  <section class="py-20">
+    <div class="max-w-lg mx-auto text-center">
+      <mat-icon class="icon-xxl text-gray-300 mb-4">inventory_2</mat-icon>
+      <h3 class="text-xl font-semibold text-gray-900 mb-2">No Releases Available</h3>
+      <p class="text-gray-600">
+        The Printer Agent has not been released yet. Check back soon!
+      </p>
+    </div>
+  </section>
+}
+
+<app-footer></app-footer>
