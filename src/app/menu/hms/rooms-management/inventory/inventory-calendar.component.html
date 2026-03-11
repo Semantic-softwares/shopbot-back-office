@@ -5,8 +5,12 @@
       Bulk Set Rates
     </button>
     @if (isChannexConnected()) {
-      <button matButton="filled" color="primary" (click)="syncToChannex()" [disabled]="syncing()">
-        <mat-icon>cloud_upload</mat-icon> {{ syncing() ? "Syncing…" : "Sync to Channex" }}
+      <button matButton="filled" color="primary" (click)="syncToChannex()" [disabled]="syncing() || fullSyncing() || !hasChannexPendingChanges()">
+        <mat-icon>cloud_upload</mat-icon> {{ syncing() ? "Syncing…" : "Sync Changes to Channex" }}
+      </button>
+      <button matButton="tonal" color="warn" (click)="fullSyncToChannex()" [disabled]="syncing() || fullSyncing()">
+        <mat-icon>{{ fullSyncing() ? 'hourglass_top' : 'cloud_sync' }}</mat-icon>
+        {{ fullSyncing() ? fullSyncProgress() : 'Full Sync 500d (Cert)' }}
       </button>
     }
     <button matButton="outlined" (click)="discardChanges()" [disabled]="!hasUnsavedChanges()">

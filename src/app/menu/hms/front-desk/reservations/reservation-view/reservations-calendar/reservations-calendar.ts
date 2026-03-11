@@ -987,6 +987,12 @@ export class ReservationsCalendar implements OnInit {
     return `${prefix} ${name}`;
   }
 
+  /** Whether this reservation has been flagged as modified */
+  public isReservationModified(reservation: any): boolean {
+    const source = reservation?.reservation || reservation;
+    return !!source?.modification?.isModified;
+  }
+
   /** Nights label for reservation block */
   public getReservationNightsLabel(reservation: any): string {
     const checkIn = this.parseDateOnly(reservation.checkInDate);

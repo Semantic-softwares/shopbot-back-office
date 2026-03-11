@@ -69,7 +69,9 @@ export class ReservationPreviewDialogComponent {
     return rooms.every((rr: any) => !rr?.room?._id);
   });
 
-  /** Get the assigned guest from room assignment, fallback to reservation guest */
+  /** Get the guest to display.
+   *  If a room is assigned, use the room's assignedGuest (matches what the calendar shows).
+   *  Otherwise fall back to the reservation-level guest. */
   public assignedGuest = computed(() => {
     const rr = this.roomAssignment();
     return rr?.assignedGuest || this.reservation()?.guest;
@@ -81,17 +83,32 @@ export class ReservationPreviewDialogComponent {
     return this.guestService.getGuestName(guest);
   });
 
+  /** Whether reservation has pending Channex/other modification flag */
+  public isModified = computed(() => {
+    return !!this.reservation()?.modification?.isModified;
+  });
+
   public openReservation(): void {
     this.close();
     // Navigate from reservations/view/calendar to reservations/edit/:id
     const res = this.reservation();
-    const bookingId = res?.channex?.bookingId;
-    if (bookingId && this.isOtaUnassigned()) {
-      this.router.navigate(['/menu', 'hms', 'channel-management', 'live-booking', bookingId, 'details']);
-      return;
+    if (this.isOtaUnassigned()) {
+      // Resolve the real Channex booking ID.
+      // rawWebhookData (from booking revision API) stores the actual booking_id in attributes.
+      // channex.bookingId may be a revision ID for legacy reservations, so prefer rawWebhookData.
+      const raw = res?.channex?.rawWebhookData;
+      const attrs = raw?.attributes || raw;
+      const realBookingId =
+        attrs?.booking_id ||
+        raw?.relationships?.data?.booking?.id ||
+        res?.channex?.bookingId;
+
+      if (realBookingId) {
+        this.router.navigate(['/menu', 'hms', 'channel-management', 'live-booking', realBookingId, 'details']);
+        return;
+      }
     }
     this.router.navigate(['/menu', 'hms', 'front-desk', 'reservations', 'edit', this.reservation()?._id]);
-
   }
 
   /** Room check-in from stayPeriod or reservation checkInDate */

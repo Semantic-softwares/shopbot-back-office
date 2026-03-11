@@ -41,8 +41,70 @@
         message="No products found matching your criteria.">
       </app-no-record>
     } @else if (dataSource.hasValue()) {
+
+      <!-- Bulk Actions Bar -->
+      @if (selectedCount() > 0) {
+        <div class="flex items-center gap-3 px-4 py-3 mx-4 mb-3 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-900/30 dark:border-blue-700">
+          <mat-icon class="text-blue-600">checklist</mat-icon>
+          <span class="text-sm font-medium text-blue-800 dark:text-blue-200">
+            {{ selectedCount() }} product(s) selected
+          </span>
+          <div class="flex items-center gap-2 ml-4">
+            <span class="text-xs text-gray-500 mr-1">Assign Station:</span>
+            @for (station of stations.value(); track station._id) {
+              <button mat-stroked-button
+                class="!text-xs !min-w-0 !px-3 !py-1 !h-8"
+                (click)="bulkAssignStation(station._id)"
+                [disabled]="bulkUpdating()"
+                [matTooltip]="'Assign to ' + station.name">
+                <mat-icon class="!text-base !w-4 !h-4 mr-1">{{ station.icon || 'restaurant' }}</mat-icon>
+                {{ station.name }}
+              </button>
+            }
+            <button mat-stroked-button color="warn"
+              class="!text-xs !min-w-0 !px-3 !py-1 !h-8"
+              (click)="bulkRemoveStation()"
+              [disabled]="bulkUpdating()"
+              matTooltip="Remove station assignment">
+              <mat-icon class="!text-base !w-4 !h-4 mr-1">link_off</mat-icon>
+              Remove Station
+            </button>
+          </div>
+          <span class="flex-grow"></span>
+          <button mat-icon-button (click)="clearSelection()" matTooltip="Clear selection" aria-label="Clear selection">
+            <mat-icon class="!text-base">close</mat-icon>
+          </button>
+          @if (bulkUpdating()) {
+            <mat-spinner diameter="20"></mat-spinner>
+          }
+        </div>
+      }
+
       <div class="table-container rounded-lg overflow-x-auto">
         <table mat-table [dataSource]="filteredProducts()" matSort class="min-w-full">
+
+          <!-- Checkbox Column -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50 !w-12">
+              <mat-checkbox
+                [checked]="isAllSelected()"
+                [indeterminate]="isIndeterminate()"
+                (change)="toggleAll()"
+                aria-label="Select all products"
+                color="primary">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let element">
+              <mat-checkbox
+                [checked]="isSelected(element._id)"
+                (change)="toggleSelection(element._id)"
+                (click)="$event.stopPropagation()"
+                [aria-label]="'Select ' + element.name"
+                color="primary">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="photo">
             <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Photo</th>
             <td mat-cell *matCellDef="let element">
@@ -59,6 +121,22 @@
           <ng-container matColumnDef="category">
             <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50">Category</th>
             <td mat-cell *matCellDef="let element">{{element?.menu?.name}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="station">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50">Station</th>
+            <td mat-cell *matCellDef="let element">
+              @if (element.station && element.station?.name) {
+                <mat-chip-set>
+                  <mat-chip class="!text-xs" [matTooltip]="element.station?.type || ''">
+                    <mat-icon matChipAvatar class="!text-sm">{{ element.station?.icon || 'restaurant' }}</mat-icon>
+                    {{ element.station.name }}
+                  </mat-chip>
+                </mat-chip-set>
+              } @else {
+                <span class="text-gray-400 text-xs italic">No station</span>
+              }
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="price">

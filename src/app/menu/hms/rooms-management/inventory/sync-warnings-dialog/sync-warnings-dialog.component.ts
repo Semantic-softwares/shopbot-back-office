@@ -7,11 +7,19 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 export interface SyncWarningsDialogData {
   availabilityCount: number;
   restrictionsCount: number;
   warnings: any[];
+  // Full sync certification fields (temporary)
+  fullSyncResult?: boolean;
+  availabilityTaskId?: string | null;
+  restrictionsTaskId?: string | null;
+  availabilityResponse?: any;
+  restrictionsResponse?: any;
 }
 
 export interface GroupedWarning {
@@ -38,6 +46,7 @@ export interface GroupedWarning {
     MatExpansionModule,
     MatBadgeModule,
     MatChipsModule,
+    MatTooltipModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sync-warnings-dialog.component.html',
@@ -45,8 +54,15 @@ export interface GroupedWarning {
 })
 export class SyncWarningsDialogComponent {
   data: SyncWarningsDialogData = inject(MAT_DIALOG_DATA);
+  private snackBar = inject(MatSnackBar);
 
   groupedWarnings = signal<GroupedWarning[]>(this.buildGroups());
+
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(() => {
+      this.snackBar.open('Copied to clipboard!', 'Close', { duration: 2000 });
+    });
+  }
 
   private buildGroups(): GroupedWarning[] {
     const groups = new Map<string, GroupedWarning>();
