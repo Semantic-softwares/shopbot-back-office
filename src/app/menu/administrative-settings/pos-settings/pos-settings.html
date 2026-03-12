@@ -1,0 +1,22 @@
+<div class="flex gap-6 p-4 h-full overflow-hidden">
+  <!-- Sidebar -->
+  <mat-card appearance="outlined" class="shrink-0 w-60 self-start">
+    <mat-nav-list>
+      @for (link of navLinks; track link.path) {
+        <a mat-list-item
+           [routerLink]="link.path"
+           routerLinkActive="active-link"
+           #rla="routerLinkActive"
+           [activated]="rla.isActive">
+          <mat-icon matListItemIcon>{{ link.icon }}</mat-icon>
+          <span matListItemTitle>{{ link.label }}</span>
+        </a>
+      }
+    </mat-nav-list>
+  </mat-card>
+
+  <!-- Content -->
+  <div class="flex-1 min-w-0 overflow-y-auto h-full">
+    <router-outlet></router-outlet>
+  </div>
+</div>

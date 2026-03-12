@@ -23,7 +23,7 @@ import { StationsService } from '../../../../../shared/services/station.service'
 import { PrinterService, Printer } from '../../../../../shared/services/printer.service';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
-import { PrinterFormModalComponent } from '../../../settings/printers/printer-form-modal/printer-form-modal.component';
+import { PrinterFormModalComponent } from '../../../../administrative-settings/pos-settings/printers/printer-form-modal/printer-form-modal.component';
 
 @Component({
   selector: 'app-create-station',

@@ -31,14 +31,12 @@ export class PaymentCallbackComponent implements OnInit {
   isError = signal<boolean>(false);
   errorMessage = signal<string>('An error occurred. Please try again.');
 
-  private roomCount = 0;
   private reference = '';
   private storeId = '';
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
       this.reference = params['reference'];
-      this.roomCount = parseInt(params['roomCount'] || '0', 10);
       this.storeId = params['storeId'];
 
       if (this.reference && this.storeId) {
@@ -50,7 +48,7 @@ export class PaymentCallbackComponent implements OnInit {
   }
 
   private verifyPayment(): void {
-    this.subscriptionService.verifyUpgradePayment(this.reference, this.roomCount, this.storeId).subscribe({
+    this.subscriptionService.verifyUpgradePayment(this.reference, this.storeId).subscribe({
       next: (subscription) => {
         this.isProcessing.set(false);
         this.isSuccess.set(true);

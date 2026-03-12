@@ -249,12 +249,7 @@ export class DashboardComponent {
         },
       ],
     },
-    {
-      name:  'Settings',
-      children: [
-        { icon: 'settings', label: 'Settings', link: './settings', permission: 'view_company' },
-      ]
-    },
+    
   ];
 
   // Computed signal for filtered nav items based on permissions
