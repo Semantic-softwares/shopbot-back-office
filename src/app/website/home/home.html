@@ -248,133 +248,85 @@
 
 <!-- Pricing Section -->
 <section id="pricing" class="py-20">
-  <div class="max-w-6xl mx-auto px-6">
+  <div class="max-w-5xl mx-auto px-6">
     <div class="text-center mb-16">
       <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
-      <p class="text-xl text-gray-600">Choose the perfect plan for your hotel</p>
+      <p class="text-xl text-gray-600">Start free. Upgrade when you're ready. One price for everything.</p>
     </div>
 
-    <div class="grid md:grid-cols-4 gap-6">
-      <!-- Plan 1 -->
-      <mat-card appearance="outlined" class="flex flex-col">
-        <mat-card-content class="p-6 flex-1">
-          <div class="mb-4">
-            <h3 class="text-lg font-bold text-gray-900">Starter</h3>
-            <p class="text-sm text-gray-600">0-10 rooms</p>
-          </div>
+    <div class="grid md:grid-cols-2 gap-8">
+      <!-- Free Plan -->
+      <mat-card appearance="outlined" class="flex flex-col hover:shadow-xl transition-shadow">
+        <mat-card-content class="p-8 flex-1">
           <div class="mb-6">
-            <span class="text-4xl font-bold text-gray-900">$20</span>
-            <span class="text-gray-600">/month</span>
+            <h3 class="text-2xl font-bold text-gray-900">Free Trial</h3>
+            <p class="text-sm text-gray-600 mt-1">Try everything for 30 days</p>
           </div>
-          <ul class="space-y-3 text-sm text-gray-600">
-            <li class="flex items-center gap-2">
+          <div class="mb-8">
+            <span class="text-5xl font-bold text-gray-900">$0</span>
+            <span class="text-gray-600">/30 days</span>
+          </div>
+          <ul class="space-y-4 text-gray-600">
+            <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Up to 10 rooms
+              30-day free trial
             </li>
-            <li class="flex items-center gap-2">
+            <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Basic support
+              No credit card required
             </li>
-            <li class="flex items-center gap-2">
+            <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Core features
+              Full access to all features
+            </li>
+            <li class="flex items-center gap-3">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              Cancel anytime
             </li>
           </ul>
         </mat-card-content>
       </mat-card>
 
-      <!-- Plan 2 -->
-      <mat-card appearance="outlined" class="flex flex-col border-2 border-blue-600 relative">
-        <div class="absolute -top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">Popular</div>
-        <mat-card-content class="p-6 flex-1">
-          <div class="mb-4">
-            <h3 class="text-lg font-bold text-gray-900">Professional</h3>
-            <p class="text-sm text-gray-600">11-30 rooms</p>
-          </div>
+      <!-- Paid Plan -->
+      <mat-card appearance="outlined" class="flex flex-col border-2 border-blue-600 relative hover:shadow-xl transition-shadow">
+        <div class="absolute -top-4 left-6 bg-blue-600 text-white px-4 py-1 rounded-full text-xs font-bold">Recommended</div>
+        <mat-card-content class="p-8 flex-1">
           <div class="mb-6">
-            <span class="text-4xl font-bold text-gray-900">$30</span>
+            <h3 class="text-2xl font-bold text-gray-900">Paid Plan</h3>
+            <p class="text-sm text-gray-600 mt-1">Everything you need to run your business</p>
+          </div>
+          <div class="mb-8">
+            <span class="text-5xl font-bold text-gray-900">$87.45</span>
             <span class="text-gray-600">/month</span>
           </div>
-          <ul class="space-y-3 text-sm text-gray-600">
-            <li class="flex items-center gap-2">
-              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Up to 30 rooms
-            </li>
-            <li class="flex items-center gap-2">
-              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Priority support
-            </li>
-            <li class="flex items-center gap-2">
-              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Advanced analytics
-            </li>
-            <li class="flex items-center gap-2">
-              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Staff management
-            </li>
-          </ul>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Plan 3 -->
-      <mat-card appearance="outlined" class="flex flex-col">
-        <mat-card-content class="p-6 flex-1">
-          <div class="mb-4">
-            <h3 class="text-lg font-bold text-gray-900">Enterprise</h3>
-            <p class="text-sm text-gray-600">31-35 rooms</p>
-          </div>
-          <div class="mb-6">
-            <span class="text-4xl font-bold text-gray-900">$40</span>
-            <span class="text-gray-600">/month</span>
-          </div>
-          <ul class="space-y-3 text-sm text-gray-600">
-            <li class="flex items-center gap-2">
-              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Up to 35 rooms
-            </li>
-            <li class="flex items-center gap-2">
-              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              24/7 support
-            </li>
-            <li class="flex items-center gap-2">
-              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              All features
-            </li>
-            <li class="flex items-center gap-2">
-              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              API access
-            </li>
-          </ul>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Plan 4 -->
-      <mat-card appearance="outlined" class="flex flex-col">
-        <mat-card-content class="p-6 flex-1">
-          <div class="mb-4">
-            <h3 class="text-lg font-bold text-gray-900">Premium</h3>
-            <p class="text-sm text-gray-600">35+ rooms</p>
-          </div>
-          <div class="mb-6">
-            <span class="text-4xl font-bold text-gray-900">$50</span>
-            <span class="text-gray-600">/month</span>
-          </div>
-          <ul class="space-y-3 text-sm text-gray-600">
-            <li class="flex items-center gap-2">
+          <ul class="space-y-4 text-gray-600">
+            <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
               Unlimited rooms
             </li>
-            <li class="flex items-center gap-2">
+            <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Dedicated support
+              Unlimited users & staff
             </li>
-            <li class="flex items-center gap-2">
+            <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Custom integrations
+              POS, HMS & ERP modules
             </li>
-            <li class="flex items-center gap-2">
+            <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              White-label option
+              Channel manager integration
+            </li>
+            <li class="flex items-center gap-3">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              Receipt & kitchen printing
+            </li>
+            <li class="flex items-center gap-3">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              24/7 priority support
+            </li>
+            <li class="flex items-center gap-3">
+              <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
+              All current & future features
             </li>
           </ul>
         </mat-card-content>
@@ -382,7 +334,7 @@
     </div>
 
     <div class="text-center mt-12">
-      <p class="text-gray-600 mb-6">30 days free trial for all plans. No credit card required.</p>
+      <p class="text-gray-600 mb-6">30 days free trial. No credit card required.</p>
       <button 
         matButton="outlined"
         color="primary" 
@@ -412,7 +364,7 @@
           </mat-panel-title>
         </mat-expansion-panel-header>
         <p class="text-gray-600 leading-relaxed pb-4">
-          Start using ShopBot immediately with full access to all features. No credit card required. After 30 days, choose a plan that fits your property size. You can cancel anytime during the trial.
+          Start using ShopBot immediately with full access to all features. No credit card required. After 30 days, upgrade to our Paid plan at $87.45/month to continue using all features. You can cancel anytime during the trial.
         </p>
       </mat-expansion-panel>
 
@@ -420,11 +372,11 @@
       <mat-expansion-panel class="!shadow-none !rounded-none">
         <mat-expansion-panel-header class="!py-6">
           <mat-panel-title class="!text-base !font-medium !text-gray-700">
-            Can I switch plans later?
+            How does billing work after the trial?
           </mat-panel-title>
         </mat-expansion-panel-header>
         <p class="text-gray-600 leading-relaxed pb-4">
-          Absolutely! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any billing differences.
+          After your 30-day free trial, you can upgrade to our Paid plan for $87.45/month. This gives you access to all features with no limits — unlimited rooms, staff, and full POS, HMS, and ERP functionality.
         </p>
       </mat-expansion-panel>
 
@@ -436,7 +388,7 @@
           </mat-panel-title>
         </mat-expansion-panel-header>
         <p class="text-gray-600 leading-relaxed pb-4">
-          Yes! All plans include access to our knowledge base and video tutorials. Professional and higher plans include personalized onboarding sessions with our customer success team.
+          Yes! All users get access to our knowledge base and video tutorials. Our Paid plan includes personalized onboarding sessions with our customer success team.
         </p>
       </mat-expansion-panel>
 
@@ -460,7 +412,7 @@
           </mat-panel-title>
         </mat-expansion-panel-header>
         <p class="text-gray-600 leading-relaxed pb-4">
-          ShopBot integrates seamlessly with popular OTAs, payment gateways, and channel managers. Enterprise and Premium plans include API access for custom integrations with your existing tools.
+          ShopBot integrates seamlessly with popular OTAs, payment gateways, and channel managers. Our Paid plan includes full API access for custom integrations with your existing tools.
         </p>
       </mat-expansion-panel>
 
@@ -472,7 +424,7 @@
           </mat-panel-title>
         </mat-expansion-panel-header>
         <p class="text-gray-600 leading-relaxed pb-4">
-          We accept all major credit cards (Visa, Mastercard, American Express), PayPal, and bank transfers for annual plans. All payments are processed securely through Stripe.
+          We accept all major credit and debit cards through Paystack, our secure payment processor. All payments are in USD. Your card details are never stored on our servers.
         </p>
       </mat-expansion-panel>
     </div>

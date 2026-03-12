@@ -110,6 +110,9 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.rolesService.isAdmin() || this.rolesService.hasAny(this.POS_PERMISSIONS)
   );
 
+  // Only super admins can access administrative settings
+  canAccessAdmin = computed(() => this.rolesService.isAdmin());
+
   constructor() {
     // Connect socket when store changes (only if not already connected)
     effect(() => {
@@ -137,13 +140,15 @@ export class MenuComponent implements OnInit, OnDestroy {
     // This ensures they persist across component navigation
   }
 
-  navigateToModule(moduleType: 'erp' | 'hotel' | 'pos'): void {
+  navigateToModule(moduleType: 'erp' | 'hotel' | 'pos' | 'admin'): void {
     if (moduleType === 'erp') {
       this.router.navigate(['/menu/erp']);
     } else if (moduleType === 'hotel') {
       this.router.navigate(['/menu/hms']);
     } else if (moduleType === 'pos') {
       this.router.navigate(['/menu/pos']);
+    } else if (moduleType === 'admin') {
+      this.router.navigate(['/menu/admin']);
     }
   }
 }

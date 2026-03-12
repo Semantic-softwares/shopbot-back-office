@@ -169,18 +169,7 @@ export class HmsDashboardComponent {
           permissions: ['finance.reports.view'],
         },
       ],
-    },
-    {
-      name: 'Settings',
-      children: [
-        {
-          icon: 'settings',
-          label: 'Hotel Settings',
-          link: './settings/hotel-settings',
-          permissions: ['settings.store.view', 'settings.store.edit', 'settings.staff.view', 'settings.roles.view'],
-        },
-      ],
-    },
+    }
   ];
 
   // Computed nav items that filters based on user permissions

@@ -126,12 +126,11 @@ export class SubscriptionService {
 
   /**
    * Initiate subscription upgrade payment
-   * @param roomCount Number of rooms to upgrade
+   * Flat pricing: $87.45/month for all features
    * @param callbackUrl Optional custom callback URL (defaults to environment.paymentReturnUrl)
    * @param webhookUrl Optional webhook URL for server-side payment notifications
    */
   initiateUpgradePayment(
-    roomCount: number,
     callbackUrl?: string,
     webhookUrl?: string,
   ): Observable<{
@@ -145,7 +144,7 @@ export class SubscriptionService {
     // Use provided callback URL or default from environment
     const finalCallbackUrl = callbackUrl || environment.paymentReturnUrl;
     
-    const payload: any = { roomCount, storeId, callbackUrl: finalCallbackUrl };
+    const payload: any = { storeId, callbackUrl: finalCallbackUrl };
     
     // Add webhook URL if provided or if environment has a default
     if (webhookUrl) {
@@ -164,15 +163,13 @@ export class SubscriptionService {
   /**
    * Verify upgrade payment and activate subscription
    * @param paystackReference Paystack transaction reference
-   * @param roomCount Number of rooms for the subscription
    * @param storeId Store ID (required for payment callback verification)
    */
   verifyUpgradePayment(
     paystackReference: string,
-    roomCount: number,
     storeId?: string,
   ): Observable<Subscription> {
-    const payload: any = { paystackReference, roomCount };
+    const payload: any = { paystackReference };
     
     // Include storeId if provided (needed for payment callback without auth)
     if (storeId) {
@@ -375,86 +372,46 @@ export class SubscriptionService {
    * Get available pricing plans
    */
   getPricingPlans(): Observable<{
-    pricingTiers: Array<{ roomRange: string; price: number; currency: string }>;
+    plans: Array<{ name: string; price: number; currency: string; features: string[] }>;
     trialDays: number;
   }> {
     return this.http.get<{
-      pricingTiers: Array<{ roomRange: string; price: number; currency: string }>;
+      plans: Array<{ name: string; price: number; currency: string; features: string[] }>;
       trialDays: number;
     }>(`${this.apiUrl}/pricing`);
   }
 
   /**
-   * Get the room count from a plan's room range
-   */
-  getRoomCountFromRange(roomRange: string): number {
-    if (roomRange.includes('0-10')) return 10;
-    if (roomRange.includes('11-30')) return 30;
-    if (roomRange.includes('31-35')) return 35;
-    if (roomRange.includes('35+')) return 50;
-    return 10;
-  }
-
-  /**
    * Check if a plan is the current subscription plan
    */
-  isCurrentSubscriptionPlan(subscription: Subscription | null, planRoomRange: string): boolean {
+  isCurrentSubscriptionPlan(subscription: Subscription | null, planName: string): boolean {
     if (!subscription) return false;
 
-    // For trial subscriptions, highlight the free tier
     if (subscription.status === 'TRIAL') {
-      return planRoomRange === '0-10 rooms';
+      return planName === 'Free';
     }
 
-    // For active subscriptions, check if the room range matches the current room count
     if (subscription.status === 'ACTIVE') {
-      const roomCount = subscription.roomCount || 10;
-
-      if (planRoomRange === '0-10 rooms' && roomCount <= 10) return true;
-      if (planRoomRange === '11-30 rooms' && roomCount > 10 && roomCount <= 30) return true;
-      if (planRoomRange === '31-35 rooms' && roomCount > 30 && roomCount <= 35) return true;
-      if (planRoomRange === '35+ rooms' && roomCount > 35) return true;
+      return planName === 'Paid';
     }
 
     return false;
   }
 
   /**
-   * Check if upgrading to a plan is a downgrade based on current subscription
-   */
-  isDowngrade(subscription: Subscription | null, planRoomRange: string): boolean {
-    if (!subscription || !subscription.roomCount) return false;
-
-    const currentRoomCount = subscription.roomCount;
-    const planRoomCount = this.getRoomCountFromRange(planRoomRange);
-
-    // It's a downgrade if the new plan's room count is less than current
-    return planRoomCount < currentRoomCount;
-  }
-
-  /**
    * Get the action label for a plan button
    */
-  getPlanActionLabel(subscription: Subscription | null, planRoomRange: string): string {
-    // Check if it's the current plan
-    if (this.isCurrentSubscriptionPlan(subscription, planRoomRange)) {
+  getPlanActionLabel(subscription: Subscription | null, planName: string): string {
+    if (this.isCurrentSubscriptionPlan(subscription, planName)) {
       return 'Current Plan';
     }
-
-    // Check if it's a downgrade
-    if (this.isDowngrade(subscription, planRoomRange)) {
-      return 'Downgrade';
-    }
-
-    // Otherwise it's an upgrade
-    return 'Upgrade Now';
+    return planName === 'Paid' ? 'Upgrade Now' : 'Start Free Trial';
   }
 
   /**
    * Check if a plan button should be disabled
    */
-  isPlanButtonDisabled(subscription: Subscription | null, planRoomRange: string): boolean {
-    // Disable button only for the current plan
-    return this.isCurrentSubscriptionPlan(subscription, planRoomRange);
+  isPlanButtonDisabled(subscription: Subscription | null, planName: string): boolean {
+    return this.isCurrentSubscriptionPlan(subscription, planName);
   }
 }

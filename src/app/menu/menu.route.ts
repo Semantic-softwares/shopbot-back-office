@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { roleGuard } from '../shared/guards/role.guard';
+import { adminGuard } from '../shared/guards/admin.guard';
 import { roleResolver } from '../shared/resolvers/role.resolver';
 
 export const MENU_ROUTES: Routes = [
@@ -113,6 +114,14 @@ export const MENU_ROUTES: Routes = [
       ],
       permissionMode: 'any',
     },
+  },
+  {
+    path: 'admin',
+    loadChildren: () =>
+      import('./administrative-settings/administrative-settings.route').then(
+        (m) => m.ADMINISTRATIVE_SETTINGS_ROUTES,
+      ),
+    canActivate: [adminGuard],
   },
   {
     path: 'menu',

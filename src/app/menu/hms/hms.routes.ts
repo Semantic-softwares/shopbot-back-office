@@ -74,20 +74,7 @@ export const DASHBOARD_HMS_ROUTES: Routes = [
                     permissionMode: 'any'
                 }
             },
-            {
-                path: 'settings',
-                loadChildren: () => import('./settings/settings.routes').then(m => m.SETTINGS_MANAGEMENT_ROUTES),
-                canActivate: [roleGuard],
-                data: {
-                    requiredPermissions: [
-                        'settings.store.view',
-                        'settings.store.edit',
-                        'settings.staff.view',
-                        'settings.roles.view'
-                    ],
-                    permissionMode: 'any'
-                }
-            },
+            
             // TODO: Add more routes as components are created
             {
                 path: '**',
