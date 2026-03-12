@@ -1,1 +1,0 @@
-import"./chunk-GAL4ENT6.js";var t=[{path:"",loadComponent:()=>import("./chunk-3XK4XXHC.js").then(o=>o.MessagingComponent)},{path:":threadId",loadComponent:()=>import("./chunk-3XK4XXHC.js").then(o=>o.MessagingComponent)}];export{t as MESSAGING_ROUTES};
