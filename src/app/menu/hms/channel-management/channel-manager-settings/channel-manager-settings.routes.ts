@@ -26,8 +26,10 @@ export const CHANNEL_MANAGER_SETTINGS_ROUTES: Routes = [
         path: 'taxes',
         loadChildren: () => import('./channel-manager-taxes/channel-manager-taxes.routes').then(m => m.TAXES_ROUTES)
       },
-    
-     
+      {
+        path: 'webhooks',
+        loadChildren: () => import('./channel-manager-webhooks/channel-manager-webhooks.routes').then(m => m.CHANNEL_MANAGER_WEBHOOKS_ROUTES)
+      },
     ]
   }
 ];

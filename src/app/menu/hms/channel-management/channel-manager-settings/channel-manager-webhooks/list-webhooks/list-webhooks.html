@@ -1,0 +1,164 @@
+<!-- Page Header -->
+<app-page-header
+  title="Webhooks"
+  subtitle="Manage webhooks for real-time updates from Channex">
+
+  <ng-container actions>
+    <button
+      matButton="filled"
+      color="primary"
+      (click)="openCreateDialog()"
+      [disabled]="webhooks.isLoading()"
+      class="px-4"
+    >
+      <mat-icon>add</mat-icon>
+      New Webhook
+    </button>
+  </ng-container>
+</app-page-header>
+
+<!-- Loading State -->
+@if (webhooks.isLoading()) {
+  <div class="flex justify-center items-center py-20">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+}
+
+<!-- Error State -->
+@if (webhooks.error()) {
+  <app-no-record
+    icon="error_outline"
+    title="Failed to Load Webhooks"
+    [message]="webhooks.error()?.message || 'Unable to load webhooks. Please try again.'"
+  ></app-no-record>
+}
+
+<!-- Empty State -->
+@if (!webhooks.isLoading() && !webhooks.error() && dataSource.data.length === 0) {
+  <app-no-record
+    icon="webhook"
+    title="No Webhooks Configured"
+    message="Create a webhook to receive real-time updates from Channex">
+    <button 
+      mat-raised-button 
+      color="primary"
+      (click)="openCreateDialog()"
+      class="mt-4">
+      <mat-icon>add</mat-icon>
+      Create Webhook
+    </button>
+  </app-no-record>
+}
+
+<!-- Webhooks Table -->
+@if (!webhooks.isLoading() && !webhooks.error() && dataSource.data.length > 0) {
+  <mat-card appearance="outlined" class="mt-6">
+    <mat-card-content class="p-0">
+      <!-- Search Field -->
+      <div class="p-4 border-b border-gray-200">
+        <mat-form-field appearance="outline" class="w-full md:w-80">
+          <mat-label>Search webhooks</mat-label>
+          <input
+            matInput
+            [(ngModel)]="searchText"
+            (input)="applyFilter()"
+            placeholder="Search by URL..."
+          />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table mat-table [dataSource]="dataSource" class="w-full">
+          <!-- URL Column -->
+          <ng-container matColumnDef="url">
+            <th mat-header-cell *matHeaderCellDef class="px-4 py-3 text-left text-sm font-semibold">URL</th>
+            <td mat-cell *matCellDef="let element" class="px-4 py-3 text-sm break-all">{{ element.attributes?.callback_url }}</td>
+          </ng-container>
+
+          <!-- Events Column -->
+          <ng-container matColumnDef="events">
+            <th mat-header-cell *matHeaderCellDef class="px-4 py-3 text-left text-sm font-semibold">Events</th>
+            <td mat-cell *matCellDef="let element" class="px-4 py-3">
+              <div class="flex items-center gap-2">
+                <mat-chip 
+                  disabled
+                  class="text-xs"
+                  [matTooltip]="element.attributes?.event_mask">
+                  {{ getFirstEvent(element.attributes?.event_mask) }}
+                </mat-chip>
+                @if (getRemainingEventCount(element.attributes?.event_mask) > 0) {
+                  <span class="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded"
+                    [matTooltip]="element.attributes?.event_mask">
+                    +{{ getRemainingEventCount(element.attributes?.event_mask) }}
+                  </span>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Active Column -->
+          <ng-container matColumnDef="is_active">
+            <th mat-header-cell *matHeaderCellDef class="px-4 py-3 text-left text-sm font-semibold">Status</th>
+            <td mat-cell *matCellDef="let element" class="px-4 py-3">
+              @if (element.attributes?.is_active) {
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Active
+                </span>
+              } @else {
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  Inactive
+                </span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="px-4 py-3 text-right text-sm font-semibold">Actions</th>
+            <td mat-cell *matCellDef="let element" class="px-4 py-3 text-right">
+              <button 
+                mat-icon-button 
+                [matMenuTriggerFor]="menu"
+                matTooltip="More options">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button 
+                  mat-menu-item 
+                  (click)="openEditDialog(element)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                <button 
+                  mat-menu-item 
+                  (click)="deleteWebhook(element)"
+                  class="text-red-600">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <!-- Header Row -->
+          <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-gray-50 border-b"></tr>
+          <!-- Data Rows -->
+          <tr mat-row *matRowDef="let element; columns: displayedColumns;" class="border-b hover:bg-gray-50"></tr>
+        </table>
+      </div>
+
+      <!-- Paginator -->
+      <mat-paginator
+        [length]="totalItems()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="pageSizeOptions"
+        [pageIndex]="currentPage()"
+        (page)="onPageChange($event)"
+        class="border-t border-gray-200"
+        aria-label="Select page">
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+}
