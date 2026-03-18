@@ -18,12 +18,13 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { StoreStore } from '../../../../shared/stores/store.store';
 import { ChannexService, ChannexStatusResponse } from '../../../../shared/services/channex.service';
+import { WebhookService, Webhook } from '../../../../shared/services/webhook.service';
 import { RoomsService } from '../../../../shared/services/rooms.service';
 import { RoomType } from '../../../../shared/models/room.model';
 import { SanitizeUrlPipe } from '../../../../shared/pipes/sanitize-url.pipe';
 import { PageHeaderComponent } from "../../../../shared/components/page-header/page-header.component";
 import { MatListModule } from "@angular/material/list";
-import { MatDialogClose } from "@angular/material/dialog";
+import { environment } from '../../../../../environments/environment';
 
 type StepStatus = 'pending' | 'in-progress' | 'completed' | 'error';
 
@@ -67,6 +68,7 @@ interface SetupStep {
 export class ChannelManagementMapping implements OnInit {
   private storeStore = inject(StoreStore);
   private channexService = inject(ChannexService);
+  private webhookService = inject(WebhookService);
   private roomsService = inject(RoomsService);
   private snackBar = inject(MatSnackBar);
   private fb = inject(FormBuilder);
@@ -338,10 +340,72 @@ export class ChannelManagementMapping implements OnInit {
         this.setCurrentStep(1);
         this.showSuccess(response.message);
         this.loadChannexStatus(); // Reload status
+
+        // Automatically create webhooks after successful sync
+        const propertyId = response?.store?.channexPropertyId || this.channexStatus()?.channex?.propertyId;
+        this.createDefaultWebhooks(propertyId!);
       },
       error: (error) => {
         this.updateStepStatus(0, 'error', error.error?.message || 'Failed to sync property');
         this.showError(error.error?.message || 'Failed to sync property to Channex');
+      },
+    });
+  }
+
+  /**
+   * Create default webhooks for bookings and messages after store sync
+   */
+  private createDefaultWebhooks(propertyId: string): void {
+    const store = this.selectedStore();
+    
+    if (!propertyId) {
+      console.warn('Cannot create webhooks: propertyId not found');
+      return;
+    }
+
+    // Get the base URL from environment
+    const baseUrl = environment.appUrl;
+
+    // Create booking webhook
+    const bookingWebhook: Webhook = {
+      property_id: propertyId,
+      url: `${baseUrl}/webhooks/channex/reservations`,
+      events: [
+        { id: 'booking', title: 'Booking' },
+      ],
+      is_active: true,
+      send_data: true,
+    };
+
+    // Create message webhook
+    const messageWebhook: Webhook = {
+      property_id: propertyId,
+      url: `${baseUrl}/webhooks/channex/messages`,
+      events: [
+        { id: 'message', title: 'Message' },
+      ],
+      send_data: true,
+      is_active: true,
+    };
+
+    // Create webhooks
+    this.webhookService.createWebhook(bookingWebhook).subscribe({
+      next: () => {
+        console.log('Booking webhook created successfully');
+      },
+      error: (error) => {
+        console.warn('Failed to create booking webhook:', error);
+        // Non-blocking - webhook creation failure shouldn't prevent main flow
+      },
+    });
+
+    this.webhookService.createWebhook(messageWebhook).subscribe({
+      next: () => {
+        console.log('Message webhook created successfully');
+      },
+      error: (error) => {
+        console.warn('Failed to create message webhook:', error);
+        // Non-blocking - webhook creation failure shouldn't prevent main flow
       },
     });
   }

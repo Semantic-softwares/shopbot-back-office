@@ -55,6 +55,12 @@ export class ChannelManagerSettings {
       icon: 'gavel',
       iconColor: 'text-red-600',
     },
+    {
+      path: 'webhooks',
+      label: 'Webhooks',
+      icon: 'webhook',
+      iconColor: 'text-purple-600',
+    },
    
   ];
 }
