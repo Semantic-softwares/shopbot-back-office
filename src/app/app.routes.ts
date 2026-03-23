@@ -9,11 +9,7 @@ export const routes: Routes = [
     {
         path: '',  
         pathMatch: 'full',
-        redirectTo: 'website'
-    },
-    {
-        path: '',
-        loadChildren: () => import('./website/website.routes').then(m => m.WEBSITE_ROUTES)
+        redirectTo: 'menu'
     },
     {
         path: 'auth',
