@@ -1,0 +1,196 @@
+<app-page-header title="Rental Owners" subtitle="Manage property rental owners">
+  <ng-container actions>
+    <button mat-button (click)="clearFilters()">
+      <mat-icon>clear</mat-icon>
+      Clear Filters
+    </button>
+
+    <button mat-button (click)="reloadData()">
+      <mat-icon class="mr-1">refresh</mat-icon>
+      Reload
+    </button>
+
+    <button mat-flat-button (click)="createOwner()">
+      <mat-icon class="mr-1">add</mat-icon>
+      New Owner
+    </button>
+  </ng-container>
+</app-page-header>
+
+<!-- Stats Cards -->
+<div class="max-w-12xl py-6 px-4">
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <div class="text-sm text-gray-600">Total</div>
+        <div class="text-2xl font-bold">{{ totalOwners() }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <div class="text-sm text-gray-600">Active</div>
+        <div class="text-2xl font-bold text-green-600">{{ activeCount() }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <div class="text-sm text-gray-600">Inactive</div>
+        <div class="text-2xl font-bold text-gray-500">{{ inactiveCount() }}</div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Table -->
+  <mat-card appearance="outlined">
+    <div class="p-3">
+      <form [formGroup]="filterForm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Search owners...</mat-label>
+            <mat-icon matPrefix class="text-gray-400">search</mat-icon>
+            <input matInput placeholder="Name, email or phone" formControlName="search">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              @for (status of statusOptions; track status.value) {
+                <mat-option [value]="status.value">{{ status.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </form>
+    </div>
+
+    @if (rentalOwners.hasValue()) {
+      @if (rentalOwners.value()!.data.items.length > 0) {
+        <table mat-table [dataSource]="rentalOwners.value()!.data.items" class="w-full">
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let owner">
+              <div class="font-medium">{{ owner.firstName }} {{ owner.lastName }}</div>
+            </td>
+          </ng-container>
+
+          <!-- Contact Column -->
+          <ng-container matColumnDef="contact">
+            <th mat-header-cell *matHeaderCellDef>Contact</th>
+            <td mat-cell *matCellDef="let owner">
+              @if (owner.email) {
+                <div class="text-sm">{{ owner.email }}</div>
+              }
+              @if (owner.phone) {
+                <div class="text-xs text-gray-500">{{ owner.phone }}</div>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Company Column -->
+          <ng-container matColumnDef="company">
+            <th mat-header-cell *matHeaderCellDef>Company</th>
+            <td mat-cell *matCellDef="let owner">
+              @if (owner.isCompany && owner.companyName) {
+                <span class="text-sm">{{ owner.companyName }}</span>
+              } @else {
+                <span class="text-sm text-gray-400">—</span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let owner">
+              <mat-chip [ngClass]="getStatusClass(owner.status)">
+                {{ owner.status | titlecase }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let owner">
+              <button mat-icon-button [matMenuTriggerFor]="actionMenu" (click)="$event.stopPropagation()">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+
+              <mat-menu #actionMenu="matMenu">
+                <button mat-menu-item (click)="viewOwner(owner)">
+                  <mat-icon>visibility</mat-icon>
+                  <span>View Details</span>
+                </button>
+                <button mat-menu-item (click)="editOwner(owner)" [disabled]="isUpdating()">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="deleteOwner(owner)" [disabled]="isUpdating()">
+                  <mat-icon color="warn">delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let owner; columns: displayedColumns;"
+              class="cursor-pointer" (click)="viewOwner(owner)"></tr>
+        </table>
+
+        <mat-card-actions class="flex justify-end">
+          <mat-paginator
+            [length]="totalOwners()"
+            [pageSize]="pageSize()"
+            [pageSizeOptions]="[5, 10, 25, 50]"
+            [pageIndex]="currentPage() - 1"
+            (page)="onPageChange($event)"
+            showFirstLastButtons>
+          </mat-paginator>
+        </mat-card-actions>
+      }
+
+      @if (rentalOwners.value()!.data.items.length === 0) {
+        <div class="p-4">
+          <app-no-record
+            icon="person"
+            title="No Rental Owners Found"
+            [message]="filterForm.get('search')?.value
+              ? 'Try adjusting your search to find matching owners.'
+              : 'Get started by creating your first rental owner.'">
+            <button mat-flat-button (click)="createOwner()">
+              <mat-icon>add</mat-icon>
+              Create Owner
+            </button>
+          </app-no-record>
+        </div>
+      }
+    }
+
+    @if (rentalOwners.error()) {
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4 m-4">
+        <div class="flex">
+          <mat-icon class="text-red-500 mr-2">error</mat-icon>
+          <div>
+            <h3 class="text-red-800 font-medium">Error loading rental owners</h3>
+            <p class="text-red-700 text-sm mt-1">{{ rentalOwners.error() }}</p>
+            <button mat-button color="warn" (click)="reloadData()" class="mt-2 !text-red-600">
+              <mat-icon class="mr-1">refresh</mat-icon>
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (rentalOwners.isLoading()) {
+      <div class="flex items-center justify-center py-20">
+        <mat-spinner diameter="48"></mat-spinner>
+      </div>
+    }
+  </mat-card>
+</div>

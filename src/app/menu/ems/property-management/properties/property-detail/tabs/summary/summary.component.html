@@ -1,0 +1,301 @@
+@if (property(); as p) {
+  <!-- Hero: Cover Photo with overlay info -->
+  <div class="relative rounded-xl overflow-hidden mb-6 bg-gray-100" style="min-height: 280px;">
+    @if (p.coverPhoto) {
+      <img [src]="p.coverPhoto" alt="Property cover" class="w-full h-72 object-cover">
+    } @else {
+      <div class="w-full h-72 flex flex-col items-center justify-center text-gray-400 bg-gradient-to-br from-gray-50 to-gray-200">
+        <mat-icon class="!text-7xl !w-20 !h-20 mb-2 text-gray-300">home</mat-icon>
+        <span class="text-sm text-gray-400">No cover photo</span>
+      </div>
+    }
+    <!-- Gradient overlay -->
+    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-6">
+      <div class="flex items-end justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-white mb-1">{{ p.name }}</h2>
+          <div class="flex items-center gap-2 text-white/80 text-sm">
+            <mat-icon class="!text-base !w-4 !h-4">location_on</mat-icon>
+            <span>{{ getFullAddress() }}</span>
+          </div>
+        </div>
+        <span class="px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="getStatusClass(p.status)">
+          {{ p.status }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gallery Thumbnails -->
+  @if (p.gallery.length) {
+    <div class="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-thin">
+      @for (photo of p.gallery; track photo) {
+        <div class="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:ring-2 hover:ring-blue-400 transition-all">
+          <img [src]="photo" alt="Gallery" class="w-full h-full object-cover">
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Main Content: 2 columns -->
+  <div class="grid grid-cols-12 gap-6">
+    <!-- LEFT COLUMN -->
+    <div class="col-span-12 lg:col-span-8 space-y-6">
+
+      <!-- Address & Location -->
+      <mat-card appearance="outlined" class="!rounded-xl">
+        <div class="text-xs font-bold text-gray-500 tracking-wider px-5 pt-5 pb-2">ADDRESS & LOCATION</div>
+        <mat-card-content class="px-5 pb-5!">
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+              <mat-icon class="text-blue-600 !text-xl">location_on</mat-icon>
+            </div>
+            <div class="flex-1">
+              <div class="text-sm leading-relaxed text-gray-800">
+                @if (p.address.street) {
+                  <div class="font-medium">{{ p.address.street }}</div>
+                }
+                <div class="text-gray-600">
+                  {{ p.address.city }}@if (p.address.state) {, {{ p.address.state }}}
+                  @if (p.address.postalCode) { {{ p.address.postalCode }}}
+                </div>
+                @if (p.address.country) {
+                  <div class="text-gray-600">{{ p.address.country }}</div>
+                }
+              </div>
+              <button mat-stroked-button class="mt-3" (click)="openMap()">
+                <mat-icon>open_in_new</mat-icon>
+                View on Map
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Rental Details (Single Unit) -->
+      @if (isSingleUnit()) {
+        <mat-card appearance="outlined" class="!rounded-xl">
+          <div class="text-xs font-bold text-gray-500 tracking-wider px-5 pt-5 pb-2">RENTAL DETAILS</div>
+          <mat-card-content class="px-5 pb-5!">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-6">
+              @if (p.bedrooms != null) {
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0">
+                    <mat-icon class="text-purple-600 !text-xl">bed</mat-icon>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-500">Bedrooms</div>
+                    <div class="text-lg font-bold text-gray-900">{{ p.bedrooms }}</div>
+                  </div>
+                </div>
+              }
+              @if (p.bathrooms != null) {
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-cyan-50 flex items-center justify-center flex-shrink-0">
+                    <mat-icon class="text-cyan-600 !text-xl">bathtub</mat-icon>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-500">Bathrooms</div>
+                    <div class="text-lg font-bold text-gray-900">{{ p.bathrooms }}</div>
+                  </div>
+                </div>
+              }
+              @if (p.sizeValue != null) {
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+                    <mat-icon class="text-amber-600 !text-xl">square_foot</mat-icon>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-500">Size</div>
+                    <div class="text-lg font-bold text-gray-900">{{ p.sizeValue }} {{ p.sizeUnit || 'sq ft' }}</div>
+                  </div>
+                </div>
+              }
+              @if (p.marketRent != null) {
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                    <mat-icon class="text-green-600 !text-xl">payments</mat-icon>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-500">Market Rent</div>
+                    <div class="text-lg font-bold text-gray-900">{{ p.marketRent | currency:(p.currency || 'NGN') }}</div>
+                  </div>
+                </div>
+              }
+              @if (p.deposit != null) {
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
+                    <mat-icon class="text-orange-600 !text-xl">account_balance_wallet</mat-icon>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-500">Deposit</div>
+                    <div class="text-lg font-bold text-gray-900">{{ p.deposit | currency:(p.currency || 'NGN') }}</div>
+                  </div>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <!-- Description -->
+      @if (p.description) {
+        <mat-card appearance="outlined" class="!rounded-xl">
+          <div class="text-xs font-bold text-gray-500 tracking-wider px-5 pt-5 pb-2">DESCRIPTION</div>
+          <mat-card-content class="px-5 pb-5!">
+            <p class="text-sm leading-relaxed text-gray-700 whitespace-pre-line">{{ p.description }}</p>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <!-- Amenities -->
+      @if (p.amenities.length) {
+        <mat-card appearance="outlined" class="!rounded-xl">
+          <div class="text-xs font-bold text-gray-500 tracking-wider px-5 pt-5 pb-2">AMENITIES</div>
+          <mat-card-content class="px-5 pb-5!">
+            <mat-chip-set>
+              @for (amenity of p.amenities; track amenity) {
+                <mat-chip highlighted>
+                  <mat-icon matChipAvatar>check_circle</mat-icon>
+                  {{ amenity }}
+                </mat-chip>
+              }
+            </mat-chip-set>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <!-- Features (Single Unit) -->
+      @if (isSingleUnit() && p.features.length) {
+        <mat-card appearance="outlined" class="!rounded-xl">
+          <div class="text-xs font-bold text-gray-500 tracking-wider px-5 pt-5 pb-2">PROPERTY FEATURES</div>
+          <mat-card-content class="px-5 pb-5!">
+            <mat-chip-set>
+              @for (feature of p.features; track feature) {
+                <mat-chip highlighted>
+                  <mat-icon matChipAvatar>star</mat-icon>
+                  {{ feature }}
+                </mat-chip>
+              }
+            </mat-chip-set>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+
+    <!-- RIGHT COLUMN: Sidebar -->
+    <div class="col-span-12 lg:col-span-4 space-y-6">
+
+      <!-- Property Details -->
+      <mat-card appearance="outlined" class="!rounded-xl">
+        <div class="text-xs font-bold text-gray-500 tracking-wider px-5 pt-5 pb-2">PROPERTY DETAILS</div>
+        <mat-card-content class="px-5 pb-5!">
+          <mat-list>
+            <mat-list-item>
+              <span matListItemTitle>Status</span>
+              <span matListItemMeta>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold" [ngClass]="getStatusClass(p.status)">
+                  {{ p.status }}
+                </span>
+              </span>
+            </mat-list-item>
+            <mat-divider></mat-divider>
+            <mat-list-item>
+              <span matListItemTitle>Category</span>
+              <span matListItemMeta class="font-medium text-gray-900">{{ p.category.replace('_', ' ') }}</span>
+            </mat-list-item>
+            <mat-divider></mat-divider>
+            <mat-list-item>
+              <span matListItemTitle>Type</span>
+              <span matListItemMeta class="font-medium text-gray-900">{{ p.type.replace('_', ' ') }}</span>
+            </mat-list-item>
+            @if (p.code) {
+              <mat-divider></mat-divider>
+              <mat-list-item>
+                <span matListItemTitle>MLS #</span>
+                <span matListItemMeta class="font-mono font-medium text-gray-900">{{ p.code }}</span>
+              </mat-list-item>
+            }
+            @if (p.yearBuilt) {
+              <mat-divider></mat-divider>
+              <mat-list-item>
+                <span matListItemTitle>Year Built</span>
+                <span matListItemMeta class="font-medium text-gray-900">{{ p.yearBuilt }}</span>
+              </mat-list-item>
+            }
+            @if (!isSingleUnit()) {
+              <mat-divider></mat-divider>
+              <mat-list-item>
+                <span matListItemTitle>Total Units</span>
+                <span matListItemMeta class="text-lg font-bold text-gray-900">{{ p.totalUnits }}</span>
+              </mat-list-item>
+            }
+            @if (getManagerName(p)) {
+              <mat-divider></mat-divider>
+              <mat-list-item>
+                <span matListItemTitle>Manager</span>
+                <span matListItemMeta class="font-medium text-gray-900">{{ getManagerName(p) }}</span>
+              </mat-list-item>
+            }
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Property Owners -->
+      <mat-card appearance="outlined" class="!rounded-xl">
+        <div class="text-xs font-bold text-gray-500 tracking-wider px-5 pt-5 pb-2">PROPERTY OWNERS</div>
+        <mat-card-content class="pb-2!">
+          @if (owners().length) {
+            <mat-nav-list>
+              @for (ownerEntry of owners(); track getOwnerId(ownerEntry)) {
+                <a mat-list-item (click)="navigateToOwner(ownerEntry)">
+                  <mat-icon matListItemIcon
+                    [ngClass]="isCompanyOwner(ownerEntry) ? 'text-indigo-600' : 'text-blue-600'">
+                    {{ isCompanyOwner(ownerEntry) ? 'business' : 'person' }}
+                  </mat-icon>
+                  <span matListItemTitle style="color: var(--mat-sys-primary)">
+                    {{ getOwnerDisplayName(ownerEntry) }}
+                  </span>
+                  @if (getOwnerEmail(ownerEntry)) {
+                    <span matListItemLine class="text-gray-500">{{ getOwnerEmail(ownerEntry) }}</span>
+                  }
+                  <span matListItemMeta>
+                    <span class="text-sm font-bold text-gray-900">{{ ownerEntry.ownershipPercentage }}%</span>
+                  </span>
+                </a>
+              }
+            </mat-nav-list>
+          } @else {
+            <div class="text-center py-6 text-gray-400">
+              <mat-icon class="!text-4xl !w-10 !h-10 mb-2">person_off</mat-icon>
+              <p class="text-sm">No owners assigned</p>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Timeline -->
+      <mat-card appearance="outlined" class="!rounded-xl">
+        <div class="text-xs font-bold text-gray-500 tracking-wider px-5 pt-5 pb-2">TIMELINE</div>
+        <mat-card-content class="pb-2!">
+          <mat-list>
+            @if (p.createdAt) {
+              <mat-list-item>
+                <mat-icon matListItemIcon class="text-gray-500">add_circle_outline</mat-icon>
+                <span matListItemTitle>Created</span>
+                <span matListItemLine class="text-gray-600">{{ p.createdAt | date:'MMM d, y' }}</span>
+              </mat-list-item>
+            }
+            @if (p.updatedAt) {
+              <mat-list-item>
+                <mat-icon matListItemIcon class="text-gray-500">update</mat-icon>
+                <span matListItemTitle>Last Updated</span>
+                <span matListItemLine class="text-gray-600">{{ p.updatedAt | date:'MMM d, y' }}</span>
+              </mat-list-item>
+            }
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+}

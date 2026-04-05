@@ -1,0 +1,75 @@
+@if (leaseResource.isLoading()) {
+  <div class="flex items-center justify-center py-20">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+} @else if (leaseResource.error()) {
+  <div class="bg-red-50 border border-red-200 rounded-lg p-4 m-4">
+    <div class="flex items-center gap-2">
+      <mat-icon class="text-red-500">error</mat-icon>
+      <div>
+        <h3 class="text-red-800 font-medium">Error loading lease</h3>
+        <button mat-button color="warn" (click)="reload()" class="mt-2 !text-red-600">
+          <mat-icon class="mr-1">refresh</mat-icon>
+          Retry
+        </button>
+      </div>
+    </div>
+  </div>
+} @else if (lease()) {
+  <app-page-header [title]="title()" [subtitle]="subtitle()">
+    <ng-container actions>
+      <a mat-button (click)="goBack()">
+        <mat-icon class="mr-1">arrow_back</mat-icon>
+        Back
+      </a>
+      @if (isDraft()) {
+        <button mat-flat-button (click)="completeDraft()">
+          <mat-icon class="mr-1">edit_note</mat-icon>
+          Complete Draft Lease
+        </button>
+      }
+      <app-lease-actions-menu
+        [lease]="lease()!"
+        triggerVariant="stroked"
+        triggerLabel="Actions"
+        ariaLabel="Lease actions"
+        [showView]="false"
+        (edit)="editLease()"
+        (completeDraft)="completeDraft()"
+        (endLease)="endLease()"
+        (delete)="deleteLease()"
+      />
+    </ng-container>
+  </app-page-header>
+
+  @if (lease()?.status === 'ENDED') {
+    <div class="mx-4 mt-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+      Lease ended
+      @if (lease()?.endedAt) {
+        <span class="font-medium"> on {{ lease()?.endedAt | date: 'mediumDate' }}</span>
+      }
+      @if (lease()?.endReason) {
+        <span> · {{ lease()?.endReason }}</span>
+      }
+    </div>
+  }
+
+  <nav mat-tab-nav-bar [tabPanel]="tabPanel" mat-stretch-tabs="false" mat-align-tabs="start">
+    @for (tab of tabs; track tab.link) {
+      <a mat-tab-link
+        [routerLink]="tab.link"
+        routerLinkActive
+        #rla="routerLinkActive"
+        [active]="rla.isActive">
+        <mat-icon class="mr-2 !text-lg">{{ tab.icon }}</mat-icon>
+        {{ tab.label }}
+      </a>
+    }
+  </nav>
+
+  <mat-tab-nav-panel #tabPanel>
+    <div class="py-6 px-4">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-tab-nav-panel>
+}

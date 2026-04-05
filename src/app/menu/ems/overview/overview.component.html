@@ -1,0 +1,273 @@
+<app-page-header title="Estate Overview" subtitle="Property, lease, and accounting performance at a glance">
+  <ng-container actions>
+    <button mat-button (click)="reload()">
+      <mat-icon class="mr-1">refresh</mat-icon>
+      Refresh
+    </button>
+  </ng-container>
+</app-page-header>
+
+<div class="mx-auto max-w-7xl px-4 py-6">
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-20">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  } @else if (hasError()) {
+    <div class="rounded-2xl border border-red-200 bg-red-50 p-5">
+      <div class="flex items-start gap-3">
+        <mat-icon class="text-red-500">error</mat-icon>
+        <div>
+          <h3 class="font-medium text-red-800">Error loading overview</h3>
+          <p class="mt-1 text-sm text-red-700">
+            One or more estate dashboard resources could not be loaded.
+          </p>
+          <button mat-button color="warn" (click)="reload()" class="mt-2 !text-red-600">
+            <mat-icon class="mr-1">refresh</mat-icon>
+            Retry
+          </button>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <section class="mb-8">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-800">Portfolio Snapshot</h2>
+          <p class="text-sm text-slate-500">Properties, units, and occupancy across the current store.</p>
+        </div>
+        <button mat-stroked-button (click)="navigateTo('../properties/properties')">
+          <mat-icon class="mr-1">home_work</mat-icon>
+          Manage Properties
+        </button>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+          <mat-card-content class="p-5!">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <div class="text-sm text-slate-500">Total Properties</div>
+                <div class="mt-2 text-3xl font-semibold text-slate-900">{{ totalProperties() }}</div>
+                <div class="mt-2 text-xs text-slate-500">{{ activeProperties() }} active, {{ inactiveProperties() }} inactive</div>
+              </div>
+              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-100">
+                <mat-icon class="text-sky-700!">domain</mat-icon>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+          <mat-card-content class="p-5!">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <div class="text-sm text-slate-500">Total Units</div>
+                <div class="mt-2 text-3xl font-semibold text-slate-900">{{ totalUnits() }}</div>
+                <div class="mt-2 text-xs text-slate-500">Inventory currently tracked in EMS</div>
+              </div>
+              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-100">
+                <mat-icon class="text-indigo-700!">apartment</mat-icon>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+          <mat-card-content class="p-5!">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <div class="text-sm text-slate-500">Occupied Units</div>
+                <div class="mt-2 text-3xl font-semibold text-slate-900">{{ occupiedUnits() }}</div>
+                <div class="mt-2 text-xs text-slate-500">Current occupancy rate: {{ occupancyRate() }}%</div>
+              </div>
+              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100">
+                <mat-icon class="text-amber-700!">meeting_room</mat-icon>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+          <mat-card-content class="p-5!">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <div class="text-sm text-slate-500">Vacant Units</div>
+                <div class="mt-2 text-3xl font-semibold text-slate-900">{{ vacantUnits() }}</div>
+                <div class="mt-2 text-xs text-slate-500">{{ reservedUnits() }} reserved and awaiting move-in</div>
+              </div>
+              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100">
+                <mat-icon class="text-emerald-700!">door_front</mat-icon>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </section>
+
+    <section class="mb-8 grid gap-4 xl:grid-cols-[1.25fr_0.75fr]">
+      <mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+        <mat-card-content class="p-6!">
+          <div class="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h2 class="text-lg font-semibold text-slate-800">Lease Activity</h2>
+              <p class="text-sm text-slate-500">Track current occupancy pressure and upcoming renewals.</p>
+            </div>
+            <button mat-stroked-button (click)="navigateTo('../leases')">
+              <mat-icon class="mr-1">receipt_long</mat-icon>
+              View Leases
+            </button>
+          </div>
+
+          <div class="grid gap-4 md:grid-cols-2">
+            <div class="rounded-2xl bg-slate-50 p-5">
+              <div class="text-sm text-slate-500">Active Leases</div>
+              <div class="mt-2 text-3xl font-semibold text-slate-900">{{ activeLeases() }}</div>
+              <div class="mt-2 text-xs text-slate-500">Leases with active tenancy and billing obligations.</div>
+            </div>
+
+            <div class="rounded-2xl bg-slate-50 p-5">
+              <div class="text-sm text-slate-500">Ending In 30 Days</div>
+              <div class="mt-2 text-3xl font-semibold text-slate-900">{{ leasesEndingSoon() }}</div>
+              <div class="mt-2 text-xs text-slate-500">Use this to prepare renewals, move-outs, or closeout actions.</div>
+            </div>
+          </div>
+
+          <div class="mt-5">
+            <div class="mb-2 flex items-center justify-between text-sm text-slate-500">
+              <span>Occupancy progress</span>
+              <span>{{ occupancyRate() }}%</span>
+            </div>
+            <div class="h-3 w-full overflow-hidden rounded-full bg-slate-200">
+              <div class="h-3 rounded-full bg-slate-900 transition-all duration-500" [style.width.%]="occupancyRate()"></div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+        <mat-card-content class="p-6!">
+          <h2 class="text-lg font-semibold text-slate-800">Quick Actions</h2>
+          <p class="mt-1 text-sm text-slate-500">Jump straight into the operational screens most used by the estate team.</p>
+
+          <div class="mt-5 grid gap-3">
+            <button mat-stroked-button class="!justify-start" (click)="navigateTo('../properties/properties')">
+              <mat-icon class="mr-2">domain_add</mat-icon>
+              Property register
+            </button>
+            <button mat-stroked-button class="!justify-start" (click)="navigateTo('../leases/create')">
+              <mat-icon class="mr-2">add_home</mat-icon>
+              Create lease
+            </button>
+            <button mat-stroked-button class="!justify-start" (click)="navigateTo('../accounting/invoices')">
+              <mat-icon class="mr-2">request_quote</mat-icon>
+              Review invoices
+            </button>
+            <button mat-stroked-button class="!justify-start" (click)="navigateTo('../accounting/payments')">
+              <mat-icon class="mr-2">payments</mat-icon>
+              Review collections
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <section class="mb-8">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-800">Finance Snapshot</h2>
+          <p class="text-sm text-slate-500">Current-month billing, collections, exposure, and overdue pressure.</p>
+        </div>
+        <button mat-stroked-button (click)="navigateTo('../accounting/invoices')">
+          <mat-icon class="mr-1">receipt</mat-icon>
+          Open Accounting
+        </button>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+          <mat-card-content class="p-5!">
+            <div class="text-sm text-slate-500">Total Invoiced This Month</div>
+            <div class="mt-2 text-3xl font-semibold text-slate-900">{{ formatCurrency(totalInvoicedThisMonth()) }}</div>
+            <div class="mt-2 text-xs text-slate-500">Income-side invoices raised since the start of the month.</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+          <mat-card-content class="p-5!">
+            <div class="text-sm text-slate-500">Total Collected This Month</div>
+            <div class="mt-2 text-3xl font-semibold text-emerald-700">{{ formatCurrency(totalCollectedThisMonth()) }}</div>
+            <div class="mt-2 text-xs text-slate-500">Successful inbound collections posted this month.</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+          <mat-card-content class="p-5!">
+            <div class="text-sm text-slate-500">Total Outstanding</div>
+            <div class="mt-2 text-3xl font-semibold text-amber-700">{{ formatCurrency(totalOutstanding()) }}</div>
+            <div class="mt-2 text-xs text-slate-500">Open invoice balances not yet settled.</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+          <mat-card-content class="p-5!">
+            <div class="text-sm text-slate-500">Overdue Invoices</div>
+            <div class="mt-2 text-3xl font-semibold text-rose-700">{{ overdueInvoiceCount() }}</div>
+            <div class="mt-2 text-xs text-slate-500">Overdue balance: {{ formatCurrency(overdueBalance()) }}</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-[1.4fr_0.6fr]">
+      <mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+        <mat-card-content class="p-6!">
+          <div class="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h2 class="text-lg font-semibold text-slate-800">Income vs Expense</h2>
+              <p class="text-sm text-slate-500">Daily movement from estate payments over the last 30 days.</p>
+            </div>
+            <button mat-stroked-button (click)="navigateTo('../accounting/payments')">
+              <mat-icon class="mr-1">query_stats</mat-icon>
+              Payment Ledger
+            </button>
+          </div>
+
+          <div class="h-[360px] w-full">
+            <canvas
+              baseChart
+              [type]="'bar'"
+              [data]="accountingChartData()"
+              [options]="accountingChartOptions"
+            ></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <div class="grid gap-4">
+        <mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+          <mat-card-content class="p-5!">
+            <div class="text-sm text-slate-500">Income, Last 30 Days</div>
+            <div class="mt-2 text-3xl font-semibold text-emerald-700">{{ formatCurrency(accountingIncome()) }}</div>
+            <div class="mt-2 text-xs text-slate-500">Inbound payments tied to income-side estate invoices.</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+          <mat-card-content class="p-5!">
+            <div class="text-sm text-slate-500">Expenses, Last 30 Days</div>
+            <div class="mt-2 text-3xl font-semibold text-amber-700">{{ formatCurrency(accountingExpenses()) }}</div>
+            <div class="mt-2 text-xs text-slate-500">Outflows such as deposit refunds and other expense-side payouts.</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+          <mat-card-content class="p-5!">
+            <div class="text-sm text-slate-500">Overdue Exposure</div>
+            <div class="mt-2 text-3xl font-semibold text-rose-700">{{ formatCurrency(overdueBalance()) }}</div>
+            <div class="mt-2 text-xs text-slate-500">Use this with the overdue count to prioritize follow-up.</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </section>
+  }
+</div>

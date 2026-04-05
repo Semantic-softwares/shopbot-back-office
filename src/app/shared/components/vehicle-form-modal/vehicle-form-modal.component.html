@@ -1,0 +1,87 @@
+<h2 mat-dialog-title class="text-lg font-semibold text-gray-900">
+  {{ isEdit ? 'Edit Vehicle' : 'Add Vehicle' }}
+</h2>
+
+<mat-dialog-content class="!pt-4 !pb-2">
+  <form [formGroup]="form" class="flex flex-col gap-4">
+    <!-- Make & Model -->
+    <div class="grid grid-cols-2 gap-3">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Make *</mat-label>
+        <input matInput formControlName="make" placeholder="e.g. Toyota" />
+        @if (form.get('make')?.invalid && form.get('make')?.touched) {
+          <mat-error>Make is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Model *</mat-label>
+        <input matInput formControlName="model" placeholder="e.g. Camry" />
+        @if (form.get('model')?.invalid && form.get('model')?.touched) {
+          <mat-error>Model is required</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <!-- Type & Year -->
+    <div class="grid grid-cols-2 gap-3">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Type *</mat-label>
+        <mat-select formControlName="type">
+          @for (opt of vehicleTypes; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Year</mat-label>
+        <input matInput type="number" formControlName="year"
+               [min]="1900" [max]="currentYear + 1"
+               placeholder="e.g. 2020" />
+      </mat-form-field>
+    </div>
+
+    <!-- Color & License Plate -->
+    <div class="grid grid-cols-2 gap-3">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Color</mat-label>
+        <input matInput formControlName="color" placeholder="e.g. Silver" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>License Plate</mat-label>
+        <input matInput formControlName="licensePlate" placeholder="e.g. ABC-1234" />
+      </mat-form-field>
+    </div>
+
+    <!-- State of Registration & VIN -->
+    <div class="grid grid-cols-2 gap-3">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>State of Registration</mat-label>
+        <input matInput formControlName="stateOfRegistration" placeholder="e.g. Lagos" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>VIN</mat-label>
+        <input matInput formControlName="vin" placeholder="Vehicle Identification Number" />
+      </mat-form-field>
+    </div>
+
+    <!-- Notes -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Notes</mat-label>
+      <textarea matInput formControlName="notes" rows="2"
+                placeholder="Any additional notes..."></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="!px-6 !pb-4 gap-2">
+  <button mat-stroked-button type="button" (click)="onCancel()">
+    Cancel
+  </button>
+  <button mat-flat-button color="primary" type="button" (click)="onConfirm()">
+    {{ isEdit ? 'Save Changes' : 'Add Vehicle' }}
+  </button>
+</mat-dialog-actions>

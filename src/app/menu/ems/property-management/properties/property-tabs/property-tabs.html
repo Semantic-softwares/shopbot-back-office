@@ -1,0 +1,23 @@
+<app-page-header title="Properties" subtitle="Manage your estate properties and units">
+  <ng-container actions>
+    <a mat-flat-button [routerLink]="['/menu/ems/properties/properties/create']">
+       <mat-icon class="mr-1">add_home</mat-icon>
+      New Property
+    </a>
+  </ng-container>
+</app-page-header>
+
+<div class="px-4 pb-6">
+  <nav mat-tab-nav-bar [tabPanel]="tabPanel" mat-stretch-tabs="false" mat-align-tabs="start" class="property-tab-nav">
+    @for (tab of tabs; track tab.link) {
+      <a mat-tab-link [routerLink]="[tab.link]" routerLinkActive #rla="routerLinkActive" [active]="rla.isActive">
+        <mat-icon class="mr-2 !text-lg">{{ tab.icon }}</mat-icon>
+        {{ tab.label }}
+      </a>
+    }
+  </nav>
+
+  <mat-tab-nav-panel #tabPanel>
+    <router-outlet></router-outlet>
+  </mat-tab-nav-panel>
+</div>

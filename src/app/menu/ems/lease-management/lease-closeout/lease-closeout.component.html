@@ -1,0 +1,218 @@
+<app-page-header
+  [title]="lease()?.leaseNumber ? 'End ' + lease()?.leaseNumber : 'End Lease'"
+  subtitle="Review balances, deposits, and closeout details before ending this lease.">
+  <ng-container actions>
+    <button mat-button (click)="goBack()">
+      <mat-icon class="mr-1">arrow_back</mat-icon>
+      Back
+    </button>
+    <button mat-flat-button (click)="submit()" [disabled]="form.invalid || isSubmitting()">
+      @if (isSubmitting()) {
+        <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+      }
+      End Lease
+    </button>
+  </ng-container>
+</app-page-header>
+
+@if (closeoutResource.isLoading()) {
+  <div class="flex items-center justify-center py-20">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+} @else if (closeoutResource.error()) {
+  <div class="m-4 rounded-lg border border-red-200 bg-red-50 p-4">
+    <div class="flex items-start gap-3">
+      <mat-icon class="text-red-500">error</mat-icon>
+      <div>
+        <p class="font-medium text-red-900">Unable to load lease closeout details.</p>
+        <p class="mt-1 text-sm text-red-700">Refresh the summary and try again.</p>
+        <button mat-button color="warn" class="mt-3" (click)="reload()">
+          <mat-icon class="mr-1">refresh</mat-icon>
+          Retry
+        </button>
+      </div>
+    </div>
+  </div>
+} @else if (summary()) {
+  <div class="space-y-4 px-4 py-6">
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-3">
+      <mat-card appearance="outlined" class="xl:col-span-2">
+        <mat-card-content class="space-y-4 p-5!">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Lease overview</p>
+            <h2 class="mt-1 text-lg font-semibold text-gray-900">
+              {{ lease()?.propertyName }}
+              @if (lease()?.unitName && lease()?.unitName !== '--') {
+                <span class="text-gray-500">· {{ lease()?.unitName }}</span>
+              }
+            </h2>
+            <p class="mt-1 text-sm text-gray-600">
+              {{ lease()?.leaseType | titlecase }}
+              @if (lease()?.invoicingType) {
+                <span>· {{ lease()?.invoicingType | titlecase }}</span>
+              }
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Lease start</p>
+              <p class="mt-1 text-sm font-medium text-gray-900">{{ lease()?.startDate | date: 'mediumDate' }}</p>
+            </div>
+            <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Current lease end</p>
+              <p class="mt-1 text-sm font-medium text-gray-900">{{ lease()?.endDate ? (lease()?.endDate | date: 'mediumDate') : 'Open-ended' }}</p>
+            </div>
+            <div class="rounded-lg border border-gray-200 bg-amber-50 px-4 py-3">
+              <p class="text-xs font-semibold uppercase tracking-wide text-amber-700">Outstanding balance</p>
+              <p class="mt-1 text-sm font-semibold text-amber-900">{{ summary()?.totalOutstanding | currency: currencyCode() : 'symbol-narrow' : '1.2-2' }}</p>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Tenants</p>
+            <div class="mt-2 flex flex-wrap gap-2">
+              @for (tenant of lease()?.tenants || []; track tenant.id) {
+                <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">{{ tenant.name }}</span>
+              }
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined">
+        <mat-card-content class="space-y-4 p-5!">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Deposit summary</p>
+            <p class="mt-1 text-2xl font-semibold text-gray-900">
+              {{ summary()?.depositSummary?.availableDepositAmount || 0 | currency: currencyCode() : 'symbol-narrow' : '1.2-2' }}
+            </p>
+            <p class="mt-1 text-sm text-gray-600">Available deposit amount for manual settlement or refund.</p>
+          </div>
+
+          <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Deposits collected</p>
+            <p class="mt-1 text-sm font-medium text-gray-900">
+              {{ summary()?.depositSummary?.totalDepositCollected || 0 | currency: currencyCode() : 'symbol-narrow' : '1.2-2' }}
+            </p>
+          </div>
+
+          @if (isDepositFullyRefunded()) {
+            <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+              Deposit has been fully refunded.
+            </div>
+          }
+
+          <div class="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+            Ending the lease stops future recurring billing. Outstanding invoices and deposit handling remain available for manual accounting after closeout.
+          </div>
+
+          @if (hasAvailableDepositToRefund()) {
+            <button
+              mat-stroked-button
+              color="primary"
+              class="w-full"
+              [disabled]="isRefundingDeposit()"
+              (click)="refundDeposit()"
+              aria-label="Refund available lease deposit"
+            >
+              {{ isRefundingDeposit() ? 'Refunding...' : 'Refund Deposit' }}
+            </button>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-3">
+      <mat-card appearance="outlined" class="xl:col-span-2">
+        <mat-card-content class="p-5!">
+          <div class="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Outstanding invoices</p>
+              <h3 class="mt-1 text-lg font-semibold text-gray-900">Open balances tied to this lease</h3>
+            </div>
+            <div class="text-right">
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Total outstanding</p>
+              <p class="mt-1 text-sm font-semibold text-gray-900">
+                {{ summary()?.totalOutstanding || 0 | currency: currencyCode() : 'symbol-narrow' : '1.2-2' }}
+              </p>
+            </div>
+          </div>
+
+          @if (summary()?.unpaidInvoices?.length) {
+            <mat-list>
+              @for (invoice of summary()?.unpaidInvoices || []; track invoice.id) {
+                <mat-list-item>
+                  <div class="flex w-full flex-col gap-2 py-2 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <p class="font-medium text-gray-900">{{ invoice.invoiceNumber }} · {{ invoice.category }}</p>
+                      <p class="text-sm text-gray-600">{{ invoice.payerName }} · Due {{ invoice.dueDate | date: 'mediumDate' }}</p>
+                    </div>
+                    <div class="flex flex-col gap-3 text-left md:flex-row md:items-center md:text-right">
+                      <div>
+                        <p class="text-sm text-gray-600">Paid {{ invoice.paid | currency: currencyCode() : 'symbol-narrow' : '1.2-2' }} of {{ invoice.total | currency: currencyCode() : 'symbol-narrow' : '1.2-2' }}</p>
+                        <p class="text-sm font-semibold text-gray-900">Balance {{ invoice.balance | currency: currencyCode() : 'symbol-narrow' : '1.2-2' }}</p>
+                      </div>
+                      <button
+                        mat-stroked-button
+                        color="primary"
+                        (click)="recordPayment(invoice)"
+                        class="whitespace-nowrap"
+                        aria-label="Record payment for {{ invoice.invoiceNumber }}"
+                      >
+                        <mat-icon class="mr-1">payment</mat-icon>
+                        Record as Paid
+                      </button>
+                    </div>
+                  </div>
+                </mat-list-item>
+              }
+            </mat-list>
+          } @else {
+            <app-no-record
+              icon="receipt_long"
+              title="No outstanding invoices"
+              message="This lease does not currently have unpaid or partially paid invoices."
+            />
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined">
+        <mat-card-content class="p-5!">
+          <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Closeout details</p>
+          <h3 class="mt-1 text-lg font-semibold text-gray-900">Confirm lease end</h3>
+
+          <form class="mt-4 space-y-4" [formGroup]="form">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Effective end date</mat-label>
+              <input matInput [matDatepicker]="effectiveEndDatePicker" formControlName="effectiveEndDate" />
+              <mat-datepicker-toggle matIconSuffix [for]="effectiveEndDatePicker" />
+              <mat-datepicker #effectiveEndDatePicker />
+              @if (form.controls.effectiveEndDate.hasError('required')) {
+                <mat-error>Effective end date is required.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Move-out date</mat-label>
+              <input matInput [matDatepicker]="moveOutDatePicker" formControlName="moveOutDate" />
+              <mat-datepicker-toggle matIconSuffix [for]="moveOutDatePicker" />
+              <mat-datepicker #moveOutDatePicker />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Reason</mat-label>
+              <input matInput formControlName="reason" placeholder="Lease completed, tenant requested move-out, etc." />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Notes</mat-label>
+              <textarea matInput rows="5" formControlName="notes" placeholder="Add any closeout notes for accounting, move-out coordination, or follow-up."></textarea>
+            </mat-form-field>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+}

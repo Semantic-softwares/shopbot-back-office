@@ -1,0 +1,305 @@
+<div class="space-y-5">
+
+  <!-- Header -->
+  <div class="flex items-center gap-3">
+    <div class="flex items-center justify-center w-9 h-9 rounded-full bg-primary-50">
+      <mat-icon class="text-primary-600 !text-lg">description</mat-icon>
+    </div>
+    <div>
+      <h2 class="text-base font-semibold text-gray-800">Lease Summary</h2>
+      <p class="text-xs text-gray-500">Review all details before submitting</p>
+    </div>
+  </div>
+
+  <!-- Property & Lease Terms -->
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      <div class="flex items-center gap-2 mb-4">
+        <mat-icon class="text-gray-500 !text-base">home_work</mat-icon>
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Property & Terms</span>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 text-sm">
+        <div>
+          <p class="text-xs text-gray-400 mb-0.5">Property</p>
+          <p class="font-medium text-gray-800">{{ propertyName(terms['propertyId']) }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-400 mb-0.5">Unit</p>
+          <p class="font-medium text-gray-800">{{ unitName(terms['unitId']) }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-400 mb-0.5">Currency</p>
+          <p class="font-medium text-gray-800">{{ terms['currency'] || '-' }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-400 mb-0.5">Lease Type</p>
+          <p class="font-medium text-gray-800">{{ leaseTypeLabel(terms['leaseType']) }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-400 mb-0.5">Invoicing Type</p>
+          <p class="font-medium text-gray-800">{{ invoicingTypeLabel(transactions['invoicingType']) }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-400 mb-0.5">Status</p>
+          <p class="font-medium text-gray-800">{{ terms['status'] || 'DRAFT' }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-400 mb-0.5">Start Date</p>
+          <p class="font-medium text-gray-800">{{ formatDate(terms['startDate']) }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-400 mb-0.5">End Date</p>
+          <p class="font-medium text-gray-800">{{ formatDate(terms['endDate']) }}</p>
+        </div>
+        @if (terms['notes']) {
+          <div class="col-span-2 md:col-span-3">
+            <p class="text-xs text-gray-400 mb-0.5">Notes</p>
+            <p class="font-medium text-gray-800">{{ terms['notes'] }}</p>
+          </div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Tenants -->
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      <div class="flex items-center gap-2 mb-4">
+        <mat-icon class="text-gray-500 !text-base">people</mat-icon>
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tenants</span>
+      </div>
+
+      @if (tenantList().length > 0) {
+        <div class="flex flex-wrap gap-2">
+          @for (tenant of tenantList(); track tenant.name) {
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-sm font-medium"
+              [class]="tenant.found
+                ? 'bg-blue-50 border-blue-200 text-blue-800'
+                : 'bg-gray-50 border-gray-200 text-gray-500'">
+              <mat-icon class="!text-sm !w-4 !h-4">person</mat-icon>
+              {{ tenant.name }}
+            </span>
+          }
+        </div>
+      } @else {
+        <p class="text-sm text-gray-400 italic">No tenants selected</p>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Recurring Rent -->
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      <div class="flex items-center gap-2 mb-4">
+        <mat-icon class="text-gray-500 !text-base">payments</mat-icon>
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Recurring Rent</span>
+      </div>
+
+      @if (recurringRent['enabled']) {
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 text-sm mb-4">
+          <div>
+            <p class="text-xs text-gray-400 mb-0.5">Total Amount</p>
+            <p class="font-semibold text-gray-900">{{ terms['currency'] || '' }} {{ recurringRent['totalAmount'] | number:'1.2-2' }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-0.5">Frequency</p>
+            <p class="font-medium text-gray-800">{{ frequencyLabel(recurringRent['frequency']) }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-0.5">Due Date Rule</p>
+            <p class="font-medium text-gray-800">{{ dueDateRuleLabel(recurringRent['dueDateRule']) }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-0.5">First Rent Date</p>
+            <p class="font-medium text-gray-800">{{ formatDate(recurringRent['firstRentDate']) }}</p>
+          </div>
+          @if (recurringRent['markPastInvoicesAsPaid']) {
+            <div>
+              <p class="text-xs text-gray-400 mb-0.5">Past Invoices</p>
+              <p class="font-medium text-green-700">Mark as Paid</p>
+            </div>
+          }
+        </div>
+
+        @if (transactions['invoicingType'] === 'INDIVIDUAL' && (recurringRent['tenantShares'] || []).length > 0) {
+          <div class="mt-3 border-t border-gray-100 pt-3">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Tenant Shares</p>
+            <div class="flex flex-col gap-2">
+              @for (share of recurringRent['tenantShares']; track $index) {
+                <div class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-4 py-2 text-sm">
+                  <span class="font-medium text-gray-800">{{ tenantName(share.tenantId) }}</span>
+                  <span class="font-semibold text-gray-900">{{ terms['currency'] || '' }} {{ share.amount | number:'1.2-2' }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      } @else {
+        <p class="text-sm text-gray-400 italic">Recurring rent is not enabled</p>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Deposits -->
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      <div class="flex items-center gap-2 mb-4">
+        <mat-icon class="text-gray-500 !text-base">account_balance_wallet</mat-icon>
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Deposits</span>
+      </div>
+
+      @if (deposits.length > 0) {
+        <div class="flex flex-col gap-3">
+          @for (deposit of deposits; track $index) {
+            <div class="rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 text-sm">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <mat-icon class="text-gray-400 !text-base">savings</mat-icon>
+                  <div>
+                    <p class="font-medium text-gray-800">{{ depositCategoryLabel(deposit.category) }}</p>
+                    <p class="text-xs text-gray-500">Invoice: {{ formatDate(deposit.invoiceDate) }}</p>
+                  </div>
+                </div>
+                <p class="font-semibold text-gray-900">{{ terms['currency'] || '' }} {{ deposit.amount | number:'1.2-2' }}</p>
+              </div>
+
+              @if (transactions['invoicingType'] === 'INDIVIDUAL' && (deposit.tenantShares || []).length > 0) {
+                <div class="mt-2 border-t border-gray-200 pt-2">
+                  <p class="text-xs text-gray-400 mb-1">Tenant Shares</p>
+                  @for (share of deposit.tenantShares; track $index) {
+                    <div class="flex items-center justify-between text-xs text-gray-600 py-0.5">
+                      <span>{{ tenantName(share.tenantId) }}</span>
+                      <span class="font-medium">{{ terms['currency'] || '' }} {{ share.amount | number:'1.2-2' }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="text-sm text-gray-400 italic">No deposits added</p>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Other Transactions -->
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      <div class="flex items-center gap-2 mb-4">
+        <mat-icon class="text-gray-500 !text-base">receipt</mat-icon>
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Other Transactions</span>
+      </div>
+
+      @if (otherTransactions.length > 0) {
+        <div class="flex flex-col gap-3">
+          @for (txn of otherTransactions; track $index) {
+            <div class="flex items-center justify-between rounded-lg border border-amber-100 bg-amber-50 px-4 py-3 text-sm">
+              <div class="flex items-center gap-3">
+                <mat-icon class="text-amber-400 !text-base">monetization_on</mat-icon>
+                <div>
+                  <p class="font-medium text-gray-800">{{ txn.title || 'Untitled' }}</p>
+                  <p class="text-xs text-gray-500">
+                    {{ frequencyLabel(txn.frequency) }} · Due: {{ formatDate(txn.dueDate) }}
+                  </p>
+                  @if (txn.account) {
+                    <p class="text-xs text-gray-400">Account: {{ txn.account }}</p>
+                  }
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="font-semibold text-gray-900">{{ terms['currency'] || '' }} {{ txn.amount | number:'1.2-2' }}</p>
+                @if (txn.memo) {
+                  <p class="text-xs text-gray-400">{{ txn.memo }}</p>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="text-sm text-gray-400 italic">No other transactions added</p>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Late Fee Settings -->
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      <div class="flex items-center gap-2 mb-4">
+        <mat-icon class="text-gray-500 !text-base">gavel</mat-icon>
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Late Fee Settings</span>
+      </div>
+
+      @if (lateFeeSettings['enabled']) {
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 text-sm">
+          <div>
+            <p class="text-xs text-gray-400 mb-0.5">Grace Period</p>
+            <p class="font-medium text-gray-800">{{ lateFeeSettings['gracePeriodDays'] || 0 }} days</p>
+          </div>
+
+          @if (lateFeeSettings['oneTimeFee']?.type) {
+            <div>
+              <p class="text-xs text-gray-400 mb-0.5">One-Time Late Fee</p>
+              <p class="font-medium text-gray-800">
+                @if (lateFeeSettings['oneTimeFee'].type === 'FIXED') {
+                  {{ terms['currency'] || '' }} {{ lateFeeSettings['oneTimeFee'].value | number:'1.2-2' }}
+                } @else {
+                  {{ lateFeeSettings['oneTimeFee'].value }}% of rent
+                }
+              </p>
+            </div>
+          }
+
+          @if (lateFeeSettings['dailyFee']?.type) {
+            <div>
+              <p class="text-xs text-gray-400 mb-0.5">Daily Late Fee</p>
+              <p class="font-medium text-gray-800">
+                @if (lateFeeSettings['dailyFee'].type === 'FIXED') {
+                  {{ terms['currency'] || '' }} {{ lateFeeSettings['dailyFee'].value | number:'1.2-2' }} / day
+                } @else {
+                  {{ lateFeeSettings['dailyFee'].value }}% of rent / day
+                }
+              </p>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="text-sm text-gray-400 italic">Late fees are not enabled</p>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Utility Responsibilities -->
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      <div class="flex items-center gap-2 mb-4">
+        <mat-icon class="text-gray-500 !text-base">bolt</mat-icon>
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Utility Responsibilities</span>
+      </div>
+
+      @if (utilities.length > 0) {
+        <div class="flex flex-col gap-2">
+          @for (utility of utilities; track $index) {
+            <div class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-4 py-2.5 text-sm">
+              <div class="flex items-center gap-2">
+                <mat-icon class="text-gray-400 !text-base">electrical_services</mat-icon>
+                <span class="font-medium text-gray-800">
+                  {{ utility.utilityType }}{{ utility.customUtilityName ? ' — ' + utility.customUtilityName : '' }}
+                </span>
+              </div>
+              <span class="text-xs px-2 py-0.5 rounded-full font-medium"
+                [class]="utility.responsibleParty === 'TENANT' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'">
+                {{ utility.responsibleParty }}
+              </span>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="text-sm text-gray-400 italic">No utility responsibilities defined</p>
+      }
+    </mat-card-content>
+  </mat-card>
+
+</div>
+

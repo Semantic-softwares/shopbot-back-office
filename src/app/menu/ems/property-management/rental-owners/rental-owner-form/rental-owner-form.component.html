@@ -1,0 +1,121 @@
+<app-page-header
+  [title]="isEditMode() ? 'Edit Rental Owner' : 'New Rental Owner'"
+  [subtitle]="isEditMode() ? 'Update rental owner information' : 'Add a new rental owner'">
+  <ng-container actions>
+    <button mat-button (click)="cancel()">
+      <mat-icon class="mr-1">arrow_back</mat-icon>
+      Cancel
+    </button>
+    <button mat-flat-button (click)="onSubmit()" [disabled]="isSaving()">
+      @if (isSaving()) {
+        <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+      }
+      {{ isEditMode() ? 'Update Owner' : 'Create Owner' }}
+    </button>
+  </ng-container>
+</app-page-header>
+
+<div class="max-w-3xl py-6 px-4">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+    <!-- PERSONAL INFORMATION -->
+    <mat-card appearance="outlined" class="mb-6">
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">PERSONAL INFORMATION</div>
+      <mat-card-content class="px-4 pb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>First Name</mat-label>
+            <input matInput formControlName="firstName" placeholder="First name">
+            @if (form.get('firstName')?.hasError('required') && form.get('firstName')?.touched) {
+              <mat-error>First name is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Last Name</mat-label>
+            <input matInput formControlName="lastName" placeholder="Last name">
+            @if (form.get('lastName')?.hasError('required') && form.get('lastName')?.touched) {
+              <mat-error>Last name is required</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- CONTACT INFORMATION -->
+    <mat-card appearance="outlined" class="mb-6">
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">CONTACT INFORMATION</div>
+      <mat-card-content class="px-4 pb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" type="email" placeholder="Email address">
+            @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
+              <mat-error>Enter a valid email</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Phone</mat-label>
+            <input matInput formControlName="phone" placeholder="Phone number">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Alternate Phone</mat-label>
+            <input matInput formControlName="alternatePhone" placeholder="Alternate phone">
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- COMPANY INFORMATION -->
+    <mat-card appearance="outlined" class="mb-6">
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">COMPANY INFORMATION</div>
+      <mat-card-content class="px-4 pb-4">
+        <div class="mb-4">
+          <mat-slide-toggle formControlName="isCompany">
+            This owner is a company
+          </mat-slide-toggle>
+        </div>
+
+        @if (isCompany()) {
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Company Name</mat-label>
+              <input matInput formControlName="companyName" placeholder="Company name">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Tax ID</mat-label>
+              <input matInput formControlName="taxId" placeholder="Tax ID / Registration number">
+            </mat-form-field>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- STATUS & NOTES -->
+    <mat-card appearance="outlined" class="mb-6">
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">STATUS & NOTES</div>
+      <mat-card-content class="px-4 pb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              @for (s of statusOptions; track s.value) {
+                <mat-option [value]="s.value">{{ s.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="w-full mt-2">
+          <mat-label>Notes</mat-label>
+          <textarea matInput formControlName="notes" rows="4" placeholder="Additional notes..."></textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+
+  </form>
+</div>

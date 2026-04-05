@@ -1,0 +1,23 @@
+@if (attachments().length === 0) {
+  <div class="flex flex-col items-center justify-center py-16 text-gray-400">
+    <mat-icon class="!text-6xl !w-16 !h-16 mb-4">folder_open</mat-icon>
+    <h3 class="text-lg font-medium text-gray-600 mb-1">No files yet</h3>
+    <p class="text-sm">Upload files from the rental owner edit form.</p>
+  </div>
+} @else {
+  <div class="mb-8">
+    <h3 class="text-sm font-bold text-gray-500 tracking-wider uppercase mb-4">Documents</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      @for (url of attachments(); track url) {
+        <a [href]="url" target="_blank" rel="noopener noreferrer"
+          class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors no-underline">
+          <mat-icon class="text-gray-500">{{ getFileIcon(url) }}</mat-icon>
+          <span class="flex-1 min-w-0 text-sm font-medium text-gray-800 truncate">
+            {{ getFileName(url) }}
+          </span>
+          <mat-icon class="!text-base text-gray-400">open_in_new</mat-icon>
+        </a>
+      }
+    </div>
+  </div>
+}

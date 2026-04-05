@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+.category-hint-link {
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 20px;
+  text-decoration: none;
+}
+
+.category-hint-link:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,33 @@
+    <div class="max-w-12xl px-4">
+          <app-page-header
+            title="Arrears & Collections"
+            subtitle="Track and manage overdue balances across your properties"
+          ></app-page-header>
+
+      @if (isPageLoading()) {
+        <div class="flex justify-center items-center h-96">
+          <mat-spinner [diameter]="50"></mat-spinner>
+        </div>
+      } @else {
+        <div class="mb-8">
+          <app-arrears-summary-cards [summary]="summary()"></app-arrears-summary-cards>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <app-arrears-aging-summary [agingSummary]="agingSummary()"></app-arrears-aging-summary>
+          <app-top-arrears-properties [properties]="topProperties()"></app-top-arrears-properties>
+        </div>
+
+        <app-arrears-filters (filterChange)="onFiltersChange($event)"></app-arrears-filters>
+
+        <app-arrears-table
+          [rows]="rows()"
+          [totalItems]="totalItems()"
+          [pageSize]="pageSize()"
+          [currentPage]="currentPage()"
+          [isLoading]="isTableLoading()"
+          (pageChange)="onPageChange($event)"
+          (actionExecuted)="onActionExecuted($event)"
+        ></app-arrears-table>
+      }
+    </div>

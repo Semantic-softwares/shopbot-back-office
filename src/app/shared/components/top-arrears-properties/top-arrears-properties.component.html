@@ -1,0 +1,39 @@
+<mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+  <mat-card-header class="px-6 pt-6">
+    <mat-card-title>Top Properties by Arrears</mat-card-title>
+    <mat-card-subtitle>Highest overdue balances</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content class="p-0!">
+    @if (properties && properties.length > 0) {
+      <mat-list class="!p-0">
+        @for (property of properties; track property.propertyId; let last = $last) {
+          <mat-list-item [class.!border-b-0]="last" class="!h-auto border-b border-slate-200 px-6 py-4">
+            <div class="w-full">
+              <div class="mb-2 flex items-center justify-between gap-4">
+                <div class="flex-1">
+                  <h4 class="font-semibold text-slate-900">{{ property.propertyName }}</h4>
+                  <p class="text-sm text-slate-500">
+                    {{ property.overdueLeaseCount }} lease(s) • {{ property.overdueInvoiceCount }} invoice(s)
+                  </p>
+                </div>
+                <p class="text-lg font-semibold text-rose-700">{{ property.totalArrears | currency }}</p>
+              </div>
+              <div class="flex gap-2">
+                <button mat-stroked-button (click)="viewProperty(property.propertyId)" class="!text-xs">
+                  <mat-icon matIconPrefix class="!text-base">location_city</mat-icon>
+                  View Property
+                </button>
+              </div>
+            </div>
+          </mat-list-item>
+        }
+      </mat-list>
+    } @else {
+      <div class="p-6 text-center text-slate-500">
+        <mat-icon class="mb-2 text-4xl opacity-50">home_work</mat-icon>
+        <p>No properties with arrears</p>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,42 @@
+<h2 mat-dialog-title>Mark as paid</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="space-y-4 pt-3">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Date paid</mat-label>
+        <input matInput [matDatepicker]="datePicker" formControlName="paymentDate" readonly>
+        <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
+        <mat-datepicker #datePicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Amount paid</mat-label>
+        <input matInput type="number" min="0.01" step="0.01" formControlName="amount">
+        @if (form.controls.amount.hasError('exceedsBalance')) {
+          <mat-error>Amount cannot exceed invoice balance.</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Method</mat-label>
+      <mat-select formControlName="paymentMethod">
+        @for (method of paymentMethodOptions; track method) {
+          <mat-option [value]="method">{{ method }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Payment details</mat-label>
+      <textarea matInput rows="4" maxlength="150" formControlName="note"></textarea>
+      <mat-hint align="end">{{ form.controls.note.value?.length || 0 }} / 150</mat-hint>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="cancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="confirm()">Confirm</button>
+</mat-dialog-actions>

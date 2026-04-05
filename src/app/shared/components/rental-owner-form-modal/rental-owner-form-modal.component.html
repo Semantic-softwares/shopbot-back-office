@@ -1,0 +1,100 @@
+@if (isEditing()) {
+  <h2 mat-dialog-title class="text-xl font-bold mb-4">Edit Rental Owner</h2>
+} @else {
+  <h2 mat-dialog-title class="text-xl font-bold mb-4">Add Property Owner</h2>
+}
+
+<mat-dialog-content class="max-h-[70vh] overflow-y-auto">
+  <!-- Owner Search Section -->
+  @if (!isEditing()) {
+    <div class="mb-6 pb-6 border-b border-gray-200">
+      <p class="text-sm text-gray-500 mb-3">Search for an existing rental owner or create a new one below.</p>
+      <app-rental-owner-search
+        label="Search Existing Owner"
+        placeholder="Search by name, email or company..."
+        (ownerSelected)="onSelectExistingOwner($event)">
+      </app-rental-owner-search>
+    </div>
+  }
+
+  <form [formGroup]="ownerForm" class="space-y-4">
+    @if (!isEditing()) {
+      <p class="text-sm font-medium text-gray-600 mb-2">Or create a new owner:</p>
+    }
+
+    <!-- Personal Information -->
+    <div class="grid grid-cols-2 gap-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>First Name</mat-label>
+        <input matInput formControlName="firstName" placeholder="First name">
+        @if (ownerForm.get('firstName')?.hasError('required') && ownerForm.get('firstName')?.touched) {
+          <mat-error>First name is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Last Name</mat-label>
+        <input matInput formControlName="lastName" placeholder="Last name">
+        @if (ownerForm.get('lastName')?.hasError('required') && ownerForm.get('lastName')?.touched) {
+          <mat-error>Last name is required</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="grid grid-cols-2 gap-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email" placeholder="Email address">
+        @if (ownerForm.get('email')?.hasError('email') && ownerForm.get('email')?.touched) {
+          <mat-error>Enter a valid email</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Phone</mat-label>
+        <input matInput formControlName="phone" placeholder="Phone number">
+      </mat-form-field>
+    </div>
+
+    <!-- Company Toggle -->
+    <div class="mb-2">
+      <mat-slide-toggle formControlName="isCompany">
+        This owner is a company
+      </mat-slide-toggle>
+    </div>
+
+    @if (isCompany()) {
+      <div class="grid grid-cols-2 gap-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Company Name</mat-label>
+          <input matInput formControlName="companyName" placeholder="Company name">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Tax ID</mat-label>
+          <input matInput formControlName="taxId" placeholder="Tax ID / Registration number">
+        </mat-form-field>
+      </div>
+    }
+
+    <!-- Notes -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Notes</mat-label>
+      <textarea matInput formControlName="notes" rows="3" placeholder="Additional notes..."></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="pt-4">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button
+    mat-flat-button
+    (click)="onSubmit()"
+    [disabled]="isSaving() || ownerForm.invalid">
+    @if (isSaving()) {
+      <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+    }
+    {{ isEditing() ? 'Update Owner' : 'Create & Add Owner' }}
+  </button>
+</mat-dialog-actions>

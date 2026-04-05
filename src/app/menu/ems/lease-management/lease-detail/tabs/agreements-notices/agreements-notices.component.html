@@ -1,0 +1,12 @@
+@if (lease(); as lease) {
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      <div class="text-xs font-semibold text-gray-500 mb-2">AGREEMENTS & NOTICES</div>
+      @if (lease.notes) {
+        <p class="text-sm text-gray-700 leading-relaxed">{{ lease.notes }}</p>
+      } @else {
+        <p class="text-sm text-gray-400">No agreements or notices recorded yet.</p>
+      }
+    </mat-card-content>
+  </mat-card>
+}

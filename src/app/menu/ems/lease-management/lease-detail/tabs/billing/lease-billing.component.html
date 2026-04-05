@@ -1,0 +1,121 @@
+<div class="space-y-4">
+  <!-- Header with generate button -->
+  <div class="flex items-center justify-between">
+    <h3 class="text-base font-semibold text-gray-900">Billing & Invoices</h3>
+    <button mat-flat-button (click)="generateMissing()" [disabled]="generating()">
+      @if (generating()) {
+        <mat-spinner diameter="18" class="mr-2"></mat-spinner>
+      } @else {
+        <mat-icon class="mr-1">sync</mat-icon>
+      }
+      Generate Missing Invoices
+    </button>
+  </div>
+
+  @if (invoicesResource.isLoading()) {
+    <div class="flex items-center justify-center py-8">
+      <mat-spinner diameter="32"></mat-spinner>
+    </div>
+  } @else if (invoices().length === 0) {
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-6!">
+        <div class="text-center py-6 text-gray-500">
+          <mat-icon class="!text-5xl !h-14 !w-14 mb-2 text-gray-300">receipt_long</mat-icon>
+          <p class="text-sm">No invoices generated for this lease yet.</p>
+          <p class="text-xs text-gray-400 mt-1">Click "Generate Missing Invoices" to create them.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <!-- Summary row -->
+    <div class="grid grid-cols-2 gap-4">
+      <mat-card appearance="outlined">
+        <mat-card-content class="p-4!">
+          <p class="text-sm text-gray-600">Total Billed</p>
+          <p class="text-xl font-bold text-gray-900 mt-1">{{ formatCurrency(totalAmount()) }}</p>
+        </mat-card-content>
+      </mat-card>
+      <mat-card appearance="outlined" [class]="totalBalance() > 0 ? 'border-red-200!' : ''">
+        <mat-card-content class="p-4!">
+          <p class="text-sm text-gray-600">Outstanding Balance</p>
+          <p class="text-xl font-bold mt-1" [class]="totalBalance() > 0 ? 'text-red-600' : 'text-gray-900'">
+            {{ formatCurrency(totalBalance()) }}
+          </p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Invoice table -->
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-0!">
+        <div class="overflow-x-auto">
+          <table mat-table [dataSource]="invoices()" class="w-full">
+
+            <!-- Status -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">Status</th>
+              <td mat-cell *matCellDef="let inv" class="py-3">
+                <div class="flex items-center gap-2">
+                  <span class="inline-block w-2 h-2 rounded-full" [ngClass]="statusDot(inv.status)"></span>
+                  <span class="text-sm text-gray-700">{{ statusLabel(inv.status) }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Title -->
+            <ng-container matColumnDef="title">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">Title</th>
+              <td mat-cell *matCellDef="let inv" class="text-sm text-gray-800 py-3">{{ inv.title }}</td>
+            </ng-container>
+
+            <!-- Due Date -->
+            <ng-container matColumnDef="dueDate">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">Due Date</th>
+              <td mat-cell *matCellDef="let inv" class="text-sm text-gray-700 py-3">{{ inv.dueDate | date: 'MMM d, y' }}</td>
+            </ng-container>
+
+            <!-- Type -->
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">Type</th>
+              <td mat-cell *matCellDef="let inv" class="text-sm text-gray-700 py-3">
+                <div class="flex items-center gap-1.5">
+                  @if (isRecurring(inv.type)) {
+                    <mat-icon class="!text-base !w-4 !h-4 text-gray-400" matTooltip="Recurring">autorenew</mat-icon>
+                  }
+                  <span>{{ categoryLabel(inv.type) }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Tenant -->
+            <ng-container matColumnDef="tenant">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">Tenant</th>
+              <td mat-cell *matCellDef="let inv" class="text-sm text-gray-700 py-3">{{ tenantName(inv) }}</td>
+            </ng-container>
+
+            <!-- Amount -->
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 text-right!">Amount</th>
+              <td mat-cell *matCellDef="let inv" class="text-sm text-gray-800 font-medium py-3 text-right!">{{ formatCurrency(inv.amount) }}</td>
+            </ng-container>
+
+            <!-- Balance -->
+            <ng-container matColumnDef="balance">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 text-right!">Balance</th>
+              <td mat-cell *matCellDef="let inv" class="text-sm font-medium py-3 text-right!" [ngClass]="inv.balance > 0 ? 'text-red-600' : 'text-gray-600'">
+                {{ formatCurrency(inv.balance) }}
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let inv; columns: displayedColumns;" class="hover:bg-gray-50"></tr>
+          </table>
+        </div>
+
+        <div class="px-4 py-3 text-xs text-gray-500 border-t border-outline-variant">
+          {{ invoices().length }} invoices
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

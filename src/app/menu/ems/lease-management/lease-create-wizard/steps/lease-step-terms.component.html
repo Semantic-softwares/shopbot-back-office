@@ -1,0 +1,67 @@
+<div [formGroup]="termsGroup" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <mat-form-field appearance="outline" class="w-full md:col-span-2">
+    <mat-label>Property</mat-label>
+    <mat-select formControlName="propertyId">
+      @for (property of properties; track property._id) {
+        <mat-option [value]="property._id">{{ property.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  @if (termsGroup.get('propertyCategory')?.value) {
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Property Category</mat-label>
+      <input matInput [value]="termsGroup.get('propertyCategory')?.value" readonly>
+    </mat-form-field>
+  }
+
+  @if (termsGroup.get('propertyCategory')?.value === propertyCategory.MULTI_UNIT) {
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Unit</mat-label>
+      <mat-select formControlName="unitId">
+        @for (unit of units; track unit._id) {
+          <mat-option [value]="unit._id">{{ unit.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>Lease Type</mat-label>
+    <mat-select formControlName="leaseType">
+      @for (item of leaseTypeOptions; track item) {
+        <mat-option [value]="item">{{ item }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>Start Date</mat-label>
+    <input matInput [matDatepicker]="startDatePicker" formControlName="startDate">
+    <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+    <mat-datepicker #startDatePicker></mat-datepicker>
+  </mat-form-field>
+
+  @if (termsGroup.get('leaseType')?.value === 'FIXED_TERM') {
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>End Date</mat-label>
+      <input matInput [matDatepicker]="endDatePicker" formControlName="endDate">
+      <mat-datepicker-toggle matIconSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #endDatePicker></mat-datepicker>
+    </mat-form-field>
+  }
+
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>Currency</mat-label>
+    <mat-select formControlName="currency">
+      @for (currency of currencyOptions; track currency.code) {
+        <mat-option [value]="currency.code">{{ currency.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="w-full md:col-span-2">
+    <mat-label>Notes</mat-label>
+    <textarea matInput rows="2" formControlName="notes"></textarea>
+  </mat-form-field>
+</div>
