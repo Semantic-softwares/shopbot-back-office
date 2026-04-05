@@ -1,0 +1,31 @@
+<div [formGroup]="tenantsGroup" class="grid grid-cols-1 gap-4">
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>Tenants</mat-label>
+
+    <mat-chip-grid #chipGrid aria-label="Selected tenants">
+      @for (tenantId of selectedTenantIds(); track tenantId) {
+        <mat-chip-row (removed)="removeTenant(tenantId)">
+          {{ selectedTenantLabel(tenantId) }}
+          <button matChipRemove type="button" aria-label="Remove tenant">
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip-row>
+      }
+      <input
+        [formControl]="tenantSearchControl"
+        [matChipInputFor]="chipGrid"
+        [matAutocomplete]="tenantAuto"
+        placeholder="Search and select tenant">
+    </mat-chip-grid>
+
+    <mat-autocomplete #tenantAuto="matAutocomplete" (optionSelected)="selectTenant($event)">
+      @for (tenant of filteredTenants(); track tenant._id) {
+        <mat-option [value]="tenant._id">{{ tenantLabel(tenant) }}</mat-option>
+      }
+    </mat-autocomplete>
+
+    @if (tenantsGroup.get('tenantIds')?.invalid && tenantsGroup.get('tenantIds')?.touched) {
+      <mat-error>Please select at least one tenant</mat-error>
+    }
+  </mat-form-field>
+</div>

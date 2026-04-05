@@ -1,0 +1,377 @@
+<app-page-header
+  [title]="pageTitle()"
+  [subtitle]="pageSubtitle()">
+  <ng-container actions>
+    <button mat-button (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </button>
+    <button mat-flat-button (click)="onSubmit()" [disabled]="isSaving() || form.invalid">
+      @if (isSaving()) {
+        <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+      }
+      {{ isEditMode() ? 'Update' : 'Create' }}
+    </button>
+  </ng-container>
+</app-page-header>
+
+<div class="max-w-7xl mx-auto py-6 px-4">
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-20">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="grid grid-cols-12 gap-6">
+
+        <!-- LEFT COLUMN: Unit Photo + Gallery -->
+        <div class="col-span-12 md:col-span-3 space-y-6">
+
+          <!-- Unit Photo Card -->
+          <mat-card appearance="outlined">
+            <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">UNIT PHOTO</div>
+            <mat-card-content class="px-4 pb-4">
+              <div class="relative bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg overflow-hidden aspect-square flex items-center justify-center">
+                @if (coverPhotoFile()?.preview || coverPhotoUrl()) {
+                  <img [src]="coverPhotoFile()?.preview || coverPhotoUrl()" alt="Cover" class="w-full h-full object-cover">
+                  <button type="button" mat-mini-fab color="warn"
+                    class="!absolute !top-2 !right-2 !z-10"
+                    aria-label="Remove photo"
+                    (click)="removeCoverPhoto()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                } @else {
+                  <label class="cursor-pointer flex flex-col items-center gap-2 text-gray-400">
+                    <mat-icon class="text-4xl !w-12 !h-12">apartment</mat-icon>
+                    <span class="text-xs font-medium" style="color: var(--mat-sys-primary)">Upload Photo</span>
+                    <input type="file" accept="image/*" class="hidden" (change)="onCoverPhotoSelected($event)">
+                  </label>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Gallery Card -->
+          <mat-card appearance="outlined">
+            <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">GALLERY</div>
+            <mat-card-content class="px-4 pb-4">
+              <div class="grid grid-cols-2 gap-2 mb-2">
+                @for (photo of existingGallery(); track photo; let i = $index) {
+                  <div class="relative aspect-square rounded-lg overflow-hidden border">
+                    <img [src]="photo" alt="Gallery" class="w-full h-full object-cover">
+                    <button type="button" mat-mini-fab color="warn"
+                      class="!absolute !top-1 !right-1 !z-10 !w-6 !h-6 !min-w-0"
+                      aria-label="Remove gallery photo"
+                      (click)="removeExistingGalleryPhoto(i)">
+                      <mat-icon class="!text-sm !w-3.5 !h-3.5">close</mat-icon>
+                    </button>
+                  </div>
+                }
+                @for (fp of galleryFiles(); track fp.preview; let i = $index) {
+                  <div class="relative aspect-square rounded-lg overflow-hidden border">
+                    <img [src]="fp.preview" alt="Gallery" class="w-full h-full object-cover">
+                    <button type="button" mat-mini-fab color="warn"
+                      class="!absolute !top-1 !right-1 !z-10 !w-6 !h-6 !min-w-0"
+                      aria-label="Remove gallery photo"
+                      (click)="removeGalleryFile(i)">
+                      <mat-icon class="!text-sm !w-3.5 !h-3.5">close</mat-icon>
+                    </button>
+                  </div>
+                }
+              </div>
+              <button type="button" mat-button color="primary" class="!px-2" (click)="galleryInput.click()">
+                <mat-icon>add_photo_alternate</mat-icon>
+                Upload photo
+              </button>
+              <input #galleryInput type="file" accept="image/*" multiple class="hidden" (change)="onGalleryPhotosSelected($event)">
+            </mat-card-content>
+          </mat-card>
+
+        </div>
+
+        <!-- RIGHT COLUMN: Form Fields -->
+        <div class="col-span-12 md:col-span-9 space-y-6">
+
+          <!-- BASIC INFORMATION Card -->
+          <mat-card appearance="outlined">
+            <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">BASIC INFORMATION</div>
+            <mat-card-content class="px-4 pb-4">
+              <div class="grid grid-cols-12 gap-4">
+                @if (!hasPropertyContext()) {
+                  <mat-form-field appearance="outline" class="col-span-12">
+                    <mat-label>Property</mat-label>
+                    <mat-select formControlName="property">
+                      @for (property of properties(); track property._id) {
+                        <mat-option [value]="property._id">{{ property.name }}</mat-option>
+                      }
+                    </mat-select>
+                    @if (form.get('property')?.hasError('required')) {
+                      <mat-error>Property is required</mat-error>
+                    }
+                  </mat-form-field>
+                }
+
+                <mat-form-field appearance="outline" class="col-span-6">
+                  <mat-label>Unit Name</mat-label>
+                  <input matInput formControlName="name" placeholder="e.g. Unit A1">
+                  @if (form.get('name')?.hasError('required')) {
+                    <mat-error>Unit name is required</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-span-6">
+                  <mat-label>Unit Code</mat-label>
+                  <input matInput formControlName="code" placeholder="e.g. A1-001">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-span-6">
+                  <mat-label>Unit Type</mat-label>
+                  <mat-select formControlName="type">
+                    @for (type of unitTypes; track type.value) {
+                      <mat-option [value]="type.value">{{ type.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-span-6">
+                  <mat-label>Status</mat-label>
+                  <mat-select formControlName="status">
+                    @for (status of statusOptions; track status.value) {
+                      <mat-option [value]="status.value">{{ status.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-span-6">
+                  <mat-label>Floor</mat-label>
+                  <input matInput formControlName="floor" placeholder="e.g. Ground Floor">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-span-6">
+                  <mat-label>Furnishing Status</mat-label>
+                  <mat-select formControlName="furnishingStatus">
+                    @for (opt of furnishingOptions; track opt.value) {
+                      <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-span-12">
+                  <mat-label>Description</mat-label>
+                  <textarea matInput formControlName="description" rows="3" placeholder="Brief description of the unit"></textarea>
+                </mat-form-field>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- UNIT INFORMATION Card -->
+          <mat-card appearance="outlined">
+            <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">UNIT INFORMATION</div>
+            <mat-card-content class="px-4 pb-4">
+              <span class="text-sm">Would this property qualify as Affordable Housing based on Federal regulations?</span>
+              <mat-icon class="text-sm ml-1 align-middle" matTooltip="Section 8 / LIHTC / HUD programs">help_outline</mat-icon>
+              <mat-radio-group formControlName="isAffordableHousing" class="flex gap-4 mt-1">
+                <mat-radio-button [value]="false">No</mat-radio-button>
+                <mat-radio-button [value]="true">Yes</mat-radio-button>
+              </mat-radio-group>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- SPECIFICATIONS Card -->
+          <mat-card appearance="outlined">
+            <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">SPECIFICATIONS</div>
+            <mat-card-content class="px-4 pb-4">
+              <div class="grid grid-cols-12 gap-4">
+                @if (!isNonLivable(form.get('type')?.value)) {
+                  <mat-form-field appearance="outline" class="col-span-3">
+                    <mat-label>Bedrooms</mat-label>
+                    <input matInput type="number" formControlName="bedrooms" min="0">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="col-span-3">
+                    <mat-label>Bathrooms</mat-label>
+                    <input matInput type="number" formControlName="bathrooms" min="0" step="0.5">
+                  </mat-form-field>
+                }
+
+                <mat-form-field appearance="outline" class="col-span-3">
+                  <mat-label>Size</mat-label>
+                  <input matInput type="number" formControlName="sizeValue" min="0">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-span-3">
+                  <mat-label>Size Unit</mat-label>
+                  <mat-select formControlName="sizeUnit">
+                    @for (su of sizeUnits; track su.value) {
+                      <mat-option [value]="su.value">{{ su.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- RENT Card -->
+          <mat-card appearance="outlined">
+            <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">RENT</div>
+            <mat-card-content class="px-4 pb-4">
+              <div class="grid grid-cols-12 gap-4">
+                <mat-form-field appearance="outline" class="col-span-6">
+                  <mat-label>Rent Amount</mat-label>
+                  <input matInput type="number" formControlName="rentAmount" min="0">
+                  <span matTextPrefix>{{ form.get('currency')?.value || 'NGN' }}&nbsp;</span>
+                  @if (form.get('rentAmount')?.hasError('required')) {
+                    <mat-error>Rent amount is required</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-span-6">
+                  <mat-label>Currency</mat-label>
+                  <input matInput formControlName="currency" placeholder="e.g. NGN">
+                </mat-form-field>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- UNIT FEATURES Card -->
+          <mat-card appearance="outlined">
+            <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">UNIT FEATURES</div>
+            <mat-card-content class="px-4 pb-4">
+              <mat-chip-listbox multiple class="mb-3">
+                @for (feature of presetFeatures; track feature) {
+                  <mat-chip-option
+                    [selected]="hasFeature(feature)"
+                    (selectionChange)="toggleFeature(feature, $event)"
+                    class="amenity-chip">
+                    {{ feature }}
+                  </mat-chip-option>
+                }
+              </mat-chip-listbox>
+
+              <!-- Custom features -->
+              <mat-chip-set class="mb-3">
+                @for (feature of customFeatures(); track feature) {
+                  <mat-chip (removed)="removeFeature(feature)">
+                    {{ feature }}
+                    <button matChipRemove aria-label="Remove feature">
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  </mat-chip>
+                }
+              </mat-chip-set>
+
+              <div class="flex items-center gap-2">
+                <mat-form-field appearance="outline" class="w-56" subscriptSizing="dynamic">
+                  <mat-label>Custom feature</mat-label>
+                  <input matInput
+                    placeholder="Type custom feature..."
+                    [value]="customFeatureInput()"
+                    (input)="customFeatureInput.set($any($event.target).value)"
+                    (keydown.enter)="$event.preventDefault(); addCustomFeature()">
+                </mat-form-field>
+                <button type="button" mat-stroked-button (click)="addCustomFeature()">
+                  <mat-icon>add</mat-icon>
+                  Custom feature
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- UNIT AMENITIES Card -->
+          <mat-card appearance="outlined">
+            <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">UNIT AMENITIES</div>
+            <mat-card-content class="px-4 pb-4">
+              <mat-chip-listbox multiple class="mb-3">
+                @for (amenity of presetAmenities; track amenity) {
+                  <mat-chip-option
+                    [selected]="hasAmenity(amenity)"
+                    (selectionChange)="toggleAmenity(amenity, $event)"
+                    class="amenity-chip">
+                    {{ amenity }}
+                  </mat-chip-option>
+                }
+              </mat-chip-listbox>
+
+              <!-- Custom amenities -->
+              <mat-chip-set class="mb-3">
+                @for (amenity of customAmenities(); track amenity) {
+                  <mat-chip (removed)="removeAmenity(amenity)">
+                    {{ amenity }}
+                    <button matChipRemove aria-label="Remove amenity">
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  </mat-chip>
+                }
+              </mat-chip-set>
+
+              <div class="flex items-center gap-2">
+                <mat-form-field appearance="outline" class="w-56" subscriptSizing="dynamic">
+                  <mat-label>Custom amenity</mat-label>
+                  <input matInput
+                    placeholder="Type custom amenity..."
+                    [value]="customAmenityInput()"
+                    (input)="customAmenityInput.set($any($event.target).value)"
+                    (keydown.enter)="$event.preventDefault(); addCustomAmenity()">
+                </mat-form-field>
+                <button type="button" mat-stroked-button (click)="addCustomAmenity()">
+                  <mat-icon>add</mat-icon>
+                  Add
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- UNIT ATTACHMENTS Card -->
+          <mat-card appearance="outlined">
+            <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">UNIT ATTACHMENTS</div>
+            <mat-card-content class="px-4 pb-4">
+              @if (existingAttachments().length > 0) {
+                <div class="space-y-2 mb-3">
+                  @for (url of existingAttachments(); track url; let i = $index) {
+                    <div class="flex items-center gap-3 p-2 border rounded-lg">
+                      <mat-icon class="text-gray-400">insert_drive_file</mat-icon>
+                      <div class="flex-1 min-w-0">
+                        <a [href]="url" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-blue-600 hover:underline truncate block">
+                          {{ url.split('/').pop() }}
+                        </a>
+                      </div>
+                      <button type="button" mat-icon-button (click)="removeExistingAttachment(i)" aria-label="Remove existing attachment">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+              @if (attachmentFiles().length > 0) {
+                <div class="space-y-2 mb-3">
+                  @for (file of attachmentFiles(); track file.name; let i = $index) {
+                    <div class="flex items-center gap-3 p-2 border rounded-lg">
+                      <mat-icon class="text-gray-400">description</mat-icon>
+                      <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium truncate">{{ file.name }}</div>
+                        <div class="text-xs text-gray-400">{{ (file.size / 1024).toFixed(1) }} KB</div>
+                      </div>
+                      <button type="button" mat-icon-button (click)="removeAttachment(i)" aria-label="Remove attachment">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+
+              <div class="border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
+                style="border-color: var(--mat-sys-outline-variant, #ccc)"
+                (click)="attachmentInput.click()">
+                <mat-icon class="text-4xl !w-12 !h-12 mb-2" color="primary">cloud_upload</mat-icon>
+                <span class="text-sm font-medium" style="color: var(--mat-sys-primary)">Upload</span>
+                <span class="text-xs text-gray-400">store documents and templates</span>
+              </div>
+              <input #attachmentInput type="file" multiple class="hidden" (change)="onAttachmentsSelected($event)">
+            </mat-card-content>
+          </mat-card>
+
+        </div>
+      </div>
+    </form>
+  }
+</div>

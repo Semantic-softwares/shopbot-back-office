@@ -1,0 +1,106 @@
+<app-page-header
+  [title]="isDraftEdit() ? 'Complete Draft Lease' : isEditMode() ? 'Edit Lease' : 'Create Lease'"
+  [subtitle]="'Guided lease creation wizard'">
+  <ng-container actions>
+    <button mat-button (click)="cancel()">
+      <mat-icon class="mr-1">arrow_back</mat-icon>
+      Back
+    </button>
+    <button mat-stroked-button (click)="saveDraft()" [disabled]="isSubmitting()">
+      <mat-icon class="mr-1">save</mat-icon>
+      Save Draft
+    </button>
+    <button mat-flat-button (click)="activateLease()" [disabled]="isSubmitting()">
+      @if (isSubmitting()) {
+        <mat-spinner diameter="18" class="mr-2 inline-block"></mat-spinner>
+      } @else {
+        <mat-icon class="mr-1">check_circle</mat-icon>
+      }
+      {{ isDraftEdit() ? 'Activate Lease' : 'Submit Lease' }}
+    </button>
+  </ng-container>
+</app-page-header>
+
+<div class="px-4  py-6 max-w-6xl">
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      <mat-stepper class="lease-stepper" orientation="vertical" linear>
+        <mat-step [stepControl]="termsGroup" label="Terms">
+          <div class="pt-4">
+            <app-lease-step-terms
+              [termsGroup]="termsGroup"
+              [properties]="properties()"
+              [units]="units()">
+            </app-lease-step-terms>
+          </div>
+          <div class="mt-4 flex justify-end">
+            <button mat-flat-button matStepperNext [disabled]="termsGroup.invalid">Next</button>
+          </div>
+        </mat-step>
+
+        <mat-step [stepControl]="tenantsGroup" label="Tenants">
+          <div class="pt-4">
+            <app-lease-step-tenants
+              [tenantsGroup]="tenantsGroup"
+              [tenants]="tenants()">
+            </app-lease-step-tenants>
+          </div>
+          <div class="mt-4 flex justify-between">
+            <button mat-button matStepperPrevious>Previous</button>
+            <button mat-flat-button matStepperNext [disabled]="tenantsGroup.invalid">Next</button>
+          </div>
+        </mat-step>
+
+        <mat-step [stepControl]="transactionsGroup" label="Lease Transactions">
+          <div class="pt-4">
+            <app-lease-step-transactions
+              [transactionsGroup]="transactionsGroup"
+              [depositsArray]="depositsArray"
+              [otherTransactionsArray]="otherTransactionsArray"
+              [addDeposit]="addDeposit"
+              [removeDeposit]="removeDeposit"
+              [addOtherTransaction]="addOtherTransaction"
+              [removeOtherTransaction]="removeOtherTransaction"
+              [tenants]="tenants()"
+              [selectedTenantIds]="tenantsGroup.get('tenantIds')?.value || []">
+            </app-lease-step-transactions>
+          </div>
+          <div class="mt-4 flex justify-between">
+            <button mat-button matStepperPrevious>Previous</button>
+            <button mat-flat-button matStepperNext [disabled]="transactionsGroup.invalid">Next</button>
+          </div>
+        </mat-step>
+
+        <mat-step [stepControl]="utilitiesGroup" label="Utilities">
+          <div class="pt-4">
+            <app-lease-step-utilities
+              [utilitiesGroup]="utilitiesGroup"
+              [responsibilitiesArray]="responsibilitiesArray"
+              [addUtilityResponsibility]="addUtilityResponsibility"
+              [removeUtilityResponsibility]="removeUtilityResponsibility">
+            </app-lease-step-utilities>
+          </div>
+          <div class="mt-4 flex justify-between">
+            <button mat-button matStepperPrevious>Previous</button>
+            <button mat-flat-button matStepperNext [disabled]="utilitiesGroup.invalid">Next</button>
+          </div>
+        </mat-step>
+
+        <mat-step label="Summary">
+          <div class="pt-4">
+            <app-lease-step-summary
+              [leaseForm]="leaseForm"
+              [properties]="properties()"
+              [units]="units()"
+              [tenants]="tenants()">
+            </app-lease-step-summary>
+          </div>
+
+          <div class="mt-4 flex justify-start">
+            <button mat-button matStepperPrevious>Previous</button>
+          </div>
+        </mat-step>
+      </mat-stepper>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,37 @@
+<mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
+  <mat-card-header class="px-6 pt-6">
+    <mat-card-title>Aging Summary</mat-card-title>
+    <mat-card-subtitle>Overdue invoices by age</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content class="p-6!">
+    @if (agingSummary; as aging) {
+      <div class="space-y-4">
+        @for (bucket of agingBuckets; track bucket.label) {
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div class="mb-2 flex items-center justify-between">
+              <div>
+                <p class="font-medium text-slate-900">{{ bucket.label }}</p>
+                <p class="text-sm text-slate-500">{{ bucket.percentage }}% of total</p>
+              </div>
+              <p class="text-lg font-semibold text-slate-900">{{ bucket.amount | currency: currencyCode(): 'symbol':'1.2-2' }}</p>
+            </div>
+            <mat-progress-bar
+              mode="determinate"
+              [value]="bucket.percentage"
+              [color]="bucket.color"
+              class="!h-3"
+            ></mat-progress-bar>
+          </div>
+        }
+      </div>
+
+      <div class="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <p class="mb-2 text-sm text-slate-500">Total Overdue Amount</p>
+        <p class="text-2xl font-semibold text-slate-900">{{ aging.total | currency: currencyCode(): 'symbol':'1.2-2' }}</p>
+      </div>
+    } @else {
+      <p class="py-8 text-center text-slate-500">Loading aging summary...</p>
+    }
+  </mat-card-content>
+</mat-card>

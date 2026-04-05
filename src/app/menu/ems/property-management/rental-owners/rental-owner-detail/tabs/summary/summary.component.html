@@ -1,0 +1,108 @@
+@if (owner(); as o) {
+  <div class="grid grid-cols-12 gap-6">
+    <!-- LEFT COLUMN: Photo -->
+    <div class="col-span-12 md:col-span-4">
+      <div class="rounded-lg overflow-hidden border aspect-square bg-gray-100 mb-4">
+        @if (o.coverPhoto) {
+          <img [src]="o.coverPhoto" alt="Owner photo" class="w-full h-full object-cover">
+        } @else {
+          <div class="w-full h-full flex flex-col items-center justify-center text-gray-400">
+            <mat-icon class="!text-6xl !w-16 !h-16 mb-2">person</mat-icon>
+            <span class="text-sm">No photo</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Owner Info -->
+    <div class="col-span-12 md:col-span-8">
+      <!-- Personal Information -->
+      <mat-card appearance="outlined" class="mb-6">
+        <mat-card-content class="p-5!">
+          <div class="text-xs font-bold text-gray-400 tracking-wider mb-3">PERSONAL INFORMATION</div>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-500">Full Name</span>
+              <span class="font-medium">{{ o.firstName }} {{ o.lastName }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Status</span>
+              <mat-chip [ngClass]="getStatusClass(o.status)" class="!text-xs">
+                {{ o.status }}
+              </mat-chip>
+            </div>
+            @if (o.isCompany) {
+              <div class="flex justify-between">
+                <span class="text-gray-500">Type</span>
+                <span class="font-medium">Company</span>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Contact Information -->
+      <mat-card appearance="outlined" class="mb-6">
+        <mat-card-content class="p-5!">
+          <div class="text-xs font-bold text-gray-400 tracking-wider mb-3">CONTACT INFORMATION</div>
+          <div class="space-y-2 text-sm">
+            @if (o.email) {
+              <div class="flex justify-between">
+                <span class="text-gray-500">Email</span>
+                <span class="font-medium">{{ o.email }}</span>
+              </div>
+            }
+            @if (o.phone) {
+              <div class="flex justify-between">
+                <span class="text-gray-500">Phone</span>
+                <span class="font-medium">{{ o.phone }}</span>
+              </div>
+            }
+            @if (o.alternatePhone) {
+              <div class="flex justify-between">
+                <span class="text-gray-500">Alternate Phone</span>
+                <span class="font-medium">{{ o.alternatePhone }}</span>
+              </div>
+            }
+            @if (!o.email && !o.phone && !o.alternatePhone) {
+              <div class="text-gray-400 text-center py-2">No contact information provided</div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Company Information -->
+      @if (o.isCompany) {
+        <mat-card appearance="outlined" class="mb-6">
+          <mat-card-content class="p-5!">
+            <div class="text-xs font-bold text-gray-400 tracking-wider mb-3">COMPANY INFORMATION</div>
+            <div class="space-y-2 text-sm">
+              @if (o.companyName) {
+                <div class="flex justify-between">
+                  <span class="text-gray-500">Company Name</span>
+                  <span class="font-medium">{{ o.companyName }}</span>
+                </div>
+              }
+              @if (o.taxId) {
+                <div class="flex justify-between">
+                  <span class="text-gray-500">Tax ID</span>
+                  <span class="font-medium">{{ o.taxId }}</span>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <!-- Notes -->
+      @if (o.notes) {
+        <mat-card appearance="outlined" class="mb-6">
+          <mat-card-content class="p-5!">
+            <div class="text-xs font-bold text-gray-400 tracking-wider mb-2">NOTES</div>
+            <p class="text-sm leading-relaxed text-gray-700">{{ o.notes }}</p>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </div>
+}

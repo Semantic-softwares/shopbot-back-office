@@ -42,6 +42,18 @@
         </mat-card>
       }
 
+      <!-- EMS Module Card -->
+      @if (canAccessEMS()) {
+        <mat-card appearance="outlined" class="p-8 text-center transition-all duration-300 ease-in-out cursor-pointer border-2 border-transparent hover:-translate-y-1 hover:shadow-2xl hover:border-blue-600" 
+             (click)="navigateToModule('ems')">
+          <div class="mb-6">
+            <mat-icon class="!text-6xl !w-16 !h-16 text-blue-600 md:!text-4xl md:!w-12 md:!h-12">domain</mat-icon>
+          </div>
+          <h3 class="text-gray-800 text-2xl font-semibold mb-4 leading-tight md:text-xl">Estate Management</h3>
+          <p class="text-gray-600 text-base leading-relaxed m-0">Manage properties, units, tenants, and estate operations</p>
+        </mat-card>
+      }
+
       <!-- Administrative Settings Card (Super Admin Only) -->
       @if (canAccessAdmin()) {
         <mat-card appearance="outlined" class="p-8 text-center transition-all duration-300 ease-in-out cursor-pointer border-2 border-transparent hover:-translate-y-1 hover:shadow-2xl hover:border-gray-600" 
@@ -55,7 +67,7 @@
       }
 
       <!-- No Access Message -->
-      @if (!canAccessERP() && !canAccessHMS() && !canAccessPOS()) {
+      @if (!canAccessERP() && !canAccessHMS() && !canAccessPOS() && !canAccessEMS()) {
         <div class="col-span-1 md:col-span-2 text-center py-12">
           <mat-icon class="!text-6xl !w-24 !h-24 text-gray-400 mb-4">lock</mat-icon>
           <h3 class="text-gray-800 text-2xl font-semibold mb-2">No Access</h3>

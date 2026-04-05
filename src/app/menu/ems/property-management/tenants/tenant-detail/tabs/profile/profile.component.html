@@ -1,0 +1,319 @@
+@if (tenant(); as t) {
+  <!-- Hero: Avatar + Name + Quick Summary -->
+  <mat-card appearance="outlined" class="mb-6 overflow-hidden">
+    <div class="bg-gradient-to-r from-indigo-50 via-blue-50 to-slate-50 px-6 pt-6 pb-5">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+
+        <!-- Avatar -->
+        <div class="w-24 h-24 rounded-full overflow-hidden bg-white border-4 border-white shadow-lg flex-shrink-0">
+          @if (t.coverPhoto) {
+            <img [src]="t.coverPhoto" [alt]="t.firstName + ' photo'" class="w-full h-full object-cover">
+          } @else {
+            <div class="w-full h-full flex items-center justify-center bg-indigo-100">
+              <mat-icon class="!text-5xl text-indigo-400">person</mat-icon>
+            </div>
+          }
+        </div>
+
+        <!-- Name & quick info -->
+        <div class="flex-1 min-w-0">
+          <div class="flex flex-wrap items-center gap-3 mb-1">
+            <h2 class="text-2xl font-bold text-gray-900 leading-tight">
+              {{ t.firstName }} {{ t.middleName || '' }} {{ t.lastName }}
+            </h2>
+            @if (t.isCompany && t.companyName) {
+              <span class="text-sm text-gray-500 font-normal">({{ t.companyName }})</span>
+            }
+            <mat-chip [color]="getStatusColor(t.status)" highlighted class="!text-xs !h-6">
+              {{ t.status }}
+            </mat-chip>
+          </div>
+          <div class="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-gray-600 mt-2">
+            @if (t.email) {
+              <span class="flex items-center gap-1.5">
+                <mat-icon class="!text-base !w-4 !h-4 text-gray-400">email</mat-icon>
+                {{ t.email }}
+              </span>
+            }
+            @if (t.phoneNumbers.length) {
+              <span class="flex items-center gap-1.5">
+                <mat-icon class="!text-base !w-4 !h-4 text-gray-400">phone</mat-icon>
+                {{ t.phoneNumbers[0] }}
+              </span>
+            }
+            @if (getAge(t.dateOfBirth); as age) {
+              <span class="flex items-center gap-1.5">
+                <mat-icon class="!text-base !w-4 !h-4 text-gray-400">cake</mat-icon>
+                {{ age }} years old
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+
+  <!-- Two-column body -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <!-- LEFT: main info (2/3 width) -->
+    <div class="md:col-span-2 flex flex-col gap-6">
+
+      <!-- Personal Information -->
+      <mat-card appearance="outlined">
+        <mat-card-header class="!px-4 !pt-4 !pb-0">
+          <div class="flex items-center gap-2">
+            <mat-icon class="text-indigo-500">badge</mat-icon>
+            <mat-card-title class="!text-base !font-semibold !m-0">Personal Information</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content class="!px-0 !pb-0">
+          <mat-list>
+            <mat-list-item class="!h-auto !min-h-16 !py-2">
+              <div class="flex flex-col gap-0.5 py-1">
+                <div class="text-xs text-gray-500 font-normal">Full Name</div>
+                <div class="text-sm font-semibold text-gray-900">
+                  {{ t.firstName }} {{ t.middleName || '' }} {{ t.lastName }}
+                </div>
+              </div>
+            </mat-list-item>
+            <mat-divider></mat-divider>
+
+            <mat-list-item class="!h-auto !min-h-16 !py-2">
+              <div class="flex flex-col gap-1 py-1">
+                <div class="text-xs text-gray-500 font-normal">Status</div>
+                <div>
+                  <mat-chip [color]="getStatusColor(t.status)" highlighted class="!text-xs !h-5">{{ t.status }}</mat-chip>
+                </div>
+              </div>
+            </mat-list-item>
+
+            @if (t.dateOfBirth) {
+              <mat-divider></mat-divider>
+              <mat-list-item class="!h-auto !min-h-16 !py-2">
+                <div class="flex flex-col gap-0.5 py-1">
+                  <div class="text-xs text-gray-500 font-normal">Date of Birth</div>
+                  <div class="text-sm font-semibold text-gray-900">
+                    {{ t.dateOfBirth | date: 'MMMM d, y' }}
+                  </div>
+                </div>
+              </mat-list-item>
+            }
+
+            @if (getAge(t.dateOfBirth); as age) {
+              <mat-divider></mat-divider>
+              <mat-list-item class="!h-auto !min-h-16 !py-2">
+                <div class="flex flex-col gap-0.5 py-1">
+                  <div class="text-xs text-gray-500 font-normal">Age</div>
+                  <div class="text-sm font-semibold text-gray-900">{{ age }} years</div>
+                </div>
+              </mat-list-item>
+            }
+
+            @if (t.isCompany) {
+              <mat-divider></mat-divider>
+              <mat-list-item class="!h-auto !min-h-16 !py-2">
+                <div class="flex flex-col gap-0.5 py-1">
+                  <div class="text-xs text-gray-500 font-normal">Company</div>
+                  <div class="text-sm font-semibold text-gray-900">{{ t.companyName || '—' }}</div>
+                </div>
+              </mat-list-item>
+            }
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Contact Information -->
+      <mat-card appearance="outlined">
+        <mat-card-header class="!px-4 !pt-4 !pb-0">
+          <div class="flex items-center gap-2">
+            <mat-icon class="text-indigo-500">contacts</mat-icon>
+            <mat-card-title class="!text-base !font-semibold !m-0">Contact Information</mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content class="!px-0 !pb-0">
+          @if (!t.email && !t.phoneNumbers.length) {
+            <div class="px-4 py-6 text-center text-gray-400">
+              <p class="text-sm italic">No contact information provided</p>
+            </div>
+          } @else {
+            <mat-list>
+              @if (t.email) {
+                <mat-list-item class="!h-auto !min-h-16 !py-2">
+                  <mat-icon matListItemIcon class="!text-gray-400">email</mat-icon>
+                  <div class="flex flex-col gap-0.5 py-1">
+                    <div class="text-xs text-gray-500 font-normal">Email</div>
+                    <div class="text-sm font-semibold text-gray-900">{{ t.email }}</div>
+                  </div>
+                </mat-list-item>
+              }
+              @for (phone of t.phoneNumbers; track $index) {
+                @if (t.email || $index > 0) {
+                  <mat-divider inset></mat-divider>
+                }
+                <mat-list-item class="!h-auto !min-h-16 !py-2">
+                  <mat-icon matListItemIcon class="!text-gray-400">phone</mat-icon>
+                  <div class="flex flex-col gap-0.5 py-1">
+                    <div class="text-xs text-gray-500 font-normal">
+                      {{ $index === 0 ? 'Primary Phone' : 'Phone ' + ($index + 1) }}
+                    </div>
+                    <div class="text-sm font-semibold text-gray-900">{{ phone }}</div>
+                  </div>
+                </mat-list-item>
+              }
+            </mat-list>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Additional Details -->
+      @if (t.forwardingAddress || emergencyContacts().length) {
+        <mat-card appearance="outlined">
+          <mat-card-header class="!px-4 !pt-4 !pb-0">
+            <div class="flex items-center gap-2">
+              <mat-icon class="text-indigo-500">info_outline</mat-icon>
+              <mat-card-title class="!text-base !font-semibold !m-0">Additional Details</mat-card-title>
+            </div>
+          </mat-card-header>
+          <mat-card-content class="!px-0 !pb-0">
+            <mat-list>
+              @if (t.forwardingAddress) {
+                <mat-list-item class="!h-auto !min-h-12 !py-2">
+                  <mat-icon matListItemIcon class="!text-gray-400">location_on</mat-icon>
+                  <div class="flex flex-col gap-0.5 py-1 whitespace-normal">
+                    <div class="text-xs text-gray-500 font-normal">Forwarding Address</div>
+                    <div class="text-sm font-semibold text-gray-900 whitespace-normal">{{ t.forwardingAddress }}</div>
+                  </div>
+                </mat-list-item>
+              }
+              @if (t.forwardingAddress && emergencyContacts().length) {
+                <mat-divider inset></mat-divider>
+              }
+              @for (contact of emergencyContacts(); track $index) {
+                @if (t.forwardingAddress || $index > 0) {
+                  <mat-divider inset></mat-divider>
+                }
+                <mat-list-item class="!h-auto !min-h-16 !py-2">
+                  <mat-icon matListItemIcon class="!text-gray-400">emergency</mat-icon>
+                  <div class="flex flex-col gap-0.5 py-1 whitespace-normal">
+                    <div class="text-xs text-gray-500 font-normal">Emergency Contact {{ $index + 1 }}</div>
+                    <div class="text-sm font-semibold text-gray-900 whitespace-normal">{{ contact.name }}</div>
+                    <div class="text-xs text-gray-500 whitespace-normal">{{ emergencyContactSubtitle(contact) || 'No relationship or email' }}</div>
+                    <div class="text-sm text-gray-700 whitespace-normal">{{ contact.phoneNumber }}</div>
+                  </div>
+                </mat-list-item>
+              }
+            </mat-list>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+
+    <!-- RIGHT sidebar -->
+    <div class="flex flex-col gap-6">
+
+      <!-- Vehicles -->
+      <mat-card appearance="outlined">
+        <mat-card-header class="!px-4 !pt-4 !pb-0">
+          <div class="flex items-center gap-2 w-full">
+            <mat-icon class="text-indigo-500">directions_car</mat-icon>
+            <mat-card-title class="!text-base !font-semibold !m-0 flex items-center gap-1.5">
+              Vehicles
+              @if (vehicles().length) {
+                <span class="text-xs font-normal text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                  {{ vehicles().length }}
+                </span>
+              }
+            </mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content class="!px-0 !pb-0">
+          @if (vehicles().length === 0) {
+            <div class="px-4 py-8 text-center text-gray-400">
+              <mat-icon class="!text-4xl mb-1 opacity-40">directions_car</mat-icon>
+              <p class="text-sm">No vehicles registered</p>
+            </div>
+          } @else {
+            <mat-list>
+              @for (v of vehicles(); track v._id) {
+                <mat-list-item class="!h-auto !min-h-12 !py-2">
+                  <mat-icon matListItemIcon class="!text-gray-400">directions_car</mat-icon>
+                  <span matListItemTitle class="!text-sm !font-semibold !text-gray-900">{{ vehicleLabel(v) }}</span>
+                  <span matListItemLine class="!text-xs !text-gray-500">
+                    {{ v.type }}@if (v.color) { &middot; {{ v.color }}}
+                  </span>
+                </mat-list-item>
+                @if (!$last) {
+                  <mat-divider inset></mat-divider>
+                }
+              }
+            </mat-list>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Pets -->
+      <mat-card appearance="outlined">
+        <mat-card-header class="!px-4 !pt-4 !pb-0">
+          <div class="flex items-center gap-2 w-full">
+            <mat-icon class="text-indigo-500">pets</mat-icon>
+            <mat-card-title class="!text-base !font-semibold !m-0 flex items-center gap-1.5">
+              Pets
+              @if (pets().length) {
+                <span class="text-xs font-normal text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                  {{ pets().length }}
+                </span>
+              }
+            </mat-card-title>
+          </div>
+        </mat-card-header>
+        <mat-card-content class="!px-0 !pb-0">
+          @if (pets().length === 0) {
+            <div class="px-4 py-8 text-center text-gray-400">
+              <mat-icon class="!text-4xl mb-1 opacity-40">pets</mat-icon>
+              <p class="text-sm">No pets registered</p>
+            </div>
+          } @else {
+            <mat-list>
+              @for (p of pets(); track p._id) {
+                <mat-list-item class="!h-auto !min-h-12 !py-2">
+                  <mat-icon matListItemIcon class="!text-gray-400">pets</mat-icon>
+                  <span matListItemTitle class="!text-sm !font-semibold !text-gray-900">{{ petLabel(p) }}</span>
+                  <span matListItemLine class="!text-xs flex gap-2 mt-0.5">
+                    @if (p.vaccinated) {
+                      <span class="text-green-600 font-medium">Vaccinated</span>
+                    }
+                    @if (p.licensed) {
+                      <span class="text-blue-600 font-medium">Licensed</span>
+                    }
+                    @if (!p.vaccinated && !p.licensed) {
+                      <span class="text-gray-400">—</span>
+                    }
+                  </span>
+                </mat-list-item>
+                @if (!$last) {
+                  <mat-divider inset></mat-divider>
+                }
+              }
+            </mat-list>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Notes -->
+      @if (t.notes) {
+        <mat-card appearance="outlined">
+          <mat-card-header class="!px-4 !pt-4 !pb-0">
+            <div class="flex items-center gap-2">
+              <mat-icon class="text-indigo-500">sticky_note_2</mat-icon>
+              <mat-card-title class="!text-base !font-semibold !m-0">Notes</mat-card-title>
+            </div>
+          </mat-card-header>
+          <mat-card-content class="!px-4 !py-3">
+            <p class="text-sm leading-relaxed text-gray-700">{{ t.notes }}</p>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </div>
+}

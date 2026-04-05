@@ -1,0 +1,38 @@
+<div class="w-full">
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>{{ label() }}</mat-label>
+    <mat-icon matPrefix class="text-gray-500 material-icons-outlined">search</mat-icon>
+    <input
+      matInput
+      [formControl]="searchControl"
+      [placeholder]="placeholder()"
+      [matAutocomplete]="ownerAutoComplete"
+    />
+    @if (isLoading()) {
+      <span matSuffix class="text-xs text-gray-400 mr-2">Searching...</span>
+    }
+    @if (searchControl.value) {
+      <button matSuffix mat-icon-button type="button" (click)="onClear()" aria-label="Clear search">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+    <mat-autocomplete #ownerAutoComplete="matAutocomplete" (optionSelected)="onOwnerSelected($event.option.value)">
+      @for (owner of filteredOwners(); track owner._id) {
+        <mat-option [value]="owner">
+          <div class="flex items-center gap-2">
+            <mat-icon class="text-gray-400 !text-lg">{{ owner.isCompany ? 'business' : 'person' }}</mat-icon>
+            <div>
+              <span class="font-medium">{{ getOwnerDisplayName(owner) }}</span>
+              @if (owner.email) {
+                <span class="text-sm text-gray-500 ml-2">{{ owner.email }}</span>
+              }
+            </div>
+          </div>
+        </mat-option>
+      }
+      @if (filteredOwners().length === 0 && !isLoading() && searchControl.value && searchControl.value.length >= 2) {
+        <mat-option disabled>No rental owners found</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+</div>

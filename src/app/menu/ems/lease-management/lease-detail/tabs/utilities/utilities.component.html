@@ -1,0 +1,24 @@
+@if (lease(); as lease) {
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      <div class="text-xs font-semibold text-gray-500 mb-2">UTILITIES</div>
+      @for (utility of lease.utilityResponsibilities; track $index) {
+        <div class="border border-gray-200 rounded-md p-2 mb-2">
+          <div class="text-sm font-semibold text-gray-800">
+            {{ utility.utilityType }}
+            @if (utility.customUtilityName) {
+              ({{ utility.customUtilityName }})
+            }
+          </div>
+          <div class="text-xs text-gray-600">Responsible: {{ utility.responsibleParty }}</div>
+        </div>
+      } @empty {
+        <app-no-record
+          icon="bolt"
+          title="No Utility Responsibilities"
+          message="No utility responsibilities configured."
+        ></app-no-record>
+      }
+    </mat-card-content>
+  </mat-card>
+}

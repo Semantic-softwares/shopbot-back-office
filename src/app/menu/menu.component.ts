@@ -75,6 +75,18 @@ export class MenuComponent implements OnInit, OnDestroy {
     'hotel.housekeeping.complete',
   ];
 
+  // EMS (Estate Management System) module permissions
+  private readonly EMS_PERMISSIONS = [
+    'estate.properties.view',
+    'estate.properties.create',
+    'estate.properties.edit',
+    'estate.properties.delete',
+    'estate.units.view',
+    'estate.units.create',
+    'estate.units.edit',
+    'estate.units.delete',
+  ];
+
   // POS module permissions
   private readonly POS_PERMISSIONS = [
     'pos.sales.view',
@@ -110,6 +122,10 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.rolesService.isAdmin() || this.rolesService.hasAny(this.POS_PERMISSIONS)
   );
 
+  canAccessEMS = computed(() =>
+    this.rolesService.isAdmin() || this.rolesService.hasAny(this.EMS_PERMISSIONS)
+  );
+
   // Only super admins can access administrative settings
   canAccessAdmin = computed(() => this.rolesService.isAdmin());
 
@@ -140,13 +156,15 @@ export class MenuComponent implements OnInit, OnDestroy {
     // This ensures they persist across component navigation
   }
 
-  navigateToModule(moduleType: 'erp' | 'hotel' | 'pos' | 'admin'): void {
+  navigateToModule(moduleType: 'erp' | 'hotel' | 'pos' | 'ems' | 'admin'): void {
     if (moduleType === 'erp') {
       this.router.navigate(['/menu/erp']);
     } else if (moduleType === 'hotel') {
       this.router.navigate(['/menu/hms']);
     } else if (moduleType === 'pos') {
       this.router.navigate(['/menu/pos']);
+    } else if (moduleType === 'ems') {
+      this.router.navigate(['/menu/ems']);
     } else if (moduleType === 'admin') {
       this.router.navigate(['/menu/admin']);
     }

@@ -18,3 +18,4 @@ export * from './print-job.model';
 export * from './cart.model';
 export * from './timesheet.model';
 export * from './subscription.model';
+export * from './estate.model';

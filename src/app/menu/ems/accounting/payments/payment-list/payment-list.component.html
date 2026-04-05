@@ -1,0 +1,202 @@
+<app-page-header title="Payments" subtitle="Track recorded payments and allocations">
+  <ng-container actions>
+    <button mat-button (click)="clearFilters()">
+      <mat-icon>clear</mat-icon>
+      Clear Filters
+    </button>
+  </ng-container>
+</app-page-header>
+
+<div class="px-4 py-6 space-y-4">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <p class="text-sm text-gray-600">Total Recorded</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1">
+          {{ formatCurrency(totals().total) }}
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <p class="text-sm text-gray-600">Allocated</p>
+        <p class="text-2xl font-bold text-green-700 mt-1">
+          {{ formatCurrency(totals().allocated) }}
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <p class="text-sm text-gray-600">Unallocated</p>
+        <p class="text-2xl font-bold text-yellow-700 mt-1">
+          {{ formatCurrency(totals().unallocated) }}
+        </p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      @if (paymentsResource.isLoading()) {
+        <div class="flex items-center justify-center py-8">
+          <mat-spinner diameter="32"></mat-spinner>
+        </div>
+      } @else {
+        <div class="mb-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Search</mat-label>
+            <mat-icon matPrefix class="mr-1">search</mat-icon>
+            <input
+              matInput
+              placeholder="Search by payment number, payer, payee, property or note..."
+              [value]="searchQuery()"
+              (input)="updateSearch($any($event.target).value)"
+            >
+            @if (searchQuery()) {
+              <button matSuffix mat-icon-button aria-label="Clear search" (click)="clearSearch()">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Method</mat-label>
+            <mat-select [value]="methodFilter()" (selectionChange)="updateMethodFilter($event.value)">
+              @for (opt of methodOptions(); track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Status</mat-label>
+            <mat-select [value]="statusFilter()" (selectionChange)="updateStatusFilter($event.value)">
+              @for (opt of statusOptions(); track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Flow</mat-label>
+            <mat-select [value]="flowFilter()" (selectionChange)="updateFlowFilter($event.value)">
+              @for (opt of flowOptions; track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        @if (filteredPayments().length === 0) {
+          <app-no-record
+            icon="payments"
+            title="No Payments Found"
+            message="No payments found."
+          ></app-no-record>
+        } @else {
+          <div class="overflow-x-auto border border-outline-variant rounded-lg">
+            <table mat-table [dataSource]="filteredPayments()" class="w-full">
+              <ng-container matColumnDef="paymentNumber">
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                  Payment
+                </th>
+                <td mat-cell *matCellDef="let payment" class="py-3 text-sm text-gray-900 font-medium">
+                  {{ payment.paymentNumber }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="paymentDate">
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                  Date
+                </th>
+                <td mat-cell *matCellDef="let payment" class="py-3 text-sm text-gray-700">
+                  {{ payment.paymentDate | date: 'MMM d, y' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="method">
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                  Method
+                </th>
+                <td mat-cell *matCellDef="let payment" class="py-3 text-sm text-gray-700">
+                  {{ methodLabel(payment.paymentMethod) }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                  Status
+                </th>
+                <td mat-cell *matCellDef="let payment" class="py-3 text-sm text-gray-700">
+                  <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" [ngClass]="statusChipClass(payment.status)">
+                    {{ statusLabel(payment.status) }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="flow">
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                  Flow
+                </th>
+                <td mat-cell *matCellDef="let payment" class="py-3 text-sm text-gray-700">
+                  <mat-chip [ngClass]="flowChipClass(payment)">
+                    {{ flowLabel(payment) }}
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="payer">
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                  Payer
+                </th>
+                <td mat-cell *matCellDef="let payment" class="py-3 text-sm text-gray-700">
+                  <div>{{ payerName(payment) }}</div>
+                  <div class="text-xs text-gray-400">{{ propertyName(payment) }}</div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="payee">
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                  Payee
+                </th>
+                <td mat-cell *matCellDef="let payment" class="py-3 text-sm text-gray-700">
+                  {{ payeeName(payment) }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 text-right!">
+                  Amount
+                </th>
+                <td mat-cell *matCellDef="let payment" class="py-3 text-sm text-gray-900 font-medium text-right!">
+                  {{ formatCurrency(payment.totalAmount, payment.currency) }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="balance">
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 text-right!">
+                  Unallocated
+                </th>
+                <td mat-cell *matCellDef="let payment" class="py-3 text-sm font-medium text-right!" [ngClass]="payment.unallocatedAmount > 0 ? 'text-yellow-700' : 'text-gray-600'">
+                  {{ formatCurrency(payment.unallocatedAmount, payment.currency) }}
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr
+                mat-row
+                *matRowDef="let payment; columns: displayedColumns"
+                class="cursor-pointer hover:bg-gray-50"
+                (click)="viewPayment(payment._id)"
+              ></tr>
+            </table>
+          </div>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

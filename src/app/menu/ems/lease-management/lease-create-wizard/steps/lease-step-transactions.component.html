@@ -1,0 +1,324 @@
+<div [formGroup]="transactionsGroup" class="space-y-6">
+
+  <!-- Invoicing Type (only for multiple tenants) -->
+  @if (hasMultipleTenants) {
+    <div class="rounded-xl border border-gray-200 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-1">Invoicing Type</h3>
+      <p class="text-xs text-gray-500 mb-3">Choose how invoices are split between tenants</p>
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Invoicing Type</mat-label>
+        <mat-select formControlName="invoicingType">
+          @for (opt of invoicingTypeOptions; track opt) {
+            <mat-option [value]="opt">{{ opt }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  }
+
+  <!-- Recurring Rent -->
+  <div class="rounded-xl border border-gray-200 p-4" formGroupName="recurringRent">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="text-sm font-semibold text-gray-700">Recurring Rent</h3>
+        <p class="text-xs text-gray-500 mt-1">Configure recurring rent payments</p>
+      </div>
+      <mat-slide-toggle formControlName="enabled" color="primary">Enabled</mat-slide-toggle>
+    </div>
+
+    @if (recurringRentGroup.get('enabled')?.value) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <input type="hidden" formControlName="accountCode" />
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Rent Account</mat-label>
+          <mat-select [disabled]="true" value="RENT">
+            <mat-option value="RENT">Rent</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Total Rent Amount</mat-label>
+          <input matInput type="number" formControlName="totalAmount" placeholder="0.00">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Frequency</mat-label>
+          <mat-select formControlName="frequency">
+            @for (opt of billingFrequencyOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Due Date Rule</mat-label>
+          <mat-select formControlName="dueDateRule">
+            @for (opt of dueDateRuleOptions; track opt) {
+              <mat-option [value]="opt">{{ opt }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>First Rent Date</mat-label>
+          <input matInput [matDatepicker]="firstRentPicker" formControlName="firstRentDate">
+          <mat-datepicker-toggle matIconSuffix [for]="firstRentPicker"></mat-datepicker-toggle>
+          <mat-datepicker #firstRentPicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="mt-3">
+        <mat-checkbox formControlName="markPastInvoicesAsPaid" color="primary">
+          Mark past invoices as paid
+        </mat-checkbox>
+      </div>
+
+      <!-- Tenant Shares (only for INDIVIDUAL with multiple tenants) -->
+      @if (isIndividualInvoicing && hasMultipleTenants) {
+        <div class="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+          <h4 class="text-xs font-semibold text-blue-700 mb-3">Rent Tenant Shares</h4>
+          <div formArrayName="tenantShares" class="flex flex-col gap-3">
+            @for (share of rentTenantSharesArray.controls; track trackByIndex($index); let idx = $index) {
+              <div [formGroupName]="idx" class="grid grid-cols-2 gap-3">
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Tenant</mat-label>
+                  <mat-select formControlName="tenantId">
+                    @for (tid of selectedTenantIds; track tid) {
+                      <mat-option [value]="tid">{{ tenantName(tid) }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Amount</mat-label>
+                  <input matInput type="number" formControlName="amount" placeholder="0.00">
+                </mat-form-field>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Deposits -->
+  <div class="rounded-xl border border-gray-200 p-4">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="text-sm font-semibold text-gray-700">Deposits</h3>
+        <p class="text-xs text-gray-500 mt-1">Security deposits, pet deposits, and other deposits</p>
+      </div>
+      <button mat-stroked-button type="button" (click)="addDeposit()">
+        <mat-icon class="mr-1">add</mat-icon>
+        Add Deposit
+      </button>
+    </div>
+
+    <div formArrayName="deposits" class="flex flex-col gap-4">
+      @if (depositsArray.length === 0) {
+        <p class="text-sm text-gray-400 py-4 text-center">No deposits added yet.</p>
+      }
+
+      @for (deposit of depositsArray.controls; track trackByIndex($index); let idx = $index) {
+        <div [formGroupName]="idx" class="rounded-lg border border-green-200 bg-green-50 p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <p class="text-xs font-medium text-green-700">Deposit {{ idx + 1 }}</p>
+            <button mat-icon-button type="button" color="warn" (click)="removeDeposit(idx)" aria-label="Remove deposit">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <app-invoice-category-select
+              [control]="getDepositAccountControl(idx)"
+              [label]="'Deposit Account'"
+              [side]="financialSide.INCOME"
+            />
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Total Amount</mat-label>
+              <input matInput type="number" formControlName="totalAmount" placeholder="0.00">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Invoice Date</mat-label>
+              <input matInput [matDatepicker]="depositDatePicker" formControlName="invoiceDate">
+              <mat-datepicker-toggle matIconSuffix [for]="depositDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #depositDatePicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <mat-form-field appearance="outline" class="w-full mt-3">
+            <mat-label>Memo</mat-label>
+            <input matInput formControlName="memo" placeholder="Optional note">
+          </mat-form-field>
+
+          <!-- Deposit Tenant Shares -->
+          @if (isIndividualInvoicing && hasMultipleTenants) {
+            <div class="mt-3 rounded-lg border border-blue-200 bg-blue-50/50 p-3">
+              <h4 class="text-xs font-semibold text-blue-700 mb-2">Deposit Tenant Shares</h4>
+              <div formArrayName="tenantShares" class="flex flex-col gap-2">
+                @for (share of getDepositTenantSharesArray(idx).controls; track trackByIndex($index); let sIdx = $index) {
+                  <div [formGroupName]="sIdx" class="grid grid-cols-2 gap-3">
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Tenant</mat-label>
+                      <mat-select formControlName="tenantId">
+                        @for (tid of selectedTenantIds; track tid) {
+                          <mat-option [value]="tid">{{ tenantName(tid) }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Amount</mat-label>
+                      <input matInput type="number" formControlName="amount" placeholder="0.00">
+                    </mat-form-field>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Other Transactions -->
+  <div class="rounded-xl border border-gray-200 p-4">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="text-sm font-semibold text-gray-700">Other Transactions</h3>
+        <p class="text-xs text-gray-500 mt-1">Additional fees, charges, or recurring costs</p>
+      </div>
+      <button mat-stroked-button type="button" (click)="addOtherTransaction()">
+        <mat-icon class="mr-1">add</mat-icon>
+        Add Transaction
+      </button>
+    </div>
+
+    <div formArrayName="otherTransactions" class="flex flex-col gap-4">
+      @if (otherTransactionsArray.length === 0) {
+        <p class="text-sm text-gray-400 py-4 text-center">No other transactions added.</p>
+      }
+
+      @for (txn of otherTransactionsArray.controls; track trackByIndex($index); let idx = $index) {
+        <div [formGroupName]="idx" class="rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <p class="text-xs font-medium text-amber-700">Transaction {{ idx + 1 }}</p>
+            <button mat-icon-button type="button" color="warn" (click)="removeOtherTransaction(idx)" aria-label="Remove transaction">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Title</mat-label>
+              <input matInput formControlName="title" placeholder="Charge name">
+            </mat-form-field>
+            <app-invoice-category-select
+              [control]="getOtherTransactionAccountControl(idx)"
+              [label]="'Account'"
+            />
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Amount</mat-label>
+              <input matInput type="number" formControlName="amount" placeholder="0.00">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Due Date</mat-label>
+              <input matInput [matDatepicker]="otherDuePicker" formControlName="dueDate">
+              <mat-datepicker-toggle matIconSuffix [for]="otherDuePicker"></mat-datepicker-toggle>
+              <mat-datepicker #otherDuePicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Frequency (optional)</mat-label>
+              <mat-select formControlName="frequency">
+                <mat-option [value]="null">One-time</mat-option>
+                @for (opt of billingFrequencyOptions; track opt) {
+                  <mat-option [value]="opt">{{ opt }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Memo</mat-label>
+              <input matInput formControlName="memo" placeholder="Optional note">
+            </mat-form-field>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Late Fee Settings -->
+  <div class="rounded-xl border border-gray-200 p-4" formGroupName="lateFeeSettings">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="text-sm font-semibold text-gray-700">Late Fee Settings</h3>
+        <p class="text-xs text-gray-500 mt-1">Configure penalties for late payments</p>
+      </div>
+      <mat-slide-toggle formControlName="enabled" color="primary">Enabled</mat-slide-toggle>
+    </div>
+
+    @if (lateFeeSettingsGroup.get('enabled')?.value) {
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Grace Period (days)</mat-label>
+          <input matInput type="number" formControlName="gracePeriodDays" placeholder="0">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Grace Period Time</mat-label>
+          <input
+            matInput
+            [matTimepicker]="gracePeriodTimePicker"
+            formControlName="gracePeriodTime"
+            placeholder="Select time"
+          >
+          <mat-timepicker-toggle matIconSuffix [for]="gracePeriodTimePicker"></mat-timepicker-toggle>
+          <mat-timepicker #gracePeriodTimePicker></mat-timepicker>
+        </mat-form-field>
+      </div>
+
+      <!-- One-Time Late Fee -->
+      <div class="rounded-lg border border-red-200 bg-red-50 p-4 mb-3" formGroupName="oneTimeLateFee">
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="text-xs font-semibold text-red-700">One-Time Late Fee</h4>
+          <mat-slide-toggle formControlName="enabled" color="warn">Enabled</mat-slide-toggle>
+        </div>
+        @if (lateFeeSettingsGroup.get('oneTimeLateFee.enabled')?.value) {
+          <div class="grid grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Fee Type</mat-label>
+              <mat-select formControlName="feeType">
+                @for (opt of lateFeeTypeOptions; track opt) {
+                  <mat-option [value]="opt">{{ opt }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Value</mat-label>
+              <input matInput type="number" formControlName="value" placeholder="0">
+            </mat-form-field>
+          </div>
+        }
+      </div>
+
+      <!-- Daily Late Fee -->
+      <div class="rounded-lg border border-red-200 bg-red-50 p-4" formGroupName="dailyLateFee">
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="text-xs font-semibold text-red-700">Daily Late Fee</h4>
+          <mat-slide-toggle formControlName="enabled" color="warn">Enabled</mat-slide-toggle>
+        </div>
+        @if (lateFeeSettingsGroup.get('dailyLateFee.enabled')?.value) {
+          <div class="grid grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Fee Type</mat-label>
+              <mat-select formControlName="feeType">
+                @for (opt of lateFeeTypeOptions; track opt) {
+                  <mat-option [value]="opt">{{ opt }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Value</mat-label>
+              <input matInput type="number" formControlName="value" placeholder="0">
+            </mat-form-field>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

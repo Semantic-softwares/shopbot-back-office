@@ -1,0 +1,262 @@
+@if (lease(); as lease) {
+  <div class="flex flex-col gap-4">
+
+    <!-- Recurring Rent -->
+    <mat-expansion-panel [expanded]="true" class="mat-elevation-z0 border border-outline-variant rounded-lg!">
+      <mat-expansion-panel-header>
+        <mat-panel-title class="flex items-center gap-2 text-sm font-semibold text-gray-800">
+          Recurring rent
+          <span class="inline-flex items-center justify-center rounded-full bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5">
+            {{ rentDataSource().length }}
+          </span>
+        </mat-panel-title>
+        <mat-panel-description class="flex justify-end">
+          <a matButton (click)="$event.stopPropagation()">
+            Edit recurring rent
+          </a>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      @if (rentDataSource().length > 0) {
+        <table mat-table [dataSource]="rentDataSource()" class="w-full">
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef class="text-xs text-gray-500 font-medium">Status</th>
+            <td mat-cell *matCellDef>
+              <mat-chip class="text-xs!" highlighted>Active</mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="firstInvoice">
+            <th mat-header-cell *matHeaderCellDef class="text-xs text-gray-500 font-medium">First invoice</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="text-sm text-gray-700">{{ row.firstRentDate | date: 'MMM d, y' }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef class="text-xs text-gray-500 font-medium">Category</th>
+            <td mat-cell *matCellDef>
+              <span class="text-sm text-gray-700">Rent</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="nextInvoice">
+            <th mat-header-cell *matHeaderCellDef class="text-xs text-gray-500 font-medium">Next invoice</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="text-sm text-gray-700">{{ row.firstRentDate | date: 'MMM d, y' }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="totalSchedule">
+            <th mat-header-cell *matHeaderCellDef class="text-xs text-gray-500 font-medium">Total &amp; Schedule</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="text-sm font-semibold text-gray-800">{{ row.totalAmount | number:'1.2-2' }}</span>
+              <span class="text-xs text-gray-500 ml-1">{{ frequencyAbbrev(row.frequency) }}</span>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="rentColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: rentColumns;"></tr>
+        </table>
+      } @else {
+        <p class="text-sm text-gray-400 px-4 py-3">Recurring rent is not enabled.</p>
+      }
+    </mat-expansion-panel>
+
+    <!-- Deposits -->
+    @if (depositDataSource().length > 0) {
+      <mat-expansion-panel [expanded]="true" class="mat-elevation-z0 border border-outline-variant rounded-lg!">
+        <mat-expansion-panel-header>
+          <mat-panel-title class="flex items-center gap-2 text-sm font-semibold text-gray-800">
+            Deposits
+            <span class="inline-flex items-center justify-center rounded-full bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5">
+              {{ depositDataSource().length }}
+            </span>
+          </mat-panel-title>
+          <mat-panel-description class="flex justify-end">
+            <a matButton (click)="$event.stopPropagation()">
+              Edit deposits
+            </a>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <table mat-table [dataSource]="depositDataSource()" class="w-full">
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef class="text-xs text-gray-500 font-medium">Status</th>
+            <td mat-cell *matCellDef>
+              <mat-chip class="text-xs!" highlighted>Active</mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="invoiceDate">
+            <th mat-header-cell *matHeaderCellDef class="text-xs text-gray-500 font-medium">Invoice date</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="text-sm text-gray-700">{{ row.invoiceDate | date: 'MMM d, y' }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef class="text-xs text-gray-500 font-medium">Category</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="text-sm text-gray-700">{{ depositCategoryLabel(row) }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="totalAmount">
+            <th mat-header-cell *matHeaderCellDef class="text-xs text-gray-500 font-medium">Total amount</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="text-sm font-semibold text-gray-800">{{ row.totalAmount | number:'1.2-2' }}</span>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="depositColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: depositColumns;"></tr>
+        </table>
+      </mat-expansion-panel>
+    }
+
+    <!-- Other Recurring Transactions -->
+    <mat-expansion-panel [expanded]="true" class="mat-elevation-z0 border border-outline-variant rounded-lg!">
+      <mat-expansion-panel-header>
+        <mat-panel-title class="flex items-center gap-2 text-sm font-semibold text-gray-800">
+          Other recurring transactions
+          <span class="inline-flex items-center justify-center rounded-full bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5">
+            {{ otherDataSource().length }}
+          </span>
+        </mat-panel-title>
+        <mat-panel-description class="flex justify-end">
+          <a matButton (click)="$event.stopPropagation()">
+            Add recurring transaction
+          </a>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      @if (otherDataSource().length > 0) {
+        <table mat-table [dataSource]="otherDataSource()" class="w-full">
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef class="text-xs text-gray-500 font-medium">Status</th>
+            <td mat-cell *matCellDef>
+              <mat-chip class="text-xs!" highlighted>Active</mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="firstInvoice">
+            <th mat-header-cell *matHeaderCellDef class="text-xs text-gray-500 font-medium">First invoice</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="text-sm text-gray-700">{{ row.dueDate | date: 'MMM d, y' }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef class="text-xs text-gray-500 font-medium">Category</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="text-sm text-gray-700">{{ otherCategoryLabel(row) }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="nextInvoice">
+            <th mat-header-cell *matHeaderCellDef class="text-xs text-gray-500 font-medium">Next invoice</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="text-sm text-gray-700">{{ row.dueDate | date: 'MMM d, y' }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="totalSchedule">
+            <th mat-header-cell *matHeaderCellDef class="text-xs text-gray-500 font-medium">Total &amp; Schedule</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="text-sm font-semibold text-gray-800">{{ row.amount | number:'1.2-2' }}</span>
+              <span class="text-xs text-gray-500 ml-1">{{ frequencyAbbrev(row.frequency) }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="w-10"></th>
+            <td mat-cell *matCellDef="let row">
+              <button mat-icon-button [matMenuTriggerFor]="txnMenu" aria-label="Transaction actions">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #txnMenu="matMenu">
+                <button mat-menu-item>
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                <button mat-menu-item>
+                  <mat-icon>delete</mat-icon>
+                  <span>Remove</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="otherColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: otherColumns;"></tr>
+        </table>
+      } @else {
+        <p class="text-sm text-gray-400 px-4 py-3">No other recurring transactions.</p>
+      }
+    </mat-expansion-panel>
+
+    <!-- Extra Fees (Late Fees) -->
+    <mat-expansion-panel [expanded]="true" class="mat-elevation-z0 border border-outline-variant rounded-lg!">
+      <mat-expansion-panel-header>
+        <mat-panel-title class="flex items-center gap-2 text-sm font-semibold text-gray-800">
+          Extra fees
+          <span class="inline-flex items-center justify-center rounded-full bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5">
+            {{ extraFeesCount() }}
+          </span>
+        </mat-panel-title>
+        <mat-panel-description class="flex justify-end">
+          <a matButton (click)="$event.stopPropagation()">
+            Edit late fees
+          </a>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      @if (lateFeeSettings()?.enabled) {
+        <div class="px-4 py-3 space-y-3">
+          <div class="text-xs text-gray-500 font-medium uppercase tracking-wide">Late fee policy</div>
+          <div class="text-sm text-gray-700">
+            Grace period: <span class="font-semibold">{{ lateFeeSettings()?.gracePeriodDays ?? 0 }} days</span>
+          </div>
+
+          @if (lateFeeSettings()?.oneTimeLateFee?.enabled) {
+            <div class="flex items-center gap-2 border border-outline-variant rounded-md p-3">
+              <mat-icon class="text-amber-500 text-base!">warning</mat-icon>
+              <div>
+                <div class="text-sm font-semibold text-gray-800">One-time late fee</div>
+                <div class="text-xs text-gray-500">
+                  {{ lateFeeSettings()?.oneTimeLateFee?.value }}
+                  @if (lateFeeSettings()?.oneTimeLateFee?.feeType === 'PERCENTAGE') {
+                    <span>% of total</span>
+                  } @else {
+                    <span> (flat)</span>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          @if (lateFeeSettings()?.dailyLateFee?.enabled) {
+            <div class="flex items-center gap-2 border border-outline-variant rounded-md p-3">
+              <mat-icon class="text-amber-500 text-base!">schedule</mat-icon>
+              <div>
+                <div class="text-sm font-semibold text-gray-800">Daily late fee</div>
+                <div class="text-xs text-gray-500">
+                  {{ lateFeeSettings()?.dailyLateFee?.value }}
+                  @if (lateFeeSettings()?.dailyLateFee?.feeType === 'PERCENTAGE') {
+                    <span>% of total per day</span>
+                  } @else {
+                    <span> per day (flat)</span>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="text-sm text-gray-400 px-4 py-3">No late fee policy configured.</p>
+      }
+    </mat-expansion-panel>
+
+  </div>
+}

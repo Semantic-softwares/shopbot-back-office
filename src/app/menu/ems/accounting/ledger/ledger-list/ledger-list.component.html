@@ -1,0 +1,175 @@
+<app-page-header title="Ledger" subtitle="Global accounting activities across leases, tenants, and properties">
+    <ng-container actions>
+          <button mat-stroked-button (click)="clearFilters()">Clear Filters</button>
+    </ng-container>
+</app-page-header>
+
+<div class="px-4 py-4 space-y-3">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <p class="text-xs uppercase tracking-wide text-gray-500">Total Debit</p>
+        <p class="text-lg font-semibold text-gray-900">{{ formatCurrency(summary().totalDebit) }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <p class="text-xs uppercase tracking-wide text-gray-500">Total Credit</p>
+        <p class="text-lg font-semibold text-gray-900">{{ formatCurrency(summary().totalCredit) }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <p class="text-xs uppercase tracking-wide text-gray-500">Closing Balance</p>
+        <p class="text-lg font-semibold text-gray-900">{{ formatCurrency(summary().closingBalance) }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-3!">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Search</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            placeholder="Reference or description"
+            [value]="searchQuery()"
+            (input)="updateSearch($any($event.target).value)"
+          >
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full md:col-span-2 lg:col-span-2">
+          <mat-label>Date Range</mat-label>
+          <mat-date-range-input [rangePicker]="dateRangePicker">
+            <input
+              matStartDate
+              placeholder="From"
+              [value]="dateFrom()"
+              (dateChange)="onDateRangeChange($event.value, dateTo())"
+            >
+            <input
+              matEndDate
+              placeholder="To"
+              [value]="dateTo()"
+              (dateChange)="onDateRangeChange(dateFrom(), $event.value)"
+            >
+          </mat-date-range-input>
+          <mat-datepicker-toggle matIconSuffix [for]="dateRangePicker"></mat-datepicker-toggle>
+          <mat-date-range-picker #dateRangePicker></mat-date-range-picker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Type</mat-label>
+          <mat-select [value]="typeFilter()" (valueChange)="onTypeChange($event)">
+            @for (option of typeOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Tenant</mat-label>
+          <mat-select [value]="tenantFilter()" (valueChange)="onTenantChange($event)">
+            <mat-option value="">All Tenants</mat-option>
+            @for (tenant of tenants(); track tenant._id) {
+              <mat-option [value]="tenant._id">{{ tenantLabel(tenant) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Property</mat-label>
+          <mat-select [value]="propertyFilter()" (valueChange)="onPropertyChange($event)">
+            <mat-option value="">All Properties</mat-option>
+            @for (property of properties(); track property._id) {
+              <mat-option [value]="property._id">{{ propertyLabel(property) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Lease</mat-label>
+          <mat-select [value]="leaseFilter()" (valueChange)="onLeaseChange($event)">
+            <mat-option value="">All Leases</mat-option>
+            @for (lease of leases(); track lease._id) {
+              <mat-option [value]="lease._id">{{ leaseLabel(lease) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-0!">
+      @if (ledgerResource.isLoading()) {
+        <div class="flex items-center justify-center py-12">
+          <mat-spinner diameter="36"></mat-spinner>
+        </div>
+      } @else if (ledgerResource.error()) {
+        <div class="p-6 text-sm text-red-600">Failed to load ledger entries.</div>
+      } @else if (entries().length === 0) {
+        <app-no-record
+          icon="timeline"
+          title="No Ledger Entries"
+          message="No ledger entries match the current filters."
+        ></app-no-record>
+      } @else {
+        <div class="overflow-x-auto">
+          <table mat-table [dataSource]="pagedEntries()" class="w-full">
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 bg-gray-50!">Date</th>
+              <td mat-cell *matCellDef="let entry" class="py-3 text-sm text-gray-700">{{ entry.date | date: 'MMM d, y, h:mm a' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 bg-gray-50!">Type</th>
+              <td mat-cell *matCellDef="let entry" class="py-3 text-sm text-gray-700">{{ typeLabel(entry.type) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="reference">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 bg-gray-50!">Reference</th>
+              <td mat-cell *matCellDef="let entry" class="py-3 text-sm text-gray-700">{{ entry.referenceNumber || '--' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="description">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 bg-gray-50!">Description</th>
+              <td mat-cell *matCellDef="let entry" class="py-3 text-sm text-gray-700">{{ entry.description || '--' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="debit">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 bg-gray-50! text-right!">Debit</th>
+              <td mat-cell *matCellDef="let entry" class="py-3 text-sm text-gray-900 text-right!">{{ formatCurrency(entry.debit) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="credit">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 bg-gray-50! text-right!">Credit</th>
+              <td mat-cell *matCellDef="let entry" class="py-3 text-sm text-gray-900 text-right!">{{ formatCurrency(entry.credit) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="balance">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 bg-gray-50! text-right!">Running Balance</th>
+              <td mat-cell *matCellDef="let entry" class="py-3 text-sm font-medium text-gray-900 text-right!">{{ formatCurrency(entry.runningBalance) }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+
+          <mat-paginator
+            [length]="entries().length"
+            [pageIndex]="pageIndex()"
+            [pageSize]="pageSize()"
+            [pageSizeOptions]="pageSizeOptions"
+            (page)="onPageChange($event)"
+          ></mat-paginator>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

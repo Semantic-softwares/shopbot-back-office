@@ -1,0 +1,8 @@
+:host {
+  display: block;
+}
+
+.selected-category-card {
+  background-color: var(--mat-sys-primary-container, #e8def8) !important;
+  border-color: var(--mat-sys-primary, #6750a4) !important;
+}

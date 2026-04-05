@@ -1,0 +1,88 @@
+@if (receiptResource.isLoading()) {
+  <div class="flex items-center justify-center py-20">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+} @else if (receipt(); as data) {
+  <app-page-header [title]="'Receipt ' + data.receiptNumber" subtitle="Payment proof and allocation breakdown">
+    <ng-container actions>
+       <button mat-button (click)="goBack()">
+        <mat-icon class="mr-1">arrow_back</mat-icon>
+        Back
+      </button>
+      <button mat-stroked-button (click)="printReceipt()" [disabled]="exportingPdf()">
+        <mat-icon class="mr-1">print</mat-icon>
+        {{ exportingPdf() ? 'Preparing...' : 'Print Receipt' }}
+      </button>
+     
+    </ng-container>
+  </app-page-header>
+
+  <div class="px-4 py-5 space-y-4 print:px-0 bg-gradient-to-b from-amber-50/20 to-white">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <mat-card appearance="outlined" class="lg:col-span-2 border-amber-200/60">
+        <mat-card-content class="p-4! space-y-4">
+          <div class="flex items-center justify-between border-b border-amber-100 pb-3">
+            <h2 class="text-xl font-semibold text-gray-900">Receipt Summary</h2>
+            <span class="text-sm px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">
+              {{ data.receiptDate | date: 'MMM d, y, h:mm a' }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="rounded-lg border border-gray-100 p-3">
+              <p class="text-xs uppercase tracking-wide text-gray-500">Tenant</p>
+              <p class="text-sm font-medium text-gray-900 mt-1">{{ tenantName(data) }}</p>
+            </div>
+            <div class="rounded-lg border border-gray-100 p-3">
+              <p class="text-xs uppercase tracking-wide text-gray-500">Payment Method</p>
+              <p class="text-sm font-medium text-gray-900 mt-1">{{ methodLabel(data.paymentMethod) }}</p>
+            </div>
+            <div class="rounded-lg border p-3" [ngClass]="amountClass(data)">
+              <p class="text-xs uppercase tracking-wide" [ngClass]="amountLabelClass(data)">{{ amountLabel(data) }}</p>
+              <p class="text-xl font-semibold mt-1" [ngClass]="amountValueClass(data)">{{ formatCurrency(data.amountReceived, data.currency) }}</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined" class="border-gray-200">
+        <mat-card-content class="p-4! space-y-2">
+          <p class="text-xs uppercase tracking-wide text-gray-500">Quick Facts</p>
+          <mat-list>
+            <mat-list-item>
+              <span matListItemTitle>Receipt Number</span>
+              <span matListItemMeta class="font-medium text-gray-900">{{ data.receiptNumber }}</span>
+            </mat-list-item>
+            <mat-list-item>
+              <span matListItemTitle>Allocations</span>
+              <span matListItemMeta class="font-medium text-gray-900">{{ data.allocations.length }}</span>
+            </mat-list-item>
+            <mat-list-item>
+              <span matListItemTitle>Currency</span>
+              <span matListItemMeta class="font-medium text-gray-900">{{ data.currency }}</span>
+            </mat-list-item>
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-card appearance="outlined" class="print:shadow-none print:border-0 overflow-hidden">
+      <mat-card-content class="p-0!">
+        <div class="px-4 py-3 border-b border-outline-variant bg-gray-50">
+          <h3 class="text-lg font-semibold text-gray-900">Allocation Breakdown</h3>
+        </div>
+
+        <mat-list>
+          @for (allocation of data.allocations; track allocation.invoiceId || allocation.invoiceNumber) {
+            <mat-list-item>
+              <span matListItemTitle>{{ allocation.invoiceNumber }}</span>
+              <span matListItemMeta class="font-medium text-gray-900">
+                {{ formatCurrency(allocation.allocatedAmount, data.currency) }}
+              </span>
+            </mat-list-item>
+          }
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+  </div>
+}

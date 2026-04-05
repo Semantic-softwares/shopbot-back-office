@@ -1,0 +1,47 @@
+@if (variant() === 'icon') {
+  <button
+    mat-icon-button
+    [matMenuTriggerFor]="actionsMenu"
+    (click)="$event.stopPropagation()"
+    aria-label="Invoice actions"
+  >
+    <mat-icon>more_horiz</mat-icon>
+  </button>
+} @else {
+  <button
+    mat-stroked-button
+    [matMenuTriggerFor]="actionsMenu"
+    (click)="$event.stopPropagation()"
+    aria-label="Invoice actions"
+  >
+    <mat-icon>more_vert</mat-icon>
+    Actions
+  </button>
+}
+
+<mat-menu #actionsMenu="matMenu">
+  @if (canMarkAsPaid()) {
+    <button mat-menu-item (click)="openMarkAsPaid()">
+      <mat-icon>payments</mat-icon>
+      <span>Mark as paid</span>
+    </button>
+  }
+  @if (canVoid()) {
+    <button mat-menu-item (click)="voidInvoice()">
+      <mat-icon>block</mat-icon>
+      <span>Void</span>
+    </button>
+  }
+  @if (canUnvoid()) {
+    <button mat-menu-item (click)="unvoidInvoice()">
+      <mat-icon>undo</mat-icon>
+      <span>Unvoid</span>
+    </button>
+  }
+  @if (canDelete()) {
+    <button mat-menu-item (click)="deleteInvoice()">
+      <mat-icon class="text-red-600">delete</mat-icon>
+      <span class="text-red-600">Delete</span>
+    </button>
+  }
+</mat-menu>

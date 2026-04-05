@@ -1,0 +1,225 @@
+<app-page-header title="Leases" subtitle="Create and manage lease agreements">
+  <ng-container actions>
+    <button mat-button (click)="clearFilters()">
+      <mat-icon>clear</mat-icon>
+      Clear Filters
+    </button>
+
+    <button mat-flat-button (click)="createLease()">
+      <mat-icon class="mr-1">add</mat-icon>
+      Add Lease
+    </button>
+  </ng-container>
+</app-page-header>
+
+<div class="px-4 py-6 space-y-4">
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <p class="text-sm text-gray-600">Active leases</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1">{{ activeLeaseCount() }}</p>
+      </mat-card-content>
+    </mat-card>
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <p class="text-sm text-gray-600">Lease expiration</p>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span class="text-2xl font-bold text-gray-900">{{ expiringLeaseCount() }}</span>
+          <span class="text-xs text-gray-400">In the upcoming 30 days</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card appearance="outlined" class="border-red-200!">
+      <mat-card-content class="p-4!">
+        <p class="text-sm text-gray-600">Scheduled</p>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span class="text-2xl font-bold text-gray-900">{{ scheduledLeaseCount() }}</span>
+          <span class="text-xs text-gray-400">Future leases</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Table Card -->
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      @if (leasesResource.isLoading()) {
+        <div class="flex items-center justify-center py-8">
+          <mat-spinner diameter="32"></mat-spinner>
+        </div>
+      } @else if (leases().length === 0) {
+        <div class="text-center py-8 text-gray-500">
+          <mat-icon class="!text-5xl !h-14 !w-14 mb-2 text-gray-300">description</mat-icon>
+          <p class="text-sm">No leases yet. Create your first lease to get started.</p>
+        </div>
+      } @else {
+        <!-- Filters -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Property</mat-label>
+            <mat-select [value]="selectedPropertyFilter()" (selectionChange)="updatePropertyFilter($event.value)">
+              <mat-option value="">All Properties</mat-option>
+              @for (name of propertyFilterOptions(); track name) {
+                <mat-option [value]="name.toLowerCase()">{{ name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Status</mat-label>
+            <mat-select [value]="selectedStatusFilter()" (selectionChange)="updateStatusFilter($event.value)">
+              @for (opt of statusOptions; track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Tenant</mat-label>
+            <mat-select [value]="selectedTenantFilter()" (selectionChange)="updateTenantFilter($event.value)">
+              <mat-option value="">All Tenants</mat-option>
+              @for (opt of tenantFilterOptions(); track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Lease timeline</mat-label>
+            <mat-select [value]="selectedExpiryFilter()" (selectionChange)="updateExpiryFilter($event.value)">
+              @for (opt of expiryOptions; track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table mat-table [dataSource]="filteredLeases()" matSort [matSortActive]="'createdAt'" [matSortDirection]="'desc'"
+                 (matSortChange)="onSortChange($event)" class="w-full">
+
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                Status
+              </th>
+              <td mat-cell *matCellDef="let lease" class="py-3">
+                <mat-chip>
+                  {{ lease.status | titlecase }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <!-- Lease Number Column -->
+            <ng-container matColumnDef="lease">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                Lease
+              </th>
+              <td mat-cell *matCellDef="let lease" class="text-sm text-gray-800 font-medium py-3">
+                {{ lease.leaseNumber || '--' }}
+              </td>
+            </ng-container>
+
+            <!-- Created Date Column -->
+            <ng-container matColumnDef="createdAt">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="createdAt" class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                Created
+              </th>
+              <td mat-cell *matCellDef="let lease" class="text-sm text-gray-700 py-3">
+                {{ lease.createdAt | date: 'MMM d, y' }}
+              </td>
+            </ng-container>
+
+            <!-- Property & Unit Column -->
+            <ng-container matColumnDef="property">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="property" class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                Property & unit
+              </th>
+              <td mat-cell *matCellDef="let lease" class="text-sm text-gray-700 py-3">
+                {{ propertyAndUnitName(lease) }}
+              </td>
+            </ng-container>
+
+            <!-- Tenants Column -->
+            <ng-container matColumnDef="tenant">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                Tenants
+              </th>
+              <td mat-cell *matCellDef="let lease" class="text-sm text-gray-700 py-3">
+                <span>{{ tenantDisplay(lease).primary }}</span>
+                @if (tenantDisplay(lease).extra > 0) {
+                  <span class="ml-1.5 inline-flex items-center justify-center px-1.5 py-0.5 rounded-full bg-gray-200 text-xs font-medium text-gray-600">
+                    +{{ tenantDisplay(lease).extra }}
+                  </span>
+                }
+              </td>
+            </ng-container>
+
+            <!-- Duration Column -->
+            <ng-container matColumnDef="duration">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                Duration
+              </th>
+              <td mat-cell *matCellDef="let lease" class="text-sm text-gray-700 py-3">
+                {{ leaseDuration(lease) }}
+              </td>
+            </ng-container>
+
+            <!-- Rent & Schedule Column -->
+            <ng-container matColumnDef="rent">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 text-right!">
+                Rent & schedule
+              </th>
+              <td mat-cell *matCellDef="let lease" class="text-sm text-gray-800 font-medium py-3 text-right!">
+                {{ rentDisplay(lease) }}
+              </td>
+            </ng-container>
+
+            <!-- Currency Column -->
+            <ng-container matColumnDef="currency">
+              <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                &nbsp;
+              </th>
+              <td mat-cell *matCellDef="let lease" class="text-sm text-gray-500 py-3">
+                {{ lease.currency || '--' }}
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="text-xs uppercase tracking-wide text-gray-600 w-10"></th>
+              <td mat-cell *matCellDef="let lease" class="py-3">
+                <app-lease-actions-menu
+                  [lease]="lease"
+                  triggerVariant="icon"
+                  ariaLabel="Lease actions"
+                  (view)="viewLease(lease._id)"
+                  (completeDraft)="completeDraft(lease._id)"
+                  (endLease)="endLease(lease._id)"
+                  (delete)="deleteLease(lease._id)"
+                  (changed)="onLeaseChanged()"
+                />
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let lease; columns: displayedColumns;"
+                class="cursor-pointer hover:bg-gray-50" (click)="viewLease(lease._id)"></tr>
+          </table>
+
+          <div class="px-4 py-3 text-xs text-gray-500 border-t border-gray-100">
+            {{ filteredLeases().length }} Total
+          </div>
+
+          @if (filteredLeases().length === 0) {
+            <div class="text-center py-6 text-sm text-gray-500">
+              No leases match the selected filters.
+            </div>
+          }
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

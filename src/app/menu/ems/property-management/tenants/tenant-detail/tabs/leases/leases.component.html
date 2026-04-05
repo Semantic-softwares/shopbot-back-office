@@ -1,0 +1,75 @@
+@if (leasesResource.isLoading()) {
+  <div class="flex items-center justify-center py-14">
+    <mat-spinner diameter="32"></mat-spinner>
+  </div>
+} @else if (leases().length === 0) {
+  <app-no-record
+    icon="description"
+    title="No Leases Found"
+    message="This tenant is not assigned to any lease yet."
+  ></app-no-record>
+} @else {
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-0!">
+      <div class="overflow-x-auto">
+        <table mat-table [dataSource]="leases()" class="w-full">
+          <ng-container matColumnDef="lease">
+            <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+              Lease
+            </th>
+            <td mat-cell *matCellDef="let lease" class="py-3">
+              <div class="flex flex-col gap-1">
+                <span class="text-sm font-semibold text-slate-800">{{ lease.leaseNumber }}</span>
+                <span class="text-xs text-slate-500">{{ formatDate(lease.startDate) }} - {{ leaseTypeLabel(lease) }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="term">
+            <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+              Property / Unit
+            </th>
+            <td mat-cell *matCellDef="let lease" class="py-3 text-sm text-slate-700">
+              {{ propertyName(lease) }} @if (unitName(lease) !== '--') { · {{ unitName(lease) }} }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+              Status
+            </th>
+            <td mat-cell *matCellDef="let lease" class="py-3">
+              <mat-chip [ngClass]="statusClass(lease.status)">{{ lease.status }}</mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="tenant">
+            <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
+              Tenant
+            </th>
+            <td mat-cell *matCellDef="let lease" class="py-3">
+              <div class="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-2.5 py-1.5">
+                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400 text-[10px] font-semibold text-white">
+                  {{ tenantInitials(lease) }}
+                </div>
+                <span class="text-sm text-emerald-700">{{ primaryTenantName(lease) }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 text-right!">
+              Action
+            </th>
+            <td mat-cell *matCellDef="let lease" class="py-3 text-right!">
+              <button mat-button color="primary" (click)="viewLease(lease._id)">View</button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+}

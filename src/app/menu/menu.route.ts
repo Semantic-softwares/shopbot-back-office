@@ -116,6 +116,26 @@ export const MENU_ROUTES: Routes = [
     },
   },
   {
+    path: 'ems',
+    loadChildren: () =>
+      import('./ems/ems.routes').then((m) => m.DASHBOARD_EMS_ROUTES),
+    resolve: { role: roleResolver },
+    canActivate: [roleGuard],
+    data: {
+      requiredPermissions: [
+        'estate.properties.view',
+        'estate.properties.create',
+        'estate.properties.edit',
+        'estate.properties.delete',
+        'estate.units.view',
+        'estate.units.create',
+        'estate.units.edit',
+        'estate.units.delete',
+      ],
+      permissionMode: 'any',
+    },
+  },
+  {
     path: 'admin',
     loadChildren: () =>
       import('./administrative-settings/administrative-settings.route').then(

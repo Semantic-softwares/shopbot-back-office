@@ -1,0 +1,50 @@
+<div [formGroup]="utilitiesGroup" class="rounded-xl border border-gray-200 p-4">
+  <div class="flex items-center justify-between mb-3">
+    <div class="text-sm font-semibold text-gray-700">Utility Responsibilities</div>
+    <button mat-stroked-button type="button" (click)="addUtilityResponsibility()">
+      <mat-icon class="mr-1">add</mat-icon>
+      Add Utility
+    </button>
+  </div>
+
+  <div formArrayName="responsibilities" class="flex flex-col gap-3">
+    @if (responsibilitiesArray.length === 0) {
+      <p class="text-sm text-gray-400">No utility responsibilities added.</p>
+    }
+
+    @for (utility of responsibilitiesArray.controls; track $index) {
+      <div [formGroupName]="$index" class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Utility Type</mat-label>
+            <mat-select formControlName="utilityType">
+              @for (type of utilityTypes; track type) {
+                <mat-option [value]="type">{{ type }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Custom Utility Name</mat-label>
+            <input matInput formControlName="customUtilityName" placeholder="Only for OTHER">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full md:col-span-2">
+            <mat-label>Responsible Party</mat-label>
+            <mat-select formControlName="responsibleParty">
+              @for (party of parties; track party) {
+                <mat-option [value]="party">{{ party }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="mt-2 flex justify-end">
+          <button mat-icon-button type="button" color="warn" (click)="removeUtilityResponsibility($index)">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,60 @@
+@if (propertyResource.isLoading()) {
+  <div class="flex items-center justify-center py-20">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+} @else if (propertyResource.error()) {
+  <div class="bg-red-50 border border-red-200 rounded-lg p-4 m-4">
+    <div class="flex items-center gap-2">
+      <mat-icon class="text-red-500">error</mat-icon>
+      <div>
+        <h3 class="text-red-800 font-medium">Error loading property</h3>
+        <button mat-button color="warn" (click)="reload()" class="mt-2 !text-red-600">
+          <mat-icon class="mr-1">refresh</mat-icon>
+          Retry
+        </button>
+      </div>
+    </div>
+  </div>
+} @else if (property()) {
+  <!-- Header -->
+  <app-page-header
+    [title]="property()!.name"
+    [subtitle]="subtitleText()">
+    <ng-container actions>
+      <a mat-button (click)="goBack()">
+        <mat-icon class="mr-1">arrow_back</mat-icon>
+        Back
+      </a>
+      <a mat-flat-button [routerLink]="['../', property()!._id, 'edit']">
+        <mat-icon class="mr-1">edit</mat-icon>
+        Edit
+      </a>
+    </ng-container>
+  </app-page-header>
+
+  <!-- Tab Navigation -->
+  <nav mat-tab-nav-bar [tabPanel]="tabPanel" mat-stretch-tabs="false" mat-align-tabs="start">
+    @for (tab of tabs; track tab.link) {
+      @if (tab.link !== 'units' || !isSingleUnit()) {
+        <a mat-tab-link
+          [routerLink]="tab.link"
+          routerLinkActive
+          #rla="routerLinkActive"
+          [active]="rla.isActive">
+          <mat-icon class="mr-2 !text-lg">{{ tab.icon }}</mat-icon>
+          {{ tab.label }}
+          @if (tab.link === 'units') {
+            <span class="ml-1 text-xs text-gray-500">({{ property()!.totalUnits }})</span>
+          }
+        </a>
+      }
+    }
+  </nav>
+
+  <!-- Tab Content -->
+  <mat-tab-nav-panel #tabPanel>
+    <div class="py-6 px-4">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-tab-nav-panel>
+}

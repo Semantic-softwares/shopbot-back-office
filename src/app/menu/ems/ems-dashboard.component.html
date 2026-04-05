@@ -1,0 +1,59 @@
+<div class="ems-dashboard-container">
+  <mat-sidenav-container>
+    <mat-sidenav [mode]="isMobile() ? 'over' : 'side'" [opened]="opened()" class="!w-[60px] !rounded-[0px] flex flex-col">
+      <nav class="flex-1 flex flex-col items-center gap-1 py-3">
+        @for (item of navItems(); track $index) {
+          @if (hasSingleChild(item)) {
+            <a
+              [routerLink]="item.children[0].link"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: false }"
+              [matTooltip]="item.children[0].label"
+              matTooltipPosition="right"
+              (click)="closeSidenavOnMobile()"
+              class="nav-item"
+            >
+              <mat-icon>{{ getFirstChildIcon(item) }}</mat-icon>
+            </a>
+          } @else {
+            <a
+              [matMenuTriggerFor]="menu"
+              [matTooltip]="item.name"
+              matTooltipPosition="right"
+              [class.active]="isNavItemActive(item)"
+              class="nav-item"
+            >
+              <mat-icon>{{ getFirstChildIcon(item) }}</mat-icon>
+            </a>
+
+            <mat-menu #menu="matMenu">
+              <div class="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">{{ item.name }}</div>
+              <mat-divider></mat-divider>
+              @for (child of item.children; track $index) {
+                <a
+                  mat-menu-item
+                  [routerLink]="child.link"
+                  routerLinkActive="active-menu-item"
+                  (click)="closeSidenavOnMobile()"
+                >
+                  <mat-icon>{{ child.icon }}</mat-icon>
+                  <span>{{ child.label }}</span>
+                </a>
+              }
+            </mat-menu>
+          }
+        }
+      </nav>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <app-toolbar
+        [title]="!isMobile() ? 'Estate Management System' : 'EMS'"
+        (menuToggle)="toggleSidenav()">
+      </app-toolbar>
+      <div class="h-[calc(100vh-64px)] overflow-scroll">
+        <router-outlet></router-outlet>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

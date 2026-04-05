@@ -1,0 +1,18 @@
+<mat-form-field appearance="outline" class="w-full">
+  <mat-label>Country</mat-label>
+  <input matInput
+    [formControl]="searchControl"
+    [matAutocomplete]="countryAuto"
+    placeholder="Search country..."
+    (blur)="onBlur()">
+  <mat-icon matSuffix>public</mat-icon>
+  <mat-autocomplete #countryAuto="matAutocomplete"
+    (optionSelected)="onOptionSelected($event.option.value)">
+    @for (country of filteredCountries(); track country.code) {
+      <mat-option [value]="country.name">
+        <span class="mr-2">{{ country.flag }}</span>
+        {{ country.name }}
+      </mat-option>
+    }
+  </mat-autocomplete>
+</mat-form-field>

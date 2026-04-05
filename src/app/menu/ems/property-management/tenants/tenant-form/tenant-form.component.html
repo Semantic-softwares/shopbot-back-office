@@ -1,0 +1,347 @@
+<app-page-header
+  [title]="isEditMode() ? 'Edit Tenant' : 'New Tenant'"
+  [subtitle]="isEditMode() ? 'Update tenant information' : 'Add a new tenant'">
+  <ng-container actions>
+    <button mat-button (click)="cancel()">
+      <mat-icon class="mr-1">arrow_back</mat-icon>
+      Cancel
+    </button>
+    <button mat-flat-button (click)="onSubmit()" [disabled]="isSaving()">
+      @if (isSaving()) {
+        <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+      }
+      {{ isEditMode() ? 'Update Tenant' : 'Create Tenant' }}
+    </button>
+  </ng-container>
+</app-page-header>
+
+<div class="max-w-5xl py-6 px-4">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+    <!-- Profile Picture -->
+    <mat-card appearance="outlined" class="mb-6">
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-3">PROFILE PICTURE</div>
+      <mat-card-content class="px-4 pb-4">
+        <div class="flex items-center gap-6">
+          <!-- Avatar preview -->
+          <div class="relative flex-shrink-0">
+            <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
+              @if (coverPhotoFile()?.preview || coverPhotoUrl()) {
+                <img [src]="coverPhotoFile()?.preview || coverPhotoUrl()"
+                     alt="Profile photo" class="w-full h-full object-cover">
+              } @else {
+                <mat-icon class="!text-5xl text-gray-400">person</mat-icon>
+              }
+            </div>
+            @if (coverPhotoFile() || coverPhotoUrl()) {
+              <button mat-mini-fab color="warn" type="button"
+                      class="!absolute -top-1 -right-1 !w-6 !h-6 !min-h-6 !p-0"
+                      (click)="removeCoverPhoto()"
+                      aria-label="Remove photo">
+                <mat-icon class="!text-sm">close</mat-icon>
+              </button>
+            }
+          </div>
+
+          <!-- Upload controls -->
+          <div>
+            <input #photoInput type="file" accept="image/*" class="hidden"
+                   (change)="onCoverPhotoSelected($event)">
+            <button mat-stroked-button type="button" (click)="photoInput.click()">
+              <mat-icon class="mr-1">upload</mat-icon>
+              {{ coverPhotoFile() || coverPhotoUrl() ? 'Change Photo' : 'Upload Photo' }}
+            </button>
+            <p class="text-xs text-gray-400 mt-2">JPG, PNG or WebP. Recommended 400×400px.</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Personal Information -->
+    <mat-card appearance="outlined" class="mb-6">
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">PERSONAL INFORMATION</div>
+      <mat-card-content class="px-4 pb-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>First Name *</mat-label>
+            <input matInput formControlName="firstName" placeholder="First name">
+            @if (form.get('firstName')?.hasError('required') && form.get('firstName')?.touched) {
+              <mat-error>First name is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Last Name *</mat-label>
+            <input matInput formControlName="lastName" placeholder="Last name">
+            @if (form.get('lastName')?.hasError('required') && form.get('lastName')?.touched) {
+              <mat-error>Last name is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Middle Name</mat-label>
+            <input matInput formControlName="middleName" placeholder="Middle name">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Date of Birth</mat-label>
+            <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth"
+                   placeholder="MM/DD/YYYY" readonly
+                   (dateChange)="onDobChange($event)">
+            <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
+            <mat-datepicker #dobPicker startView="multi-year"></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Age</mat-label>
+            <input matInput formControlName="age" placeholder="Auto-calculated">
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Contact Information -->
+    <mat-card appearance="outlined" class="mb-6">
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">CONTACT INFORMATION</div>
+      <mat-card-content class="px-4 pb-4">
+
+        <!-- Email -->
+        <mat-form-field appearance="outline" class="w-full mb-4">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="Email address">
+          @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
+            <mat-error>Enter a valid email</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Multiple Phone Numbers -->
+        <div class="mb-2">
+          <div class="text-sm font-medium text-gray-700 mb-3">Phone Numbers</div>
+          <div formArrayName="phoneNumbers" class="flex flex-col gap-3">
+            @for (ctrl of phoneNumbersArray.controls; track $index) {
+              <div class="flex items-center gap-2">
+                <mat-form-field appearance="outline" class="flex-1">
+                  <mat-label>{{ $index === 0 ? 'Primary Phone' : 'Phone ' + ($index + 1) }}</mat-label>
+                  <input matInput [formControlName]="$index" placeholder="Phone number">
+                  <mat-icon matPrefix class="text-gray-400 mr-1">phone</mat-icon>
+                </mat-form-field>
+                @if (phoneNumbersArray.length > 1) {
+                  <button mat-icon-button type="button" color="warn"
+                          (click)="removePhone($index)"
+                          [attr.aria-label]="'Remove phone ' + ($index + 1)">
+                    <mat-icon>remove_circle_outline</mat-icon>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+          <button mat-stroked-button type="button" class="mt-2"
+                  (click)="addPhone()">
+            <mat-icon class="mr-1">add</mat-icon>
+            Add Phone Number
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Company Information -->
+    <mat-card appearance="outlined" class="mb-6">
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">COMPANY INFORMATION</div>
+      <mat-card-content class="px-4 pb-4">
+        <div class="mb-4">
+          <mat-slide-toggle formControlName="isCompany">
+            Display as a company
+          </mat-slide-toggle>
+        </div>
+        @if (isCompany()) {
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Company Name</mat-label>
+              <input matInput formControlName="companyName" placeholder="Company name">
+            </mat-form-field>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Additional Details -->
+    <mat-card appearance="outlined" class="mb-6">
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">ADDITIONAL DETAILS</div>
+      <mat-card-content class="px-4 pb-4">
+        <div class="grid grid-cols-1 gap-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Forwarding Address</mat-label>
+            <textarea matInput formControlName="forwardingAddress" rows="2"
+                      placeholder="Forwarding address"></textarea>
+          </mat-form-field>
+
+          <div>
+            <div class="flex items-center justify-between mb-3 gap-3">
+              <div>
+                <div class="text-sm font-medium text-gray-700">Emergency Contacts</div>
+                <p class="text-xs text-gray-400 mt-1">Add one or more contacts with name, email, phone number, and relationship.</p>
+              </div>
+              <button mat-stroked-button type="button" (click)="addEmergencyContact()">
+                <mat-icon class="mr-1">add</mat-icon>
+                Add Contact
+              </button>
+            </div>
+
+            <div formArrayName="emergencyContacts" class="flex flex-col gap-4">
+              @for (contact of emergencyContactsArray.controls; track $index) {
+                <div [formGroupName]="$index" class="rounded-xl border border-gray-200 p-4">
+                  <div class="flex items-center justify-between mb-4">
+                    <div class="text-sm font-semibold text-gray-700">Emergency Contact {{ $index + 1 }}</div>
+                    @if (emergencyContactsArray.length > 1) {
+                      <button mat-icon-button type="button" color="warn"
+                              (click)="removeEmergencyContact($index)"
+                              [attr.aria-label]="'Remove emergency contact ' + ($index + 1)">
+                        <mat-icon>delete_outline</mat-icon>
+                      </button>
+                    }
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Name</mat-label>
+                      <input matInput formControlName="name" placeholder="Full name">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Relationship</mat-label>
+                      <input matInput formControlName="relationship" placeholder="e.g. Sister, Friend">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Email</mat-label>
+                      <input matInput formControlName="email" type="email" placeholder="Email address">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                      <mat-label>Phone Number</mat-label>
+                      <input matInput formControlName="phoneNumber" placeholder="Phone number">
+                    </mat-form-field>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Vehicles -->
+    <mat-card appearance="outlined" class="mb-6">
+      <div class="flex items-center justify-between px-4 pt-4 pb-2">
+        <span class="text-xs font-bold text-gray-500 tracking-wider">VEHICLES</span>
+        <button mat-stroked-button type="button" (click)="openAddVehicleModal()">
+          <mat-icon class="mr-1">directions_car</mat-icon>
+          Add Vehicle
+        </button>
+      </div>
+      <mat-card-content class="px-4 pb-4">
+        @if (pendingVehicles().length === 0) {
+          <p class="text-sm text-gray-400 py-2">No vehicles added yet.</p>
+        } @else {
+          <div class="flex flex-col gap-3">
+            @for (vehicle of pendingVehicles(); track $index) {
+              <div class="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-3 bg-gray-50">
+                <div class="flex items-center gap-3">
+                  <mat-icon class="text-gray-500">directions_car</mat-icon>
+                  <div>
+                    <div class="text-sm font-semibold text-gray-800">{{ vehicleLabel(vehicle) }}</div>
+                    @if (vehicle.color) {
+                      <div class="text-xs text-gray-500">{{ vehicle.color }} · {{ vehicle.type }}</div>
+                    } @else {
+                      <div class="text-xs text-gray-500">{{ vehicle.type }}</div>
+                    }
+                  </div>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button mat-icon-button type="button" (click)="openAddVehicleModal($index)"
+                          aria-label="Edit vehicle" matTooltip="Edit">
+                    <mat-icon class="text-gray-600">edit</mat-icon>
+                  </button>
+                  <button mat-icon-button type="button" color="warn" (click)="removeVehicle($index)"
+                          aria-label="Remove vehicle" matTooltip="Remove">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Pets -->
+    <mat-card appearance="outlined" class="mb-6">
+      <div class="flex items-center justify-between px-4 pt-4 pb-2">
+        <span class="text-xs font-bold text-gray-500 tracking-wider">PETS</span>
+        <button mat-stroked-button type="button" (click)="openAddPetModal()">
+          <mat-icon class="mr-1">pets</mat-icon>
+          Add Pet
+        </button>
+      </div>
+      <mat-card-content class="px-4 pb-4">
+        @if (pendingPets().length === 0) {
+          <p class="text-sm text-gray-400 py-2">No pets added yet.</p>
+        } @else {
+          <div class="flex flex-col gap-3">
+            @for (pet of pendingPets(); track $index) {
+              <div class="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-3 bg-gray-50">
+                <div class="flex items-center gap-3">
+                  <mat-icon class="text-gray-500">pets</mat-icon>
+                  <div>
+                    <div class="text-sm font-semibold text-gray-800">{{ petLabel(pet) }}</div>
+                    <div class="flex flex-wrap gap-2 mt-0.5">
+                      @if (pet.vaccinated) {
+                        <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Vaccinated</span>
+                      }
+                      @if (pet.licensed) {
+                        <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Licensed</span>
+                      }
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button mat-icon-button type="button" (click)="openAddPetModal($index)"
+                          aria-label="Edit pet" matTooltip="Edit">
+                    <mat-icon class="text-gray-600">edit</mat-icon>
+                  </button>
+                  <button mat-icon-button type="button" color="warn" (click)="removePet($index)"
+                          aria-label="Remove pet" matTooltip="Remove">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Status & Notes -->
+    <mat-card appearance="outlined" class="mb-6">
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">STATUS & NOTES</div>
+      <mat-card-content class="px-4 pb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              @for (status of statusOptions; track status.value) {
+                <mat-option [value]="status.value">{{ status.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="w-full mt-2">
+          <mat-label>Notes</mat-label>
+          <textarea matInput formControlName="notes" rows="4" placeholder="Additional notes..."></textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+  </form>
+</div>
