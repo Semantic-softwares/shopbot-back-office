@@ -1,10 +1,11 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
-import { Subscription, Invoice, SubscriptionStatus, BillingCountry } from '../models';
+import { Observable, tap, throwError, shareReplay, finalize } from 'rxjs';
+import { Subscription, SubscriptionWithModules, Invoice, SubscriptionStatus, BillingCountry, ModuleKey, BillingCycle } from '../models';
 import { environment } from '../../../environments/environment';
 import { StoreStore } from '../stores/store.store';
 import { SessionStorageService } from './session-storage.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,9 @@ export class SubscriptionService {
   private http = inject(HttpClient);
   private storeStore = inject(StoreStore);
   private sessionStorage = inject(SessionStorageService);
-  private apiUrl = `${environment.apiUrl}/api/v1/subscription`;
+  private authService = inject(AuthService);
+  private apiUrl = `${environment.apiUrl}/subscription`;
+  private createTrialInFlight: Observable<Subscription> | null = null;
 
   // Signal-based subscription state
   private subscriptionSignal = signal<Subscription | null>(this.loadCachedSubscription());
@@ -86,42 +89,64 @@ export class SubscriptionService {
   }
 
   /**
-   * Create a free trial subscription
-   * All stores are charged in USD
+   * Create a free trial subscription using the new module-based setup flow.
+   * This is primarily a compatibility bridge for older guards/resolvers that
+   * still attempt to bootstrap a missing subscription after login.
    */
   createTrial(): Observable<Subscription> {
-    const selectedStore = this.storeStore.selectedStore();
-    const storeId = selectedStore?._id;
-    
-    // Get billing email from store owner first, then fallback to user email
-    let billingEmail = '';
-    
-    if (selectedStore?.owner) {
-      // If owner is an object with email property
-      if (typeof selectedStore.owner === 'object' && (selectedStore.owner as any).email) {
-        billingEmail = (selectedStore.owner as any).email;
-        // billingEmail = 'alexonozor@gmail.com'
-      }
-      // If owner is just an ID string, use the store contactInfo email
-      else if (selectedStore?.contactInfo?.email) {
-        billingEmail = selectedStore.contactInfo.email;
-        // billingEmail = 'alexonozor@gmail.com'
-      }
-    
+    if (this.createTrialInFlight) {
+      return this.createTrialInFlight;
     }
 
-    return this.http
-      .post<Subscription>(`${this.apiUrl}/trial`, {
-        storeId,
-        billingEmail,
-        billingCountry: selectedStore?.contactInfo.country,
-      })
-      .pipe(
-        tap((subscription) => {
-          this.subscriptionSignal.set(subscription);
-          this.cacheSubscription(subscription);
-        }),
-      );
+    const selectedStore = this.storeStore.selectedStore();
+    const storeId = selectedStore?._id;
+
+    const ownerEmail =
+      selectedStore?.owner &&
+      typeof selectedStore.owner === 'object' &&
+      'email' in selectedStore.owner
+        ? (selectedStore.owner as { email?: string }).email
+        : undefined;
+
+    const billingEmail =
+      selectedStore?.contactInfo?.email ||
+      ownerEmail ||
+      this.authService.currentUserValue?.email ||
+      '';
+
+    if (!storeId) {
+      return throwError(() => new Error('storeId is required to create subscription'));
+    }
+
+    if (!billingEmail) {
+      return throwError(() => new Error('billingEmail is required to create subscription'));
+    }
+
+    const defaultModules = this.getDefaultTrialModules();
+
+    this.createTrialInFlight = this.setupSubscription({
+      storeId,
+      billingEmail,
+      modules: defaultModules,
+      billingCycle: 'MONTHLY',
+    }).pipe(
+      finalize(() => {
+        this.createTrialInFlight = null;
+      }),
+      shareReplay(1),
+    );
+
+    return this.createTrialInFlight;
+  }
+
+  private getDefaultTrialModules(): ModuleKey[] {
+    const selectedStore = this.storeStore.selectedStore();
+
+    if (selectedStore?.storeType === 'restaurant') {
+      return ['POS', 'ERP'];
+    }
+
+    return ['PMS'];
   }
 
   /**
@@ -413,5 +438,79 @@ export class SubscriptionService {
    */
   isPlanButtonDisabled(subscription: Subscription | null, planName: string): boolean {
     return this.isCurrentSubscriptionPlan(subscription, planName);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Module-based billing (new)
+  // ---------------------------------------------------------------------------
+
+  private get billingApiUrl(): string {
+    return `${environment.apiUrl}/billing/subscription`;
+  }
+
+  /**
+   * POST /billing/subscription/setup
+   * Call after store creation at signup to create the trial subscription with modules.
+   */
+  setupSubscription(params: {
+    storeId: string;
+    billingEmail: string;
+    modules: ModuleKey[];
+    billingCycle: BillingCycle;
+  }): Observable<Subscription> {
+    return this.http.post<Subscription>(`${this.billingApiUrl}/setup`, params).pipe(
+      tap((subscription) => {
+        this.subscriptionSignal.set(subscription);
+        this.cacheSubscription(subscription);
+      }),
+    );
+  }
+
+  /**
+   * GET /billing/subscription/current
+   * Returns subscription + per-module pricing summary for the store.
+   */
+  getSubscriptionWithModules(): Observable<SubscriptionWithModules> {
+    const selectedStore = this.storeStore.selectedStore();
+    const storeId = selectedStore?._id;
+
+    let params = new HttpParams();
+    if (storeId) {
+      params = params.set('storeId', storeId);
+    }
+
+    return this.http.get<SubscriptionWithModules>(`${this.billingApiUrl}/current`, {
+      params,
+    });
+  }
+
+  /**
+   * POST /billing/subscription/add-module
+   */
+  addModule(moduleKey: ModuleKey): Observable<unknown> {
+    const storeId = this.storeStore.selectedStore()?._id;
+    return this.http.post(`${this.billingApiUrl}/add-module`, { moduleKey, storeId });
+  }
+
+  /**
+   * POST /billing/subscription/remove-module
+   */
+  removeModule(moduleKey: ModuleKey): Observable<unknown> {
+    const storeId = this.storeStore.selectedStore()?._id;
+    return this.http.post(`${this.billingApiUrl}/remove-module`, { moduleKey, storeId });
+  }
+
+  /**
+   * POST /billing/subscription/change-billing-cycle
+   */
+  changeBillingCycle(billingCycle: BillingCycle): Observable<Subscription> {
+    return this.http
+      .post<Subscription>(`${this.billingApiUrl}/change-billing-cycle`, { billingCycle })
+      .pipe(
+        tap((subscription) => {
+          this.subscriptionSignal.set(subscription);
+          this.cacheSubscription(subscription);
+        }),
+      );
   }
 }

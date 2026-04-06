@@ -1,13 +1,19 @@
-import { Component, inject, OnInit, OnDestroy, effect, computed } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, effect, computed, signal } from '@angular/core';
 
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
+import { catchError, of, switchMap } from 'rxjs';
 import { ToolbarComponent } from '../shared/components/toolbar/toolbar.component';
 import { SocketService } from '../shared/services/socket.service';
 import { StoreStore } from '../shared/stores/store.store';
 import { RolesService } from '../shared/services/roles.service';
+import { SubscriptionService } from '../shared/services/subscription.service';
+import { ModuleKey, SubscriptionWithModules } from '../shared/models';
 
 @Component({
   selector: 'app-menu',
@@ -15,8 +21,10 @@ import { RolesService } from '../shared/services/roles.service';
     CommonModule,
     MatIconModule,
     MatCardModule,
-    ToolbarComponent
-],
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    ToolbarComponent,
+  ],
   templateUrl: './menu.component.html',
   styleUrl: './menu.component.scss',
 })
@@ -25,6 +33,76 @@ export class MenuComponent implements OnInit, OnDestroy {
   private socketService = inject(SocketService);
   private storeStore = inject(StoreStore);
   private rolesService = inject(RolesService);
+  private subscriptionService = inject(SubscriptionService);
+  private snackBar = inject(MatSnackBar);
+
+  readonly subscriptionLoading = signal(true);
+  readonly addingModule = signal<ModuleKey | null>(null);
+  private readonly subscriptionDetails = signal<SubscriptionWithModules | null>(null);
+
+  /** All possible modules with their display config */
+  readonly ALL_MODULE_DEFS: Array<{
+    key: ModuleKey;
+    label: string;
+    description: string;
+    icon: string;
+    monthly: number;
+    yearly: number;
+    color: string;
+  }> = [
+    {
+      key: 'PMS',
+      label: 'Hotel Management',
+      description: 'Reservations, rooms, housekeeping & guest services',
+      icon: 'hotel',
+      monthly: 100,
+      yearly: 1000,
+      color: 'text-blue-600',
+    },
+    {
+      key: 'EMS',
+      label: 'Estate Management',
+      description: 'Properties, units, tenants & invoicing',
+      icon: 'domain',
+      monthly: 100,
+      yearly: 1000,
+      color: 'text-emerald-600',
+    },
+    {
+      key: 'POS',
+      label: 'Point of Sale',
+      description: 'Sales, transactions & customer orders',
+      icon: 'point_of_sale',
+      monthly: 0,
+      yearly: 0,
+      color: 'text-orange-600',
+    },
+    {
+      key: 'ERP',
+      label: 'Enterprise Resource Planning',
+      description: 'Inventory, orders, suppliers & stock management',
+      icon: 'business',
+      monthly: 0,
+      yearly: 0,
+      color: 'text-purple-600',
+    },
+  ];
+
+  /** Modules the store currently has active in subscription */
+  private readonly activeSubscribedKeys = computed<ModuleKey[]>(() => {
+    const details = this.subscriptionDetails();
+    if (!details) return [];
+    return details.modules
+      .filter((m) => m.status === 'ACTIVE')
+      .map((m) => m.moduleKey);
+  });
+
+  /** Modules not yet in subscription — shown in "Add Modules" section */
+  readonly availableToAdd = computed(() =>
+    this.ALL_MODULE_DEFS.filter(
+      (def) => !this.activeSubscribedKeys().includes(def.key),
+    ),
+  );
 
   // ERP module permissions
   private readonly ERP_PERMISSIONS = [
@@ -110,20 +188,28 @@ export class MenuComponent implements OnInit, OnDestroy {
   ];
 
   // Menu visibility computed signals
+  private hasSubscribedModule(moduleKey: ModuleKey): boolean {
+    return this.activeSubscribedKeys().includes(moduleKey);
+  }
+
   canAccessERP = computed(() => 
-    this.rolesService.isAdmin() || this.rolesService.hasAny(this.ERP_PERMISSIONS)
+    this.hasSubscribedModule('ERP') &&
+    (this.rolesService.isAdmin() || this.rolesService.hasAny(this.ERP_PERMISSIONS))
   );
 
   canAccessHMS = computed(() =>
-    this.rolesService.isAdmin() || this.rolesService.hasAny(this.HMS_PERMISSIONS)
+    this.hasSubscribedModule('PMS') &&
+    (this.rolesService.isAdmin() || this.rolesService.hasAny(this.HMS_PERMISSIONS))
   );
 
   canAccessPOS = computed(() =>
-    this.rolesService.isAdmin() || this.rolesService.hasAny(this.POS_PERMISSIONS)
+    this.hasSubscribedModule('POS') &&
+    (this.rolesService.isAdmin() || this.rolesService.hasAny(this.POS_PERMISSIONS))
   );
 
   canAccessEMS = computed(() =>
-    this.rolesService.isAdmin() || this.rolesService.hasAny(this.EMS_PERMISSIONS)
+    this.hasSubscribedModule('EMS') &&
+    (this.rolesService.isAdmin() || this.rolesService.hasAny(this.EMS_PERMISSIONS))
   );
 
   // Only super admins can access administrative settings
@@ -141,19 +227,63 @@ export class MenuComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // Connect to socket on component init
     const storeId = this.storeStore.selectedStore()?._id;
-    console.log('🔌 [MENU] Menu component ngOnInit - Store ID:', storeId);
-    
+
     if (storeId && !this.socketService.isConnected()) {
-      console.log('🔌 [MENU] Connecting socket...');
       this.socketService.connect(storeId);
     }
+
+    this.subscriptionLoading.set(true);
+
+    this.subscriptionService
+      .getSubscriptionWithModules()
+      .pipe(
+        catchError((error) => {
+          if (error?.status === 404) {
+            return this.subscriptionService.createTrial().pipe(
+              switchMap(() => this.subscriptionService.getSubscriptionWithModules()),
+              catchError(() => of(null)),
+            );
+          }
+          return of(null);
+        }),
+      )
+      .subscribe((subscriptionDetails) => {
+        this.subscriptionDetails.set(subscriptionDetails);
+        this.subscriptionLoading.set(false);
+      });
   }
 
   ngOnDestroy() {
     // Socket listeners are now managed by SocketService - no cleanup needed here
-    // This ensures they persist across component navigation
+  }
+
+  addModule(key: ModuleKey): void {
+    if (this.addingModule()) return;
+    this.addingModule.set(key);
+
+    this.subscriptionService.addModule(key).pipe(
+      switchMap(() => this.subscriptionService.getSubscriptionWithModules()),
+      catchError((err) => {
+        this.snackBar.open(
+          err?.error?.message ?? `Failed to add module ${key}`,
+          'Close',
+          { duration: 4000, horizontalPosition: 'end', verticalPosition: 'top' },
+        );
+        return of(null);
+      }),
+    ).subscribe((details) => {
+      this.addingModule.set(null);
+      if (details) {
+        this.subscriptionDetails.set(details);
+        const def = this.ALL_MODULE_DEFS.find((d) => d.key === key);
+        this.snackBar.open(
+          `${def?.label ?? key} added to your subscription`,
+          'Close',
+          { duration: 4000, horizontalPosition: 'end', verticalPosition: 'top' },
+        );
+      }
+    });
   }
 
   navigateToModule(moduleType: 'erp' | 'hotel' | 'pos' | 'ems' | 'admin'): void {
