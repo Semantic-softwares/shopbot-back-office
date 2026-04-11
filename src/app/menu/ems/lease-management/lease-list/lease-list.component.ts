@@ -312,7 +312,13 @@ export class LeaseListComponent {
     const rent = lease.leaseTransactions?.recurringRent;
     if (!rent?.enabled || !rent.totalAmount) return '—';
     const freq = this.frequencyAbbrev(rent.frequency);
-    return `$${rent.totalAmount.toFixed(2)}/${freq}`;
+    const currency = lease.currency || this.storeStore.selectedStore()?.currencyCode || 'USD';
+    try {
+      const formatted = new Intl.NumberFormat('en', { style: 'currency', currency }).format(rent.totalAmount);
+      return `${formatted}/${freq}`;
+    } catch {
+      return `${currency} ${rent.totalAmount.toFixed(2)}/${freq}`;
+    }
   }
 
   getStatusIcon(status: string): string {
