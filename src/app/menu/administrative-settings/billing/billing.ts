@@ -9,7 +9,6 @@ import { InvoicesComponent } from './invoices/invoices';
 import { BillingInformationComponent } from './billing-information/billing-information';
 import { CurrentPlanComponent } from './current-plan/current-plan';
 import { SubscriptionService } from '../../../shared/services/subscription.service';
-import { SubscriptionWithModules } from '../../../shared/models/subscription.model';
 
 @Component({
   selector: 'app-billing',
@@ -32,7 +31,7 @@ export class Billing implements OnInit {
   private subscriptionService = inject(SubscriptionService);
 
   isLoading = signal<boolean>(true);
-  data = signal<SubscriptionWithModules | null>(null);
+  readonly data = this.subscriptionService.subscriptionWithModules;
 
   ngOnInit(): void {
     this.loadSubscription();
@@ -41,8 +40,7 @@ export class Billing implements OnInit {
   loadSubscription(): void {
     this.isLoading.set(true);
     this.subscriptionService.getSubscriptionWithModules().subscribe({
-      next: (result) => {
-        this.data.set(result);
+      next: () => {
         this.isLoading.set(false);
       },
       error: (error) => {
