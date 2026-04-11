@@ -28,4 +28,18 @@
       <mat-error>Please select at least one tenant</mat-error>
     }
   </mat-form-field>
+
+  <div class="flex items-center gap-1 -mt-2">
+    <span class="text-sm text-gray-500">Can't find a tenant?</span>
+    <button
+      mat-button
+      type="button"
+      color="primary"
+      class="!text-sm !px-2 !min-w-0"
+      (click)="openCreateTenantDialog()"
+      aria-label="Create a new tenant">
+      <mat-icon class="!text-base !w-4 !h-4 mr-1">person_add</mat-icon>
+      Create New Tenant
+    </button>
+  </div>
 </div>
