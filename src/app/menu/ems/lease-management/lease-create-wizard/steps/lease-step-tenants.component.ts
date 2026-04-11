@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -6,7 +6,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Tenant } from '../../../../../shared/models/estate.model';
+import { CreateTenantDialogComponent } from '../../../../../shared/components/create-tenant-dialog/create-tenant-dialog.component';
 
 @Component({
   selector: 'app-lease-step-tenants',
@@ -19,11 +22,15 @@ import { Tenant } from '../../../../../shared/models/estate.model';
     MatAutocompleteModule,
     MatChipsModule,
     MatIconModule,
+    MatButtonModule,
+    MatDialogModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './lease-step-tenants.component.html',
 })
 export class LeaseStepTenantsComponent {
+  private dialog = inject(MatDialog);
+
   @Input({ required: true }) tenantsGroup!: FormGroup;
   @Input() tenants: Tenant[] = [];
   readonly tenantSearchControl = new FormControl<string>('', { nonNullable: true });
@@ -78,5 +85,19 @@ export class LeaseStepTenantsComponent {
     this.tenantsGroup.get('tenantIds')?.markAsTouched();
     this.tenantsGroup.get('tenantIds')?.markAsDirty();
     this.tenantSearchControl.setValue('');
+  }
+
+  openCreateTenantDialog(): void {
+    const ref = this.dialog.open(CreateTenantDialogComponent, {
+      width: '520px',
+      maxWidth: '95vw',
+      disableClose: true,
+    });
+
+    ref.afterClosed().subscribe((tenant: Tenant | null) => {
+      if (!tenant) return;
+      this.tenants = [...this.tenants, tenant];
+      this.addTenant(tenant._id);
+    });
   }
 }

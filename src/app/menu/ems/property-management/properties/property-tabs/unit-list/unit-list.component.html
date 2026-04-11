@@ -143,10 +143,29 @@
                     </div>
                   </div>
 
-                  <div class="flex justify-end">
+                  <div class="flex items-center justify-end gap-2">
                     <button mat-stroked-button (click)="viewUnit(unit)">
                       View unit
                     </button>
+                    <button mat-icon-button [matMenuTriggerFor]="unitMenu" aria-label="Unit actions">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #unitMenu="matMenu">
+                      <button mat-menu-item (click)="viewUnit(unit)">
+                        <mat-icon>visibility</mat-icon>
+                        <span>View</span>
+                      </button>
+                      @if (shouldShowAddLease(unit)) {
+                        <button mat-menu-item (click)="addLease(unit)">
+                          <mat-icon>description</mat-icon>
+                          <span>Add Lease</span>
+                        </button>
+                      }
+                      <button mat-menu-item (click)="deleteUnit(unit)" class="!text-red-600" [disabled]="deleting() === unit._id">
+                        <mat-icon class="!text-red-600">delete</mat-icon>
+                        <span>{{ deleting() === unit._id ? 'Deleting...' : 'Delete' }}</span>
+                      </button>
+                    </mat-menu>
                   </div>
                 </div>
               }

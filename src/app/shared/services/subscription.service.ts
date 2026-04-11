@@ -1,6 +1,6 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, tap, throwError, shareReplay, finalize } from 'rxjs';
+import { Observable, tap, throwError, shareReplay, finalize, switchMap } from 'rxjs';
 import { Subscription, SubscriptionWithModules, Invoice, SubscriptionStatus, BillingCountry, ModuleKey, BillingCycle } from '../models';
 import { environment } from '../../../environments/environment';
 import { StoreStore } from '../stores/store.store';
@@ -20,6 +20,18 @@ export class SubscriptionService {
 
   // Signal-based subscription state
   private subscriptionSignal = signal<Subscription | null>(this.loadCachedSubscription());
+
+  // Shared signal for subscription + modules (updated by all module operations)
+  private _subscriptionWithModules = signal<SubscriptionWithModules | null>(null);
+  readonly subscriptionWithModules = this._subscriptionWithModules.asReadonly();
+
+  readonly activeModuleKeys = computed<ModuleKey[]>(() => {
+    const details = this._subscriptionWithModules();
+    if (!details) return [];
+    return details.modules
+      .filter((m) => m.status === 'ACTIVE')
+      .map((m) => m.moduleKey);
+  });
 
   constructor() {
     // Whenever subscription signal changes, save it to localStorage
@@ -481,23 +493,29 @@ export class SubscriptionService {
 
     return this.http.get<SubscriptionWithModules>(`${this.billingApiUrl}/current`, {
       params,
-    });
+    }).pipe(
+      tap((data) => this._subscriptionWithModules.set(data)),
+    );
   }
 
   /**
    * POST /billing/subscription/add-module
    */
-  addModule(moduleKey: ModuleKey): Observable<unknown> {
+  addModule(moduleKey: ModuleKey): Observable<SubscriptionWithModules> {
     const storeId = this.storeStore.selectedStore()?._id;
-    return this.http.post(`${this.billingApiUrl}/add-module`, { moduleKey, storeId });
+    return this.http.post(`${this.billingApiUrl}/add-module`, { moduleKey, storeId }).pipe(
+      switchMap(() => this.getSubscriptionWithModules()),
+    );
   }
 
   /**
    * POST /billing/subscription/remove-module
    */
-  removeModule(moduleKey: ModuleKey): Observable<unknown> {
+  removeModule(moduleKey: ModuleKey): Observable<SubscriptionWithModules> {
     const storeId = this.storeStore.selectedStore()?._id;
-    return this.http.post(`${this.billingApiUrl}/remove-module`, { moduleKey, storeId });
+    return this.http.post(`${this.billingApiUrl}/remove-module`, { moduleKey, storeId }).pipe(
+      switchMap(() => this.getSubscriptionWithModules()),
+    );
   }
 
   /**

@@ -10,6 +10,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { EstatePropertyService } from '../../../../../../shared/services/estate-property.service';
@@ -44,6 +46,7 @@ type UnitGroup = {
     MatInputModule,
     MatProgressSpinnerModule,
     MatSelectModule,
+    MatMenuModule,
     NoRecordComponent,
   ],
   templateUrl: './unit-list.component.html',
@@ -55,6 +58,9 @@ export class PropertyTabsUnitListComponent {
   private readonly propertyService = inject(EstatePropertyService);
   private readonly unitService = inject(EstateUnitService);
   private readonly storeStore = inject(StoreStore);
+  private readonly snackBar = inject(MatSnackBar);
+
+  readonly deleting = signal<string | null>(null);
 
   readonly searchFilter = signal('');
   readonly propertyFilter = signal('');
@@ -139,7 +145,7 @@ export class PropertyTabsUnitListComponent {
       }
 
       const property =
-        (typeof propertyRef === 'object' ? propertyRef : undefined) || propertyMap.get(propertyId);
+        propertyMap.get(propertyId) || (typeof propertyRef === 'object' ? propertyRef : undefined);
       if (!property) {
         continue;
       }
@@ -271,5 +277,25 @@ export class PropertyTabsUnitListComponent {
 
   shouldShowAddLease(unit: Unit): boolean {
     return unit.status !== UnitStatus.OCCUPIED && unit.status !== UnitStatus.INACTIVE;
+  }
+
+  deleteUnit(unit: Unit): void {
+    if (!confirm(`Are you sure you want to delete unit "${unit.name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    this.deleting.set(unit._id);
+    this.unitService.deleteUnit(unit._id).subscribe({
+      next: () => {
+        this.snackBar.open(`Unit "${unit.name}" deleted successfully`, 'Close', { duration: 3000 });
+        this.deleting.set(null);
+        this.reloadData();
+      },
+      error: (err) => {
+        const msg = err?.error?.message || 'Failed to delete unit';
+        this.snackBar.open(msg, 'Close', { duration: 5000 });
+        this.deleting.set(null);
+      },
+    });
   }
 }

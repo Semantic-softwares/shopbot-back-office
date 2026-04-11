@@ -9,7 +9,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { StoreService } from '../../../shared/services/store.service';
 import { StoreStore } from '../../../shared/stores/store.store';
 import { SubscriptionService } from '../../../shared/services/subscription.service';
-import { SubscriptionWithModules, ModuleKey } from '../../../shared/models/subscription.model';
 
 @Component({
   selector: 'app-notifications-settings',
@@ -35,15 +34,8 @@ export class NotificationsSettings implements OnInit {
 
   loading = signal<boolean>(false);
   saving = signal<boolean>(false);
-  private subscriptionDetails = signal<SubscriptionWithModules | null>(null);
 
-  private readonly activeModuleKeys = computed<ModuleKey[]>(() => {
-    const details = this.subscriptionDetails();
-    if (!details) return [];
-    return details.modules
-      .filter((m) => m.status === 'ACTIVE')
-      .map((m) => m.moduleKey);
-  });
+  private readonly activeModuleKeys = this.subscriptionService.activeModuleKeys;
 
   readonly hasPms = computed<boolean>(() => this.activeModuleKeys().includes('PMS'));
   readonly hasEms = computed<boolean>(() => this.activeModuleKeys().includes('EMS'));
@@ -54,7 +46,6 @@ export class NotificationsSettings implements OnInit {
   ngOnInit(): void {
     this.initializeForm();
     this.loadSettings();
-    this.loadSubscription();
   }
 
   private initializeForm(): void {
@@ -108,13 +99,6 @@ export class NotificationsSettings implements OnInit {
     }
     
     this.loading.set(false);
-  }
-
-  private loadSubscription(): void {
-    this.subscriptionService.getSubscriptionWithModules().subscribe({
-      next: (data: SubscriptionWithModules) => this.subscriptionDetails.set(data),
-      error: () => {},
-    });
   }
 
   savePmsNotificationSettings(): void {

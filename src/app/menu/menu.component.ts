@@ -13,7 +13,7 @@ import { SocketService } from '../shared/services/socket.service';
 import { StoreStore } from '../shared/stores/store.store';
 import { RolesService } from '../shared/services/roles.service';
 import { SubscriptionService } from '../shared/services/subscription.service';
-import { ModuleKey, SubscriptionWithModules } from '../shared/models';
+import { ModuleKey } from '../shared/models';
 
 @Component({
   selector: 'app-menu',
@@ -38,7 +38,7 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   readonly subscriptionLoading = signal(true);
   readonly addingModule = signal<ModuleKey | null>(null);
-  private readonly subscriptionDetails = signal<SubscriptionWithModules | null>(null);
+  private readonly subscriptionDetails = this.subscriptionService.subscriptionWithModules;
 
   /** All possible modules with their display config */
   readonly ALL_MODULE_DEFS: Array<{
@@ -89,13 +89,7 @@ export class MenuComponent implements OnInit, OnDestroy {
   ];
 
   /** Modules the store currently has active in subscription */
-  private readonly activeSubscribedKeys = computed<ModuleKey[]>(() => {
-    const details = this.subscriptionDetails();
-    if (!details) return [];
-    return details.modules
-      .filter((m) => m.status === 'ACTIVE')
-      .map((m) => m.moduleKey);
-  });
+  private readonly activeSubscribedKeys = this.subscriptionService.activeModuleKeys;
 
   /** Modules not yet in subscription — shown in "Add Modules" section */
   readonly availableToAdd = computed(() =>
@@ -248,8 +242,7 @@ export class MenuComponent implements OnInit, OnDestroy {
           return of(null);
         }),
       )
-      .subscribe((subscriptionDetails) => {
-        this.subscriptionDetails.set(subscriptionDetails);
+      .subscribe(() => {
         this.subscriptionLoading.set(false);
       });
   }
@@ -263,7 +256,6 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.addingModule.set(key);
 
     this.subscriptionService.addModule(key).pipe(
-      switchMap(() => this.subscriptionService.getSubscriptionWithModules()),
       catchError((err) => {
         this.snackBar.open(
           err?.error?.message ?? `Failed to add module ${key}`,
@@ -275,7 +267,6 @@ export class MenuComponent implements OnInit, OnDestroy {
     ).subscribe((details) => {
       this.addingModule.set(null);
       if (details) {
-        this.subscriptionDetails.set(details);
         const def = this.ALL_MODULE_DEFS.find((d) => d.key === key);
         this.snackBar.open(
           `${def?.label ?? key} added to your subscription`,

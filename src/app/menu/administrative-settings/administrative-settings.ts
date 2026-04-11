@@ -7,7 +7,7 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatIconModule } from "@angular/material/icon";
 import { ToolbarComponent } from "../../shared/components/toolbar/toolbar.component";
 import { SubscriptionService } from '../../shared/services/subscription.service';
-import { SubscriptionWithModules, ModuleKey } from '../../shared/models/subscription.model';
+import { ModuleKey } from '../../shared/models/subscription.model';
 
 @Component({
   selector: 'app-administrative-settings',
@@ -22,15 +22,8 @@ export class AdministrativeSettings {
 
   // State signals
   loading = signal<boolean>(false);
-  private subscriptionDetails = signal<SubscriptionWithModules | null>(null);
 
-  private readonly activeModuleKeys = computed<ModuleKey[]>(() => {
-    const details = this.subscriptionDetails();
-    if (!details) return [];
-    return details.modules
-      .filter((m) => m.status === 'ACTIVE')
-      .map((m) => m.moduleKey);
-  });
+  private readonly activeModuleKeys = this.subscriptionService.activeModuleKeys;
 
   // All possible navigation links
   private readonly allNavLinks = [
@@ -48,10 +41,5 @@ export class AdministrativeSettings {
     ),
   );
 
-  constructor() {
-    this.subscriptionService.getSubscriptionWithModules().subscribe({
-      next: (data: SubscriptionWithModules) => this.subscriptionDetails.set(data),
-      error: () => {},
-    });
-  }
+  constructor() {}
 }
