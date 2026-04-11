@@ -7,13 +7,13 @@
       </div>
     }
 
-    @if (!isLoading() && subscription()) {
+    @if (!isLoading() && data()) {
       <!-- Billing Information Component -->
-      <app-billing-information [subscription]="subscription()" />
+      <app-billing-information [data]="data()!" />
 
       <!-- Current Plan Component -->
-      @if (subscription()!.status !== 'EXPIRED' && subscription()!.status !== 'CANCELLED') {
-        <app-current-plan [subscription]="subscription()"></app-current-plan>
+      @if (data()!.subscription.status !== 'EXPIRED' && data()!.subscription.status !== 'CANCELLED') {
+        <app-current-plan [data]="data()!" (subscriptionChanged)="loadSubscription()"></app-current-plan>
       }
 
       <!-- Invoices Component -->

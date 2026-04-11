@@ -9,7 +9,7 @@ import { InvoicesComponent } from './invoices/invoices';
 import { BillingInformationComponent } from './billing-information/billing-information';
 import { CurrentPlanComponent } from './current-plan/current-plan';
 import { SubscriptionService } from '../../../shared/services/subscription.service';
-import { Subscription } from '../../../shared/models/subscription.model';
+import { SubscriptionWithModules } from '../../../shared/models/subscription.model';
 
 @Component({
   selector: 'app-billing',
@@ -31,18 +31,18 @@ import { Subscription } from '../../../shared/models/subscription.model';
 export class Billing implements OnInit {
   private subscriptionService = inject(SubscriptionService);
 
-  isLoading = signal(true);
-  subscription = signal<Subscription | null>(null);
+  isLoading = signal<boolean>(true);
+  data = signal<SubscriptionWithModules | null>(null);
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadSubscription();
   }
 
-  private loadSubscription() {
+  loadSubscription(): void {
     this.isLoading.set(true);
-    this.subscriptionService.getSubscriptionStatus().subscribe({
-      next: (sub) => {
-        this.subscription.set(sub);
+    this.subscriptionService.getSubscriptionWithModules().subscribe({
+      next: (result) => {
+        this.data.set(result);
         this.isLoading.set(false);
       },
       error: (error) => {
@@ -50,16 +50,5 @@ export class Billing implements OnInit {
         this.isLoading.set(false);
       },
     });
-  }
-
-  getStatusLabel(status: string): string {
-    const labels: Record<string, string> = {
-      TRIAL: 'Free Trial',
-      ACTIVE: 'Active',
-      PAST_DUE: 'Payment Required',
-      EXPIRED: 'Expired',
-      CANCELLED: 'Cancelled',
-    };
-    return labels[status] || status;
   }
 }

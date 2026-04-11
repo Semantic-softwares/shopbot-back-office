@@ -19,7 +19,7 @@
     
     <!-- Navigation Tabs -->
     <nav mat-tab-nav-bar [tabPanel]="tabPanel" mat-stretch-tabs="false" mat-align-tabs="start" class="settings-nav mb-6">
-      @for (link of navLinks; track link.path) {
+      @for (link of navLinks(); track link.path) {
         <a mat-tab-link
            [routerLink]="link.path"
            routerLinkActive
