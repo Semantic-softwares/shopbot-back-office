@@ -3,7 +3,7 @@ import { User } from "./user.model";
 
 export interface Store {
     _id: string;
-    storeType?: 'restaurant' | 'hotel';
+    storeType?: 'restaurant' | 'hotel' | 'real_estate';
     propertyType?: 'hotel' | 'hostel' | 'apartment' | 'guesthouse' | 'resort' | 'motel' | 'villa' | 'boutique_hotel' | 'bed_and_breakfast' | 'lodge';
     storeNumber?: string;
     bannerImage?: string;
@@ -48,6 +48,7 @@ export interface Store {
       };
     };
     hotelSettings?: HotelSettings;
+    emsSettings?: EmsSettings;
     channex?: ChannexIntegration;
   };
   
@@ -168,6 +169,32 @@ export interface HotelSettings {
     smsNotifications: boolean;
     pushNotifications: boolean;
   };
+}
+
+export interface EmsNotifications {
+  leaseExpiryReminder: boolean;
+  rentDueReminder: boolean;
+  rentPaymentConfirmation: boolean;
+  maintenanceRequestUpdate: boolean;
+  moveInInstructions: boolean;
+  moveOutReminder: boolean;
+  leaseRenewalNotice: boolean;
+  ownerRentCollection: boolean;
+  ownerMaintenanceAlert: boolean;
+  ownerVacancyAlert: boolean;
+  ownerLeaseExpiry: boolean;
+  ownerMonthlyReport: boolean;
+  ownerPropertyInspection: boolean;
+  staffMaintenanceAssigned: boolean;
+  staffInspectionScheduled: boolean;
+  staffTenantComplaint: boolean;
+  staffLeaseAction: boolean;
+  smsNotifications: boolean;
+  pushNotifications: boolean;
+}
+
+export interface EmsSettings {
+  notifications: EmsNotifications;
 }
 
 export interface ChannexIntegration {
