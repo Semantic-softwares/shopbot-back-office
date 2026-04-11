@@ -13,10 +13,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EstateInvoiceService } from '../../services/estate-invoice.service';
 import { EstatePaymentService } from '../../services/estate-payment.service';
+import { RolesService } from '../../services/roles.service';
+import { StoreStore } from '../../stores/store.store';
 import {
   MarkInvoicePaidDialogComponent,
   MarkInvoicePaidDialogResult,
 } from '../mark-invoice-paid-dialog/mark-invoice-paid-dialog.component';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { PinAuthorizationDialogComponent, PinAuthorizationDialogResult } from '../../../menu/hms/front-desk/reservations/pin-authorization-dialog/pin-authorization-dialog.component';
 import { EstateInvoice, InvoiceStatus } from '../../models/estate.model';
 
 @Component({
@@ -32,6 +36,8 @@ export class InvoiceActionsMenuComponent {
   private readonly snackBar = inject(MatSnackBar);
   private readonly invoiceService = inject(EstateInvoiceService);
   private readonly paymentService = inject(EstatePaymentService);
+  private readonly rolesService = inject(RolesService);
+  private readonly storeStore = inject(StoreStore);
 
   invoice = input.required<EstateInvoice>();
   /** 'icon' = icon-only button (for table rows); 'button' = labelled stroked button (for page headers) */
@@ -57,9 +63,7 @@ export class InvoiceActionsMenuComponent {
     () => this.invoice().status === InvoiceStatus.VOID,
   );
 
-  readonly canDelete = computed(
-    () => this.invoice().status === InvoiceStatus.VOID,
-  );
+  readonly canDelete = computed(() => this.rolesService.isAdmin());
 
   openMarkAsPaid(): void {
     const inv = this.invoice();
@@ -147,23 +151,49 @@ export class InvoiceActionsMenuComponent {
   }
 
   deleteInvoice(): void {
-    const confirmed = window.confirm(
-      'Delete this void invoice? This action cannot be undone.',
-    );
-    if (!confirmed) return;
+    const inv = this.invoice();
+    const confirmRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Delete Invoice',
+        message: `Are you sure you want to delete invoice ${inv.invoiceNumber}? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+      },
+    });
 
-    this.invoiceService.deleteInvoice(this.invoice()._id).subscribe({
-      next: () => {
-        this.snackBar.open('Invoice deleted', 'Close', { duration: 3000 });
-        this.actionCompleted.emit('deleted');
-      },
-      error: (err: { error?: { message?: string } }) => {
-        this.snackBar.open(
-          err?.error?.message || 'Failed to delete invoice',
-          'Close',
-          { duration: 5000 },
-        );
-      },
+    confirmRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      const storeId = this.storeStore.selectedStore()?._id;
+      if (!storeId) return;
+
+      const pinRef = this.dialog.open(PinAuthorizationDialogComponent, {
+        width: '400px',
+        disableClose: true,
+        data: {
+          storeId,
+          actionDescription: `delete invoice ${inv.invoiceNumber}`,
+          reservationId: '',
+        },
+      });
+
+      pinRef.afterClosed().subscribe((result: PinAuthorizationDialogResult) => {
+        if (!result?.authorized) return;
+
+        this.invoiceService.deleteInvoice(inv._id).subscribe({
+          next: () => {
+            this.snackBar.open('Invoice deleted', 'Close', { duration: 3000 });
+            this.actionCompleted.emit('deleted');
+          },
+          error: (err: { error?: { message?: string } }) => {
+            this.snackBar.open(
+              err?.error?.message || 'Failed to delete invoice',
+              'Close',
+              { duration: 5000 },
+            );
+          },
+        });
+      });
     });
   }
 }

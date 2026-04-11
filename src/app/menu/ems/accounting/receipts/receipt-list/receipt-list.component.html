@@ -117,10 +117,33 @@
                 </td>
               </ng-container>
 
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              @if (isAdmin()) {
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 text-center! w-16">
+                    Actions
+                  </th>
+                  <td mat-cell *matCellDef="let receipt" class="py-3 text-center!">
+                    <button
+                      mat-icon-button
+                      [matMenuTriggerFor]="receiptMenu"
+                      aria-label="Receipt actions"
+                      (click)="$event.stopPropagation()">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #receiptMenu="matMenu">
+                      <button mat-menu-item (click)="deleteReceipt($event, receipt)">
+                        <mat-icon color="warn">delete</mat-icon>
+                        <span>Delete</span>
+                      </button>
+                    </mat-menu>
+                  </td>
+                </ng-container>
+              }
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
               <tr
                 mat-row
-                *matRowDef="let receipt; columns: displayedColumns"
+                *matRowDef="let receipt; columns: displayedColumns()"
                 class="cursor-pointer hover:bg-gray-50"
                 (click)="viewReceipt(receipt._id)"
               ></tr>
