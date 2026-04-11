@@ -145,7 +145,7 @@ export class PropertyTabsUnitListComponent {
       }
 
       const property =
-        (typeof propertyRef === 'object' ? propertyRef : undefined) || propertyMap.get(propertyId);
+        propertyMap.get(propertyId) || (typeof propertyRef === 'object' ? propertyRef : undefined);
       if (!property) {
         continue;
       }
