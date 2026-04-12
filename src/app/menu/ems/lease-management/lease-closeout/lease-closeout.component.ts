@@ -97,6 +97,7 @@ export class LeaseCloseoutComponent {
     return totalCollected > 0 && available <= 0;
   });
   readonly currencyCode = computed(() => 'NGN');
+  readonly minEndDate = computed(() => this.parseDate(this.lease()?.startDate));
 
   constructor() {
     effect(() => {
@@ -105,8 +106,17 @@ export class LeaseCloseoutComponent {
         return;
       }
 
+      const leaseEnd = this.parseDate(lease.endDate);
+      const leaseStart = this.parseDate(lease.startDate);
+      const today = new Date();
+      // Default to lease end date, but never before lease start
+      let defaultDate = leaseEnd ?? today;
+      if (leaseStart && defaultDate < leaseStart) {
+        defaultDate = leaseStart;
+      }
+
       this.form.patchValue({
-        effectiveEndDate: this.parseDate(lease.endDate) ?? new Date(),
+        effectiveEndDate: defaultDate,
         moveOutDate: null,
       });
       this.hasInitializedForm.set(true);
