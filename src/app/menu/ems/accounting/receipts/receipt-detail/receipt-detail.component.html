@@ -3,9 +3,11 @@
     <mat-spinner diameter="36"></mat-spinner>
   </div>
 } @else if (receipt(); as data) {
-  <app-page-header [title]="'Receipt ' + data.receiptNumber" subtitle="Payment proof and allocation breakdown">
+  <app-page-header
+    [title]="data.receiptNumber ? 'Receipt ' + data.receiptNumber : 'Receipt Details'"
+    [subtitle]="(data.receiptDate | date: 'MMM d, y') ?? ''">
     <ng-container actions>
-       <button mat-button (click)="goBack()">
+      <button mat-button (click)="goBack()">
         <mat-icon class="mr-1">arrow_back</mat-icon>
         Back
       </button>
@@ -13,7 +15,7 @@
         <mat-icon class="mr-1">print</mat-icon>
         {{ exportingPdf() ? 'Preparing...' : 'Print Receipt' }}
       </button>
-     
+
     </ng-container>
   </app-page-header>
 
@@ -24,7 +26,7 @@
           <div class="flex items-center justify-between border-b border-amber-100 pb-3">
             <h2 class="text-xl font-semibold text-gray-900">Receipt Summary</h2>
             <span class="text-sm px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">
-              {{ data.receiptDate | date: 'MMM d, y, h:mm a' }}
+              {{ data.receiptDate | date: 'MMM d, y' }}
             </span>
           </div>
 
