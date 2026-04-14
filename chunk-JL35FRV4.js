@@ -1,1 +1,0 @@
-import"./chunk-GAL4ENT6.js";var t=[{path:"",loadComponent:()=>import("./chunk-MPPUYPHZ.js").then(o=>o.LedgerComponent),children:[{path:"",loadComponent:()=>import("./chunk-F2MLLS5T.js").then(o=>o.LedgerListComponent)}]}];export{t as LEDGER_ROUTES};
