@@ -8,17 +8,24 @@ import {
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { NoRecordComponent } from '../../../../../shared/components/no-record/no-record.component';
+import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { PinAuthorizationDialogComponent, PinAuthorizationDialogResult } from '../../../../hms/front-desk/reservations/pin-authorization-dialog/pin-authorization-dialog.component';
 import { ReceiptApiService } from '../../../../../shared/services/receipt-api.service';
 import { StoreStore } from '../../../../../shared/stores/store.store';
+import { RolesService } from '../../../../../shared/services/roles.service';
 import {
   EstatePaymentMethod,
   Receipt,
@@ -30,12 +37,16 @@ import {
   standalone: true,
   imports: [
     CommonModule,
+    MatButtonModule,
     MatCardModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatMenuModule,
     MatProgressSpinnerModule,
     MatSelectModule,
+    MatSnackBarModule,
     MatTableModule,
     NoRecordComponent,
     PageHeaderComponent,
@@ -48,17 +59,27 @@ export class ReceiptListComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly receiptApiService = inject(ReceiptApiService);
   private readonly storeStore = inject(StoreStore);
+  private readonly rolesService = inject(RolesService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly searchQuery = signal('');
   readonly tenantFilter = signal('');
   readonly methodFilter = signal('');
-  readonly displayedColumns = [
-    'receiptNumber',
-    'receiptDate',
-    'method',
-    'tenant',
-    'amount',
-  ];
+  readonly isAdmin = computed(() => this.rolesService.isAdmin());
+  readonly displayedColumns = computed(() => {
+    const cols = [
+      'receiptNumber',
+      'receiptDate',
+      'method',
+      'tenant',
+      'amount',
+    ];
+    if (this.isAdmin()) {
+      cols.push('actions');
+    }
+    return cols;
+  });
 
   readonly receiptsResource = rxResource({
     params: () => ({
@@ -195,5 +216,53 @@ export class ReceiptListComponent {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount || 0);
+  }
+
+  deleteReceipt(event: MouseEvent, receipt: Receipt): void {
+    event.stopPropagation();
+
+    const confirmRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Delete Receipt',
+        message: `Are you sure you want to delete receipt ${receipt.receiptNumber}? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+      },
+    });
+
+    confirmRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      const storeId = this.storeStore.selectedStore()?._id;
+      if (!storeId) return;
+
+      const pinRef = this.dialog.open(PinAuthorizationDialogComponent, {
+        width: '400px',
+        disableClose: true,
+        data: {
+          storeId,
+          actionDescription: `delete receipt ${receipt.receiptNumber}`,
+          reservationId: '',
+        },
+      });
+
+      pinRef.afterClosed().subscribe((result: PinAuthorizationDialogResult) => {
+        if (!result?.authorized) return;
+
+        this.receiptApiService.deleteReceipt(receipt._id).subscribe({
+          next: () => {
+            this.snackBar.open('Receipt deleted successfully', 'Close', { duration: 3000 });
+            this.receiptsResource.reload();
+          },
+          error: (err) => {
+            this.snackBar.open(
+              err?.error?.message || 'Failed to delete receipt',
+              'Close',
+              { duration: 5000 },
+            );
+          },
+        });
+      });
+    });
   }
 }

@@ -508,6 +508,7 @@ export interface LeaseCloseoutInvoice {
 export interface LeaseDepositSummary {
   totalDepositCollected: number;
   totalDepositExpected?: number;
+  totalDepositRefunded?: number;
   isFullyCollected?: boolean;
   availableDepositAmount: number;
 }

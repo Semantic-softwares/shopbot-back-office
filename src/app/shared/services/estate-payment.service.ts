@@ -64,4 +64,8 @@ export class EstatePaymentService {
       `${this.baseUrl}/invoice/${invoiceId}?storeId=${storeId}`,
     );
   }
+
+  deletePayment(id: string): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(`${this.baseUrl}/${id}`);
+  }
 }

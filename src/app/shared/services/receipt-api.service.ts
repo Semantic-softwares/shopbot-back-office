@@ -52,4 +52,10 @@ export class ReceiptApiService {
       `${this.baseUrl}/payments/${paymentId}/receipt`,
     );
   }
+
+  deleteReceipt(id: string): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${this.baseUrl}/receipts/${id}`,
+    );
+  }
 }

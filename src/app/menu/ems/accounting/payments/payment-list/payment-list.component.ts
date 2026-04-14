@@ -11,16 +11,23 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { NoRecordComponent } from '../../../../../shared/components/no-record/no-record.component';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
+import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { PinAuthorizationDialogComponent, PinAuthorizationDialogResult } from '../../../../hms/front-desk/reservations/pin-authorization-dialog/pin-authorization-dialog.component';
 import { EstatePaymentService } from '../../../../../shared/services/estate-payment.service';
 import { StoreStore } from '../../../../../shared/stores/store.store';
+import { RolesService } from '../../../../../shared/services/roles.service';
 import {
   EstatePayment,
   EstatePaymentMethod,
@@ -37,12 +44,16 @@ import {
     MatButtonModule,
     MatCardModule,
     MatChipsModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
     MatSelectModule,
+    MatMenuModule,
+    MatSnackBarModule,
     MatTableModule,
+    MatTooltipModule,
     NoRecordComponent,
     PageHeaderComponent,
   ],
@@ -55,22 +66,32 @@ export class PaymentListComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly paymentService = inject(EstatePaymentService);
   private readonly storeStore = inject(StoreStore);
+  private readonly rolesService = inject(RolesService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly searchQuery = signal('');
   readonly methodFilter = signal<string>('');
   readonly statusFilter = signal<string>('');
   readonly flowFilter = signal<string>('');
-  readonly displayedColumns = [
-    'paymentNumber',
-    'paymentDate',
-    'method',
-    'status',
-    'flow',
-    'payer',
-    'payee',
-    'amount',
-    'balance',
-  ];
+  readonly isAdmin = computed(() => this.rolesService.isAdmin());
+  readonly displayedColumns = computed(() => {
+    const cols = [
+      'paymentNumber',
+      'paymentDate',
+      'method',
+      'status',
+      'flow',
+      'payer',
+      'payee',
+      'amount',
+      'balance',
+    ];
+    if (this.isAdmin()) {
+      cols.push('actions');
+    }
+    return cols;
+  });
 
   readonly paymentsResource = rxResource({
     params: () => ({
@@ -293,5 +314,53 @@ export class PaymentListComponent {
       return 'bg-amber-100 text-amber-700';
     }
     return 'bg-gray-100 text-gray-600';
+  }
+
+  deletePayment(event: MouseEvent, payment: EstatePayment): void {
+    event.stopPropagation();
+
+    const confirmRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Delete Payment',
+        message: `Are you sure you want to delete payment ${payment.paymentNumber}? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+      },
+    });
+
+    confirmRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      const storeId = this.storeStore.selectedStore()?._id;
+      if (!storeId) return;
+
+      const pinRef = this.dialog.open(PinAuthorizationDialogComponent, {
+        width: '400px',
+        disableClose: true,
+        data: {
+          storeId,
+          actionDescription: `delete payment ${payment.paymentNumber}`,
+          reservationId: '',
+        },
+      });
+
+      pinRef.afterClosed().subscribe((result: PinAuthorizationDialogResult) => {
+        if (!result?.authorized) return;
+
+        this.paymentService.deletePayment(payment._id).subscribe({
+          next: () => {
+            this.snackBar.open('Payment deleted successfully', 'Close', { duration: 3000 });
+            this.paymentsResource.reload();
+          },
+          error: (err) => {
+            this.snackBar.open(
+              err?.error?.message || 'Failed to delete payment',
+              'Close',
+              { duration: 5000 },
+            );
+          },
+        });
+      });
+    });
   }
 }

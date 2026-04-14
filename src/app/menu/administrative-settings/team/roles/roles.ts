@@ -231,6 +231,11 @@ export class Roles {
   getRoleIcon(role: Role): string {
     const name = role.name.toLowerCase();
     if (name.includes('admin') || name.includes('owner')) return 'admin_panel_settings';
+    if (name.includes('estate') && name.includes('manager')) return 'domain';
+    if (name.includes('estate') && name.includes('accountant')) return 'account_balance';
+    if (name.includes('property')) return 'apartment';
+    if (name.includes('leasing')) return 'description';
+    if (name.includes('maintenance')) return 'build';
     if (name.includes('pos') && name.includes('manager')) return 'point_of_sale';
     if (name.includes('pos') || name.includes('cashier')) return 'point_of_sale';
     if (name.includes('kitchen')) return 'restaurant';
@@ -247,6 +252,7 @@ export class Roles {
   getRoleColor(role: Role): string {
     const name = role.name.toLowerCase();
     if (name.includes('admin') || name.includes('owner')) return 'bg-purple-100 text-purple-700';
+    if (name.includes('estate') || name.includes('property') || name.includes('leasing') || name.includes('maintenance')) return 'bg-emerald-100 text-emerald-700';
     if (name.includes('pos') || name.includes('cashier')) return 'bg-orange-100 text-orange-700';
     if (name.includes('kitchen')) return 'bg-red-100 text-red-700';
     if (name.includes('manager')) return 'bg-blue-100 text-blue-700';
@@ -265,6 +271,7 @@ export class Roles {
       case 'ERP': return 'inventory_2';
       case 'Point of Sale': return 'point_of_sale';
       case 'Finance': return 'payments';
+      case 'Estate Management': return 'domain';
       case 'Settings': return 'settings';
       default: return 'folder';
     }
@@ -277,6 +284,7 @@ export class Roles {
       case 'ERP': return 'text-green-600';
       case 'Point of Sale': return 'text-orange-600';
       case 'Finance': return 'text-purple-600';
+      case 'Estate Management': return 'text-emerald-600';
       case 'Settings': return 'text-gray-600';
       default: return 'text-gray-500';
     }

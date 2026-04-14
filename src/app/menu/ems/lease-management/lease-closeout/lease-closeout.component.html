@@ -97,6 +97,15 @@
             </p>
           </div>
 
+          @if ((summary()?.depositSummary?.totalDepositRefunded || 0) > 0) {
+            <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Total refunded</p>
+              <p class="mt-1 text-sm font-medium text-gray-900">
+                {{ summary()?.depositSummary?.totalDepositRefunded || 0 | currency: currencyCode() : 'symbol-narrow' : '1.2-2' }}
+              </p>
+            </div>
+          }
+
           @if (isDepositFullyRefunded()) {
             <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
               Deposit has been fully refunded.
@@ -186,11 +195,14 @@
           <form class="mt-4 space-y-4" [formGroup]="form">
             <mat-form-field appearance="outline" class="w-full">
               <mat-label>Effective end date</mat-label>
-              <input matInput [matDatepicker]="effectiveEndDatePicker" formControlName="effectiveEndDate" />
+              <input matInput [matDatepicker]="effectiveEndDatePicker" [min]="minEndDate()" formControlName="effectiveEndDate" />
               <mat-datepicker-toggle matIconSuffix [for]="effectiveEndDatePicker" />
               <mat-datepicker #effectiveEndDatePicker />
               @if (form.controls.effectiveEndDate.hasError('required')) {
                 <mat-error>Effective end date is required.</mat-error>
+              }
+              @if (form.controls.effectiveEndDate.hasError('matDatepickerMin')) {
+                <mat-error>Date must be on or after the lease start date.</mat-error>
               }
             </mat-form-field>
 
