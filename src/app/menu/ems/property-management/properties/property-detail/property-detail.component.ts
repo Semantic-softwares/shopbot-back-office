@@ -91,7 +91,7 @@ export class PropertyDetailComponent {
 
 
   goBack(): void {
-    this.router.navigate(['..', '..'], { relativeTo: this.route });
+    this.router.navigate(['..', 'tabs', 'properties'], { relativeTo: this.route });
   }
 
   reload(): void {

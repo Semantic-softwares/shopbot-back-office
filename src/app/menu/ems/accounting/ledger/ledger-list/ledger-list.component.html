@@ -10,6 +10,7 @@
       <mat-card-content class="p-4!">
         <p class="text-xs uppercase tracking-wide text-gray-500">Total Debit</p>
         <p class="text-lg font-semibold text-gray-900">{{ formatCurrency(summary().totalDebit) }}</p>
+        <p class="text-xs text-gray-500 mt-1">Total invoiced charges and amounts owed.</p>
       </mat-card-content>
     </mat-card>
 
@@ -17,6 +18,7 @@
       <mat-card-content class="p-4!">
         <p class="text-xs uppercase tracking-wide text-gray-500">Total Credit</p>
         <p class="text-lg font-semibold text-gray-900">{{ formatCurrency(summary().totalCredit) }}</p>
+        <p class="text-xs text-gray-500 mt-1">Total payments received and amounts settled.</p>
       </mat-card-content>
     </mat-card>
 
@@ -24,6 +26,7 @@
       <mat-card-content class="p-4!">
         <p class="text-xs uppercase tracking-wide text-gray-500">Closing Balance</p>
         <p class="text-lg font-semibold text-gray-900">{{ formatCurrency(summary().closingBalance) }}</p>
+        <p class="text-xs text-gray-500 mt-1">Net outstanding balance after credits are applied.</p>
       </mat-card-content>
     </mat-card>
   </div>
