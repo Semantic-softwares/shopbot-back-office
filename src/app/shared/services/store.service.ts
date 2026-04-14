@@ -131,6 +131,60 @@ export class StoreService {
   }
 
   /**
+   * Reset selected EMS account data for a store.
+   */
+  resetEmsAccountData(
+    storeId: string,
+    payload: { pin: string; targets: string[] },
+  ): Observable<{
+    success: boolean;
+    message: string;
+    deletedCounts: Record<string, number>;
+  }> {
+    return this._httpClient.post<{
+      success: boolean;
+      message: string;
+      deletedCounts: Record<string, number>;
+    }>(`${this.hostServer}/stores/${storeId}/reset-ems-data`, payload);
+  }
+
+  /**
+   * Reset selected PMS account data for a store.
+   */
+  resetPmsAccountData(
+    storeId: string,
+    payload: { pin: string; targets: string[] },
+  ): Observable<{
+    success: boolean;
+    message: string;
+    deletedCounts: Record<string, number>;
+  }> {
+    return this._httpClient.post<{
+      success: boolean;
+      message: string;
+      deletedCounts: Record<string, number>;
+    }>(`${this.hostServer}/stores/${storeId}/reset-pms-data`, payload);
+  }
+
+  /**
+   * Reset selected ERP account data for a store.
+   */
+  resetErpAccountData(
+    storeId: string,
+    payload: { pin: string; targets: string[] },
+  ): Observable<{
+    success: boolean;
+    message: string;
+    deletedCounts: Record<string, number>;
+  }> {
+    return this._httpClient.post<{
+      success: boolean;
+      message: string;
+      deletedCounts: Record<string, number>;
+    }>(`${this.hostServer}/stores/${storeId}/reset-erp-data`, payload);
+  }
+
+  /**
    * Find a store by its unique store number
    */
   getStoreByNumber(storeNumber: string): Observable<{ success: boolean; data: Store; message?: string }> {
