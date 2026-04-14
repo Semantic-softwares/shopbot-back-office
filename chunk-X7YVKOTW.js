@@ -1,0 +1,1 @@
+import"./chunk-GAL4ENT6.js";var t=[{path:"",loadComponent:()=>import("./chunk-AKZCVA5D.js").then(o=>o.InvoicesComponent),children:[{path:"",loadComponent:()=>import("./chunk-4D6ZEQ3Q.js").then(o=>o.InvoiceListComponent)},{path:":id",loadComponent:()=>import("./chunk-LOQZ5XVO.js").then(o=>o.InvoiceDetailComponent)}]}];export{t as INVOICES_ROUTES};
