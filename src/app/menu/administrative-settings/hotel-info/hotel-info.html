@@ -89,6 +89,141 @@
         </mat-card-content>
       </mat-card>
 
+      @if (hasEmsModule() && canManageReset()) {
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="text-red-600 !flex !items-center !justify-center">warning</mat-icon>
+            <mat-card-title>Reset Account Data (EMS)</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="pt-4">
+            <p class="text-sm text-gray-600 mb-3">
+              Select the EMS data categories you want to reset for this store. This action permanently deletes selected records.
+            </p>
+
+            <mat-selection-list
+              #resetSelection
+              class="border border-gray-200 rounded-lg"
+              [disabled]="resetting()"
+              (selectionChange)="onSelectionListChange(resetSelection)">
+              @for (item of emsResetItems; track item.key) {
+                <mat-list-option [value]="item.key" [selected]="isTargetSelected(item.key)">
+                  <div class="min-w-0 py-1">
+                    <p class="text-sm font-medium text-gray-900">{{ item.label }}</p>
+                    <p class="text-xs text-gray-500">{{ item.description }}</p>
+                  </div>
+                </mat-list-option>
+              }
+            </mat-selection-list>
+
+            <div class="flex justify-end mt-4">
+              <button
+                type="button"
+                mat-flat-button
+                color="warn"
+                [disabled]="!canResetSelection()"
+                (click)="confirmAndResetEmsData()">
+                @if (resetting()) {
+                  <mat-spinner diameter="18"></mat-spinner>
+                } @else {
+                  <mat-icon class="mr-1">restart_alt</mat-icon>
+                }
+                Reset
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      @if (hasPmsModule() && canManageReset()) {
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="text-amber-600 !flex !items-center !justify-center">hotel</mat-icon>
+            <mat-card-title>Reset Account Data (PMS)</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="pt-4">
+            <p class="text-sm text-gray-600 mb-3">
+              Select the PMS data categories you want to reset for this store. This action permanently deletes selected records.
+            </p>
+
+            <mat-selection-list
+              #pmsResetSelection
+              class="border border-gray-200 rounded-lg"
+              [disabled]="resettingPms()"
+              (selectionChange)="onPmsSelectionListChange(pmsResetSelection)">
+              @for (item of pmsResetItems; track item.key) {
+                <mat-list-option [value]="item.key" [selected]="isPmsTargetSelected(item.key)">
+                  <div class="min-w-0 py-1">
+                    <p class="text-sm font-medium text-gray-900">{{ item.label }}</p>
+                    <p class="text-xs text-gray-500">{{ item.description }}</p>
+                  </div>
+                </mat-list-option>
+              }
+            </mat-selection-list>
+
+            <div class="flex justify-end mt-4">
+              <button
+                type="button"
+                mat-flat-button
+                color="warn"
+                [disabled]="!canResetPmsSelection()"
+                (click)="confirmAndResetPmsData()">
+                @if (resettingPms()) {
+                  <mat-spinner diameter="18"></mat-spinner>
+                } @else {
+                  <mat-icon class="mr-1">restart_alt</mat-icon>
+                }
+                Reset PMS
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      @if (hasErpModule() && canManageReset()) {
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="text-indigo-600 !flex !items-center !justify-center">inventory_2</mat-icon>
+            <mat-card-title>Reset Account Data (ERP)</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="pt-4">
+            <p class="text-sm text-gray-600 mb-3">
+              Select the ERP data categories you want to reset for this store. This action permanently deletes selected records.
+            </p>
+
+            <mat-selection-list
+              #erpResetSelection
+              class="border border-gray-200 rounded-lg"
+              [disabled]="resettingErp()"
+              (selectionChange)="onErpSelectionListChange(erpResetSelection)">
+              @for (item of erpResetItems; track item.key) {
+                <mat-list-option [value]="item.key" [selected]="isErpTargetSelected(item.key)">
+                  <div class="min-w-0 py-1">
+                    <p class="text-sm font-medium text-gray-900">{{ item.label }}</p>
+                    <p class="text-xs text-gray-500">{{ item.description }}</p>
+                  </div>
+                </mat-list-option>
+              }
+            </mat-selection-list>
+
+            <div class="flex justify-end mt-4">
+              <button
+                type="button"
+                mat-flat-button
+                color="warn"
+                [disabled]="!canResetErpSelection()"
+                (click)="confirmAndResetErpData()">
+                @if (resettingErp()) {
+                  <mat-spinner diameter="18"></mat-spinner>
+                } @else {
+                  <mat-icon class="mr-1">restart_alt</mat-icon>
+                }
+                Reset ERP
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+
      
     </div>
   </form>
