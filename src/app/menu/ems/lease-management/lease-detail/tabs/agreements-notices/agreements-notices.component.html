@@ -5,7 +5,11 @@
       @if (lease.notes) {
         <p class="text-sm text-gray-700 leading-relaxed">{{ lease.notes }}</p>
       } @else {
-        <p class="text-sm text-gray-400">No agreements or notices recorded yet.</p>
+        <app-no-record
+          icon="description"
+          title="No Agreements or Notices"
+          message="No agreements or notices have been recorded for this lease yet."
+        ></app-no-record>
       }
     </mat-card-content>
   </mat-card>

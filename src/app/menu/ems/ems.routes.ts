@@ -89,6 +89,22 @@ export const DASHBOARD_EMS_ROUTES: Routes = [
         },
       },
       {
+        path: 'maintenance',
+        loadChildren: () =>
+          import('./maintenance-managements/maintenance-managements.routes').then(
+            (m) => m.MAINTENANCE_MANAGEMENT_ROUTES,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          requiredPermissions: [
+            'estate.properties.view',
+            'estate.units.view',
+            'estate.leases.view',
+          ],
+          permissionMode: 'any',
+        },
+      },
+      {
         path: '**',
         redirectTo: 'overview',
       },

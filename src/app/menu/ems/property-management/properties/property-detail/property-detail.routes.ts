@@ -31,6 +31,11 @@ export const PROPERTY_DETAIL_ROUTES: Routes = [
         loadComponent: () =>
           import('./tabs/files/files.component').then((m) => m.PropertyFilesComponent),
       },
+      {
+        path: 'maintenance',
+        loadComponent: () =>
+          import('./tabs/maintenance/maintenance.component').then((m) => m.PropertyMaintenanceComponent),
+      },
     ]
   },
 ];

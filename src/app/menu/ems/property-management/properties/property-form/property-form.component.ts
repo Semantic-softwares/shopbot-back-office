@@ -33,8 +33,7 @@ import { MatChipInputEvent, MatChipsModule } from '@angular/material/chips';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { EstatePropertyService } from '../../../../../shared/services/estate-property.service';
 import { EstateUnitService } from '../../../../../shared/services/estate-unit.service';
@@ -45,13 +44,12 @@ import {
   UnitType,
   SizeUnit,
   NON_LIVABLE_UNIT_TYPES,
-  RentalOwner,
 } from '../../../../../shared/models/estate.model';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { CountrySelectComponent } from '../../../../../shared/components/country-select/country-select.component';
-import { RentalOwnerFormModalComponent } from '../../../../../shared/components/rental-owner-form-modal/rental-owner-form-modal.component';
-import { UserService } from '../../../../../shared/services/user.service';
+import { PropertyManagerSelectorComponent } from '../../../../../shared/components/property-manager-selector/property-manager-selector.component';
+import { PropertyOwnerSelectorComponent } from '../../../../../shared/components/property-owner-selector/property-owner-selector.component';
 import { Employee } from '../../../../../shared/models/employee.model';
 
 declare const google: any;
@@ -78,10 +76,11 @@ interface FilePreview {
     MatRadioModule,
     MatTooltipModule,
     MatDividerModule,
-    MatAutocompleteModule,
     MatDialogModule,
     PageHeaderComponent,
     CountrySelectComponent,
+    PropertyManagerSelectorComponent,
+    PropertyOwnerSelectorComponent,
   ],
   templateUrl: './property-form.component.html',
   styleUrl: './property-form.component.scss',
@@ -95,11 +94,9 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
   private snackBar = inject(MatSnackBar);
   private propertyService = inject(EstatePropertyService);
   private unitService = inject(EstateUnitService);
-  private storeStore = inject(StoreStore);
+  readonly storeStore = inject(StoreStore);
   private ngZone = inject(NgZone);
-  private userService = inject(UserService);
   private cdr = inject(ChangeDetectorRef);
-  private dialog = inject(MatDialog);
 
   isEditMode = signal<boolean>(false);
   propertyId = signal<string>('');
@@ -120,20 +117,8 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
   attachmentFiles = signal<File[]>([]);
   existingAttachments = signal<string[]>([]);
 
-  // Property Manager autocomplete
-  merchants = signal<Employee[]>([]);
-  managerSearchText = signal<string>('');
-  filteredMerchants = computed(() => {
-    const search = this.managerSearchText().toLowerCase();
-    const all = this.merchants();
-    if (!search) return all;
-    return all.filter(
-      (m) =>
-        m.name?.toLowerCase().includes(search) ||
-        m.email?.toLowerCase().includes(search),
-    );
-  });
-  selectedManager = signal<Employee | null>(null);
+  // Preloaded manager for edit mode (passed to PropertyManagerSelectorComponent)
+  readonly preloadedManagerForSelector = signal<Employee | null>(null);
 
   readonly PropertyCategory = PropertyCategory;
   readonly NON_LIVABLE_UNIT_TYPES = NON_LIVABLE_UNIT_TYPES;
@@ -197,16 +182,13 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
     return this.form.get('owners') as FormArray;
   }
 
-  totalOwnershipPercentage = computed(() => {
-    const owners = this.ownersArray;
+  get ownershipExceeds100(): boolean {
     let total = 0;
-    for (let i = 0; i < owners.length; i++) {
-      total += Number(owners.at(i).get('ownershipPercentage')?.value) || 0;
+    for (let i = 0; i < this.ownersArray.length; i++) {
+      total += Number(this.ownersArray.at(i).get('ownershipPercentage')?.value) || 0;
     }
-    return total;
-  });
-
-  ownershipExceeds100 = computed(() => this.totalOwnershipPercentage() > 100);
+    return total > 100;
+  }
 
   isSingleUnit = computed(() => this.selectedCategory() === PropertyCategory.SINGLE_UNIT);
   isMultiUnit = computed(() => this.selectedCategory() === PropertyCategory.MULTI_UNIT);
@@ -236,13 +218,6 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
       this.selectedCategory.set(category);
     });
 
-    // Load merchants for property manager autocomplete
-    const storeId = this.storeStore.selectedStore()?._id;
-    if (storeId) {
-      this.userService.getStoreMerchants(storeId).subscribe({
-        next: (merchants) => this.merchants.set(merchants),
-      });
-    }
   }
 
   ngAfterViewInit(): void {
@@ -346,16 +321,13 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
         this.existingAttachments.set(p.attachments || []);
         // Set property manager
         if (p.propertyManager) {
-          const mgr = typeof p.propertyManager === 'object'
-            ? p.propertyManager
-            : null;
+          const mgr = typeof p.propertyManager === 'object' ? p.propertyManager : null;
           const mgrId = typeof p.propertyManager === 'string'
             ? p.propertyManager
             : p.propertyManager?._id;
           if (mgr) {
-            this.selectedManager.set(mgr as any);
+            this.preloadedManagerForSelector.set(mgr as Employee);
           }
-          // Patch form AFTER setting selectedManager so displayWith can resolve the name
           this.form.patchValue({ propertyManager: mgrId });
         }
         // Load existing units for MULTI_UNIT properties
@@ -370,7 +342,7 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
             const ownerId = typeof po.owner === 'string' ? po.owner : po.owner?._id;
             const ownerGroup = this.fb.group({
               ownerId: [ownerId],
-              ownerName: [ownerData ? this.getOwnerDisplayName(ownerData as RentalOwner) : ownerId],
+              ownerName: [ownerData ? (ownerData.isCompany && ownerData.companyName ? ownerData.companyName : `${ownerData.firstName} ${ownerData.lastName}`) : ownerId],
               ownerEmail: [ownerData?.email || ''],
               isCompany: [ownerData?.isCompany ?? false],
               ownershipPercentage: [po.ownershipPercentage, [Validators.required, Validators.min(0), Validators.max(100)]],
@@ -400,35 +372,6 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
         this.unitsArray.clear();
       }
     }
-  }
-
-  // === Property Manager Autocomplete ===
-  displayMerchantName(merchantId: string): string {
-    if (!merchantId) return '';
-    const found = this.merchants().find((m) => m._id === merchantId);
-    if (found) return found.name || '';
-    // Fallback: merchants may not have loaded yet on edit
-    const selected = this.selectedManager();
-    if (selected && selected._id === merchantId) return selected.name || '';
-    return '';
-  }
-
-  onManagerSelected(event: any): void {
-    const merchant = this.merchants().find((m) => m._id === event.option.value);
-    if (merchant) {
-      this.selectedManager.set(merchant);
-      this.managerSearchText.set(merchant.name);
-    }
-  }
-
-  onManagerInput(event: Event): void {
-    this.managerSearchText.set((event.target as HTMLInputElement).value);
-  }
-
-  clearManager(): void {
-    this.form.patchValue({ propertyManager: '' });
-    this.selectedManager.set(null);
-    this.managerSearchText.set('');
   }
 
   // === Unit FormArray Management ===
@@ -645,7 +588,7 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    if (this.ownershipExceeds100()) {
+    if (this.ownershipExceeds100) {
       this.snackBar.open('Total ownership percentage cannot exceed 100%', 'Close', { duration: 5000 });
       return;
     }
@@ -672,7 +615,7 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
       },
       amenities: this.amenities(),
       features: this.features(),
-      propertyManager: this.selectedManager()?._id || undefined,
+      propertyManager: f.propertyManager || undefined,
     };
 
     // Only include store on create (must not change on update)
@@ -794,53 +737,6 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
     );
     this.isSaving.set(false);
     this.router.navigate(['..'], { relativeTo: this.route });
-  }
-
-  // === Property Owners ===
-  openAddOwnerModal(): void {
-    const dialogRef = this.dialog.open(RentalOwnerFormModalComponent, {
-      width: '600px',
-      disableClose: true,
-    });
-
-    dialogRef.afterClosed().subscribe((owner: RentalOwner | undefined) => {
-      if (owner) {
-        this.addOwnerToList(owner);
-      }
-    });
-  }
-
-  addOwnerToList(owner: RentalOwner): void {
-    // Prevent duplicate owners
-    const exists = this.ownersArray.controls.some(
-      (c) => c.get('ownerId')?.value === owner._id,
-    );
-    if (exists) {
-      this.snackBar.open('This owner is already added', 'Close', { duration: 3000 });
-      return;
-    }
-
-    const ownerGroup = this.fb.group({
-      ownerId: [owner._id],
-      ownerName: [this.getOwnerDisplayName(owner)],
-      ownerEmail: [owner.email || ''],
-      isCompany: [owner.isCompany],
-      ownershipPercentage: [100, [Validators.required, Validators.min(0), Validators.max(100)]],
-    });
-    this.ownersArray.push(ownerGroup);
-    this.cdr.markForCheck();
-  }
-
-  removeOwner(index: number): void {
-    this.ownersArray.removeAt(index);
-    this.cdr.markForCheck();
-  }
-
-  getOwnerDisplayName(owner: RentalOwner): string {
-    if (owner.isCompany && owner.companyName) {
-      return owner.companyName;
-    }
-    return `${owner.firstName} ${owner.lastName}`;
   }
 
   cancel(): void {

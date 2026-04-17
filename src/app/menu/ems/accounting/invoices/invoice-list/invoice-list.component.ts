@@ -419,6 +419,9 @@ export class InvoiceListComponent {
 
   payeeName(invoice: EstateInvoice): string {
     if (invoice.categorySide === 'EXPENSE') {
+      if (invoice.vendorId && typeof invoice.vendorId === 'object') {
+        return invoice.vendorId.name || '--';
+      }
       return this.primaryTenantName(invoice);
     }
     return this.storeStore.selectedStore()?.name || 'Company';

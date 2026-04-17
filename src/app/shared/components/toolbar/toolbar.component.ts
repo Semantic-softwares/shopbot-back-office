@@ -189,6 +189,13 @@ export class ToolbarComponent implements OnInit, OnDestroy {
           this.router.navigate(['/menu/hms/front-desk/reservations']);
         }
         break;
+      case 'maintenance_invoice_generated':
+        if (notification.referenceId) {
+          this.router.navigate(['/menu/ems/accounting/invoices', notification.referenceId]);
+        } else {
+          this.router.navigate(['/menu/ems/accounting/invoices']);
+        }
+        break;
       default:
         this.router.navigate(['/menu/hms']);
     }
@@ -206,6 +213,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       channel_disconnected: 'link_off',
       availability_updated: 'event_available',
       rate_updated: 'attach_money',
+      maintenance_invoice_generated: 'receipt_long',
       system: 'info',
     };
     return icons[eventType] || 'notifications';

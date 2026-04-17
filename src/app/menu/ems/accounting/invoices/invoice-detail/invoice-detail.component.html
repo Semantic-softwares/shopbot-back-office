@@ -19,203 +19,227 @@
   </ng-container>
 </app-page-header>
 
-<div class="px-4 max-w-7xl mx-auto py-6 space-y-4">
+<div class="px-4 max-w-4xl mx-auto py-6 space-y-6">
   @if (invoiceResource.isLoading()) {
     <div class="flex items-center justify-center py-12">
       <mat-spinner diameter="32"></mat-spinner>
     </div>
   } @else if (invoice(); as inv) {
-    <mat-card appearance="outlined" class="overflow-hidden">
-      <mat-card-content class="p-6! space-y-6">
-        <div class="flex items-start justify-between gap-4 flex-wrap">
-          <div class="space-y-3">
-            <div class="flex items-center gap-2 text-sm font-semibold text-slate-700">
-              <span>Due on {{ inv.dueDate | date: 'MMM d, y' }}</span>
-            </div>
-
-            <div class="flex items-center gap-3 flex-wrap">
-              <h2 class="text-2xl md:text-4xl font-semibold text-slate-800 leading-tight">
-                {{ inv.title }}
-                <span class="text-slate-900">{{ inv.currency }} {{ formatCurrency(inv.amount) }}</span>
-              </h2>
-              <mat-chip >
-                {{ statusLabel(inv.status) }}
-              </mat-chip>
-              <mat-chip [ngClass]="flowChipClass(inv)">
-                {{ flowLabel(inv) }}
-              </mat-chip>
+    <!-- Invoice Document -->
+    <mat-card appearance="outlined">
+        <mat-card-content>
+      <!-- Header -->
+      <div class="px-8 pt-8 pb-6 border-b border-gray-100">
+        <div class="flex items-start justify-between gap-6">
+          <div>
+            <h1 class="text-3xl font-bold text-slate-800 tracking-tight">INVOICE</h1>
+            <p class="text-lg font-semibold text-slate-600 mt-1">{{ inv.invoiceNumber }}</p>
+          </div>
+          <div class="text-right space-y-1">
+            <div class="flex items-center justify-end gap-2">
+              <mat-chip>{{ statusLabel(inv.status) }}</mat-chip>
+              <mat-chip [ngClass]="flowChipClass(inv)">{{ flowLabel(inv) }}</mat-chip>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="space-y-2">
-          <mat-progress-bar class="rounded-full overflow-hidden" mode="determinate" [value]="paymentProgress()"></mat-progress-bar>
-          <div class="flex items-center justify-between gap-4 text-sm text-slate-600">
-            <span>{{ inv.currency }} {{ formatCurrency(amountLeft(inv)) }} Left</span>
-            <span>{{ inv.currency }} {{ formatCurrency(inv.amountPaid) }} Paid</span>
-          </div>
-        </div>
-
-        <div class="space-y-3">
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Payer</div>
-          <div class="inline-flex items-center gap-3 rounded-xl bg-emerald-50 px-4 py-3 text-emerald-700">
-            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-300 text-xs font-semibold text-white">
+      <!-- From / To / Details -->
+      <div class="px-8 py-6 grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-gray-100">
+        <!-- From (Payer) -->
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">From (Payer)</p>
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold">
               {{ tenantInitials(primaryPayerName(inv)) }}
             </div>
-            <span class="text-sm font-medium">{{ primaryPayerName(inv) }}</span>
+            <div>
+              <p class="text-sm font-semibold text-slate-800">{{ primaryPayerName(inv) }}</p>
+            </div>
           </div>
         </div>
 
-        <div class="space-y-3">
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Payee</div>
-          <div class="inline-flex items-center gap-3 rounded-xl bg-blue-50 px-4 py-3 text-blue-700">
-            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-300 text-xs font-semibold text-white">
+        <!-- To (Payee) -->
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">To (Payee)</p>
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-700 text-sm font-bold">
               {{ tenantInitials(primaryPayeeName(inv)) }}
             </div>
-            <span class="text-sm font-medium">{{ primaryPayeeName(inv) }}</span>
+            <div>
+              <p class="text-sm font-semibold text-slate-800">{{ primaryPayeeName(inv) }}</p>
+              @if (vendorEmail(inv)) {
+                <p class="text-xs text-slate-500">{{ vendorEmail(inv) }}</p>
+              }
+            </div>
           </div>
         </div>
 
-        <div class="space-y-3">
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Initiator</div>
-          <div class="inline-flex items-center gap-3 rounded-xl bg-slate-100 px-4 py-3 text-slate-700">
-            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-300 text-xs font-semibold text-white">
-              {{ tenantInitials(initiatorName(inv)) }}
-            </div>
-            <span class="text-sm font-medium">{{ initiatorName(inv) }}</span>
+        <!-- Invoice Details -->
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-slate-500">Issue Date</span>
+            <span class="font-medium text-slate-800">{{ inv.issueDate | date: 'MMM d, y' }}</span>
           </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-accordion class="block" multi>
-      <mat-expansion-panel [expanded]="true" class="!shadow-none border border-outline-variant">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <div class="flex items-center gap-3 text-slate-800">
-              <mat-icon>assessment</mat-icon>
-              <span class="text-xl font-semibold">Summary</span>
-              <span class="text-xs font-medium text-slate-400">(invoice details)</span>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Due Date</span>
+            <span class="font-medium text-slate-800">{{ inv.dueDate | date: 'MMM d, y' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Property</span>
+            <span class="font-medium text-slate-800">{{ propertyName(inv) }}</span>
+          </div>
+          @if (unitName(inv)) {
+            <div class="flex justify-between">
+              <span class="text-slate-500">Unit</span>
+              <span class="font-medium text-slate-800">{{ unitName(inv) }}</span>
             </div>
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-
-        <mat-list class="px-1 py-2">
-          <mat-list-item>
-            <span matListItemTitle>Property</span>
-            <strong matListItemMeta>{{ propertyName(inv) }}</strong>
-          </mat-list-item>
-          <mat-list-item>
-            <span matListItemTitle>Transaction ID</span>
-            <strong matListItemMeta>{{ transactionId(inv) }}</strong>
-          </mat-list-item>
-          <mat-list-item>
-            <span matListItemTitle>Unit</span>
-            <strong matListItemMeta>{{ unitName(inv) || '--' }}</strong>
-          </mat-list-item>
-          <mat-list-item>
-            <span matListItemTitle>Type</span>
-            <strong matListItemMeta>{{ typeSummary(inv) }}</strong>
-          </mat-list-item>
-          <mat-list-item>
-            <span matListItemTitle>Direction</span>
-            <strong matListItemMeta>{{ flowLabel(inv) }}</strong>
-          </mat-list-item>
-          <mat-list-item>
-            <span matListItemTitle>Lease</span>
-            <strong matListItemMeta>{{ typeof inv.leaseId === 'string' ? inv.leaseId : inv.leaseId._id }}</strong>
-          </mat-list-item>
-          <mat-list-item>
-            <span matListItemTitle>Source</span>
-            <strong matListItemMeta>{{ sourceLabel(inv.source) }}</strong>
-          </mat-list-item>
-          <mat-list-item>
-            <span matListItemTitle>Issue Date</span>
-            <strong matListItemMeta>{{ inv.issueDate | date: 'MMM d, y' }}</strong>
-          </mat-list-item>
-          <mat-list-item>
-            <span matListItemTitle>Due Date</span>
-            <strong matListItemMeta>{{ inv.dueDate | date: 'MMM d, y' }}</strong>
-          </mat-list-item>
-          @if (inv.billingPeriodStart && inv.billingPeriodEnd) {
-            <mat-list-item>
-              <span matListItemTitle>Billing Period</span>
-              <strong matListItemMeta>
-                {{ inv.billingPeriodStart | date: 'MMM d' }} - {{ inv.billingPeriodEnd | date: 'MMM d, y' }}
-              </strong>
-            </mat-list-item>
           }
-        </mat-list>
-      </mat-expansion-panel>
-
-      <mat-expansion-panel [expanded]="true" class="!shadow-none border border-outline-variant">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <div class="flex items-center gap-3 text-slate-800">
-              <mat-icon>payments</mat-icon>
-              <span class="text-xl font-semibold">Payments &amp; Activity</span>
-              <span class="text-xs font-medium text-slate-400">
-                ({{ paymentActivities().length }} record{{ paymentActivities().length === 1 ? '' : 's' }})
-              </span>
+          @if (inv.leaseId) {
+            <div class="flex justify-between">
+              <span class="text-slate-500">Lease</span>
+              <span class="font-medium text-slate-800">{{ typeof inv.leaseId === 'string' ? inv.leaseId : $any(inv.leaseId).leaseNumber || inv.leaseId }}</span>
             </div>
-          </mat-panel-title>
-        </mat-expansion-panel-header>
+          }
+        </div>
+      </div>
+
+      <!-- Line Items (from metadata) -->
+      @if (lineItems(inv).length > 0) {
+        <div class="px-8 py-6 border-b border-gray-100">
+          <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">Line Items</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b-2 border-slate-200">
+                  <th class="text-left py-3 px-2 font-semibold text-slate-600 w-16">QTY</th>
+                  <th class="text-left py-3 px-2 font-semibold text-slate-600">Account</th>
+                  <th class="text-left py-3 px-2 font-semibold text-slate-600">Description</th>
+                  <th class="text-right py-3 px-2 font-semibold text-slate-600 w-28">Price</th>
+                  <th class="text-right py-3 px-2 font-semibold text-slate-600 w-28">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of lineItems(inv); track $index) {
+                  <tr class="border-b border-gray-100">
+                    <td class="py-3 px-2 text-slate-700">{{ item.quantity }}</td>
+                    <td class="py-3 px-2 text-slate-700">{{ item.category }}</td>
+                    <td class="py-3 px-2 text-slate-500">{{ item.description || '-' }}</td>
+                    <td class="py-3 px-2 text-right text-slate-700">{{ inv.currency }} {{ formatCurrency(item.price) }}</td>
+                    <td class="py-3 px-2 text-right font-semibold text-slate-800">{{ inv.currency }} {{ formatCurrency(item.total) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      <!-- Totals -->
+      <div class="px-8 py-6 border-b border-gray-100">
+        <div class="flex justify-end">
+          <div class="w-72 space-y-3 text-sm">
+            <div class="flex justify-between">
+              <span class="text-slate-500">Subtotal</span>
+              <span class="font-medium text-slate-800">{{ inv.currency }} {{ formatCurrency(inv.amount) }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">Amount Paid</span>
+              <span class="font-medium text-green-700">- {{ inv.currency }} {{ formatCurrency(inv.amountPaid) }}</span>
+            </div>
+            <div class="border-t border-slate-200 pt-3 flex justify-between">
+              <span class="text-base font-bold text-slate-800">Balance Due</span>
+              <span class="text-base font-bold text-slate-800">{{ inv.currency }} {{ formatCurrency(amountLeft(inv)) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="mt-4 space-y-2">
+          <mat-progress-bar class="rounded-full overflow-hidden" mode="determinate" [value]="paymentProgress()"></mat-progress-bar>
+          <div class="flex items-center justify-between text-xs text-slate-500">
+            <span>{{ inv.currency }} {{ formatCurrency(amountLeft(inv)) }} remaining</span>
+            <span>{{ paymentProgress() | number: '1.0-0' }}% paid</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Details -->
+      <div class="px-8 py-6 border-b border-gray-100 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <div>
+          <p class="text-slate-500 mb-1">Type</p>
+          <p class="font-medium text-slate-800">{{ typeSummary(inv) }}</p>
+        </div>
+        <div>
+          <p class="text-slate-500 mb-1">Source</p>
+          <p class="font-medium text-slate-800">{{ sourceLabel(inv.source) }}</p>
+        </div>
+        <div>
+          <p class="text-slate-500 mb-1">Transaction ID</p>
+          <p class="font-medium text-slate-800">{{ transactionId(inv) }}</p>
+        </div>
+        <div>
+          <p class="text-slate-500 mb-1">Created by</p>
+          <p class="font-medium text-slate-800">{{ initiatorName(inv) }}</p>
+        </div>
+        @if (inv.billingPeriodStart && inv.billingPeriodEnd) {
+          <div>
+            <p class="text-slate-500 mb-1">Billing Period</p>
+            <p class="font-medium text-slate-800">
+              {{ inv.billingPeriodStart | date: 'MMM d' }} – {{ inv.billingPeriodEnd | date: 'MMM d, y' }}
+            </p>
+          </div>
+        }
+        @if (inv.description) {
+          <div class="col-span-2 md:col-span-4">
+            <p class="text-slate-500 mb-1">Description</p>
+            <p class="font-medium text-slate-800">{{ inv.description }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- Payments & Activity -->
+      <div class="px-8 py-6">
+        <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">
+          Payments & Activity
+          <span class="text-slate-300 ml-1">({{ paymentActivities().length }} record{{ paymentActivities().length === 1 ? '' : 's' }})</span>
+        </p>
 
         @if (hasPaymentActivity()) {
-          <div class="overflow-x-auto border border-outline-variant rounded-lg">
+          <div class="overflow-x-auto border border-gray-200 rounded-lg">
             <table mat-table [dataSource]="paymentActivities()" class="w-full">
               <ng-container matColumnDef="date">
-                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                  Date
-                </th>
-                <td mat-cell *matCellDef="let item" class="py-3 text-sm text-slate-700">
-                  {{ item.date | date: 'MMM d, y' }}
-                </td>
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">Date</th>
+                <td mat-cell *matCellDef="let item" class="py-3 text-sm text-slate-700">{{ item.date | date: 'MMM d, y' }}</td>
               </ng-container>
 
               <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                  Status
-                </th>
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">Status</th>
                 <td mat-cell *matCellDef="let item" class="py-3">
                   <mat-chip [ngClass]="item.statusClass">{{ item.status }}</mat-chip>
                 </td>
               </ng-container>
 
               <ng-container matColumnDef="method">
-                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                  Method
-                </th>
-                <td mat-cell *matCellDef="let item" class="py-3 text-sm text-slate-700">
-                  {{ item.method }}
-                </td>
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">Method</th>
+                <td mat-cell *matCellDef="let item" class="py-3 text-sm text-slate-700">{{ item.method }}</td>
               </ng-container>
 
               <ng-container matColumnDef="amount">
-                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 text-right!">
-                  Amount
-                </th>
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 text-right!">Amount</th>
                 <td mat-cell *matCellDef="let item" class="py-3 text-sm font-semibold text-slate-800 text-right!">
                   {{ inv.currency }} {{ formatCurrency(item.amount) }}
                 </td>
               </ng-container>
 
               <ng-container matColumnDef="payer">
-                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                  Payer
-                </th>
-                <td mat-cell *matCellDef="let item" class="py-3 text-sm text-slate-700">
-                  {{ item.payer }}
-                </td>
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">Payer</th>
+                <td mat-cell *matCellDef="let item" class="py-3 text-sm text-slate-700">{{ item.payer }}</td>
               </ng-container>
 
               <ng-container matColumnDef="description">
-                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                  Details
-                </th>
-                <td mat-cell *matCellDef="let item" class="py-3 text-sm text-slate-500">
-                  {{ item.description }}
-                </td>
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">Details</th>
+                <td mat-cell *matCellDef="let item" class="py-3 text-sm text-slate-500">{{ item.description }}</td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="paymentActivityColumns"></tr>
@@ -223,20 +247,25 @@
             </table>
           </div>
         } @else {
-          <div class="px-1 py-3 text-sm text-slate-500">
-            No payment activity has been recorded for this invoice yet.
-          </div>
+          <app-no-record
+            icon="payments"
+            title="No Payment Activity"
+            message="No payment activity has been recorded for this invoice yet."
+          ></app-no-record>
         }
-      </mat-expansion-panel>
-    </mat-accordion>
+      </div>
+    </mat-card-content>
+    </mat-card>
   } @else {
-    <div class="text-center py-12 text-gray-500">
-      <mat-icon class="!text-5xl !h-14 !w-14 mb-2 text-gray-300">error_outline</mat-icon>
-      <p class="text-sm">Invoice not found.</p>
-      <button mat-button class="mt-4" (click)="goBack()">
+    <app-no-record
+      icon="error_outline"
+      title="Invoice Not Found"
+      message="The invoice could not be found or may have been deleted."
+    >
+      <button mat-button (click)="goBack()">
         <mat-icon>arrow_back</mat-icon>
         Back to Invoices
       </button>
-    </div>
+    </app-no-record>
   }
 </div>

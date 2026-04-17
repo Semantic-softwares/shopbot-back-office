@@ -45,6 +45,7 @@ export class PropertyDetailComponent {
     { label: 'Units', link: 'units', icon: 'apartment' },
     { label: 'Notes', link: 'notes', icon: 'sticky_note_2' },
     { label: 'Files', link: 'files', icon: 'folder' },
+    { label: 'Maintenance', link: 'maintenance', icon: 'handyman' },
   ];
 
   propertyResource = rxResource({

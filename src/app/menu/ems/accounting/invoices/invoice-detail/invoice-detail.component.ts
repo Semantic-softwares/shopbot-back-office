@@ -23,6 +23,7 @@ import { MatTableModule } from '@angular/material/table';
 import { EstateInvoiceService } from '../../../../../shared/services/estate-invoice.service';
 import { EstatePaymentService } from '../../../../../shared/services/estate-payment.service';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
+import { NoRecordComponent } from '../../../../../shared/components/no-record/no-record.component';
 import { InvoiceActionsMenuComponent } from '../../../../../shared/components/invoice-actions-menu/invoice-actions-menu.component';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import {
@@ -53,6 +54,7 @@ import {
     MatTableModule,
     PageHeaderComponent,
     InvoiceActionsMenuComponent,
+    NoRecordComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './invoice-detail.component.html',
@@ -290,6 +292,9 @@ export class InvoiceDetailComponent {
 
   primaryPayeeName(invoice: EstateInvoice): string {
     if (invoice.categorySide === 'EXPENSE') {
+      if (invoice.vendorId && typeof invoice.vendorId === 'object') {
+        return invoice.vendorId.name || '--';
+      }
       return this.tenantNames(invoice)[0] || '--';
     }
     return this.storeStore.selectedStore()?.name || 'Company';
@@ -338,6 +343,17 @@ export class InvoiceDetailComponent {
 
   amountLeft(invoice: EstateInvoice): number {
     return Math.max(invoice.balance || 0, 0);
+  }
+
+  lineItems(invoice: EstateInvoice): Array<{ quantity: number; category: string; description?: string; price: number; total: number }> {
+    return invoice.metadata?.['lineItems'] || [];
+  }
+
+  vendorEmail(invoice: EstateInvoice): string | null {
+    if (invoice.vendorId && typeof invoice.vendorId === 'object') {
+      return invoice.vendorId.email || null;
+    }
+    return null;
   }
 
   transactionId(invoice: EstateInvoice): string {

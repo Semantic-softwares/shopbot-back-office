@@ -1,0 +1,144 @@
+<app-page-header title="Vendor Details" subtitle="View vendor information and assigned maintenance requests">
+  <ng-container actions>
+    <button mat-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </button>
+    <button mat-flat-button (click)="editVendor()">
+      <mat-icon>edit</mat-icon>
+      Edit
+    </button>
+  </ng-container>
+</app-page-header>
+
+<div class="px-4 py-6 space-y-4">
+  @if (vendorResource.isLoading()) {
+    <div class="flex items-center justify-center py-10">
+      <mat-spinner diameter="34"></mat-spinner>
+    </div>
+  } @else if (!vendor()) {
+    <app-no-record
+      icon="error_outline"
+      title="Vendor Not Found"
+      message="The vendor could not be found or may have been deleted."
+    ></app-no-record>
+  } @else {
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div class="xl:col-span-1">
+        <mat-card appearance="outlined">
+          <mat-card-content class="p-4! space-y-3">
+            <div class="flex items-center gap-3">
+              <mat-icon class="text-gray-400">engineering</mat-icon>
+              <div>
+                <h2 class="text-lg font-semibold">{{ vendor()!.name }}</h2>
+                @if (vendor()!.company) {
+                  <p class="text-sm text-gray-500">Company</p>
+                }
+              </div>
+            </div>
+
+            <div class="space-y-2 text-sm">
+              @if (vendor()!.email) {
+                <div class="flex items-center gap-2">
+                  <mat-icon class="!text-base text-gray-400">email</mat-icon>
+                  <span>{{ vendor()!.email }}</span>
+                </div>
+              }
+              @if (vendor()!.phone) {
+                <div class="flex items-center gap-2">
+                  <mat-icon class="!text-base text-gray-400">phone</mat-icon>
+                  <span>{{ vendor()!.phone }}</span>
+                </div>
+              }
+              @if (vendor()!.specialty) {
+                <div class="flex items-center gap-2">
+                  <mat-icon class="!text-base text-gray-400">build</mat-icon>
+                  <span>{{ vendor()!.specialty }}</span>
+                </div>
+              }
+              @if (vendor()!.address) {
+                <div class="flex items-center gap-2">
+                  <mat-icon class="!text-base text-gray-400">location_on</mat-icon>
+                  <span>{{ vendor()!.address }}</span>
+                </div>
+              }
+            </div>
+
+            @if (vendor()!.notes) {
+              <div class="pt-2 border-t">
+                <p class="text-xs text-gray-500 uppercase mb-1">Notes</p>
+                <p class="text-sm text-gray-700">{{ vendor()!.notes }}</p>
+              </div>
+            }
+
+            <div class="pt-2">
+              <mat-chip [class]="vendor()!.isActive ? 'bg-green-600! text-white!' : 'bg-gray-500! text-white!'">
+                {{ vendor()!.isActive ? 'Active' : 'Inactive' }}
+              </mat-chip>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="xl:col-span-2">
+        <mat-card appearance="outlined">
+          <mat-card-content class="p-4!">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase mb-3">Assigned Maintenance Requests</h3>
+
+            @if (requestsResource.isLoading()) {
+              <div class="flex items-center justify-center py-6">
+                <mat-spinner diameter="24"></mat-spinner>
+              </div>
+            } @else if (requests().length === 0) {
+              <app-no-record
+                icon="handyman"
+                title="No Assigned Requests"
+                message="No maintenance requests are currently assigned to this vendor."
+              ></app-no-record>
+            } @else {
+              <div class="overflow-auto">
+                <table mat-table [dataSource]="requests()" class="w-full">
+                  <ng-container matColumnDef="requestNumber">
+                    <th mat-header-cell *matHeaderCellDef>Request #</th>
+                    <td mat-cell *matCellDef="let row">
+                      <button mat-button (click)="goToRequest(row._id)" class="!px-0">
+                        {{ row.requestNumber }}
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="title">
+                    <th mat-header-cell *matHeaderCellDef>Title</th>
+                    <td mat-cell *matCellDef="let row">{{ row.title }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let row">
+                      <mat-chip>{{ getStatusLabel(row.status) }}</mat-chip>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="priority">
+                    <th mat-header-cell *matHeaderCellDef>Priority</th>
+                    <td mat-cell *matCellDef="let row">
+                      <mat-chip>{{ getPriorityLabel(row.priority) }}</mat-chip>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="createdAt">
+                    <th mat-header-cell *matHeaderCellDef>Created</th>
+                    <td mat-cell *matCellDef="let row">{{ row.createdAt | date: 'mediumDate' }}</td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="requestColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: requestColumns"></tr>
+                </table>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>

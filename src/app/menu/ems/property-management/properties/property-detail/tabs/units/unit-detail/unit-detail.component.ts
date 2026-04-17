@@ -1,14 +1,13 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDividerModule } from '@angular/material/divider';
+import { MatTabsModule } from '@angular/material/tabs';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { EstateUnitService } from '../../../../../../../../shared/services/estate-unit.service';
+import { StoreStore } from '../../../../../../../../shared/stores/store.store';
 import { Unit, Property, NON_LIVABLE_UNIT_TYPES } from '../../../../../../../../shared/models/estate.model';
 import { PageHeaderComponent } from '../../../../../../../../shared/components/page-header/page-header.component';
 
@@ -18,12 +17,13 @@ import { PageHeaderComponent } from '../../../../../../../../shared/components/p
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
     MatButtonModule,
     MatIconModule,
-    MatCardModule,
-    MatChipsModule,
     MatProgressSpinnerModule,
-    MatDividerModule,
+    MatTabsModule,
     PageHeaderComponent,
   ],
   templateUrl: './unit-detail.component.html',
@@ -32,10 +32,17 @@ export class UnitDetailComponent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private unitService = inject(EstateUnitService);
+  readonly storeStore = inject(StoreStore);
 
   readonly unitId = signal<string>(
     this.route.snapshot.paramMap.get('unitId') || '',
   );
+
+  readonly tabs = [
+    { label: 'Summary', link: 'summary', icon: 'dashboard' },
+    { label: 'Leases', link: 'leases', icon: 'description' },
+    { label: 'Maintenance', link: 'maintenance', icon: 'handyman' },
+  ];
 
   unitResource = rxResource({
     params: () => ({ id: this.unitId() }),
@@ -52,34 +59,19 @@ export class UnitDetailComponent {
     return [typeName, status].filter(Boolean).join(' · ');
   });
 
-  readonly isNonLivable = computed(() => {
-    const u = this.unit();
-    return u ? NON_LIVABLE_UNIT_TYPES.includes(u.type) : false;
-  });
-
-  getPropertyName(unit: Unit): string {
-    if (!unit.property) return '—';
-    if (typeof unit.property === 'string') return unit.property;
-    return (unit.property as Property).name ?? '—';
-  }
-
-  getStatusClass(status: string): string {
-    const map: Record<string, string> = {
-      VACANT: 'bg-green-600! text-white!',
-      OCCUPIED: 'bg-orange-600! text-white!',
-      RESERVED: 'bg-yellow-600! text-white!',
-      INACTIVE: 'bg-gray-500! text-white!',
-    };
-    return map[status] || 'bg-gray-500! text-white!';
-  }
+  readonly currencyCode = computed(() => this.storeStore.selectedStore()?.currencyCode || 'NGN');
 
   editUnit(): void {
     const id = this.unitId();
     if (!id) return;
-    this.router.navigate(['../../', id, 'edit'], { relativeTo: this.route });
+    this.router.navigate(['../../../', id, 'edit'], { relativeTo: this.route });
   }
 
   goBack(): void {
-    this.router.navigate(['../../lists'], { relativeTo: this.route });
+    this.router.navigate(['../../../lists'], { relativeTo: this.route });
+  }
+
+  reload(): void {
+    this.unitResource.reload();
   }
 }

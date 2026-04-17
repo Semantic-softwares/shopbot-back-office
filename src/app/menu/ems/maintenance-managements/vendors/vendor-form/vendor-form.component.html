@@ -1,0 +1,111 @@
+<app-page-header
+  [title]="isEditMode() ? 'Edit Vendor' : 'New Vendor'"
+  subtitle="Manage vendor contact and specialty information"
+>
+  <ng-container actions>
+    <button mat-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </button>
+  </ng-container>
+</app-page-header>
+
+<div class="px-4 max-w-7xl mx-auto py-6">
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+        <!-- Profile Image Upload -->
+        <div class="flex items-center gap-4">
+          <div class="relative w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-100 flex items-center justify-center">
+            @if (profileImagePreview()) {
+              <img [src]="profileImagePreview()" alt="Vendor profile" class="w-full h-full object-cover" />
+              <button
+                type="button"
+                class="absolute top-0 right-0 bg-white/90 rounded-full p-0.5"
+                (click)="removeProfileImage()"
+                aria-label="Remove profile image"
+              >
+                <mat-icon class="!text-sm">close</mat-icon>
+              </button>
+            } @else {
+              <mat-icon class="!text-3xl text-gray-400">person</mat-icon>
+            }
+          </div>
+          <div>
+            <label class="cursor-pointer">
+              <input type="file" accept="image/*" class="hidden" (change)="onProfileImageSelected($event)" />
+              <span class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">
+                <mat-icon>upload</mat-icon>
+                {{ profileImagePreview() ? 'Change Photo' : 'Upload Photo' }}
+              </span>
+            </label>
+            <p class="text-xs text-gray-500 mt-1">Vendor profile picture</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>{{ form.controls.company.value ? 'Company Name' : 'Vendor Name' }}</mat-label>
+            <input matInput formControlName="name" [placeholder]="form.controls.company.value ? 'Enter company name' : 'Enter vendor name'" />
+            @if (form.controls.name.hasError('required')) {
+              <mat-error>Name is required</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="flex items-center">
+            <mat-slide-toggle formControlName="company" color="primary">
+              Is a Company
+            </mat-slide-toggle>
+          </div>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" type="email" placeholder="vendor@example.com" />
+            @if (form.controls.email.hasError('email')) {
+              <mat-error>Please enter a valid email</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Phone</mat-label>
+            <input matInput formControlName="phone" placeholder="Phone number" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Specialty</mat-label>
+            <input matInput formControlName="specialty" placeholder="e.g. Plumbing, Electrical" />
+          </mat-form-field>
+
+          <app-maintenance-category-select
+            [control]="$any(form.controls.category)"
+            label="Category"
+          />
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Address</mat-label>
+            <input matInput formControlName="address" placeholder="Vendor address" />
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Notes</mat-label>
+          <textarea matInput formControlName="notes" rows="3" placeholder="Additional notes"></textarea>
+        </mat-form-field>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button mat-button type="button" (click)="goBack()">Cancel</button>
+          <button
+            mat-flat-button
+            type="submit"
+            [disabled]="form.invalid || submitting()"
+          >
+            @if (submitting()) {
+              <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+            }
+            {{ isEditMode() ? 'Update Vendor' : 'Create Vendor' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,209 +1,52 @@
-<app-page-header
-  [title]="unit()?.name || 'Unit Detail'"
-  [subtitle]="subtitleText()">
-  <ng-container actions>
-    <button mat-button (click)="goBack()">
-      <mat-icon>arrow_back</mat-icon>
-      Back to Units
-    </button>
-    <button mat-flat-button (click)="editUnit()">
-      <mat-icon class="mr-1">edit</mat-icon>
-      Edit
-    </button>
-  </ng-container>
-</app-page-header>
-
-<div class="max-w-12xl mx-auto py-6 px-4">
-  @if (unitResource.isLoading()) {
-    <div class="flex items-center justify-center py-20">
-      <mat-spinner diameter="48"></mat-spinner>
+@if (unitResource.isLoading()) {
+  <div class="flex items-center justify-center py-20">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+} @else if (unitResource.error()) {
+  <div class="bg-red-50 border border-red-200 rounded-lg p-4 m-4">
+    <div class="flex items-center gap-2">
+      <mat-icon class="text-red-500">error</mat-icon>
+      <div>
+        <h3 class="text-red-800 font-medium">Error loading unit</h3>
+        <button mat-button color="warn" (click)="reload()" class="mt-2 !text-red-600">
+          <mat-icon class="mr-1">refresh</mat-icon>
+          Retry
+        </button>
+      </div>
     </div>
-  } @else if (unitResource.error()) {
-    <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-      <mat-icon class="text-red-500 !text-4xl !w-10 !h-10 mb-2">error</mat-icon>
-      <h3 class="text-red-800 font-medium">Error loading unit</h3>
-      <p class="text-red-700 text-sm mt-1">{{ unitResource.error() }}</p>
-      <button mat-button color="warn" (click)="unitResource.reload()" class="mt-3">
-        <mat-icon class="mr-1">refresh</mat-icon>
-        Retry
+  </div>
+} @else if (unit()) {
+  <app-page-header
+    [title]="unit()!.name || 'Unit Detail'"
+    [subtitle]="subtitleText()">
+    <ng-container actions>
+      <button mat-button (click)="goBack()">
+        <mat-icon class="mr-1">arrow_back</mat-icon>
+        Back to Units
       </button>
+      <button mat-flat-button (click)="editUnit()">
+        <mat-icon class="mr-1">edit</mat-icon>
+        Edit
+      </button>
+    </ng-container>
+  </app-page-header>
+
+  <nav mat-tab-nav-bar [tabPanel]="tabPanel" mat-stretch-tabs="false" mat-align-tabs="start">
+    @for (tab of tabs; track tab.link) {
+      <a mat-tab-link
+        [routerLink]="tab.link"
+        routerLinkActive
+        #rla="routerLinkActive"
+        [active]="rla.isActive">
+        <mat-icon class="mr-2 !text-lg">{{ tab.icon }}</mat-icon>
+        {{ tab.label }}
+      </a>
+    }
+  </nav>
+
+  <mat-tab-nav-panel #tabPanel>
+    <div class="py-6 px-4">
+      <router-outlet></router-outlet>
     </div>
-  } @else if (unit(); as u) {
-    <div class="grid grid-cols-12 gap-6">
-
-      <!-- LEFT COLUMN: Cover Photo + Gallery -->
-      <div class="col-span-12 md:col-span-4">
-        <div class="rounded-lg overflow-hidden border aspect-[4/3] bg-gray-100 mb-4">
-          @if (u.coverPhoto) {
-            <img [src]="u.coverPhoto" alt="Unit photo" class="w-full h-full object-cover">
-          } @else {
-            <div class="w-full h-full flex flex-col items-center justify-center text-gray-400">
-              <mat-icon class="!text-6xl !w-16 !h-16 mb-2">apartment</mat-icon>
-              <span class="text-sm">No photo</span>
-            </div>
-          }
-        </div>
-
-        @if (u.gallery.length) {
-          <div class="grid grid-cols-3 gap-2 mb-4">
-            @for (photo of u.gallery; track photo) {
-              <div class="aspect-square rounded-lg overflow-hidden border">
-                <img [src]="photo" alt="Gallery" class="w-full h-full object-cover">
-              </div>
-            }
-          </div>
-        }
-      </div>
-
-      <!-- RIGHT COLUMN: Unit Info -->
-      <div class="col-span-12 md:col-span-8">
-
-        <!-- Unit Info & Status -->
-        <mat-card appearance="outlined" class="mb-6">
-          <mat-card-content class="p-5!">
-            <div class="grid grid-cols-2 gap-6">
-              <!-- Basic Info -->
-              <div>
-                <div class="text-xs font-bold text-gray-400 tracking-wider mb-2">UNIT INFO</div>
-                <div class="space-y-2 text-sm">
-                  <div class="flex justify-between">
-                    <span class="text-gray-500">Status</span>
-                    <mat-chip [ngClass]="getStatusClass(u.status)" class="!text-xs">
-                      {{ u.status }}
-                    </mat-chip>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-gray-500">Type</span>
-                    <span class="font-medium">{{ u.type.replace('_', ' ') }}</span>
-                  </div>
-                  @if (u.code) {
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">Code</span>
-                      <span class="font-medium">{{ u.code }}</span>
-                    </div>
-                  }
-                  @if (u.floor) {
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">Floor</span>
-                      <span class="font-medium">{{ u.floor }}</span>
-                    </div>
-                  }
-                  <div class="flex justify-between">
-                    <span class="text-gray-500">Property</span>
-                    <span class="font-medium">{{ getPropertyName(u) }}</span>
-                  </div>
-                  @if (u.furnishingStatus) {
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">Furnishing</span>
-                      <span class="font-medium">{{ u.furnishingStatus.replace('_', ' ') }}</span>
-                    </div>
-                  }
-                  @if (u.isAffordableHousing) {
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">Affordable Housing</span>
-                      <mat-chip class="bg-blue-100! text-blue-800! !text-xs">Yes</mat-chip>
-                    </div>
-                  }
-                </div>
-              </div>
-
-              <!-- Rent & Specs -->
-              <div>
-                <div class="text-xs font-bold text-gray-400 tracking-wider mb-2">RENT & SPECIFICATIONS</div>
-                <div class="space-y-2 text-sm">
-                  <div class="flex justify-between">
-                    <span class="text-gray-500">Rent</span>
-                    <span class="text-lg font-bold">{{ u.rentAmount | currency:(u.currency || 'NGN') }}</span>
-                  </div>
-                  @if (u.deposit != null) {
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">Deposit</span>
-                      <span class="font-medium">{{ u.deposit | currency:(u.currency || 'NGN') }}</span>
-                    </div>
-                  }
-                  @if (!isNonLivable() && u.bedrooms != null) {
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">Bedrooms</span>
-                      <span class="font-medium">{{ u.bedrooms }}</span>
-                    </div>
-                  }
-                  @if (!isNonLivable() && u.bathrooms != null) {
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">Bathrooms</span>
-                      <span class="font-medium">{{ u.bathrooms }}</span>
-                    </div>
-                  }
-                  @if (u.sizeValue != null) {
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">Size</span>
-                      <span class="font-medium">{{ u.sizeValue }} {{ u.sizeUnit === 'SQM' ? 'sq m' : 'sq ft' }}</span>
-                    </div>
-                  }
-                </div>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <!-- Description -->
-        @if (u.description) {
-          <mat-card appearance="outlined" class="mb-6">
-            <mat-card-content class="p-5!">
-              <div class="text-xs font-bold text-gray-400 tracking-wider mb-2">DESCRIPTION</div>
-              <p class="text-sm leading-relaxed text-gray-700">{{ u.description }}</p>
-            </mat-card-content>
-          </mat-card>
-        }
-
-        <!-- Features -->
-        @if (u.features.length) {
-          <mat-card appearance="outlined" class="mb-6">
-            <mat-card-content class="p-5!">
-              <div class="text-xs font-bold text-gray-400 tracking-wider mb-3">FEATURES</div>
-              <div class="flex flex-wrap gap-2">
-                @for (feature of u.features; track feature) {
-                  <mat-chip>{{ feature }}</mat-chip>
-                }
-              </div>
-            </mat-card-content>
-          </mat-card>
-        }
-
-        <!-- Amenities -->
-        @if (u.amenities.length) {
-          <mat-card appearance="outlined" class="mb-6">
-            <mat-card-content class="p-5!">
-              <div class="text-xs font-bold text-gray-400 tracking-wider mb-3">AMENITIES</div>
-              <div class="flex flex-wrap gap-2">
-                @for (amenity of u.amenities; track amenity) {
-                  <mat-chip>{{ amenity }}</mat-chip>
-                }
-              </div>
-            </mat-card-content>
-          </mat-card>
-        }
-
-        <!-- Attachments -->
-        @if (u.attachments.length) {
-          <mat-card appearance="outlined" class="mb-6">
-            <mat-card-content class="p-5!">
-              <div class="text-xs font-bold text-gray-400 tracking-wider mb-3">ATTACHMENTS</div>
-              <div class="space-y-2">
-                @for (url of u.attachments; track url) {
-                  <div class="flex items-center gap-3 p-2 border border-gray-200 rounded-lg">
-                    <mat-icon class="text-gray-400">insert_drive_file</mat-icon>
-                    <a [href]="url" target="_blank" rel="noopener noreferrer"
-                      class="flex-1 min-w-0 text-sm font-medium text-blue-600 hover:underline truncate">
-                      {{ url.split('/').pop() }}
-                    </a>
-                  </div>
-                }
-              </div>
-            </mat-card-content>
-          </mat-card>
-        }
-
-      </div>
-    </div>
-  }
-</div>
+  </mat-tab-nav-panel>
+}

@@ -1,0 +1,205 @@
+<app-page-header title="Maintenance" subtitle="Track, assign, and resolve property maintenance requests">
+  <ng-container actions>
+    <button mat-button (click)="clearFilters()">
+      <mat-icon>filter_alt_off</mat-icon>
+      Clear Filters
+    </button>
+    <button mat-flat-button (click)="goToCreate()">
+      <mat-icon>add</mat-icon>
+      New Request
+    </button>
+  </ng-container>
+</app-page-header>
+
+<div class="px-4 py-6 space-y-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <p class="text-xs text-gray-500 uppercase tracking-wide">Open</p>
+        <p class="text-2xl font-bold mt-1">{{ summary()?.open ?? 0 }}</p>
+      </mat-card-content>
+    </mat-card>
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <p class="text-xs text-gray-500 uppercase tracking-wide">Assigned/In Progress</p>
+        <p class="text-2xl font-bold mt-1">{{ (summary()?.assigned ?? 0) + (summary()?.inProgress ?? 0) }}</p>
+      </mat-card-content>
+    </mat-card>
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <p class="text-xs text-gray-500 uppercase tracking-wide">Completed</p>
+        <p class="text-2xl font-bold mt-1">{{ summary()?.completed ?? 0 }}</p>
+      </mat-card-content>
+    </mat-card>
+    <mat-card appearance="outlined">
+      <mat-card-content class="p-4!">
+        <p class="text-xs text-gray-500 uppercase tracking-wide">Total Requests</p>
+        <p class="text-2xl font-bold mt-1">{{ summary()?.total ?? 0 }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      @if (requestsResource.isLoading()) {
+        <div class="flex items-center justify-center py-8">
+          <mat-spinner diameter="30"></mat-spinner>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Search</mat-label>
+            <input
+              matInput
+              [value]="search()"
+              (keyup.enter)="onSearch(($any($event.target)).value)"
+              placeholder="Request number, title, description"
+            />
+            <button mat-icon-button matSuffix (click)="onSearch(search())" aria-label="Search requests">
+              <mat-icon>search</mat-icon>
+            </button>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select [value]="status()" (valueChange)="onStatusChange($event)">
+              @for (option of statusOptions; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Priority</mat-label>
+            <mat-select [value]="priority()" (valueChange)="onPriorityChange($event)">
+              @for (option of priorityOptions; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Category</mat-label>
+            <mat-select [value]="category()" (valueChange)="onCategoryChange($event)">
+              @for (option of categoryOptions(); track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        @if (requests().length === 0) {
+          <app-no-record
+            icon="handyman"
+            title="No Maintenance Requests"
+            message="No maintenance requests found. Try adjusting your filters or create a new request."
+          ></app-no-record>
+        } @else {
+          <div class="overflow-auto">
+            <table mat-table [dataSource]="requests()" class="w-full">
+              <ng-container matColumnDef="requestNumber">
+                <th mat-header-cell *matHeaderCellDef>Request</th>
+                <td mat-cell *matCellDef="let row">
+                  <button mat-button (click)="goToDetails(row._id)" class="!px-0">
+                    <mat-chip>{{ row.requestNumber }}</mat-chip>
+                  </button>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="title">
+                <th mat-header-cell *matHeaderCellDef>Title</th>
+                <td mat-cell *matCellDef="let row">
+                  <div class="font-medium text-gray-900">{{ row.title }}</div>
+                  <div class="text-xs text-gray-500">{{ row.description || 'No description' }}</div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="property">
+                <th mat-header-cell *matHeaderCellDef>Property</th>
+                <td mat-cell *matCellDef="let row">{{ getPropertyName(row) }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="vendor">
+                <th mat-header-cell *matHeaderCellDef>Vendor</th>
+                <td mat-cell *matCellDef="let row">{{ getVendorName(row.vendorId) }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let row">
+                  <mat-chip>{{ getStatusLabel(row.status) }}</mat-chip>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="priority">
+                <th mat-header-cell *matHeaderCellDef>Priority</th>
+                <td mat-cell *matCellDef="let row">
+                  <mat-chip>{{ getPriorityLabel(row.priority) }}</mat-chip>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="category">
+                <th mat-header-cell *matHeaderCellDef>Category</th>
+                <td mat-cell *matCellDef="let row">{{ getCategoryLabel(row.category) }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="cost">
+                <th mat-header-cell *matHeaderCellDef>Cost</th>
+                <td mat-cell *matCellDef="let row">
+                  <span class="font-medium">{{ getPartsLaborTotal(row) | currency: currencyCode() : 'symbol' : '1.2-2' }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef>Created</th>
+                <td mat-cell *matCellDef="let row">{{ row.createdAt | date: 'mediumDate' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let row">
+                  <button mat-icon-button [matMenuTriggerFor]="actionMenu" aria-label="Open request actions">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+
+                  <mat-menu #actionMenu="matMenu">
+                    <button mat-menu-item (click)="goToDetails(row._id)">
+                      <mat-icon>visibility</mat-icon>
+                      <span>View Request</span>
+                    </button>
+                    @if (row.expenseInvoiceId) {
+                      <button mat-menu-item (click)="viewInvoice(row.expenseInvoiceId)">
+                        <mat-icon>receipt_long</mat-icon>
+                        <span>View Invoice</span>
+                      </button>
+                    }
+                    <button mat-menu-item (click)="goToEdit(row._id)">
+                      <mat-icon>edit</mat-icon>
+                      <span>Edit Request</span>
+                    </button>
+                    <button mat-menu-item (click)="onDelete(row._id)">
+                      <mat-icon>delete</mat-icon>
+                      <span>Delete Request</span>
+                    </button>
+                  </mat-menu>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+          </div>
+
+          <mat-paginator
+            [length]="pagination().totalItems"
+            [pageSize]="pagination().limit"
+            [pageIndex]="pagination().page - 1"
+            [pageSizeOptions]="[10, 20, 50, 100]"
+            (page)="onPageChange($event)"
+            showFirstLastButtons
+          ></mat-paginator>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

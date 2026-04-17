@@ -584,6 +584,7 @@ export interface EstateInvoice {
   metadata?: Record<string, any>;
   categoryCode?: string | null;
   categorySide?: 'INCOME' | 'EXPENSE' | null;
+  vendorId?: string | { _id: string; name: string; email?: string; phone?: string; company?: boolean } | null;
   store: string;
   createdBy?:
     | string

@@ -122,6 +122,29 @@ export class EmsDashboardComponent {
           permissions: ['estate.leases.view', 'estate.leases.create'],
         },
       ],
+    },
+    {
+      name: 'Maintenance',
+      children: [
+        {
+          icon: 'handyman',
+          label: 'Maintenance Requests',
+          link: './maintenance/maintenances',
+          permissions: ['estate.properties.view', 'estate.units.view', 'estate.leases.view'],
+        },
+        {
+          icon: 'engineering',
+          label: 'Vendors',
+          link: './maintenance/vendors',
+          permissions: ['estate.properties.view', 'estate.units.view', 'estate.leases.view'],
+        },
+        {
+          icon: 'category',
+          label: 'Categories',
+          link: './maintenance/categories',
+          permissions: ['estate.properties.view', 'estate.units.view', 'estate.leases.view'],
+        },
+      ],
     }
   ];
 

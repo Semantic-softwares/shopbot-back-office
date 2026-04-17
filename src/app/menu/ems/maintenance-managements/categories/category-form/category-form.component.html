@@ -1,0 +1,52 @@
+<app-page-header
+  [title]="isEditMode() ? 'Edit Category' : 'New Category'"
+  subtitle="Define a category for maintenance requests"
+>
+  <ng-container actions>
+    <button mat-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </button>
+  </ng-container>
+</app-page-header>
+
+<div class="px-4 py-6">
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Category Name</mat-label>
+          <input matInput formControlName="name" placeholder="e.g. Plumbing, Electrical" />
+          @if (form.controls.name.hasError('required')) {
+            <mat-error>Name is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="3" placeholder="Brief description of this category"></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Icon (Material Icon Name)</mat-label>
+          <input matInput formControlName="icon" placeholder="e.g. plumbing, electrical_services" />
+          <mat-hint>Use Material Design icon names</mat-hint>
+        </mat-form-field>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button mat-button type="button" (click)="goBack()">Cancel</button>
+          <button
+            mat-flat-button
+            type="submit"
+            [disabled]="form.invalid || submitting()"
+          >
+            @if (submitting()) {
+              <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+            }
+            {{ isEditMode() ? 'Update Category' : 'Create Category' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,346 @@
+<app-page-header
+  [title]="isEditMode() ? 'Edit Maintenance Request' : 'Create Maintenance Request'"
+  subtitle="Guided maintenance request wizard"
+>
+  <ng-container actions>
+    <button mat-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </button>
+    <button matButton="filled" (click)="submit()" [disabled]="submitting() || form.invalid">
+      {{ isEditMode() ? (submitting() ? 'Submitting...' : 'Save Changes') : (submitting() ? 'Submitting...' : 'Create Request') }}
+    </button>
+  </ng-container>
+</app-page-header>
+
+<div class="px-4 max-w-7xl mx-auto py-6">
+  <mat-card appearance="outlined">
+    <mat-card-content class="p-4!">
+      <form [formGroup]="form">
+        <mat-stepper orientation="vertical" linear>
+          <mat-step [stepControl]="reporterGroup" label="Reporter">
+            <div class="pt-4" [formGroup]="reporterGroup">
+              <mat-form-field appearance="outline" class="w-full md:max-w-sm">
+                <mat-label>Reporter Type</mat-label>
+                <mat-select formControlName="reportedByType">
+                  @for (item of reportedByOptions; track item) {
+                    <mat-option [value]="item">{{ item }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              @if (reportedByType() === 'TENANT') {
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline" class="md:col-span-2">
+                    <mat-label>Tenant Reporter</mat-label>
+                    <input
+                      matInput
+                      [formControl]="tenantSearchControl"
+                      [matAutocomplete]="tenantAuto"
+                      placeholder="Search tenant by name or email"
+                      aria-label="Search and select tenant reporter"
+                    />
+                    @if (reporterGroup.controls['tenantId'].value) {
+                      <button matSuffix mat-icon-button type="button" (click)="clearReporterTenant()" aria-label="Clear selected tenant reporter">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    }
+                    <mat-autocomplete #tenantAuto="matAutocomplete" (optionSelected)="selectReporterTenant($event)">
+                      @for (tenant of filteredReporterTenants(); track tenant._id) {
+                        <mat-option [value]="tenant._id">
+                          {{ tenant.firstName }} {{ tenant.middleName || '' }} {{ tenant.lastName }}
+                        </mat-option>
+                      }
+                    </mat-autocomplete>
+                    @if (reporterGroup.controls['tenantId'].invalid && reporterGroup.controls['tenantId'].touched) {
+                      <mat-error>Please select a tenant reporter</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+              }
+
+              @if (reportedByType() === 'STAFF') {
+                <div class="mt-4">
+                  <app-property-manager-selector
+                    [control]="$any(reporterGroup.controls['reportedByUserId'])"
+                    [storeId]="storeStore.selectedStore()?._id"
+                    [preloadedManager]="preloadedManagerForSelector()"
+                    label="Staff Reporter">
+                  </app-property-manager-selector>
+                </div>
+              }
+
+              @if (reportedByType() === 'MANAGER' || reportedByType() === 'ADMIN') {
+                <div class="mt-4">
+                  <app-property-manager-selector
+                    [control]="$any(reporterGroup.controls['reportedByUserId'])"
+                    [storeId]="storeStore.selectedStore()?._id"
+                    [preloadedManager]="preloadedManagerForSelector()"
+                    [label]="reportedByType() === 'MANAGER' ? 'Manager Reporter' : 'Admin Reporter'">
+                  </app-property-manager-selector>
+                </div>
+              }
+            </div>
+
+            <div class="mt-4 flex justify-end">
+              <button mat-flat-button matStepperNext [disabled]="reporterGroup.invalid">Next</button>
+            </div>
+          </mat-step>
+
+          <mat-step [stepControl]="locationGroup" label="Property & Lease">
+            <div class="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4" [formGroup]="locationGroup">
+              <mat-form-field appearance="outline">
+                <mat-label>Property *</mat-label>
+                <mat-select formControlName="propertyId">
+                  @for (property of properties(); track property._id) {
+                    <mat-option [value]="property._id">{{ property.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Unit for selected property (optional)</mat-label>
+                <mat-select formControlName="unitId" [disabled]="!locationGroup.controls['propertyId'].value">
+                  <mat-option value="">None</mat-option>
+                  @for (unit of units(); track unit._id) {
+                    <mat-option [value]="unit._id">{{ unit.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="md:col-span-2">
+                <mat-label>Lease (optional)</mat-label>
+                <mat-select formControlName="leaseId" [disabled]="!locationGroup.controls['propertyId'].value">
+                  <mat-option value="">None</mat-option>
+                  @for (lease of leases(); track lease._id) {
+                    <mat-option [value]="lease._id">{{ lease.leaseNumber || lease._id }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="mt-4 flex justify-between">
+              <button mat-button matStepperPrevious>Previous</button>
+              <button mat-flat-button matStepperNext [disabled]="locationGroup.invalid">Next</button>
+            </div>
+          </mat-step>
+
+          <mat-step [stepControl]="infoGroup" label="Maintenance Info">
+            <div class="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4" [formGroup]="infoGroup">
+              <mat-form-field appearance="outline" class="md:col-span-2">
+                <mat-label>Title *</mat-label>
+                <input matInput formControlName="title" placeholder="e.g. leaking pipe in A-102" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="md:col-span-2">
+                <mat-label>Description</mat-label>
+                <textarea matInput rows="3" formControlName="description"></textarea>
+              </mat-form-field>
+
+              <app-maintenance-category-select
+                [control]="$any(infoGroup.controls['category'])"
+                label="Category *"
+                [showNone]="false"
+              />
+
+              <mat-form-field appearance="outline">
+                <mat-label>Priority *</mat-label>
+                <mat-select formControlName="priority">
+                  @for (item of priorityOptions; track item.value) {
+                    <mat-option [value]="item.value">{{ item.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <app-maintenance-vendor-select
+                [control]="$any(infoGroup.controls['vendorId'])"
+                label="Vendor *"
+                [showNone]="false"
+              />
+
+              <mat-form-field appearance="outline">
+                <mat-label>Status *</mat-label>
+                <mat-select formControlName="status">
+                  @for (item of statusOptions; track item.value) {
+                    <mat-option [value]="item.value">{{ item.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <div>
+                <app-property-manager-selector
+                  [control]="$any(infoGroup.controls['assignedTo'])"
+                  [storeId]="storeStore.selectedStore()?._id"
+                  [preloadedManager]="preloadedAssignedToForSelector()"
+                  label="Assigned Staff">
+                </app-property-manager-selector>
+              </div>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Due Date</mat-label>
+                <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" />
+                <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
+                <mat-datepicker #dueDatePicker></mat-datepicker>
+              </mat-form-field>
+
+              <!-- Parts and Labor -->
+              <div class="md:col-span-2">
+                <div class="flex items-center justify-between mb-3">
+                  <div>
+                    <p class="text-sm font-medium text-gray-800">Parts and Labor</p>
+                    <p class="text-xs text-gray-500">Add line items for parts, labor, and other costs</p>
+                  </div>
+                  <button mat-stroked-button type="button" (click)="addPartRow()">
+                    <mat-icon>add</mat-icon>
+                    Add Row
+                  </button>
+                </div>
+
+                @if (partsAndLaborArray.length > 0) {
+                  <div class="overflow-x-auto rounded-lg border border-gray-200">
+                    <table class="w-full text-sm">
+                      <thead class="bg-gray-50">
+                        <tr>
+                          <th class="px-3 py-2 text-left font-medium text-gray-600 w-20">QTY</th>
+                          <th class="px-3 py-2 text-left font-medium text-gray-600">ACCOUNT</th>
+                          <th class="px-3 py-2 text-left font-medium text-gray-600">DESCRIPTION</th>
+                          <th class="px-3 py-2 text-right font-medium text-gray-600 w-28">PRICE</th>
+                          <th class="px-3 py-2 text-right font-medium text-gray-600 w-28">TOTAL</th>
+                          <th class="px-3 py-2 w-12"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of partsAndLaborArray.controls; track $index; let i = $index) {
+                          <tr class="border-t border-gray-100" [formGroup]="$any(row)">
+                            <td class="px-2 py-1">
+                              <mat-form-field appearance="outline" class="w-full compact-field">
+                                <input matInput type="number" formControlName="quantity" min="0" />
+                              </mat-form-field>
+                            </td>
+                            <td class="px-2 py-1">
+                              <app-invoice-category-select
+                                [control]="getPartCategoryControl(i)"
+                                [label]="'Account'"
+                                [side]="financialSide.EXPENSE"
+                                [allowLeaseOnly]="false"
+                              />
+                            </td>
+                            <td class="px-2 py-1">
+                              <mat-form-field appearance="outline" class="w-full compact-field">
+                                <input matInput formControlName="description" placeholder="Description" />
+                              </mat-form-field>
+                            </td>
+                            <td class="px-2 py-1">
+                              <mat-form-field appearance="outline" class="w-full compact-field">
+                                <input matInput type="number" formControlName="price" min="0" step="0.01" />
+                              </mat-form-field>
+                            </td>
+                            <td class="px-3 py-2 text-right font-medium text-gray-700">
+                              {{ $any(row).controls['total'].value | number: '1.2-2' }}
+                            </td>
+                            <td class="px-2 py-1 text-center">
+                              <button
+                                type="button"
+                                mat-icon-button
+                                (click)="removePartRow(i)"
+                                aria-label="Remove row"
+                                class="!w-8 !h-8"
+                              >
+                                <mat-icon class="!text-base text-red-500">delete</mat-icon>
+                              </button>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                      <tfoot class="border-t border-gray-200 bg-gray-50">
+                        <tr>
+                          <td colspan="4" class="px-3 py-2 text-right font-semibold text-gray-700">
+                            Estimated Total
+                          </td>
+                          <td class="px-3 py-2 text-right font-semibold text-gray-900">
+                            {{ partsAndLaborTotal() | number: '1.2-2' }}
+                          </td>
+                          <td></td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                } @else {
+                  <div class="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500">
+                    No parts or labor items added yet. Click "Add Row" to begin.
+                  </div>
+                }
+              </div>
+
+              <div class="md:col-span-2 rounded-lg border border-dashed border-gray-300 p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-sm font-medium text-gray-800">Maintenance Photos</p>
+                    <p class="text-xs text-gray-500">Upload multiple images</p>
+                  </div>
+                  <label class="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      class="hidden"
+                      (change)="onPhotosSelected($event)"
+                    />
+                    <span class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">
+                      <mat-icon>upload</mat-icon>
+                      Select Photos
+                    </span>
+                  </label>
+                </div>
+
+                @if (uploadedPhotoUrls().length > 0) {
+                  <div class="mt-4">
+                    <p class="text-xs text-gray-500 mb-2">Already attached</p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      @for (photo of uploadedPhotoUrls(); track $index) {
+                        <div class="relative rounded border border-gray-200 overflow-hidden">
+                          <img [src]="photo" alt="Uploaded photo" class="w-full h-24 object-cover" />
+                          <button
+                            type="button"
+                            class="absolute top-1 right-1 bg-white/90 rounded-full p-1"
+                            (click)="removeUploadedPhoto($index)"
+                            aria-label="Remove uploaded photo"
+                          >
+                            <mat-icon class="!text-base">close</mat-icon>
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+
+                @if (selectedPhotoPreviews().length > 0) {
+                  <div class="mt-4">
+                    <p class="text-xs text-gray-500 mb-2">Selected for upload</p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      @for (preview of selectedPhotoPreviews(); track $index) {
+                        <div class="relative rounded border border-gray-200 overflow-hidden">
+                          <img [src]="preview" alt="Selected photo preview" class="w-full h-24 object-cover" />
+                          <button
+                            type="button"
+                            class="absolute top-1 right-1 bg-white/90 rounded-full p-1"
+                            (click)="removeSelectedPhoto($index)"
+                            aria-label="Remove selected photo"
+                          >
+                            <mat-icon class="!text-base">close</mat-icon>
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+       
+          </mat-step>
+        </mat-stepper>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

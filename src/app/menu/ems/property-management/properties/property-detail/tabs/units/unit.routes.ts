@@ -29,9 +29,9 @@ export const PROPERTY_UNITS_ROUTES: Routes = [
       },
       {
         path: ':unitId/view',
-        loadComponent: () =>
-          import('./unit-detail/unit-detail.component').then(
-            (m) => m.UnitDetailComponent,
+        loadChildren: () =>
+          import('./unit-detail/unit-detail.routes').then(
+            (m) => m.UNIT_DETAIL_ROUTES,
           ),
       },
       {

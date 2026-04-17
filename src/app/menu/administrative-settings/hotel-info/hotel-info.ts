@@ -65,6 +65,9 @@ export class HotelInfo implements OnInit {
     { key: 'allocations', label: 'Allocations', description: 'Delete all payment allocation records.' },
     { key: 'vehicles', label: 'Vehicles', description: 'Delete all tenant vehicle records.' },
     { key: 'pets', label: 'Pets', description: 'Delete all tenant pet records.' },
+    { key: 'maintenanceVendors', label: 'Maintenance Vendors', description: 'Delete all maintenance vendor records.' },
+    { key: 'maintenanceRequests', label: 'Maintenance Requests', description: 'Delete all maintenance request records.' },
+    { key: 'maintenanceActivities', label: 'Maintenance Activities', description: 'Delete all maintenance activity logs.' },
   ];
 
   readonly pmsResetItems: Array<{ key: string; label: string; description: string }> = [

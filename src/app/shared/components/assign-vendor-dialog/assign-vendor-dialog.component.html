@@ -1,0 +1,74 @@
+<h2 mat-dialog-title>Assign Vendor</h2>
+<mat-dialog-content class="min-w-[400px]">
+  @if (requestTitle) {
+    <p class="text-sm text-gray-500 mb-4">Assigning vendor to: <strong>{{ requestTitle }}</strong></p>
+  }
+
+  <div class="space-y-4">
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Filter by Category</mat-label>
+      <mat-select [formControl]="categoryFilter" (selectionChange)="onCategoryChange()">
+        @for (option of categoryOptions(); track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (vendorsResource.isLoading()) {
+      <div class="flex items-center justify-center py-4">
+        <mat-spinner diameter="24"></mat-spinner>
+      </div>
+    } @else if (vendors().length === 0) {
+      <p class="text-sm text-gray-500 text-center py-4">No active vendors found.</p>
+    } @else {
+      <div class="max-h-64 overflow-y-auto space-y-2">
+        @for (vendor of vendors(); track vendor._id) {
+          <button
+            type="button"
+            class="w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-colors"
+            [class]="selectedVendorId() === vendor._id
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-200 hover:bg-gray-50'"
+            (click)="selectVendor(vendor._id)"
+          >
+            <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center shrink-0">
+              @if (vendor.profileImage) {
+                <img [src]="vendor.profileImage" [alt]="vendor.name" class="w-full h-full object-cover" />
+              } @else {
+                <mat-icon class="text-gray-400">person</mat-icon>
+              }
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="font-medium text-sm text-gray-900">{{ vendor.name }}</p>
+              <p class="text-xs text-gray-500">
+                {{ vendor.category || vendor.specialty || vendor.company || 'No category' }}
+              </p>
+            </div>
+            @if (selectedVendorId() === vendor._id) {
+              <mat-icon class="text-blue-600 shrink-0">check_circle</mat-icon>
+            }
+          </button>
+        }
+      </div>
+    }
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Note (optional)</mat-label>
+      <textarea matInput [formControl]="noteControl" rows="2" placeholder="Add a note for this assignment"></textarea>
+    </mat-form-field>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button
+    mat-flat-button
+    [disabled]="!selectedVendorId() || submitting()"
+    (click)="assign()"
+  >
+    @if (submitting()) {
+      <mat-spinner diameter="18" class="inline-block mr-2"></mat-spinner>
+    }
+    Assign Vendor
+  </button>
+</mat-dialog-actions>

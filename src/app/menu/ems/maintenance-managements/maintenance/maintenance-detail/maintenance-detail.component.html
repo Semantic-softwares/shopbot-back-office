@@ -1,0 +1,258 @@
+<app-page-header
+  title="Maintenance Request"
+  subtitle="Track assignment, status changes, comments, and cost history"
+>
+  <ng-container actions>
+    <button matButton (click)="backToList()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to List
+    </button>
+    <button matButton="outlined" [matMenuTriggerFor]="actionMenu">
+      <mat-icon>more_vert</mat-icon>
+      Actions
+    </button>
+
+    <mat-menu #actionMenu="matMenu">
+      <button mat-menu-item (click)="editRequest()">
+        <mat-icon>edit</mat-icon>
+        <span>Edit Request</span>
+      </button>
+      @if (request()?.expenseInvoiceId) {
+        <button mat-menu-item (click)="viewInvoice()">
+          <mat-icon>receipt_long</mat-icon>
+          <span>View Invoice</span>
+        </button>
+      }
+      <button mat-menu-item (click)="onDelete()">
+        <mat-icon>delete</mat-icon>
+        <span>Delete Request</span>
+      </button>
+    </mat-menu>
+  </ng-container>
+</app-page-header>
+
+<div class="px-4 py-6">
+  @if (detailResource.isLoading()) {
+    <div class="flex items-center justify-center py-10">
+      <mat-spinner diameter="34"></mat-spinner>
+    </div>
+  } @else if (!request()) {
+    <app-no-record
+      icon="error_outline"
+      title="Request Not Found"
+      message="The maintenance request could not be found or may have been deleted."
+    ></app-no-record>
+  } @else {
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <!-- Main Content -->
+      <div class="xl:col-span-2 space-y-4">
+        <!-- Request Overview -->
+        <mat-card appearance="outlined">
+          <mat-card-content class="p-4! space-y-3">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="text-xs uppercase tracking-wide text-gray-500">{{ request()!.requestNumber }}</p>
+                <h2 class="text-xl font-semibold text-gray-900">{{ request()!.title }}</h2>
+              </div>
+              <div class="flex gap-2">
+                <mat-chip [class]="getStatusClass(request()!.status)">
+                  {{ getStatusLabel(request()!.status) }}
+                </mat-chip>
+                <mat-chip [class]="getPriorityClass(request()!.priority)">
+                  {{ getPriorityLabel(request()!.priority) }}
+                </mat-chip>
+              </div>
+            </div>
+
+            <p class="text-sm text-gray-600">{{ request()!.description || 'No description provided.' }}</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+              <div>
+                <p class="text-gray-500">Property</p>
+                <p class="font-medium">{{ $any(request()!.propertyId)?.name || request()!.propertyId }}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Unit</p>
+                <p class="font-medium">{{ $any(request()!.unitId)?.name || request()!.unitId || '-' }}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Category</p>
+                <p class="font-medium">{{ getCategoryLabel(request()!.category) }}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Reporter</p>
+                <p class="font-medium">
+                  @if (request()!.reportedByType === 'TENANT') {
+                    {{ getTenantName(request()!.tenantId) }}
+                  } @else {
+                    {{ getUserName(request()!.reportedByUserId) }}
+                  }
+                  <span class="text-xs text-gray-400 ml-1">({{ request()!.reportedByType || 'N/A' }})</span>
+                </p>
+              </div>
+              <div>
+                <p class="text-gray-500">Vendor</p>
+                <p class="font-medium">{{ getVendorName(request()!.vendorId) }}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Assigned Staff</p>
+                <p class="font-medium">{{ getUserName(request()!.assignedTo) }}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Due Date</p>
+                <p class="font-medium">{{ request()!.dueDate ? (request()!.dueDate | date: 'mediumDate') : '-' }}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Lease</p>
+                <p class="font-medium">{{ $any(request()!.leaseId)?.leaseNumber || request()!.leaseId || '-' }}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Created By</p>
+                <p class="font-medium">{{ getUserName(request()!.createdBy) }}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Created</p>
+                <p class="font-medium">{{ request()!.createdAt | date: 'medium' }}</p>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Costs -->
+        <mat-card appearance="outlined">
+          <mat-card-content class="p-4! space-y-2">
+            <h3 class="text-base font-semibold text-gray-900">Cost Summary</h3>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p class="text-gray-500">Estimated Cost</p>
+                <p class="font-semibold text-lg">{{ (request()!.estimatedCost ?? 0) | currency: currencyCode(): 'symbol':'1.2-2' }}</p>
+              </div>
+              <div>
+                <p class="text-gray-500">Actual Cost</p>
+                <p class="font-semibold text-lg">{{ (request()!.actualCost ?? 0) | currency: currencyCode(): 'symbol':'1.2-2' }}</p>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Parts & Labor -->
+        @if (request()!.partsAndLabor && request()!.partsAndLabor!.length > 0) {
+          <mat-card appearance="outlined">
+            <mat-card-content class="p-4! space-y-2">
+              <h3 class="text-base font-semibold text-gray-900">Parts & Labor</h3>
+              <div class="overflow-x-auto rounded-lg border border-gray-200">
+                <table class="w-full text-sm">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-3 py-2 text-left font-medium text-gray-600 w-20">QTY</th>
+                      <th class="px-3 py-2 text-left font-medium text-gray-600">Account</th>
+                      <th class="px-3 py-2 text-left font-medium text-gray-600">Description</th>
+                      <th class="px-3 py-2 text-right font-medium text-gray-600 w-28">Price</th>
+                      <th class="px-3 py-2 text-right font-medium text-gray-600 w-28">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of request()!.partsAndLabor!; track $index) {
+                      <tr class="border-t border-gray-100">
+                        <td class="px-3 py-2">{{ item.quantity }}</td>
+                        <td class="px-3 py-2">{{ item.category }}</td>
+                        <td class="px-3 py-2">{{ item.description || '-' }}</td>
+                        <td class="px-3 py-2 text-right">{{ item.price | currency: currencyCode(): 'symbol':'1.2-2' }}</td>
+                        <td class="px-3 py-2 text-right font-medium">{{ item.total | currency: currencyCode(): 'symbol':'1.2-2' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <!-- Photos -->
+        @if (request()!.photos.length) {
+          <mat-card appearance="outlined">
+            <mat-card-content class="p-4! space-y-2">
+              <h3 class="text-base font-semibold text-gray-900">Photos</h3>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                @for (photo of request()!.photos; track photo) {
+                  <a [href]="photo" target="_blank" rel="noopener" class="block rounded border border-gray-200 overflow-hidden">
+                    <img [src]="photo" alt="Maintenance photo" class="w-full h-24 object-cover" />
+                  </a>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <!-- Activity Timeline -->
+        <mat-card appearance="outlined">
+          <mat-card-content class="p-4! space-y-3">
+            <h3 class="text-base font-semibold text-gray-900">Activity Timeline</h3>
+
+            @if (activities().length === 0) {
+              <p class="text-sm text-gray-500">No activity yet.</p>
+            } @else {
+              <div class="space-y-3">
+                @for (activity of activities(); track activity._id) {
+                  <div class="flex gap-3 p-3 rounded-lg border border-gray-100">
+                    <div class="w-9 h-9 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center">
+                      <mat-icon>{{ getActivityIcon(activity.type) }}</mat-icon>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm text-gray-900">{{ activity.message }}</p>
+                      <p class="text-xs text-gray-500 mt-1">{{ activity.createdAt | date: 'medium' }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-4">
+        <!-- Update Status -->
+        <mat-card appearance="outlined">
+          <mat-card-content class="p-4! space-y-3">
+            <h3 class="text-base font-semibold text-gray-900">Update Status</h3>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Next status</mat-label>
+              <mat-select [value]="selectedStatus()" (valueChange)="selectedStatus.set($event)">
+                @for (item of availableStatusTransitions(); track item) {
+                  <mat-option [value]="item">{{ getStatusLabel(item) }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Note (optional)</mat-label>
+              <textarea matInput rows="2" [ngModel]="statusNote()" (ngModelChange)="statusNote.set($event)"></textarea>
+            </mat-form-field>
+            <button mat-flat-button class="w-full" (click)="changeStatus()" [disabled]="!selectedStatus() || updatingStatus()">
+              @if (updatingStatus()) {
+                <mat-spinner diameter="18" class="inline-block mr-2"></mat-spinner>
+                Updating...
+              } @else {
+                Save Status
+              }
+            </button>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Add Comment -->
+        <mat-card appearance="outlined">
+          <mat-card-content class="p-4! space-y-3">
+            <h3 class="text-base font-semibold text-gray-900">Add Comment</h3>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Comment</mat-label>
+              <textarea matInput rows="3" [ngModel]="newComment()" (ngModelChange)="newComment.set($event)"></textarea>
+            </mat-form-field>
+            <button mat-flat-button class="w-full" (click)="addComment()" [disabled]="!newComment().trim()">
+              Add Comment
+            </button>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>
