@@ -14,6 +14,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { FormsModule } from '@angular/forms';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
@@ -53,7 +54,8 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
     MatPaginatorModule,
     PageHeaderComponent,
     NoRecordComponent,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatTooltipModule
 ],
   templateUrl: './list-orders.html',
   styleUrl: './list-orders.scss',

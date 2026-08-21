@@ -620,14 +620,17 @@ export class CartComponent implements OnDestroy {
       .afterClosed()
       .subscribe((result: PaymentDialogResult | undefined) => {
         if (result) {
+          const selectedCart = this.cartStore.selectedCart();
           if (result.action === 'confirm' && result.paymentMethod) {
             // Update cart with payment method before processing checkout
-            const selectedCart = this.cartStore.selectedCart();
             if (selectedCart) {
               this.cartStore.updateSelectedCartPaymentMethod(
                 result.paymentMethod as any
               );
             }
+          }
+          if (selectedCart && result.note) {
+            this.cartStore.updateCartNote(selectedCart._id, result.note);
           }
           // Process checkout regardless of confirm or skip
           this.processCheckout();

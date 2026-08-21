@@ -23,6 +23,7 @@ import { StoreStore } from '../../../../../shared/stores/store.store';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { tap } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ExportService } from '../../../../../shared/services/export.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PageHeaderComponent } from "../../../../../shared/components/page-header/page-header.component";
@@ -51,7 +52,8 @@ import { MatCard } from "@angular/material/card";
     DateRangeSelectorComponent,
     MatProgressSpinner,
     PageHeaderComponent,
-    MatCard
+    MatCard,
+    MatTooltipModule
 ],
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [

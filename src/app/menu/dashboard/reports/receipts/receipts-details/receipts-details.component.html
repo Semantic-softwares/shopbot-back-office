@@ -172,6 +172,12 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Delivery Type</label>
                 <div class="text-sm">{{ order.deliveryType | titlecase }}</div>
               </div>
+              @if (order.note) {
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Note</label>
+                <div class="text-sm whitespace-pre-line bg-amber-50 rounded-md p-3">{{ order.note }}</div>
+              </div>
+              }
             </div>
           </mat-card-content>
         </mat-card>

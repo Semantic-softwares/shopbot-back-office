@@ -4,6 +4,9 @@ import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 
 export interface PaymentDialogData {
   totalAmount: number;
@@ -16,6 +19,7 @@ export interface PaymentDialogResult {
     name: string;
     id: string;
   };
+  note?: string;
 }
 
 @Component({
@@ -26,7 +30,10 @@ export interface PaymentDialogResult {
     MatDialogModule,
     MatButtonModule,
     MatIconModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule
   ],
   templateUrl: './payment-dialog.component.html',
   styleUrl: './payment-dialog.component.scss',
@@ -36,6 +43,7 @@ export class PaymentDialogComponent {
   readonly data = inject<PaymentDialogData>(MAT_DIALOG_DATA);
 
   selectedPaymentMethod = signal<string>('');
+  note = signal<string>('');
 
   paymentMethods = [
     { id: 'POS', name: 'POS Terminal', icon: 'credit_card' },
@@ -51,14 +59,16 @@ export class PaymentDialogComponent {
     const method = this.paymentMethods.find(m => m.id === this.selectedPaymentMethod());
     const result: PaymentDialogResult = {
       action: 'confirm',
-      paymentMethod: method ? { name: method.name, id: method.id } : undefined
+      paymentMethod: method ? { name: method.name, id: method.id } : undefined,
+      note: this.note().trim()
     };
     this.dialogRef.close(result);
   }
 
   onSkipPayment(): void {
     const result: PaymentDialogResult = {
-      action: 'skip'
+      action: 'skip',
+      note: this.note().trim()
     };
     this.dialogRef.close(result);
   }
