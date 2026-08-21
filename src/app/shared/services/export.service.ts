@@ -13,14 +13,16 @@ export class ExportService {
   exportToPdf(data: any[], filename: string = 'export', dateRange?: { from: string; to: string }) {
     const doc = new jsPDF();
     const storeName = this.storeStore.selectedStore()?.name || 'Store';
-    const tableColumn = ["Receipt No", "Date", "Category", "Total", "Ordered By", "Type"];
+    const currencyCode = this.storeStore.selectedStore()?.currencyCode || 'NGN';
+    const tableColumn = ["Receipt No", "Date", "Category", "Order Type", "Payment Type", "Ordered By", "Grand Total"];
     const tableRows: any[] = [];
+    let grandTotal = 0;
 
     // Add store name and date range
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.text(storeName, doc.internal.pageSize.width / 2, 15, { align: 'center' });
-    
+
     if (dateRange) {
       doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
@@ -29,15 +31,15 @@ export class ExportService {
     }
 
     data.forEach(item => {
-      const date = new Date(item.date);
-      const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+      grandTotal += item.total || 0;
       const rowData = [
         item.receiptNo,
-        formattedDate,
+        this.formatDateTime(item.date),
         item.category,
-        item.total,
+        item.ordertype,
+        item.type,
         item.orderedBy?.name || 'N/A',
-        item.ordertype
+        this.formatCurrency(item.total, currencyCode)
       ];
       tableRows.push(rowData);
     });
@@ -45,6 +47,7 @@ export class ExportService {
     autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
+      foot: [['', '', '', '', '', 'Grand Total', this.formatCurrency(grandTotal, currencyCode)]],
       startY: dateRange ? 35 : 25,
       styles: {
         fontSize: 10,
@@ -55,6 +58,11 @@ export class ExportService {
         fillColor: [63, 81, 181],
         textColor: 255
       },
+      footStyles: {
+        fillColor: [230, 230, 230],
+        textColor: 0,
+        fontStyle: 'bold'
+      },
       didDrawPage: (data) => {
         // Add footer to each page
         doc.setFontSize(10);
@@ -64,6 +72,32 @@ export class ExportService {
     });
 
     doc.save(`${filename}-${new Date().toISOString()}.pdf`);
+  }
+
+  /** Readable date+time, e.g. "Aug 20, 2026, 02:30 PM" */
+  public formatDateTime(date: any): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
+
+  /** Currency-formatted amount with the store's currency code, e.g. "NGN 8,545.00" */
+  private formatCurrency(value: number, currencyCode: string): string {
+    const amount = value || 0;
+    try {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currencyCode,
+      }).format(amount);
+    } catch {
+      return `${currencyCode} ${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    }
   }
 
   exportToCSV(data: any[], filename: string = 'export') {
@@ -493,16 +527,19 @@ export class ExportService {
   }
 
   private convertToCSV(data: any[]): string {
-    const headers = ["Receipt No", "Date", "Category", "Total", "Ordered By", "Type"];
+    const headers = ["Receipt No", "Date", "Category", "Order Type", "Payment Type", "Ordered By", "Grand Total"];
     const rows = data.map(item => [
       item.receiptNo,
-      new Date(item.date).toLocaleString(),
+      this.formatDateTime(item.date),
       item.category,
-      item.total,
+      item.ordertype,
+      item.type,
       item.orderedBy?.name || 'N/A',
-      item.ordertype
+      item.total || 0
     ]);
-    
+    const grandTotal = data.reduce((sum, item) => sum + (item.total || 0), 0);
+    rows.push(['', '', '', '', '', 'Grand Total', grandTotal]);
+
     return [
       headers.join(','),
       ...rows.map(row => row.join(','))

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
@@ -53,6 +53,7 @@ import { MatCard } from "@angular/material/card";
     PageHeaderComponent,
     MatCard
 ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host ::ng-deep .mat-mdc-tab-nav-bar {
@@ -132,7 +133,26 @@ export class ListReceiptsComponent {
         this.exportService.exportToCSV(data, filename);
         break;
       case 'excel':
-        this.exportService.exportToExcel(data, filename);
+        const excelData = data.map((item: any) => ({
+          'Receipt No': item.receiptNo,
+          'Date': this.exportService.formatDateTime(item.date),
+          'Category': item.category,
+          'Order Type': item.ordertype,
+          'Payment Type': item.type,
+          'Ordered By': item.orderedBy?.name || 'N/A',
+          'Grand Total': item.total || 0,
+        }));
+        const excelGrandTotal = data.reduce((sum: number, item: any) => sum + (item.total || 0), 0);
+        excelData.push({
+          'Receipt No': '',
+          'Date': '',
+          'Category': '',
+          'Order Type': '',
+          'Payment Type': '',
+          'Ordered By': 'Grand Total',
+          'Grand Total': excelGrandTotal,
+        });
+        this.exportService.exportToExcel(excelData, filename);
         break;
     }
   }
