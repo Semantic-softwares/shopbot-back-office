@@ -1,1 +1,0 @@
-import {A as Av,ah as aa,I as Ir,W as Wd}from'./main-LCW6NQTV.js';var s=class n{static \u0275fac=function(e){return new(e||n)};static \u0275cmp=Av({type:n,selectors:[["app-channel-manager-policies"]],decls:1,vars:0,template:function(e,r){e&1&&Wd(0,"router-outlet");},dependencies:[aa,Ir],styles:["[_nghost-%COMP%]{display:block}"]})};export{s as ChannelManagerPolicies};

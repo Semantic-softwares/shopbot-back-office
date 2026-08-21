@@ -1,0 +1,1 @@
+var t=[{path:"",loadComponent:()=>import('./chunk-DiqbMpof.js').then(o=>o.Billing)}];export{t as BILLING_ROUTES};

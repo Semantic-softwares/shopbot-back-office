@@ -1,0 +1,1 @@
+var t=[{path:"",loadComponent:()=>import('./chunk-Ba05CdnB.js').then(o=>o.Tables)}];export{t as TABLES_ROUTES};

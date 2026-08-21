@@ -1,1 +1,0 @@
-import {A as Av,I as Ir,W as Wd}from'./main-LCW6NQTV.js';var s=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=Av({type:t,selectors:[["app-reports"]],decls:1,vars:0,template:function(e,a){e&1&&Wd(0,"router-outlet");},dependencies:[Ir],styles:["[_nghost-%COMP%]{display:block}"],changeDetection:1})};export{s as ReportsComponent};
