@@ -132,7 +132,16 @@ export class ListReceiptsComponent {
         this.exportService.exportToCSV(data, filename);
         break;
       case 'excel':
-        this.exportService.exportToExcel(data, filename);
+        const excelData = data.map((item: any) => ({
+          'Receipt No': item.receiptNo,
+          'Date': new Date(item.date).toLocaleString(),
+          'Category': item.category,
+          'Order Type': item.ordertype,
+          'Payment Type': item.type,
+          'Ordered By': item.orderedBy?.name || 'N/A',
+          'Grand Total': item.total,
+        }));
+        this.exportService.exportToExcel(excelData, filename);
         break;
     }
   }

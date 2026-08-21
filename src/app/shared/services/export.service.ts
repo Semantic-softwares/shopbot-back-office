@@ -13,14 +13,14 @@ export class ExportService {
   exportToPdf(data: any[], filename: string = 'export', dateRange?: { from: string; to: string }) {
     const doc = new jsPDF();
     const storeName = this.storeStore.selectedStore()?.name || 'Store';
-    const tableColumn = ["Receipt No", "Date", "Category", "Total", "Ordered By", "Type"];
+    const tableColumn = ["Receipt No", "Date", "Category", "Order Type", "Payment Type", "Ordered By", "Grand Total"];
     const tableRows: any[] = [];
 
     // Add store name and date range
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.text(storeName, doc.internal.pageSize.width / 2, 15, { align: 'center' });
-    
+
     if (dateRange) {
       doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
@@ -35,9 +35,10 @@ export class ExportService {
         item.receiptNo,
         formattedDate,
         item.category,
-        item.total,
+        item.ordertype,
+        item.type,
         item.orderedBy?.name || 'N/A',
-        item.ordertype
+        item.total
       ];
       tableRows.push(rowData);
     });
@@ -493,14 +494,15 @@ export class ExportService {
   }
 
   private convertToCSV(data: any[]): string {
-    const headers = ["Receipt No", "Date", "Category", "Total", "Ordered By", "Type"];
+    const headers = ["Receipt No", "Date", "Category", "Order Type", "Payment Type", "Ordered By", "Grand Total"];
     const rows = data.map(item => [
       item.receiptNo,
       new Date(item.date).toLocaleString(),
       item.category,
-      item.total,
+      item.ordertype,
+      item.type,
       item.orderedBy?.name || 'N/A',
-      item.ordertype
+      item.total
     ]);
     
     return [
