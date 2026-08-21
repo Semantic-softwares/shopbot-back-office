@@ -217,8 +217,11 @@ export class ListOrders {
   onDateRangeClosed(): void {
     // Only update signals if both dates are selected
     if (this.tempStartDate && this.tempEndDate) {
-      this.startDate.set(this.tempStartDate);
-      this.endDate.set(this.tempEndDate);
+      // The date picker emits raw Date objects at local midnight. For a
+      // single-day range (start === end) that collapses the query to one
+      // exact millisecond, matching no orders. Expand to the full day.
+      this.startDate.set(new Date(this.tempStartDate.setHours(0, 0, 0, 0)));
+      this.endDate.set(new Date(this.tempEndDate.setHours(23, 59, 59, 999)));
     }
   }
 
