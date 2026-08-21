@@ -24,7 +24,19 @@
         </mat-button-toggle>
       }
     </mat-button-toggle-group>
-  
+
+  <!-- Order Note -->
+  <mat-form-field appearance="outline" class="w-full mt-4">
+    <mat-label>Order Note (optional)</mat-label>
+    <textarea
+      matInput
+      rows="3"
+      placeholder="Add a note for this order..."
+      [ngModel]="note()"
+      (ngModelChange)="note.set($event)">
+    </textarea>
+  </mat-form-field>
+
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="border-2 border-outline-variant">

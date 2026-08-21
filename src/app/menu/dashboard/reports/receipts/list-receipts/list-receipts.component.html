@@ -73,7 +73,18 @@
 
             <ng-container matColumnDef="receiptNo">
               <th mat-header-cell *matHeaderCellDef>Receipt no.</th>
-              <td mat-cell *matCellDef="let element">{{element.receiptNo}}</td>
+              <td mat-cell *matCellDef="let element">
+                <div class="flex items-center gap-1">
+                  <span>{{element.receiptNo}}</span>
+                  @if (element.note) {
+                  <mat-icon
+                    class="!text-base !w-4 !h-4 text-amber-600"
+                    [matTooltip]="element.note">
+                    sticky_note_2
+                  </mat-icon>
+                  }
+                </div>
+              </td>
             </ng-container>
 
             <ng-container matColumnDef="date">
