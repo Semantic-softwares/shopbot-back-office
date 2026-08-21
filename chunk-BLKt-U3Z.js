@@ -1,0 +1,1 @@
+var t=[{path:"",loadComponent:()=>import('./chunk-CDJWlscz.js').then(o=>o.Checkout)}];export{t as CHECKOUT_ROUTES};

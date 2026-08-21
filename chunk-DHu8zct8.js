@@ -1,1 +1,0 @@
-import {A as Av,I as Ir,W as Wd}from'./main-PLHEK74B.js';var s=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=Av({type:t,selectors:[["app-rate-plans"]],decls:1,vars:0,template:function(e,p){e&1&&Wd(0,"router-outlet");},dependencies:[Ir],encapsulation:2,changeDetection:1})};export{s as RatePlansComponent};
