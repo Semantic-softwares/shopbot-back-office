@@ -1,1 +1,0 @@
-import {A as Av,ah as aa,I as Ir,W as Wd}from'./main-JK6PE6HY.js';var s=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=Av({type:t,selectors:[["app-receipts"]],decls:1,vars:0,template:function(e,r){e&1&&Wd(0,"router-outlet");},dependencies:[aa,Ir],encapsulation:2})};export{s as ReceiptsComponent};

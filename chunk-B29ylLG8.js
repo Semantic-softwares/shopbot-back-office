@@ -1,0 +1,1 @@
+var t=[{path:"",loadComponent:()=>import('./chunk-CwJMR1Ne.js').then(o=>o.Checkout)}];export{t as CHECKOUT_ROUTES};

@@ -1,0 +1,1 @@
+import {A as Av,ah as aa,I as Ir,W as Wd}from'./main-JWBINLMV.js';var m=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=Av({type:t,selectors:[["app-property-management"]],decls:1,vars:0,template:function(e,i){e&1&&Wd(0,"router-outlet");},dependencies:[aa,Ir],styles:["[_nghost-%COMP%]{display:block}"],changeDetection:1})};export{m as PropertyManagement};

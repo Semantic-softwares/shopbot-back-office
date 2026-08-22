@@ -1,0 +1,1 @@
+import {A as Av,ah as aa,I as Ir,W as Wd}from'./main-JWBINLMV.js';var a=class n{static \u0275fac=function(e){return new(e||n)};static \u0275cmp=Av({type:n,selectors:[["app-accounting"]],decls:1,vars:0,template:function(e,p){e&1&&Wd(0,"router-outlet");},dependencies:[aa,Ir],encapsulation:2,changeDetection:1})};export{a as AccountingComponent};

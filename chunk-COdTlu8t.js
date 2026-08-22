@@ -1,1 +1,0 @@
-var t=[{path:"",loadComponent:()=>import('./chunk-Cog_b-9U.js').then(o=>o.MessagingComponent)},{path:":threadId",loadComponent:()=>import('./chunk-Cog_b-9U.js').then(o=>o.MessagingComponent)}];export{t as MESSAGING_ROUTES};
