@@ -136,6 +136,18 @@ export class CartComponent implements OnDestroy {
     return null;
   });
 
+  // Editing an existing order never populates tableStore (only the "Select Table"
+  // dialog does, for a brand-new sale) — fall back to the order being edited's own
+  // table so the cart's Table button still shows the right name/state on edit.
+  public displayedTable = computed(() => {
+    return (
+      this.tableStore.selectedTable() ??
+      (this.saleTypeStore.isEditing()
+        ? this.orderStore.selectedOrder()?.table ?? null
+        : null)
+    );
+  });
+
   // Inputs
   items = input<CartItem[]>([]);
   taxRate = input<number>(0);
@@ -336,7 +348,7 @@ export class CartComponent implements OnDestroy {
 
   onSelectTable(): void {
     const dialogData: TableSelectionDialogData = {
-      selectedTable: this.tableStore.selectedTable(),
+      selectedTable: this.displayedTable(),
     };
 
     const dialogRef = this.dialog.open(TableSelectionDialogComponent, {
@@ -611,7 +623,7 @@ export class CartComponent implements OnDestroy {
       currency: this.currency(),
       // Quick sales are one-time transactions with no tab to come back to —
       // payment can't be skipped. Table orders may legitimately stay open/unpaid.
-      requirePayment: !this.tableStore.selectedTable(),
+      requirePayment: !this.displayedTable(),
     };
 
     const dialogRef = this.dialog.open(PaymentDialogComponent, {
@@ -642,12 +654,18 @@ export class CartComponent implements OnDestroy {
   }
 
   private processCheckout(): void {
-  this.saleTypeStore.setSelectedSaleType(
-    this.tableStore.selectedTable() ? SalesTypeId.TABLE : SalesTypeId.QUICK,
-    this.saleTypeStore.isEditing()
-  );
+  // Only derive the sale type from tableStore for a brand-new sale. During an
+  // edit, editOrder()/onEditOrder() already set the correct sale type before
+  // navigating here — tableStore is never populated on that path, so redoing
+  // this unconditionally would stomp a table order back down to "quick".
+  if (!this.saleTypeStore.isEditing()) {
+    this.saleTypeStore.setSelectedSaleType(
+      this.tableStore.selectedTable() ? SalesTypeId.TABLE : SalesTypeId.QUICK,
+      false
+    );
+  }
   const selectedCart = this.cartStore.selectedCart();
-  const selectedTable = this.tableStore.selectedTable();
+  const selectedTable = this.displayedTable();
   const selectedSaleType = this.saleTypeStore.selectedSale();
   const selectedStore = this.storeStore.selectedStore();
 

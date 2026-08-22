@@ -27,10 +27,10 @@
             </mat-menu>
 
             <!-- Table Selection -->
-            @if (tableStore.selectedTable()) {
-            <button matButton="outlined" (click)="onSelectTable()" [matTooltip]="tableStore.selectedTable()?.name" class="!flex-1">
+            @if (displayedTable()) {
+            <button matButton="outlined" (click)="onSelectTable()" [matTooltip]="displayedTable()?.name" class="!flex-1">
                 <mat-icon>table_restaurant</mat-icon>
-                <span class="text-xs truncate max-w-[60px]">{{ tableStore.selectedTable()?.name }}</span>
+                <span class="text-xs truncate max-w-[60px]">{{ displayedTable()?.name }}</span>
             </button>
             } @else {
             <button matButton="outlined"  (click)="onSelectTable()">
