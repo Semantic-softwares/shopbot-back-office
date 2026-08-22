@@ -69,6 +69,8 @@ export class PrinterFormModalComponent implements OnInit {
 
   selectedConnectionType = signal<string>('network');
 
+  private readonly usbIdPattern = /^(0x[0-9A-Fa-f]{1,4}|[0-9]{1,5})$/;
+
   constructor() {
     this.printerForm = this.fb.group({
       name: ['', Validators.required],
@@ -85,8 +87,8 @@ export class PrinterFormModalComponent implements OnInit {
         ip: [''],
         port: [9100],
         deviceName: [''],
-        vendorId: [''],
-        productId: [''],
+        vendorId: ['', Validators.pattern(this.usbIdPattern)],
+        productId: ['', Validators.pattern(this.usbIdPattern)],
         macAddress: [''],
         channel: [0],
       }),
@@ -132,6 +134,13 @@ export class PrinterFormModalComponent implements OnInit {
     });
   }
 
+  /** Accepts a decimal ("1048") or 0x-prefixed hex ("0x0418") string and returns the numeric value. */
+  private parseUsbId(value: string | number | null | undefined): number | undefined {
+    if (value === null || value === undefined || value === '') return undefined;
+    const num = Number(value);
+    return isNaN(num) ? undefined : num;
+  }
+
   onSubmit() {
     if (!this.printerForm.valid) {
       this.snackBar.open('Please fill all required fields', 'Close', {
@@ -156,6 +165,11 @@ export class PrinterFormModalComponent implements OnInit {
     const formValue = this.printerForm.getRawValue();
     const printerData = {
       ...formValue,
+      connection: {
+        ...formValue.connection,
+        vendorId: this.parseUsbId(formValue.connection.vendorId),
+        productId: this.parseUsbId(formValue.connection.productId),
+      },
       store: storeId,
     };
 
