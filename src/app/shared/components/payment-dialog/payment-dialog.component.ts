@@ -11,6 +11,8 @@ import { FormsModule } from '@angular/forms';
 export interface PaymentDialogData {
   totalAmount: number;
   currency: string;
+  /** When true (quick sales), payment can't be skipped — "Skip Payment" is hidden. */
+  requirePayment?: boolean;
 }
 
 export interface PaymentDialogResult {

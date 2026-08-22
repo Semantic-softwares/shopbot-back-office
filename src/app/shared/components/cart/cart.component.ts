@@ -609,6 +609,9 @@ export class CartComponent implements OnDestroy {
     const dialogData: PaymentDialogData = {
       totalAmount: this.cartSummary()?.totalCost || 0,
       currency: this.currency(),
+      // Quick sales are one-time transactions with no tab to come back to —
+      // payment can't be skipped. Table orders may legitimately stay open/unpaid.
+      requirePayment: !this.tableStore.selectedTable(),
     };
 
     const dialogRef = this.dialog.open(PaymentDialogComponent, {

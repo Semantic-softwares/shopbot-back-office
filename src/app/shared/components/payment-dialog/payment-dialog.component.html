@@ -40,14 +40,15 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="border-2 border-outline-variant">
-    <button 
-    matButton="outlined"
-    color="primary" 
-    
-    (click)="onSkipPayment()">
-    Skip Payment
-  </button>
-  <button 
+  @if (!data.requirePayment) {
+    <button
+      matButton="outlined"
+      color="primary"
+      (click)="onSkipPayment()">
+      Skip Payment
+    </button>
+  }
+  <button
     matButton="filled" 
     color="primary" 
     [disabled]="!selectedPaymentMethod()"

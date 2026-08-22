@@ -284,7 +284,17 @@ export class ListOrders {
     });
   }
 
+  /** Completed + paid orders are final — no in-place edits once a sale is closed out. */
+  public canEditOrder(order: Order): boolean {
+    return !(order.category === 'Complete' && order.paymentStatus === 'Paid');
+  }
+
   public editOrder(order: Order): void {
+    if (!this.canEditOrder(order)) {
+      this.snackBar.open('This order is complete and paid — it can no longer be edited.', 'Close', { duration: 3000 });
+      return;
+    }
+
     if (!order.cart?._id) {
       this.snackBar.open('Invalid cart data', 'Close', { duration: 3000 });
       console.error('Invalid cart data');

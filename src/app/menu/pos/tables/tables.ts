@@ -204,7 +204,13 @@ export class Tables implements OnInit {
 
 
   public onEditOrder(table: Table): void {
-      if (!table?.orderId?.cart) {
+      const order = table?.orderId;
+      if (order?.category === 'Complete' && order?.paymentStatus === 'Paid') {
+        this.snackBar.open('This order is complete and paid — it can no longer be edited.', 'Close', { duration: 3000 });
+        return;
+      }
+
+      if (!order?.cart) {
         this.snackBar.open('Invalid cart data', 'Close', { duration: 3000 });
         console.error('Invalid cart data');
         return;

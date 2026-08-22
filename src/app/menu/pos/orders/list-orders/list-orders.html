@@ -211,10 +211,12 @@
                                 <mat-icon>print</mat-icon>
                                 <span>Print</span>
                             </button>
-                            <button mat-menu-item (click)="editOrder(order)">
-                                <mat-icon>edit</mat-icon>
-                                <span>Edit</span>
-                            </button>
+                            @if (canEditOrder(order)) {
+                                <button mat-menu-item (click)="editOrder(order)">
+                                    <mat-icon>edit</mat-icon>
+                                    <span>Edit</span>
+                                </button>
+                            }
                         </mat-menu>
                     </td>
                 </ng-container>
@@ -268,10 +270,12 @@
                             <mat-icon>print</mat-icon>
                             <span>Print</span>
                         </button>
-                        <button mat-menu-item (click)="editOrder(order)">
-                            <mat-icon>edit</mat-icon>
-                            <span>Edit</span>
-                        </button>
+                        @if (canEditOrder(order)) {
+                            <button mat-menu-item (click)="editOrder(order)">
+                                <mat-icon>edit</mat-icon>
+                                <span>Edit</span>
+                            </button>
+                        }
                     </mat-menu>
                 </div>
 
