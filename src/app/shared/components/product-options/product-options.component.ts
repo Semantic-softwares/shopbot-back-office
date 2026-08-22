@@ -99,17 +99,18 @@ export class ProductOptionsComponent implements OnInit {
     }
 
     this.variant.destroy();
+    // Keep the full option groups (with each item's own `selected` flag) rather
+    // than filtering down to only the chosen items — otherwise reopening this
+    // dialog to edit an already-added cart item has nothing left to show but
+    // whatever was previously picked. CartComponent.getOptionsDisplay() and the
+    // backend's order-save flattening already read `option.selected` to know
+    // what was actually chosen, so the full array is what's expected here.
     const variants = this.variantStore.selectedVariants();
-    
-    const filteredVariants = variants.map((item: Option) => ({
-      ...item,
-      options: item.options.filter((option) => option.selected),
-    }));
     this.product.quantity = this.quantity();
-    
+
     this.dialogRef.close({
       ...this.product,
-      options: filteredVariants,
+      options: variants,
       activityDateTime: this.isActivity() ? this.product.activityDateTime : undefined
     } as ProductOptionsDialogResult);
   }
