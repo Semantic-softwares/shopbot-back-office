@@ -138,10 +138,12 @@ export class Tables implements OnInit {
       return;
     }
 
-    // Open payment dialog
+    // Open payment dialog. Completing an order is a checkout, not a tab-left-open
+    // save — a real payment method must be picked, so "Skip Payment" is hidden.
     const dialogData: PaymentDialogData = {
       totalAmount: orderTotal,
-      currency: currency
+      currency: currency,
+      requirePayment: true,
     };
 
     const dialogRef = this.dialog.open(PaymentDialogComponent, {
@@ -150,10 +152,10 @@ export class Tables implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((result: PaymentDialogResult | undefined) => {
-      if (result) {
-        const paymentMethodName = result.action === 'confirm' && result.paymentMethod 
-          ? result.paymentMethod.name 
-          : 'Cash'; // Default to Cash if skipped
+      // Only a genuine "Confirm Payment" click completes the order — closing via
+      // the cancel button, backdrop, or Escape leaves it untouched.
+      if (result && result.action === 'confirm' && result.paymentMethod) {
+        const paymentMethodName = result.paymentMethod.name;
 
         this.orderStore
           .completeOrder(orderId, paymentMethodName)
@@ -165,18 +167,11 @@ export class Tables implements OnInit {
             this.orderStore.deleteSelectedOrder();
             this.tableStore.clearSelectedTable();
             this.saleTypeStore.setDefaultSaleType();
-            // Auto-print the completed order
-            if (order?._id) {
-              this.printJobService.printOrder(order._id).subscribe({
-                next: (res) => {
-                  this.snackBar.open('Print job created successfully', 'Close', { duration: 3000 });
-                },
-                error: (err) => {
-                  console.error('Failed to create print job:', err);
-                  this.snackBar.open('Failed to create print job', 'Close', { duration: 3000 });
-                },
-              });
-            }
+            // No explicit print call needed here anymore — the backend's
+            // updateOrder() (which completeOrder() calls under the hood) now
+            // auto-prints on completion itself, gated by the store's
+            // "printAfterFinish" setting. Calling printOrder() here too would
+            // create a duplicate ticket.
           });
       }
     });

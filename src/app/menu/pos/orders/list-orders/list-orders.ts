@@ -29,8 +29,15 @@ import { MatButtonToggleModule } from "@angular/material/button-toggle";
 import { CartStore } from '../../../../shared/stores/cart.store';
 import { OrderStore } from '../../../../shared/stores/order.store';
 import { SalesTypeStore } from '../../../../shared/stores/sale-type.store';
+import { TableStore } from '../../../../shared/stores/table.store';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import {
+  PaymentDialogComponent,
+  PaymentDialogData,
+  PaymentDialogResult
+} from '../../../../shared/components/payment-dialog/payment-dialog.component';
 
 @Component({
   selector: 'app-list-orders',
@@ -69,8 +76,10 @@ export class ListOrders {
   private readonly orderStore = inject(OrderStore);
   private readonly router = inject(Router);
   private readonly saleTypeStore = inject(SalesTypeStore);
+  private readonly tableStore = inject(TableStore);
   private readonly printJobService = inject(PrintJobService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
   private readonly breakpointObserver = inject(BreakpointObserver);
   
 
@@ -281,6 +290,70 @@ export class ListOrders {
         this.snackBar.open(`Print failed: ${error.error?.error || error.message}`, 'Close', { duration: 5000 });
         console.error('Print order error:', error);
       },
+    });
+  }
+
+  /** Only a still-open order (a table tab, typically) can be checked out from here. */
+  public canCompleteOrder(order: Order): boolean {
+    return order.category === OrderCategoryType.PROCESSING;
+  }
+
+  /**
+   * Checkout/complete an order directly from the list — same action as the
+   * "Complete" button on a table card, just reachable without navigating to the
+   * table view first. Calls the order API directly (not OrderStore.completeOrder())
+   * since that method requires the order to already be in OrderStore's own local
+   * `orders` list, which this page's independent rxResource doesn't populate.
+   */
+  public completeOrder(order: Order): void {
+    if (!order._id) {
+      this.snackBar.open('Invalid order data', 'Close', { duration: 3000 });
+      return;
+    }
+
+    const dialogData: PaymentDialogData = {
+      totalAmount: order.total || 0,
+      currency: this.currency(),
+      // Completing an order is a checkout, not a tab-left-open save — a real
+      // payment method must be picked. Hides "Skip Payment" entirely.
+      requirePayment: true,
+    };
+
+    const dialogRef = this.dialog.open(PaymentDialogComponent, {
+      width: '450px',
+      data: dialogData,
+    });
+
+    dialogRef.afterClosed().subscribe((result: PaymentDialogResult | undefined) => {
+      // Only a genuine "Confirm Payment" click completes the order — closing
+      // via the cancel button, backdrop, or Escape leaves it untouched.
+      if (!result || result.action !== 'confirm' || !result.paymentMethod) return;
+
+      const paymentMethodName = result.paymentMethod.name;
+
+      const updates: Partial<Order> = { category: OrderCategoryType.COMPLETE };
+      if (!order.payment && paymentMethodName) {
+        updates.payment = paymentMethodName;
+        updates.paymentStatus = 'Paid';
+      }
+
+      this.ordersService.updateOrderComprehensive(order._id!, updates).subscribe({
+        next: () => {
+          // Backend's updateOrder() now auto-prints on completion itself
+          // (gated by the "printAfterFinish" store setting) — no explicit
+          // print call needed here.
+          if (order.table?._id) {
+            this.tableStore.updateTable(order.table._id, { orderId: null, order: null });
+            this.tableStore.updateTableOrderSync(order.table._id, { orderId: null });
+          }
+          this.snackBar.open('Order completed', 'Close', { duration: 3000 });
+          this.reloadData();
+        },
+        error: (error) => {
+          this.snackBar.open('Failed to complete order', 'Close', { duration: 5000 });
+          console.error('Complete order error:', error);
+        },
+      });
     });
   }
 

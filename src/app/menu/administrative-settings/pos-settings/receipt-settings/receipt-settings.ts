@@ -57,6 +57,7 @@ export class ReceiptSettings implements OnInit {
         showSellerInfo: [true],
         showCustomerName: [true],
         printAfterFinish: [true],
+        printPendingTableOrders: [true],
         useCustomBusinessName: [false],
         businessName: [''],
         footerMessage: ['Thank you for your patronage', Validators.required],
