@@ -1,1 +1,0 @@
-var t=[{path:"",loadComponent:()=>import('./chunk-D9LYUNMG.js').then(o=>o.ListWebhooks)}];export{t as CHANNEL_MANAGER_WEBHOOKS_ROUTES};

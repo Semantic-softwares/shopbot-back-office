@@ -1,1 +1,0 @@
-var e=[{path:"",loadComponent:()=>import('./chunk-Dosd4AMe.js').then(t=>t.ChannelManagerTaxes),children:[{path:"",redirectTo:"list",pathMatch:"full"},{path:"list",loadComponent:()=>import('./chunk-DEuTbfqZ.js').then(t=>t.ChannelManagerListTaxes)}]}];export{e as TAXES_ROUTES};
