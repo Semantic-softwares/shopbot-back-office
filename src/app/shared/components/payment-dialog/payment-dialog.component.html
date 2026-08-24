@@ -1,4 +1,9 @@
-<h2 mat-dialog-title>Payment</h2>
+<div class="flex items-center justify-between pr-2">
+  <h2 mat-dialog-title class="!mb-0">Payment</h2>
+  <button mat-icon-button (click)="onCancel()" aria-label="Cancel" matTooltip="Cancel">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
 
 <mat-dialog-content>
   <!-- Total Amount Display -->

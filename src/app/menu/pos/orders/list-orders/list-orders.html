@@ -211,6 +211,12 @@
                                 <mat-icon>print</mat-icon>
                                 <span>Print</span>
                             </button>
+                            @if (canCompleteOrder(order)) {
+                                <button mat-menu-item (click)="completeOrder(order)">
+                                    <mat-icon>task_alt</mat-icon>
+                                    <span>Complete Order</span>
+                                </button>
+                            }
                             @if (canEditOrder(order)) {
                                 <button mat-menu-item (click)="editOrder(order)">
                                     <mat-icon>edit</mat-icon>
@@ -270,6 +276,12 @@
                             <mat-icon>print</mat-icon>
                             <span>Print</span>
                         </button>
+                        @if (canCompleteOrder(order)) {
+                            <button mat-menu-item (click)="completeOrder(order)">
+                                <mat-icon>task_alt</mat-icon>
+                                <span>Complete Order</span>
+                            </button>
+                        }
                         @if (canEditOrder(order)) {
                             <button mat-menu-item (click)="editOrder(order)">
                                 <mat-icon>edit</mat-icon>
