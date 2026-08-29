@@ -1,1 +1,0 @@
-import {aL as yI,aM as el,cm as Dt,c2 as te,aN as w,c4 as fe}from'./main-TPFFNNCX.js';var c=(()=>{class o{static \u0275fac=function(T){return new(T||o)};static \u0275mod=yI({type:o});static \u0275inj=el({imports:[Dt,te,w,fe]})}return o})();export{c};

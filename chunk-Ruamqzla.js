@@ -1,1 +1,0 @@
-var o=[{path:"",loadComponent:()=>import('./chunk-Bg9lWf4p.js').then(t=>t.TimecardsComponent),children:[{path:"",redirectTo:"list",pathMatch:"full"},{path:"list",loadComponent:()=>import('./chunk-DuGDPd35.js').then(t=>t.ListTimecardsComponent)}]}];export{o as TIMECARDS_ROUTES};
