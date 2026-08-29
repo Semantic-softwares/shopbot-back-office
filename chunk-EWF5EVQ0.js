@@ -1,1 +1,0 @@
-var t=[{path:"",loadComponent:()=>import('./chunk-D_0wootn.js').then(o=>o.Tables)}];export{t as TABLES_ROUTES};

@@ -1,0 +1,1 @@
+import {m as mI,ah as aa,I as Ir,t as tp}from'./main-TPFFNNCX.js';var i=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=mI({type:t,selectors:[["shopbot-items"]],decls:1,vars:0,template:function(e,r){e&1&&tp(0,"router-outlet");},dependencies:[aa,Ir],styles:["[_nghost-%COMP%]{display:block}"],changeDetection:1})};export{i as ItemsComponent};

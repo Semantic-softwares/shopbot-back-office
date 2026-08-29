@@ -1,1 +1,0 @@
-import {S}from'./chunk-Dwwtc__W.js';import'./main-374WDBS3.js';var o=[{path:"",redirectTo:"arrears",pathMatch:"full"},{path:"arrears",loadComponent:()=>import('./chunk-D5H8i1nw.js').then(e=>e.ArrearsPageComponent),canActivate:[S],data:{requiredPermissions:["finance.arrears.view","finance.collections.view"],permissionMode:"any"}}];export{o as COLLECTIONS_ROUTES};

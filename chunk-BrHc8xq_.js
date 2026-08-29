@@ -1,1 +1,0 @@
-import {G}from'./chunk-CVQTGNvd.js';import {y,dN as Fv}from'./main-374WDBS3.js';var n=class e{guestService=y(G);transform(t){return this.guestService.getGuestName(t)}static \u0275fac=function(m){return new(m||e)};static \u0275pipe=Fv({name:"getGuestName",type:e,pure:true})};export{n};

@@ -1,0 +1,1 @@
+import {m as mI,I as Ir,t as tp}from'./main-TPFFNNCX.js';var c=class n{static \u0275fac=function(e){return new(e||n)};static \u0275cmp=mI({type:n,selectors:[["app-pricing-shell"]],decls:1,vars:0,template:function(e,p){e&1&&tp(0,"router-outlet");},dependencies:[Ir],encapsulation:2,changeDetection:1})};export{c as PricingShellComponent};

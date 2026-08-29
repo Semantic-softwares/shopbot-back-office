@@ -1,1 +1,0 @@
-var o=[{path:"",loadComponent:()=>import('./chunk-DT2cfQtx.js').then(t=>t.EmployeesComponent),children:[{path:"",redirectTo:"list",pathMatch:"full"},{path:"list",loadComponent:()=>import('./chunk-3lKqRKLS.js').then(t=>t.EmployeeListComponent)},{path:"timecards",loadChildren:()=>import('./chunk-DhUdcqjs.js').then(t=>t.TIMECARDS_ROUTES)}]}];export{o as DASHBOARD_EMPLOYEES_ROUTES};
