@@ -155,7 +155,7 @@ export class AuthService {
    */
   toggleDuty(isOnDuty: boolean): Observable<{ isOnDuty: boolean }> {
     return this.http
-      .patch<{ isOnDuty: boolean }>(`${environment.apiUrl}/merchants/me/duty`, { isOnDuty })
+      .put<{ isOnDuty: boolean }>(`${environment.apiUrl}/merchants/me/duty`, { isOnDuty })
       .pipe(
         retry({
           count: 2,
