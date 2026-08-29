@@ -50,6 +50,15 @@ export interface Store {
     hotelSettings?: HotelSettings;
     emsSettings?: EmsSettings;
     channex?: ChannexIntegration;
+    // Public identifier for the self-order storefront URL (/m/:slug) —
+    // generated once by the backend, immutable after creation.
+    slug?: string;
+    selfOrderSettings?: {
+      enabled: boolean;
+      templateSlug: string;
+      settingsValues: Record<string, any>;
+      autoPrintReceipt?: boolean;
+    };
   };
   
   export interface DeliverySettings {

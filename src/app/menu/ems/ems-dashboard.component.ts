@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
@@ -27,6 +27,7 @@ import { RolesService } from '../../shared/services/roles.service';
     ToolbarComponent,
   ],
   templateUrl: './ems-dashboard.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './ems-dashboard.component.scss',
 })
 export class EmsDashboardComponent {

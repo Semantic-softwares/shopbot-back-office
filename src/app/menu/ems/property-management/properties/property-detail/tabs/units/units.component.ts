@@ -15,6 +15,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatProgressSpinnerModule,
     MatIconModule,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './units.component.html',
 })
 export class UnitsComponent {}

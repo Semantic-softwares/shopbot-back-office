@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal, effect } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, effect, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -33,6 +33,7 @@ import { StoreStore } from '../../../shared/stores/store.store';
     BaseChartDirective,
   ],
   templateUrl: './overview.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./overview.component.scss'],
 })
 export class OverviewComponent implements OnInit, OnDestroy {

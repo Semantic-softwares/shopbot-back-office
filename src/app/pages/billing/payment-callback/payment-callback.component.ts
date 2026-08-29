@@ -1,4 +1,4 @@
-import { Component, inject, signal, effect, OnInit } from '@angular/core';
+import { Component, inject, signal, effect, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -18,6 +18,7 @@ import { SubscriptionService } from '../../../shared/services/subscription.servi
     MatButtonModule,
     MatSnackBarModule,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './payment-callback.component.html',
 })
 export class PaymentCallbackComponent implements OnInit {

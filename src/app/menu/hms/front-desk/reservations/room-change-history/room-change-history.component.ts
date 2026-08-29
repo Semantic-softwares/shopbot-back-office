@@ -1,4 +1,4 @@
-import { Component, Input, computed, inject, input, signal } from '@angular/core';
+import { Component, Input, computed, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -25,6 +25,7 @@ import { Reservation } from '../../../../../shared/models/reservation.model';
     MatExpansionModule,
     MatTableModule,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './room-change-history.component.html',
 })
 export class RoomChangeHistoryComponent {

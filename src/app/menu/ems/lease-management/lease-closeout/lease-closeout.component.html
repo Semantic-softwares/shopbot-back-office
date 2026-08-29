@@ -1,5 +1,5 @@
 <app-page-header
-  [title]="lease()?.leaseNumber ? 'End ' + lease()?.leaseNumber : 'End Lease'"
+  [title]="lease()?.leaseNumber ? 'End ' + $safeNavigationMigration(lease()?.leaseNumber) : 'End Lease'"
   subtitle="Review balances, deposits, and closeout details before ending this lease.">
   <ng-container actions>
     <button mat-button (click)="goBack()">
@@ -47,9 +47,9 @@
               }
             </h2>
             <p class="mt-1 text-sm text-gray-600">
-              {{ lease()?.leaseType | titlecase }}
+              {{ $safeNavigationMigration(lease()?.leaseType) | titlecase }}
               @if (lease()?.invoicingType) {
-                <span>· {{ lease()?.invoicingType | titlecase }}</span>
+                <span>· {{ $safeNavigationMigration(lease()?.invoicingType) | titlecase }}</span>
               }
             </p>
           </div>
@@ -57,15 +57,15 @@
           <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
               <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Lease start</p>
-              <p class="mt-1 text-sm font-medium text-gray-900">{{ lease()?.startDate | date: 'mediumDate' }}</p>
+              <p class="mt-1 text-sm font-medium text-gray-900">{{ $safeNavigationMigration(lease()?.startDate) | date: 'mediumDate' }}</p>
             </div>
             <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
               <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Current lease end</p>
-              <p class="mt-1 text-sm font-medium text-gray-900">{{ lease()?.endDate ? (lease()?.endDate | date: 'mediumDate') : 'Open-ended' }}</p>
+              <p class="mt-1 text-sm font-medium text-gray-900">{{ lease()?.endDate ? ($safeNavigationMigration(lease()?.endDate) | date: 'mediumDate') : 'Open-ended' }}</p>
             </div>
             <div class="rounded-lg border border-gray-200 bg-amber-50 px-4 py-3">
               <p class="text-xs font-semibold uppercase tracking-wide text-amber-700">Outstanding balance</p>
-              <p class="mt-1 text-sm font-semibold text-amber-900">{{ summary()?.totalOutstanding | currency: currencyCode() : 'symbol-narrow' : '1.2-2' }}</p>
+              <p class="mt-1 text-sm font-semibold text-amber-900">{{ $safeNavigationMigration(summary()?.totalOutstanding) | currency: currencyCode() : 'symbol-narrow' : '1.2-2' }}</p>
             </div>
           </div>
 

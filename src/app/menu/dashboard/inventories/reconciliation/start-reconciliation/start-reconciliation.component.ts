@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -114,6 +114,7 @@ import { AuthService } from '../../../../../shared/services/auth.service';
       </form>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .mat-mdc-form-field {
       width: 100%;

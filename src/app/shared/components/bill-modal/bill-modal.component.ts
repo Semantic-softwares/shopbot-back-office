@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   MAT_DIALOG_DATA,
@@ -32,6 +32,7 @@ export interface BillModalData {
     MatChipsModule,
   ],
   templateUrl: './bill-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './bill-modal.component.scss',
 })
 export class BillModalComponent {

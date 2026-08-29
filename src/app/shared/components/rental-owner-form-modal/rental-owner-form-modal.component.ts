@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -36,6 +36,7 @@ export interface RentalOwnerFormModalData {
     MatSlideToggleModule,
     RentalOwnerSearchComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './rental-owner-form-modal.component.html',
 })
 export class RentalOwnerFormModalComponent implements OnDestroy {

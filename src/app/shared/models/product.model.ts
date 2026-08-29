@@ -22,6 +22,9 @@ export interface Product {
   options?: Option[];
   store?: Store | string | any;
   featured: boolean;
+  // Whether this product shows up on the public self-order storefront.
+  // Defaults to true — staff opt individual items out.
+  availableForSelfOrder?: boolean;
   location?: any;
   units?: string;
   sku?: string;

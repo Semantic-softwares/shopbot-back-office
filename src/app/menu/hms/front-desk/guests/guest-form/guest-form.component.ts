@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -36,6 +36,7 @@ import { PageHeaderComponent } from '../../../../../shared/components/page-heade
     PageHeaderComponent
   ],
   templateUrl: './guest-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './guest-form.component.scss'
 })
 export class GuestFormComponent implements OnInit, OnDestroy {

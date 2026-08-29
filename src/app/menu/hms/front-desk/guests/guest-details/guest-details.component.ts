@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
@@ -32,6 +32,7 @@ import { PageHeaderComponent } from '../../../../../shared/components/page-heade
     PageHeaderComponent
   ],
   templateUrl: './guest-details.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './guest-details.component.scss'
 })
 export class GuestDetailsComponent implements OnInit, OnDestroy {

@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -37,6 +37,7 @@ export interface ExtensionPaymentResult {
     MatButtonModule,
     MatIconModule
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="max-w-md">
       <div class="flex items-center gap-3 p-6 border-b border-gray-200">

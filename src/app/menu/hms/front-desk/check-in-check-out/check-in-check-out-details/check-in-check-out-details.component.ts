@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, OnInit } from '@angular/core';
+import { Component, computed, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -36,6 +36,7 @@ import { Reservation } from '../../../../../shared/models/reservation.model';
     MatDialogModule,
   ],
   templateUrl: './check-in-check-out-details.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./check-in-check-out-details.component.scss']
 })
 export class CheckInCheckOutDetailsComponent implements OnInit {

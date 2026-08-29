@@ -66,6 +66,9 @@ export interface Order {
   orderCancellationReason?: string;
   status?: Status[];
   reference?: string;
+  // Free-text name captured for orders with no account (self-order, no
+  // login) — display fallback when `user` isn't set.
+  guestName?: string;
   synced?: boolean;
   syncTimestamp?: Date;
   total?: number;

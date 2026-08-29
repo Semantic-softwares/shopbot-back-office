@@ -3,6 +3,7 @@ import {
   Component,
   inject,
   Input,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -29,6 +30,7 @@ import { RentalOwnerFormModalComponent } from '../rental-owner-form-modal/rental
     MatInputModule,
     MatTooltipModule,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './property-owner-selector.component.html',
 })
 export class PropertyOwnerSelectorComponent {

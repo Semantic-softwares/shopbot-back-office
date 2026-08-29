@@ -1,0 +1,23 @@
+<!-- Also shown after a transfer: hasActiveOrder goes false, but the guests
+     still need to be told where their order went. -->
+@if (store.orderStatus()?.hasActiveOrder || store.orderStatus()?.movedToTableName) {
+  <button
+    type="button"
+    class="fixed right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-[bottom] duration-200"
+    [class.bottom-4]="store.cartCount() === 0"
+    [class.bottom-24]="store.cartCount() > 0"
+    style="background: var(--sf-accent, #111827); color: var(--sf-on-accent, #fff)"
+    (click)="open()"
+    i18n-aria-label="@@storefront.orderStatus.viewOrder"
+    aria-label="View your order"
+  >
+    <mat-icon>{{ store.orderStatus()?.movedToTableName ? 'swap_horiz' : 'receipt_long' }}</mat-icon>
+
+    @if (store.hasUnseenOrderUpdate()) {
+      <span class="absolute -right-0.5 -top-0.5 flex h-4 w-4">
+        <span class="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background: #ef4444"></span>
+        <span class="relative inline-flex h-4 w-4 rounded-full" style="background: #ef4444; border: 2px solid var(--sf-bg, #f9fafb)"></span>
+      </span>
+    }
+  </button>
+}

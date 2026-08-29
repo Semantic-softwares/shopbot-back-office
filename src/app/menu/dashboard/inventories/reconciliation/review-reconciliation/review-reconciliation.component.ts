@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -412,6 +412,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .mat-mdc-form-field {
       width: 100%;

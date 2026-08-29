@@ -11,20 +11,20 @@
         <div class="grid grid-cols-2 gap-4 mb-4">
             <div class="bg-white p-3 rounded border border-gray-200">
                 <div class="text-xs text-gray-600 mb-1">Total Amount</div>
-                <div class="text-lg font-bold">{{ totalAmount() | currency: storeStore.selectedStore()?.currency }}
+                <div class="text-lg font-bold">{{ totalAmount() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
                 </div>
             </div>
 
             <div class="bg-white p-3 rounded border border-gray-200">
                 <div class="text-xs text-gray-600 mb-1">Amount Paid</div>
                 <div class="text-lg font-bold text-green-600">{{ paidAmount() | currency:
-                    storeStore.selectedStore()?.currency }}</div>
+                    $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</div>
             </div>
 
             <div class="bg-white p-3 rounded border border-gray-200">
                 <div class="text-xs text-gray-600 mb-1">Balance Due</div>
                 <div class="text-lg font-bold" [class]="balanceAmount() > 0 ? 'text-red-600' : 'text-green-600'">
-                    {{ balanceAmount() | currency: storeStore.selectedStore()?.currency }}
+                    {{ balanceAmount() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
                 </div>
             </div>
 
@@ -85,7 +85,7 @@
                         <span matPrefix>{{ storeStore.selectedStore()?.currency }}&nbsp;</span>
                         <input matInput 
                             currencyMask
-                            [options]="{ prefix: storeStore.selectedStore()?.currency }"
+                            [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
                             step="0.01"
                             [min]="paymentForm.get('type')?.value === 'refund' ? 0.01 : 0.01"
                             [max]="paymentForm.get('type')?.value === 'refund' ? absBalanceAmount() : balanceAmount()"
@@ -139,16 +139,16 @@
                     <h4 class="text-sm font-medium mb-2">Quick Amounts</h4>
                     <div class="flex flex-wrap gap-2">
                         <button type="button" mat-stroked-button (click)="setAmount(balanceAmount())">
-                            Full Balance ({{ balanceAmount() | currency: storeStore.selectedStore()?.currency }})
+                            Full Balance ({{ balanceAmount() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }})
                         </button>
                         @if (balanceAmount() >= 100) {
                         <button type="button" mat-stroked-button (click)="setAmount(100)">
-                            {{ 100 | currency: storeStore.selectedStore()?.currency }}
+                            {{ 100 | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
                         </button>
                         }
                         @if (balanceAmount() >= 50) {
                         <button type="button" mat-stroked-button (click)="setAmount(50)">
-                            {{ 50 | currency: storeStore.selectedStore()?.currency }}
+                            {{ 50 | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
                         </button>
                         }
                     </div>
@@ -201,7 +201,7 @@
                 <mat-error class="block">
                     <strong>Cannot mark as "Paid in Full":</strong>
                     There is still an outstanding balance of
-                    <strong>{{ balanceAmount() | currency: storeStore.selectedStore()?.currency }}</strong>.
+                    <strong>{{ balanceAmount() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</strong>.
                     Please use "Partial Payment" status or record additional payments first.
                 </mat-error>
                 }
@@ -246,7 +246,7 @@
                     <ng-container matColumnDef="amount">
                         <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-right">Amount</th>
                         <td mat-cell *matCellDef="let element" class="text-sm text-right font-semibold">
-                            {{ element.amount | currency: storeStore.selectedStore()?.currency }}
+                            {{ element.amount | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
                         </td>
                     </ng-container>
 
@@ -285,7 +285,7 @@
                         <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-right">Balance After
                         </th>
                         <td mat-cell *matCellDef="let element" class="text-sm text-right">
-                            {{ element.balanceAfterTransaction | currency: storeStore.selectedStore()?.currency }}
+                            {{ element.balanceAfterTransaction | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
                         </td>
                     </ng-container>
 

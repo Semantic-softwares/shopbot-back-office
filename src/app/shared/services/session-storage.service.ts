@@ -34,7 +34,22 @@ export class SessionStorageService {
     }
     
     getAuthToken(): string | null {
-        return localStorage.getItem(this.AUTH_TOKEN_KEY);
+        const raw = localStorage.getItem(this.AUTH_TOKEN_KEY);
+        if (!raw) return null;
+        // The token is written by login via the generic setItem(), which
+        // JSON.stringify's it — so what's stored is a QUOTED string. Returning
+        // it raw handed the socket a token wrapped in literal double quotes,
+        // which failed JWT verification server-side and got the connection
+        // dropped ("io server disconnect"), while HTTP kept working because the
+        // auth interceptor reads it through getItem() and parses.
+        // Parse when it's quoted, but still tolerate a bare token written by
+        // setAuthToken().
+        try {
+            const parsed = JSON.parse(raw);
+            return typeof parsed === 'string' ? parsed : raw;
+        } catch {
+            return raw;
+        }
     }
     
     removeAuthToken(): void {

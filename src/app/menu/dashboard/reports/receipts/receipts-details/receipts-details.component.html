@@ -59,7 +59,57 @@
   @let order = orderResource.value();
   
   <div class="max-w-12xl mx-auto px-4 py-6">
-    
+
+    <!-- Self-order claim bar. Lets an employee review the order first and then
+         accept it, rather than deciding blind from the alert toast. -->
+    @if (isSelfOrder()) {
+      <mat-card appearance="outlined" class="mb-4 !border-l-4"
+        [class.!border-l-orange-500]="canAccept()"
+        [class.!border-l-green-600]="!canAccept()">
+        <mat-card-content class="flex flex-wrap items-center justify-between gap-3 py-3">
+          <div class="flex items-center gap-3">
+            <mat-icon [class.text-orange-600]="canAccept()" [class.text-green-600]="!canAccept()">
+              {{ canAccept() ? 'room_service' : 'assignment_turned_in' }}
+            </mat-icon>
+            <div>
+              @if (canAccept()) {
+                <h3 class="font-medium">This table hasn't been picked up yet</h3>
+                <p class="text-sm text-gray-600">Accept it to serve this table — it will show in your orders.</p>
+              } @else if (isMine()) {
+                <h3 class="font-medium">You are serving this table</h3>
+                <p class="text-sm text-gray-600">It appears in your POS orders list.</p>
+              } @else {
+                <h3 class="font-medium">
+                  @if (assignedStaffName()) {
+                    Already taken by {{ assignedStaffName() }}
+                  } @else {
+                    Already taken
+                  }
+                </h3>
+                <p class="text-sm text-gray-600">Another team member is serving this table.</p>
+              }
+            </div>
+          </div>
+
+          @if (canAccept()) {
+            <div class="flex gap-2">
+              <button mat-stroked-button [disabled]="claiming()" (click)="declineOrder()">
+                Decline
+              </button>
+              <button mat-flat-button color="primary" [disabled]="claiming()" (click)="acceptOrder()">
+                @if (claiming()) {
+                  <mat-icon class="animate-spin">refresh</mat-icon>
+                } @else {
+                  Accept order
+                }
+              </button>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
+
     <!-- Scheduled Delivery Alert -->
     @if (order.deliveryTime?.name === 'Schedule Delivery') {
       <mat-card appearance="outlined" class="mb-4 !border-l-4 !border-l-blue-500">
@@ -210,6 +260,12 @@
                         @if (item.description) {
                           <div class="text-xs text-gray-500">{{ item.description }}</div>
                         }
+                        @if (item.orderedBy) {
+                          <div class="flex items-center gap-1 text-xs text-gray-500">
+                            <mat-icon class="!text-sm !w-3.5 !h-3.5">person</mat-icon>
+                            {{ item.orderedBy }}
+                          </div>
+                        }
                       </div>
                     </div>
                   </td>
@@ -223,7 +279,7 @@
                       <div class="space-y-1">
                         @for (option of item.options; track $index) {
                           <mat-chip class="!text-xs">
-                            {{ option.name }}
+                            {{ option.optionItemName || option.name }}
                             @if (option.price) {
                               ({{ option.price | currency: currency() }})
                             }
@@ -347,12 +403,34 @@
           </mat-card>
         }
 
+        <!-- Customer who placed a self-order — distinct from the staff member
+             serving it below. Only self-orders have a separate orderer. -->
+        @if (order.salesChannel === 'Qrcode' && order.guestName) {
+          <mat-card appearance="outlined">
+            <mat-card-header>
+              <mat-card-title class="flex items-center gap-2">
+                <mat-icon>person</mat-icon>
+                Ordered by
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="!p-0">
+              <mat-list>
+                <mat-list-item>
+                  <span matListItemTitle>Customer</span>
+                  <span matListItemMeta>{{ order.guestName }}</span>
+                </mat-list-item>
+              </mat-list>
+            </mat-card-content>
+          </mat-card>
+        }
+
         <!-- Staff Information -->
         @if (order.staff) {
           <mat-card appearance="outlined">
             <mat-card-header>
               <mat-card-title class="flex items-center gap-2">
-                Staff
+                <mat-icon>room_service</mat-icon>
+                Served by
               </mat-card-title>
             </mat-card-header>
             <mat-card-content class="!p-0">

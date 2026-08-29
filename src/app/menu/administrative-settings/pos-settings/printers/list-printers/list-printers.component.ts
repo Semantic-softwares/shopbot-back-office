@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 
@@ -22,6 +22,7 @@ import { NoRecordComponent } from '../../../../../shared/components/no-record/no
   templateUrl: './list-printers.component.html',
   styleUrls: ['./list-printers.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     MatTableModule,

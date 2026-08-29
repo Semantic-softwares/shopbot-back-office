@@ -1,4 +1,4 @@
-import { Component, inject, ViewChild } from '@angular/core';
+import { Component, inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
@@ -31,6 +31,7 @@ import { OptionItem } from '../../../../shared/models';
   selector: 'app-options',
   templateUrl: './options.component.html',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     MatTableModule,

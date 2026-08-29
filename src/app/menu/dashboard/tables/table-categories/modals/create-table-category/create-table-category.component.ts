@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -16,6 +16,7 @@ import { TableCategory } from '../../../../../../shared/models';
   templateUrl: './create-table-category.component.html',
   styleUrls: ['./create-table-category.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     ReactiveFormsModule,
     MatDialogModule,

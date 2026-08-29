@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -19,6 +19,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
     MatToolbarModule,
 ],
   templateUrl: './rooms-management.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './rooms-management.component.scss',
 })
 export class RoomsManagementComponent {

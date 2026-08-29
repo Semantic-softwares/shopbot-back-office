@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -47,6 +47,7 @@ import { RoomChangeDialogComponent, RoomChangeDialogData, RoomChangeResult } fro
     MatTooltipModule
   ],
   templateUrl: './reservation-details.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./reservation-details.component.scss']
 })
 export class ReservationDetailsComponent implements OnInit {

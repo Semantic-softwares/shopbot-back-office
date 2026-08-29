@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -42,6 +42,7 @@ import { NoRecordComponent } from '../../../../../../../../shared/components/no-
     PageHeaderComponent,
     NoRecordComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './unit-list.component.html',
 })
 export class UnitListComponent {

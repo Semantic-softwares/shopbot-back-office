@@ -1,4 +1,4 @@
-import { Component, inject, resource, ViewChild } from '@angular/core';
+import { Component, inject, resource, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
@@ -30,6 +30,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
   selector: 'app-variants',
   templateUrl: './variants.component.html',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTableModule,
     MatPaginatorModule,

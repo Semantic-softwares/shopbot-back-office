@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, ViewChild } from '@angular/core';
+import { Component, computed, inject, signal, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CategoryStore } from '../../../shared/stores/category.store';
 import { StoreStore } from '../../../shared/stores/store.store';
 import { CommonModule } from '@angular/common';
@@ -37,6 +37,7 @@ import { map } from 'rxjs/operators';
     MatBottomSheetModule
   ],
   templateUrl: './checkout.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './checkout.scss',
 })
 export class Checkout {

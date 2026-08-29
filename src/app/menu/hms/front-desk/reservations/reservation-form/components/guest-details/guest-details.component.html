@@ -64,7 +64,7 @@
                     <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">cake_outline</mat-icon>
                     <div matListItemTitle class="text-sm text-gray-600!">Date of Birth</div>
                     <div matListItemLine class="text-gray-900 font-medium">
-                        {{ guest()?.dateOfBirth | date: 'MMM dd, yyyy' }}
+                        {{ $safeNavigationMigration(guest()?.dateOfBirth) | date: 'MMM dd, yyyy' }}
                     </div>
                 </mat-list-item>
                 }

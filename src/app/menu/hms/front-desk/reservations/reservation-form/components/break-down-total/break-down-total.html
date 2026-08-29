@@ -17,7 +17,7 @@
         <mat-list-item>
             <span matListItemTitle>Base Total (all rooms)</span>
             <span matListItemMeta>
-                {{ breakdownSubtotal() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                {{ breakdownSubtotal() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
         </mat-list-item>
 
@@ -25,7 +25,7 @@
         <mat-list-item>
             <span matListItemTitle>Service Fee</span>
             <span matListItemMeta>
-                {{ breakdownServiceFee() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                {{ breakdownServiceFee() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
         </mat-list-item>
 
@@ -33,7 +33,7 @@
         <mat-list-item>
             <span matListItemTitle>Cleaning Fee</span>
             <span matListItemMeta>
-                {{ breakdownCleaningFee() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                {{ breakdownCleaningFee() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
         </mat-list-item>
 
@@ -41,7 +41,7 @@
         <mat-list-item>
             <span matListItemTitle>Resort Fee</span>
             <span matListItemMeta>
-                {{ breakdownResortFee() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                {{ breakdownResortFee() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
         </mat-list-item>
 
@@ -49,7 +49,7 @@
         <mat-list-item>
             <span matListItemTitle>Other Fees</span>
             <span matListItemMeta>
-                {{ breakdownOtherFees() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                {{ breakdownOtherFees() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
         </mat-list-item>
 
@@ -60,7 +60,7 @@
         <mat-list-item>
             <span matListItemTitle class="font-semibold">Total Fees</span>
             <span matListItemMeta class="font-semibold">
-                {{ breakdownTotalFees() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                {{ breakdownTotalFees() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
         </mat-list-item>
 
@@ -71,7 +71,7 @@
         <mat-list-item>
             <span matListItemTitle>Taxes</span>
             <span matListItemMeta>
-                {{ breakdownTaxes() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                {{ breakdownTaxes() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
         </mat-list-item>
 
@@ -79,7 +79,7 @@
         <mat-list-item>
             <span matListItemTitle>Discount</span>
             <span matListItemMeta>
-                {{ breakdownDiscount() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                {{ breakdownDiscount() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
         </mat-list-item>
 
@@ -90,7 +90,7 @@
         <mat-list-item class="py-4">
             <span matListItemTitle class="font-bold text-lg">Grand Total</span>
             <span matListItemMeta class="font-bold text-lg">
-                {{ breakdownGrandTotal() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                {{ breakdownGrandTotal() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
         </mat-list-item>
 
@@ -101,7 +101,7 @@
         <mat-list-item class="py-4 bg-indigo-50">
             <span matListItemTitle class="font-bold text-indigo-900">Reservation Total</span>
             <span matListItemMeta class="font-bold text-indigo-900">
-                {{ breakdownGrandTotal() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                {{ breakdownGrandTotal() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
         </mat-list-item>
 
@@ -112,7 +112,7 @@
                 <span class="text-sm">📦</span> Orders Total
               </span>
               <span matListItemMeta class="font-bold text-green-900">
-                  {{ ordersGrandTotal() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                  {{ ordersGrandTotal() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
               </span>
           </mat-list-item>
 
@@ -120,7 +120,7 @@
           <mat-list-item class="py-2 pl-8">
               <span matListItemTitle class="text-sm text-gray-700">Orders Paid</span>
               <span matListItemMeta class="text-sm text-green-700">
-                  {{ ordersPaidAmount() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                  {{ ordersPaidAmount() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
               </span>
           </mat-list-item>
 
@@ -128,7 +128,7 @@
           <mat-list-item class="py-2 pl-8 mb-2">
               <span matListItemTitle class="text-sm text-gray-700">Orders Balance</span>
               <span matListItemMeta class="text-sm" [class.text-red-700]="ordersBalanceAmount() > 0" [class.text-green-700]="ordersBalanceAmount() <= 0">
-                  {{ ordersBalanceAmount() | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                  {{ ordersBalanceAmount() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
               </span>
           </mat-list-item>
 
@@ -139,7 +139,7 @@
         <mat-list-item class="py-4">
             <span matListItemTitle >Paid</span>
             <span matListItemMeta >
-                {{ paidAmount() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}
+                {{ paidAmount() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
         </mat-list-item>
 
@@ -147,7 +147,7 @@
         <mat-list-item class="py-4">
             <span matListItemTitle >Balance</span>
             <span matListItemMeta >
-                {{ breakdownBalance() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}
+                {{ breakdownBalance() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
         </mat-list-item>
     </mat-list>

@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -23,6 +23,7 @@ import { CommonModule } from '@angular/common';
     MatProgressSpinnerModule,
   ],
   templateUrl: './verify-reset-token.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './verify-reset-token.component.scss'
 })
 export class VerifyResetTokenComponent implements OnInit {

@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Select Table</h2>
+<h2 mat-dialog-title>{{ title }}</h2>
 
 <mat-dialog-content>
   <!-- Search Field -->
@@ -32,7 +32,7 @@
   @if (tablesResource.value() && !tablesResource.isLoading()) {
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
       @for (table of filteredTables; track $index) {
-        <div [class.opacity-50]="table.orderId" [class.pointer-events-none]="table.orderId">
+        <div [class.opacity-50]="!isSelectable(table)" [class.pointer-events-none]="!isSelectable(table)">
           <app-table-card 
             [table]="table"
             [hideActions]="true"

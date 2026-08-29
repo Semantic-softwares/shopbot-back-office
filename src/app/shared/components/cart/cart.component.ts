@@ -7,6 +7,7 @@ import {
   signal,
   OnDestroy,
   Optional,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -92,6 +93,7 @@ export interface CartItem {
     MatDividerModule
 ],
   templateUrl: './cart.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './cart.component.scss',
 })
 export class CartComponent implements OnDestroy {

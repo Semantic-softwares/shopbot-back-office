@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from "@angular/material/card";
@@ -25,6 +25,7 @@ import { SubscriptionService } from '../../../shared/services/subscription.servi
     CurrentPlanComponent,
   ],
   templateUrl: './billing.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './billing.scss',
 })
 export class Billing implements OnInit {

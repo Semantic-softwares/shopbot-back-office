@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, ViewChild } from '@angular/core';
+import { Component, OnInit, signal, inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -45,6 +45,7 @@ import { tap, of } from 'rxjs';
     NoRecordComponent
 ],
   templateUrl: './list-suppliers.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './list-suppliers.component.scss'
 })
 export class ListSuppliersComponent implements OnInit {

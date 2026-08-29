@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -30,6 +30,7 @@ import { PrinterFormModalComponent } from '../../../../administrative-settings/p
   templateUrl: './create-station.component.html',
   styleUrls: ['./create-station.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     MatCardModule,

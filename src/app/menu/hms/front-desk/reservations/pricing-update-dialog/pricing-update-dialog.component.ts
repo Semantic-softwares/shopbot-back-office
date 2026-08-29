@@ -1,4 +1,4 @@
-import { Component, Inject, signal, inject } from '@angular/core';
+import { Component, Inject, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
@@ -38,6 +38,7 @@ export interface PricingUpdateDialogResult {
     MatDividerModule
   ],
   templateUrl: './pricing-update-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./pricing-update-dialog.component.scss']
 })
 export class PricingUpdateDialogComponent {

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -31,6 +31,7 @@ import { OptionItem } from '../../../../../shared/models';
     CurrencyMaskModule,
   ],
   templateUrl: './convert-to-food-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './convert-to-food-dialog.component.scss',
 })
 export class ConvertToFoodDialogComponent implements OnInit {

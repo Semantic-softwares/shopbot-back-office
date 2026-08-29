@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { RouterOutlet } from '@angular/router';
 
@@ -9,6 +9,7 @@ import { RouterOutlet } from '@angular/router';
     RouterOutlet
 ],
   templateUrl: './guests.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './guests.component.scss',
 })
 export class GuestsComponent { }

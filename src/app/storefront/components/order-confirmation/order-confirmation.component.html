@@ -1,0 +1,30 @@
+@if (store.lastOrderResult(); as result) {
+  <div class="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 px-6 text-center" style="background: var(--sf-surface, #fff)">
+    <div class="flex h-14 w-14 items-center justify-center rounded-full" style="background: var(--sf-accent, #111827)">
+      <mat-icon style="color: var(--sf-on-accent, #fff)">check</mat-icon>
+    </div>
+    <h1 class="text-lg font-semibold" style="color: var(--sf-text, #111827)" i18n="@@storefront.confirmation.title">
+      Order sent to the kitchen
+    </h1>
+    <p class="text-sm" style="color: var(--sf-muted, #6b7280)">
+      <span i18n="@@storefront.cart.itemCount">{result.itemCount, plural, =1 {1 item} other {{{result.itemCount}} items}}</span>
+      ·
+      <span i18n="@@storefront.confirmation.orderRef">Order {{ result.orderReference }}</span>
+    </p>
+    <p class="text-sm font-semibold" style="color: var(--sf-text, #111827)">
+      {{ result.total | currency: (store.storeInfo()?.currency || '₦') : 'symbol' : '1.0-0' }}
+    </p>
+    <p class="max-w-xs text-xs" style="color: var(--sf-muted, #6b7280)" i18n="@@storefront.confirmation.subtitle">
+      Your server will bring your order out shortly. You can pay in person when you're ready.
+    </p>
+    <button
+      type="button"
+      class="mt-2 rounded-xl px-5 py-2.5 text-sm font-semibold"
+      style="background: var(--sf-accent, #111827); color: var(--sf-on-accent, #fff)"
+      (click)="store.dismissOrderResult()"
+      i18n="@@storefront.confirmation.orderMore"
+    >
+      Order more
+    </button>
+  </div>
+}

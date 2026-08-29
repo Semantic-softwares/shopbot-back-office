@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,6 +19,7 @@ import { SubscriptionService } from '../../../shared/services/subscription.servi
     MatProgressSpinnerModule,
     MatSnackBarModule,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './pricing.component.html',
 })
 export class PricingComponent {

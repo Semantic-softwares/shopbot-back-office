@@ -1,4 +1,4 @@
-import { Component, input, output, computed, inject, signal } from '@angular/core';
+import { Component, input, output, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -27,6 +27,7 @@ import { CartService } from '../../services/cart.service';
     MatProgressSpinnerModule,
   ],
   templateUrl: './table-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './table-card.component.scss',
 })
 export class TableCardComponent {
@@ -43,6 +44,7 @@ export class TableCardComponent {
   viewOrder = output<Table>();
   printOrder = output<Table>();
   editOrder = output<Table>();
+  transferOrder = output<Table>();
 
   isLoadingBill = signal(false);
 
@@ -65,6 +67,11 @@ export class TableCardComponent {
   onEditOrder(event: Event): void {
     event.stopPropagation();
     this.editOrder.emit(this.table());
+  }
+
+  onTransferOrder(event: Event): void {
+    event.stopPropagation();
+    this.transferOrder.emit(this.table());
   }
 
   onCompleteOrder(event: Event): void {

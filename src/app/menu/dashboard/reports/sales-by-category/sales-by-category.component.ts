@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
@@ -24,6 +24,7 @@ import { MatMenuModule } from '@angular/material/menu';
   selector: 'app-sales-by-category',
   templateUrl: './sales-by-category.component.html',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     MatTableModule,

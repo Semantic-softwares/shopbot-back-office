@@ -1,4 +1,4 @@
-import { Component, Inject, inject, signal, computed } from '@angular/core';
+import { Component, Inject, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
@@ -37,6 +37,7 @@ export interface CreateRatePlanDialogData {
     MatProgressSpinnerModule,
     MatSnackBarModule,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <h2 mat-dialog-title>Create Rate Plan</h2>
     <mat-dialog-content class="space-y-4">

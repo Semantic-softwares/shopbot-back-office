@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true,
   imports: [CommonModule, MatButtonToggleModule, MatIconModule],
   templateUrl: './page-header.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./page-header.component.scss'],
 })
 export class PageHeaderComponent {

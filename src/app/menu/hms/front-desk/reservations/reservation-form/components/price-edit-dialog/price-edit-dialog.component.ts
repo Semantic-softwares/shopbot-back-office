@@ -6,6 +6,7 @@ import {
   effect,
   OnInit,
   OnDestroy,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -49,6 +50,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     CurrencyMaskModule,
   ],
   templateUrl: './price-edit-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './price-edit-dialog.component.scss',
 })
 export class PriceEditDialogComponent implements OnInit, OnDestroy {

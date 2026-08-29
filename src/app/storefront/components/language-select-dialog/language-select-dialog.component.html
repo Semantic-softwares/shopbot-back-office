@@ -1,0 +1,28 @@
+<div class="flex items-center justify-between px-6 pt-6 pb-2">
+  <h2 class="text-lg font-semibold" style="color: var(--sf-text, #111827)" i18n="@@storefront.language.title">
+    Choose your language
+  </h2>
+  @if (dismissible) {
+    <button type="button" (click)="close()">
+      <mat-icon style="color: var(--sf-muted, #6b7280)">close</mat-icon>
+    </button>
+  }
+</div>
+
+<div class="grid grid-cols-2 gap-2 px-6 pb-6 pt-2">
+  @for (lang of languages; track lang.code) {
+    <button
+      type="button"
+      class="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm"
+      style="border: 1px solid var(--sf-border, #e5e7eb)"
+      [style.border-color]="lang.code === currentCode ? 'var(--sf-accent, #111827)' : 'var(--sf-border, #e5e7eb)'"
+      (click)="select(lang)"
+    >
+      <span class="text-lg">{{ lang.flag }}</span>
+      <span class="flex-1 text-left" style="color: var(--sf-text, #111827)">{{ lang.label }}</span>
+      @if (lang.code === currentCode) {
+        <mat-icon class="!text-base" style="color: var(--sf-accent, #111827)">check</mat-icon>
+      }
+    </button>
+  }
+</div>

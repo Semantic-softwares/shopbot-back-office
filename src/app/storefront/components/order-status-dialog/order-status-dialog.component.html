@@ -1,0 +1,84 @@
+@if (store.orderStatus(); as status) {
+  @if (status.movedToTableName) {
+    <!-- Staff moved this table's order elsewhere. This page is bound to the
+         OLD table's QR token, so it can't follow — the guests are physically
+         at the new table and need to scan the code there. -->
+    <div class="px-6 py-8 text-center">
+      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
+           style="background: var(--sf-border, #e5e7eb)">
+        <mat-icon style="color: var(--sf-accent, #111827)">swap_horiz</mat-icon>
+      </div>
+      <h2 class="text-lg font-semibold" style="color: var(--sf-text, #111827)"
+          i18n="@@storefront.orderStatus.movedTitle">
+        Your order moved to {{ status.movedToTableName }}
+      </h2>
+      <p class="mx-auto mt-2 max-w-xs text-sm" style="color: var(--sf-muted, #6b7280)"
+         i18n="@@storefront.orderStatus.movedBody">
+        Scan the QR code at your new table to see your bill and keep ordering.
+      </p>
+      <button
+        type="button"
+        class="mt-6 rounded-lg px-5 py-2.5 text-sm font-semibold"
+        style="background: var(--sf-accent, #111827); color: var(--sf-on-accent, #ffffff)"
+        (click)="close()"
+        i18n="@@storefront.orderStatus.movedClose"
+      >
+        Close
+      </button>
+    </div>
+  } @else if (status.hasActiveOrder) {
+    <div class="flex items-center justify-between px-6 pt-6 pb-2">
+      <div>
+        <h2 class="text-lg font-semibold" style="color: var(--sf-text, #111827)" i18n="@@storefront.orderStatus.title">
+          Your table's order
+        </h2>
+        <p class="text-sm" style="color: var(--sf-muted, #6b7280)">{{ categoryLabel(status.category) }}</p>
+        @if (status.assignedStaffName) {
+          <p class="mt-0.5 flex items-center gap-1 text-xs" style="color: var(--sf-accent, #111827)">
+            <mat-icon class="!text-sm !h-3.5 !w-3.5">badge</mat-icon>
+            <span i18n="@@storefront.orderStatus.servedBy">Your server: {{ status.assignedStaffName }}</span>
+          </p>
+        }
+      </div>
+      <button type="button" (click)="close()">
+        <mat-icon style="color: var(--sf-muted, #6b7280)">close</mat-icon>
+      </button>
+    </div>
+
+    <div class="max-h-[60vh] overflow-y-auto px-6 py-2">
+      @for (item of status.items; track $index) {
+        <div class="flex items-start justify-between gap-3 border-b py-3" style="border-color: var(--sf-border, #e5e7eb)">
+          <div class="min-w-0">
+            <p class="text-sm font-medium" style="color: var(--sf-text, #111827)">{{ item.quantity }}× {{ item.name }}</p>
+            @if (item.options && item.options.length > 0) {
+              <p class="mt-0.5 text-xs" style="color: var(--sf-muted, #6b7280)">{{ optionsSummary(item) }}</p>
+            }
+            @if (item.notes) {
+              <p class="mt-0.5 flex items-center gap-1 text-xs italic" style="color: var(--sf-muted, #6b7280)">
+                <mat-icon class="!text-sm !h-3.5 !w-3.5">sticky_note_2</mat-icon>
+                {{ item.notes }}
+              </p>
+            }
+            @if (item.orderedBy) {
+              <p class="mt-0.5 flex items-center gap-1 text-xs" style="color: var(--sf-muted, #6b7280)">
+                <mat-icon class="!text-sm !h-3.5 !w-3.5">person</mat-icon>
+                {{ item.orderedBy }}
+              </p>
+            }
+          </div>
+          <span class="whitespace-nowrap text-sm font-semibold" style="color: var(--sf-text, #111827)">
+            {{ item.price * item.quantity | currency: (store.storeInfo()?.currency || '₦') : 'symbol' : '1.0-0' }}
+          </span>
+        </div>
+      }
+    </div>
+
+    <div
+      class="mx-6 mb-6 mt-2 flex items-center justify-between border-t pt-3 text-sm font-semibold"
+      style="border-color: var(--sf-border, #e5e7eb); color: var(--sf-text, #111827)"
+    >
+      <span i18n="@@storefront.cart.total">Total</span>
+      <span>{{ status.total | currency: (store.storeInfo()?.currency || '₦') : 'symbol' : '1.0-0' }}</span>
+    </div>
+  }
+}

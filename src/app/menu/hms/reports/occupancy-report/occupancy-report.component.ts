@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
@@ -55,6 +55,7 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatNativeDateModule,
   ],
   templateUrl: './occupancy-report.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./occupancy-report.component.scss'],
 })
 export class OccupancyReportComponent {

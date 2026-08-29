@@ -1,0 +1,28 @@
+@if (store.isLoading()) {
+  <app-storefront-loading />
+} @else if (store.loadError()) {
+  <app-storefront-empty
+    icon="error_outline"
+    title="Something went wrong"
+    i18n-title="@@storefront.error.title"
+    [message]="store.loadError()!"
+  />
+} @else if (store.storeInfo(); as info) {
+  @if (!info.selfOrderSettings?.enabled) {
+    <app-storefront-empty
+      icon="storefront"
+      title="Ordering isn't available right now"
+      i18n-title="@@storefront.disabled.title"
+      message="Please speak to a member of staff to place your order."
+      i18n-message="@@storefront.disabled.message"
+    />
+  } @else {
+    <div class="min-h-screen" style="background: var(--sf-bg, #f9fafb); font-family: var(--sf-font-family, inherit)">
+      <app-theme-host />
+      <app-storefront-cart-badge (open)="isCartOpen.set(true)" />
+      <app-storefront-cart-drawer [isOpen]="isCartOpen()" (closed)="isCartOpen.set(false)" />
+      <app-storefront-order-status-fab />
+      <app-storefront-order-confirmation />
+    </div>
+  }
+}

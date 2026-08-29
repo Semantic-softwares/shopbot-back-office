@@ -1,4 +1,4 @@
-import { Component, ViewChild, OnInit, inject, resource } from '@angular/core';
+import { Component, ViewChild, OnInit, inject, resource, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
@@ -26,6 +26,7 @@ import { Employee } from '../../../../shared/models/employee.model';
   selector: 'app-list-employees',
   templateUrl: './list.component.html',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTableModule,
     MatPaginatorModule,

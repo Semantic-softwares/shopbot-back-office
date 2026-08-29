@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -40,6 +40,7 @@ import { Observable } from 'rxjs';
     FormsModule,
   ],
   templateUrl: './list-reconciliation.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .mat-mdc-table {
       width: 100%;

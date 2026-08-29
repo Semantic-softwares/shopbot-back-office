@@ -6,6 +6,7 @@ import {
   signal,
   inject,
   OnInit,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -31,6 +32,7 @@ import { QueryParamService } from '../../services/query-param.service';
     FormsModule,
   ],
 
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <mat-form-field appearance="outline" class="w-full">
       <mat-label>Date Range</mat-label>

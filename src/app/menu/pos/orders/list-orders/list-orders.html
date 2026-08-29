@@ -137,7 +137,7 @@
                                 </mat-icon>
                                 }
                             </div>
-                            <span class="text-sm text-gray-600">{{ order.user?.name || order.user?.email || 'Guest'
+                            <span class="text-sm text-gray-600">{{ order.user?.name || order.guestName || order.user?.email || 'Guest'
                                 }}</span>
                         </div>
                     </td>
@@ -262,7 +262,7 @@
                             </mat-icon>
                             }
                         </div>
-                        <p class="text-sm text-gray-600">{{ order.user?.name || order.user?.email || 'Guest' }}</p>
+                        <p class="text-sm text-gray-600">{{ order.user?.name || order.guestName || order.user?.email || 'Guest' }}</p>
                     </div>
                     <button mat-icon-button [matMenuTriggerFor]="cardMenu">
                         <mat-icon>more_vert</mat-icon>

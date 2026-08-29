@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -54,6 +54,7 @@ import {
     MatProgressSpinnerModule,
     PageHeaderComponent
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './room-form.component.html'
 })
 export class RoomFormComponent implements OnInit, OnDestroy {

@@ -1,4 +1,4 @@
-import { Component, input, model, output } from '@angular/core';
+import { Component, input, model, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -16,6 +16,7 @@ import { MatButtonModule } from '@angular/material/button';
     MatButtonModule,
   ],
   templateUrl: './search.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './search.component.scss',
 })
 export class SearchComponent {

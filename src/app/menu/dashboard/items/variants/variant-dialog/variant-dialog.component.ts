@@ -1,4 +1,4 @@
-import { Component, Inject, inject, signal } from '@angular/core';
+import { Component, Inject, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   MatDialogRef,
@@ -34,6 +34,7 @@ interface DialogData {
   selector: 'app-variant-dialog',
   templateUrl: './variant-dialog.component.html',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     MatDialogModule,

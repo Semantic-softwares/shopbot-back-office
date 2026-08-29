@@ -224,11 +224,11 @@
         <div class="space-y-2 text-sm">
           <div class="flex justify-between">
             <span class="text-gray-600">Subtotal:</span>
-            <span class="font-medium">{{ pricingForm.get('subtotal')?.value | currency: currency:'symbol':'1.2-2' }}</span>
+            <span class="font-medium">{{ $safeNavigationMigration(pricingForm.get('subtotal')?.value) | currency: currency:'symbol':'1.2-2' }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-gray-600">Taxes:</span>
-            <span class="font-medium">{{ pricingForm.get('taxes')?.value | currency: currency:'symbol':'1.2-2' }}</span>
+            <span class="font-medium">{{ $safeNavigationMigration(pricingForm.get('taxes')?.value) | currency: currency:'symbol':'1.2-2' }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-gray-600">Total Fees:</span>
@@ -247,7 +247,7 @@
           }
           <div class="flex justify-between">
             <span class="text-gray-600">Discount:</span>
-            <span class="font-medium text-green-600">-{{ pricingForm.get('discounts.amount')?.value | currency: currency:'symbol':'1.2-2' }}</span>
+            <span class="font-medium text-green-600">-{{ $safeNavigationMigration(pricingForm.get('discounts.amount')?.value) | currency: currency:'symbol':'1.2-2' }}</span>
           </div>
           <mat-divider class="my-2"></mat-divider>
           <div class="flex justify-between text-lg font-semibold">
@@ -256,7 +256,7 @@
           </div>
           <div class="flex justify-between">
             <span class="text-gray-600">Amount Paid:</span>
-            <span class="font-medium text-green-600">{{ pricingForm.get('paid')?.value | currency: currency:'symbol':'1.2-2' }}</span>
+            <span class="font-medium text-green-600">{{ $safeNavigationMigration(pricingForm.get('paid')?.value) | currency: currency:'symbol':'1.2-2' }}</span>
           </div>
           <div class="flex justify-between text-lg font-semibold" 
                [class.text-red-600]="currentBalance > 0"

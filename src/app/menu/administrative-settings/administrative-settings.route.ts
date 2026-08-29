@@ -42,6 +42,13 @@ export const ADMINISTRATIVE_SETTINGS_ROUTES: Routes = [
         loadChildren: () =>
           import('./billing/billing.routes').then((m) => m.BILLING_ROUTES),
       },
+      {
+        path: 'self-order',
+        loadComponent: () =>
+          import('./self-order-settings/self-order-settings').then(
+            (m) => m.SelfOrderSettings,
+          ),
+      },
     ],
   },
 ];

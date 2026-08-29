@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
@@ -156,6 +156,7 @@ interface ValueOverrideData {
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     :host {
       display: block;

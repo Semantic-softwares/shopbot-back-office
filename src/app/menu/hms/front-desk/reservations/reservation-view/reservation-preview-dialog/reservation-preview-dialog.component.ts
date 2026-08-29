@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,6 +23,7 @@ interface ReservationPreviewData {
   selector: 'app-reservation-preview-dialog',
   standalone: true,
   imports: [CommonModule, MatDialogModule, MatIconModule, MatButtonModule, MatDividerModule, MatChipsModule, MatListModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './reservation-preview-dialog.component.html',
 })
 export class ReservationPreviewDialogComponent {

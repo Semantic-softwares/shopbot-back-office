@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -35,6 +35,7 @@ import { PinAuthorizationDialogComponent, PinAuthorizationDialogResult } from '.
     PageHeaderComponent,
   ],
   templateUrl: './hotel-info.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './hotel-info.scss',
 })
 export class HotelInfo implements OnInit {

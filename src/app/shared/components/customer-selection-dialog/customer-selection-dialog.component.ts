@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -43,6 +43,7 @@ export interface CustomerSelectionDialogResult {
     FormsModule,
   ],
   templateUrl: './customer-selection-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './customer-selection-dialog.component.scss'
 })
 export class CustomerSelectionDialogComponent implements OnInit {

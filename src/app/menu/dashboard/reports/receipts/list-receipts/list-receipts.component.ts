@@ -12,6 +12,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
 import { SelectionModel } from '@angular/cdk/collections';
 import { EmployeeSelectorComponent } from '../../../../../shared/components/employee-selector/employee-selector.component';
 import { DateRangeSelectorComponent } from '../../../../../shared/components/date-range-selector/date-range-selector.component';
@@ -48,6 +49,7 @@ import { MatCard } from "@angular/material/card";
     MatCheckboxModule,
     MatProgressBarModule,
     MatDialogModule,
+    MatSelectModule,
     EmployeeSelectorComponent,
     DateRangeSelectorComponent,
     MatProgressSpinner,
@@ -89,7 +91,9 @@ export class ListReceiptsComponent {
     'type',
     'total',
     'orderedBy',
+    'servedBy',
     'ordertype',
+    'salesChannel',
     'actions'
   ];
 
@@ -114,6 +118,33 @@ export class ListReceiptsComponent {
   });
 
   readonly orders = computed(() => this.dataSource.value()?.orders || []);
+
+  // Shows every channel/order type by default (empty = no filter sent) —
+  // narrow down explicitly via these two dropdowns.
+  salesChannelOptions = [
+    { value: '', label: 'All Channels' },
+    { value: 'Point of Sale', label: 'Point of Sale' },
+    { value: 'Qrcode', label: 'Self-Order (QR)' },
+    { value: 'Shopbot', label: 'Shopbot' },
+  ];
+
+  orderTypeOptions = [
+    { value: '', label: 'All Order Types' },
+    { value: 'table', label: 'Table' },
+    { value: 'quick', label: 'Quick Sale' },
+    { value: 'online', label: 'Online' },
+  ];
+
+  selectedSalesChannel = computed(() => this.query()?.['salesChannel'] || '');
+  selectedOrderType = computed(() => this.query()?.['orderType'] || '');
+
+  onSalesChannelChange(value: string): void {
+    value ? this.queryParams.add({ salesChannel: value }) : this.queryParams.remove('salesChannel');
+  }
+
+  onOrderTypeChange(value: string): void {
+    value ? this.queryParams.add({ orderType: value }) : this.queryParams.remove('orderType');
+  }
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   pageSize = 10;
@@ -142,6 +173,7 @@ export class ListReceiptsComponent {
           'Order Type': item.ordertype,
           'Payment Type': item.type,
           'Ordered By': item.orderedBy?.name || 'N/A',
+          'Served By': item.servedBy?.name || 'N/A',
           'Grand Total': item.total || 0,
         }));
         const excelGrandTotal = data.reduce((sum: number, item: any) => sum + (item.total || 0), 0);

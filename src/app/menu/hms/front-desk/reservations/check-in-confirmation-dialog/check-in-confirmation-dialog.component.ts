@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -40,6 +40,7 @@ export interface CheckInDialogResult {
     GetGuestNamePipe
 ],
   templateUrl: './check-in-confirmation-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./check-in-confirmation-dialog.component.scss']
 })
 export class CheckInConfirmationDialogComponent {

@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, output } from '@angular/core';
+import { Component, signal, inject, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -22,6 +22,7 @@ import { QueryParamService } from '../../services/query-param.service';
     ReactiveFormsModule,
     FormsModule,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <mat-form-field appearance="outline" class="w-full">
       <mat-label>Period</mat-label>

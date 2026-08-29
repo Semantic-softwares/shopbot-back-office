@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
@@ -65,6 +65,7 @@ import {
     MatTooltipModule
 ],
   templateUrl: './list-orders.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './list-orders.scss',
 })
 export class ListOrders {
@@ -127,7 +128,12 @@ export class ListOrders {
       storeId: this.storeStore.selectedStore()?._id,
       limit: this.pageSize(),
       skip: this.pageIndex() * this.pageSize(),
-      salesChannel: SalesChannel.POINT_OF_SALE
+      // POS sales plus self-orders (Qrcode). Combined with the staff filter
+      // below — which defaults to the signed-in employee — this shows POS
+      // orders alongside only the self-orders THIS employee accepted, since
+      // claiming is what stamps `staff` on a self-order. Unclaimed ones stay
+      // out of everyone's list.
+      salesChannel: `${SalesChannel.POINT_OF_SALE},${SalesChannel.QRCODE}`
     };
 
     if (this.statusFilter()) {

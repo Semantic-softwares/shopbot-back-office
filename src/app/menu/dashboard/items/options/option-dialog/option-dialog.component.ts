@@ -1,4 +1,4 @@
-import { Component, inject, Inject, signal } from '@angular/core';
+import { Component, inject, Inject, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -18,6 +18,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
   selector: 'app-option-dialog',
   templateUrl: './option-dialog.component.html',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatDialogModule,
     MatFormFieldModule,

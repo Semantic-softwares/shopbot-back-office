@@ -1,4 +1,4 @@
-import { Component, input, output, OnInit, inject, signal, OnDestroy } from '@angular/core';
+import { Component, input, output, OnInit, inject, signal, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -35,6 +35,7 @@ import { StoreStore } from '../../stores/store.store';
     MatButtonModule,
     MatTooltipModule,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './rental-owner-search.component.html',
 })
 export class RentalOwnerSearchComponent implements OnInit, OnDestroy {

@@ -7,6 +7,7 @@ import {
   effect,
   ChangeDetectorRef,
   input,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -93,6 +94,7 @@ import { ReservationOrdersComponent } from '../reservation-orders/reservation-or
     ReservationOrdersComponent,
   ],
   templateUrl: './reservation-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./reservation-form.component.scss'],
 })
 export class ReservationFormComponent implements OnDestroy {

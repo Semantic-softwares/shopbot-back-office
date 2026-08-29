@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, ViewChild } from '@angular/core';
+import { Component, computed, inject, signal, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTable } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
@@ -31,6 +31,7 @@ import { CreateTimecardComponent } from '../modals/create-timecard/create-timeca
   templateUrl: './list-timecards.component.html',
   styleUrls: ['./list-timecards.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     MatTableModule,

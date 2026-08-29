@@ -57,10 +57,10 @@
       <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ booking()?.unique_id }}</h2>
       <div class="flex items-center gap-2 mb-4">
         <mat-chip 
-          [color]="getStatusChip(booking()?.status).color"
+          [color]="getStatusChip($safeNavigationMigration(booking()?.status)).color"
           selected
         >
-          {{ getStatusChip(booking()?.status).label | uppercase }}
+          {{ getStatusChip($safeNavigationMigration(booking()?.status)).label | uppercase }}
         </mat-chip>
         <mat-chip 
           [ngClass]="getPaymentStatus(booking()) === 'Paid' ? 'bg-green-100! text-green-800!' : getPaymentStatus(booking()) === 'Prepaid' ? 'bg-blue-100! text-blue-800!' : 'bg-amber-100! text-amber-800!'"
@@ -140,16 +140,16 @@
                   <mat-list>
                     <mat-list-item>
                       <span matListItemTitle>Check-in</span>
-                      <span matListItemMeta>{{ formatDate(booking()?.arrival_date) || 'N/A' }}</span>
+                      <span matListItemMeta>{{ formatDate($safeNavigationMigration(booking()?.arrival_date)) || 'N/A' }}</span>
                     </mat-list-item>
                     <mat-list-item>
                       <span matListItemTitle>Check-out</span>
-                      <span matListItemMeta>{{ formatDate(booking()?.departure_date) || 'N/A' }}</span>
+                      <span matListItemMeta>{{ formatDate($safeNavigationMigration(booking()?.departure_date)) || 'N/A' }}</span>
                     </mat-list-item>
                     <mat-list-item>
                       <span matListItemTitle>Nights</span>
                       <span matListItemMeta class="text-lg font-bold">
-                        {{ calculateNights(booking()?.arrival_date, booking()?.departure_date) || 'N/A' }}
+                        {{ calculateNights($safeNavigationMigration(booking()?.arrival_date), $safeNavigationMigration(booking()?.departure_date)) || 'N/A' }}
                       </span>
                     </mat-list-item>
                   </mat-list>
@@ -202,7 +202,7 @@
                     <span matListItemTitle>OTA Commission</span>
                     <span matListItemMeta>
                       @if (booking()?.ota_commission) {
-                        {{ formatCurrency(booking()?.ota_commission, booking()?.currency) }}
+                        {{ formatCurrency($safeNavigationMigration(booking()?.ota_commission), $safeNavigationMigration(booking()?.currency)) }}
                       } @else {
                         N/A
                       }
@@ -210,7 +210,7 @@
                   </mat-list-item>
                   <mat-list-item>
                     <span matListItemTitle>Received At</span>
-                    <span matListItemMeta>{{ booking()?.inserted_at ? (booking()?.inserted_at | slice:0:10) : 'N/A' }}</span>
+                    <span matListItemMeta>{{ booking()?.inserted_at ? ($safeNavigationMigration(booking()?.inserted_at) | slice:0:10) : 'N/A' }}</span>
                   </mat-list-item>
                 </mat-list>
               </mat-card-content>
@@ -225,7 +225,7 @@
                 <mat-list>
                   <mat-list-item>
                     <span matListItemTitle>Total Amount</span>
-                    <span matListItemMeta class="text-lg font-bold">{{ formatCurrency(booking()?.amount, booking()?.currency) }}</span>
+                    <span matListItemMeta class="text-lg font-bold">{{ formatCurrency($safeNavigationMigration(booking()?.amount), $safeNavigationMigration(booking()?.currency)) }}</span>
                   </mat-list-item>
                   <mat-list-item>
                     <span matListItemTitle>Payment Collect</span>
@@ -279,15 +279,15 @@
                         <div class="flex items-center justify-between w-full pr-4">
                           <div class="flex items-center gap-3">
                             <mat-icon class="text-blue-600">door_front</mat-icon>
-                            <span class="font-semibold">{{ getRoomTypeName(room?.room_type_id) }}</span>
+                            <span class="font-semibold">{{ getRoomTypeName($safeNavigationMigration(room?.room_type_id)) }}</span>
                           </div>
                           <span class="text-lg font-bold text-blue-600">
-                            {{ formatCurrency(room?.amount, booking()?.currency) }}
+                            {{ formatCurrency($safeNavigationMigration(room?.amount), $safeNavigationMigration(booking()?.currency)) }}
                           </span>
                         </div>
                       </mat-panel-title>
                       <mat-panel-description>
-                        {{ formatDate(room?.checkin_date) }} → {{ formatDate(room?.checkout_date) }}
+                        {{ formatDate($safeNavigationMigration(room?.checkin_date)) }} → {{ formatDate($safeNavigationMigration(room?.checkout_date)) }}
                       </mat-panel-description>
                     </mat-expansion-panel-header>
 
@@ -315,15 +315,15 @@
                       </div>
 
                       <!-- Daily Price Breakdown in Mat-List -->
-                      @if (room?.days && (room?.days | keyvalue)!.length > 0) {
+                      @if (room?.days && ($safeNavigationMigration(room?.days) | keyvalue)!.length > 0) {
                         <div>
                           <h4 class="text-sm font-semibold text-gray-700 mb-3">Price Breakdown</h4>
                           <mat-list class="pricing-list">
-                            @for (day of room?.days | keyvalue; track day.key) {
+                            @for (day of $safeNavigationMigration(room?.days) | keyvalue; track day.key) {
                               <mat-list-item>
                                 <span matListItemTitle>{{ day.key }}</span>
                                 <span matListItemMeta class="font-semibold text-gray-900">
-                                  {{ formatCurrency(day.value, booking()?.currency) }}
+                                  {{ formatCurrency(day.value, $safeNavigationMigration(booking()?.currency)) }}
                                 </span>
                               </mat-list-item>
                             }
@@ -331,7 +331,7 @@
                             <mat-list-item class="font-semibold">
                               <span matListItemTitle>Subtotal</span>
                               <span matListItemMeta class="font-bold text-blue-600 text-lg">
-                                {{ formatCurrency(room?.amount, booking()?.currency) }}
+                                {{ formatCurrency($safeNavigationMigration(room?.amount), $safeNavigationMigration(booking()?.currency)) }}
                               </span>
                             </mat-list-item>
                           </mat-list>
@@ -364,7 +364,7 @@
                                   </div>
                                 </div>
                                 <div class="font-semibold text-gray-900">
-                                  {{ formatCurrency(tax.total_price, booking()?.currency) }}
+                                  {{ formatCurrency(tax.total_price, $safeNavigationMigration(booking()?.currency)) }}
                                 </div>
                               </div>
                             }
@@ -406,14 +406,14 @@
                 <mat-list-item>
                   <span matListItemTitle>Rooms Total</span>
                   <span matListItemLine class="text-right font-semibold">
-                    {{ formatCurrency(getTotalRoomPrice(booking()), booking()?.currency) }}
+                    {{ formatCurrency(getTotalRoomPrice(booking()), $safeNavigationMigration(booking()?.currency)) }}
                   </span>
                 </mat-list-item>
                 @if (getTotalTaxes(booking()) > 0) {
                   <mat-list-item>
                     <span matListItemTitle>Taxes & Fees</span>
                     <span matListItemLine class="text-right font-semibold">
-                      {{ formatCurrency(getTotalTaxes(booking()), booking()?.currency) }}
+                      {{ formatCurrency(getTotalTaxes(booking()), $safeNavigationMigration(booking()?.currency)) }}
                     </span>
                   </mat-list-item>
                 }
@@ -421,7 +421,7 @@
                   <mat-list-item class="text-amber-700">
                     <span matListItemTitle>OTA Commission</span>
                     <span matListItemLine class="text-right font-semibold">
-                      -{{ formatCurrency(booking()?.ota_commission, booking()?.currency) }}
+                      -{{ formatCurrency($safeNavigationMigration(booking()?.ota_commission), $safeNavigationMigration(booking()?.currency)) }}
                     </span>
                   </mat-list-item>
                 }
@@ -429,7 +429,7 @@
                 <mat-list-item>
                   <span matListItemTitle class="text-lg font-bold">Total Amount</span>
                   <span matListItemLine class="text-right text-lg font-bold text-blue-600">
-                    {{ formatCurrency(booking()?.amount, booking()?.currency) }}
+                    {{ formatCurrency($safeNavigationMigration(booking()?.amount), $safeNavigationMigration(booking()?.currency)) }}
                   </span>
                 </mat-list-item>
               </mat-list>
@@ -469,7 +469,7 @@
                             <div class="text-gray-700 text-xs mt-1">
                               {{ service.nights || 1 }} night{{ (service.nights || 1) > 1 ? 's' : '' }} × 
                               {{ service.persons || 1 }} person{{ (service.persons || 1) > 1 ? 's' : '' }}
-                              - {{ formatCurrency(service.total_price, booking()?.currency) }}
+                              - {{ formatCurrency(service.total_price, $safeNavigationMigration(booking()?.currency)) }}
                             </div>
                           </div>
                         }

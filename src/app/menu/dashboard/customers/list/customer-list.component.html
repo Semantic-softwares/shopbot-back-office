@@ -62,12 +62,12 @@
 
           <ng-container matColumnDef="totalAmountSpent">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Total Amount Spent</th>
-            <td mat-cell *matCellDef="let element">{{(element.totalAmountSpent || 0) | currency: storeStore.selectedStore()?.currency}}</td>
+            <td mat-cell *matCellDef="let element">{{(element.totalAmountSpent || 0) | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</td>
           </ng-container>
 
           <ng-container matColumnDef="avgAmountSpent">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Avg Amount Spent</th>
-            <td mat-cell *matCellDef="let element">{{(element.avgAmountSpent || 0) | currency: storeStore.selectedStore()?.currency}}</td>
+            <td mat-cell *matCellDef="let element">{{(element.avgAmountSpent || 0) | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</td>
           </ng-container>
 
           <ng-container matColumnDef="totalOrders">

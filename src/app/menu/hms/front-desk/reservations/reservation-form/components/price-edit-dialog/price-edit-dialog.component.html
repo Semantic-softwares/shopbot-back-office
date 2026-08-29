@@ -10,7 +10,7 @@
           <mat-label>Price/Night</mat-label>
           <input matInput
             currencyMask
-            [options]="{ prefix: storeStore.selectedStore()?.currency }"
+            [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
             formControlName="pricePerNight" 
             readonly />
           <mat-icon matPrefix>{{storeStore.selectedStore()?.currency}}</mat-icon>
@@ -21,11 +21,11 @@
           <mat-label>Subtotal</mat-label>
           <input matInput 
             currencyMask 
-            [options]="{ prefix: storeStore.selectedStore()?.currency }"
+            [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
             formControlName="subtotal" 
             readonly>
           <mat-icon matPrefix>{{storeStore.selectedStore()?.currency}}</mat-icon>
-          <mat-hint>{{ pricePerNight() | currency:storeStore.selectedStore()?.currency }} × {{ numberOfNights() }} nights</mat-hint>
+          <mat-hint>{{ pricePerNight() | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency) }} × {{ numberOfNights() }} nights</mat-hint>
         </mat-form-field>
       </div>
     </div>
@@ -59,7 +59,7 @@
           <mat-icon matPrefix>money_off</mat-icon>
           @if (pricingForm.get('discountType')?.value === 'percentage') {
             <mat-hint>
-              % of subtotal (= {{ (subtotal() * discount() / 100).toFixed(2) | currency:storeStore.selectedStore()?.currency}})
+              % of subtotal (= {{ (subtotal() * discount() / 100).toFixed(2) | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency)}})
             </mat-hint>
           }
           @if (pricingForm.get('discountType')?.value === 'amount') {
@@ -82,7 +82,7 @@
         <mat-label>Taxes</mat-label>
         <input matInput 
           currencyMask 
-          [options]="{ prefix: storeStore.selectedStore()?.currency }"
+          [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
           formControlName="taxes" 
           placeholder="0.00">
         <mat-icon matPrefix>receipt</mat-icon>
@@ -94,7 +94,7 @@
           <mat-label>Service Fee</mat-label>
           <input matInput 
             currencyMask 
-            [options]="{ prefix: storeStore.selectedStore()?.currency }"
+            [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
             formControlName="serviceFee" 
             placeholder="0.00">
           <mat-icon matPrefix>room_service</mat-icon>
@@ -105,7 +105,7 @@
           <mat-label>Cleaning Fee</mat-label>
           <input matInput 
             currencyMask 
-            [options]="{ prefix: storeStore.selectedStore()?.currency }"
+            [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
             formControlName="cleaningFee" 
             placeholder="0.00">
           <mat-icon matPrefix>cleaning_services</mat-icon>
@@ -116,7 +116,7 @@
           <mat-label>Resort Fee</mat-label>
           <input matInput 
             currencyMask 
-            [options]="{ prefix: storeStore.selectedStore()?.currency }"
+            [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
             formControlName="resortFee" 
             placeholder="0.00">
           <mat-icon matPrefix>villa</mat-icon>
@@ -127,7 +127,7 @@
           <mat-label>Other Fee</mat-label>
           <input matInput 
             currencyMask 
-            [options]="{ prefix: storeStore.selectedStore()?.currency }"
+            [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
             formControlName="other" 
             placeholder="0.00">
           <mat-icon matPrefix>add_circle_outline</mat-icon>
@@ -144,7 +144,7 @@
         <mat-label>Total</mat-label>
         <input matInput 
           currencyMask 
-          [options]="{ prefix: storeStore.selectedStore()?.currency }"
+          [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
           formControlName="total" 
           readonly
           class="text-lg font-bold">

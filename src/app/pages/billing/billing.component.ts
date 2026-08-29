@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -19,6 +19,7 @@ import { SubscriptionService } from '../../shared/services/subscription.service'
     MatProgressSpinnerModule,
   ],
   templateUrl: './billing.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./billing.component.scss']
 })
 export class BillingComponent {

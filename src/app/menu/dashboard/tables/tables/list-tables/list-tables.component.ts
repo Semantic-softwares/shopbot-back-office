@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, ViewChild } from '@angular/core';
+import { Component, computed, inject, signal, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatTableModule, MatTable } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
@@ -23,12 +23,14 @@ import { Table } from '../../../../../shared/models';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CreateTableComponent } from '../modals/create-table/create-table.component';
+import { TableQrDialogComponent } from '../modals/table-qr-dialog/table-qr-dialog.component';
 
 @Component({
   selector: 'app-list-tables',
   templateUrl: './list-tables.component.html',
   styleUrls: ['./list-tables.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTableModule,
     MatPaginatorModule,
@@ -159,6 +161,50 @@ export class ListTablesComponent {
           }
         });
       }
+    });
+  }
+
+  showQrCode(table: Table) {
+    this.dialog.open(TableQrDialogComponent, {
+      width: '480px',
+      data: { table },
+    });
+  }
+
+  downloadAllQrCodes() {
+    const storeId = this.storeStore.selectedStore()?._id;
+    if (!storeId) return;
+    this.tableService.getStoreTablesQrPdf(storeId).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'tables-qr.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.snackBar.open('Could not download QR codes', 'Close', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+        });
+      },
+    });
+  }
+
+  downloadQrPdf(table: Table, force = false) {
+    this.tableService.getTableQrPdf(table._id, force).subscribe({
+      next: ({ url }) => window.open(url, '_blank'),
+      error: () => {
+        this.snackBar.open('Could not generate the QR PDF', 'Close', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+        });
+      },
     });
   }
 

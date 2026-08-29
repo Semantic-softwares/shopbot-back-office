@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, of, forkJoin, EMPTY } from 'rxjs';
 import { switchMap, catchError, tap, finalize } from 'rxjs/operators';
@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import {
   FormBuilder,
   FormGroup,
@@ -45,6 +46,7 @@ interface ImagePreview {
   templateUrl: './create-product.component.html',
   styleUrls: ['./create-product.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     MatCardModule,
@@ -55,6 +57,7 @@ interface ImagePreview {
     MatIconModule,
     ReactiveFormsModule,
     MatProgressSpinnerModule,
+    MatSlideToggleModule,
     RouterModule,
     NoRecordComponent,
   ],
@@ -128,6 +131,9 @@ export class CreateProductComponent implements OnInit {
       photos: [[]],
       profit: [0],
       active: [true], // Add active field with default true
+      // Defaults to visible on the self-order storefront — staff opt items
+      // *out* (e.g. a chef's-choice special that needs a verbal explanation).
+      availableForSelfOrder: [true],
       options: [[]], // Add variants form control
     });
 
@@ -271,6 +277,7 @@ export class CreateProductComponent implements OnInit {
           stockLevelAlert: product.stockLevelAlert,
           inStock: product.activate,
           photos: product.photos || [],
+          availableForSelfOrder: product.availableForSelfOrder ?? true,
         });
 
         if (product.photos?.length) {
@@ -475,6 +482,7 @@ export class CreateProductComponent implements OnInit {
       store: this.storeStore.selectedStore()?._id,
       stockLevelAlert: false,
       active: true,
+      availableForSelfOrder: true,
       options: [],
       images: [],
     });

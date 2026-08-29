@@ -1,0 +1,129 @@
+<h2 mat-dialog-title>Transfer {{ data.fromTable.name }}</h2>
+
+<mat-dialog-content class="!pt-2">
+  @if (orderResource.isLoading()) {
+    <div class="flex items-center justify-center py-12">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (orderResource.error()) {
+    <p class="py-6 text-center text-sm text-gray-500">
+      Could not load this order. Close and try again.
+    </p>
+  } @else {
+    <!-- What moves -->
+    <mat-button-toggle-group
+      class="w-full"
+      [value]="mode()"
+      (change)="onModeChange($event.value)"
+      aria-label="How much of the order to move"
+    >
+      <mat-button-toggle value="full" class="flex-1">Entire order</mat-button-toggle>
+      <mat-button-toggle value="partial" class="flex-1">Selected items</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    @if (mode() === 'full') {
+      <div class="mt-4 rounded-lg bg-gray-50 p-4">
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-600">Moving the whole order</span>
+          <span class="text-lg font-semibold">
+            {{ orderTotal() | currency:currency():'symbol':'1.2-2' }}
+          </span>
+        </div>
+        <p class="mt-2 text-xs text-gray-500">
+          {{ data.fromTable.name }} becomes free. Only tables with no open order can be chosen.
+        </p>
+      </div>
+    } @else {
+      <div class="mt-4 max-h-[38vh] overflow-y-auto rounded-lg border border-gray-200">
+        @for (line of lines(); track line.productId) {
+          <div class="flex items-center gap-3 border-b border-gray-100 px-3 py-2 last:border-b-0">
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-medium text-gray-900">{{ line.name }}</p>
+              <p class="text-xs text-gray-500">
+                {{ line.price | currency:currency():'symbol':'1.2-2' }} · {{ line.available }} on the order
+              </p>
+            </div>
+            <div class="flex items-center gap-1">
+              <button
+                matIconButton
+                type="button"
+                [disabled]="line.selected === 0"
+                (click)="adjust(line.productId, -1)"
+                [attr.aria-label]="'Move one fewer ' + line.name"
+              >
+                <mat-icon>remove_circle_outline</mat-icon>
+              </button>
+              <span class="w-6 text-center text-sm font-semibold tabular-nums">{{ line.selected }}</span>
+              <button
+                matIconButton
+                type="button"
+                [disabled]="line.selected >= line.available"
+                (click)="adjust(line.productId, 1)"
+                [attr.aria-label]="'Move one more ' + line.name"
+              >
+                <mat-icon>add_circle_outline</mat-icon>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="mt-3 flex items-center justify-between text-sm">
+        <span class="text-gray-600">
+          {{ selectedLines().length }} item{{ selectedLines().length === 1 ? '' : 's' }} selected
+        </span>
+        <span class="font-semibold">{{ selectedTotal() | currency:currency():'symbol':'1.2-2' }}</span>
+      </div>
+
+      @if (movesEverything()) {
+        <p class="mt-2 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          That's everything on the order — it will move as a whole order, so
+          {{ data.fromTable.name }} becomes free and the destination must have no open order.
+        </p>
+      }
+    }
+
+    <!-- Where it goes -->
+    <div class="mt-5">
+      <p class="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">Destination</p>
+      @if (destination(); as toTable) {
+        <button
+          type="button"
+          class="flex w-full items-center gap-3 rounded-lg border border-gray-300 px-3 py-3 text-left hover:bg-gray-50"
+          (click)="chooseTable()"
+        >
+          <mat-icon class="text-gray-400">table_restaurant</mat-icon>
+          <span class="min-w-0 flex-1">
+            <span class="block text-sm font-semibold text-gray-900">{{ toTable.name }}</span>
+            <span class="block text-xs text-gray-500">
+              {{ toTable.orderId ? 'Has an open order — items will be added to it' : 'Free' }}
+            </span>
+          </span>
+          <span class="text-xs font-medium" style="color: var(--mat-sys-primary);">Change</span>
+        </button>
+      } @else {
+        <button matButton="outlined" type="button" class="w-full" (click)="chooseTable()">
+          <mat-icon>table_restaurant</mat-icon>
+          Choose a table
+        </button>
+      }
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" [disabled]="submitting()" (click)="cancel()">Cancel</button>
+  <button
+    matButton="filled"
+    type="button"
+    color="primary"
+    [disabled]="!canSubmit()"
+    (click)="transfer()"
+  >
+    @if (submitting()) {
+      <mat-spinner diameter="18"></mat-spinner>
+    } @else {
+      Transfer
+    }
+  </button>
+</mat-dialog-actions>

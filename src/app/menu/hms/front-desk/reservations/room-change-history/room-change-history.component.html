@@ -50,7 +50,7 @@
                 'text-green-600': change.pricingDetails.difference < 0,
                 'text-red-600': change.pricingDetails.difference > 0
               }">
-                {{ change.pricingDetails.difference >= 0 ? '+' : '' }}{{ change.pricingDetails.difference | currency: storeStore.selectedStore()?.currency:'symbol':'1.0-0' }}
+                {{ change.pricingDetails.difference >= 0 ? '+' : '' }}{{ change.pricingDetails.difference | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.0-0' }}
               </span>
               <div class="text-xs text-gray-400">{{ change.pricingDetails.adjustmentType ? formatAdjustmentType(change.pricingDetails.adjustmentType) : '' }}</div>
             </td>

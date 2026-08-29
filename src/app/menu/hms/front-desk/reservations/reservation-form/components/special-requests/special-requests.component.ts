@@ -1,4 +1,4 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -20,6 +20,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatTooltipModule,
   ],
   templateUrl: './special-requests.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './special-requests.component.scss',
 })
 export class SpecialRequestsComponent {

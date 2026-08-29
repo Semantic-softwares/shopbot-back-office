@@ -10,6 +10,7 @@ import {
   model,
   untracked,
   AfterViewInit,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -76,6 +77,7 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
     MatProgressSpinnerModule
 ],
   templateUrl: './room-sharers.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './room-sharers.component.scss',
 })
 export class RoomSharersComponent {

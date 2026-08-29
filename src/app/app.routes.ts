@@ -48,4 +48,10 @@ export const routes: Routes = [
         canActivate: [authGuard, subscriptionActiveGuard],
         resolve: { role: roleResolver, subscription: subscriptionResolver }
     },
+    // Public self-service table ordering — deliberately no canActivate/resolve.
+    // Scanned from a printed table QR code; must work with no auth session.
+    {
+        path: 'm/:storeSlug',
+        loadChildren: () => import('./storefront/storefront.routes').then(m => m.STOREFRONT_ROUTES),
+    },
 ];

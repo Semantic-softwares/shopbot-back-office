@@ -1,4 +1,5 @@
-import { Component, inject, signal, ViewChild, OnInit } from '@angular/core';
+import { Component, inject, signal, ViewChild, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TableStore } from '../../../shared/stores/table.store';
 import { TableCategoryStore } from '../../../shared/stores/table-category.store';
 import { CommonModule } from '@angular/common';
@@ -29,6 +30,12 @@ import { NoRecordComponent } from '../../../shared/components/no-record/no-recor
 import { PrintJobService } from '../../../shared/services/print-job.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CartService } from '../../../shared/services/cart.service';
+import {
+  TransferOrderDialogComponent,
+  TransferOrderDialogData,
+  TransferOrderDialogResult,
+} from '../../../shared/components/transfer-order-dialog/transfer-order-dialog.component';
+import { SocketService } from '../../../shared/services/socket.service';
 
 @Component({
   selector: 'app-tables',
@@ -49,6 +56,7 @@ import { CartService } from '../../../shared/services/cart.service';
     NoRecordComponent
   ],
   templateUrl: './tables.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './tables.scss',
 })
 export class Tables implements OnInit {
@@ -64,6 +72,8 @@ export class Tables implements OnInit {
   public readonly router = inject(Router);
   public readonly cartService = inject(CartService);
   public readonly route = inject(ActivatedRoute);
+  private readonly socketService = inject(SocketService);
+  private readonly destroyRef = inject(DestroyRef);
   public viewMode = signal<'grid' | 'list'>('grid');
   public searchQuery = signal('');
   @ViewChild("searchComponent") searchComponent!: SearchComponent;
@@ -75,6 +85,24 @@ export class Tables implements OnInit {
     if (selectedStore?._id) {
       this.tableStore.getTables$(selectedStore._id);
     }
+
+    // Another terminal moved an order — two cards in this grid just changed
+    // occupancy, so refetch rather than showing a stale table map.
+    this.socketService.tableTransferred$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((data) => {
+        const storeId = this.storeStore.selectedStore()?._id;
+        if (storeId) {
+          this.tableStore.getTables$(storeId);
+        }
+        if (data?.fromTableName && data?.toTableName) {
+          this.snackBar.open(
+            `${data.fromTableName} → ${data.toTableName}`,
+            'Close',
+            { duration: 4000 },
+          );
+        }
+      });
   }
 
   onSearchChange(query: string): void {
@@ -245,5 +273,40 @@ export class Tables implements OnInit {
     if (table.orderId?._id) {
       this.router.navigate(['/menu/pos/orders', table.orderId._id, 'details']);
     }
+  }
+
+  public onTransferOrder(table: Table): void {
+    const orderId = table.orderId?._id;
+    if (!orderId) {
+      this.snackBar.open('No order on this table to move', 'Close', { duration: 3000 });
+      return;
+    }
+
+    this.dialog
+      .open(TransferOrderDialogComponent, {
+        width: '560px',
+        maxHeight: '90vh',
+        data: { orderId, fromTable: table } satisfies TransferOrderDialogData,
+      })
+      .afterClosed()
+      .subscribe((result: TransferOrderDialogResult | undefined) => {
+        if (!result?.transferred) {
+          return;
+        }
+        // Two tables just changed occupancy — refetch rather than patching
+        // local state, since a partial transfer may also have opened a brand
+        // new order on the destination.
+        const storeId = this.storeStore.selectedStore()?._id;
+        if (storeId) {
+          this.tableStore.getTables$(storeId);
+        }
+        this.snackBar.open(
+          result.type === 'full'
+            ? `Order moved to ${result.toTableName}`
+            : `Items moved to ${result.toTableName}`,
+          'Close',
+          { duration: 4000 },
+        );
+      });
   }
 }

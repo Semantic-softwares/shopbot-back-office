@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, CurrencyPipe, TitleCasePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -29,6 +29,7 @@ export interface ProductOptionsDialogResult extends Product {
   selector: 'app-product-options',
   templateUrl: './product-options.component.html',
   styleUrls: ['./product-options.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     ReactiveFormsModule,

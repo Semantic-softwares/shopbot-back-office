@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, effect, input } from '@angular/core';
+import { Component, inject, signal, computed, effect, input, ChangeDetectionStrategy } from '@angular/core';
 import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatListModule } from "@angular/material/list";
 import { StoreStore } from '../../../../../../../shared/stores/store.store';
@@ -13,6 +13,7 @@ import { Reservation } from '../../../../../../../shared/models/reservation.mode
   selector: 'break-down-total',
   imports: [MatListModule, CommonModule, ReactiveFormsModule, MatInputModule, CurrencyMaskModule],
   templateUrl: './break-down-total.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './break-down-total.scss',
 })
 export class BreakDownTotal {

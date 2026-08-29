@@ -1,4 +1,4 @@
-import { Component, inject, Inject, signal } from '@angular/core';
+import { Component, inject, Inject, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -18,6 +18,7 @@ import { AuthService } from '../../../../shared/services/auth.service';
   selector: 'app-employee-dialog',
   templateUrl: './employee-dialog.component.html',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatDialogModule,
     MatButtonModule,

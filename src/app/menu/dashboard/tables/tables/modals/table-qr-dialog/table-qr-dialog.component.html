@@ -1,0 +1,40 @@
+<div class="flex items-center justify-between px-6 pt-5 pb-1">
+  <h2 mat-dialog-title class="!m-0">QR Code — {{ data.table.name }}</h2>
+  <button mat-icon-button (click)="close()" aria-label="Close">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="flex flex-col items-center gap-4 py-2 px-6">
+  @if (isLoading()) {
+    <div class="flex h-52 w-52 items-center justify-center">
+      <mat-spinner diameter="32"></mat-spinner>
+    </div>
+  } @else if (qrDataUrl()) {
+    <img [src]="qrDataUrl()" alt="Table QR code" class="mx-auto block h-52 w-52 rounded-lg border" />
+    <p class="max-w-xs text-center text-xs text-gray-500">
+      Print this and place it on the table. Customers scan it to view the menu and order.
+    </p>
+  } @else {
+    <p class="text-sm text-gray-500">Could not generate a QR code.</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="center" class="gap-2 px-6 pb-5">
+  <button mat-stroked-button class="!flex-1" (click)="copyLink()" [disabled]="!qrUrl()">
+    <span class="inline-flex items-center justify-center gap-1.5">
+      <mat-icon class="!text-lg">link</mat-icon>
+      Copy Link
+    </span>
+  </button>
+  <button mat-flat-button color="primary" class="!flex-1" (click)="downloadPdf()" [disabled]="isDownloading() || isLoading()">
+    <span class="inline-flex items-center justify-center gap-1.5">
+      @if (isDownloading()) {
+        <mat-spinner diameter="18"></mat-spinner>
+      } @else {
+        <mat-icon class="!text-lg">download</mat-icon>
+        Download
+      }
+    </span>
+  </button>
+</mat-dialog-actions>

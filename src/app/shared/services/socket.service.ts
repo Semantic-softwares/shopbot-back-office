@@ -14,7 +14,6 @@ export class SocketService {
   private sessionStorage = inject(SessionStorageService);
   private printJobService = inject(PrintJobService);
   private snackBar = inject(MatSnackBar);
-  private globalListenersSetup = false;
 
   /** Subject for hotel notifications — components can subscribe */
   private hotelNotificationSubject = new Subject<any>();
@@ -24,41 +23,91 @@ export class SocketService {
   private hotelMessageSubject = new Subject<any>();
   readonly hotelMessage$ = this.hotelMessageSubject.asObservable();
 
+  /**
+   * A brand-new self-order table order for this on-duty staff member. Acts as
+   * the single alert bus regardless of how the alert arrived — the socket
+   * feeds it below, and FirebasePushService feeds it via
+   * pushTableOrderAlert() for pushes that land while the tab is focused.
+   * Consumers dedupe by orderId, so both transports firing is harmless.
+   */
+  private tableNewOrderSubject = new Subject<any>();
+  readonly tableNewOrder$ = this.tableNewOrderSubject.asObservable();
+
+  /** A table order was claimed by someone (possibly this staff member) — dismiss any matching pending alert. */
+  private tableOrderClaimedSubject = new Subject<any>();
+  readonly tableOrderClaimed$ = this.tableOrderClaimedSubject.asObservable();
+
+  /**
+   * An order moved between tables on some terminal — two table cards just
+   * changed occupancy, so every other POS in the store needs to refetch.
+   */
+  private tableTransferredSubject = new Subject<any>();
+  readonly tableTransferred$ = this.tableTransferredSubject.asObservable();
+
   /** Audio element for notification sound */
   private notificationAudio: HTMLAudioElement | null = null;
 
+  /** Separate, loopable audio element for the incoming-table-order alert — kept
+   * apart from the one-shot notificationAudio above so a looping alert never
+   * gets silently reset by an unrelated one-shot sound sharing the same element. */
+  private alertLoopAudio: HTMLAudioElement | null = null;
+
+  /** Store this socket was opened for — lets a repeat connect() call be a no-op. */
+  private currentStoreId: string | null = null;
+
+  /** jobIds already toasted, so the backend's re-push sweep can't duplicate them. */
+  private readonly toastedPrintJobIds = new Set<string>();
+
   connect(storeId: string): void {
-    if (this.socket?.connected) {
-      return;
+    // Guard on the socket EXISTING, not on it being connected: `connected` is
+    // still false during the handshake, so a second call landing in that
+    // window (menu.component.ts calls this from both a constructor effect and
+    // ngOnInit) would build a second socket and orphan the first — which then
+    // keeps its own connect/disconnect lifecycle and fights the real one.
+    if (this.socket) {
+      if (this.currentStoreId === storeId) {
+        return;
+      }
+      // Genuinely switching stores — tear the old one down first.
+      this.disconnect();
     }
 
     const token = this.sessionStorage.getAuthToken();
-    this.socket = io(environment.apiUrl, {
+    this.currentStoreId = storeId;
+
+    // Bind everything to THIS instance rather than re-reading this.socket
+    // inside the handlers, so a later reconnect can never make an old
+    // socket's callback operate on a newer socket.
+    const socket = io(environment.apiUrl, {
       auth: { token },
       query: { storeId },
       transports: ['websocket', 'polling'],
     });
+    this.socket = socket;
 
-    this.socket.on('connect', () => {
-      console.log('✅ Socket.IO connected:', this.socket?.id);
-      // Join store room
-      this.socket?.emit('joinStore', storeId);
-      
-      // Setup global listeners after socket is connected
-      if (!this.globalListenersSetup) {
-        this.setupGlobalPrintJobListeners();
-        this.setupGlobalHotelNotificationListeners();
-        this.globalListenersSetup = true;
-      }
+    socket.on('connect', () => {
+      console.log('✅ Socket.IO connected:', socket.id);
+      socket.emit('joinStore', storeId);
     });
 
-    this.socket.on('disconnect', () => {
-      console.log('❌ Socket.IO disconnected');
+    socket.on('disconnect', (reason: string) => {
+      console.log('❌ Socket.IO disconnected:', reason);
     });
 
-    this.socket.on('error', (error: any) => {
+    socket.on('connect_error', (error: any) => {
+      console.error('Socket.IO connect_error:', error?.message || error);
+    });
+
+    socket.on('error', (error: any) => {
       console.error('Socket.IO error:', error);
     });
+
+    // Attached once per socket instance, immediately — not deferred into the
+    // 'connect' handler behind a global flag, which previously could bind them
+    // to a different socket than the one that fired the event.
+    this.setupGlobalPrintJobListeners(socket);
+    this.setupGlobalHotelNotificationListeners(socket);
+    this.setupGlobalTableOrderListeners(socket);
   }
 
   disconnect(): void {
@@ -132,16 +181,24 @@ export class SocketService {
    * Setup global print job listeners
    * These are registered directly on the socket service to persist across component navigation
    */
-  private setupGlobalPrintJobListeners(): void {
+  private setupGlobalPrintJobListeners(socket: Socket): void {
     console.log('🎧 [SOCKET SERVICE] Setting up global print job listeners');
 
     // Listen for new print jobs
-    this.socket?.on('printJob:created', (data: any) => {
-      console.log('========================================');
-      console.log('📡 [GLOBAL SOCKET] printJob:created EVENT RECEIVED');
-      console.log('Payload:', data);
-      console.log('Order ID:', data.order?._id || data._id);
-      console.log('========================================');
+    socket.on('printJob:created', (data: any) => {
+      // The backend sweep re-emits any job a printer hasn't picked up, so the
+      // SAME jobId arrives repeatedly (every 10s while it stays unclaimed).
+      // Toast once per job — otherwise an unclaimed job buries the screen in
+      // duplicate snackbars, which is what this listener used to do.
+      const jobId = data?.jobId || data?.printJob?._id;
+      if (jobId && this.toastedPrintJobIds.has(jobId)) {
+        return;
+      }
+      if (jobId) {
+        this.toastedPrintJobIds.add(jobId);
+      }
+
+      console.log('📡 [GLOBAL SOCKET] printJob:created', jobId);
 
       this.snackBar.open(
         `📋 Print job created for Order #${data.orderNumber || data.order?._id || 'N/A'}`,
@@ -152,12 +209,10 @@ export class SocketService {
           verticalPosition: 'top',
         }
       );
-
-      
     });
 
     // Listen for completed jobs
-    this.socket?.on('printJob:completed', (data: any) => {
+    socket.on('printJob:completed', (data: any) => {
       console.log('✅ [GLOBAL SOCKET] printJob:completed EVENT RECEIVED');
       this.snackBar.open('✅ Print job completed successfully', 'Close', {
         duration: 3000,
@@ -167,7 +222,7 @@ export class SocketService {
     });
 
     // Listen for failed jobs
-    this.socket?.on('printJob:failed', (data: any) => {
+    socket.on('printJob:failed', (data: any) => {
       console.log('❌ [GLOBAL SOCKET] printJob:failed EVENT RECEIVED');
       this.snackBar.open(
         `❌ Print job failed: ${data.error || 'Unknown error'}`,
@@ -186,11 +241,11 @@ export class SocketService {
    * Global hotel notification listeners — registered ONCE when socket connects.
    * Pushes events to subjects so any component can subscribe without duplicates.
    */
-  private setupGlobalHotelNotificationListeners(): void {
+  private setupGlobalHotelNotificationListeners(socket: Socket): void {
     console.log('🎧 [SOCKET SERVICE] Setting up global hotel notification listeners');
 
     // Generic hotel notification (all event types)
-    this.socket?.on('hotel:notification', (data: any) => {
+    socket.on('hotel:notification', (data: any) => {
       console.log('🏨 [GLOBAL SOCKET] hotel:notification EVENT RECEIVED');
       console.log('Notification:', data?.notification?.title);
 
@@ -201,7 +256,7 @@ export class SocketService {
     });
 
     // Real-time message push (for chat window)
-    this.socket?.on('hotel:message', (data: any) => {
+    socket.on('hotel:message', (data: any) => {
       console.log('💬 [GLOBAL SOCKET] hotel:message EVENT RECEIVED');
       console.log('Thread:', data?.threadId, 'Sender:', data?.sender);
 
@@ -214,15 +269,104 @@ export class SocketService {
     });
 
     // Booking-specific events
-    this.socket?.on('hotel:booking_new', (data: any) => {
+    socket.on('hotel:booking_new', (data: any) => {
       console.log('🆕 [GLOBAL SOCKET] hotel:booking_new EVENT RECEIVED');
       this.playNotificationSound();
     });
 
-    this.socket?.on('hotel:booking_cancellation', (data: any) => {
+    socket.on('hotel:booking_cancellation', (data: any) => {
       console.log('❌ [GLOBAL SOCKET] hotel:booking_cancellation EVENT RECEIVED');
       this.playNotificationSound();
     });
+  }
+
+  /**
+   * Global incoming-table-order listeners. Deliberately no auto-sound here
+   * (unlike hotel:notification's one-shot ping) — the alert queue component
+   * owns the continuous/looping sound's lifecycle based on how many alerts
+   * are currently pending, via playAlertLoop()/stopAlertLoop() below.
+   */
+  private setupGlobalTableOrderListeners(socket: Socket): void {
+    console.log('🎧 [SOCKET SERVICE] Setting up global table-order listeners');
+
+    socket.on('table:newOrder', (data: any) => {
+      console.log('🔔 [GLOBAL SOCKET] table:newOrder EVENT RECEIVED', data);
+      this.tableNewOrderSubject.next(data);
+    });
+
+    socket.on('table:orderClaimed', (data: any) => {
+      console.log('✅ [GLOBAL SOCKET] table:orderClaimed EVENT RECEIVED', data);
+      this.tableOrderClaimedSubject.next(data);
+    });
+
+    socket.on('table:transferred', (data: any) => {
+      console.log('🔀 [GLOBAL SOCKET] table:transferred EVENT RECEIVED', data);
+      this.tableTransferredSubject.next(data);
+    });
+  }
+
+  /**
+   * Feed a table-order alert that arrived over a transport other than the
+   * socket — specifically an FCM push delivered while the tab is focused (see
+   * FirebasePushService). Same bus as the socket path, so the toast and
+   * looping sound behave identically whichever one gets there first.
+   */
+  pushTableOrderAlert(data: any): void {
+    this.tableNewOrderSubject.next(data);
+  }
+
+  /** Start (or keep playing) the continuous incoming-order alert sound. Idempotent. */
+  playAlertLoop(): void {
+    this.alertLoopWanted = true;
+    try {
+      if (!this.alertLoopAudio) {
+        this.alertLoopAudio = new Audio('assets/sounds/notification.wav');
+        this.alertLoopAudio.loop = true;
+        this.alertLoopAudio.volume = 0.6;
+      }
+      if (this.alertLoopAudio.paused) {
+        this.alertLoopAudio.currentTime = 0;
+        this.alertLoopAudio.play().catch((err) => {
+          // Browsers block audio until the page has seen a user gesture. If
+          // this is the first sound of the session and the user hasn't
+          // clicked yet, retry once on their next interaction rather than
+          // losing the alert's audio entirely.
+          console.warn('🔇 [SOUND] Could not play alert loop:', err.message);
+          this.retryAlertLoopOnNextGesture();
+        });
+      }
+    } catch (err) {
+      console.warn('🔇 [SOUND] Alert loop sound not available');
+    }
+  }
+
+  private gestureRetryArmed = false;
+
+  private retryAlertLoopOnNextGesture(): void {
+    if (this.gestureRetryArmed) return;
+    this.gestureRetryArmed = true;
+    const retry = () => {
+      this.gestureRetryArmed = false;
+      // Only resume if an alert is still pending — the queue owner pauses this
+      // when the last alert is dismissed, and we must not restart it after that.
+      if (this.alertLoopAudio && this.alertLoopAudio.paused && this.alertLoopWanted) {
+        this.alertLoopAudio.play().catch(() => {});
+      }
+    };
+    document.addEventListener('click', retry, { once: true });
+    document.addEventListener('keydown', retry, { once: true });
+  }
+
+  /** Whether a caller currently wants the loop playing — guards the gesture retry above. */
+  private alertLoopWanted = false;
+
+  /** Stop the continuous incoming-order alert sound — call once no alerts remain pending. */
+  stopAlertLoop(): void {
+    this.alertLoopWanted = false;
+    this.alertLoopAudio?.pause();
+    if (this.alertLoopAudio) {
+      this.alertLoopAudio.currentTime = 0;
+    }
   }
 
   /**

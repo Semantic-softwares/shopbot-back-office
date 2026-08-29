@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, inject } from '@angular/core';
+import { Component, Inject, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import {
   MatDialogRef,
@@ -33,6 +33,7 @@ import { StoreStore } from '../../../../../shared/stores/store.store';
   templateUrl: './category-dialog.component.html',
   styleUrls: ['./category-dialog.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatDialogModule,
     MatButtonModule,

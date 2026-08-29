@@ -85,13 +85,13 @@
                 <mat-chip 
                   disabled
                   class="text-xs"
-                  [matTooltip]="element.attributes?.event_mask">
-                  {{ getFirstEvent(element.attributes?.event_mask) }}
+                  [matTooltip]="$safeNavigationMigration(element.attributes?.event_mask)">
+                  {{ getFirstEvent($safeNavigationMigration(element.attributes?.event_mask)) }}
                 </mat-chip>
-                @if (getRemainingEventCount(element.attributes?.event_mask) > 0) {
+                @if (getRemainingEventCount($safeNavigationMigration(element.attributes?.event_mask)) > 0) {
                   <span class="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded"
-                    [matTooltip]="element.attributes?.event_mask">
-                    +{{ getRemainingEventCount(element.attributes?.event_mask) }}
+                    [matTooltip]="$safeNavigationMigration(element.attributes?.event_mask)">
+                    +{{ getRemainingEventCount($safeNavigationMigration(element.attributes?.event_mask)) }}
                   </span>
                 }
               </div>

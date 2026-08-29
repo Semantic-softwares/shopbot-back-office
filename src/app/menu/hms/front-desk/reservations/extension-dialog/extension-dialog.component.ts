@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -46,6 +46,7 @@ export interface ExtensionDialogResult {
     MatRadioModule
   ],
   templateUrl: './extension-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./extension-dialog.component.scss']
 })
 export class ExtensionDialogComponent {

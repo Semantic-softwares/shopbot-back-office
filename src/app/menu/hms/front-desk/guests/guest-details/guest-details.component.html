@@ -71,7 +71,7 @@
                 @if (guest()?.nationality) {
                   <div class="flex items-center gap-1">
                     <mat-icon class="text-lg">public</mat-icon>
-                    <span>{{ getCountryName(guest()?.nationality) }}</span>
+                    <span>{{ getCountryName($safeNavigationMigration(guest()?.nationality)) }}</span>
                   </div>
                 }
               </div>
@@ -91,7 +91,7 @@
                 @if (guest()?.loyaltyProgram?.tier) {
                   <mat-chip class="bg-amber-100! text-amber-800!">
                     <mat-icon class="text-sm mr-1">workspace_premium</mat-icon>
-                    {{ guest()?.loyaltyProgram?.tier | titlecase }} Member
+                    {{ $safeNavigationMigration(guest()?.loyaltyProgram?.tier) | titlecase }} Member
                   </mat-chip>
                 }
 
@@ -142,7 +142,7 @@
                 <p>This guest has VIP status and should receive premium service and privileges.</p>
                 @if (guest()?.vipSince) {
                   <div class="mt-1 text-xs text-purple-600">
-                    VIP member since {{ formatDate(guest()?.vipSince) }}
+                    VIP member since {{ formatDate($safeNavigationMigration(guest()?.vipSince)) }}
                   </div>
                 }
               </div>
@@ -169,7 +169,7 @@
                 }
                 @if (guest()?.blacklistedAt) {
                   <div class="mt-1 text-xs text-red-600">
-                    Blacklisted on {{ formatDate(guest()?.blacklistedAt) }}
+                    Blacklisted on {{ formatDate($safeNavigationMigration(guest()?.blacklistedAt)) }}
                   </div>
                 }
               </div>
@@ -215,17 +215,17 @@
                   <div class="grid grid-cols-2 gap-4">
                     <div>
                       <label class="text-sm font-medium text-gray-500">Date of Birth</label>
-                      <p class="text-gray-900 mt-1">{{ formatDate(guest()?.dateOfBirth) }}</p>
+                      <p class="text-gray-900 mt-1">{{ formatDate($safeNavigationMigration(guest()?.dateOfBirth)) }}</p>
                     </div>
                     <div>
                       <label class="text-sm font-medium text-gray-500">Nationality</label>
-                      <p class="text-gray-900 mt-1">{{ getCountryName(guest()?.nationality) }}</p>
+                      <p class="text-gray-900 mt-1">{{ getCountryName($safeNavigationMigration(guest()?.nationality)) }}</p>
                     </div>
                   </div>
                   @if (guest()?.lastStayDate) {
                     <div>
                       <label class="text-sm font-medium text-gray-500">Last Stay</label>
-                      <p class="text-gray-900 mt-1">{{ formatDate(guest()?.lastStayDate) }}</p>
+                      <p class="text-gray-900 mt-1">{{ formatDate($safeNavigationMigration(guest()?.lastStayDate)) }}</p>
                     </div>
                   }
                 </mat-card-content>
@@ -260,7 +260,7 @@
                       </div>
                       <div>
                         <label class="text-sm font-medium text-gray-500">Country</label>
-                        <p class="text-gray-900 mt-1">{{ getCountryName(guest()?.address?.country) }}</p>
+                        <p class="text-gray-900 mt-1">{{ getCountryName($safeNavigationMigration(guest()?.address?.country)) }}</p>
                       </div>
                     </div>
                   } @else {
@@ -298,11 +298,11 @@
                     <div class="grid grid-cols-2 gap-4">
                       <div>
                         <label class="text-sm font-medium text-gray-500">Expiry Date</label>
-                        <p class="text-gray-900 mt-1">{{ formatDate(guest()?.idDocument?.expiryDate) }}</p>
+                        <p class="text-gray-900 mt-1">{{ formatDate($safeNavigationMigration(guest()?.idDocument?.expiryDate)) }}</p>
                       </div>
                       <div>
                         <label class="text-sm font-medium text-gray-500">Issuing Country</label>
-                        <p class="text-gray-900 mt-1">{{ getCountryName(guest()?.idDocument?.issuingCountry) }}</p>
+                        <p class="text-gray-900 mt-1">{{ getCountryName($safeNavigationMigration(guest()?.idDocument?.issuingCountry)) }}</p>
                       </div>
                     </div>
                   } @else {
@@ -414,7 +414,7 @@
                     @if (guest()?.vipSince) {
                       <div>
                         <label class="text-sm font-medium text-purple-700">VIP Since</label>
-                        <p class="text-purple-900 mt-1">{{ formatDate(guest()?.vipSince) }}</p>
+                        <p class="text-purple-900 mt-1">{{ formatDate($safeNavigationMigration(guest()?.vipSince)) }}</p>
                       </div>
                     }
                     <div class="bg-purple-100 rounded-lg p-4">
@@ -458,7 +458,7 @@
                     @if (guest()?.blacklistedAt) {
                       <div>
                         <label class="text-sm font-medium text-red-700">Date Blacklisted</label>
-                        <p class="text-red-900 mt-1">{{ formatDate(guest()?.blacklistedAt) }}</p>
+                        <p class="text-red-900 mt-1">{{ formatDate($safeNavigationMigration(guest()?.blacklistedAt)) }}</p>
                       </div>
                     }
                     <div class="bg-red-100 rounded-lg p-3">

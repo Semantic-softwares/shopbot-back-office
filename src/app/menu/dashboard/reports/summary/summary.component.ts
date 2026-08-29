@@ -6,6 +6,7 @@ import {
   DestroyRef,
   ElementRef,
   effect,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -59,6 +60,7 @@ import { ExportService } from '../../../../shared/services/export.service';
     PeriodSelectorComponent,
   ],
   templateUrl: './summary.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './summary.component.scss',
 })
 export class SummaryComponent implements OnInit {

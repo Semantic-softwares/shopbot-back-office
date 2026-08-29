@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-orders',
   imports: [RouterModule],
   templateUrl: './orders.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './orders.scss',
 })
 export class Orders { }

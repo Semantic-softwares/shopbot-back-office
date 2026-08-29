@@ -94,10 +94,10 @@
           <div class="min-w-0 flex-1">
             <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Today's Revenue</p>
             <p class="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mt-2 truncate" [class.animate-pulse]="loading()">
-              {{(dashboardStats()?.todayRevenue  | currency: currency) || defaultValue}}
+              {{($safeNavigationMigration(dashboardStats()?.todayRevenue)  | currency: currency) || defaultValue}}
             </p>
             <p class="text-sm text-green-600 mt-1 truncate">
-              <span class="font-medium">{{(dashboardStats()?.monthlyRevenue | currency: currency) || defaultValue}}</span> This Month
+              <span class="font-medium">{{($safeNavigationMigration(dashboardStats()?.monthlyRevenue) | currency: currency) || defaultValue}}</span> This Month
             </p>
           </div>
           <div class="p-3 border border-outline-variant rounded-lg flex-shrink-0">

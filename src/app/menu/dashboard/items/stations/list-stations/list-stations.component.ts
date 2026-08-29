@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -24,6 +24,7 @@ import { MatListModule } from "@angular/material/list";
   templateUrl: './list-stations.component.html',
   styleUrls: ['./list-stations.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     MatTableModule,
