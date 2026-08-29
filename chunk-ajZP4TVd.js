@@ -1,0 +1,1 @@
+import {m as mI,ah as aa,I as Ir,t as tp}from'./main-LJU3YL7L.js';var r=class n{static \u0275fac=function(e){return new(e||n)};static \u0275cmp=mI({type:n,selectors:[["app-channel-manager-tax-sets"]],decls:1,vars:0,template:function(e,l){e&1&&tp(0,"router-outlet");},dependencies:[aa,Ir],styles:["[_nghost-%COMP%]{display:block}"]})};export{r as ChannelManagerTaxSets};

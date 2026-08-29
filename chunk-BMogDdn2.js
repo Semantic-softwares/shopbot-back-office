@@ -1,0 +1,1 @@
+import {m as mI,ah as aa,I as Ir,t as tp}from'./main-LJU3YL7L.js';var s=class o{static \u0275fac=function(e){return new(e||o)};static \u0275cmp=mI({type:o,selectors:[["app-live-booking"]],decls:1,vars:0,template:function(e,m){e&1&&tp(0,"router-outlet");},dependencies:[aa,Ir],styles:["[_nghost-%COMP%]{display:block}"]})};export{s as LiveBooking};

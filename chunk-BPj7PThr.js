@@ -1,1 +1,0 @@
-var o=[{path:"",loadComponent:()=>import('./chunk-B1uSCTOr.js').then(t=>t.Orders),children:[{path:"",redirectTo:"list",pathMatch:"full"},{path:"list",loadComponent:()=>import('./chunk-q-pYAYEw.js').then(t=>t.ListOrders)},{path:":id/details",loadComponent:()=>import('./chunk-BdKwCGMa.js').then(t=>t.ReceiptsDetailsComponent)}]}];export{o as ORDERS_ROUTES};
