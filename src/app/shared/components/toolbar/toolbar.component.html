@@ -29,6 +29,21 @@
           <mat-icon>{{ isOnDuty() ? 'work' : 'work_off' }}</mat-icon>
         </button>
 
+        <!-- Alert status. Only shown once notifications are actually possible
+             and not already granted, so it's a prompt to fix something rather
+             than permanent chrome. -->
+        @if (pushPermission() !== 'granted' && pushPermission() !== 'unsupported') {
+          <button
+            mat-icon-button
+            (click)="enablePushNotifications()"
+            [matTooltip]="pushTooltip()"
+            [class.text-amber-300]="pushPermission() === 'default'"
+            [class.text-red-300]="pushPermission() === 'denied'"
+          >
+            <mat-icon>{{ pushPermission() === 'denied' ? 'notifications_off' : 'notification_add' }}</mat-icon>
+          </button>
+        }
+
         <!-- Notification Bell -->
         <button
           mat-icon-button
