@@ -65,21 +65,60 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   toggleDuty(): void {
     const next = !this.isOnDuty();
     this.togglingDuty.set(true);
+
+    // Kick off push registration BEFORE the duty call, not in its success
+    // handler. Asking for notification permission is a purely local browser
+    // action with no dependency on the server, and coupling it to the response
+    // meant a slow or failed /merchants/me/duty request (a cold Heroku dyno
+    // returning 504, say) left the user with no permission prompt at all and
+    // nothing on screen to explain why.
+    if (next) {
+      void this.enablePushNotifications();
+    }
+
     this.authService.toggleDuty(next).subscribe({
       next: () => {
         this.togglingDuty.set(false);
         this.snackBar.open(next ? 'You\'re on duty — you\'ll be alerted about new table orders' : 'You\'re off duty', 'Close', { duration: 3000 });
-        if (next) {
-          // Best-effort — a no-op until real Firebase Web config is in place
-          // (see FirebasePushService), and never blocks the duty toggle itself.
-          this.firebasePushService.requestPermissionAndRegister();
-        }
       },
       error: () => {
         this.togglingDuty.set(false);
-        this.snackBar.open('Could not update duty status', 'Close', { duration: 3000 });
+        this.snackBar.open('Could not update duty status — check your connection and try again', 'Close', { duration: 4000 });
       },
     });
+  }
+
+  /**
+   * Current browser notification permission, so the toolbar can actually show
+   * whether alerts will arrive. Previously nothing on screen reflected this,
+   * so a blocked or never-requested permission was invisible.
+   */
+  protected readonly pushPermission = signal<NotificationPermission | 'unsupported'>(
+    typeof Notification === 'undefined' ? 'unsupported' : Notification.permission,
+  );
+
+  protected readonly pushTooltip = computed(() => {
+    switch (this.pushPermission()) {
+      case 'granted': return 'Table order alerts are on';
+      case 'denied': return 'Alerts are blocked — enable notifications for this site in your browser settings';
+      case 'unsupported': return 'This browser does not support notifications';
+      default: return 'Tap to turn on table order alerts';
+    }
+  });
+
+  /** Also callable straight from the toolbar, so alerts can be enabled without touching duty. */
+  protected async enablePushNotifications(): Promise<void> {
+    await this.firebasePushService.requestPermissionAndRegister();
+    if (typeof Notification !== 'undefined') {
+      this.pushPermission.set(Notification.permission);
+    }
+    if (this.pushPermission() === 'denied') {
+      this.snackBar.open(
+        'Alerts are blocked for this site. Enable notifications in your browser settings to be told about new table orders.',
+        'Close',
+        { duration: 7000 },
+      );
+    }
   }
 
   /** User initials for avatar (e.g. "AO" from "Alex Onozor") */
