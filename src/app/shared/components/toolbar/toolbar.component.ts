@@ -76,14 +76,32 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       void this.enablePushNotifications();
     }
 
+    // The retry inside toggleDuty() can take ~10s when the server is waking
+    // from idle. Without this the button just sits there looking broken.
+    const waking = setTimeout(
+      () => this.snackBar.open('Waking the server, one moment…', '', { duration: 8000 }),
+      2500,
+    );
+
     this.authService.toggleDuty(next).subscribe({
       next: () => {
+        clearTimeout(waking);
         this.togglingDuty.set(false);
         this.snackBar.open(next ? 'You\'re on duty — you\'ll be alerted about new table orders' : 'You\'re off duty', 'Close', { duration: 3000 });
       },
-      error: () => {
+      error: (err) => {
+        clearTimeout(waking);
         this.togglingDuty.set(false);
-        this.snackBar.open('Could not update duty status — check your connection and try again', 'Close', { duration: 4000 });
+        // A gateway timeout that survived the retries is a different problem
+        // from being signed out, so say which one it is.
+        const timedOut = err?.status === 504 || err?.status === 502 || err?.status === 0;
+        this.snackBar.open(
+          timedOut
+            ? 'The server did not respond in time. It may be waking up — try once more in a few seconds.'
+            : 'Could not update duty status — please sign out and back in.',
+          'Close',
+          { duration: 6000 },
+        );
       },
     });
   }

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, BehaviorSubject, throwError, timer } from 'rxjs';
+import { map, retry } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { User } from '../models/user.model';
 import { SessionStorageService } from './session-storage.service';
@@ -137,14 +137,42 @@ export class AuthService {
     this.currentUserSubject.next(updated);
   }
 
-  /** Self-toggled "I'm on duty" — gates who gets alerted about new table orders. */
+  /**
+   * Self-toggled "I'm on duty" — gates who gets alerted about new table orders.
+   *
+   * The API runs on a dyno that sleeps when idle, and the first request after
+   * that can exceed the platform's 30s gateway limit and come back 504. The
+   * browser reports a timed-out CORS preflight as "Method PATCH is not allowed
+   * by Access-Control-Allow-Methods" — the headers are correct, they just
+   * never arrived — so this looked like a CORS/verb problem and isn't one.
+   * Switching to PUT would change nothing: a request carrying an
+   * Authorization header and a JSON body is preflighted whatever the verb.
+   *
+   * Retrying is the fix that matches the cause. The first attempt is what
+   * wakes the dyno, so a retry a few seconds later usually lands on a warm
+   * server. Only retried for gateway/network failures — a 401 or 403 is a real
+   * answer and is passed straight through.
+   */
   toggleDuty(isOnDuty: boolean): Observable<{ isOnDuty: boolean }> {
     return this.http
       .patch<{ isOnDuty: boolean }>(`${environment.apiUrl}/merchants/me/duty`, { isOnDuty })
-      .pipe(map((res) => {
-        this.updateCurrentUser({ isOnDuty: res.isOnDuty });
-        return res;
-      }));
+      .pipe(
+        retry({
+          count: 2,
+          delay: (error: HttpErrorResponse, retryCount: number) => {
+            const isTransient = error.status === 504 || error.status === 502 || error.status === 0;
+            if (!isTransient) {
+              return throwError(() => error);
+            }
+            console.warn(`⏳ Duty toggle attempt ${retryCount} failed (${error.status}) — server may be waking, retrying…`);
+            return timer(retryCount * 4000);
+          },
+        }),
+        map((res) => {
+          this.updateCurrentUser({ isOnDuty: res.isOnDuty });
+          return res;
+        }),
+      );
   }
 
   login(email: string, password: string): Observable<User> {
