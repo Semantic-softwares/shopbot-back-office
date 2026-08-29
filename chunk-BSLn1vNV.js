@@ -1,1 +1,0 @@
-var t=[{path:"",loadComponent:()=>import('./chunk-DOmmXEST.js').then(o=>o.ListRestockComponent)},{path:"add",loadComponent:()=>import('./chunk-CqrEqsCI.js').then(o=>o.RestockComponent)},{path:"edit/:id",loadComponent:()=>import('./chunk-CqrEqsCI.js').then(o=>o.RestockComponent)}];export{t as RESTOCK_ROUTES};
