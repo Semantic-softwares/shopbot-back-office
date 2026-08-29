@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,6 +22,7 @@ export interface ValidationErrorsDialogData {
     MatListModule
   ],
   templateUrl: './validation-errors-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './validation-errors-dialog.component.scss'
 })
 export class ValidationErrorsDialogComponent {

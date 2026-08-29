@@ -1,0 +1,131 @@
+<div class="px-4">
+  <div class="grid grid-cols-1 gap-6">
+    <app-page-header title="Self-Order Menu" subtitle="Let customers scan a table QR code to browse the menu and order">
+      <div actions class="flex items-center gap-2">
+        <button type="button" mat-stroked-button [disabled]="!previewUrl()" (click)="openPreview()">
+          <mat-icon class="mr-1">visibility</mat-icon>
+          Preview
+        </button>
+        <button type="button" mat-flat-button color="primary" [disabled]="saving()" (click)="save()">
+          <mat-icon class="mr-1">save</mat-icon>
+          {{ saving() ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </app-page-header>
+
+    @if (loading()) {
+      <div class="flex items-center justify-center py-8">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    } @else {
+      <mat-card appearance="outlined">
+        <mat-card-content class="pt-4">
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div>
+              <h4 class="text-sm font-medium text-gray-900">Enable self-ordering</h4>
+              <p class="text-xs text-gray-500">Turn this on once you've generated table QR codes and are ready for customers to order.</p>
+            </div>
+            <mat-slide-toggle [ngModel]="enabled()" (ngModelChange)="enabled.set($event)" color="primary"></mat-slide-toggle>
+          </div>
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 mt-3">
+            <div>
+              <h4 class="text-sm font-medium text-gray-900">Auto-print a receipt</h4>
+              <p class="text-xs text-gray-500">Automatically send a kitchen ticket to the printer when a customer places a self-order.</p>
+            </div>
+            <mat-slide-toggle [ngModel]="autoPrintReceipt()" (ngModelChange)="autoPrintReceipt.set($event)" color="primary"></mat-slide-toggle>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined">
+        <mat-card-content class="pt-4">
+          <h4 class="text-sm font-medium text-gray-900 mb-3">Menu theme</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            @for (template of availableTemplates(); track template.slug) {
+              <button
+                type="button"
+                class="text-left rounded-lg border-2 p-3 transition"
+                [class.border-blue-500]="selectedTemplateSlug() === template.slug"
+                [class.border-gray-200]="selectedTemplateSlug() !== template.slug"
+                (click)="selectTemplate(template)"
+              >
+                @if (template.previewImage) {
+                  <img [src]="template.previewImage" [alt]="template.name" class="w-full h-28 object-cover rounded-md mb-2" />
+                } @else {
+                  <div class="w-full h-28 rounded-md mb-2 bg-gray-100 flex items-center justify-center">
+                    <mat-icon class="!text-3xl text-gray-400">storefront</mat-icon>
+                  </div>
+                }
+                <p class="text-sm font-semibold text-gray-900">{{ template.name }}</p>
+                @if (template.description) {
+                  <p class="text-xs text-gray-500">{{ template.description }}</p>
+                }
+              </button>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      @if (selectedTemplate(); as template) {
+        <mat-card appearance="outlined">
+          <mat-card-content class="pt-4">
+            <h4 class="text-sm font-medium text-gray-900 mb-3">{{ template.name }} — appearance</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              @for (field of template.settingsSchema; track field.key) {
+                <div>
+                  @switch (field.type) {
+                    @case ('color') {
+                      <label class="block text-xs text-gray-500 mb-1">{{ field.label }}</label>
+                      <div class="flex items-center gap-2">
+                        <input
+                          type="color"
+                          class="h-9 w-12 rounded border border-gray-200"
+                          [ngModel]="settingsValues()[field.key] || field.default"
+                          (ngModelChange)="updateSetting(field.key, $event)"
+                        />
+                        <span class="text-xs text-gray-500">{{ settingsValues()[field.key] || field.default }}</span>
+                      </div>
+                    }
+                    @case ('select') {
+                      <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>{{ field.label }}</mat-label>
+                        <mat-select
+                          [ngModel]="settingsValues()[field.key] || field.default"
+                          (ngModelChange)="updateSetting(field.key, $event)"
+                        >
+                          @for (option of field.options; track option) {
+                            <mat-option [value]="option">{{ option }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                    }
+                    @case ('image') {
+                      <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>{{ field.label }} URL</mat-label>
+                        <input
+                          matInput
+                          [ngModel]="settingsValues()[field.key] || ''"
+                          (ngModelChange)="updateSetting(field.key, $event)"
+                        />
+                      </mat-form-field>
+                    }
+                    @default {
+                      <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>{{ field.label }}</mat-label>
+                        <input
+                          matInput
+                          [ngModel]="settingsValues()[field.key] || field.default || ''"
+                          (ngModelChange)="updateSetting(field.key, $event)"
+                        />
+                      </mat-form-field>
+                    }
+                  }
+                </div>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    }
+  </div>
+</div>

@@ -268,7 +268,7 @@
                       </div>
                       <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Extension Cost</label>
-                        <div class="text-sm font-medium text-orange-600">{{ extension.additionalCost | currency: storeStore.selectedStore()?.currency }}</div>
+                        <div class="text-sm font-medium text-orange-600">{{ extension.additionalCost | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</div>
                       </div>
                     </div>
 
@@ -339,7 +339,7 @@
                             </div>
                             <div>
                               <span class="text-gray-600">Amount:</span>
-                              <span class="ml-2 font-medium text-gray-900">{{ extension.paymentInfo.amount | currency: storeStore.selectedStore()?.currency }}</span>
+                              <span class="ml-2 font-medium text-gray-900">{{ extension.paymentInfo.amount | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
                             </div>
                             @if (extension.paymentInfo.transactionReference) {
                               <div>
@@ -382,7 +382,7 @@
                     <span class="font-medium text-green-800">Active Extension</span>
                   </div>
                   <div class="text-sm text-green-700">
-                    <p>Total extension cost: <strong>{{ getTotalExtensionCost() | currency: storeStore.selectedStore()?.currency }}</strong></p>
+                    <p>Total extension cost: <strong>{{ getTotalExtensionCost() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</strong></p>
                     <p>Total additional nights: <strong>{{ getTotalExtensionNights() }}</strong></p>
                   </div>
                 </div>
@@ -431,7 +431,7 @@
                       <td class="py-3 px-4 text-gray-600">{{ room.roomType }}</td>
                       <td class="py-3 px-4 text-gray-600">{{ room.adults }}</td>
                       <td class="py-3 px-4 text-gray-600">{{ room.children }}</td>
-                      <td class="py-3 px-4 font-medium text-gray-900">{{ room.rate | currency: storeStore.selectedStore()?.currency }}</td>
+                      <td class="py-3 px-4 font-medium text-gray-900">{{ room.rate | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</td>
                     </tr>
                   }
                 </tbody>
@@ -478,55 +478,55 @@
             <div class="space-y-3">
               <div class="flex justify-between">
                 <span class="text-gray-600">Subtotal</span>
-                <span class="font-medium text-gray-900">{{ reservation()!.pricing.subtotal | currency: storeStore.selectedStore()?.currency }}</span>
+                <span class="font-medium text-gray-900">{{ reservation()!.pricing.subtotal | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-600">Taxes</span>
-                <span class="font-medium text-gray-900">{{ reservation()!.pricing.taxes | currency: storeStore.selectedStore()?.currency }}</span>
+                <span class="font-medium text-gray-900">{{ reservation()!.pricing.taxes | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
               </div>
               @if (reservation()!.pricing.fees?.serviceFee) {
                 <div class="flex justify-between">
                   <span class="text-gray-600">Service Fee</span>
-                  <span class="font-medium text-gray-900">{{ reservation()!.pricing.fees?.serviceFee! | currency: storeStore.selectedStore()?.currency }}</span>
+                  <span class="font-medium text-gray-900">{{ $safeNavigationMigration(reservation()!.pricing.fees?.serviceFee)! | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
                 </div>
               }
               @if (reservation()!.pricing.fees?.cleaningFee) {
                 <div class="flex justify-between">
                   <span class="text-gray-600">Cleaning Fee</span>
-                  <span class="font-medium text-gray-900">{{ reservation()!.pricing.fees?.cleaningFee! | currency: storeStore.selectedStore()?.currency }}</span>
+                  <span class="font-medium text-gray-900">{{ $safeNavigationMigration(reservation()!.pricing.fees?.cleaningFee)! | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
                 </div>
               }
               @if (reservation()!.pricing.fees?.resortFee) {
                 <div class="flex justify-between">
                   <span class="text-gray-600">Resort Fee</span>
-                  <span class="font-medium text-gray-900">{{ reservation()!.pricing.fees?.resortFee! | currency: storeStore.selectedStore()?.currency }}</span>
+                  <span class="font-medium text-gray-900">{{ $safeNavigationMigration(reservation()!.pricing.fees?.resortFee)! | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
                 </div>
               }
               @if (reservation()!.pricing.discounts) {
                 <div class="flex justify-between">
                   <span class="text-gray-600">Discount</span>
-                  <span class="font-medium text-green-600">-{{ reservation()!.pricing.discounts! | currency: storeStore.selectedStore()?.currency }}</span>
+                  <span class="font-medium text-green-600">-{{ reservation()!.pricing.discounts! | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
                 </div>
               }
               @if (getTotalExtensionCost() > 0) {
                 <div class="flex justify-between">
                   <span class="text-gray-600">Extensions ({{ getTotalExtensionNights() }} nights)</span>
-                  <span class="font-medium text-orange-600">+{{ getTotalExtensionCost() | currency: storeStore.selectedStore()?.currency }}</span>
+                  <span class="font-medium text-orange-600">+{{ getTotalExtensionCost() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
                 </div>
               }
               <hr class="border-gray-200">
               <div class="flex justify-between text-lg font-semibold">
                 <span class="text-gray-900">Total</span>
-                <span class="text-gray-900">{{ getFinalTotal() | currency: storeStore.selectedStore()?.currency }}</span>
+                <span class="text-gray-900">{{ getFinalTotal() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-600">Paid</span>
-                <span class="font-medium text-green-600">{{ reservation()!.pricing.paid | currency: storeStore.selectedStore()?.currency }}</span>
+                <span class="font-medium text-green-600">{{ reservation()!.pricing.paid | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-600">Balance</span>
                 <span class="font-medium" [class]="reservation()!.pricing.balance > 0 ? 'text-red-600' : 'text-green-600'">
-                  {{ reservation()!.pricing.balance | currency: storeStore.selectedStore()?.currency }}
+                  {{ reservation()!.pricing.balance | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
                 </span>
               </div>
             </div>
@@ -566,7 +566,7 @@
               <div class="space-y-3">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
-                  <div class="text-sm text-gray-900">{{ reservation()!.paymentInfo?.method | titlecase }}</div>
+                  <div class="text-sm text-gray-900">{{ $safeNavigationMigration(reservation()!.paymentInfo?.method) | titlecase }}</div>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
@@ -578,7 +578,7 @@
                           [class]="reservation()!.paymentInfo?.status === 'paid' ? 'bg-green-100 text-green-800' : 
                                    reservation()!.paymentInfo?.status === 'refunded' ? 'bg-gray-100 text-gray-800' :
                                    'bg-yellow-100 text-yellow-800'">
-                      {{ reservation()!.paymentInfo?.status | titlecase }}
+                      {{ $safeNavigationMigration(reservation()!.paymentInfo?.status) | titlecase }}
                     </span>
                   </div>
                 </div>
@@ -586,7 +586,7 @@
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Last Transaction</label>
                     <div class="text-sm text-gray-900">
-                      {{ transactionHistory()[transactionHistory().length - 1].amount | currency: storeStore.selectedStore()?.currency }}
+                      {{ transactionHistory()[transactionHistory().length - 1].amount | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
                       on {{ formatDateTime(transactionHistory()[transactionHistory().length - 1].date) }}
                     </div>
                   </div>
@@ -626,7 +626,7 @@
                   @for (transaction of transactionHistory(); track $index) {
                     <tr class="border-b border-gray-100 hover:bg-gray-50">
                       <td class="py-3 px-4 text-gray-600">{{ formatDateTime(transaction.date) }}</td>
-                      <td class="py-3 px-4 font-medium text-gray-900">{{ transaction.amount | currency: storeStore.selectedStore()?.currency }}</td>
+                      <td class="py-3 px-4 font-medium text-gray-900">{{ transaction.amount | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</td>
                       <td class="py-3 px-4 text-gray-600">{{ transaction.method | titlecase }}</td>
                       <td class="py-3 px-4 text-gray-600">{{ transaction.reference }}</td>
                       <td class="py-3 px-4">
@@ -766,13 +766,13 @@
               @if (hasRefundAmount()) {
                 <div>
                   <label class="block text-sm font-medium text-red-700 mb-1">Refund Amount</label>
-                  <div class="text-sm text-red-600">{{ getRefundAmount() | currency: storeStore.selectedStore()?.currency }}</div>
+                  <div class="text-sm text-red-600">{{ getRefundAmount() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</div>
                 </div>
               }
               @if (hasCancellationFee()) {
                 <div>
                   <label class="block text-sm font-medium text-red-700 mb-1">Cancellation Fee</label>
-                  <div class="text-sm text-red-600">{{ getCancellationFee() | currency: storeStore.selectedStore()?.currency }}</div>
+                  <div class="text-sm text-red-600">{{ getCancellationFee() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</div>
                 </div>
               }
             </div>

@@ -1,0 +1,100 @@
+@if (isOpen) {
+  <div class="fixed inset-0 z-40 flex flex-col justify-end">
+    <div class="absolute inset-0 bg-black/40" (click)="closed.emit()"></div>
+
+    <div
+      class="relative z-10 flex max-h-[85vh] flex-col rounded-t-2xl px-4 pb-4 pt-3"
+      style="background: var(--sf-surface, #fff)"
+    >
+      <div class="mx-auto mb-2 h-1 w-10 rounded-full" style="background: var(--sf-border, #e5e7eb)"></div>
+
+      <div class="mb-2 flex items-center justify-between">
+        <h2 class="text-base font-semibold" style="color: var(--sf-text, #111827)" i18n="@@storefront.cart.title">Your order</h2>
+        <button type="button" (click)="closed.emit()">
+          <mat-icon style="color: var(--sf-muted, #6b7280)">close</mat-icon>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        @for (line of store.cart(); track line.lineId) {
+          <div class="flex items-start gap-3 border-b py-3" style="border-color: var(--sf-border, #e5e7eb)">
+            @if (line.photo) {
+              <img [src]="line.photo" [alt]="line.name" class="h-12 w-12 rounded-lg object-cover" />
+            }
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <p class="truncate text-sm font-medium" style="color: var(--sf-text, #111827)">{{ line.name }}</p>
+                <button type="button" (click)="store.removeFromCart(line.lineId)">
+                  <mat-icon class="!text-base" style="color: var(--sf-muted, #9ca3af)">delete_outline</mat-icon>
+                </button>
+              </div>
+
+              @if (line.options.length > 0) {
+                <p class="mt-0.5 text-xs" style="color: var(--sf-muted, #6b7280)">
+                  {{ optionsSummary(line) }}
+                </p>
+              }
+
+              <input
+                type="text"
+                placeholder="Add a note (e.g. no onions)"
+                i18n-placeholder="@@storefront.cart.notePlaceholder"
+                class="mt-1 w-full rounded-md border-0 bg-transparent text-xs outline-none"
+                style="color: var(--sf-muted, #6b7280)"
+                [ngModel]="line.notes"
+                (ngModelChange)="store.updateNotes(line.lineId, $event)"
+              />
+              <div class="mt-1 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    class="flex h-6 w-6 items-center justify-center rounded-full"
+                    style="border: 1px solid var(--sf-border, #e5e7eb)"
+                    (click)="store.updateQuantity(line.lineId, line.quantity - 1)"
+                  >
+                    <mat-icon class="!text-sm">remove</mat-icon>
+                  </button>
+                  <span class="w-4 text-center text-xs" style="color: var(--sf-text, #111827)">{{ line.quantity }}</span>
+                  <button
+                    type="button"
+                    class="flex h-6 w-6 items-center justify-center rounded-full"
+                    style="border: 1px solid var(--sf-border, #e5e7eb)"
+                    (click)="store.updateQuantity(line.lineId, line.quantity + 1)"
+                  >
+                    <mat-icon class="!text-sm">add</mat-icon>
+                  </button>
+                </div>
+                <span class="text-xs font-semibold" style="color: var(--sf-text, #111827)">
+                  {{ unitPrice(line) * line.quantity | currency: (store.storeInfo()?.currency || '₦') : 'symbol' : '1.0-0' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (store.submitError()) {
+        <p class="mt-2 text-xs" style="color: #dc2626">{{ store.submitError() }}</p>
+      }
+
+      <div class="mt-3 flex items-center justify-between text-sm font-semibold" style="color: var(--sf-text, #111827)">
+        <span i18n="@@storefront.cart.total">Total</span>
+        <span>{{ store.cartEstimatedTotal() | currency: (store.storeInfo()?.currency || '₦') : 'symbol' : '1.0-0' }}</span>
+      </div>
+
+      <button
+        type="button"
+        class="mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold"
+        style="background: var(--sf-accent, #111827); color: var(--sf-on-accent, #fff)"
+        [disabled]="store.submitting() || store.cart().length === 0"
+        (click)="placeOrder()"
+      >
+        @if (store.submitting()) {
+          <mat-spinner diameter="18"></mat-spinner>
+        } @else {
+          <span i18n="@@storefront.cart.placeOrder">Place order</span>
+        }
+      </button>
+    </div>
+  </div>
+}

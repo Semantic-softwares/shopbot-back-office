@@ -149,7 +149,7 @@
                 <div class="col-span-6">
                   <app-property-manager-selector
                     [control]="$any(form.get('propertyManager'))"
-                    [storeId]="storeStore.selectedStore()?._id"
+                    [storeId]="$safeNavigationMigration(storeStore.selectedStore()?._id)"
                     [preloadedManager]="preloadedManagerForSelector()"
                     label="Property Manager">
                   </app-property-manager-selector>
@@ -323,7 +323,7 @@
                             <input matInput formControlName="sizeValue" type="number" min="0" placeholder="0.00">
                           </mat-form-field>
 
-                          @if (!isNonLivable(unit.get('type')?.value)) {
+                          @if (!isNonLivable($safeNavigationMigration(unit.get('type')?.value))) {
                             <mat-form-field appearance="outline" class="col-span-3">
                               <mat-label>Bedrooms</mat-label>
                               <input matInput formControlName="bedrooms" type="number" min="0">

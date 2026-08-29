@@ -66,7 +66,7 @@
               <div>
                 <h3 class="font-semibold text-gray-900 flex items-center gap-2">
                   <mat-icon class="text-base text-blue-600">door_front</mat-icon>
-                  {{ getRoomTypeName(otaRoom?.room_type_id) }}
+                  {{ getRoomTypeName($safeNavigationMigration(otaRoom?.room_type_id)) }}
                 </h3>
                 <p class="text-xs text-gray-600 mt-1">
                   {{ formatGuestNames(otaRoom.guests) }}
@@ -102,10 +102,10 @@
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>Select Available Room</mat-label>
             <mat-select [formControlName]="'room_' + i">
-              @if ((getAvailableRoomsForType(otaRoom?.room_type_id) || []).length === 0) {
+              @if ((getAvailableRoomsForType($safeNavigationMigration(otaRoom?.room_type_id)) || []).length === 0) {
                 <mat-option disabled>No available rooms</mat-option>
               } @else {
-                @for (room of getAvailableRoomsForType(otaRoom?.room_type_id); track room._id) {
+                @for (room of getAvailableRoomsForType($safeNavigationMigration(otaRoom?.room_type_id)); track room._id) {
                   <mat-option [value]="room._id">
                     <span class="font-semibold">{{ room.roomNumber }}</span>
                     <span class="text-gray-600 ml-2">- {{ room.roomType?.name || 'Standard' }}</span>
@@ -120,7 +120,7 @@
 
           <!-- Room Details -->
           @if (assignmentForm.get('room_' + i)?.value) {
-            @for (availRoom of getAvailableRoomsForType(otaRoom?.room_type_id); track availRoom._id) {
+            @for (availRoom of getAvailableRoomsForType($safeNavigationMigration(otaRoom?.room_type_id)); track availRoom._id) {
               @if (availRoom._id === assignmentForm.get('room_' + i)?.value) {
                 <div class="mt-3 pt-3 border-t border-gray-200 text-sm text-gray-600">
                   <div class="flex justify-between">

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -46,6 +46,7 @@ import { ExportService } from '../../../../shared/services/export.service';
     DateRangeSelectorComponent
   ],
   templateUrl: './sales-by-item.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './sales-by-item.component.scss',
 })
 export class SalesByItemComponent {

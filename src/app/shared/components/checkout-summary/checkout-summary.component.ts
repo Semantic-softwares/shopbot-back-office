@@ -1,4 +1,4 @@
-import { Component, input, output, computed, inject } from '@angular/core';
+import { Component, input, output, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,6 +17,7 @@ import { Cart, CartSummary } from '../../models';
     MatIconModule
   ],
   templateUrl: './checkout-summary.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './checkout-summary.component.scss'
 })
 export class CheckoutSummaryComponent {

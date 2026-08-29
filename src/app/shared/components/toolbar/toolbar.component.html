@@ -18,6 +18,17 @@
       </div>
 
       <div class="flex items-center gap-1">
+        <!-- On-duty toggle -->
+        <button
+          mat-icon-button
+          (click)="toggleDuty()"
+          [disabled]="togglingDuty()"
+          [matTooltip]="isOnDuty() ? 'On duty — tap to stop receiving table order alerts' : 'Off duty — tap to start receiving table order alerts'"
+          [class.text-green-300]="isOnDuty()"
+        >
+          <mat-icon>{{ isOnDuty() ? 'work' : 'work_off' }}</mat-icon>
+        </button>
+
         <!-- Notification Bell -->
         <button
           mat-icon-button

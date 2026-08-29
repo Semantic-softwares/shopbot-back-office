@@ -1,0 +1,16 @@
+@if (store.cartCount() > 0) {
+  <button
+    type="button"
+    class="fixed inset-x-4 bottom-4 z-30 flex items-center justify-between rounded-2xl px-4 py-3 shadow-lg"
+    style="background: var(--sf-accent, #111827); color: var(--sf-on-accent, #fff)"
+    (click)="open.emit()"
+  >
+    <span class="flex items-center gap-2 text-sm font-semibold">
+      <mat-icon class="!text-lg">shopping_bag</mat-icon>
+      <span i18n="@@storefront.cart.itemCount">{store.cartCount(), plural, =1 {1 item} other {{{store.cartCount()}} items}}</span>
+    </span>
+    <span class="text-sm font-semibold">
+      {{ store.cartEstimatedTotal() | currency: (store.storeInfo()?.currency || '₦') : 'symbol' : '1.0-0' }}
+    </span>
+  </button>
+}

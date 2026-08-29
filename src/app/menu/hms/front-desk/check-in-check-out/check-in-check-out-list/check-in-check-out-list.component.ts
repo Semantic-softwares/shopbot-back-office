@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, OnInit } from '@angular/core';
+import { Component, computed, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -86,6 +86,7 @@ export interface CheckInOutReservation {
     MatTooltipModule,
   ],
   templateUrl: './check-in-check-out-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./check-in-check-out-list.component.scss']
 })
 export class CheckInCheckOutListComponent implements OnInit {

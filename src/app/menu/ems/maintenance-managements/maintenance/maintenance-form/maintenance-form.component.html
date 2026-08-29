@@ -63,7 +63,7 @@
                 <div class="mt-4">
                   <app-property-manager-selector
                     [control]="$any(reporterGroup.controls['reportedByUserId'])"
-                    [storeId]="storeStore.selectedStore()?._id"
+                    [storeId]="$safeNavigationMigration(storeStore.selectedStore()?._id)"
                     [preloadedManager]="preloadedManagerForSelector()"
                     label="Staff Reporter">
                   </app-property-manager-selector>
@@ -74,7 +74,7 @@
                 <div class="mt-4">
                   <app-property-manager-selector
                     [control]="$any(reporterGroup.controls['reportedByUserId'])"
-                    [storeId]="storeStore.selectedStore()?._id"
+                    [storeId]="$safeNavigationMigration(storeStore.selectedStore()?._id)"
                     [preloadedManager]="preloadedManagerForSelector()"
                     [label]="reportedByType() === 'MANAGER' ? 'Manager Reporter' : 'Admin Reporter'">
                   </app-property-manager-selector>
@@ -170,7 +170,7 @@
               <div>
                 <app-property-manager-selector
                   [control]="$any(infoGroup.controls['assignedTo'])"
-                  [storeId]="storeStore.selectedStore()?._id"
+                  [storeId]="$safeNavigationMigration(storeStore.selectedStore()?._id)"
                   [preloadedManager]="preloadedAssignedToForSelector()"
                   label="Assigned Staff">
                 </app-property-manager-selector>

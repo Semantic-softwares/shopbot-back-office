@@ -1,0 +1,64 @@
+@if (queue().length > 0) {
+  @let order = queue()[0];
+  <div class="fixed top-4 right-4 z-[9999] w-[340px] max-w-[92vw] overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black/10">
+    <div
+      class="flex items-center gap-2 px-4 py-2 text-white"
+      [class.bg-orange-500]="!order.isAddition"
+      [class.bg-blue-600]="order.isAddition"
+    >
+      <mat-icon class="!text-lg animate-pulse">notifications_active</mat-icon>
+      <span class="text-sm font-semibold">
+        {{ order.isAddition ? 'Items added to your table' : 'New table order' }}
+      </span>
+      @if (queue().length > 1) {
+        <span class="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-xs font-medium">+{{ queue().length - 1 }} more</span>
+      }
+    </div>
+
+    <!-- Tapping the body opens the order so it can be reviewed before deciding. -->
+    <button type="button" class="block w-full px-4 py-3 text-left hover:bg-gray-50" (click)="view(order)">
+      <p class="text-lg font-bold text-gray-900">{{ order.tableName }}</p>
+      <p class="text-sm text-gray-500">
+        {{ order.itemCount }} item{{ order.itemCount === 1 ? '' : 's' }}
+        @if (order.itemPreview?.length) {
+          — {{ order.itemPreview.join(', ') }}@if (order.itemCount > order.itemPreview.length) {, …}
+        }
+      </p>
+      <p class="mt-1 text-xs text-gray-400">Tap to review the order</p>
+    </button>
+
+    <div class="flex gap-2 border-t border-gray-100 px-4 py-3">
+      @if (order.isAddition) {
+        <!-- Already this employee's table — nothing to claim, just go to it. -->
+        <button mat-stroked-button class="!flex-1" (click)="decline(order)">Dismiss</button>
+        <button mat-flat-button color="primary" class="!flex-1" (click)="view(order)">
+          View order
+        </button>
+      } @else {
+        <!-- "Open" rather than "Decline": reviewing the order first is the
+             common case, and the order stays claimable by anyone either way. -->
+        <button
+          mat-stroked-button
+          class="!flex-1"
+          [disabled]="claiming()"
+          (click)="view(order)"
+        >
+          Open
+        </button>
+        <button
+          mat-flat-button
+          color="primary"
+          class="!flex-1"
+          [disabled]="claiming()"
+          (click)="accept(order)"
+        >
+          @if (claiming()) {
+            <mat-icon class="animate-spin !text-base">refresh</mat-icon>
+          } @else {
+            Accept
+          }
+        </button>
+      }
+    </div>
+  </div>
+}

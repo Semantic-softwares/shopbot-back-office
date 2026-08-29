@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -54,6 +54,7 @@ import {
     MatDividerModule,
     PageHeaderComponent
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './room-types-list.component.html'
 })
 export class RoomTypesListComponent {

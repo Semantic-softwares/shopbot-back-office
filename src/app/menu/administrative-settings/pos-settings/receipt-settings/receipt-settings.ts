@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -29,6 +29,7 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
     PageHeaderComponent,
   ],
   templateUrl: './receipt-settings.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './receipt-settings.scss',
 })
 export class ReceiptSettings implements OnInit {

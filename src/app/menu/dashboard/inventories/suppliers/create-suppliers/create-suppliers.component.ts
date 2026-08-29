@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -31,6 +31,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     MatSnackBarModule
 ],
   templateUrl: './create-suppliers.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './create-suppliers.component.scss'
 })
 export class CreateSuppliersComponent implements OnInit {

@@ -32,7 +32,7 @@
             <span matPrefix>{{ storeStore.selectedStore()?.currency }}&nbsp;</span>
             <input matInput 
               currencyMask
-              [options]="{ prefix: storeStore.selectedStore()?.currency }"
+              [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
               step="0.01"
               formControlName="costPrice">
             @if (form.get('costPrice')?.hasError('required')) {
@@ -48,7 +48,7 @@
             <span matPrefix>{{ storeStore.selectedStore()?.currency }}&nbsp;</span>
             <input matInput 
               currencyMask
-              [options]="{ prefix: storeStore.selectedStore()?.currency }"
+              [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
               step="0.01"
               formControlName="sellingPrice">
             @if (form.get('sellingPrice')?.hasError('required')) {

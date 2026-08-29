@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { SuppliersService } from '../../../../../shared/services/suppliers.service';
@@ -10,6 +10,7 @@ import { StoreStore } from '../../../../../shared/stores/store.store';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './supplier-details.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './supplier-details.component.scss'
 })
 export class SupplierDetailsComponent implements OnInit {

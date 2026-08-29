@@ -85,7 +85,7 @@
                                     
                                     (selectionChange)="onRoomChange(i, $event.value)">
                                     <mat-option value="">-- Select Room --</mat-option>
-                                    @for (r of filterRoomsByType(getRoomsFormArray()?.at(i)?.get('roomType')?.value, i);
+                                    @for (r of filterRoomsByType($safeNavigationMigration(getRoomsFormArray()?.at(i)?.get('roomType')?.value), i);
                                     track r._id) {
                                     <mat-option [value]="r._id">
                                         {{r.name + " " + r.roomNumber }}
@@ -180,7 +180,7 @@
                             <mat-form-field appearance="outline" class="w-full">
                                 <mat-label>Price</mat-label>
                                 <input matInput currencyMask
-                                    [options]="{ prefix: storeStore!.selectedStore()?.currency }"
+                                    [options]="{ prefix: $safeNavigationMigration(storeStore!.selectedStore()?.currency) }"
                                     formControlName="totalPrice" placeholder="0.00"
                                     class="text-xs text-right font-semibold" readonly>
                                 <span matPrefix class="text-gray-600"> {{storeStore!.selectedStore()?.currency}}</span>
@@ -189,7 +189,7 @@
                                     <mat-icon class="text-sm">edit</mat-icon>
                                 </button>
                                 <mat-hint>
-                                    Total: {{ price(i) | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2'
+                                    Total: {{ price(i) | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2'
                                     }}
                                 </mat-hint>
                             </mat-form-field>
@@ -221,12 +221,12 @@
                                 @if (rateInfo.hasRatePlan) {
                                 <div class="flex items-center gap-1 text-gray-500">
                                     <span>Base:</span>
-                                    <span class="line-through">{{ rateInfo.originalPrice | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}/night</span>
-                                    <span class="text-green-700 font-semibold">→ {{ rateInfo.inventoryRate | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}/night</span>
+                                    <span class="line-through">{{ rateInfo.originalPrice | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}/night</span>
+                                    <span class="text-green-700 font-semibold">→ {{ rateInfo.inventoryRate | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}/night</span>
                                 </div>
                                 } @else {
                                 <div class="flex items-center gap-1 text-gray-500">
-                                    <span>{{ rateInfo.inventoryRate | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}/night × {{ rateInfo.numberOfNights }} nights</span>
+                                    <span>{{ rateInfo.inventoryRate | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}/night × {{ rateInfo.numberOfNights }} nights</span>
                                 </div>
                                 }
                                 <!-- Always show per-night breakdown -->
@@ -237,7 +237,7 @@
                                     <div class="flex justify-between">
                                         <span class="text-gray-400">{{ night.date | date: 'EEE, MMM d' }}</span>
                                         <span [class]="night.source === 'rate_plan_day_of_week' || night.source === 'inventory' ? 'text-green-600 font-semibold' : 'text-gray-600'">
-                                            {{ night.rate | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}
+                                            {{ night.rate | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
                                             @if (night.source === 'rate_plan_day_of_week') {
                                             <span class="text-[8px]">★</span>
                                             } @else if (night.source === 'inventory') {
@@ -248,7 +248,7 @@
                                     }
                                     <div class="flex justify-between mt-1 border-t border-gray-200 pt-1 font-semibold text-gray-700">
                                         <span>Total ({{ rateInfo.numberOfNights }} nights)</span>
-                                        <span>{{ rateInfo.totalRate | currency:storeStore!.selectedStore()?.currency:'symbol':'1.2-2' }}</span>
+                                        <span>{{ rateInfo.totalRate | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}</span>
                                     </div>
                                 </div>
                                 }

@@ -5,7 +5,7 @@
     <!-- Store Header -->
     <div class="text-center mb-4 pb-4 border-b border-dashed border-gray-400">
       @if (storeStore.selectedStore()?.logo) {
-        <img [src]="storeStore.selectedStore()?.logo" alt="Store Logo" class="h-12 w-12 object-contain mx-auto mb-2">
+        <img [src]="$safeNavigationMigration(storeStore.selectedStore()?.logo)" alt="Store Logo" class="h-12 w-12 object-contain mx-auto mb-2">
       }
       <h3 class="text-base font-bold uppercase mb-1">{{ storeStore.selectedStore()?.name || 'Store Name' }}</h3>
       @if (storeStore.selectedStore()?.contactInfo) {

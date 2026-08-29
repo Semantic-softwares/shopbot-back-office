@@ -128,6 +128,25 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
+  /** Patches the cached session user (both the in-memory subject and sessionStorage) without a re-login. */
+  updateCurrentUser(partial: Partial<User>): void {
+    const current = this.currentUserSubject.value;
+    if (!current) return;
+    const updated = { ...current, ...partial };
+    this.sessionStorage.setItem('currentUser', updated);
+    this.currentUserSubject.next(updated);
+  }
+
+  /** Self-toggled "I'm on duty" — gates who gets alerted about new table orders. */
+  toggleDuty(isOnDuty: boolean): Observable<{ isOnDuty: boolean }> {
+    return this.http
+      .patch<{ isOnDuty: boolean }>(`${environment.apiUrl}/merchants/me/duty`, { isOnDuty })
+      .pipe(map((res) => {
+        this.updateCurrentUser({ isOnDuty: res.isOnDuty });
+        return res;
+      }));
+  }
+
   login(email: string, password: string): Observable<User> {
     return this.http.post<{access_token: string, user: User}>(`${environment.apiUrl}/auth/login?user=merchant`, { email, password })
       .pipe(map(response => {

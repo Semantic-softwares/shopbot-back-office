@@ -1,0 +1,35 @@
+<div class="px-6 pt-6 pb-2">
+  <h2 class="text-lg font-semibold" style="color: var(--sf-text, #111827)" i18n="@@storefront.nameDialog.title">
+    What's your name?
+  </h2>
+  <p class="mt-1 text-sm" style="color: var(--sf-muted, #6b7280)" i18n="@@storefront.nameDialog.subtitle">
+    So the staff know who to bring the order out to.
+  </p>
+</div>
+
+<div class="px-6 py-3">
+  <input
+    type="text"
+    placeholder="Full name"
+    i18n-placeholder="@@storefront.nameDialog.placeholder"
+    autofocus
+    class="w-full rounded-lg px-3 py-2.5 text-sm outline-none"
+    style="border: 1px solid var(--sf-border, #e5e7eb)"
+    [ngModel]="name()"
+    (ngModelChange)="name.set($event)"
+    (keyup.enter)="submit()"
+  />
+</div>
+
+<div class="flex items-center justify-end gap-2 px-6 pb-6 pt-2">
+  <button
+    type="button"
+    class="rounded-lg px-4 py-2.5 text-sm font-semibold disabled:opacity-40"
+    style="background: var(--sf-accent, #111827); color: var(--sf-on-accent, #fff)"
+    [disabled]="!canSubmit()"
+    (click)="submit()"
+    i18n="@@storefront.nameDialog.continue"
+  >
+    Continue
+  </button>
+</div>

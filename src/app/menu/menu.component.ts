@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, effect, computed, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, effect, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -26,6 +26,7 @@ import { ModuleKey } from '../shared/models';
     ToolbarComponent,
   ],
   templateUrl: './menu.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './menu.component.scss',
 })
 export class MenuComponent implements OnInit, OnDestroy {

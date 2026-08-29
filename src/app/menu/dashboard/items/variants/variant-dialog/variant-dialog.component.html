@@ -87,7 +87,7 @@
             <div>
               <span class="font-medium">{{option.name}}</span>
               <span class="ml-2 text-sm text-gray-500">{{option.price | currency:
-                storeStore.selectedStore()?.currency}}</span>
+                $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
             </div>
             <a mat-icon-button color="warn" (click)="removeOption(option)">
               <mat-icon>close</mat-icon>

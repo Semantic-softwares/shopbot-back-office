@@ -1,4 +1,4 @@
-import { Component, effect, inject, OnInit } from '@angular/core';
+import { Component, effect, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 import { firstValueFrom, from, switchMap } from 'rxjs';
 import {
@@ -33,6 +33,7 @@ import { map } from 'rxjs';
     MatIconModule,
     MatProgressSpinnerModule
 ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './store-settings.component.html',
 })
 export class StoreSettingsComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,6 +12,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { OrderService } from '../../../../../shared/services/orders.service';
 import { StoreService } from '../../../../../shared/services/store.service';
+import { AuthService } from '../../../../../shared/services/auth.service';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { MatListModule } from "@angular/material/list";
 
@@ -21,6 +22,7 @@ import { MatListModule } from "@angular/material/list";
   templateUrl: './receipts-details.component.html',
   styleUrl: './receipts-details.component.scss',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     MatCardModule,
@@ -44,6 +46,118 @@ export class ReceiptsDetailsComponent {
   private location = inject(Location);
 
   exporting = signal(false);
+  claiming = signal(false);
+
+  private authService = inject(AuthService);
+
+  /** Self-orders are the only ones an employee claims; POS sales already have an owner. */
+  isSelfOrder = computed(() => this.orderResource.value()?.salesChannel === 'Qrcode');
+
+  /**
+   * Whether anyone has taken this order. Keyed on `status`, not on the staff
+   * reference: `tableAssignment.staff` is only an object when the endpoint
+   * populates it, and comes back as a bare ObjectId otherwise — reading
+   * `staff._id` off that yields undefined and would leave the Accept card up
+   * even after a successful claim.
+   */
+  isAssigned = computed(() => this.orderResource.value()?.tableAssignment?.status === 'assigned');
+
+  /** Handles both a populated staff object and a bare ObjectId reference. */
+  assignedStaffId = computed(() => {
+    const staff = this.orderResource.value()?.tableAssignment?.staff;
+    if (!staff) return null;
+    return typeof staff === 'string' ? staff : staff._id ? String(staff._id) : null;
+  });
+
+  /** Name of the employee serving it — only available when staff is populated. */
+  assignedStaffName = computed(() => {
+    const staff = this.orderResource.value()?.tableAssignment?.staff;
+    return typeof staff === 'object' && staff?.name ? staff.name : null;
+  });
+
+  /** True when the signed-in employee is the one already serving it. */
+  isMine = computed(() => {
+    const assigned = this.assignedStaffId();
+    return !!assigned && assigned === this.authService.currentUserValue?._id;
+  });
+
+  /** Only an unclaimed self-order can be accepted. */
+  canAccept = computed(() => this.isSelfOrder() && !this.isAssigned());
+
+  /**
+   * Claim this order. The backend enforces first-to-claim atomically and
+   * answers 409 if someone else got there first, so a stale screen can't
+   * steal a table that's already taken.
+   */
+  acceptOrder(): void {
+    const order = this.orderResource.value();
+    if (!order?._id) return;
+
+    this.claiming.set(true);
+    this.orderService.claimOrder(order._id).subscribe({
+      next: (result) => {
+        this.claiming.set(false);
+        if (result.success) {
+          this.snackBar.open('You are now serving this table', 'Close', { duration: 4000 });
+          // Flip the card immediately rather than waiting on the refetch — the
+          // claim already succeeded server-side, so the UI shouldn't keep
+          // offering an Accept button while the reload is in flight.
+          this.markAssignedLocally();
+        } else {
+          this.snackBar.open(
+            result.assignedTo ? `Already taken by ${result.assignedTo}` : 'Someone else already took this order',
+            'Close',
+            { duration: 5000 },
+          );
+        }
+        // Refresh either way so the screen reflects who actually holds it.
+        this.orderResource.reload();
+      },
+      error: (err) => {
+        this.claiming.set(false);
+        const taken = err?.error?.assignedTo;
+        this.snackBar.open(
+          taken ? `Already taken by ${taken}` : 'Could not accept this order',
+          'Close',
+          { duration: 5000 },
+        );
+        this.orderResource.reload();
+      },
+    });
+  }
+
+  /**
+   * Mark the loaded order as assigned to the current user without a round
+   * trip. The server is the source of truth — a reload always follows — this
+   * just avoids a window where the Accept button is still showing for an
+   * order this employee has already successfully claimed.
+   */
+  private markAssignedLocally(): void {
+    // update() is only valid while the resource actually holds a value.
+    if (!this.orderResource.hasValue()) return;
+
+    const user = this.authService.currentUserValue;
+    this.orderResource.update((order: any) =>
+      order
+        ? {
+            ...order,
+            staff: order.staff ?? user,
+            tableAssignment: {
+              ...(order.tableAssignment || {}),
+              status: 'assigned',
+              staff: user ? { _id: user._id, name: user.name } : order.tableAssignment?.staff,
+              assignedAt: new Date().toISOString(),
+            },
+          }
+        : order,
+    );
+  }
+
+  /** Declining is local only — the order stays open for any other employee. */
+  declineOrder(): void {
+    this.snackBar.open('Left for another team member', 'Close', { duration: 3000 });
+    this.goBack();
+  }
 
   orderResource = rxResource({
     params: () => ({
@@ -191,10 +305,10 @@ export class ReceiptsDetailsComponent {
 
     // Generate products list
     const productsHTML = order.cart?.products?.map((item: any) => {
-      const optionsHTML = item.options?.length > 0 
-        ? item.options.map((opt: any) => 
-            `<div class="option-line">  + ${opt.name} ${opt.price ? '(' + formatCurrency(opt.price) + ')' : ''} x${opt.quantity}</div>`
-          ).join('') 
+      const optionsHTML = item.options?.length > 0
+        ? item.options.map((opt: any) =>
+            `<div class="option-line">  + ${opt.optionItemName || opt.name} ${opt.price ? '(' + formatCurrency(opt.price) + ')' : ''} x${opt.quantity}</div>`
+          ).join('')
         : '';
       
       const subtotal = this.getProductSubtotal(item);
@@ -575,9 +689,9 @@ export class ReceiptsDetailsComponent {
 
     // Generate products table rows
     const productsRows = order.cart?.products?.map((item: any, index: number) => {
-      const optionsText = item.options?.length > 0 
-        ? `<br><small style="color: #666;">${item.options.map((opt: any) => 
-            `+ ${opt.name} ${opt.price ? '(' + formatCurrency(opt.price) + ')' : ''} x${opt.quantity}`
+      const optionsText = item.options?.length > 0
+        ? `<br><small style="color: #666;">${item.options.map((opt: any) =>
+            `+ ${opt.optionItemName || opt.name} ${opt.price ? '(' + formatCurrency(opt.price) + ')' : ''} x${opt.quantity}`
           ).join('<br>')}</small>`
         : '';
       

@@ -30,6 +30,7 @@ export class AdministrativeSettings {
     { path: 'info', label: 'General', icon: 'business', iconColor: 'text-blue-600', module: null },
     { path: 'notifications', label: 'Notifications', icon: 'notifications', iconColor: 'text-red-600', module: null },
     { path: 'pos-settings', label: 'Point of Sale', icon: 'print', iconColor: 'text-green-600', module: 'POS' as ModuleKey },
+    { path: 'self-order', label: 'Self-Order Menu', icon: 'qr_code_2', iconColor: 'text-orange-600', module: 'POS' as ModuleKey },
     { path: 'team', label: 'Team', icon: 'people', iconColor: 'text-purple-600', module: null },
     { path: 'billing', label: 'Billing', icon: 'payment', iconColor: 'text-yellow-600', module: null },
   ];

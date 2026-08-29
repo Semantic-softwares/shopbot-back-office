@@ -1,4 +1,4 @@
-import { Component, Inject, inject, ViewChild } from '@angular/core';
+import { Component, Inject, inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,6 +22,7 @@ import { VariantDialogComponent } from '../../../variants/variant-dialog/variant
     MatIconModule,
     NoRecordComponent
 ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="p-6">
       <div class="flex items-center justify-between mb-4">

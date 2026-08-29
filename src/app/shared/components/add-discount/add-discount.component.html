@@ -24,7 +24,7 @@
         <input 
           matInput 
           currencyMask
-          [options]="{ prefix: storeStore.selectedStore()?.currency + ' ' }"
+          [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) + ' ' }"
           formControlName="value" 
           [placeholder]="valueLabel"
         />

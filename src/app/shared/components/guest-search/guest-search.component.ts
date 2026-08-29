@@ -1,4 +1,4 @@
-import { Component, input, output, OnInit, inject, signal, OnDestroy } from '@angular/core';
+import { Component, input, output, OnInit, inject, signal, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -39,6 +39,7 @@ import { GetGuestNamePipe } from "../../pipes/get-guest-name.pipe";
     GetGuestNamePipe
 ],
   templateUrl: './guest-search.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./guest-search.component.scss'],
 })
 export class GuestSearchComponent implements OnInit, OnDestroy {

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, effect } from '@angular/core';
+import { Component, inject, signal, computed, effect, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -54,6 +54,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
     GetGuestNamePipe,
     PageHeaderComponent
 ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './reservations-list.component.html'
 })
 export class ReservationsListComponent {

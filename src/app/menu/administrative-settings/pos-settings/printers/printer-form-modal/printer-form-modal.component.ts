@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
@@ -19,6 +19,7 @@ import { StoreStore } from '../../../../../shared/stores/store.store';
 @Component({
   selector: 'app-printer-form-modal',
   templateUrl: './printer-form-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./printer-form-modal.component.scss'],
   standalone: true,
   imports: [

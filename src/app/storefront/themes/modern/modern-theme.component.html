@@ -1,0 +1,66 @@
+<div
+  class="relative flex flex-col items-center justify-end gap-2 px-4 pb-6 pt-16 text-center"
+  style="background-size: cover; background-position: center; min-height: 220px"
+  [style.background-image]="
+    store.themeSettings()['heroImage']
+      ? 'linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.65)), url(' + store.themeSettings()['heroImage'] + ')'
+      : null
+  "
+  [style.background-color]="store.themeSettings()['heroImage'] ? null : 'var(--sf-accent, #111827)'"
+>
+  <div class="absolute right-4 top-4">
+    <app-storefront-language-switcher variant="inverted" />
+  </div>
+
+  @if (store.storeInfo()?.logo) {
+    <img
+      [src]="store.storeInfo()!.logo"
+      [alt]="store.storeInfo()!.name"
+      class="h-14 w-14 rounded-full object-cover"
+      style="border: 2px solid #fff"
+    />
+  }
+  <h1 class="text-2xl font-extrabold" style="color: #fff">{{ store.storeInfo()?.name }}</h1>
+  @if (store.table(); as table) {
+    <p
+      class="rounded-full px-3 py-1 text-xs font-semibold"
+      style="background: rgba(255,255,255,0.2); color: #fff"
+      i18n="@@storefront.common.tableLabel"
+    >
+      Table {{ table.name }}
+    </p>
+  }
+</div>
+
+<nav class="sticky top-0 z-20 flex gap-2 overflow-x-auto px-4 py-3" style="background: var(--sf-bg, #f9fafb)">
+  @for (section of store.menu(); track section._id) {
+    @if (section.foods.length > 0) {
+      <button
+        type="button"
+        [attr.data-nav-id]="section._id"
+        class="flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold"
+        style="border: 1px solid var(--sf-border, #e5e7eb)"
+        [style.background]="activeSectionId() === section._id ? 'var(--sf-accent, #111827)' : 'transparent'"
+        [style.color]="activeSectionId() === section._id ? 'var(--sf-on-accent, #fff)' : 'var(--sf-text, #111827)'"
+        (click)="scrollTo(section._id)"
+      >
+        {{ section.name }}
+      </button>
+    }
+  }
+</nav>
+
+<main class="space-y-8 px-4 pb-28 pt-2">
+  @for (section of store.menu(); track section._id) {
+    @if (section.foods.length > 0) {
+      <section [id]="'sf-section-' + section._id">
+        <h2 class="mb-3 text-lg font-bold" style="color: var(--sf-text, #111827)">{{ section.name }}</h2>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          @for (product of section.foods; track product._id) {
+            <app-storefront-product-card [product]="product" [currency]="store.storeInfo()?.currency || '₦'" />
+          }
+        </div>
+      </section>
+    }
+  }
+</main>

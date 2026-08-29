@@ -72,7 +72,7 @@
                 <div class="flex justify-between items-center text-sm">
                   <span class="text-gray-600">Last Synced:</span>
                   <span class="text-gray-900">
-                    {{ channexStatus()?.channex?.lastSyncAt | date: 'MMM d, y h:mm a' }}
+                    {{ $safeNavigationMigration(channexStatus()?.channex?.lastSyncAt) | date: 'MMM d, y h:mm a' }}
                   </span>
                 </div>
                 <button 
@@ -308,7 +308,7 @@
               <p class="text-sm text-gray-600 mb-1">Last Sync</p>
               <p class="text-lg font-semibold text-gray-900">
                 @if (channexStatus()?.channex?.lastSyncAt) {
-                  {{ channexStatus()?.channex?.lastSyncAt | date: 'short' }}
+                  {{ $safeNavigationMigration(channexStatus()?.channex?.lastSyncAt) | date: 'short' }}
                 } @else {
                   Never
                 }

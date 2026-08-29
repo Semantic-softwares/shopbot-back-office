@@ -13,6 +13,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { SocketService } from '../../services/socket.service';
+import { FirebasePushService } from '../../services/firebase-push.service';
 import { HotelNotificationService, HotelNotification } from '../../services/hotel-notification.service';
 import { StoreStore } from '../../stores/store.store';
 
@@ -38,6 +39,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private authService = inject(AuthService);
   private socketService = inject(SocketService);
+  private firebasePushService = inject(FirebasePushService);
   private notificationService = inject(HotelNotificationService);
   private storeStore = inject(StoreStore);
   private snackBar = inject(MatSnackBar);
@@ -55,6 +57,30 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   public currentUser = toSignal(this.authService.currentUser, {
     initialValue: null,
   });
+
+  /** Self-toggled "I'm on duty" — gates who gets alerted about new table orders. */
+  protected readonly isOnDuty = computed(() => this.currentUser()?.isOnDuty ?? false);
+  protected readonly togglingDuty = signal(false);
+
+  toggleDuty(): void {
+    const next = !this.isOnDuty();
+    this.togglingDuty.set(true);
+    this.authService.toggleDuty(next).subscribe({
+      next: () => {
+        this.togglingDuty.set(false);
+        this.snackBar.open(next ? 'You\'re on duty — you\'ll be alerted about new table orders' : 'You\'re off duty', 'Close', { duration: 3000 });
+        if (next) {
+          // Best-effort — a no-op until real Firebase Web config is in place
+          // (see FirebasePushService), and never blocks the duty toggle itself.
+          this.firebasePushService.requestPermissionAndRegister();
+        }
+      },
+      error: () => {
+        this.togglingDuty.set(false);
+        this.snackBar.open('Could not update duty status', 'Close', { duration: 3000 });
+      },
+    });
+  }
 
   /** User initials for avatar (e.g. "AO" from "Alex Onozor") */
   public userInitials = computed(() => {
@@ -80,6 +106,15 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Load initial unread count
     this.loadUnreadCount();
+
+    // Someone already on duty when the app loads (duty persists server-side
+    // across sessions) would otherwise never be asked for push permission —
+    // the toggle only asks on the off→on transition, and their next click
+    // turns duty OFF. Ask here too so an already-on-duty session still ends up
+    // with a registered token.
+    if (this.isOnDuty()) {
+      this.firebasePushService.requestPermissionAndRegister();
+    }
 
     // Subscribe to real-time hotel notifications from socket
     this.socketSub = this.socketService.hotelNotification$.subscribe((data) => {

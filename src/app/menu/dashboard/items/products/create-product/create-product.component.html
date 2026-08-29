@@ -128,7 +128,7 @@
 
             <div class="flex justify-between items-center bg-green-50 p-4 rounded">
               <span class="font-medium text-gray-900">Profit:</span>
-              <span class="text-lg font-medium text-green-700">{{profit() | currency: storeStore.selectedStore()?.currency}}</span>
+              <span class="text-lg font-medium text-green-700">{{profit() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
               <input type="hidden" formControlName="profit">
             </div>
           </div>
@@ -171,6 +171,16 @@
               <mat-label>Barcode</mat-label>
               <input matInput formControlName="barcode">
             </mat-form-field>
+          </div>
+
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="text-sm font-medium text-gray-900">Self-Order Menu</h4>
+                <p class="text-xs text-gray-500">Show this product on the public QR-code menu customers order from.</p>
+              </div>
+              <mat-slide-toggle formControlName="availableForSelfOrder" color="primary"></mat-slide-toggle>
+            </div>
           </div>
 
           <!-- Variants Section -->

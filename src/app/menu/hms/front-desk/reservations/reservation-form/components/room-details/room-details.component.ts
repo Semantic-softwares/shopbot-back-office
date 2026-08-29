@@ -8,6 +8,7 @@ import {
   OnInit,
   ResourceRef,
   effect,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -81,6 +82,7 @@ import { GuestService } from '../../../../../../../shared/services/guest.service
   ],
   templateUrl: './room-details.component.html',
   styleUrl: './room-details.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-US' }],
 })
 export class RoomDetailsComponent {

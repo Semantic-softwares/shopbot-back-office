@@ -51,7 +51,7 @@
 
           <ng-container matColumnDef="paymentAmount">
             <mat-header-cell *matHeaderCellDef>Payment Amount</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.paymentAmount | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{element.paymentAmount | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="refundTransactions">
@@ -61,12 +61,12 @@
 
           <ng-container matColumnDef="refundAmount">
             <mat-header-cell *matHeaderCellDef>Refund Amount</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.refundAmount | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{element.refundAmount | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="netAmount">
             <mat-header-cell *matHeaderCellDef>Net Amount</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.netAmount | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{element.netAmount | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
           </ng-container>
 
           <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>

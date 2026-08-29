@@ -8,6 +8,7 @@ import {
   output,
   inject,
   OnInit,
+  ChangeDetectionStrategy
 } from '@angular/core';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,6 +21,7 @@ import { FormGroup, FormControl } from '@angular/forms';
   selector: 'app-employee-selector',
   standalone: true,
   imports: [MatFormFieldModule, MatSelectModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <mat-form-field appearance="outline" class="w-full">
       <mat-label>All employees</mat-label>

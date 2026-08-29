@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed, HostListener } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -80,6 +80,7 @@ interface DragSelection {
     CurrencyPipe,
   ],
   templateUrl: './reservations-calendar.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './reservations-calendar.scss',
 })
 export class ReservationsCalendar implements OnInit {

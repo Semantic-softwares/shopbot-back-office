@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -53,6 +53,7 @@ export interface OccupiedRoom extends Omit<Room, 'currentGuest' | 'currentReserv
     GuestSearchComponent,
   ],
   templateUrl: './guest-selection-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './guest-selection-dialog.component.scss'
 })
 export class GuestSelectionDialogComponent implements OnInit {

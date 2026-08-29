@@ -5,7 +5,7 @@
         <div>
           <div class="text-sm text-slate-500">Total Overdue</div>
           <div class="mt-2 text-3xl font-semibold text-slate-900">
-            {{ summary?.totalOverdueAmount | currency: currencyCode(): 'symbol':'1.2-2' }}
+            {{ $safeNavigationMigration(summary?.totalOverdueAmount) | currency: currencyCode(): 'symbol':'1.2-2' }}
           </div>
           <div class="mt-2 text-xs text-slate-500">Across all leases</div>
         </div>
@@ -59,7 +59,7 @@
             {{ summary?.oldestUnpaidInvoiceDays ?? 0 }} <span class="text-lg font-medium text-slate-600">days</span>
           </div>
           <div class="mt-2 text-xs text-slate-500">
-            Since {{ summary?.oldestUnpaidInvoiceDate | date: 'MMM dd, yyyy' }}
+            Since {{ $safeNavigationMigration(summary?.oldestUnpaidInvoiceDate) | date: 'MMM dd, yyyy' }}
           </div>
         </div>
         <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-100">

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -27,6 +27,7 @@ import { SubscriptionService } from '../../../../../shared/services/subscription
     MatSnackBarModule,
   ],
   templateUrl: './cancel-subscription-dialog.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './cancel-subscription-dialog.scss',
 })
 export class CancelSubscriptionDialogComponent {

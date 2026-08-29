@@ -11,7 +11,7 @@
   @if (termsGroup.get('propertyCategory')?.value) {
     <mat-form-field appearance="outline" class="w-full">
       <mat-label>Property Category</mat-label>
-      <input matInput [value]="termsGroup.get('propertyCategory')?.value" readonly>
+      <input matInput [value]="$safeNavigationMigration(termsGroup.get('propertyCategory')?.value)" readonly>
     </mat-form-field>
   }
 

@@ -1,0 +1,35 @@
+<header
+  class="relative flex flex-col items-center gap-2 px-4 pb-6 pt-10 text-center"
+  style="border-bottom: 1px solid var(--sf-border, #e5e7eb)"
+>
+  <div class="absolute right-4 top-4">
+    <app-storefront-language-switcher />
+  </div>
+
+  @if (store.storeInfo()?.logo) {
+    <img [src]="store.storeInfo()!.logo" [alt]="store.storeInfo()!.name" class="h-16 w-16 rounded-full object-cover" />
+  }
+  <h1 class="text-xl font-bold tracking-wide" style="color: var(--sf-text, #111827)">{{ store.storeInfo()?.name }}</h1>
+  @if (store.table(); as table) {
+    <p class="text-xs uppercase tracking-widest" style="color: var(--sf-muted, #9ca3af)" i18n="@@storefront.common.tableLabel">
+      Table {{ table.name }}
+    </p>
+  }
+</header>
+
+<main class="mx-auto max-w-lg space-y-8 px-4 pb-28 pt-6">
+  @for (section of store.menu(); track section._id) {
+    @if (section.foods.length > 0) {
+      <section>
+        <h2 class="mb-3 text-sm font-bold uppercase tracking-widest" style="color: var(--sf-accent, #111827)">
+          {{ section.name }}
+        </h2>
+        <div class="space-y-3">
+          @for (product of section.foods; track product._id) {
+            <app-storefront-product-card [product]="product" [currency]="store.storeInfo()?.currency || '₦'" />
+          }
+        </div>
+      </section>
+    }
+  }
+</main>

@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,6 +9,7 @@ import { SubscriptionService } from '../../services/subscription.service';
   selector: 'app-subscription-expiring-banner',
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './subscription-expiring-banner.component.html',
 })
 export class SubscriptionExpiringBannerComponent {

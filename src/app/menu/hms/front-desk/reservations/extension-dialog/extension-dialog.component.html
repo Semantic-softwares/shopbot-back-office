@@ -161,7 +161,7 @@
                             matInput
                             type="number"
                             min="1"
-                            [max]="availability()?.pricingBreakdown?.originalRate"
+                            [max]="$safeNavigationMigration(availability()?.pricingBreakdown?.originalRate)"
                             step="0.01"
                             formControlName="discountedRate"
                             placeholder="Enter discounted rate">

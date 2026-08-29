@@ -28,7 +28,7 @@
 
             <!-- Table Selection -->
             @if (displayedTable()) {
-            <button matButton="outlined" (click)="onSelectTable()" [matTooltip]="displayedTable()?.name" class="!flex-1">
+            <button matButton="outlined" (click)="onSelectTable()" [matTooltip]="$safeNavigationMigration(displayedTable()?.name)" class="!flex-1">
                 <mat-icon>table_restaurant</mat-icon>
                 <span class="text-xs truncate max-w-[60px]">{{ displayedTable()?.name }}</span>
             </button>

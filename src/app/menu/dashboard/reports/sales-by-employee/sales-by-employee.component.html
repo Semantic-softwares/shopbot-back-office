@@ -39,12 +39,12 @@
 
           <ng-container matColumnDef="grossSales">
             <mat-header-cell *matHeaderCellDef>Gross Sales</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.grossSales | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{element.grossSales | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="refunds">
             <mat-header-cell *matHeaderCellDef>Refunds</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.refunds | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{element.refunds | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="discounts">
@@ -54,7 +54,7 @@
 
           <ng-container matColumnDef="netSales">
             <mat-header-cell *matHeaderCellDef>Net Sales</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.netSales |  currency: storeStore.selectedStore()?.currency}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{element.netSales |  currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="receipts">
@@ -64,7 +64,7 @@
 
           <ng-container matColumnDef="averageSale">
             <mat-header-cell *matHeaderCellDef>Average Sale</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.averageSale | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{element.averageSale | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
           </ng-container>
 
       

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -26,6 +26,7 @@ import { StoreStore } from '../../shared/stores/store.store';
     MatExpansionModule,
   ],
   templateUrl: './pos.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './pos.scss',
 })
 export class Pos {

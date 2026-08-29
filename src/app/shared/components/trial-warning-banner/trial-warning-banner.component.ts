@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,6 +9,7 @@ import { FeatureGatingService } from '../../services/feature-gating.service';
   selector: 'app-trial-warning-banner',
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trial-warning-banner.component.html',
 })
 export class TrialWarningBannerComponent {

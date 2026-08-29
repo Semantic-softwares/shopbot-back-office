@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -38,6 +38,7 @@ import { Observable, of, startWith, map } from 'rxjs';
     RouterModule,
   ],
   templateUrl: './add-restock.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['../restock.component.scss']
 })
 export class RestockComponent implements OnInit {

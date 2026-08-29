@@ -20,6 +20,10 @@
         </mat-form-field>
       </div>
       <div class="flex gap-3 justify-end">
+        <button mat-stroked-button (click)="downloadAllQrCodes()">
+          <mat-icon>qr_code_2</mat-icon>
+          DOWNLOAD ALL QR CODES
+        </button>
         <button mat-raised-button color="primary" (click)="addTable()">
           <mat-icon>add</mat-icon>
           ADD TABLE
@@ -90,6 +94,18 @@
                 <button mat-menu-item (click)="editTable(table)">
                   <mat-icon>edit</mat-icon>
                   <span>Edit</span>
+                </button>
+                <button mat-menu-item (click)="showQrCode(table)">
+                  <mat-icon>qr_code_2</mat-icon>
+                  <span>Generate QR Code</span>
+                </button>
+                <button mat-menu-item (click)="downloadQrPdf(table)">
+                  <mat-icon>download</mat-icon>
+                  <span>Download PDF</span>
+                </button>
+                <button mat-menu-item (click)="downloadQrPdf(table, true)">
+                  <mat-icon>refresh</mat-icon>
+                  <span>Regenerate PDF</span>
                 </button>
                 <button mat-menu-item (click)="deleteTable(table)">
                   <mat-icon>delete</mat-icon>

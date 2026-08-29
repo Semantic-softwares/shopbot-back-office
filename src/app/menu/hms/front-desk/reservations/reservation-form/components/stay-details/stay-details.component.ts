@@ -10,6 +10,7 @@ import {
   OnInit,
   untracked,
   AfterViewInit,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -49,6 +50,7 @@ import { ActivatedRoute } from '@angular/router';
   ],
   templateUrl: './stay-details.component.html',
   styleUrls: ['./stay-details.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   viewProviders: [
     { provide: ControlContainer, useExisting: FormGroupDirective },
   ], // Key step

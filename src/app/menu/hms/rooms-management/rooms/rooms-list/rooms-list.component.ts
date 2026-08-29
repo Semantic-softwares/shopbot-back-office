@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -60,6 +60,7 @@ import {
     PageHeaderComponent
   ],
   templateUrl: './rooms-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './rooms-list.component.scss'
 })
 export class RoomsListComponent {

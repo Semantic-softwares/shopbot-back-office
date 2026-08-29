@@ -1,0 +1,152 @@
+<div class="flex max-h-[88vh] flex-col" style="background: var(--sf-surface, #fff)">
+  <div class="mx-auto mt-2 h-1 w-10 flex-shrink-0 rounded-full" style="background: var(--sf-border, #e5e7eb)"></div>
+
+  <div class="flex-1 overflow-y-auto px-4 pb-4 pt-3">
+    <div class="mb-3 flex items-start justify-between gap-3">
+      <h2 class="text-lg font-semibold" style="color: var(--sf-text, #111827)">{{ product.name }}</h2>
+      <button type="button" (click)="close()" class="flex-shrink-0">
+        <mat-icon style="color: var(--sf-muted, #6b7280)">close</mat-icon>
+      </button>
+    </div>
+
+    @if (product.photos?.[0]) {
+      <img [src]="product.photos[0]" [alt]="product.name" class="mb-3 h-44 w-full rounded-xl object-cover" />
+    }
+
+    @if (product.description) {
+      <p class="mb-4 text-sm" style="color: var(--sf-muted, #6b7280)">{{ product.description }}</p>
+    }
+
+    @for (group of product.options; track group._id) {
+      <div class="mb-4">
+        <div class="mb-2 flex items-center justify-between">
+          <h3 class="text-sm font-semibold" style="color: var(--sf-text, #111827)">{{ group.name }}</h3>
+          <span
+            class="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+            [style.background]="groupValidity()[group._id] ? 'var(--sf-muted-bg, #f3f4f6)' : '#fee2e2'"
+            [style.color]="groupValidity()[group._id] ? 'var(--sf-muted, #6b7280)' : '#dc2626'"
+          >
+            {{ groupBadgeLabel(group) }}
+          </span>
+        </div>
+
+        <div class="space-y-2">
+          @for (item of group.options; track item._id) {
+            @if (isSingleSelect(group)) {
+              <button
+                type="button"
+                class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm"
+                style="border: 1px solid var(--sf-border, #e5e7eb)"
+                [style.border-color]="isSelected(group, item._id) ? 'var(--sf-accent, #111827)' : 'var(--sf-border, #e5e7eb)'"
+                (click)="selectSingle(group, item._id)"
+              >
+                <span class="flex items-center gap-2">
+                  <mat-icon class="!text-lg" style="color: var(--sf-accent, #111827)">
+                    {{ isSelected(group, item._id) ? 'radio_button_checked' : 'radio_button_unchecked' }}
+                  </mat-icon>
+                  {{ item.name }}
+                </span>
+                @if (item.price) {
+                  <span style="color: var(--sf-muted, #6b7280)">+{{ item.price | currency: data.currency : 'symbol' : '1.0-0' }}</span>
+                }
+              </button>
+            } @else {
+              <div
+                class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm"
+                style="border: 1px solid var(--sf-border, #e5e7eb)"
+                [style.border-color]="isSelected(group, item._id) ? 'var(--sf-accent, #111827)' : 'var(--sf-border, #e5e7eb)'"
+              >
+                <button type="button" class="flex flex-1 items-center gap-2 text-left" (click)="toggleMulti(group, item._id)">
+                  <mat-icon class="!text-lg" style="color: var(--sf-accent, #111827)">
+                    {{ isSelected(group, item._id) ? 'check_box' : 'check_box_outline_blank' }}
+                  </mat-icon>
+                  <span>
+                    {{ item.name }}
+                    @if (item.price) {
+                      <span
+                        class="block text-xs"
+                        style="color: var(--sf-muted, #6b7280)"
+                        i18n="@@storefront.option.priceEach"
+                      >
+                        {{ item.price | currency: data.currency : 'symbol' : '1.0-0' }} each
+                      </span>
+                    }
+                  </span>
+                </button>
+
+                @if (isSelected(group, item._id)) {
+                  <div class="flex flex-shrink-0 items-center gap-2">
+                    <button
+                      type="button"
+                      class="flex h-7 w-7 items-center justify-center rounded-full"
+                      style="border: 1px solid var(--sf-border, #e5e7eb)"
+                      (click)="decrementOption(group, item._id, $event)"
+                    >
+                      <mat-icon class="!text-base">remove</mat-icon>
+                    </button>
+                    <span class="w-4 text-center text-sm" style="color: var(--sf-text, #111827)">{{ optionQuantity(group, item._id) }}</span>
+                    <button
+                      type="button"
+                      class="flex h-7 w-7 items-center justify-center rounded-full"
+                      style="border: 1px solid var(--sf-border, #e5e7eb)"
+                      (click)="incrementOption(group, item._id, $event)"
+                    >
+                      <mat-icon class="!text-base">add</mat-icon>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+      </div>
+    }
+
+    <div class="mb-2">
+      <h3 class="mb-2 text-sm font-semibold" style="color: var(--sf-text, #111827)" i18n="@@storefront.product.notes">Notes</h3>
+      <input
+        type="text"
+        placeholder="e.g. no onions, extra spicy"
+        i18n-placeholder="@@storefront.product.notesPlaceholder"
+        class="w-full rounded-lg px-3 py-2 text-sm outline-none"
+        style="border: 1px solid var(--sf-border, #e5e7eb)"
+        [ngModel]="notes()"
+        (ngModelChange)="notes.set($event)"
+      />
+    </div>
+  </div>
+
+  <div class="flex-shrink-0 border-t px-4 py-3" style="border-color: var(--sf-border, #e5e7eb)">
+    <div class="mb-3 flex items-center justify-center gap-4">
+      <button
+        type="button"
+        class="flex h-9 w-9 items-center justify-center rounded-full"
+        style="border: 1px solid var(--sf-border, #e5e7eb)"
+        (click)="decrement()"
+      >
+        <mat-icon>remove</mat-icon>
+      </button>
+      <span class="w-6 text-center text-base font-semibold" style="color: var(--sf-text, #111827)">{{ quantity() }}</span>
+      <button
+        type="button"
+        class="flex h-9 w-9 items-center justify-center rounded-full"
+        style="border: 1px solid var(--sf-border, #e5e7eb)"
+        (click)="increment()"
+      >
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+
+    <button
+      type="button"
+      class="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold"
+      style="background: var(--sf-accent, #111827); color: var(--sf-on-accent, #fff)"
+      [disabled]="!canAdd()"
+      [style.opacity]="canAdd() ? 1 : 0.5"
+      (click)="addToOrder()"
+      i18n="@@storefront.product.addToOrderWithPrice"
+    >
+      Add to order — {{ lineTotal() | currency: data.currency : 'symbol' : '1.0-0' }}
+    </button>
+  </div>
+</div>

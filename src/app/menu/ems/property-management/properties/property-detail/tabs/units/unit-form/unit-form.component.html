@@ -182,7 +182,7 @@
             <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">SPECIFICATIONS</div>
             <mat-card-content class="px-4 pb-4">
               <div class="grid grid-cols-12 gap-4">
-                @if (!isNonLivable(form.get('type')?.value)) {
+                @if (!isNonLivable($safeNavigationMigration(form.get('type')?.value))) {
                   <mat-form-field appearance="outline" class="col-span-3">
                     <mat-label>Bedrooms</mat-label>
                     <input matInput type="number" formControlName="bedrooms" min="0">

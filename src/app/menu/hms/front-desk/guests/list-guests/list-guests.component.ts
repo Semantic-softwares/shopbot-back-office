@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -43,6 +43,7 @@ import { PageHeaderComponent } from '../../../../../shared/components/page-heade
     PageHeaderComponent
   ],
   templateUrl: './list-guests.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './list-guests.component.scss'
 })
 export class ListGuestsComponent {

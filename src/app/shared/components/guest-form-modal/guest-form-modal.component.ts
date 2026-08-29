@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -42,6 +42,7 @@ import { GuestSearchComponent } from '../guest-search/guest-search.component';
     GuestSearchComponent
   ],
   templateUrl: './guest-form-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './guest-form-modal.component.scss'
 })
 export class GuestFormModalComponent implements OnInit, OnDestroy {

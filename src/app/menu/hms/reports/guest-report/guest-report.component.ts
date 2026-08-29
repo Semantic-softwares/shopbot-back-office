@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
@@ -61,6 +61,7 @@ const currencySymbolToCode: Record<string, string> = {
     PageHeaderComponent,
   ],
   templateUrl: './guest-report.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './guest-report.component.scss',
 })
 export class GuestReportComponent {

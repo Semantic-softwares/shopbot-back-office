@@ -1,0 +1,11 @@
+<button
+  type="button"
+  class="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+  [class]="customClass"
+  [style.background]="variant === 'inverted' ? 'rgba(255,255,255,0.2)' : 'var(--sf-muted-bg, #f3f4f6)'"
+  [style.color]="variant === 'inverted' ? '#fff' : 'var(--sf-text, #111827)'"
+  (click)="open()"
+>
+  <span>{{ currentLanguage.flag }}</span>
+  <span>{{ currentLanguage.code.toUpperCase() }}</span>
+</button>

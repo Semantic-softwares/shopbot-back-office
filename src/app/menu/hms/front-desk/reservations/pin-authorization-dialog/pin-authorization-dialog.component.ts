@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -33,6 +33,7 @@ export interface PinAuthorizationDialogResult {
     MatProgressSpinnerModule
 ],
   templateUrl: './pin-authorization-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./pin-authorization-dialog.component.scss']
 })
 export class PinAuthorizationDialogComponent {

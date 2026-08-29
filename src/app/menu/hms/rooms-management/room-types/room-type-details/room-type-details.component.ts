@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnDestroy, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -34,6 +34,7 @@ import { PageHeaderComponent } from '../../../../../shared/components/page-heade
     MatTabsModule,
     PageHeaderComponent
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './room-type-details.component.html'
 })
 export class RoomTypeDetailsComponent implements OnDestroy {

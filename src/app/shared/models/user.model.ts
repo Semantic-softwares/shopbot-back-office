@@ -38,6 +38,8 @@ export interface User {
   stores?: string[]; // Array of store IDs the merchant belongs to
   phoneCredentials?: PhoneCredentials[];
   isOwner?: boolean; // Flag to assign Super Admin role during signup
+  // Self-toggled — "I'm working the floor right now, alert me about new table orders."
+  isOnDuty?: boolean;
 }
 
 export interface Shipping {

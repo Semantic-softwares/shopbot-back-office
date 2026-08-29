@@ -44,17 +44,17 @@
 
                 <ng-container matColumnDef="netSales">
                     <mat-header-cell *matHeaderCellDef>Net Sales</mat-header-cell>
-                    <mat-cell *matCellDef="let element">{{element.netSales | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+                    <mat-cell *matCellDef="let element">{{element.netSales | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
                 </ng-container>
 
                 <ng-container matColumnDef="costOfGoods">
                     <mat-header-cell *matHeaderCellDef>Cost of Goods</mat-header-cell>
-                    <mat-cell *matCellDef="let element">{{element.costOfGoods | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+                    <mat-cell *matCellDef="let element">{{element.costOfGoods | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
                 </ng-container>
 
                 <ng-container matColumnDef="grossProfit">
                     <mat-header-cell *matHeaderCellDef>Gross Profit</mat-header-cell>
-                    <mat-cell *matCellDef="let element">{{element.grossProfit | currency: storeStore.selectedStore()?.currency}}</mat-cell>
+                    <mat-cell *matCellDef="let element">{{element.grossProfit | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
                 </ng-container>
 
                 <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>

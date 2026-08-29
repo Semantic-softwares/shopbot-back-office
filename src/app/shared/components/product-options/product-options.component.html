@@ -56,7 +56,7 @@
                 @if (option.inStock) {
                   <div class="flex items-center gap-2">
                     <span class="text-sm text-gray-600">
-                      +{{ option.price | currency: product.store?.currency  }}
+                      +{{ option.price | currency: $safeNavigationMigration(product.store?.currency)  }}
                     </span>
                     @if (option.selected) {
                       <div class="flex items-center gap-2">

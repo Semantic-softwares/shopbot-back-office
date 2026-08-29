@@ -10,6 +10,22 @@
     <ng-container actions>
       <date-range-selector />
       <app-employee-selector />
+      <mat-form-field appearance="outline" class="!w-48">
+        <mat-label>Sales Channel</mat-label>
+        <mat-select [value]="selectedSalesChannel()" (selectionChange)="onSalesChannelChange($event.value)">
+          @for (option of salesChannelOptions; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="!w-48">
+        <mat-label>Order Type</mat-label>
+        <mat-select [value]="selectedOrderType()" (selectionChange)="onOrderTypeChange($event.value)">
+          @for (option of orderTypeOptions; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
       <button matButton  (click)="dataSource.reload()">
           <mat-icon class="mr-2">refresh</mat-icon>
           Refresh
@@ -97,6 +113,15 @@
               <td mat-cell *matCellDef="let element">{{element?.orderedBy?.name ?? 'Admin'}}</td>
             </ng-container>
 
+            <!-- The employee handling the order. Same person as "Ordered by"
+                 on a POS sale; the customer vs. their server on a self-order. -->
+            <ng-container matColumnDef="servedBy">
+              <th mat-header-cell *matHeaderCellDef>Served by</th>
+              <td mat-cell *matCellDef="let element">
+                {{ element?.servedBy?.name ?? 'Unassigned' }}
+              </td>
+            </ng-container>
+
             <ng-container matColumnDef="category">
               <th mat-header-cell *matHeaderCellDef>Status</th>
               <td mat-cell *matCellDef="let element">
@@ -122,6 +147,22 @@
             <ng-container matColumnDef="ordertype">
               <th mat-header-cell *matHeaderCellDef>Order Type</th>
               <td mat-cell *matCellDef="let element">{{element.ordertype | titlecase}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="salesChannel">
+              <th mat-header-cell *matHeaderCellDef>Channel</th>
+              <td mat-cell *matCellDef="let element">
+                <span
+                  class="inline-block px-2 py-1 rounded-full text-xs font-semibold"
+                  [ngClass]="{
+                    'bg-purple-100 text-purple-800': element.salesChannel === 'Qrcode',
+                    'bg-blue-100 text-blue-800': element.salesChannel === 'Point of Sale',
+                    'bg-gray-100 text-gray-800': element.salesChannel !== 'Qrcode' && element.salesChannel !== 'Point of Sale'
+                  }"
+                >
+                  {{ element.salesChannel === 'Qrcode' ? 'QR Code' : element.salesChannel }}
+                </span>
+              </td>
             </ng-container>
 
             <ng-container matColumnDef="total">

@@ -31,7 +31,7 @@
                   <mat-option [value]="room._id">
                     {{ room.name || room.roomNumber }}
                     @if (room.priceOverride) {
-                      <span class="text-xs text-gray-500 ml-1">({{ room.priceOverride | currency: storeStore.selectedStore()?.currency }})</span>
+                      <span class="text-xs text-gray-500 ml-1">({{ room.priceOverride | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }})</span>
                     }
                   </mat-option>
                 }
@@ -123,7 +123,7 @@
               </mat-date-range-input>
               <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-date-range-picker #picker></mat-date-range-picker>
-              <mat-hint>{{ calculateNights(element.get('checkInDate')?.value, element.get('checkOutDate')?.value) }}
+              <mat-hint>{{ calculateNights($safeNavigationMigration(element.get('checkInDate')?.value), $safeNavigationMigration(element.get('checkOutDate')?.value)) }}
                 night(s)</mat-hint>
             </mat-form-field>
 
@@ -131,7 +131,7 @@
             <div class="flex items-center gap-1 ml-auto">
               <a mat-icon-button
                 matTooltip="{{ !hasPrimaryGuest() && element.get('ageGrade')?.value === 'child' ? 'Assign primary guest first' : 'Edit Guest' }}"
-                (click)="editSharer(i, element.get('ageGrade')?.value)"
+                (click)="editSharer(i, $safeNavigationMigration(element.get('ageGrade')?.value))"
                 [disabled]="!hasPrimaryGuest() && element.get('ageGrade')?.value === 'child'"
                 [ngClass]="!hasPrimaryGuest() && element.get('ageGrade')?.value === 'child' ? 'text-gray-300' : 'text-blue-600 hover:bg-blue-50'">
                 <mat-icon class="material-icons-outlined">edit</mat-icon>
@@ -207,11 +207,11 @@
             </div>
             @if (breakdown.hasRatePlan) {
             <div class="text-xs text-gray-500 mb-2">
-                Avg: <span class="font-semibold text-green-700">{{ breakdown.averageRate | currency:storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}</span>/night
+                Avg: <span class="font-semibold text-green-700">{{ breakdown.averageRate | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}</span>/night
             </div>
             } @else {
             <div class="text-xs text-gray-500 mb-2">
-                {{ breakdown.averageRate | currency:storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}/night × {{ breakdown.numberOfNights }} nights
+                {{ breakdown.averageRate | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}/night × {{ breakdown.numberOfNights }} nights
             </div>
             }
             <div class="border-t border-gray-200 pt-2 space-y-1">
@@ -219,7 +219,7 @@
                 <div class="flex justify-between text-xs">
                     <span class="text-gray-500">{{ night.date | date: 'EEE, MMM d' }}</span>
                     <span [class]="night.source === 'rate_plan_day_of_week' || night.source === 'inventory' ? 'text-green-600 font-semibold' : 'text-gray-700'">
-                        {{ night.rate | currency:storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}
+                        {{ night.rate | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}
                         @if (night.source === 'rate_plan_day_of_week') {
                         <span class="text-[9px]">★</span>
                         } @else if (night.source === 'inventory') {
@@ -230,7 +230,7 @@
                 }
                 <div class="flex justify-between pt-2 border-t border-gray-200 font-semibold text-sm text-gray-800">
                     <span>Total ({{ breakdown.numberOfNights }} nights)</span>
-                    <span>{{ breakdown.totalRate | currency:storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}</span>
+                    <span>{{ breakdown.totalRate | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}</span>
                 </div>
             </div>
             <!-- Legend -->

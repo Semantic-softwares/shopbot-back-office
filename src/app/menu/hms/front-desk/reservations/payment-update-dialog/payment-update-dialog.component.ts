@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -52,6 +52,7 @@ export interface PaymentUpdateResult {
     CurrencyMaskModule
   ],
   templateUrl: './payment-update-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './payment-update-dialog.component.scss'
 })
 export class PaymentUpdateDialogComponent implements OnInit {

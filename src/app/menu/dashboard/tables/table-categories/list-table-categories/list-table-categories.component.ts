@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, ViewChild } from '@angular/core';
+import { Component, inject, signal, computed, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatTableModule, MatTable } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
@@ -26,6 +26,7 @@ import { CreateTableCategoryComponent } from '../modals/create-table-category/cr
   templateUrl: './list-table-categories.component.html',
   styleUrls: ['./list-table-categories.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTableModule,
     MatPaginatorModule,

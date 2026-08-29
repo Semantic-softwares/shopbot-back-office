@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -47,6 +47,7 @@ import { StoreStore } from '../../../../shared/stores/store.store';
     RouterModule
 ],
   templateUrl: './staff-account.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './staff-account.scss',
 })
 export class StaffAccount {

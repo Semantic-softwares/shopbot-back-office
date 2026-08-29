@@ -39,7 +39,7 @@
             @for (item of summaryItems; track item) {
               <div class="bg-gray-50 rounded-lg p-4 text-center border">
                 <h3 class="text-gray-600 font-medium mb-2 text-sm">{{item | titlecase}}</h3>
-                <p class="text-xl font-semibold mb-1">{{summaryData.value()[item].value | currency: storeStore.selectedStore()?.currency}}</p>
+                <p class="text-xl font-semibold mb-1">{{summaryData.value()[item].value | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</p>
                 <p class="text-xs text-gray-500">{{summaryData.value()[item].percentage | percent }}</p>
               </div>
             }
@@ -57,7 +57,7 @@
               class="!h-auto !min-h-[140px] !px-4 !py-6 border-b">
               <div class="text-center">
                 <h3 class="text-gray-600 font-medium mb-2">{{item | titlecase}}</h3>
-                <p class="text-2xl font-semibold mb-1">{{summaryData.value()[item].value | currency: storeStore.selectedStore()?.currency}}</p>
+                <p class="text-2xl font-semibold mb-1">{{summaryData.value()[item].value | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</p>
                 <p class="text-sm text-gray-500">{{summaryData.value()[item].percentage | percent }}</p>
               </div>
             </a>
@@ -179,25 +179,25 @@
                 <mat-cell *matCellDef="let element">
                   @switch (column) {
                     @case ('grossSales') {
-                      {{element[column] | currency: storeStore.selectedStore()?.currency}}
+                      {{element[column] | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}
                     }
                     @case ('refunds') {
-                      {{element[column] | currency: storeStore.selectedStore()?.currency}}
+                      {{element[column] | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}
                     }
                     @case ('discounts') {
-                      {{element[column] | currency: storeStore.selectedStore()?.currency}}
+                      {{element[column] | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}
                     }
                     @case ('taxes') {
-                      {{element[column] | currency: storeStore.selectedStore()?.currency}}
+                      {{element[column] | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}
                     }
                     @case ('costOfGoods') {
-                      {{element[column] | currency: storeStore.selectedStore()?.currency}}
+                      {{element[column] | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}
                     }
                     @case ('netSales') {
-                      {{element[column] | currency: storeStore.selectedStore()?.currency}}
+                      {{element[column] | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}
                     }
                     @case ('grossProfit') {
-                      {{element[column] | currency: storeStore.selectedStore()?.currency}}
+                      {{element[column] | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}
                     }
                     @case ('margin') {
                       {{element[column] | percent:'1.0-2'}}
@@ -224,15 +224,15 @@
                   </div>
                   <div class="flex justify-between items-center">
                     <span class="font-medium text-gray-600">Gross Sales</span>
-                    <span class="text-gray-900">{{item.grossSales | currency: storeStore.selectedStore()?.currency}}</span>
+                    <span class="text-gray-900">{{item.grossSales | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
                   </div>
                   <div class="flex justify-between items-center">
                     <span class="font-medium text-gray-600">Net Sales</span>
-                    <span class="text-gray-900">{{item.netSales | currency: storeStore.selectedStore()?.currency}}</span>
+                    <span class="text-gray-900">{{item.netSales | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
                   </div>
                   <div class="flex justify-between items-center">
                     <span class="font-medium text-gray-600">Gross Profit</span>
-                    <span class="text-gray-900">{{item.grossProfit | currency: storeStore.selectedStore()?.currency}}</span>
+                    <span class="text-gray-900">{{item.grossProfit | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
                   </div>
                   <div class="flex justify-between items-center pt-2 border-t">
                     <span class="font-medium text-gray-600">Margin</span>

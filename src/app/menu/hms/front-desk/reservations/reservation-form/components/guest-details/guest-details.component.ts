@@ -5,6 +5,7 @@ import {
   inject,
   signal,
   computed,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -38,6 +39,7 @@ import { GetGuestNamePipe } from "../../../../../../../shared/pipes/get-guest-na
     GetGuestNamePipe
 ],
   templateUrl: './guest-details.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./guest-details.component.scss'],
 })
 export class GuestDetailsComponent {
