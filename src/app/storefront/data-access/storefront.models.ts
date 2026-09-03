@@ -8,6 +8,7 @@ export interface SelfOrderSettings {
   settingsValues: Record<string, any>;
   showWifi?: boolean;
   showContactInfo?: boolean;
+  wifi?: StorefrontWifi;
 }
 
 // Only what a guest would use to find or call the venue. The backend already
@@ -30,6 +31,9 @@ export interface StorefrontStoreInfo {
   currency?: string;
   selfOrderSettings: SelfOrderSettings;
   contactInfo?: StorefrontContactInfo;
+  // The venue-wide network, already resolved server-side. Present on the
+  // browse-only path too, so the card still renders when there's no table.
+  wifi?: StorefrontWifi;
 }
 
 export interface StorefrontWifi {

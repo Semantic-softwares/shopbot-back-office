@@ -3,9 +3,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { StorefrontStore } from '../../data-access/storefront.store';
 
 /**
- * Guest Wi-Fi for the scanned table. Renders nothing at all unless the
- * backend sent a `wifi` block — it only does that when this table has a
- * network name and the store hasn't switched the card off, so there's no
+ * Guest Wi-Fi. Renders nothing at all unless the backend sent a `wifi` block —
+ * it resolves the table's own network over the store's and omits it entirely
+ * when neither is set or the store has switched the card off, so there's no
  * second condition to re-check here.
  */
 @Component({
@@ -17,7 +17,11 @@ import { StorefrontStore } from '../../data-access/storefront.store';
 })
 export class WifiCardComponent {
   protected readonly store = inject(StorefrontStore);
-  protected readonly wifi = computed(() => this.store.table()?.wifi ?? null);
+  // The table's block already carries the resolved network when a table was
+  // scanned; the store's covers the browse-only path, where there is no table.
+  protected readonly wifi = computed(
+    () => this.store.table()?.wifi ?? this.store.storeInfo()?.wifi ?? null,
+  );
 
   /** Which field was just copied, so only that row shows the tick. */
   protected readonly copied = signal<'ssid' | 'password' | null>(null);

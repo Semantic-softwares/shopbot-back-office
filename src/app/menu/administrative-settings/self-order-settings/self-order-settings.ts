@@ -67,6 +67,10 @@ export class SelfOrderSettings implements OnInit {
   // filled in but doesn't want public.
   showWifi = signal(true);
   showContactInfo = signal(true);
+  // The venue-wide network. Most stores run exactly one, so this is the field
+  // they'll actually use — a table's own Wi-Fi overrides it for one area.
+  wifiSsid = signal('');
+  wifiPassword = signal('');
   selectedTemplateSlug = signal<string>('classic');
   settingsValues = signal<Record<string, any>>({});
 
@@ -107,6 +111,8 @@ export class SelfOrderSettings implements OnInit {
       this.autoPrintReceipt.set(store.selfOrderSettings.autoPrintReceipt ?? false);
       this.showWifi.set(store.selfOrderSettings.showWifi ?? true);
       this.showContactInfo.set(store.selfOrderSettings.showContactInfo ?? true);
+      this.wifiSsid.set(store.selfOrderSettings.wifi?.ssid ?? '');
+      this.wifiPassword.set(store.selfOrderSettings.wifi?.password ?? '');
       this.selectedTemplateSlug.set(store.selfOrderSettings.templateSlug || 'classic');
       this.settingsValues.set({ ...(store.selfOrderSettings.settingsValues || {}) });
     }
@@ -310,6 +316,7 @@ export class SelfOrderSettings implements OnInit {
         autoPrintReceipt: this.autoPrintReceipt(),
         showWifi: this.showWifi(),
         showContactInfo: this.showContactInfo(),
+        wifi: { ssid: this.wifiSsid().trim(), password: this.wifiPassword().trim() },
         templateSlug: this.selectedTemplateSlug(),
         settingsValues: this.settingsValues(),
         qrTemplate: {

@@ -58,8 +58,13 @@ export interface Store {
       templateSlug: string;
       settingsValues: Record<string, any>;
       autoPrintReceipt?: boolean;
-      /** Master switch for the guest Wi-Fi card — the data itself lives per-table. */
+      /** Master switch for the guest Wi-Fi card. */
       showWifi?: boolean;
+      /** The venue-wide guest network; a table's own Wi-Fi overrides it. */
+      wifi?: {
+        ssid?: string;
+        password?: string;
+      };
       /** Master switch for the address/phone/email block in the menu footer. */
       showContactInfo?: boolean;
       /**

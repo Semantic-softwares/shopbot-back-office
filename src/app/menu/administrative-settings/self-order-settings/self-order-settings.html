@@ -34,15 +34,32 @@
             </div>
             <mat-slide-toggle [ngModel]="autoPrintReceipt()" (ngModelChange)="autoPrintReceipt.set($event)" color="primary"></mat-slide-toggle>
           </div>
-          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 mt-3">
-            <div>
-              <h4 class="text-sm font-medium text-gray-900">Show guest Wi-Fi</h4>
-              <p class="text-xs text-gray-500">
-                Show the Wi-Fi name and password on the menu. Set them per table when you add or edit a table —
-                a table with no network name shows nothing either way.
-              </p>
+          <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 mt-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="text-sm font-medium text-gray-900">Show guest Wi-Fi</h4>
+                <p class="text-xs text-gray-500">
+                  Show the Wi-Fi name and password on the menu. Leave the network name blank to show nothing.
+                </p>
+              </div>
+              <mat-slide-toggle [ngModel]="showWifi()" (ngModelChange)="showWifi.set($event)" color="primary"></mat-slide-toggle>
             </div>
-            <mat-slide-toggle [ngModel]="showWifi()" (ngModelChange)="showWifi.set($event)" color="primary"></mat-slide-toggle>
+            @if (showWifi()) {
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 mt-3">
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                  <mat-label>Wi-Fi Network Name</mat-label>
+                  <input matInput [ngModel]="wifiSsid()" (ngModelChange)="wifiSsid.set($event)" placeholder="e.g. LE POLE" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                  <mat-label>Wi-Fi Password</mat-label>
+                  <input matInput [ngModel]="wifiPassword()" (ngModelChange)="wifiPassword.set($event)" placeholder="Leave blank for an open network" />
+                </mat-form-field>
+              </div>
+              <p class="mt-2 text-xs text-gray-500">
+                This covers the whole venue. If one area has its own network, set it on that table instead —
+                a table's own Wi-Fi overrides this.
+              </p>
+            }
           </div>
           <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 mt-3">
             <div>
