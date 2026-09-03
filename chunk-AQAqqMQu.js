@@ -1,0 +1,1 @@
+var t=[{path:"",loadComponent:()=>import('./chunk-BTAzyMJQ.js').then(o=>o.StorefrontShellComponent)},{path:"t/:qrToken",loadComponent:()=>import('./chunk-BTAzyMJQ.js').then(o=>o.StorefrontShellComponent)}];export{t as STOREFRONT_ROUTES};

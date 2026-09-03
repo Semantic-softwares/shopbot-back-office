@@ -26,7 +26,6 @@
   "storefront.error.title": "Algo salió mal",
   "storefront.disabled.title": "Los pedidos no están disponibles en este momento",
   "storefront.disabled.message": "Por favor, habla con un miembro del personal para realizar tu pedido.",
-  "storefront.common.tableLabel": " Mesa {$INTERPOLATION} ",
   "storefront.orderStatus.title": " El pedido de tu mesa ",
   "storefront.orderStatus.new": "Pedido recibido",
   "storefront.orderStatus.processing": "Preparando tu pedido",
@@ -38,5 +37,8 @@
   "storefront.orderStatus.acceptedToast": "{$serverName} se está ocupando de tu pedido",
   "storefront.orderStatus.movedTitle": "Tu pedido se ha movido a {$INTERPOLATION}",
   "storefront.orderStatus.movedBody": "Escanea el código QR de tu nueva mesa para ver tu cuenta y seguir pidiendo.",
-  "storefront.orderStatus.movedClose": "Cerrar"
+  "storefront.orderStatus.movedClose": "Cerrar",
+  "storefront.wifi.title": "Wi-Fi para invitados",
+  "storefront.wifi.network": "Red",
+  "storefront.wifi.password": "Contraseña"
 }

@@ -26,7 +26,6 @@
   "storefront.error.title": "Une erreur s'est produite",
   "storefront.disabled.title": "La commande n'est pas disponible pour le moment",
   "storefront.disabled.message": "Veuillez vous adresser à un membre du personnel pour passer votre commande.",
-  "storefront.common.tableLabel": " Table {$INTERPOLATION} ",
   "storefront.orderStatus.title": " La commande de votre table ",
   "storefront.orderStatus.new": "Commande reçue",
   "storefront.orderStatus.processing": "Préparation de votre commande",
@@ -38,5 +37,8 @@
   "storefront.orderStatus.acceptedToast": "{$serverName} s'occupe de votre commande",
   "storefront.orderStatus.movedTitle": "Votre commande a été déplacée vers {$INTERPOLATION}",
   "storefront.orderStatus.movedBody": "Scannez le QR code de votre nouvelle table pour voir votre addition et continuer à commander.",
-  "storefront.orderStatus.movedClose": "Fermer"
+  "storefront.orderStatus.movedClose": "Fermer",
+  "storefront.wifi.title": "Wi-Fi invité",
+  "storefront.wifi.network": "Réseau",
+  "storefront.wifi.password": "Mot de passe"
 }
