@@ -35,15 +35,43 @@ export class TableService {
     return this.http.get<{ qrDataUrl: string; url: string }>(`${this.baseUrl}/tables/${tableId}/qr-code`);
   }
 
-  // Returns a cached Cloudinary URL — generated + cached on the table the
-  // first time it's requested. Pass force=true to rebuild and overwrite it.
-  getTableQrPdf(tableId: string, force = false): Observable<{ url: string }> {
-    return this.http.get<{ url: string }>(`${this.baseUrl}/tables/${tableId}/qr-pdf`, {
-      params: force ? { force: 'true' } : {},
+  /**
+   * Streams a freshly rendered PDF. POST (not GET) because the render takes a
+   * template/size/language body, and a blob (not a Cloudinary URL) because the
+   * server no longer caches these — see TableQrService on the backend for why.
+   * Omitted options fall back to the store's saved QR card defaults.
+   */
+  getTableQrPdf(tableId: string, options: QrRenderOptions = {}): Observable<Blob> {
+    return this.http.post(`${this.baseUrl}/tables/${tableId}/qr-pdf`, options, {
+      responseType: 'blob',
     });
   }
 
-  getStoreTablesQrPdf(storeId: string): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/tables/store/${storeId}/qr-pdf`, { responseType: 'blob' });
+  getStoreTablesQrPdf(storeId: string, options: QrRenderOptions = {}): Observable<Blob> {
+    return this.http.post(`${this.baseUrl}/tables/store/${storeId}/qr-pdf`, options, {
+      responseType: 'blob',
+    });
   }
+}
+
+export interface QrRenderOptions {
+  templateSlug?: string;
+  size?: string;
+  language?: string;
+}
+
+/**
+ * Triggers a browser download for a rendered PDF blob. Shared by the single
+ * and bulk QR exports so both behave identically, and so the object URL is
+ * always revoked (a leaked one pins the whole PDF in memory).
+ */
+export function downloadPdfBlob(blob: Blob, filename: string): void {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
 }

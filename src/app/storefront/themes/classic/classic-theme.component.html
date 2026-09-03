@@ -11,13 +11,17 @@
   }
   <h1 class="text-xl font-bold tracking-wide" style="color: var(--sf-text, #111827)">{{ store.storeInfo()?.name }}</h1>
   @if (store.table(); as table) {
-    <p class="text-xs uppercase tracking-widest" style="color: var(--sf-muted, #9ca3af)" i18n="@@storefront.common.tableLabel">
-      Table {{ table.name }}
-    </p>
+    <!-- The name is printed exactly as staff typed it, with no "Table"
+         prefix: stores routinely name their tables "Table 4" already, and
+         prefixing produced "TABLE TABLE 4" on those menus. -->
+    <p class="text-xs uppercase tracking-widest" style="color: var(--sf-muted, #9ca3af)">{{ table.name }}</p>
   }
 </header>
 
-<main class="mx-auto max-w-lg space-y-8 px-4 pb-28 pt-6">
+<main class="mx-auto max-w-lg px-4 pb-28 pt-6">
+  <app-storefront-wifi-card />
+
+  <div class="space-y-8">
   @for (section of store.menu(); track section._id) {
     @if (section.foods.length > 0) {
       <section>
@@ -32,4 +36,7 @@
       </section>
     }
   }
+  </div>
+
+  <app-storefront-store-footer />
 </main>

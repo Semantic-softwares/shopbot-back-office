@@ -23,7 +23,7 @@ import { Table } from '../../../../../shared/models';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CreateTableComponent } from '../modals/create-table/create-table.component';
-import { TableQrDialogComponent } from '../modals/table-qr-dialog/table-qr-dialog.component';
+import { TableQrDialogComponent, TableQrDialogData } from '../modals/table-qr-dialog/table-qr-dialog.component';
 
 @Component({
   selector: 'app-list-tables',
@@ -167,44 +167,21 @@ export class ListTablesComponent {
   showQrCode(table: Table) {
     this.dialog.open(TableQrDialogComponent, {
       width: '480px',
-      data: { table },
+      data: { table, mode: 'single' } satisfies TableQrDialogData,
     });
   }
 
+  /**
+   * Opens the same dialog as a single table rather than downloading straight
+   * away — the bulk export needs a size and language too, and having the two
+   * paths behave differently was the confusing part.
+   */
   downloadAllQrCodes() {
     const storeId = this.storeStore.selectedStore()?._id;
     if (!storeId) return;
-    this.tableService.getStoreTablesQrPdf(storeId).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'tables-qr.pdf';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      },
-      error: () => {
-        this.snackBar.open('Could not download QR codes', 'Close', {
-          duration: 3000,
-          horizontalPosition: 'end',
-          verticalPosition: 'top',
-        });
-      },
-    });
-  }
-
-  downloadQrPdf(table: Table, force = false) {
-    this.tableService.getTableQrPdf(table._id, force).subscribe({
-      next: ({ url }) => window.open(url, '_blank'),
-      error: () => {
-        this.snackBar.open('Could not generate the QR PDF', 'Close', {
-          duration: 3000,
-          horizontalPosition: 'end',
-          verticalPosition: 'top',
-        });
-      },
+    this.dialog.open(TableQrDialogComponent, {
+      width: '480px',
+      data: { mode: 'bulk' } satisfies TableQrDialogData,
     });
   }
 

@@ -95,17 +95,13 @@
                   <mat-icon>edit</mat-icon>
                   <span>Edit</span>
                 </button>
+                <!-- One entry: the dialog shows the code and handles the PDF,
+                     asking for size and language. "Regenerate" is gone —
+                     every PDF is now rendered fresh, so there is no cached
+                     file left to rebuild. -->
                 <button mat-menu-item (click)="showQrCode(table)">
                   <mat-icon>qr_code_2</mat-icon>
-                  <span>Generate QR Code</span>
-                </button>
-                <button mat-menu-item (click)="downloadQrPdf(table)">
-                  <mat-icon>download</mat-icon>
-                  <span>Download PDF</span>
-                </button>
-                <button mat-menu-item (click)="downloadQrPdf(table, true)">
-                  <mat-icon>refresh</mat-icon>
-                  <span>Regenerate PDF</span>
+                  <span>QR code &amp; print</span>
                 </button>
                 <button mat-menu-item (click)="deleteTable(table)">
                   <mat-icon>delete</mat-icon>

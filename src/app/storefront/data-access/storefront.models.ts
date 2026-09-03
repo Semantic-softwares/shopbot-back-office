@@ -6,6 +6,20 @@ export interface SelfOrderSettings {
   enabled: boolean;
   templateSlug: string;
   settingsValues: Record<string, any>;
+  showWifi?: boolean;
+  showContactInfo?: boolean;
+}
+
+// Only what a guest would use to find or call the venue. The backend already
+// omits this block entirely when the store has filled nothing in (or has the
+// toggle off), so the footer decides whether to render on presence alone.
+export interface StorefrontContactInfo {
+  phone?: string;
+  email?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
 }
 
 export interface StorefrontStoreInfo {
@@ -15,11 +29,21 @@ export interface StorefrontStoreInfo {
   bannerImage?: string;
   currency?: string;
   selfOrderSettings: SelfOrderSettings;
+  contactInfo?: StorefrontContactInfo;
+}
+
+export interface StorefrontWifi {
+  ssid: string;
+  password?: string;
 }
 
 export interface StorefrontTable {
   _id: string;
   name: string;
+  // Present only when this table has a network name AND the store hasn't
+  // switched the card off — the backend does that filtering, so any `wifi`
+  // that arrives here is meant to be shown.
+  wifi?: StorefrontWifi;
 }
 
 export interface StorefrontOptionItem {

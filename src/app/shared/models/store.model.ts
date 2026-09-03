@@ -58,6 +58,21 @@ export interface Store {
       templateSlug: string;
       settingsValues: Record<string, any>;
       autoPrintReceipt?: boolean;
+      /** Master switch for the guest Wi-Fi card — the data itself lives per-table. */
+      showWifi?: boolean;
+      /** Master switch for the address/phone/email block in the menu footer. */
+      showContactInfo?: boolean;
+      /**
+       * The printed QR card design — distinct from `templateSlug` above,
+       * which is the customer-facing web theme. Staff can override size and
+       * language per print; this holds the store's defaults.
+       */
+      qrTemplate?: {
+        slug: string;
+        defaultSize: string;
+        defaultLanguage: string;
+        settingsValues: Record<string, any>;
+      };
     };
   };
   

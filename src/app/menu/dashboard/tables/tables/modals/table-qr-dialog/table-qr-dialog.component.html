@@ -1,39 +1,83 @@
 <div class="flex items-center justify-between px-6 pt-5 pb-1">
-  <h2 mat-dialog-title class="!m-0">QR Code — {{ data.table.name }}</h2>
+  <h2 mat-dialog-title class="!m-0">{{ title() }}</h2>
   <button mat-icon-button (click)="close()" aria-label="Close">
     <mat-icon>close</mat-icon>
   </button>
 </div>
 
 <mat-dialog-content class="flex flex-col items-center gap-4 py-2 px-6">
-  @if (isLoading()) {
-    <div class="flex h-52 w-52 items-center justify-center">
-      <mat-spinner diameter="32"></mat-spinner>
+  @if (data.mode === 'single') {
+    @if (isLoading()) {
+      <div class="flex h-52 w-52 items-center justify-center">
+        <mat-spinner diameter="32"></mat-spinner>
+      </div>
+    } @else if (qrDataUrl()) {
+      <img [src]="qrDataUrl()" alt="Table QR code" class="mx-auto block h-52 w-52 rounded-lg border" />
+    } @else {
+      <p class="text-sm text-gray-500">Could not generate a QR code.</p>
+    }
+  } @else {
+    <div class="flex flex-col items-center gap-2 py-2 text-center">
+      <mat-icon class="!h-10 !w-10 !text-4xl text-gray-400">qr_code_2</mat-icon>
+      <p class="text-sm text-gray-600">
+        One card per table, in a single PDF ready to print and cut.
+      </p>
     </div>
-  } @else if (qrDataUrl()) {
-    <img [src]="qrDataUrl()" alt="Table QR code" class="mx-auto block h-52 w-52 rounded-lg border" />
+  }
+
+  <!-- Staff choose how it prints; the design itself is set by an admin in
+       Self-order settings, so it isn't offered here. -->
+  <div class="grid w-full grid-cols-2 gap-3">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Size</mat-label>
+      <mat-select [value]="selectedSize()" (valueChange)="selectedSize.set($event)">
+        @for (size of sizes(); track size.key) {
+          <mat-option [value]="size.key">
+            {{ size.label }} ({{ size.widthMm }}×{{ size.heightMm }}mm)
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Language</mat-label>
+      <mat-select [value]="selectedLanguage()" (valueChange)="selectedLanguage.set($event)">
+        @for (language of languages(); track language.code) {
+          <mat-option [value]="language.code">{{ language.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  @if (data.mode === 'single') {
     <p class="max-w-xs text-center text-xs text-gray-500">
       Print this and place it on the table. Customers scan it to view the menu and order.
     </p>
-  } @else {
-    <p class="text-sm text-gray-500">Could not generate a QR code.</p>
   }
 </mat-dialog-content>
 
 <mat-dialog-actions align="center" class="gap-2 px-6 pb-5">
-  <button mat-stroked-button class="!flex-1" (click)="copyLink()" [disabled]="!qrUrl()">
-    <span class="inline-flex items-center justify-center gap-1.5">
-      <mat-icon class="!text-lg">link</mat-icon>
-      Copy Link
-    </span>
-  </button>
-  <button mat-flat-button color="primary" class="!flex-1" (click)="downloadPdf()" [disabled]="isDownloading() || isLoading()">
+  @if (data.mode === 'single') {
+    <button mat-stroked-button class="!flex-1" (click)="copyLink()" [disabled]="!qrUrl()">
+      <span class="inline-flex items-center justify-center gap-1.5">
+        <mat-icon class="!text-lg">link</mat-icon>
+        Copy Link
+      </span>
+    </button>
+  }
+  <button
+    mat-flat-button
+    color="primary"
+    class="!flex-1"
+    (click)="downloadPdf()"
+    [disabled]="isDownloading() || isLoading()"
+  >
     <span class="inline-flex items-center justify-center gap-1.5">
       @if (isDownloading()) {
         <mat-spinner diameter="18"></mat-spinner>
       } @else {
         <mat-icon class="!text-lg">download</mat-icon>
-        Download
+        Download PDF
       }
     </span>
   </button>

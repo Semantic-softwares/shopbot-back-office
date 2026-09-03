@@ -2,11 +2,13 @@ import { Component, DestroyRef, ElementRef, effect, inject, signal } from '@angu
 import { StorefrontStore } from '../../data-access/storefront.store';
 import { ProductCardComponent } from '../../components/product-card/product-card.component';
 import { LanguageSwitcherComponent } from '../../components/language-switcher/language-switcher.component';
+import { WifiCardComponent } from '../../components/wifi-card/wifi-card.component';
+import { StoreFooterComponent } from '../../components/store-footer/store-footer.component';
 
 @Component({
   selector: 'app-storefront-modern-theme',
   standalone: true,
-  imports: [ProductCardComponent, LanguageSwitcherComponent],
+  imports: [ProductCardComponent, LanguageSwitcherComponent, WifiCardComponent, StoreFooterComponent],
   templateUrl: './modern-theme.component.html',
   styleUrl: './modern-theme.component.scss',
 })

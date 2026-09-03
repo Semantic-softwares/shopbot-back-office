@@ -64,6 +64,23 @@
           {{ tableForm.get('active')?.value ? 'Table is active and available' : 'Table is inactive' }}
         </span>
       </div>
+
+      <div formGroupName="wifi" class="pt-2">
+        <h3 class="text-sm font-medium text-gray-900">Guest Wi-Fi <span class="font-normal text-gray-500">(optional)</span></h3>
+        <p class="mb-3 text-xs text-gray-500">
+          Shown on this table's self-order menu. Leave the network name blank to show nothing.
+        </p>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Wi-Fi Network Name</mat-label>
+          <input matInput formControlName="ssid" placeholder="e.g. Gesi-Guest">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Wi-Fi Password</mat-label>
+          <input matInput formControlName="password" placeholder="Leave blank for an open network">
+        </mat-form-field>
+      </div>
     </mat-dialog-content>
 
     <mat-dialog-actions class="flex justify-end gap-3 pt-4">
