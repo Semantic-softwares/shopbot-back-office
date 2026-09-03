@@ -66,7 +66,13 @@ export class CreateTableComponent implements OnInit {
       category: ['', Validators.required],
       numberOfGuest: [1, [Validators.required, Validators.min(1), Validators.max(20)]],
       active: [true],
-      store: [this.storeStore.selectedStore()?._id]
+      store: [this.storeStore.selectedStore()?._id],
+      // Optional throughout: a blank network name is the switch that hides
+      // the Wi-Fi card on this table's self-order menu.
+      wifi: this.fb.group({
+        ssid: [''],
+        password: ['']
+      })
     });
   }
 
@@ -76,7 +82,11 @@ export class CreateTableComponent implements OnInit {
       category: typeof table.category === 'object' ? table.category._id : table.category,
       numberOfGuest: table.numberOfGuest,
       active: table.active,
-      storeId: table.storeId
+      storeId: table.storeId,
+      wifi: {
+        ssid: table.wifi?.ssid || '',
+        password: table.wifi?.password || ''
+      }
     });
   }
 

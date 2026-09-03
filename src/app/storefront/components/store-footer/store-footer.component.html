@@ -1,0 +1,37 @@
+@if (contact(); as info) {
+  <footer class="mt-10 pt-6 text-center" style="border-top: 1px solid var(--sf-border, #e5e7eb)">
+    <p class="text-sm font-semibold" style="color: var(--sf-text, #111827)">{{ store.storeInfo()?.name }}</p>
+
+    @if (addressLine()) {
+      <p class="mt-2 flex items-center justify-center gap-1.5 text-xs" style="color: var(--sf-muted, #6b7280)">
+        <mat-icon class="!h-4 !w-4 !text-base leading-4">place</mat-icon>
+        <span>{{ addressLine() }}</span>
+      </p>
+    }
+
+    <div class="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+      @if (info.phone) {
+        <!-- tel:/mailto: rather than plain text — a guest reading this on a
+             phone taps to call instead of copying the number out. -->
+        <a
+          [href]="'tel:' + info.phone"
+          class="flex items-center gap-1.5 text-xs font-medium"
+          style="color: var(--sf-accent, #111827)"
+        >
+          <mat-icon class="!h-4 !w-4 !text-base leading-4">call</mat-icon>
+          <span>{{ info.phone }}</span>
+        </a>
+      }
+      @if (info.email) {
+        <a
+          [href]="'mailto:' + info.email"
+          class="flex min-w-0 items-center gap-1.5 text-xs font-medium"
+          style="color: var(--sf-accent, #111827)"
+        >
+          <mat-icon class="!h-4 !w-4 !text-base leading-4">mail</mat-icon>
+          <span class="truncate">{{ info.email }}</span>
+        </a>
+      }
+    </div>
+  </footer>
+}

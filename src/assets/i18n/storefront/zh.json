@@ -26,7 +26,6 @@
   "storefront.error.title": "出错了",
   "storefront.disabled.title": "当前暂不支持点餐",
   "storefront.disabled.message": "请联系工作人员为您下单。",
-  "storefront.common.tableLabel": " 餐桌 {$INTERPOLATION} ",
   "storefront.orderStatus.title": " 您桌子的订单 ",
   "storefront.orderStatus.new": "订单已收到",
   "storefront.orderStatus.processing": "正在准备您的订单",
@@ -38,5 +37,8 @@
   "storefront.orderStatus.acceptedToast": "{$serverName} 正在为您处理订单",
   "storefront.orderStatus.movedTitle": "您的订单已转至{$INTERPOLATION}",
   "storefront.orderStatus.movedBody": "请扫描新餐桌上的二维码查看账单并继续点餐。",
-  "storefront.orderStatus.movedClose": "关闭"
+  "storefront.orderStatus.movedClose": "关闭",
+  "storefront.wifi.title": "访客 Wi-Fi",
+  "storefront.wifi.network": "网络名称",
+  "storefront.wifi.password": "密码"
 }

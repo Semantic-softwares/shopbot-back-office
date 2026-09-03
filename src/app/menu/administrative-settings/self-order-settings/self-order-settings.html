@@ -34,6 +34,25 @@
             </div>
             <mat-slide-toggle [ngModel]="autoPrintReceipt()" (ngModelChange)="autoPrintReceipt.set($event)" color="primary"></mat-slide-toggle>
           </div>
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 mt-3">
+            <div>
+              <h4 class="text-sm font-medium text-gray-900">Show guest Wi-Fi</h4>
+              <p class="text-xs text-gray-500">
+                Show the Wi-Fi name and password on the menu. Set them per table when you add or edit a table —
+                a table with no network name shows nothing either way.
+              </p>
+            </div>
+            <mat-slide-toggle [ngModel]="showWifi()" (ngModelChange)="showWifi.set($event)" color="primary"></mat-slide-toggle>
+          </div>
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 mt-3">
+            <div>
+              <h4 class="text-sm font-medium text-gray-900">Show address &amp; contact in the footer</h4>
+              <p class="text-xs text-gray-500">
+                Add your address, phone and email to the bottom of the menu, taken from your store's contact details.
+              </p>
+            </div>
+            <mat-slide-toggle [ngModel]="showContactInfo()" (ngModelChange)="showContactInfo.set($event)" color="primary"></mat-slide-toggle>
+          </div>
         </mat-card-content>
       </mat-card>
 
@@ -122,6 +141,184 @@
                   }
                 </div>
               }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <!-- ============================================================
+           Printed QR card design. Separate from the storefront theme
+           above: that styles the web menu, this styles the physical
+           tent card guests scan at the table.
+           ============================================================ -->
+      <mat-card appearance="outlined">
+        <mat-card-content class="pt-4">
+          <h4 class="text-sm font-medium text-gray-900">QR card design</h4>
+          <p class="mb-3 text-xs text-gray-500">
+            The printed card guests scan at the table. Staff can still pick a size and
+            language when printing an individual table.
+          </p>
+
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            @for (template of qrTemplates(); track template.slug) {
+              <button
+                type="button"
+                class="rounded-lg border p-3 text-left transition-colors"
+                [class.border-gray-200]="qrSelectedSlug() !== template.slug"
+                [class.border-2]="qrSelectedSlug() === template.slug"
+                [style.border-color]="qrSelectedSlug() === template.slug ? 'var(--mat-sys-primary)' : null"
+                (click)="selectQrTemplate(template)"
+              >
+                <div class="mb-2 flex h-24 w-full items-center justify-center rounded-md bg-gray-100">
+                  @if (template.previewImage) {
+                    <img [src]="template.previewImage" [alt]="template.name" class="h-full w-full rounded-md object-cover" />
+                  } @else {
+                    <mat-icon class="!text-3xl text-gray-400">qr_code_2</mat-icon>
+                  }
+                </div>
+                <p class="text-sm font-semibold text-gray-900">{{ template.name }}</p>
+                @if (template.description) {
+                  <p class="text-xs text-gray-500">{{ template.description }}</p>
+                }
+              </button>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      @if (qrSelectedTemplate(); as qrTemplate) {
+        <mat-card appearance="outlined">
+          <mat-card-content class="pt-4">
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <!-- Controls -->
+              <div>
+                <h4 class="mb-3 text-sm font-medium text-gray-900">{{ qrTemplate.name }} — appearance</h4>
+
+                <div class="mb-4 grid grid-cols-2 gap-3">
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Default size</mat-label>
+                    <mat-select [value]="qrSize()" (valueChange)="setQrSize($event)">
+                      @for (size of qrAvailableSizes(); track size.key) {
+                        <mat-option [value]="size.key">
+                          {{ size.label }} ({{ size.widthMm }}×{{ size.heightMm }}mm)
+                        </mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Default language</mat-label>
+                    <mat-select [value]="qrLanguage()" (valueChange)="setQrLanguage($event)">
+                      @for (language of qrOptions()?.languages || []; track language.code) {
+                        <mat-option [value]="language.code">{{ language.label }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  @for (field of qrTemplate.settingsSchema; track field.key) {
+                    <div [class.sm:col-span-2]="field.type === 'image' || field.type === 'text'">
+                      @switch (field.type) {
+                        @case ('color') {
+                          <label class="mb-1 block text-xs text-gray-500">{{ field.label }}</label>
+                          <div class="flex items-center gap-2">
+                            <input
+                              type="color"
+                              class="h-9 w-12 rounded border border-gray-200"
+                              [ngModel]="qrSettings()[field.key] || field.default"
+                              (ngModelChange)="updateQrSetting(field.key, $event)"
+                            />
+                            <span class="text-xs text-gray-500">{{ qrSettings()[field.key] || field.default }}</span>
+                          </div>
+                        }
+                        @case ('image') {
+                          <label class="mb-1 block text-xs text-gray-500">{{ field.label }}</label>
+                          <div class="flex items-center gap-3">
+                            @if (qrSettings()[field.key]) {
+                              <img
+                                [src]="qrSettings()[field.key]"
+                                alt=""
+                                class="h-14 w-20 rounded border border-gray-200 object-cover"
+                              />
+                            }
+                            <input
+                              type="file"
+                              accept="image/*"
+                              class="hidden"
+                              #bgInput
+                              (change)="uploadQrBackground($event, field.key)"
+                            />
+                            <button mat-stroked-button type="button" [disabled]="qrUploading()" (click)="bgInput.click()">
+                              @if (qrUploading()) {
+                                <mat-spinner diameter="18"></mat-spinner>
+                              } @else {
+                                {{ qrSettings()[field.key] ? 'Replace' : 'Upload' }}
+                              }
+                            </button>
+                            @if (qrSettings()[field.key]) {
+                              <button mat-button type="button" (click)="updateQrSetting(field.key, '')">Remove</button>
+                            }
+                          </div>
+                        }
+                        @case ('select') {
+                          <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>{{ field.label }}</mat-label>
+                            <mat-select
+                              [ngModel]="qrSettings()[field.key] || field.default"
+                              (ngModelChange)="updateQrSetting(field.key, $event)"
+                            >
+                              @for (option of field.options; track option) {
+                                <mat-option [value]="option">{{ option }}</mat-option>
+                              }
+                            </mat-select>
+                          </mat-form-field>
+                        }
+                        @default {
+                          <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>{{ field.label }}</mat-label>
+                            <input
+                              matInput
+                              [ngModel]="qrSettings()[field.key] || ''"
+                              (ngModelChange)="updateQrSetting(field.key, $event)"
+                              [placeholder]="'Leave blank to use the ' + qrLanguage() + ' default'"
+                            />
+                          </mat-form-field>
+                        }
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Live preview: the real PDF, so there is no drift between
+                   what is shown here and what actually prints. -->
+              <div>
+                <div class="mb-2 flex items-center justify-between">
+                  <h4 class="text-sm font-medium text-gray-900">Preview</h4>
+                  @if (qrPreviewLoading()) {
+                    <span class="flex items-center gap-2 text-xs text-gray-500">
+                      <mat-spinner diameter="14"></mat-spinner> Rendering…
+                    </span>
+                  }
+                </div>
+                <div class="flex min-h-[26rem] items-center justify-center rounded-lg border border-gray-200 bg-gray-50 p-2">
+                  @if (qrPreviewUrl(); as previewUrl) {
+                    <iframe
+                      [src]="previewUrl"
+                      title="QR card preview"
+                      class="h-[26rem] w-full rounded"
+                      style="border: 0"
+                    ></iframe>
+                  } @else {
+                    <p class="text-xs text-gray-400">Preview will appear here.</p>
+                  }
+                </div>
+                <p class="mt-2 text-xs text-gray-500">
+                  Shown with a sample table. The QR here is a placeholder — real cards
+                  encode each table's own code.
+                </p>
+              </div>
             </div>
           </mat-card-content>
         </mat-card>

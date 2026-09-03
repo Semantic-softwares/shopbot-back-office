@@ -40,6 +40,8 @@
     "storefront.disabled.title": "Ordering isn't available right now",
     "storefront.disabled.message": "Please speak to a member of staff to place your order.",
     "storefront.orderStatus.acceptedToast": "{$serverName} is taking care of your order",
-    "storefront.common.tableLabel": " Table {$INTERPOLATION} "
+    "storefront.wifi.title": "Guest Wi-Fi",
+    "storefront.wifi.network": "Network",
+    "storefront.wifi.password": "Password"
   }
 }

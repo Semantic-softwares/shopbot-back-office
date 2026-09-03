@@ -1,0 +1,65 @@
+@if (wifi(); as net) {
+  <!-- Own bottom margin rather than relying on a parent's space-y: the host
+       element still exists when there's no Wi-Fi, and a gap owned by the
+       parent would show up as a blank strip above the menu on those tables. -->
+  <div
+    class="mb-6 rounded-xl p-3.5"
+    style="background: var(--sf-surface, #fff); border: 1px solid var(--sf-border, #e5e7eb)"
+  >
+    <div class="flex items-center gap-2">
+      <div
+        class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
+        style="background: var(--sf-accent, #111827); color: var(--sf-on-accent, #fff)"
+      >
+        <mat-icon class="!h-4 !w-4 !text-base leading-4">wifi</mat-icon>
+      </div>
+      <p
+        class="text-xs font-semibold uppercase tracking-wider"
+        style="color: var(--sf-muted, #6b7280)"
+        i18n="@@storefront.wifi.title"
+      >
+        Guest Wi-Fi
+      </p>
+    </div>
+
+    <div class="mt-3 space-y-2">
+      <button
+        type="button"
+        class="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left"
+        style="background: var(--sf-muted-bg, #f3f4f6)"
+        (click)="copy(net.ssid, 'ssid')"
+      >
+        <span class="min-w-0">
+          <span class="block text-[11px] uppercase tracking-wide" style="color: var(--sf-muted, #9ca3af)" i18n="@@storefront.wifi.network">
+            Network
+          </span>
+          <span class="block truncate text-sm font-semibold" style="color: var(--sf-text, #111827)">{{ net.ssid }}</span>
+        </span>
+        <mat-icon class="!h-5 !w-5 flex-shrink-0 !text-lg leading-5" style="color: var(--sf-muted, #9ca3af)">
+          {{ copied() === 'ssid' ? 'check' : 'content_copy' }}
+        </mat-icon>
+      </button>
+
+      @if (net.password) {
+        <button
+          type="button"
+          class="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left"
+          style="background: var(--sf-muted-bg, #f3f4f6)"
+          (click)="copy(net.password!, 'password')"
+        >
+          <span class="min-w-0">
+            <span class="block text-[11px] uppercase tracking-wide" style="color: var(--sf-muted, #9ca3af)" i18n="@@storefront.wifi.password">
+              Password
+            </span>
+            <!-- Shown in full rather than masked: the point of the card is
+                 that a guest can read it off the screen and type it in. -->
+            <span class="block truncate font-mono text-sm font-semibold" style="color: var(--sf-text, #111827)">{{ net.password }}</span>
+          </span>
+          <mat-icon class="!h-5 !w-5 flex-shrink-0 !text-lg leading-5" style="color: var(--sf-muted, #9ca3af)">
+            {{ copied() === 'password' ? 'check' : 'content_copy' }}
+          </mat-icon>
+        </button>
+      }
+    </div>
+  </div>
+}
