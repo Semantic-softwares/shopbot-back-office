@@ -1,0 +1,1 @@
+import {m as mI,ah as aa,I as Ir,t as tp}from'./main-GWNSJMC4.js';var m=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=mI({type:t,selectors:[["app-property-management"]],decls:1,vars:0,template:function(e,i){e&1&&tp(0,"router-outlet");},dependencies:[aa,Ir],styles:["[_nghost-%COMP%]{display:block}"],changeDetection:1})};export{m as PropertyManagement};

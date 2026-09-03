@@ -1,0 +1,1 @@
+var t=[{path:"",loadComponent:()=>import('./chunk-BJG_IYXl.js').then(o=>o.MessagingComponent)},{path:":threadId",loadComponent:()=>import('./chunk-BJG_IYXl.js').then(o=>o.MessagingComponent)}];export{t as MESSAGING_ROUTES};
