@@ -7,7 +7,7 @@ import { environment } from '../../../environments/environment';
 export interface QrTemplateSettingField {
   key: string;
   label: string;
-  type: 'color' | 'text' | 'select' | 'image' | 'font';
+  type: 'color' | 'text' | 'select' | 'image' | 'font' | 'boolean';
   default?: any;
   options?: any[];
 }

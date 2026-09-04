@@ -237,6 +237,19 @@
                   @for (field of qrTemplate.settingsSchema; track field.key) {
                     <div [class.sm:col-span-2]="field.type === 'image' || field.type === 'text'">
                       @switch (field.type) {
+                        @case ('boolean') {
+                          <!-- Compared against false rather than truthy, so a
+                               setting the store hasn't touched yet still shows
+                               the design's default of on. -->
+                          <div class="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2">
+                            <span class="text-xs text-gray-700">{{ field.label }}</span>
+                            <mat-slide-toggle
+                              color="primary"
+                              [ngModel]="qrSettings()[field.key] !== false"
+                              (ngModelChange)="updateQrSetting(field.key, $event)"
+                            ></mat-slide-toggle>
+                          </div>
+                        }
                         @case ('color') {
                           <label class="mb-1 block text-xs text-gray-500">{{ field.label }}</label>
                           <div class="flex items-center gap-2">
