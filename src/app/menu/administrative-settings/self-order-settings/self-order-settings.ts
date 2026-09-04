@@ -12,6 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSliderModule } from '@angular/material/slider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { StoreService } from '../../../shared/services/store.service';
@@ -45,6 +46,7 @@ import {
     MatSelectModule,
     MatIconModule,
     MatSlideToggleModule,
+    MatSliderModule,
     MatProgressSpinnerModule,
     PageHeaderComponent,
   ],
@@ -160,6 +162,35 @@ export class SelfOrderSettings implements OnInit {
   qrSelectedTemplate = computed(
     () => this.qrTemplates().find((t) => t.slug === this.qrSelectedSlug()) ?? null,
   );
+
+  /**
+   * Settings bucketed into the sections the design declares, in the order the
+   * schema lists them. A design ships twenty-odd controls now — rendering
+   * them as one flat grid made finding anything a scan of the whole form.
+   */
+  qrFieldGroups = computed(() => {
+    const schema = this.qrSelectedTemplate()?.settingsSchema ?? [];
+    const groups: { name: string; fields: QrTemplateSettingField[] }[] = [];
+    for (const field of schema) {
+      const name = field.group || 'Design';
+      const existing = groups.find((g) => g.name === name);
+      if (existing) existing.fields.push(field);
+      else groups.push({ name, fields: [field] });
+    }
+    return groups;
+  });
+
+  /** [min, max, step] for a size control, with sane fallbacks. */
+  sizeBounds(field: QrTemplateSettingField): { min: number; max: number; step: number } {
+    const [min, max, step] = (field.options as number[]) || [];
+    return { min: min ?? 1, max: max ?? 14, step: step ?? 0.1 };
+  }
+
+  /** A size field's current value, falling back to the design's default. */
+  sizeValue(field: QrTemplateSettingField): number {
+    const value = this.qrSettings()[field.key];
+    return typeof value === 'number' ? value : Number(field.default ?? 0);
+  }
 
   /** Only the sizes the chosen design declares support for. */
   qrAvailableSizes = computed(() => {

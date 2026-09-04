@@ -7,15 +7,21 @@ import { environment } from '../../../environments/environment';
 export interface QrTemplateSettingField {
   key: string;
   label: string;
-  type: 'color' | 'text' | 'select' | 'image' | 'font' | 'boolean';
+  type: 'color' | 'text' | 'select' | 'image' | 'font' | 'boolean' | 'size';
   default?: any;
   options?: any[];
+  /** For 'size' fields: [min, max, step], in vmin. */
   /**
    * Image fields only: width ÷ height of the space this photo fills on the
    * printed card, so the crop tool can default to the shape that will
    * actually print rather than letting object-fit crop it again at render.
    */
   aspectRatio?: number;
+  /**
+   * Section this control is filed under in the admin form. A design ships
+   * twenty-odd settings; without grouping they render as one flat grid.
+   */
+  group?: string;
 }
 
 /** A printed QR card design — distinct from a storefront web theme. */

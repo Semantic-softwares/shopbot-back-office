@@ -36,6 +36,18 @@ export class TableService {
   }
 
   /**
+   * Issues a new link for a table and invalidates the old one — every card
+   * already printed for it stops working. Deliberately separate from the
+   * print calls, which never change the link. Confirm with the user first.
+   */
+  resetTableQrToken(tableId: string): Observable<{ qrDataUrl: string; url: string }> {
+    return this.http.post<{ qrDataUrl: string; url: string }>(
+      `${this.baseUrl}/tables/${tableId}/qr-token/reset`,
+      {},
+    );
+  }
+
+  /**
    * Streams a freshly rendered PDF. POST (not GET) because the render takes a
    * template/size/language body, and a blob (not a Cloudinary URL) because the
    * server no longer caches these — see TableQrService on the backend for why.

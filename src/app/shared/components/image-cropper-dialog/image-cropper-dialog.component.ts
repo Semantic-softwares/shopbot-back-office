@@ -9,6 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,9 +20,11 @@ import {
   CropRect,
   DragMode,
   centredCrop,
+  cropScaleOf,
   moveCrop,
   outputSize,
   resizeCrop,
+  scaleCrop,
 } from './crop-geometry';
 
 export interface ImageCropperDialogData {
@@ -48,6 +51,7 @@ export interface ImageCropperDialogData {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatDialogModule,
     MatButtonModule,
     MatIconModule,
@@ -70,8 +74,18 @@ export class ImageCropperDialogComponent implements OnDestroy {
 
   /** Natural size of the source image. */
   private readonly natural = signal({ width: 0, height: 0 });
-  /** Where the fitted image sits inside the stage, in CSS pixels. */
-  private readonly fitted = signal({ left: 0, top: 0, width: 0, height: 0 });
+  /**
+   * Where the fitted image sits inside the stage, in CSS pixels. Compared by
+   * value because it is re-measured on every pointerdown and on every resize
+   * notification, and an unchanged stage should not redraw the overlay.
+   */
+  private readonly fitted = signal(
+    { left: 0, top: 0, width: 0, height: 0 },
+    {
+      equal: (a, b) =>
+        a.left === b.left && a.top === b.top && a.width === b.width && a.height === b.height,
+    },
+  );
   protected readonly crop = signal<CropRect>({ x: 0, y: 0, width: 0, height: 0 });
 
   /** Locked unless the user switches to free crop. */
@@ -82,6 +96,7 @@ export class ImageCropperDialogComponent implements OnDestroy {
 
   private objectUrl: string | null = null;
   private image: HTMLImageElement | null = null;
+  private resize: ResizeObserver | null = null;
   private drag: {
     mode: DragMode;
     startX: number;
@@ -103,6 +118,19 @@ export class ImageCropperDialogComponent implements OnDestroy {
       height: `${c.height * scale}px`,
     };
   });
+
+  /**
+   * How big the frame is as a share of the largest that fits. Derived from the
+   * crop rather than stored, so dragging a corner keeps the slider in step.
+   */
+  protected readonly cropScale = computed(() =>
+    Math.round(cropScaleOf(this.crop(), this.natural(), this.aspect) * 100),
+  );
+
+  /** Resizes the frame around its current centre — the slider's handler. */
+  setCropScale(percent: number): void {
+    this.crop.set(scaleCrop(this.crop(), this.natural(), percent / 100, this.aspect));
+  }
 
   protected readonly outputSize = computed(() => {
     const c = this.crop();
@@ -144,13 +172,27 @@ export class ImageCropperDialogComponent implements OnDestroy {
     this.resetCrop();
   }
 
-  /** Recomputes where the contain-fitted image actually sits in the stage. */
+  /**
+   * Recomputes where the contain-fitted image actually sits in the stage.
+   *
+   * Deliberately clientWidth/clientHeight and not getBoundingClientRect().
+   * Material opens a dialog at `transform: scale(0.8)` and transitions it to
+   * none, and a bounding rect reports the *transformed* box — so measuring
+   * during those 150ms, which is exactly when the image finishes decoding,
+   * fitted the overlay to a phantom rectangle about 80% of the real one. The
+   * frame then drew short of the photo on every side and clamped before
+   * reaching its edges: on a 924×1600 photo roughly 83px of it could not be
+   * selected at all. Layout dimensions ignore transforms, so they are correct
+   * on the first frame and stay correct.
+   */
   protected measure(): void {
     const stage = this.stageRef?.nativeElement;
     const n = this.natural();
     if (!stage || !n.width) return;
 
-    const box = stage.getBoundingClientRect();
+    const box = { width: stage.clientWidth, height: stage.clientHeight };
+    if (!box.width || !box.height) return;
+
     const scale = Math.min(box.width / n.width, box.height / n.height);
     const width = n.width * scale;
     const height = n.height * scale;
@@ -160,11 +202,27 @@ export class ImageCropperDialogComponent implements OnDestroy {
       width,
       height,
     });
+
+    this.watchStage(stage);
+  }
+
+  /**
+   * Re-measures when the stage itself changes size — a window resize, or the
+   * dialog reflowing. Transforms don't trigger this (they aren't layout), which
+   * is why measure() must be transform-proof in its own right.
+   */
+  private watchStage(stage: HTMLElement): void {
+    if (this.resize || typeof ResizeObserver === 'undefined') return;
+    this.resize = new ResizeObserver(() => this.measure());
+    this.resize.observe(stage);
   }
 
   protected onPointerDown(event: PointerEvent, mode: DragMode): void {
     event.preventDefault();
     event.stopPropagation();
+    // The mapping between screen and image pixels has to be right at the
+    // instant the drag starts, whatever happened to the layout beforehand.
+    this.measure();
     (event.target as HTMLElement).setPointerCapture?.(event.pointerId);
     this.drag = { mode, startX: event.clientX, startY: event.clientY, origin: { ...this.crop() } };
   }
@@ -225,6 +283,7 @@ export class ImageCropperDialogComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.resize?.disconnect();
     if (this.objectUrl) URL.revokeObjectURL(this.objectUrl);
   }
 }

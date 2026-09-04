@@ -233,10 +233,38 @@
                   </mat-form-field>
                 </div>
 
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  @for (field of qrTemplate.settingsSchema; track field.key) {
+                <!-- Grouped, because a design ships twenty-odd controls now
+                     and a single flat grid made finding one a scan of the
+                     whole form. -->
+                @for (group of qrFieldGroups(); track group.name) {
+                <div class="mb-5">
+                  <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">{{ group.name }}</p>
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  @for (field of group.fields; track field.key) {
                     <div [class.sm:col-span-2]="field.type === 'image' || field.type === 'text'">
                       @switch (field.type) {
+                        @case ('size') {
+                          <label class="mb-1 flex items-baseline justify-between text-xs text-gray-500">
+                            <span>{{ field.label }}</span>
+                            <span class="font-mono text-gray-700">{{ sizeValue(field) }}</span>
+                          </label>
+                          <!-- Sizes are in vmin, the unit the card templates
+                               lay out in, so one value scales correctly from
+                               an 80mm sticker to an A4 poster. -->
+                          <mat-slider
+                            class="w-full"
+                            [min]="sizeBounds(field).min"
+                            [max]="sizeBounds(field).max"
+                            [step]="sizeBounds(field).step"
+                            discrete
+                          >
+                            <input
+                              matSliderThumb
+                              [ngModel]="sizeValue(field)"
+                              (ngModelChange)="updateQrSetting(field.key, $event)"
+                            />
+                          </mat-slider>
+                        }
                         @case ('boolean') {
                           <!-- Compared against false rather than truthy, so a
                                setting the store hasn't touched yet still shows
@@ -331,12 +359,21 @@
                       }
                     </div>
                   }
+                  </div>
                 </div>
+                }
               </div>
 
               <!-- Live preview: the real PDF, so there is no drift between
-                   what is shown here and what actually prints. -->
-              <div>
+                   what is shown here and what actually prints.
+
+                   Sticky, because the controls column is now five groups and
+                   twenty-odd fields tall: adjusting a colour or a font size
+                   near the bottom of it otherwise meant scrolling back up to
+                   see what the change did. `self-start` is load-bearing —
+                   grid items stretch to the row height by default, which
+                   leaves a sticky item nothing to travel within. -->
+              <div class="lg:sticky lg:top-4 lg:self-start">
                 <div class="mb-2 flex items-center justify-between">
                   <h4 class="text-sm font-medium text-gray-900">Preview</h4>
                   @if (qrPreviewLoading()) {

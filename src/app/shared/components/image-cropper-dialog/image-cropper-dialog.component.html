@@ -20,7 +20,6 @@
       (pointermove)="onPointerMove($event)"
       (pointerup)="onPointerUp()"
       (pointercancel)="onPointerUp()"
-      (pointerleave)="onPointerUp()"
     >
       @if (loading()) {
         <div class="absolute inset-0 flex items-center justify-center">
@@ -72,7 +71,17 @@
       }
     </div>
 
-    <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
+    <!-- A narrow frame at full size touches two edges and can only slide one
+         way; shrinking it is what gives it room to move. -->
+    <div class="mt-3 flex items-center gap-3">
+      <span class="shrink-0 text-xs text-gray-500">Frame size</span>
+      <mat-slider class="flex-1" [min]="20" [max]="100" [step]="1" discrete>
+        <input matSliderThumb [ngModel]="cropScale()" (ngModelChange)="setCropScale($event)" />
+      </mat-slider>
+      <span class="w-10 shrink-0 text-right font-mono text-xs text-gray-600">{{ cropScale() }}%</span>
+    </div>
+
+    <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
       <span class="text-xs text-gray-500">Output {{ outputSize() }} px</span>
       <div class="flex items-center gap-2">
         <button mat-stroked-button type="button" (click)="resetCrop()">

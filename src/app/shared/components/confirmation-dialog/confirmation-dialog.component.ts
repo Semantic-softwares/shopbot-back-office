@@ -4,6 +4,19 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 
+/**
+ * `title` and `confirmText` are optional so every existing caller that passes
+ * only a message keeps its current wording. Supply them when a generic
+ * "Confirmation / Confirm" would leave the user guessing what they're about
+ * to break.
+ */
+export interface ConfirmationDialogData {
+  message: string;
+  title?: string;
+  confirmText?: string;
+  cancelText?: string;
+}
+
 @Component({
   selector: 'app-confirmation-dialog',
   standalone: true,
@@ -17,7 +30,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 export class ConfirmationDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<ConfirmationDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { message: string }
+    @Inject(MAT_DIALOG_DATA) public data: ConfirmationDialogData
   ) {}
 
   onConfirm(): void {

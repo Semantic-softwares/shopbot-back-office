@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, computed, inject, signal } from '@angular/core';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -11,6 +11,7 @@ import { TableService, downloadPdfBlob } from '../../../../../../shared/services
 import { QrTemplateService } from '../../../../../../shared/services/qr-template.service';
 import { StoreStore } from '../../../../../../shared/stores/store.store';
 import { Table } from '../../../../../../shared/models';
+import { ConfirmationDialogComponent } from '../../../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 export interface TableQrDialogData {
   /** Omitted for the bulk export, which covers every table in the store. */
@@ -36,6 +37,7 @@ export class TableQrDialogComponent implements OnInit {
   private qrTemplateService = inject(QrTemplateService);
   private storeStore = inject(StoreStore);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
 
   public qrDataUrl = signal<string | null>(null);
   public qrUrl = signal<string | null>(null);
@@ -98,6 +100,51 @@ export class TableQrDialogComponent implements OnInit {
     if (!url) return;
     navigator.clipboard.writeText(url);
     this.snackBar.open('Link copied', 'Close', { duration: 2000 });
+  }
+
+  /**
+   * Issues a new link, invalidating every card already printed for this
+   * table. Printing never does this — reprinting in another language or on a
+   * new design keeps the same code on purpose — so it's behind an explicit
+   * confirmation that spells out what breaks.
+   */
+  resetLink(): void {
+    const table = this.data.table;
+    if (!table) return;
+
+    this.dialog
+      .open(ConfirmationDialogComponent, {
+        width: '460px',
+        data: {
+          title: 'Issue a new QR link?',
+          message:
+            `Every card already printed for ${table.name} will stop working and has to be reprinted. ` +
+            `Guests scanning an old card will see "this QR code is no longer valid".\n\n` +
+            `You don't need this to change the design, size or language — those keep the same code. ` +
+            `Only do this if the current code has to be retired, for example because a card was lost or shared publicly.`,
+          confirmText: 'Issue new link',
+        },
+      })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (!confirmed) return;
+
+        this.isLoading.set(true);
+        this.tableService.resetTableQrToken(table._id).subscribe({
+          next: ({ qrDataUrl, url }) => {
+            this.qrDataUrl.set(qrDataUrl);
+            this.qrUrl.set(url);
+            this.isLoading.set(false);
+            this.snackBar.open('New QR link issued — reprint this table\'s card.', 'Close', {
+              duration: 6000,
+            });
+          },
+          error: () => {
+            this.isLoading.set(false);
+            this.snackBar.open('Could not issue a new link', 'Close', { duration: 4000 });
+          },
+        });
+      });
   }
 
   downloadPdf(): void {
