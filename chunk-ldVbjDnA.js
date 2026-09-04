@@ -1,0 +1,1 @@
+var t=[{path:"",loadComponent:()=>import('./chunk-CINFZncJ.js').then(o=>o.StorefrontShellComponent)},{path:"t/:qrToken",loadComponent:()=>import('./chunk-CINFZncJ.js').then(o=>o.StorefrontShellComponent)}];export{t as STOREFRONT_ROUTES};

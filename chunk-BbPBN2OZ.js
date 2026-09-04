@@ -1,0 +1,1 @@
+import {m as mI,I as Ir,t as tp}from'./main-S4IYHHBX.js';var r=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=mI({type:t,selectors:[["app-front-desk"]],decls:1,vars:0,template:function(e,m){e&1&&tp(0,"router-outlet");},dependencies:[Ir],styles:["[_nghost-%COMP%]{display:block}"],changeDetection:1})};export{r as FrontDeskComponent};

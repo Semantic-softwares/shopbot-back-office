@@ -1,0 +1,1 @@
+import {m as mI,I as Ir,t as tp}from'./main-S4IYHHBX.js';var a=class n{static \u0275fac=function(e){return new(e||n)};static \u0275cmp=mI({type:n,selectors:[["app-vendors"]],decls:1,vars:0,template:function(e,m){e&1&&tp(0,"router-outlet");},dependencies:[Ir],encapsulation:2})};export{a as VendorsComponent};

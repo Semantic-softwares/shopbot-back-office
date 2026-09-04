@@ -1,0 +1,1 @@
+var t=[{path:"",loadComponent:()=>import('./chunk-BM9Bo6No.js').then(o=>o.CategoriesComponent),children:[{path:"",loadComponent:()=>import('./chunk-Bb2-5Vjp.js').then(o=>o.CategoryListComponent)},{path:":id/edit",loadComponent:()=>import('./chunk-By3kzGRI.js').then(o=>o.CategoryFormComponent)}]}];export{t as CATEGORY_ROUTES};
