@@ -1,0 +1,1 @@
+var o=[{path:"",loadComponent:()=>import('./chunk-DqxdN3gZ.js').then(t=>t.LiveBooking),children:[{path:"",redirectTo:"list",pathMatch:"full"},{path:"list",loadComponent:()=>import('./chunk-0hYl8sZY.js').then(t=>t.ListLiveBooking)},{path:":id/details",loadComponent:()=>import('./chunk-DLI3wPZ5.js').then(t=>t.LiveBookingDetails)}]}];export{o as DASHBOARD_LIVE_BOOKING_ROUTES};
