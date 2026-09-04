@@ -1,0 +1,1 @@
+import {m as mI,I as Ir,t as tp}from'./main-PUVXMXGX.js';var i=class n{static \u0275fac=function(e){return new(e||n)};static \u0275cmp=mI({type:n,selectors:[["app-maintenance"]],decls:1,vars:0,template:function(e,c){e&1&&tp(0,"router-outlet");},dependencies:[Ir],styles:["[_nghost-%COMP%]{display:block}"]})};export{i as MaintenanceComponent};
