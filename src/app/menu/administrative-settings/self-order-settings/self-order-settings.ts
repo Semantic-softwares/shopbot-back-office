@@ -23,8 +23,14 @@ import { THEME_REGISTRY } from '../../../storefront/theme-engine/theme-registry'
 import {
   QrTemplateService,
   QrTemplate,
+  QrTemplateSettingField,
   QrOptions,
 } from '../../../shared/services/qr-template.service';
+import { MatDialog } from '@angular/material/dialog';
+import {
+  ImageCropperDialogComponent,
+  ImageCropperDialogData,
+} from '../../../shared/components/image-cropper-dialog/image-cropper-dialog.component';
 
 @Component({
   selector: 'app-self-order-settings',
@@ -50,6 +56,7 @@ export class SelfOrderSettings implements OnInit {
   private templateService = inject(TemplateService);
   private qrTemplateService = inject(QrTemplateService);
   private sanitizer = inject(DomSanitizer);
+  private dialog = inject(MatDialog);
   private destroyRef = inject(DestroyRef);
   private snackBar = inject(MatSnackBar);
   public storeStore = inject(StoreStore);
@@ -272,25 +279,89 @@ export class SelfOrderSettings implements OnInit {
     this.qrPreviewTrigger.next();
   }
 
-  uploadQrBackground(event: Event, key: string): void {
+  /**
+   * Crop first, then upload. The card gives a photo a fixed shape — a
+   * full-height column on one design, a wide band on another — so an
+   * uncropped upload gets centre-cropped by object-fit at render time and the
+   * store never gets to say which part of the photo survives. The dialog
+   * defaults to the shape that will actually print.
+   */
+  uploadQrBackground(event: Event, field: QrTemplateSettingField): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     const storeId = this.storeStore.selectedStore()?._id;
+    // Cleared up front, so picking the same file again after a cancel still
+    // fires a change event.
+    input.value = '';
     if (!file || !storeId) return;
 
+    if (!file.type.startsWith('image/')) {
+      this.snackBar.open('Please choose an image file.', 'Close', { duration: 4000 });
+      return;
+    }
+
+    this.dialog
+      .open(ImageCropperDialogComponent, {
+        width: '720px',
+        maxWidth: '95vw',
+        data: {
+          file,
+          aspectRatio: field.aspectRatio,
+          title: `Crop ${field.label.toLowerCase()}`,
+          hint: field.aspectRatio
+            ? 'The frame matches the space this photo fills on the card. Drag to reposition, or drag a corner to resize.'
+            : 'Drag to reposition, or drag a corner to resize.',
+        } satisfies ImageCropperDialogData,
+      })
+      .afterClosed()
+      .subscribe((blob?: Blob | null) => {
+        if (!blob) return;
+        // Named so the backend's Cloudinary upload sees a sensible filename;
+        // the crop always comes back as JPEG.
+        const cropped = new File([blob], `${field.key}.jpg`, { type: 'image/jpeg' });
+
+        this.qrUploading.set(true);
+        this.qrTemplateService.uploadBackground(storeId, cropped).subscribe({
+          next: ({ photo }) => {
+            this.qrUploading.set(false);
+            this.updateQrSetting(field.key, photo);
+          },
+          error: () => {
+            this.qrUploading.set(false);
+            this.snackBar.open('Could not upload that image.', 'Close', { duration: 4000 });
+          },
+        });
+      });
+  }
+
+  /** Re-crop an image already on the card, without re-picking the file. */
+  recropQrBackground(field: QrTemplateSettingField): void {
+    const url = this.qrSettings()[field.key];
+    const storeId = this.storeStore.selectedStore()?._id;
+    if (!url || !storeId) return;
+
     this.qrUploading.set(true);
-    this.qrTemplateService.uploadBackground(storeId, file).subscribe({
-      next: ({ photo }) => {
+    // Cloudinary serves these with permissive CORS, so the fetched blob can go
+    // through the same canvas path as a freshly picked file.
+    fetch(url)
+      .then((response) => {
+        if (!response.ok) throw new Error(String(response.status));
+        return response.blob();
+      })
+      .then((blob) => {
         this.qrUploading.set(false);
-        this.updateQrSetting(key, photo);
-        // Clear the input so re-picking the same file still fires a change.
-        input.value = '';
-      },
-      error: () => {
+        const file = new File([blob], `${field.key}.jpg`, { type: blob.type || 'image/jpeg' });
+        const fakeEvent = { target: { files: [file], value: '' } } as unknown as Event;
+        this.uploadQrBackground(fakeEvent, field);
+      })
+      .catch(() => {
         this.qrUploading.set(false);
-        this.snackBar.open('Could not upload that image.', 'Close', { duration: 4000 });
-      },
-    });
+        this.snackBar.open(
+          'Could not load that image to re-crop — upload it again instead.',
+          'Close',
+          { duration: 5000 },
+        );
+      });
   }
 
   previewUrl = computed(() => {

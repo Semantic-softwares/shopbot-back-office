@@ -10,6 +10,12 @@ export interface QrTemplateSettingField {
   type: 'color' | 'text' | 'select' | 'image' | 'font' | 'boolean';
   default?: any;
   options?: any[];
+  /**
+   * Image fields only: width ÷ height of the space this photo fills on the
+   * printed card, so the crop tool can default to the shape that will
+   * actually print rather than letting object-fit crop it again at render.
+   */
+  aspectRatio?: number;
 }
 
 /** A printed QR card design — distinct from a storefront web theme. */
