@@ -1,0 +1,1 @@
+import {G}from'./chunk-BYtIUEE8.js';import {E,d$ as CI}from'./main-GY6OZVE5.js';var n=class e{guestService=E(G);transform(t){return this.guestService.getGuestName(t)}static \u0275fac=function(m){return new(m||e)};static \u0275pipe=CI({name:"getGuestName",type:e,pure:true})};export{n};
