@@ -1,41 +1,183 @@
-<div class="flex items-center justify-between pr-2">
-  <h2 mat-dialog-title class="!mb-0">Payment</h2>
+<div class="flex items-center justify-between gap-2 pl-6 pr-2 pt-4">
+  <h2 mat-dialog-title class="!mb-0 !p-0 !text-lg">Payment</h2>
   <button mat-icon-button (click)="onCancel()" aria-label="Cancel" matTooltip="Cancel">
     <mat-icon>close</mat-icon>
   </button>
 </div>
 
-<mat-dialog-content>
-  <!-- Total Amount Display -->
-  <div class=" rounded-lg p-6 mb-6 text-center">
-    <p class="text-sm text-gray-600 mb-2">Total Amount:</p>
-    <p class="text-3xl font-bold text-gray-900">
-      {{ data.totalAmount | number:'1.2-2' }}
+<mat-dialog-content class="!px-4 sm:!px-6">
+  <!-- Total, then the running balance. The balance is the number the cashier
+       works down to, so it sits with the total rather than under the controls. -->
+  <div class="rounded-lg border border-gray-200 p-4 mb-4 text-center">
+    <p class="text-xs uppercase tracking-wide text-gray-500 mb-1">Total Amount</p>
+    <p class="text-2xl sm:text-3xl font-bold text-gray-900 tabular-nums">
+      {{ total() | currency: data.currency : 'symbol' : '1.2-2' }}
     </p>
+
+    @if (payments().length) {
+      <div class="mt-3 pt-3 border-t border-dashed border-gray-300 grid grid-cols-2 gap-2 text-sm">
+        <div>
+          <p class="text-xs text-gray-500">Paid</p>
+          <p class="font-semibold text-gray-900 tabular-nums">
+            {{ amountPaid() | currency: data.currency : 'symbol' : '1.2-2' }}
+          </p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">{{ settled() ? 'Balance' : 'Balance due' }}</p>
+          <p
+            class="font-semibold tabular-nums"
+            [class]="settled() ? 'text-emerald-700' : 'text-amber-700'"
+          >
+            {{ remaining() | currency: data.currency : 'symbol' : '1.2-2' }}
+          </p>
+        </div>
+      </div>
+    }
   </div>
 
-  <!-- Payment Method Selection -->
-
-    <mat-button-toggle-group 
-      [value]="selectedPaymentMethod()"
-      (change)="onPaymentMethodChange($event.value)">
-      @for (method of paymentMethods; track method.id) {
-        <mat-button-toggle 
-          [value]="method.id">
-         
-            <mat-icon>{{ method.icon }}</mat-icon>
-            <span>{{ method.name }}</span>
-          
-        </mat-button-toggle>
+  <!-- Tenders taken so far. Hidden until there is one, so a single-payment
+       sale looks no busier than it did before. -->
+  @if (payments().length) {
+    <div class="mb-4 flex flex-col gap-2">
+      @for (payment of payments(); track $index) {
+        <div class="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2">
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-sm font-medium text-gray-900">{{ payment.method }}</p>
+            @if (payment.change > 0) {
+              <!-- Both halves of an over-tender, so the change figure is
+                   traceable back to what the customer actually handed over. -->
+              <p class="text-xs text-gray-500 tabular-nums">
+                Tendered {{ payment.tendered | currency: data.currency : 'symbol' : '1.2-2' }}
+                · change {{ payment.change | currency: data.currency : 'symbol' : '1.2-2' }}
+              </p>
+            }
+          </div>
+          <span class="shrink-0 text-sm font-semibold text-gray-900 tabular-nums">
+            {{ payment.amount | currency: data.currency : 'symbol' : '1.2-2' }}
+          </span>
+          <button
+            mat-icon-button
+            type="button"
+            aria-label="Remove this payment"
+            matTooltip="Remove"
+            (click)="removePaymentAt($index)"
+          >
+            <mat-icon class="text-gray-400" style="font-size: 18px; width: 18px; height: 18px">
+              close
+            </mat-icon>
+          </button>
+        </div>
       }
-    </mat-button-toggle-group>
+    </div>
+  }
+
+  <!-- Entry. Hidden once the bill is covered, so there is nothing left to
+       argue with when the cashier is done. -->
+  @if (!settled()) {
+    <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+      {{ payments().length ? 'Add another payment' : 'Payment method' }}
+    </p>
+
+    <!-- A plain responsive grid rather than mat-button-toggle-group: the
+         toggle group lays its buttons out in one non-wrapping row, which
+         overflowed the dialog on a phone and on a small POS screen. -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+      @for (method of paymentMethods; track method.id) {
+        <button
+          type="button"
+          class="flex items-center justify-center gap-2 rounded-lg border px-3 py-3 text-sm font-medium transition-colors"
+          [class]="selectedPaymentMethod() === method.id
+            ? 'border-blue-500 bg-blue-50 text-blue-800'
+            : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'"
+          [attr.aria-pressed]="selectedPaymentMethod() === method.id"
+          (click)="onPaymentMethodChange(method.id)"
+        >
+          <mat-icon class="shrink-0" style="font-size: 20px; width: 20px; height: 20px">
+            {{ method.icon }}
+          </mat-icon>
+          <span class="truncate">{{ method.name }}</span>
+        </button>
+      }
+    </div>
+
+    @if (selectedPaymentMethod()) {
+      <div class="mt-3 flex flex-col sm:flex-row sm:items-start gap-2">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="flex-1">
+          <mat-label>{{ selectedIsCash() ? 'Amount tendered' : 'Amount' }}</mat-label>
+          <!-- type="text" with inputmode="decimal": a number input hands
+               ngModel a number, which broke the string handling behind the
+               Add button, and it cannot show a thousands separator. -->
+          <input
+            matInput
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            [ngModel]="amountDisplay()"
+            (ngModelChange)="onAmountInput($event)"
+            (focus)="onAmountFocus()"
+            (blur)="onAmountBlur()"
+            (keyup.enter)="addSelectedPayment()"
+          />
+          <span matTextPrefix class="pr-1 text-gray-500">{{ data.currency }}</span>
+        </mat-form-field>
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="!h-14 sm:!mt-0 shrink-0"
+          [disabled]="!canAddPayment()"
+          (click)="addSelectedPayment()"
+        >
+          Add payment
+        </button>
+      </div>
+
+      @if (selectedIsCash() && pendingChange() > 0) {
+        <!-- Previewed before the payment is added, so the cashier knows what
+             to hand back while the customer is still holding the notes. -->
+        <p class="mt-2 text-sm font-semibold text-emerald-700 tabular-nums">
+          Change to give: {{ pendingChange() | currency: data.currency : 'symbol' : '1.2-2' }}
+        </p>
+      } @else if (!selectedIsCash()) {
+        <p class="mt-2 text-xs text-gray-500">
+          Applied up to the
+          {{ remaining() | currency: data.currency : 'symbol' : '1.2-2' }} still owed — only
+          cash gives change.
+        </p>
+      }
+    }
+  }
+
+  <!-- Settled: what to hand back, stated once and unmissably. -->
+  @if (settled()) {
+    <div
+      class="rounded-lg border p-4 text-center"
+      [class]="changeDue() > 0
+        ? 'border-emerald-200 bg-emerald-50'
+        : 'border-gray-200 bg-gray-50'"
+    >
+      @if (changeDue() > 0) {
+        <p class="text-xs uppercase tracking-wide text-emerald-800 mb-1">Change due to customer</p>
+        <p class="text-2xl sm:text-3xl font-bold text-emerald-900 tabular-nums">
+          {{ changeDue() | currency: data.currency : 'symbol' : '1.2-2' }}
+        </p>
+      } @else {
+        <p class="flex items-center justify-center gap-2 text-sm font-medium text-gray-700">
+          <mat-icon class="text-emerald-600" style="font-size: 18px; width: 18px; height: 18px">
+            check_circle
+          </mat-icon>
+          Paid in full{{ isSplit() ? ' across ' + payments().length + ' payments' : '' }}
+        </p>
+      }
+    </div>
+  }
 
   <!-- Order Note -->
   <mat-form-field appearance="outline" class="w-full mt-4">
     <mat-label>Order Note (optional)</mat-label>
     <textarea
       matInput
-      rows="3"
+      rows="2"
       placeholder="Add a note for this order..."
       [ngModel]="note()"
       (ngModelChange)="note.set($event)">
@@ -44,21 +186,22 @@
 
 </mat-dialog-content>
 
-<mat-dialog-actions align="end" class="border-2 border-outline-variant">
-  @if (!data.requirePayment) {
+<mat-dialog-actions class="!px-4 sm:!px-6 !pb-4 border-t border-gray-200">
+  <!-- Stacks on a phone, sits inline from sm up. -->
+  <div class="flex w-full flex-col-reverse sm:flex-row sm:justify-end gap-2">
+    @if (!data.requirePayment) {
+      <button matButton="outlined" color="primary" class="w-full sm:w-auto" (click)="onSkipPayment()">
+        Skip Payment
+      </button>
+    }
     <button
-      matButton="outlined"
+      matButton="filled"
       color="primary"
-      (click)="onSkipPayment()">
-      Skip Payment
+      class="w-full sm:w-auto"
+      [disabled]="!settled()"
+      [matTooltip]="settled() ? '' : 'Add payments covering the full total first'"
+      (click)="onConfirmPayment()">
+      Confirm Payment
     </button>
-  }
-  <button
-    matButton="filled" 
-    color="primary" 
-    [disabled]="!selectedPaymentMethod()"
-    (click)="onConfirmPayment()">
-    Confirm Payment
-  </button>
-  
+  </div>
 </mat-dialog-actions>

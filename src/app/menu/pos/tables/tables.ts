@@ -175,7 +175,10 @@ export class Tables implements OnInit {
     };
 
     const dialogRef = this.dialog.open(PaymentDialogComponent, {
-      width: '450px',
+      // Caps at 95vw so the dialog fits a phone and a small POS screen;
+      // a flat 450px overflowed both.
+      width: '480px',
+      maxWidth: '95vw',
       data: dialogData
     });
 
@@ -186,7 +189,11 @@ export class Tables implements OnInit {
         const paymentMethodName = result.paymentMethod.name;
 
         this.orderStore
-          .completeOrder(orderId, paymentMethodName)
+          .completeOrder(orderId, paymentMethodName, {
+            payments: result.payments,
+            amountPaid: result.amountPaid,
+            changeDue: result.changeDue,
+          })
           .then((order) => {
             // Update local state
             this.tableStore.updateTable(table._id, {orderId: null, order: null});

@@ -326,7 +326,10 @@ export class ListOrders {
     };
 
     const dialogRef = this.dialog.open(PaymentDialogComponent, {
-      width: '450px',
+      // Caps at 95vw so the dialog fits a phone and a small POS screen;
+      // a flat 450px overflowed both.
+      width: '480px',
+      maxWidth: '95vw',
       data: dialogData,
     });
 
@@ -341,6 +344,13 @@ export class ListOrders {
       if (!order.payment && paymentMethodName) {
         updates.payment = paymentMethodName;
         updates.paymentStatus = 'Paid';
+        // The per-method breakdown behind that summary string, so a split
+        // settles into the right report buckets.
+        if (result.payments?.length) {
+          updates.payments = result.payments;
+          updates.amountPaid = result.amountPaid;
+          updates.changeDue = result.changeDue;
+        }
       }
 
       this.ordersService.updateOrderComprehensive(order._id!, updates).subscribe({

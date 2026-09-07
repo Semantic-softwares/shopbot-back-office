@@ -7,7 +7,7 @@ import {
   withState,
 } from "@ngrx/signals";
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { Order, OrderCategoryType, SalesTypeId, SearchFilter } from "../models";
+import { Order, OrderCategoryType, OrderPayment, SalesTypeId, SearchFilter } from "../models";
 import { computed, inject } from "@angular/core";
 import { StoreStore } from "./store.store";
 import { debounceTime, distinctUntilChanged, pipe, switchMap, tap } from "rxjs";
@@ -224,10 +224,14 @@ export const OrderStore = signalStore(
       return orderType.toLowerCase() as OnlineOrdersKey;
     }
 
-    async function completeOrder(orderId: string, payment?: string): Promise<Order> {
+    async function completeOrder(
+      orderId: string,
+      payment?: string,
+      split?: { payments?: OrderPayment[]; amountPaid?: number; changeDue?: number },
+    ): Promise<Order> {
       const ordersSignal = store.orders();
       const order = ordersSignal.find((order) => order._id === orderId);
-      
+
       if (!order) {
         console.error(`Order with ID ${orderId} not found.`);
         return Promise.reject(new Error(`Order with ID ${orderId} not found.`));
@@ -242,6 +246,13 @@ export const OrderStore = signalStore(
       if (!order.payment && payment) {
         updates.payment = payment;
         updates.paymentStatus = "Paid";
+        // The per-method breakdown behind that summary string, so a split
+        // settles into the right report buckets.
+        if (split?.payments?.length) {
+          updates.payments = split.payments;
+          updates.amountPaid = split.amountPaid;
+          updates.changeDue = split.changeDue;
+        }
       }
 
       try {

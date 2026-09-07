@@ -243,6 +243,44 @@ export class ReceiptsDetailsComponent {
     }
   }
 
+  /**
+   * How the order was paid, as one line.
+   *
+   * A bill settled with several tenders lists each with its amount; a single
+   * tender is just the method name, and an order placed before split payments
+   * falls back to the `payment` summary string. Lives here rather than inline
+   * because the three print templates below are hand-built HTML strings that
+   * TypeScript cannot check — one implementation is far easier to keep right
+   * than three copies.
+   */
+  private paymentText(order: any, currency: string): string {
+    const payments = Array.isArray(order?.payments) ? order.payments : [];
+    if (payments.length > 1) {
+      return payments
+        .map((p: any) => `${p.method} ${this.formatMoney(p.amount, currency)}`)
+        .join(' + ');
+    }
+    return payments[0]?.method || order?.payment || 'N/A';
+  }
+
+  /** Change handed back, or null when there was none (the usual case). */
+  private changeText(order: any, currency: string): string | null {
+    const change = Number(order?.changeDue) || 0;
+    return change > 0 ? this.formatMoney(change, currency) : null;
+  }
+
+  private formatMoney(amount: number, currency: string): string {
+    try {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency,
+        currencyDisplay: 'symbol',
+      }).format(amount || 0);
+    } catch {
+      return `${currency} ${(amount || 0).toFixed(2)}`;
+    }
+  }
+
   private generatePrintableReceipt(order: any, currency: string): string {
     const formatCurrency = (amount: number) => {
       try {
@@ -560,7 +598,8 @@ export class ReceiptsDetailsComponent {
 
         <!-- Order Details -->
         <div class="info-section">
-          <div><span class="info-label">Payment:</span> ${order.payment}</div>
+          <div><span class="info-label">Payment:</span> ${this.paymentText(order, currency)}</div>
+          ${this.changeText(order, currency) ? `<div><span class="info-label">Change:</span> ${this.changeText(order, currency)}</div>` : ''}
           <div><span class="info-label">Status:</span> ${order.paymentStatus}</div>
           <div><span class="info-label">Order Type:</span> ${order.orderType}</div>
           <div><span class="info-label">Delivery:</span> ${order.deliveryType}</div>
@@ -1036,7 +1075,7 @@ export class ReceiptsDetailsComponent {
             ${order.shipping?.name ? `<p>${order.shipping.name}</p>` : '<p>N/A</p>'}
             <p style="margin-top: 10px;"><strong>Delivery Type:</strong> ${order.deliveryType}</p>
             <p><strong>Order Type:</strong> ${order.orderType}</p>
-            <p><strong>Payment Method:</strong> ${order.payment}</p>
+            <p><strong>Payment Method:</strong> ${this.paymentText(order, currency)}</p>
           </div>
         </div>
 
@@ -1095,7 +1134,7 @@ export class ReceiptsDetailsComponent {
         <!-- Payment Status -->
         <div class="payment-status ${order.paymentStatus?.toLowerCase()}">
           <h4>Payment Status: ${order.paymentStatus}</h4>
-          <p>Payment Method: ${order.payment} | Order Date: ${formatDateTime(order.createdAt)}</p>
+          <p>Payment Method: ${this.paymentText(order, currency)} | Order Date: ${formatDateTime(order.createdAt)}</p>
         </div>
 
         <!-- Footer -->

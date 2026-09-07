@@ -629,7 +629,10 @@ export class CartComponent implements OnDestroy {
     };
 
     const dialogRef = this.dialog.open(PaymentDialogComponent, {
-      width: '450px',
+      // Caps at 95vw so the dialog fits a phone and a small POS screen;
+      // a flat 450px overflowed both.
+      width: '480px',
+      maxWidth: '95vw',
       data: dialogData,
     });
 
@@ -639,7 +642,10 @@ export class CartComponent implements OnDestroy {
         if (result) {
           const selectedCart = this.cartStore.selectedCart();
           if (result.action === 'confirm' && result.paymentMethod) {
-            // Update cart with payment method before processing checkout
+            // Mirrored onto the cart so anything still reading it there stays
+            // consistent; the split itself is handed straight to
+            // processCheckout rather than round-tripping through the cart,
+            // which only ever held one method.
             if (selectedCart) {
               this.cartStore.updateSelectedCartPaymentMethod(
                 result.paymentMethod as any
@@ -650,12 +656,12 @@ export class CartComponent implements OnDestroy {
             this.cartStore.updateCartNote(selectedCart._id, result.note);
           }
           // Process checkout regardless of confirm or skip
-          this.processCheckout();
+          this.processCheckout(result.action === 'confirm' ? result : undefined);
         }
       });
   }
 
-  private processCheckout(): void {
+  private processCheckout(payment?: PaymentDialogResult): void {
   // Only derive the sale type from tableStore for a brand-new sale. During an
   // edit, editOrder()/onEditOrder() already set the correct sale type before
   // navigating here — tableStore is never populated on that path, so redoing
@@ -701,6 +707,18 @@ export class CartComponent implements OnDestroy {
 
   // Payment method is optional - can always be updated later
   this.cartStore.updateCartSummary(this.cartSummary()!);
+
+  // Derived once and shared by the create and edit branches below, which used
+  // to repeat `selectedCart.paymentMethod?.name` four times each.
+  //
+  // `paymentName` stays a single string ('Cash', or 'Split') because the
+  // orders list, receipts report and the backend's quick-sale guard all still
+  // read it; `payments` carries the detail. A skipped payment leaves all of
+  // this undefined, exactly as before.
+  const orderPayments = payment?.payments ?? [];
+  const paymentName = payment?.paymentMethod?.name
+    ?? selectedCart.paymentMethod?.name;
+  const isPaid = !!paymentName;
   
   // CHECK EDITING STATE BEFORE any operations that might reset it
   const isEditingOrder = this.saleTypeStore.isEditing();
@@ -730,21 +748,24 @@ export class CartComponent implements OnDestroy {
       table: selectedTable ?? undefined,
       salesType: selectedSaleType,
       type: selectedSaleType.id,
-      payment: selectedCart?.paymentMethod?.name,
+      payment: paymentName,
+      payments: orderPayments,
+      amountPaid: payment?.amountPaid,
+      changeDue: payment?.changeDue,
       total: this.cartSummary()!.totalCost,
       subTotal: this.cartSummary()!.subtotal,
       discount: this.cartSummary()!.discount,
       tax: this.cartSummary()!.tax,
       shippingFee: this.cartSummary()!.deliveryFee,
-      paymentStatus: selectedCart?.paymentMethod?.name ? 'Paid' : 'Unpaid',
+      paymentStatus: isPaid ? 'Paid' : 'Unpaid',
       note: selectedCart?.note,
       vendorCommissionAmount: 0,
       orderInstruction: selectedCart?.note,
       staff: this.selectedUser?._id,
-      category: selectedCart.paymentMethod?.name
+      category: isPaid
         ? OrderCategoryType.COMPLETE
         : OrderCategoryType.PROCESSING,
-      settled: selectedCart.paymentMethod?.name ? true : false,
+      settled: isPaid,
     };
 
     console.log('Updating order with payload:', updates);
@@ -767,22 +788,25 @@ export class CartComponent implements OnDestroy {
       guest: this.selectedGuest() ?? undefined,
       salesType: selectedSaleType,
       type: selectedSaleType.id,
-      payment: selectedCart.paymentMethod?.name,
+      payment: paymentName,
+      payments: orderPayments,
+      amountPaid: payment?.amountPaid,
+      changeDue: payment?.changeDue,
       salesChannel: SalesChannel.POINT_OF_SALE,
       total: this.cartSummary()!.totalCost,
       subTotal: this.cartSummary()!.subtotal,
       discount: this.cartSummary()!.discount,
       tax: this.cartSummary()!.tax,
       shippingFee: this.cartSummary()!.deliveryFee,
-      paymentStatus: selectedCart.paymentMethod?.name ? 'Paid' : 'Unpaid',
+      paymentStatus: isPaid ? 'Paid' : 'Unpaid',
       note: selectedCart.note,
       orderInstruction: selectedCart.note,
       createdAt: new Date(),
       synced: true,
-      category: selectedCart.paymentMethod?.name
+      category: isPaid
         ? OrderCategoryType.COMPLETE
         : OrderCategoryType.PROCESSING,
-      settled: selectedCart.paymentMethod?.name ? true : false,
+      settled: isPaid,
       reference: generateReference(),
       staff: this.selectedUser?._id,
       storeId: selectedStore._id,
