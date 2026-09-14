@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
 import { Role } from '../models/role.model';
 import { AuthService } from '../services/auth.service';
-import { switchMap, tap, of } from 'rxjs';
+import { switchMap, tap, of, catchError } from 'rxjs';
 import { RolesService } from '../services/roles.service';
 import { StoreStore } from '../stores/store.store';
 
@@ -25,12 +25,17 @@ export const roleResolver: ResolveFn<Role | null> = () => {
       // reachable), so fall back to the legacy global lookup rather than
       // failing outright.
       const storeId = storeStore.selectedStore()?._id;
-      if (!storeId) {
-        return roleService.getRoleByMerchantId(user._id).pipe(
-          tap(role => role && roleService.applyRole(role))
-        );
-      }
-      return roleService.loadForStore(user._id, storeId);
+      const role$ = !storeId
+        ? roleService.getRoleByMerchantId(user._id).pipe(tap(role => role && roleService.applyRole(role)))
+        : roleService.loadForStore(user._id, storeId);
+
+      // No role on record comes back as a 404 — land with no permissions instead of cancelling navigation.
+      return role$.pipe(
+        catchError(() => {
+          roleService.clearAccess();
+          return of(null);
+        })
+      );
     })
   );
 };
