@@ -15,6 +15,10 @@ export const AUTH_ROUTES: Routes = [
         loadComponent: () => import('./signup/signup.component').then(m => m.SignupComponent)
     },
     {
+        path: 'accept-invite/:token',
+        loadComponent: () => import('./accept-invite/accept-invite.component').then(m => m.AcceptInviteComponent)
+    },
+    {
         path: 'forgot-password',
         loadComponent: () => import('./forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
     },

@@ -1,0 +1,47 @@
+<div class="min-h-screen w-full flex flex-col items-center justify-center px-6 py-12 bg-gray-50">
+    <div class="w-full max-w-2xl">
+        <div class="text-center mb-8">
+            <img src="assets/logo/logo_vector.svg" alt="ShopBot Logo" class="h-9 w-9 mx-auto mb-4">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-2">Select a store</h2>
+            <p class="text-gray-500">You have access to more than one store. Choose which one to work in.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            @for (store of stores(); track store._id) {
+                <button
+                    type="button"
+                    (click)="selectStore(store)"
+                    [disabled]="!!selecting()"
+                    class="flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white hover:border-blue-500 hover:shadow-md transition text-left disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                    @if (store.logo) {
+                        <img [src]="store.logo" [alt]="store.name" class="w-12 h-12 rounded-lg object-cover flex-shrink-0">
+                    } @else {
+                        <div class="w-12 h-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
+                            <mat-icon fontSet="material-icons-outlined">storefront</mat-icon>
+                        </div>
+                    }
+
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium text-gray-800 truncate">{{ store.name }}</p>
+                        @if (store.storeType) {
+                            <p class="text-sm text-gray-500 capitalize">{{ store.storeType.replace('_', ' ') }}</p>
+                        }
+                    </div>
+
+                    @if (selecting() === store._id) {
+                        <mat-spinner diameter="20"></mat-spinner>
+                    } @else {
+                        <mat-icon class="text-gray-400">chevron_right</mat-icon>
+                    }
+                </button>
+            }
+        </div>
+
+        <div class="text-center mt-8">
+            <button mat-button (click)="logout()">
+                Sign out
+            </button>
+        </div>
+    </div>
+</div>

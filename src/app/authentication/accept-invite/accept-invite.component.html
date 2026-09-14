@@ -1,0 +1,117 @@
+<div class="min-h-screen w-full flex flex-col lg:flex-row">
+    <!-- Left Column - Form -->
+    <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 py-12 lg:px-16 xl:px-24 bg-white">
+        <!-- Logo/Brand -->
+        <div class="mb-8">
+            <img src="assets/logo/logo_vector.svg" alt="ShopBot Logo" class="h-9 w-9">
+            <p class="text-gray-500 mt-1">Welcome to the team</p>
+        </div>
+
+        <div class="max-w-md">
+            @if (loadingPreview()) {
+                <div class="flex flex-col items-center py-16 gap-4">
+                    <mat-spinner diameter="40"></mat-spinner>
+                    <p class="text-gray-500 text-sm">Checking your invite…</p>
+                </div>
+            } @else if (invalidReason()) {
+                <div class="text-center py-8">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <mat-icon class="text-red-600 text-3xl">error_outline</mat-icon>
+                    </div>
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-2">Invite link not valid</h2>
+                    <p class="text-gray-500 mb-8">{{ invalidReason() }}</p>
+                    <a routerLink="/auth/login" mat-flat-button color="primary" class="w-full h-12">
+                        Go to Login
+                    </a>
+                </div>
+            } @else if (!done()) {
+                <h2 class="text-2xl font-semibold text-gray-800 mb-2">Hi {{ name() }}!</h2>
+                <p class="text-gray-500 mb-8">Set a password for <strong>{{ email() }}</strong> to finish setting up your account.</p>
+
+                <form [formGroup]="acceptForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Password</mat-label>
+                        <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password"
+                            placeholder="••••••••">
+                        <button type="button" mat-icon-button matSuffix (click)="clickEvent('password')"
+                            [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword()">
+                            <mat-icon fontSet="material-icons-outlined">{{hidePassword() ? 'visibility_off' : 'visibility'}}</mat-icon>
+                        </button>
+                        @if (acceptForm.get('password')?.hasError('required')) {
+                        <mat-error>Password is required</mat-error>
+                        }
+                        @if (acceptForm.get('password')?.hasError('minlength')) {
+                        <mat-error>Password must be at least 6 characters</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Confirm Password</mat-label>
+                        <input matInput [type]="hideConfirmPassword() ? 'password' : 'text'"
+                            formControlName="confirmPassword" placeholder="••••••••">
+                        <button type="button" mat-icon-button matSuffix (click)="clickEvent('confirmPassword')"
+                            [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hideConfirmPassword()">
+                            <mat-icon fontSet="material-icons-outlined">{{hideConfirmPassword() ? 'visibility_off' : 'visibility'}}</mat-icon>
+                        </button>
+                        @if (acceptForm.get('confirmPassword')?.hasError('required')) {
+                        <mat-error>Please confirm your password</mat-error>
+                        }
+                    </mat-form-field>
+
+                    @if (acceptForm.hasError('passwordMismatch') && acceptForm.get('password')?.value &&
+                    acceptForm.get('confirmPassword')?.value) {
+                    <div class="bg-red-50 text-red-600 text-sm p-3 rounded-lg text-center">
+                        Passwords do not match
+                    </div>
+                    }
+
+                    <button mat-flat-button color="primary" type="submit"
+                            [disabled]="!acceptForm.valid || submitting()"
+                            class="w-full h-12 text-base mt-2">
+                        @if (submitting()) {
+                            <span class="flex items-center justify-center gap-2">
+                                <mat-spinner diameter="20"></mat-spinner>
+                                Setting password...
+                            </span>
+                        } @else {
+                            Set Password &amp; Continue
+                        }
+                    </button>
+                </form>
+            } @else {
+                <div class="text-center py-8">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <mat-icon class="text-green-600 text-3xl">check_circle</mat-icon>
+                    </div>
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-2">You're all set!</h2>
+                    <p class="text-gray-500 mb-8">
+                        Your password has been created. Taking you to login…
+                    </p>
+                    <a routerLink="/auth/login" mat-flat-button color="primary" class="w-full h-12">
+                        Go to Login
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Right Column - Hero/Feature Section -->
+    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+            <div class="absolute bottom-0 right-0 w-80 h-80 bg-white rounded-full translate-x-1/3 translate-y-1/3"></div>
+            <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+        </div>
+
+        <div class="relative z-10 flex flex-col justify-center px-12 xl:px-16 text-white">
+            <div class="mb-10">
+                <h2 class="text-3xl xl:text-4xl font-bold leading-tight mb-4">
+                    You've been invited to join the team.
+                </h2>
+                <p class="text-blue-200 text-lg">
+                    Set a password to finish setting up your account and get to work.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

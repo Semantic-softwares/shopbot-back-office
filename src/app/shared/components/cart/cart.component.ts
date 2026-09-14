@@ -34,6 +34,7 @@ import { StoreStore } from '../../stores/store.store';
 import { CartStore } from '../../stores/cart.store';
 import { CartService } from '../../services/cart.service';
 import { GuestService } from '../../services/guest.service';
+import { SubscriptionService } from '../../services/subscription.service';
 import { CheckoutSummaryComponent } from '../checkout-summary/checkout-summary.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import {
@@ -103,6 +104,7 @@ export class CartComponent implements OnDestroy {
   private readonly cartService = inject(CartService);
   public readonly tableStore = inject(TableStore);
   public readonly guestService = inject(GuestService);
+  private readonly subscriptionService = inject(SubscriptionService);
   public readonly saleTypeStore = inject(SalesTypeStore);
   private readonly dialog = inject(MatDialog);
   private readonly breakpointObserver = inject(BreakpointObserver);
@@ -131,6 +133,9 @@ export class CartComponent implements OnDestroy {
   hasSelectedBuyer = computed(
     () => !!this.selectedGuest() || !!this.selectedCustomer()
   );
+
+  // Guest is a PMS (hotel) concept — hide it for stores without that module.
+  hasPmsModule = computed(() => this.subscriptionService.activeModuleKeys().includes('PMS'));
 
   buyerType = computed(() => {
     if (this.selectedGuest()) return 'guest';

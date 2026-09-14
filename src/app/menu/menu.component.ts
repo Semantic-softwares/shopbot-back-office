@@ -5,7 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { catchError, of, switchMap } from 'rxjs';
 import { ToolbarComponent } from '../shared/components/toolbar/toolbar.component';
@@ -35,69 +34,12 @@ export class MenuComponent implements OnInit, OnDestroy {
   private storeStore = inject(StoreStore);
   private rolesService = inject(RolesService);
   private subscriptionService = inject(SubscriptionService);
-  private snackBar = inject(MatSnackBar);
 
   readonly subscriptionLoading = signal(true);
-  readonly addingModule = signal<ModuleKey | null>(null);
   private readonly subscriptionDetails = this.subscriptionService.subscriptionWithModules;
-
-  /** All possible modules with their display config */
-  readonly ALL_MODULE_DEFS: Array<{
-    key: ModuleKey;
-    label: string;
-    description: string;
-    icon: string;
-    monthly: number;
-    yearly: number;
-    color: string;
-  }> = [
-    {
-      key: 'PMS',
-      label: 'Hotel Management',
-      description: 'Reservations, rooms, housekeeping & guest services',
-      icon: 'hotel',
-      monthly: 100,
-      yearly: 1000,
-      color: 'text-blue-600',
-    },
-    {
-      key: 'EMS',
-      label: 'Estate Management',
-      description: 'Properties, units, tenants & invoicing',
-      icon: 'domain',
-      monthly: 100,
-      yearly: 1000,
-      color: 'text-emerald-600',
-    },
-    {
-      key: 'POS',
-      label: 'Point of Sale',
-      description: 'Sales, transactions & customer orders',
-      icon: 'point_of_sale',
-      monthly: 0,
-      yearly: 0,
-      color: 'text-orange-600',
-    },
-    {
-      key: 'ERP',
-      label: 'Enterprise Resource Planning',
-      description: 'Inventory, orders, suppliers & stock management',
-      icon: 'business',
-      monthly: 0,
-      yearly: 0,
-      color: 'text-purple-600',
-    },
-  ];
 
   /** Modules the store currently has active in subscription */
   private readonly activeSubscribedKeys = this.subscriptionService.activeModuleKeys;
-
-  /** Modules not yet in subscription — shown in "Add Modules" section */
-  readonly availableToAdd = computed(() =>
-    this.ALL_MODULE_DEFS.filter(
-      (def) => !this.activeSubscribedKeys().includes(def.key),
-    ),
-  );
 
   // ERP module permissions
   private readonly ERP_PERMISSIONS = [
@@ -210,6 +152,21 @@ export class MenuComponent implements OnInit, OnDestroy {
   // Only super admins can access administrative settings
   canAccessAdmin = computed(() => this.rolesService.isAdmin());
 
+  /**
+   * The actual product modules (not Administrative Settings, which is an
+   * admin panel rather than something the store subscribes to) this user
+   * can open right now. Used to skip the picker entirely when there's only
+   * one real choice to make.
+   */
+  private readonly accessibleModuleRoutes = computed(() => {
+    const routes: string[] = [];
+    if (this.canAccessERP()) routes.push('/menu/erp');
+    if (this.canAccessHMS()) routes.push('/menu/hms');
+    if (this.canAccessPOS()) routes.push('/menu/pos');
+    if (this.canAccessEMS()) routes.push('/menu/ems');
+    return routes;
+  });
+
   constructor() {
     // Connect socket when store changes (only if not already connected)
     effect(() => {
@@ -245,37 +202,19 @@ export class MenuComponent implements OnInit, OnDestroy {
       )
       .subscribe(() => {
         this.subscriptionLoading.set(false);
+
+        // Nothing to pick between — skip the module picker and go straight
+        // to the one module this user can actually open. replaceUrl so the
+        // picker never sits in browser history to land on via "back".
+        const routes = this.accessibleModuleRoutes();
+        if (routes.length === 1) {
+          this.router.navigate([routes[0]], { replaceUrl: true });
+        }
       });
   }
 
   ngOnDestroy() {
     // Socket listeners are now managed by SocketService - no cleanup needed here
-  }
-
-  addModule(key: ModuleKey): void {
-    if (this.addingModule()) return;
-    this.addingModule.set(key);
-
-    this.subscriptionService.addModule(key).pipe(
-      catchError((err) => {
-        this.snackBar.open(
-          err?.error?.message ?? `Failed to add module ${key}`,
-          'Close',
-          { duration: 4000, horizontalPosition: 'end', verticalPosition: 'top' },
-        );
-        return of(null);
-      }),
-    ).subscribe((details) => {
-      this.addingModule.set(null);
-      if (details) {
-        const def = this.ALL_MODULE_DEFS.find((d) => d.key === key);
-        this.snackBar.open(
-          `${def?.label ?? key} added to your subscription`,
-          'Close',
-          { duration: 4000, horizontalPosition: 'end', verticalPosition: 'top' },
-        );
-      }
-    });
   }
 
   navigateToModule(moduleType: 'erp' | 'hotel' | 'pos' | 'ems' | 'admin'): void {

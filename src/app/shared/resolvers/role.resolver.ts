@@ -4,36 +4,33 @@ import { Role } from '../models/role.model';
 import { AuthService } from '../services/auth.service';
 import { switchMap, tap, of } from 'rxjs';
 import { RolesService } from '../services/roles.service';
+import { StoreStore } from '../stores/store.store';
 
 export const roleResolver: ResolveFn<Role | null> = () => {
   const roleService = inject(RolesService);
   const authService = inject(AuthService);
-  console.log('Role Resolver Invoked');
-  // Always fetch fresh role from server to get latest changes
-  // The RolesService already restores from storage in constructor for quick guard check
+  const storeStore = inject(StoreStore);
+  // Always fetch fresh role from server to get latest changes.
+  // The RolesService already restores from storage in constructor for quick guard check.
   return authService.currentUser.pipe(
     switchMap(user => {
       if (!user?._id) {
         return of(null);
       }
-      return roleService.getRoleByMerchantId(user._id);
-    }),
-    tap(role => {
-      if (role) {
-        const permissions = role.permissions
-          .filter(p => p.isActive)
-          .map(p => p.code);
-        // isAdmin is only true for actual admin roles, NOT all administrative (global) roles.
-        // isAdministrative means "global role, not tied to a store" — POS Manager, Cashier, etc. are also administrative.
-        const adminRoleNames = ['super admin', 'admin'];
-        const isAdmin = adminRoleNames.includes(role.name.toLowerCase());
-        // Update signals and storage with fresh data
-        roleService.setAccess({
-          role,
-          permissions,
-          isAdmin,
-        });
+      // A merchant can hold a different role at each store they belong to
+      // (via Membership), so the role must be resolved for whichever store
+      // is currently selected — not a single global merchant.role. No
+      // selected store here means the store-selection step was skipped
+      // (shouldn't happen: selecting a store is mandatory before /menu is
+      // reachable), so fall back to the legacy global lookup rather than
+      // failing outright.
+      const storeId = storeStore.selectedStore()?._id;
+      if (!storeId) {
+        return roleService.getRoleByMerchantId(user._id).pipe(
+          tap(role => role && roleService.applyRole(role))
+        );
       }
+      return roleService.loadForStore(user._id, storeId);
     })
   );
 };

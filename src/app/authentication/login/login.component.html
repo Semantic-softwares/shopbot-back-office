@@ -14,18 +14,6 @@
 
             <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
                 <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Store Number</mat-label>
-                    <input matInput formControlName="storeNumber" placeholder="Enter 4-digit store number" maxlength="4">
-                    <mat-icon matSuffix fontSet="material-icons-outlined">store</mat-icon>
-                    @if (loginForm.get('storeNumber')?.hasError('required')) {
-                    <mat-error>Store number is required</mat-error>
-                    }
-                    @if (loginForm.get('storeNumber')?.hasError('pattern') || loginForm.get('storeNumber')?.hasError('minlength')) {
-                    <mat-error>Enter a valid 4-digit store number</mat-error>
-                    }
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="w-full">
                     <mat-label>Email</mat-label>
                     <input matInput formControlName="email" type="email" placeholder="you@example.com">
                     <mat-icon matSuffix fontSet="material-icons-outlined">email</mat-icon>

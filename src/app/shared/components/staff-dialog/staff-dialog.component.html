@@ -48,22 +48,11 @@
           <mat-icon matSuffix>wc</mat-icon>
         </mat-form-field>
 
-        <!-- Password (only for create mode) -->
         @if (!isEditMode()) {
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Password</mat-label>
-            <input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'" 
-                   placeholder="Enter password">
-            <button mat-icon-button matSuffix type="button" (click)="hidePassword.set(!hidePassword())">
-              <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-            </button>
-            @if (staffForm.get('password')?.hasError('required') && staffForm.get('password')?.touched) {
-              <mat-error>Password is required</mat-error>
-            }
-            @if (staffForm.get('password')?.hasError('minlength') && staffForm.get('password')?.touched) {
-              <mat-error>Password must be at least 6 characters</mat-error>
-            }
-          </mat-form-field>
+          <div class="flex items-start gap-2 text-sm text-gray-500 bg-gray-50 rounded-lg p-3">
+            <mat-icon class="!text-lg !w-5 !h-5 text-gray-400 mt-0.5">mail_outline</mat-icon>
+            <span>They'll be emailed a link to set their own password and log in.</span>
+          </div>
         }
 
         <!-- Role -->

@@ -4,6 +4,7 @@ import { noAuthGuard } from './shared/guards/no-auth.guard';
 import { roleResolver } from './shared/resolvers/role.resolver';
 import { subscriptionResolver } from './shared/resolvers/subscription.resolver';
 import { subscriptionActiveGuard } from './shared/guards/subscription-active.guard';
+import { storeSelectedGuard } from './shared/guards/store-selected.guard';
 
 export const routes: Routes = [
     {
@@ -15,6 +16,14 @@ export const routes: Routes = [
         path: 'auth',
         loadChildren: () => import('./authentication/authentication.routes').then(m => m.AUTH_ROUTES),
         canActivate: [noAuthGuard]
+    },
+    // Post-login store picker for a merchant with access to more than one
+    // store — deliberately NOT under 'auth' (which noAuthGuard blocks once
+    // logged in) since the user is already authenticated at this point.
+    {
+        path: 'select-store',
+        loadComponent: () => import('./authentication/select-store/select-store.component').then(m => m.SelectStoreComponent),
+        canActivate: [authGuard],
     },
     {
         path: 'pricing',
@@ -45,7 +54,7 @@ export const routes: Routes = [
     {
         path: 'menu',
         loadChildren: () => import('./menu/menu.route').then(m => m.MENU_ROUTES),
-        canActivate: [authGuard, subscriptionActiveGuard],
+        canActivate: [authGuard, storeSelectedGuard, subscriptionActiveGuard],
         resolve: { role: roleResolver, subscription: subscriptionResolver }
     },
     // Public self-service table ordering — deliberately no canActivate/resolve.

@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { computed, signal, effect } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { Subscription, SubscriptionStatus } from '../models';
 import { SubscriptionService } from './subscription.service';
+import { StoreStore } from '../stores/store.store';
 
 /**
  * Feature gating utility for controlling feature access based on subscription status
@@ -12,7 +12,7 @@ import { SubscriptionService } from './subscription.service';
 })
 export class FeatureGatingService {
   private subscriptionService = inject(SubscriptionService);
-  private activatedRoute = inject(ActivatedRoute);
+  private storeStore = inject(StoreStore);
 
   currentSubscription = signal<Subscription | null>(null);
 
@@ -55,17 +55,22 @@ export class FeatureGatingService {
   });
 
   constructor() {
-    this.initializeSubscription();
-  }
-
-  private initializeSubscription(): void {
-    // Try to get subscription from resolver data first
-    this.activatedRoute.data.subscribe((data) => {
-      if (data['subscription']) {
-        this.currentSubscription.set(data['subscription']);
-      } else {
-        // If no data from resolver, fetch it directly
+    // This service is provided at the root and lives for the whole app —
+    // including the login and store-picker screens, before any store is
+    // selected. It used to fetch immediately off route resolver data, but
+    // that data is set on /menu's own route, not this root-injected
+    // ActivatedRoute (Angular doesn't propagate child-route resolver data
+    // upward by default), so that branch never actually matched and this
+    // fired unconditionally at construction — a GET with no storeId, which
+    // the backend correctly rejects with 400. Driving it off the selected
+    // store instead fixes that AND makes it refetch on every store switch,
+    // matching how RolesService already re-resolves permissions per store.
+    effect(() => {
+      const storeId = this.storeStore.selectedStore()?._id;
+      if (storeId) {
         this.loadSubscription();
+      } else {
+        this.currentSubscription.set(null);
       }
     });
   }

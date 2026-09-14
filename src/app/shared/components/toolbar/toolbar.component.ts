@@ -16,6 +16,8 @@ import { SocketService } from '../../services/socket.service';
 import { FirebasePushService } from '../../services/firebase-push.service';
 import { HotelNotificationService, HotelNotification } from '../../services/hotel-notification.service';
 import { StoreStore } from '../../stores/store.store';
+import { RolesService } from '../../services/roles.service';
+import { Store } from '../../models/store.model';
 
 @Component({
   selector: 'app-toolbar',
@@ -42,6 +44,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   private firebasePushService = inject(FirebasePushService);
   private notificationService = inject(HotelNotificationService);
   private storeStore = inject(StoreStore);
+  private rolesService = inject(RolesService);
   private snackBar = inject(MatSnackBar);
 
   private socketSub?: Subscription;
@@ -61,6 +64,48 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   /** Self-toggled "I'm on duty" — gates who gets alerted about new table orders. */
   protected readonly isOnDuty = computed(() => this.currentUser()?.isOnDuty ?? false);
   protected readonly togglingDuty = signal(false);
+
+  // ── Store switching — a sub-item under the user menu (below "Menu"), not
+  // its own toolbar control. Hidden entirely for the common case of a
+  // merchant with exactly one store — nothing to switch to. ──────────────
+  protected readonly stores = this.storeStore.stores;
+  protected readonly selectedStore = this.storeStore.selectedStore;
+  protected readonly hasMultipleStores = computed(() => this.stores().length > 1);
+  protected readonly switchingStore = signal(false);
+
+  protected switchStore(store: Store): void {
+    if (this.switchingStore()) return;
+    if (store._id === this.selectedStore()?._id) return;
+
+    const merchantId = this.authService.currentUserValue?._id;
+    if (!merchantId) return;
+
+    this.switchingStore.set(true);
+    this.storeStore.setSelectedStore(store);
+
+    this.rolesService.loadForStore(merchantId, store._id).subscribe({
+      next: () => {
+        this.switchingStore.set(false);
+        this.snackBar.open(`Switched to ${store.name}`, 'Close', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+        });
+        // Reset to a neutral landing spot — the route the user was on may
+        // require permissions this store's role doesn't have.
+        this.router.navigate(['/menu/menu']);
+      },
+      error: () => {
+        this.switchingStore.set(false);
+        this.snackBar.open('Could not switch stores — please try again.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar'],
+        });
+      },
+    });
+  }
 
   toggleDuty(): void {
     const next = !this.isOnDuty();

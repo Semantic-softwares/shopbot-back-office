@@ -123,6 +123,14 @@
             <mat-icon>menu</mat-icon>
             <span>Menu</span>
           </button>
+
+          @if (hasMultipleStores()) {
+            <button mat-menu-item [matMenuTriggerFor]="storeMenu" [disabled]="switchingStore()">
+              <mat-icon>storefront</mat-icon>
+              <span>{{ selectedStore()?.name || 'Select company' }}</span>
+            </button>
+          }
+
           <!-- <button mat-menu-item (click)="goToSettings()">
             <mat-icon>settings</mat-icon>
             <span>Settings</span>
@@ -132,6 +140,19 @@
             <mat-icon>logout</mat-icon>
             <span>Logout</span>
           </button>
+        </mat-menu>
+
+        <mat-menu #storeMenu="matMenu">
+          @for (store of stores(); track store._id) {
+            <button
+              mat-menu-item
+              (click)="switchStore(store)"
+              [class.bg-blue-50]="store._id === selectedStore()?._id"
+            >
+              <mat-icon>{{ store._id === selectedStore()?._id ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
+              <span>{{ store.name }}</span>
+            </button>
+          }
         </mat-menu>
       </div>
     </mat-toolbar>

@@ -13,10 +13,12 @@
                     <mat-icon>person</mat-icon>
                     <span>Customer</span>
                 </button>
+                @if (hasPmsModule()) {
                 <button mat-menu-item (click)="openGuestSelectionDialog()">
                     <mat-icon>hotel</mat-icon>
                     <span>Guest</span>
                 </button>
+                }
                 @if (selectedCustomer() || selectedGuest()) {
                 <mat-divider></mat-divider>
                 <button mat-menu-item (click)="clearBuyerSelection()">

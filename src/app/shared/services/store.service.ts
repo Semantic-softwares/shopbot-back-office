@@ -201,4 +201,17 @@ export class StoreService {
       `${this.hostServer}/stores/validate-access/${storeNumber}/${merchantId}`
     );
   }
+
+  /**
+   * Hand off store ownership to another active team member. Only the
+   * current owner may call this — enforced server-side, not just hidden in
+   * the UI, since ownership gates the can't-delete/deactivate-the-owner
+   * rule, billing email fallback, and PIN authorization.
+   */
+  transferOwnership(storeId: string, toMerchantId: string): Observable<{ success: boolean; message: string; data: Store }> {
+    return this._httpClient.post<{ success: boolean; message: string; data: Store }>(
+      `${this.hostServer}/stores/${storeId}/transfer-ownership`,
+      { toMerchantId }
+    );
+  }
 }

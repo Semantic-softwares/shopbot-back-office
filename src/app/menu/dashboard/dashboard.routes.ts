@@ -8,8 +8,12 @@ export const DASHBOARD_ROUTES: Routes = [
         children: [
             {
                 path: '',
-                redirectTo: 'reports',
+                redirectTo: 'dashboard',
                 pathMatch: 'full',
+            },
+            {
+                path: 'dashboard',
+                loadComponent: () => import('./sales-dashboard/sales-dashboard.component').then(m => m.SalesDashboardComponent)
             },
             {
                 path: 'reports',

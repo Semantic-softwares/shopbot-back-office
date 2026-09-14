@@ -10,6 +10,7 @@ import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { MAT_ICON_DEFAULT_OPTIONS } from '@angular/material/icon';
 import { progressInterceptor } from 'ngx-progressbar/http';
 import { provideServiceWorker } from '@angular/service-worker';
+import { provideEchartsCore } from 'ngx-echarts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -28,7 +29,9 @@ export const appConfig: ApplicationConfig = {
       withInterceptorsFromDi(),
       withInterceptors([authInterceptor, subscriptionInterceptor, progressInterceptor])
     ), 
-    provideCharts(withDefaultRegisterables()), provideServiceWorker('ngsw-worker.js', {
+    provideCharts(withDefaultRegisterables()),
+    provideEchartsCore({ echarts: () => import('echarts') }),
+    provideServiceWorker('ngsw-worker.js', {
             enabled: !isDevMode(),
             registrationStrategy: 'registerWhenStable:30000'
           })

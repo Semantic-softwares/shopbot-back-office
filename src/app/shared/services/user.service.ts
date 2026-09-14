@@ -6,6 +6,7 @@ import {  Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { User } from '../models';
 import { Employee } from '../models/employee.model';
+import { TeamMember } from '../models/membership.model';
 
 @Injectable({
   providedIn: 'root'
@@ -33,10 +34,48 @@ export class UserService {
 
   public createMerchant(params: Partial<Employee> ) : Observable<Partial<Employee>> {
     return this.http.post<Employee>(`${this.hostServer}/merchants`, params);
-  } 
+  }
+
+  /** Preview a staff invite before showing the set-password form. */
+  public getInvitePreview(token: string): Observable<{ name: string; email: string }> {
+    return this.http.get<{ name: string; email: string }>(`${this.hostServer}/merchants/invite/${token}`);
+  }
+
+  /** Consumes the invite token and sets the invited person's first password. */
+  public acceptInvite(token: string, password: string): Observable<{ success: boolean }> {
+    return this.http.post<{ success: boolean }>(`${this.hostServer}/merchants/invite/${token}/accept`, { password });
+  }
 
   public getStoreMerchants(storeId:string ) : Observable<Employee[]> {
     return this.http.get<Employee[]>(`${this.hostServer}/merchants/find-by-store/${storeId}`);
+  }
+
+  /**
+   * The Team settings page's data source — one row per Membership at this
+   * store (ACTIVE/INVITED/SUSPENDED), each flagged with isOwner so the page
+   * knows whose row can never offer a delete/deactivate action.
+   */
+  public getTeamForStore(storeId: string): Observable<TeamMember[]> {
+    return this.http.get<TeamMember[]>(`${this.hostServer}/merchants/store/${storeId}/team`);
+  }
+
+  /**
+   * "Remove from workspace" — deletes only this person's Membership for
+   * THIS store. Their Merchant/login account and any other store
+   * memberships are untouched, unlike the full-account deleteMerchant()
+   * above (kept as-is for the other, unrelated screens still using it).
+   */
+  public removeStaffFromStore(merchantId: string, storeId: string): Observable<any> {
+    return this.http.delete(`${this.hostServer}/merchants/${merchantId}/stores/${storeId}`);
+  }
+
+  /**
+   * "Deactivate"/"Activate" — suspends or reactivates access to ONE store
+   * only. Never touches the merchant's account globally, so it can't lock
+   * them out of other stores they belong to.
+   */
+  public setStaffStoreStatus(merchantId: string, storeId: string, status: 'ACTIVE' | 'SUSPENDED'): Observable<any> {
+    return this.http.put(`${this.hostServer}/merchants/${merchantId}/stores/${storeId}/status`, { status });
   }
 
 

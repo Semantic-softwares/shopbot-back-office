@@ -51,7 +51,6 @@ export class StaffDialogComponent implements OnInit {
 
   staffForm!: FormGroup;
   saving = signal(false);
-  hidePassword = signal(true);
 
   // Fetch roles for the store
   rolesResource = rxResource({
@@ -75,14 +74,8 @@ export class StaffDialogComponent implements OnInit {
       email: [this.data.staff?.email || '', [Validators.required, Validators.email]],
       phoneNumber: [this.data.staff?.phoneNumber || '', Validators.required],
       gender: [this.data.staff?.gender || ''],
-      password: ['', this.isEditMode() ? [] : [Validators.required, Validators.minLength(6)]],
       role: [roleId, Validators.required],
     });
-
-    // Remove password control in edit mode
-    if (this.isEditMode()) {
-      this.staffForm.removeControl('password');
-    }
   }
 
   getRoleIcon(role: Role): string {
@@ -143,9 +136,12 @@ export class StaffDialogComponent implements OnInit {
 
           // Validation passed, create new staff
           this.userService.createMerchant(staffData).subscribe({
-            next: (result) => {
+            next: (result: any) => {
               this.saving.set(false);
-              this.snackBar.open('Staff member created successfully!', 'Close', { duration: 3000 });
+              const message = result?.membershipStatus === 'INVITED'
+                ? 'Added — they already have an account, so they were emailed instead of asked to set a password.'
+                : 'Staff member added! They\'ll receive an email to set their password.';
+              this.snackBar.open(message, 'Close', { duration: 5000 });
               this.dialogRef.close(result);
             },
             error: (err) => {

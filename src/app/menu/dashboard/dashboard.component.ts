@@ -85,6 +85,12 @@ export class DashboardComponent {
 
   // Map of section names to their required permissions
   private readonly sectionPermissions: Record<string, string[]> = {
+    'Dashboard': [
+      'erp.orders.view',
+      'erp.products.view',
+      'finance.reports.view',
+      'finance.transactions.view',
+    ],
     'Reports': [
       'erp.orders.view',
       'erp.products.view',
@@ -121,6 +127,17 @@ export class DashboardComponent {
   };
 
   private readonly allNavItems: NavSection[] = [
+    {
+      name: 'Dashboard',
+      children: [
+        {
+          icon: 'space_dashboard',
+          label: 'Dashboard',
+          link: './dashboard',
+          permission: 'view_company',
+        },
+      ],
+    },
     {
       name: 'Reports',
       children: [

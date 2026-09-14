@@ -1,0 +1,210 @@
+<div class="sales-dashboard">
+
+  <app-page-header title="Dashboard" [subtitle]="subtitle()">
+    <ng-container actions>
+      <date-range-selector />
+      <app-employee-selector />
+      <button matButton (click)="retry()" [disabled]="refreshing()">
+        <mat-icon>refresh</mat-icon>
+        Refresh
+      </button>
+    </ng-container>
+  </app-page-header>
+
+  @if (loading()) {
+    <div class="state-panel">
+      <mat-spinner diameter="36"></mat-spinner>
+      <p>Crunching your sales numbers…</p>
+    </div>
+  } @else if (error()) {
+    <mat-card appearance="outlined" class="state-panel">
+      <mat-icon class="state-panel__icon">cloud_off</mat-icon>
+      <p class="state-panel__title">We couldn't load your dashboard</p>
+      <p>Check your connection, then try again.</p>
+      <button matButton="filled" (click)="retry()">Try again</button>
+    </mat-card>
+  } @else {
+
+    <div class="toolbar-row">
+      <p class="range-label">
+        <mat-icon>calendar_month</mat-icon>
+        {{ rangeLabel() }}
+        @if (refreshing()) { <mat-spinner diameter="14"></mat-spinner> }
+      </p>
+    </div>
+
+    <!-- KPI row -->
+    <div class="kpi-grid">
+      @for (kpi of kpis(); track kpi.label) {
+        <mat-card appearance="outlined" class="kpi-card {{ kpi.accent }}">
+          <div class="kpi-card__body">
+            <div class="kpi-card__info">
+              <p class="kpi-card__label">{{ kpi.label }}</p>
+              <p class="kpi-card__value">{{ kpi.value }}</p>
+              <p class="kpi-card__meta">
+                @if (kpi.delta !== null) {
+                  <span class="delta delta--{{ deltaTone(kpi) }}">
+                    <mat-icon>{{ deltaTone(kpi) === 'flat' ? 'remove' : kpi.delta > 0 ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+                    {{ (kpi.delta < 0 ? -kpi.delta : kpi.delta) | number: '1.0-1' }}%
+                  </span>
+                }
+                <span class="kpi-card__note">{{ kpi.note }}</span>
+              </p>
+            </div>
+            <div class="kpi-card__icon-wrap">
+              <mat-icon>{{ kpi.icon }}</mat-icon>
+            </div>
+          </div>
+        </mat-card>
+      }
+    </div>
+
+    @if (!hasSales()) {
+      <mat-card appearance="outlined" class="state-panel">
+        <mat-icon class="state-panel__icon">insights</mat-icon>
+        <p class="state-panel__title">No sales in this period</p>
+        <p>Pick a different date range or employee to see your charts.</p>
+      </mat-card>
+    } @else {
+
+      <div class="dash-grid">
+
+        <!-- Sales trend -->
+        <mat-card appearance="outlined" class="chart-card span-8">
+          <div class="chart-card__header">
+            <div>
+              <h3 class="chart-card__title">Sales trend</h3>
+              <p class="chart-card__meta">Gross vs. net sales over time</p>
+            </div>
+            <mat-button-toggle-group hideSingleSelectionIndicator class="period-toggle" [value]="period()" (change)="setPeriod($event.value)" aria-label="Group sales by">
+              @for (option of periodOptions; track option.value) {
+                <mat-button-toggle [value]="option.value">{{ option.label }}</mat-button-toggle>
+              }
+            </mat-button-toggle-group>
+          </div>
+          <div echarts [options]="trendChart()" class="chart chart--lg"></div>
+        </mat-card>
+
+        <!-- Payment methods -->
+        <mat-card appearance="outlined" class="chart-card span-4">
+          <div class="chart-card__header">
+            <div>
+              <h3 class="chart-card__title">Payment methods</h3>
+              <p class="chart-card__meta">How customers paid</p>
+            </div>
+          </div>
+          <div class="donut-wrap">
+            <div echarts [options]="paymentsChart()" class="chart chart--lg"></div>
+            <div class="donut-center">
+              <span class="donut-center__label">Collected</span>
+              <span class="donut-center__value">{{ money(paymentsTotal()) }}</span>
+            </div>
+          </div>
+        </mat-card>
+
+        <!-- Top products -->
+        <mat-card appearance="outlined" class="chart-card span-6">
+          <div class="chart-card__header">
+            <div>
+              <h3 class="chart-card__title">Top products</h3>
+              <p class="chart-card__meta">Best sellers by revenue</p>
+            </div>
+            <a matButton routerLink="../reports/sales-by-item" [queryParams]="receiptsQueryParams()">View all</a>
+          </div>
+          <div echarts [options]="topProductsChart()" class="chart chart--lg"></div>
+        </mat-card>
+
+        <!-- Categories -->
+        <mat-card appearance="outlined" class="chart-card span-6">
+          <div class="chart-card__header">
+            <div>
+              <h3 class="chart-card__title">Sales by category</h3>
+              <p class="chart-card__meta">Net sales share per category</p>
+            </div>
+            <a matButton routerLink="../reports/sales-by-category" [queryParams]="receiptsQueryParams()">View all</a>
+          </div>
+          <div echarts [options]="categoryChart()" class="chart chart--lg"></div>
+        </mat-card>
+
+        <!-- Busiest hours -->
+        <mat-card appearance="outlined" class="chart-card span-8">
+          <div class="chart-card__header">
+            <div>
+              <h3 class="chart-card__title">Busiest hours</h3>
+              <p class="chart-card__meta">{{ peakHour() || 'Orders by day of week and hour' }}</p>
+            </div>
+          </div>
+          <div class="chart-scroll">
+            <div echarts [options]="heatmapChart()" class="chart chart--heatmap"></div>
+          </div>
+        </mat-card>
+
+        <!-- Channels -->
+        <mat-card appearance="outlined" class="chart-card span-4">
+          <div class="chart-card__header">
+            <div>
+              <h3 class="chart-card__title">Sales channels</h3>
+              <p class="chart-card__meta">Point of sale vs. self-order</p>
+            </div>
+          </div>
+          <div echarts [options]="channelChart()" class="chart chart--lg"></div>
+        </mat-card>
+
+        <!-- Staff -->
+        <mat-card appearance="outlined" class="chart-card span-5">
+          <div class="chart-card__header">
+            <div>
+              <h3 class="chart-card__title">Staff performance</h3>
+              <p class="chart-card__meta">Net sales by employee</p>
+            </div>
+            <a matButton routerLink="../reports/sales-by-employee" [queryParams]="receiptsQueryParams()">View all</a>
+          </div>
+          <div echarts [options]="employeesChart()" class="chart"></div>
+        </mat-card>
+
+        <!-- Order types -->
+        <mat-card appearance="outlined" class="chart-card span-3">
+          <div class="chart-card__header">
+            <div>
+              <h3 class="chart-card__title">Order types</h3>
+              <p class="chart-card__meta">Table, quick sale, online</p>
+            </div>
+          </div>
+          <div echarts [options]="orderTypeChart()" class="chart"></div>
+        </mat-card>
+
+        <!-- Recent receipts -->
+        <mat-card appearance="outlined" class="chart-card span-4">
+          <div class="chart-card__header">
+            <div>
+              <h3 class="chart-card__title">Recent receipts</h3>
+              <p class="chart-card__meta">Latest orders in this range</p>
+            </div>
+            <a matButton routerLink="../reports/receipts" [queryParams]="receiptsQueryParams()">View all</a>
+          </div>
+          <ul class="receipt-list">
+            @for (receipt of recentReceipts(); track receipt._id) {
+              <li>
+                <button type="button" class="receipt-row" (click)="openReceipt(receipt._id)">
+                  <span class="receipt-row__icon" [class.receipt-row__icon--refund]="receipt.category === 'Cancel'">
+                    <mat-icon>{{ receipt.category === 'Cancel' ? 'undo' : 'receipt' }}</mat-icon>
+                  </span>
+                  <span class="receipt-row__main">
+                    <span class="receipt-row__title">#{{ receipt.receiptNo }}</span>
+                    <span class="receipt-row__sub">{{ receipt.date | date: 'MMM d, h:mm a' }} · {{ receipt.type || 'Unpaid' }}</span>
+                  </span>
+                  <span class="receipt-row__amount" [class.receipt-row__amount--refund]="receipt.category === 'Cancel'">
+                    {{ money(receipt.total) }}
+                  </span>
+                </button>
+              </li>
+            } @empty {
+              <li class="receipt-list__empty">No receipts yet</li>
+            }
+          </ul>
+        </mat-card>
+
+      </div>
+    }
+  }
+</div>

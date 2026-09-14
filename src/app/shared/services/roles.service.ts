@@ -79,6 +79,43 @@ export class RolesService {
     this.sessionStorage.removeItem(ROLE_ACCESS_KEY);
   }
 
+  /**
+   * Applies a fetched role to the signals/session-storage this service owns.
+   * Shared by role.resolver.ts (boot) and anywhere a store switch needs to
+   * re-resolve permissions for the newly selected store, so both stay in
+   * sync with the exact same isAdmin/permissions-filtering rules.
+   */
+  applyRole(role: Role): void {
+    const permissions = role.permissions
+      .filter(p => p.isActive)
+      .map(p => p.code);
+    // isAdmin is only true for actual admin roles, NOT all administrative
+    // (global) roles. isAdministrative means "global role, not tied to a
+    // store" — POS Manager, Cashier, etc. are also administrative.
+    const adminRoleNames = ['super admin', 'admin'];
+    const isAdmin = adminRoleNames.includes(role.name.toLowerCase());
+    this.setAccess({ role, permissions, isAdmin });
+  }
+
+  /**
+   * Fetches and applies the role for a specific (merchant, store) pair —
+   * what the store switcher calls after the user picks a store, so
+   * permission-gated UI reflects the newly selected store instead of
+   * staying on whatever was resolved at login/boot.
+   */
+  loadForStore(merchantId: string, storeId: string): Observable<Role | null> {
+    return this.getRoleByMembership(merchantId, storeId).pipe(
+      map(role => {
+        if (role) {
+          this.applyRole(role);
+        } else {
+          this.clearAccess();
+        }
+        return role ?? null;
+      })
+    );
+  }
+
   has(permission: string) {
     return this.permissions().has(permission);
   }
@@ -182,12 +219,26 @@ export class RolesService {
   }
 
   /**
-   * Get role by merchant ID
+   * Get role by merchant ID — a single global role, correct only for a
+   * merchant with access to exactly one store. Kept as a fallback for
+   * getRoleByMembership() below.
    */
   getRoleByMerchantId(merchantId: string): Observable<Role> {
     return this.http.get<ApiResponse<Role>>(`${this.hostServer}/roles/merchant/${merchantId}`).pipe(
       map(response => response.data)
     );
+  }
+
+  /**
+   * Get the role this merchant holds AT A SPECIFIC STORE. A merchant can now
+   * belong to several stores (via Membership), each with its own role, so
+   * this is the one that must be used once a store is selected — the
+   * store-switcher's whole point is that this can change without a re-login.
+   */
+  getRoleByMembership(merchantId: string, storeId: string): Observable<Role> {
+    return this.http
+      .get<ApiResponse<Role>>(`${this.hostServer}/roles/merchant/${merchantId}/store/${storeId}`)
+      .pipe(map(response => response.data));
   }
 
   /**
