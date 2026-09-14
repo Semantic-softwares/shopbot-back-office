@@ -1,1 +1,0 @@
-var o=[{path:"",loadComponent:()=>import('./chunk-D-zGFDjI.js').then(t=>t.RatePlansComponent),children:[{path:"",redirectTo:"list",pathMatch:"full"},{path:"list",loadComponent:()=>import('./chunk-CjwG03B6.js').then(t=>t.RatePlansListComponent)}]}];export{o as RATE_PLANS_ROUTES};

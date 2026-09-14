@@ -1,0 +1,1 @@
+var o=[{path:"",loadComponent:()=>import('./chunk-DjF_Zx0x.js').then(t=>t.CustomersComponent),children:[{path:"",redirectTo:"list",pathMatch:"full"},{path:"list",loadComponent:()=>import('./chunk-tLT4ce0P.js').then(t=>t.CustomerListComponent)}]}];export{o as DASHBOARD_CUSTOMERS_ROUTES};
