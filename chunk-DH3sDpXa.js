@@ -1,1 +1,0 @@
-var t=[{path:"",loadComponent:()=>import('./chunk-azgc_fSp.js').then(o=>o.InventoryCalendarComponent)}];export{t as INVENTORY_ROUTES};
