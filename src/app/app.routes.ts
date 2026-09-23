@@ -25,6 +25,18 @@ export const routes: Routes = [
         loadComponent: () => import('./authentication/select-store/select-store.component').then(m => m.SelectStoreComponent),
         canActivate: [authGuard],
     },
+    // The "Accept Invite" email button lands here. Deliberately NOT under
+    // 'auth' either, but for the opposite reason from select-store: this
+    // page must work for someone who is ALREADY logged in (the common case —
+    // most invited people already use the app for another store), so
+    // noAuthGuard bouncing them to /menu/menu before the page ever loads
+    // would break the primary path. No guard at all: the component itself
+    // checks auth state and redirects to /auth/login (preserving a
+    // returnUrl back here) only when actually signed out.
+    {
+        path: 'accept-membership/:id',
+        loadComponent: () => import('./authentication/accept-membership/accept-membership.component').then(m => m.AcceptMembershipComponent),
+    },
     {
         path: 'pricing',
         loadComponent: () => import('./pages/billing/pricing/pricing-shell.component').then(m => m.PricingShellComponent),

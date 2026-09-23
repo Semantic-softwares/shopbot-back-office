@@ -1,0 +1,45 @@
+<h2 mat-dialog-title>Store invitations</h2>
+<mat-dialog-content>
+    <p class="text-sm text-gray-600 mb-4">You've been invited to join the following store(s).</p>
+    <div class="flex flex-col gap-3">
+        @for (row of rows(); track row.membership._id) {
+            <div class="flex items-center justify-between gap-3 p-3 rounded-lg border border-gray-200">
+                <div class="flex items-center gap-3 min-w-0">
+                    @if (row.store?.logo) {
+                        <img [src]="row.store.logo" [alt]="row.store.name" class="w-10 h-10 rounded-lg object-cover flex-shrink-0">
+                    } @else {
+                        <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
+                            <mat-icon fontSet="material-icons-outlined">storefront</mat-icon>
+                        </div>
+                    }
+                    <div class="min-w-0">
+                        <p class="font-medium text-gray-900 truncate">{{ row.store?.name }}</p>
+                        @if (row.role?.name) {
+                            <p class="text-xs text-gray-500">as {{ row.role?.name }}</p>
+                        }
+                    </div>
+                </div>
+
+                @if (row.resolved === 'accepted') {
+                    <span class="text-sm text-green-600 flex items-center gap-1 flex-shrink-0">
+                        <mat-icon class="!text-base !w-4 !h-4">check_circle</mat-icon> Joined
+                    </span>
+                } @else if (row.resolved === 'declined') {
+                    <span class="text-sm text-gray-400 flex-shrink-0">Declined</span>
+                } @else if (row.resolving) {
+                    <mat-spinner diameter="20"></mat-spinner>
+                } @else {
+                    <div class="flex gap-2 flex-shrink-0">
+                        <button mat-button (click)="decline(row)">Decline</button>
+                        <button matButton="filled" color="primary" (click)="accept(row)">Accept</button>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button matButton="filled" color="primary" [mat-dialog-close]="true">
+        {{ allResolved() ? 'Continue' : 'Skip for now' }}
+    </button>
+</mat-dialog-actions>
