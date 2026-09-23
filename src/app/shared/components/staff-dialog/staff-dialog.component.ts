@@ -113,46 +113,24 @@ export class StaffDialogComponent implements OnInit {
         }
       });
     } else {
-      // Validate email and phone number before creating
-      const email = this.staffForm.value.email;
-      const phoneNumber = this.staffForm.value.phoneNumber;
-
-      this.userService.validateEmailAndPhoneNumber({ email, phoneNumber }).subscribe({
-        next: (result) => {
-          const errors: string[] = [];
-          
-          if (!result.email) {
-            errors.push('Email is already registered');
-          }
-          if (!result.phoneNumber) {
-            errors.push('Phone number is already registered');
-          }
-
-          if (errors.length > 0) {
-            this.saving.set(false);
-            this.snackBar.open(errors.join('. '), 'Close', { duration: 5000 });
-            return;
-          }
-
-          // Validation passed, create new staff
-          this.userService.createMerchant(staffData).subscribe({
-            next: (result: any) => {
-              this.saving.set(false);
-              const message = result?.membershipStatus === 'INVITED'
-                ? 'Added — they already have an account, so they were emailed instead of asked to set a password.'
-                : 'Staff member added! They\'ll receive an email to set their password.';
-              this.snackBar.open(message, 'Close', { duration: 5000 });
-              this.dialogRef.close(result);
-            },
-            error: (err) => {
-              this.saving.set(false);
-              this.snackBar.open(err.error?.message || 'Failed to create staff member', 'Close', { duration: 5000 });
-            }
-          });
+      // No pre-check here: an email/phone already belonging to someone isn't
+      // an error, it's the normal case for adding an existing person to a
+      // new store. MerchantsService.create() on the backend already handles
+      // this — an existing match gets a Membership invite instead of a new
+      // account; a real conflict (email and phone belong to two different
+      // people) still comes back as an error from the request itself.
+      this.userService.createMerchant(staffData).subscribe({
+        next: (result: any) => {
+          this.saving.set(false);
+          const message = result?.membershipStatus === 'INVITED'
+            ? 'Added — they already have an account, so they were emailed instead of asked to set a password.'
+            : 'Staff member added! They\'ll receive an email to set their password.';
+          this.snackBar.open(message, 'Close', { duration: 5000 });
+          this.dialogRef.close(result);
         },
         error: (err) => {
           this.saving.set(false);
-          this.snackBar.open('Error validating information. Please try again.', 'Close', { duration: 5000 });
+          this.snackBar.open(err.error?.message || 'Failed to create staff member', 'Close', { duration: 5000 });
         }
       });
     }
