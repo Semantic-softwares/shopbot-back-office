@@ -1,1 +1,0 @@
-var t=[{path:"",loadComponent:()=>import('./chunk-JRe9PMh9.js').then(o=>o.InventoryCalendarComponent)}];export{t as INVENTORY_ROUTES};

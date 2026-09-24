@@ -1,0 +1,1 @@
+var o=[{path:``,loadComponent:()=>import(`./chunk-BM7TCtU9.js`).then(t=>t.Team),children:[{path:``,redirectTo:`staffs`,pathMatch:`full`},{path:`staffs`,loadComponent:()=>import(`./chunk-CHKipyZr.js`).then(t=>t.StaffAccount)},{path:`roles`,loadComponent:()=>import(`./chunk-BHxVJr8n.js`).then(t=>t.Roles)}]}];export{o as TEAM_ROUTES};

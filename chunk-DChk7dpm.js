@@ -1,1 +1,0 @@
-var t=[{path:"",loadComponent:()=>import('./chunk-CTsp8MCp.js').then(o=>o.Billing)}];export{t as BILLING_ROUTES};

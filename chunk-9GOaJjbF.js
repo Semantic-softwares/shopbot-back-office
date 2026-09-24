@@ -1,0 +1,1 @@
+import{Cn as kI,sn as fl}from"./chunk-5XvVQiy2.js";import{t as I}from"./chunk--TR0RrN-.js";var n=(()=>{class e{static ɵfac=function(p){return new(p||e)};static ɵmod=kI({type:e});static ɵinj=fl({imports:[I]})}return e})();export{n as t};

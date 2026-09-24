@@ -1,0 +1,1 @@
+var o=[{path:``,loadComponent:()=>import(`./chunk-CRKENx_5.js`).then(t=>t.PaymentsComponent),children:[{path:``,loadComponent:()=>import(`./chunk-BIBq6oGU.js`).then(t=>t.PaymentListComponent)},{path:`:id`,loadComponent:()=>import(`./chunk-DRmmWBUY.js`).then(t=>t.PaymentDetailComponent)}]}];export{o as PAYMENTS_ROUTES};

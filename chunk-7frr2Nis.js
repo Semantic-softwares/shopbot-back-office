@@ -1,0 +1,1 @@
+var t=[{path:``,loadComponent:()=>import(`./chunk-BPi5v32M.js`).then(o=>o.Checkout)}];export{t as CHECKOUT_ROUTES};

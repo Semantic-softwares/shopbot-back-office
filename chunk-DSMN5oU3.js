@@ -1,1 +1,0 @@
-var o=[{path:"",loadComponent:()=>import('./chunk-26BpaY5X.js').then(t=>t.ReceiptsComponent),children:[{path:"",loadComponent:()=>import('./chunk-s78wk89M.js').then(t=>t.ReceiptListComponent)},{path:":id",loadComponent:()=>import('./chunk-fPID-vCZ.js').then(t=>t.ReceiptDetailComponent)}]}];export{o as RECEIPTS_ROUTES};
