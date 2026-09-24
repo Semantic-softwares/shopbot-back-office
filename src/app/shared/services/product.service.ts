@@ -112,6 +112,14 @@ export class ProductService  {
    * @param product
    * @returns {Observable<any>}
    */
+  importProducts(payload: { store: string; items: any[]; reuploadImages: boolean }): Observable<{
+    created: { _id: string; name: string }[];
+    skipped: { name: string; reason: string }[];
+    failed: { name: string; error: string }[];
+  }> {
+    return this._httpClient.post<any>(`${this.hostServer}/foods/import`, payload);
+  }
+
   addProduct(product: any): Observable<Product> {
     return this._httpClient.post<Product>(`${this.hostServer}/foods`, product)
   }

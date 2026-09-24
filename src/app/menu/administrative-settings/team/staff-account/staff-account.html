@@ -102,10 +102,17 @@
                     }
 
                     @if (!member.isOwner) {
-                        <button mat-menu-item (click)="toggleMerchantStatus(member)">
+                        @if (member.inviteState) {
+                            <button mat-menu-item (click)="resendInvite(member)">
+                                <mat-icon>forward_to_inbox</mat-icon>
+                                <span>Resend Invite</span>
+                            </button>
+                        } @else {
+                            <button mat-menu-item (click)="toggleMerchantStatus(member)">
                             <mat-icon>{{ member.status === 'SUSPENDED' ? 'toggle_on' : 'toggle_off' }}</mat-icon>
                             <span>{{ member.status === 'SUSPENDED' ? 'Activate' : 'Deactivate' }}</span>
                         </button>
+                        }
 
                         @if (isCurrentUserOwner()) {
                             <button mat-menu-item (click)="transferOwnership(member)">
@@ -175,10 +182,17 @@
                         }
 
                         @if (!member.isOwner) {
-                            <button mat-menu-item (click)="toggleMerchantStatus(member)">
+                            @if (member.inviteState) {
+                                <button mat-menu-item (click)="resendInvite(member)">
+                                    <mat-icon>forward_to_inbox</mat-icon>
+                                    <span>Resend Invite</span>
+                                </button>
+                            } @else {
+                                <button mat-menu-item (click)="toggleMerchantStatus(member)">
                                 <mat-icon>{{ member.status === 'SUSPENDED' ? 'toggle_on' : 'toggle_off' }}</mat-icon>
                                 <span>{{ member.status === 'SUSPENDED' ? 'Activate' : 'Deactivate' }}</span>
                             </button>
+                            }
 
                             @if (isCurrentUserOwner()) {
                                 <button mat-menu-item (click)="transferOwnership(member)">

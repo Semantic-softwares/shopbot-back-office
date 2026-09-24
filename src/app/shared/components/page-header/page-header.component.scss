@@ -12,11 +12,18 @@
   }
 }
 
-// Ensure projected action buttons don't shrink on mobile
-::ng-deep [actions] {
+// Wrapper elements marked `actions` flatten into the action bar; a button or
+// link marked `actions` must keep its own box (display: contents would strip
+// its background and leave only the ripple visible).
+::ng-deep [actions]:not(button):not(a) {
   display: contents;
 
   > * {
     flex-shrink: 0;
   }
+}
+
+::ng-deep button[actions],
+::ng-deep a[actions] {
+  flex-shrink: 0;
 }

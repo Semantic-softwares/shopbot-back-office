@@ -1,11 +1,12 @@
+<div class="p-4 md:p-6">
 <app-page-header title="Products" subtitle="Manage your menu items and pricing">
-  <button matButton (click)="reloadProducts()" actions title="Reload products" matTooltip="Reload">
-    <mat-icon>refresh</mat-icon>
-    Refresh
+  <button matButton="outlined" (click)="openImportDialog()" actions>
+    <mat-icon>upload_file</mat-icon>
+    Import
   </button>
-  <button matButton="filled" color="primary" (click)="addItem()" actions>
+  <button matButton="filled" (click)="addItem()" actions>
     <mat-icon>add</mat-icon>
-    ADD ITEM
+    Add product
   </button>
 </app-page-header>
 
@@ -44,12 +45,13 @@
 
       <!-- Bulk Actions Bar -->
       @if (selectedCount() > 0) {
-        <div class="flex items-center gap-3 px-4 py-3 mx-4 mb-3 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-900/30 dark:border-blue-700">
+        <div class="flex flex-wrap items-center gap-3 px-4 py-3 mx-4 mb-3 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-900/30 dark:border-blue-700">
           <mat-icon class="text-blue-600">checklist</mat-icon>
           <span class="text-sm font-medium text-blue-800 dark:text-blue-200">
             {{ selectedCount() }} product(s) selected
           </span>
-          <div class="flex items-center gap-2 ml-4">
+
+          <div class="flex flex-wrap items-center gap-2 ml-4">
             <span class="text-xs text-gray-500 mr-1">Assign Station:</span>
             @for (station of stations.value(); track station._id) {
               <button mat-stroked-button
@@ -71,17 +73,21 @@
             </button>
           </div>
           <span class="flex-grow"></span>
-          <button mat-icon-button (click)="clearSelection()" matTooltip="Clear selection" aria-label="Clear selection">
-            <mat-icon class="!text-base">close</mat-icon>
-          </button>
           @if (bulkUpdating()) {
             <mat-spinner diameter="20"></mat-spinner>
           }
+          <button matButton (click)="bulkDelete()" [disabled]="bulkUpdating()" class="!text-red-600">
+            <mat-icon>delete</mat-icon>
+            Delete
+          </button>
+          <button mat-icon-button (click)="clearSelection()" matTooltip="Clear selection" aria-label="Clear selection">
+            <mat-icon class="!text-base">close</mat-icon>
+          </button>
         </div>
       }
 
       <div class="table-container rounded-lg overflow-x-auto">
-        <table mat-table [dataSource]="filteredProducts()" matSort class="min-w-full">
+        <table mat-table [dataSource]="paginatedProducts()" class="min-w-full hidden md:table">
 
           <!-- Checkbox Column -->
           <ng-container matColumnDef="select">
@@ -108,23 +114,34 @@
           <ng-container matColumnDef="photo">
             <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Photo</th>
             <td mat-cell *matCellDef="let element">
-              <img [src]="$safeNavigationMigration(element.photos?.[0])" alt="product"
-                class="w-10 h-10 object-cover rounded-full border shadow" />
+              @if (element.photos?.[0]) {
+                <img [src]="element.photos[0]" alt="" loading="lazy"
+                  class="w-10 h-10 object-cover rounded-full border" />
+              } @else {
+                <div class="w-10 h-10 rounded-full border bg-gray-100 flex items-center justify-center text-gray-400">
+                  <mat-icon class="!text-xl !w-5 !h-5">restaurant</mat-icon>
+                </div>
+              }
             </td>
           </ng-container>
 
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50">Item name</th>
-            <td mat-cell *matCellDef="let element" class="font-semibold">{{element.name}}</td>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Item name</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="font-semibold">{{element.name}}</div>
+              @if (element.description) {
+                <div class="text-xs text-gray-500 max-w-xs truncate" [matTooltip]="element.description">{{element.description}}</div>
+              }
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="category">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50">Category</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Category</th>
             <td mat-cell *matCellDef="let element">{{element?.menu?.name}}</td>
           </ng-container>
 
           <ng-container matColumnDef="station">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50">Station</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Station</th>
             <td mat-cell *matCellDef="let element">
               @if (element.station && element.station?.name) {
                 <mat-chip-set>
@@ -140,7 +157,7 @@
           </ng-container>
 
           <ng-container matColumnDef="price">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50">Price</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Price</th>
             <td mat-cell *matCellDef="let element">
               <span class="font-semibold text-primary">
                 {{element.price | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
@@ -149,22 +166,22 @@
           </ng-container>
 
           <ng-container matColumnDef="cost">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50">Cost Price</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Cost Price</th>
             <td mat-cell *matCellDef="let element">{{element.costPrice}}</td>
           </ng-container>
 
           <ng-container matColumnDef="initialStock">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50">Initial Stock</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Initial Stock</th>
             <td mat-cell *matCellDef="let element">{{element.initialStock || 0}}</td>
           </ng-container>
 
           <ng-container matColumnDef="criticalStockLevel">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50">Critical Level</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Critical Level</th>
             <td mat-cell *matCellDef="let element">{{element.criticalStockLevel || 0}}</td>
           </ng-container>
 
           <ng-container matColumnDef="qty">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header class="bg-gray-50">Quantity</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Quantity</th>
             <td mat-cell *matCellDef="let element">{{element.qty || 0}}</td>
           </ng-container>
 
@@ -201,7 +218,75 @@
           <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-gray-50"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50 transition"></tr>
         </table>
-        <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of products"></mat-paginator>
+
+        <!-- Mobile: one card per product -->
+        <div class="flex flex-col gap-3 md:hidden">
+          @for (product of paginatedProducts(); track product._id) {
+            <div class="border border-gray-200 rounded-xl p-4">
+              <div class="flex items-start gap-3">
+                <mat-checkbox
+                  [checked]="isSelected(product._id)"
+                  (change)="toggleSelection(product._id)"
+                  [aria-label]="'Select ' + product.name"
+                  color="primary">
+                </mat-checkbox>
+                @if (product.photos?.[0]) {
+                  <img [src]="product.photos[0]" alt="" loading="lazy"
+                    class="w-14 h-14 object-cover rounded-lg border flex-shrink-0" />
+                } @else {
+                  <div class="w-14 h-14 rounded-lg border bg-gray-100 flex items-center justify-center text-gray-400 flex-shrink-0">
+                    <mat-icon>restaurant</mat-icon>
+                  </div>
+                }
+                <div class="min-w-0 flex-1">
+                  <p class="font-semibold text-gray-900 truncate">{{ product.name }}</p>
+                  @if (product.description) {
+                    <p class="text-xs text-gray-500 line-clamp-2">{{ product.description }}</p>
+                  }
+                  @if (product.menu?.name) {
+                    <p class="text-sm text-gray-500 truncate">{{ product.menu.name }}</p>
+                  }
+                  <p class="font-semibold text-primary mt-1">
+                    {{ product.price | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
+                  </p>
+                </div>
+                <button mat-icon-button [matMenuTriggerFor]="cardMenu" aria-label="Product actions" class="flex-shrink-0">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #cardMenu="matMenu">
+                  <button mat-menu-item (click)="onEditProduct(product._id)">
+                    <mat-icon>edit</mat-icon>
+                    <span>Edit</span>
+                  </button>
+                  <button mat-menu-item (click)="deleteProduct(product)">
+                    <mat-icon>delete</mat-icon>
+                    <span>Delete</span>
+                  </button>
+                </mat-menu>
+              </div>
+              <div class="flex items-center justify-between mt-3">
+                @if (product.station?.name) {
+                  <mat-chip class="!text-xs">{{ product.station.name }}</mat-chip>
+                } @else {
+                  <span class="text-gray-400 text-xs italic">No station</span>
+                }
+                <mat-slide-toggle [checked]="product.active" (change)="toggleProductStatus(product)" color="primary">
+                  {{ product.active ? 'Active' : 'Hidden' }}
+                </mat-slide-toggle>
+              </div>
+            </div>
+          }
+        </div>
+
+        <mat-paginator
+          [length]="filteredProducts().length"
+          [pageIndex]="pageIndex()"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="[10, 25, 50, 100]"
+          (page)="onPage($event)"
+          showFirstLastButtons
+          aria-label="Select page of products">
+        </mat-paginator>
       </div>
     } @else if (dataSource.error()) {
       <app-no-record icon="error" title="Error"
@@ -210,3 +295,4 @@
     }
   </mat-card-content>
 </mat-card>
+</div>

@@ -45,7 +45,7 @@ export class PrinterFormModalComponent implements OnInit {
   private printerService = inject(PrinterService);
   private storeStore = inject(StoreStore);
   private snackBar = inject(MatSnackBar);
-  data = inject(MAT_DIALOG_DATA) as { printer?: Printer; isEditMode: boolean };
+  data = (inject(MAT_DIALOG_DATA, { optional: true }) ?? { isEditMode: false }) as { printer?: Printer; isEditMode: boolean };
 
   isSubmitting = signal(false);
   printerForm: FormGroup;

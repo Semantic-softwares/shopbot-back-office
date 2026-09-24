@@ -79,6 +79,10 @@ export class UserService {
   }
 
 
+  public resendStaffInvite(storeId: string, merchantId: string): Observable<any> {
+    return this.http.post(`${this.hostServer}/merchants/store/${storeId}/team/${merchantId}/resend-invite`, {});
+  }
+
   public deleteMerchant(merchantId:string): Observable<Employee> {
     return this.http.delete<Employee>(`${this.hostServer}/merchants/${merchantId}`)
   }

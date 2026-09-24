@@ -28,6 +28,7 @@ import { CategoryService } from '../../../../shared/services/category.service';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin } from 'rxjs';
+import { ImportProductsDialogComponent } from './import-products-dialog/import-products-dialog.component';
 
 @Component({
   selector: 'app-products',
@@ -109,6 +110,19 @@ export class ProductsComponent {
       this.stationsService.getStoreStations(params.storeId!)
   });
 
+  public pageIndex = signal(0);
+  public pageSize = signal(10);
+
+  public paginatedProducts = computed(() => {
+    const start = this.pageIndex() * this.pageSize();
+    return this.filteredProducts().slice(start, start + this.pageSize());
+  });
+
+  public onPage(event: { pageIndex: number; pageSize: number }): void {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
+  }
+
   public selectedCount = computed(() => this.selectedIds().size);
 
   public isAllSelected = computed(() => {
@@ -140,10 +154,12 @@ export class ProductsComponent {
   onSearch(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.searchTerm.set(input.value);
+    this.pageIndex.set(0);
   }
 
   onCategoryChange(category: string) {
     this.selectedCategory.set(category);
+    this.pageIndex.set(0);
   }
 
 
@@ -205,8 +221,22 @@ export class ProductsComponent {
     });
   }
 
-  reloadProducts(): void {
-    this.dataSource.reload();
+  openImportDialog(): void {
+    const storeId = this.storeStore.selectedStore()?._id;
+    if (!storeId) return;
+    this.dialog
+      .open(ImportProductsDialogComponent, {
+        width: '640px',
+        disableClose: true,
+        data: { storeId, menus: this.categories.value() ?? [] },
+      })
+      .afterClosed()
+      .subscribe((imported) => {
+        if (imported) {
+          this.dataSource.reload();
+          this.categories.reload();
+        }
+      });
   }
 
   toggleSelection(productId: string): void {
@@ -234,6 +264,38 @@ export class ProductsComponent {
 
   clearSelection(): void {
     this.selectedIds.set(new Set());
+  }
+
+  bulkDelete(): void {
+    const ids = Array.from(this.selectedIds());
+    if (ids.length === 0) return;
+    this.dialog
+      .open(ConfirmationDialogComponent, {
+        width: '400px',
+        data: { message: `Delete ${ids.length} selected product(s)? This cannot be undone.` },
+      })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (!confirmed) return;
+        this.bulkUpdating.set(true);
+        forkJoin(ids.map((id) => this.productService.deleteProduct(id))).subscribe({
+          next: () => {
+            this.snackBar.open(`${ids.length} product(s) deleted`, 'Close', {
+              duration: 3000, horizontalPosition: 'end', verticalPosition: 'top',
+            });
+            this.clearSelection();
+            this.dataSource.reload();
+            this.bulkUpdating.set(false);
+          },
+          error: () => {
+            this.snackBar.open('Some products could not be deleted. Please try again.', 'Close', {
+              duration: 3000, horizontalPosition: 'end', verticalPosition: 'top',
+            });
+            this.dataSource.reload();
+            this.bulkUpdating.set(false);
+          },
+        });
+      });
   }
 
   bulkAssignStation(stationId: string): void {

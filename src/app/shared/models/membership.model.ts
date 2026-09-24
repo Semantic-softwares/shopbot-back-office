@@ -21,6 +21,8 @@ export interface TeamMember {
   status: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
   isOnDuty: boolean;
   isOwner: boolean;
+  inviteState?: 'pending' | 'expired' | null;
+  inviteExpiresAt?: string | null;
 }
 
 /**

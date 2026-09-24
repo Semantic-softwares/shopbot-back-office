@@ -1,15 +1,25 @@
-<mat-card class="m-5 max-w-7xl mx-auto bg-white !mb-6">
-  <mat-card-header class="!p-4 mb-6 border-b border-gray-200">
-    <mat-card-title class="text-xl font-medium">{{pageTitle()}}</mat-card-title>
-  </mat-card-header>
+<div class="p-4 md:p-6">
+  <app-page-header [title]="pageTitle()" subtitle="Fill in the details, then save the product">
+    <button matButton="outlined" type="button" (click)="cancel()" actions>Cancel</button>
+    <button matButton="filled" type="submit" form="productForm" [disabled]="isSubmitting()" actions>
+      @if (isSubmitting()) {
+        <mat-spinner diameter="18"></mat-spinner>
+      }
+      {{submitButtonText()}}
+    </button>
+  </app-page-header>
 
-  <mat-card-content>
-    <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <!-- Left Column -->
-        <div class="space-y-4">
-          <h3 class="text-lg font-medium text-gray-900 mb-5">Basic Information</h3>
-          <mat-form-field appearance="outline" class="w-full">
+  <div class="max-w-7xl mx-auto">
+  <form id="productForm" [formGroup]="productForm" (ngSubmit)="onSubmit()">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <div class="flex flex-col gap-6">
+      <mat-card appearance="outlined">
+        <mat-card-header class="!pb-2">
+          <mat-card-title class="!text-base !font-medium">Basic information</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="!pt-4">
+<div class="flex flex-col gap-4">
+<mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
             <mat-label>Category</mat-label>
             <mat-select formControlName="menu">
               @for (category of categories.value(); track category) {
@@ -24,17 +34,17 @@
             </mat-select>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
             <mat-label>Product Name</mat-label>
             <input matInput formControlName="name">
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
             <mat-label>Description</mat-label>
             <textarea matInput formControlName="description" rows="4" class="min-h-[100px]"></textarea>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
             <mat-label>Unit</mat-label>
             <mat-select formControlName="units">
               @for (unit of productUnits; track unit.value) {
@@ -45,7 +55,7 @@
             </mat-select>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
             <mat-label>Station</mat-label>
             <mat-select formControlName="station">
               <mat-option [value]="null">
@@ -63,9 +73,16 @@
             <mat-hint>Select the kitchen station where this product is prepared</mat-hint>
           </mat-form-field>
 
-          <!-- Image Upload Section -->
-          <div class="w-full p-4 bg-gray-50 rounded-lg">
-            <h4 class="text-base font-medium text-gray-900 mb-4">Product Images</h4>
+          
+</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card appearance="outlined">
+        <mat-card-header class="!pb-2">
+          <mat-card-title class="!text-base !font-medium">Product images</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="!pt-4">
+
             
             <div class="flex items-center justify-center w-full">
               <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-50">
@@ -108,20 +125,23 @@
                 }
               </div>
             }
-          </div>
-        </div>
-
-        <!-- Right Column -->
-        <div class="space-y-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-5">Pricing & Stock Information</h3>
           
-          <div class="bg-gray-50 p-4 rounded-lg space-y-4">
-            <mat-form-field appearance="outline" class="w-full">
+        </mat-card-content>
+      </mat-card>
+      </div>
+      <div class="flex flex-col gap-6">
+      <mat-card appearance="outlined">
+        <mat-card-header class="!pb-2">
+          <mat-card-title class="!text-base !font-medium">Pricing</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="!pt-4">
+<div class="flex flex-col gap-4">
+<mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
               <mat-label>Selling Price</mat-label>
               <input matInput type="number" formControlName="price">
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="w-full">
+            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
               <mat-label>Cost Price</mat-label>
               <input matInput type="number" formControlName="costPrice">
             </mat-form-field>
@@ -131,25 +151,32 @@
               <span class="text-lg font-medium text-green-700">{{profit() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
               <input type="hidden" formControlName="profit">
             </div>
-          </div>
-
-          <div class="bg-gray-50 p-4 rounded-lg space-y-4">
-            <mat-form-field appearance="outline" class="w-full">
+          
+</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card appearance="outlined">
+        <mat-card-header class="!pb-2">
+          <mat-card-title class="!text-base !font-medium">Stock</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="!pt-4">
+<div class="flex flex-col gap-4">
+<mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
               <mat-label>Quantity</mat-label>
               <input matInput type="number" formControlName="qty">
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="w-full">
+            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
               <mat-label>Initial Stock</mat-label>
               <input matInput type="number" formControlName="initialStock">
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="w-full">
+            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
               <mat-label>Critical Stock</mat-label>
               <input matInput type="number" formControlName="criticalStock">
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="w-full">
+            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
               <mat-label>Stock Level Alert</mat-label>
               <mat-select formControlName="stockLevelAlert">
                 @for (option of stockLevelAlertOptions; track option.value) {
@@ -159,39 +186,56 @@
                 }
               </mat-select>
             </mat-form-field>
-          </div>
-
-          <div class="bg-gray-50 p-4 rounded-lg space-y-4">
-            <mat-form-field appearance="outline" class="w-full">
+          
+</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card appearance="outlined">
+        <mat-card-header class="!pb-2">
+          <mat-card-title class="!text-base !font-medium">Identifiers</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="!pt-4">
+<div class="flex flex-col gap-4">
+<mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
               <mat-label>SKU</mat-label>
               <input matInput formControlName="sku">
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="w-full">
+            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
               <mat-label>Barcode</mat-label>
               <input matInput formControlName="barcode">
             </mat-form-field>
-          </div>
-
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <div class="flex items-center justify-between">
+          
+</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card appearance="outlined">
+        <mat-card-header class="!pb-2">
+          <mat-card-title class="!text-base !font-medium">Self-order menu</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="!pt-4">
+<div class="flex items-center justify-between">
               <div>
                 <h4 class="text-sm font-medium text-gray-900">Self-Order Menu</h4>
                 <p class="text-xs text-gray-500">Show this product on the public QR-code menu customers order from.</p>
               </div>
               <mat-slide-toggle formControlName="availableForSelfOrder" color="primary"></mat-slide-toggle>
             </div>
-          </div>
+          
+        </mat-card-content>
+      </mat-card>
+      <mat-card appearance="outlined">
+        <mat-card-header class="!pb-2 !flex !items-center !justify-between w-full">
+          <mat-card-title class="!text-base !font-medium">Variants</mat-card-title>
+          @if (selectedVariants.length > 0) {
+            <button matButton="outlined" type="button" class="ml-auto" (click)="openVariantsDialog()">
+              <mat-icon>add</mat-icon>
+              Add variants
+            </button>
+          }
+        </mat-card-header>
+        <mat-card-content class="!pt-4">
 
-          <!-- Variants Section -->
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <div class="flex items-center justify-between mb-4">
-              <h4 class="text-base font-medium text-gray-900">Variants</h4>
-              <button mat-stroked-button color="primary" type="button" (click)="openVariantsDialog()">
-                <mat-icon class="mr-2">add</mat-icon>
-                Add Variants
-              </button>
-            </div>
 
             @if (selectedVariants.length > 0) {
               <div class="space-y-2">
@@ -213,23 +257,17 @@
               <app-no-record 
                 icon="tune"
                 title="No Variants Added"
-                message="Variants allow you to create different versions of your product (e.g., sizes, flavors). Click 'Add Variants' to customize your product options.">
+                message="Variants allow you to create different versions of your product (e.g., sizes, flavors). Click 'Add variants' to customize your product options.">
+                <button matButton type="button" (click)="openVariantsDialog()">
+                  <mat-icon>add</mat-icon>
+                  Add variants
+                </button>
               </app-no-record>
             }
-          </div>
-        </div>
+        </mat-card-content>
+      </mat-card>
       </div>
-
-      <div class="flex justify-end gap-4 pt-6 border-t border-gray-200">
-        <button mat-stroked-button type="button" routerLink="/dashboard/items/products">Cancel</button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="isSubmitting()">
-          @if (isSubmitting()) {
-            <mat-spinner diameter="20" class="mr-2"></mat-spinner>
-          }
-          {{submitButtonText()}}
-        </button>
-      </div>
-    </form>
-  </mat-card-content>
-</mat-card>
-<div class="mb-8 pb-6"></div>
+    </div>
+  </form>
+  </div>
+</div>

@@ -17,9 +17,15 @@
             }
             @case ('not-found') {
                 <mat-icon class="!text-5xl !w-14 !h-14 text-gray-400 mb-3">info</mat-icon>
-                <h2 class="text-xl font-semibold text-gray-800 mb-2">This invite has already been handled</h2>
-                <p class="text-gray-500 mb-6">It may have already been accepted or declined. Check your stores after logging in.</p>
-                <button matButton="filled" color="primary" (click)="goToLogin()">Go to login</button>
+                <h2 class="text-xl font-semibold text-gray-800 mb-2">This invite isn't waiting on this account</h2>
+                <p class="text-gray-500 mb-6">
+                    You're signed in as <strong>{{ currentEmail() }}</strong>. If the invite was sent to a different
+                    email, log out and sign in with that account. Otherwise it may already have been accepted or declined.
+                </p>
+                <div class="flex flex-col gap-2 items-center">
+                    <button matButton="filled" color="primary" (click)="switchAccount()">Sign in with a different account</button>
+                    <button matButton (click)="continue()">Go to my stores</button>
+                </div>
             }
             @case ('error') {
                 <mat-icon class="!text-5xl !w-14 !h-14 text-red-500 mb-3">error_outline</mat-icon>

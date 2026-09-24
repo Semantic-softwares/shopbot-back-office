@@ -88,6 +88,8 @@ export class StaffAccount {
   }
 
   getStatusText(member: TeamMember): string {
+    if (member.inviteState === 'expired') return 'Invite expired';
+    if (member.inviteState === 'pending') return 'Invite pending';
     switch (member.status) {
       case 'ACTIVE': return 'Active';
       case 'SUSPENDED': return 'Deactivated';
@@ -140,6 +142,21 @@ export class StaffAccount {
   openAssignRoleDialog(member: TeamMember): void {
     // Open the same dialog in edit mode - user can change the role there
     this.openEditMerchantDialog(member);
+  }
+
+  resendInvite(member: TeamMember): void {
+    const storeId = this.storeStore.selectedStore()?._id;
+    if (!storeId) return;
+
+    this.userService.resendStaffInvite(storeId, member.merchant._id).subscribe({
+      next: () => {
+        this.snackBar.open(`Invite re-sent to ${member.merchant.email}`, 'Close', { duration: 3000 });
+        this.team.reload();
+      },
+      error: (err) => {
+        this.snackBar.open(err.error?.message || 'Failed to resend invite', 'Close', { duration: 5000 });
+      }
+    });
   }
 
   toggleMerchantStatus(member: TeamMember): void {

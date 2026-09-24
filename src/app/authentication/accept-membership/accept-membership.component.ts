@@ -65,10 +65,19 @@ export class AcceptMembershipComponent implements OnInit {
         );
       }),
       catchError((err) => {
+        if (err?.status === 401) {
+          // Saved session is stale/invalid — sign in fresh, then come back here.
+          this.authService.logout();
+          this.router.navigate(['/auth/login'], {
+            queryParams: { returnUrl: `/accept-membership/${membershipId}` },
+          });
+          return of('redirected' as const);
+        }
         this.errorMessage.set(err?.error?.message || 'Something went wrong. Please try again.');
         return of('error' as const);
       }),
     ).subscribe((result) => {
+      if (result === 'redirected') return;
       if (result === 'not-found' || result === 'error') {
         this.state.set(result);
         return;
@@ -89,6 +98,18 @@ export class AcceptMembershipComponent implements OnInit {
     } else {
       this.router.navigate(['/select-store']);
     }
+  }
+
+  protected currentEmail(): string {
+    return this.authService.currentUserValue?.email ?? '';
+  }
+
+  protected switchAccount(): void {
+    const membershipId = this.route.snapshot.paramMap.get('id')!;
+    this.authService.logout();
+    this.router.navigate(['/auth/login'], {
+      queryParams: { returnUrl: `/accept-membership/${membershipId}` },
+    });
   }
 
   protected goToLogin(): void {

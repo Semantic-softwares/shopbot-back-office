@@ -253,6 +253,7 @@ export class CreateStationComponent implements OnInit {
     const dialogRef = this.dialog.open(PrinterFormModalComponent, {
       width: '600px',
       disableClose: false,
+      data: { isEditMode: false },
     });
 
     dialogRef.afterClosed().subscribe((result) => {

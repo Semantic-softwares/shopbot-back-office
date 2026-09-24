@@ -50,7 +50,7 @@ import { VariantDialogComponent } from '../../../variants/variant-dialog/variant
           @for (variant of variants.value(); track variant._id) {
             <mat-list-option [value]="variant" 
                            [selected]="isSelected(variant._id)"
-                           [checkboxPosition]="'before'">
+                           togglePosition="before">
               {{variant.name}}
               <div class="text-sm text-gray-500">
                 At least: {{variant.atLeast}} | At most: {{variant.atMost}}

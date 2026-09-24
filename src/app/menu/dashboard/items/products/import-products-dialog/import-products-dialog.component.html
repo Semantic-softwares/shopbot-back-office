@@ -1,0 +1,116 @@
+<h2 mat-dialog-title>Import products</h2>
+
+<mat-dialog-content class="!max-h-[70vh]">
+  @switch (step()) {
+    @case ('select') {
+      <p class="text-sm text-gray-600 mb-4">
+        Upload a menu export (.json). Each item's name, description, price, photo and availability are mapped to
+        your product fields. Nothing is created until you confirm.
+      </p>
+
+      <label class="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl p-8 cursor-pointer hover:bg-gray-50">
+        <mat-icon class="!text-4xl !w-10 !h-10 text-gray-400">upload_file</mat-icon>
+        <span class="font-medium text-gray-700">{{ fileName() || 'Choose a JSON file' }}</span>
+        <input type="file" accept=".json,application/json" class="hidden" (change)="onFileSelected($event)" />
+      </label>
+      @if (parseError()) {
+        <p class="text-sm text-red-600 mt-3">{{ parseError() }}</p>
+      }
+
+      <div class="flex items-start justify-between gap-4 mt-6">
+        <div>
+          <p class="font-medium text-gray-800">Copy photos to our storage</p>
+          <p class="text-sm text-gray-500">
+            Off: keep the original photo links (fast). On: download each photo and upload it to ShopBot, so it
+            still works if the original source is removed (slower).
+          </p>
+        </div>
+        <mat-slide-toggle [checked]="reuploadImages()" (change)="reuploadImages.set($event.checked)"></mat-slide-toggle>
+      </div>
+    }
+
+    @case ('map') {
+      <p class="text-sm text-gray-600 mb-1">
+        {{ rows().length }} products found in {{ groups().length }} categories.
+        @if (invalidCount() > 0) {
+          <span class="text-amber-700">{{ invalidCount() }} without a name or valid price will be skipped.</span>
+        }
+      </p>
+      <p class="text-sm text-gray-600 mb-4">
+        Name each group, or add it to a category you already have. Names found in the file are filled in for you.
+      </p>
+
+      <div class="flex flex-col gap-3">
+        @for (group of groups(); track group.key) {
+          <div class="border border-gray-200 rounded-xl p-3">
+            <p class="text-sm text-gray-500 mb-2">
+              {{ group.count }} items, e.g. {{ group.samples.join(', ') }}
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <mat-form-field appearance="outline" class="sm:w-56" subscriptSizing="dynamic">
+                <mat-label>Category</mat-label>
+                <mat-select [value]="group.choice" (selectionChange)="setChoice(group.key, $event.value)">
+                  <mat-option value="new">Create new category</mat-option>
+                  @for (menu of data.menus; track menu._id) {
+                    <mat-option [value]="menu._id">{{ menu.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              @if (group.choice === 'new') {
+                <mat-form-field appearance="outline" class="flex-1" subscriptSizing="dynamic">
+                  <mat-label>New category name</mat-label>
+                  <input matInput [value]="group.newName" (input)="setNewName(group.key, $any($event.target).value)" />
+                </mat-form-field>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @case ('importing') {
+      <p class="text-sm text-gray-600 mb-3">
+        Importing{{ reuploadImages() ? ' and copying photos' : '' }}… keep this window open.
+      </p>
+      <mat-progress-bar mode="determinate" [value]="progress()"></mat-progress-bar>
+    }
+
+    @case ('done') {
+      @if (result(); as r) {
+        <div class="flex items-center gap-2 mb-3">
+          <mat-icon class="text-green-600">check_circle</mat-icon>
+          <p class="font-medium text-gray-800">{{ r.created }} products imported</p>
+        </div>
+        @if (r.skipped.length) {
+          <p class="text-sm font-medium text-gray-700 mt-2">Already there, skipped ({{ r.skipped.length }})</p>
+          <ul class="text-sm text-gray-500 list-disc pl-5 max-h-32 overflow-auto">
+            @for (s of r.skipped; track s) { <li>{{ s }}</li> }
+          </ul>
+        }
+        @if (r.failed.length) {
+          <p class="text-sm font-medium text-red-700 mt-2">Could not import ({{ r.failed.length }})</p>
+          <ul class="text-sm text-red-600 list-disc pl-5 max-h-32 overflow-auto">
+            @for (f of r.failed; track f) { <li>{{ f }}</li> }
+          </ul>
+        }
+      }
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @switch (step()) {
+    @case ('select') {
+      <button matButton (click)="cancel()">Cancel</button>
+    }
+    @case ('map') {
+      <button matButton (click)="cancel()">Cancel</button>
+      <button matButton="filled" color="primary" [disabled]="!canImport()" (click)="startImport()">
+        Import {{ rows().length }} products
+      </button>
+    }
+    @case ('done') {
+      <button matButton="filled" color="primary" (click)="finish()">Done</button>
+    }
+  }
+</mat-dialog-actions>

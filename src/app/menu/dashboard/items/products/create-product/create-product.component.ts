@@ -27,6 +27,7 @@ import { Product } from '../../../../../shared/models';
 import { MatDialog } from '@angular/material/dialog';
 import { CategoryDialogComponent } from '../../categories/category-dialog/category-dialog.component';
 import { AddVariantsListComponent } from '../modals/add-variants-list/add-variants-list.component';
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { NoRecordComponent } from '../../../../../shared/components/no-record/no-record.component';
 import { environment } from '../../../../../../environments/environment';
 import { ValidationErrorsDialogComponent } from '../../../../../shared/components/validation-errors-dialog/validation-errors-dialog.component';
@@ -60,6 +61,7 @@ interface ImagePreview {
     MatSlideToggleModule,
     RouterModule,
     NoRecordComponent,
+    PageHeaderComponent,
   ],
 })
 export class CreateProductComponent implements OnInit {
@@ -242,6 +244,10 @@ export class CreateProductComponent implements OnInit {
 
   public isEditMode = signal(false);
   public productId = signal<string | null>(null);
+  cancel(): void {
+    this.router.navigate(['/menu/erp/items/products']);
+  }
+
   public pageTitle = computed(() =>
     this.isEditMode() ? 'Edit Product' : 'Create Product'
   );
@@ -473,7 +479,7 @@ export class CreateProductComponent implements OnInit {
     if (!this.isEditMode()) {
       this.resetForm();
     } else {
-      this.router.navigate(['/dashboard/items/products']);
+      this.router.navigate(['/menu/erp/items/products']);
     }
   }
 
