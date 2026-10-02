@@ -1,0 +1,1 @@
+var n=[{id:`classic`,loadComponent:()=>import(`./chunk-DJrsan-e.js`).then(e=>e.ClassicThemeComponent)},{id:`modern`,loadComponent:()=>import(`./chunk-Ci7NBd1V.js`).then(e=>e.ModernThemeComponent)}];function i(e){return n.find(o=>o.id===e)??n[0]}export{n,i as t};
