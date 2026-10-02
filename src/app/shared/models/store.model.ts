@@ -1,5 +1,6 @@
 import { Employee } from "./employee.model";
 import { User } from "./user.model";
+import { LandingPageSettings } from "./landing-page.model";
 
 export interface Store {
     _id: string;
@@ -71,6 +72,8 @@ export interface Store {
       };
       /** Master switch for the address/phone/email block in the menu footer. */
       showContactInfo?: boolean;
+      /** The public home page at store.shopbot.africa/<slug>. */
+      landingPage?: Partial<LandingPageSettings>;
       /**
        * The printed QR card design — distinct from `templateSlug` above,
        * which is the customer-facing web theme. Staff can override size and

@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpParams } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { DeliveryZone, Store } from '../models';
@@ -105,6 +105,20 @@ export class StoreService {
 
   uploadBanner(formData: any, storeId?: string): Observable<any> {
     return this._httpClient.post(`${this.hostServer}/stores/upload/${storeId}/banner`, formData)
+  }
+
+  /**
+   * Image or video for the storefront home page. Returns the URL without
+   * saving it; emits progress events so a video upload can show a bar.
+   */
+  uploadLandingMedia(storeId: string, file: File): Observable<HttpEvent<{ photo: string; resourceType: 'image' | 'video' }>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this._httpClient.post<{ photo: string; resourceType: 'image' | 'video' }>(
+      `${this.hostServer}/stores/upload/${storeId}/landing-media`,
+      formData,
+      { reportProgress: true, observe: 'events' },
+    );
   }
 
   getOrderStat(date:any) {

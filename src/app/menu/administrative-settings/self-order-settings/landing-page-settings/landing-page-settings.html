@@ -1,0 +1,277 @@
+@let v = value();
+@let p = preview();
+
+<!-- Live preview: a scaled-down copy of the page, resolved the same way the storefront resolves it. -->
+<div
+  class="relative isolate mx-auto max-w-3xl overflow-hidden rounded-xl border border-gray-200 text-white aspect-[16/10] sm:aspect-[16/8] bg-[#140b05]"
+  aria-label="Home page preview"
+  role="img"
+>
+  @if (p.video) {
+    <video class="absolute inset-0 -z-10 h-full w-full object-cover" [src]="p.video" [poster]="p.image" autoplay [muted]="true" loop playsinline></video>
+  } @else if (p.image) {
+    <div class="absolute inset-0 -z-10 bg-cover bg-center" [style.background-image]="'url(' + p.image + ')'"></div>
+  } @else {
+    <div
+      class="absolute inset-0 -z-10"
+      [style.background]="'radial-gradient(60% 70% at 78% 45%, ' + v.accentColor + 'cc 0%, transparent 70%), linear-gradient(135deg, ' + v.accentColor + '55, #140b05 70%)'"
+    ></div>
+  }
+  <div class="absolute inset-0 -z-10" style="background: linear-gradient(90deg, rgb(20 11 5 / 0.9) 0%, rgb(20 11 5 / 0.7) 35%, rgb(20 11 5 / 0.15) 75%)"></div>
+
+  <div class="flex h-full flex-col px-[5%] py-[3.5%]">
+    <div class="flex items-center justify-between gap-2">
+      <div class="flex min-w-0 items-center gap-1.5">
+        @if (storeLogo()) {
+          <img [src]="storeLogo()" alt="" class="h-5 w-5 rounded-full object-cover sm:h-6 sm:w-6" />
+        } @else {
+          <span class="grid h-5 w-5 place-items-center rounded-full sm:h-6 sm:w-6" [style.background]="v.accentColor">
+            <mat-icon class="!h-3 !w-3 !text-[12px]">restaurant</mat-icon>
+          </span>
+        }
+        <span class="truncate text-[11px] font-extrabold sm:text-sm" [style.color]="v.accentColor">{{ p.logoText }}</span>
+      </div>
+      <div class="flex shrink-0 items-center gap-2 text-[9px] text-white/80 sm:gap-3 sm:text-[11px]">
+        <span>Menu</span><span>Contact</span>
+        @if (v.showOrderButton) {
+          <span class="rounded-md px-2 py-1 font-semibold text-white" [style.background]="v.accentColor">{{ v.orderButtonText || 'Order Now' }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-1 flex-col justify-center">
+      <div class="max-w-[55%]">
+        @if (v.badgeText.trim()) {
+          <span
+            class="mb-1.5 inline-block rounded-full border px-2 py-0.5 text-[8px] sm:text-[10px]"
+            [style.border-color]="v.accentColor"
+            [style.color]="v.accentColor"
+          >{{ v.badgeText }}</span>
+        }
+        <p class="text-lg font-extrabold leading-none tracking-tight sm:text-3xl">{{ v.headline || ' ' }}</p>
+        @if (v.headlineAccent.trim()) {
+          <p class="text-lg font-extrabold leading-tight tracking-tight sm:text-3xl" [style.color]="v.accentColor">{{ v.headlineAccent }}</p>
+        }
+        <p class="mt-1.5 line-clamp-2 text-[9px] leading-snug text-white/75 sm:text-xs">{{ p.subtext }}</p>
+        @if (v.showOrderButton || v.showMenuButton) {
+          <div class="mt-2 flex gap-1.5">
+            @if (v.showOrderButton) {
+              <span class="rounded-md px-2 py-1 text-[9px] font-semibold sm:text-[11px]" [style.background]="v.accentColor">{{ v.orderButtonText || 'Order Now' }} →</span>
+            }
+            @if (v.showMenuButton) {
+              <span class="rounded-md border border-white/20 bg-black/40 px-2 py-1 text-[9px] font-semibold sm:text-[11px]">{{ v.menuButtonText || 'View Menu' }}</span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (p.highlights.length) {
+      <div class="flex gap-3 sm:gap-5">
+        @for (h of p.highlights; track $index) {
+          <div class="flex min-w-0 items-center gap-1">
+            <mat-icon class="!h-3.5 !w-3.5 shrink-0 !text-[14px]" [style.color]="v.accentColor">{{ h.icon }}</mat-icon>
+            <span class="truncate text-[8px] font-semibold sm:text-[10px]">{{ h.title }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+<p class="mx-auto mt-2 max-w-3xl text-xs text-gray-500">
+  Live preview — changes appear here as you type. Save to publish them to your store's home page.
+</p>
+
+<div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+  <!-- Brand & background -->
+  <section class="space-y-4">
+    <h5 class="text-sm font-semibold text-gray-900">Logo &amp; colour</h5>
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Logo text</mat-label>
+        <input matInput [ngModel]="v.logoText" (ngModelChange)="set('logoText', $event)" [placeholder]="storeName()" maxlength="40" />
+        <mat-hint>Leave blank to use your store name.</mat-hint>
+      </mat-form-field>
+      <label class="flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 sm:h-14">
+        <input
+          type="color"
+          class="h-8 w-10 cursor-pointer rounded border-0 bg-transparent p-0"
+          [ngModel]="v.accentColor"
+          (ngModelChange)="set('accentColor', $event)"
+          aria-label="Accent colour"
+        />
+        <span class="text-sm text-gray-700">Accent <span class="font-mono text-xs text-gray-500">{{ v.accentColor }}</span></span>
+      </label>
+    </div>
+
+    <h5 class="pt-2 text-sm font-semibold text-gray-900">Background</h5>
+    <mat-button-toggle-group
+      [value]="v.backgroundType"
+      (change)="set('backgroundType', $event.value)"
+      aria-label="Background type"
+      hideSingleSelectionIndicator
+    >
+      <mat-button-toggle value="image"><mat-icon class="mr-1 !text-lg align-middle">image</mat-icon>Image</mat-button-toggle>
+      <mat-button-toggle value="video"><mat-icon class="mr-1 !text-lg align-middle">movie</mat-icon>Video</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <div class="rounded-lg border border-gray-200 p-3">
+      <div class="flex items-start gap-3">
+        <div class="aspect-video w-32 shrink-0 overflow-hidden rounded-md bg-gray-100">
+          @if (v.backgroundImage || storeBanner()) {
+            <img [src]="v.backgroundImage || storeBanner()" alt="" class="h-full w-full object-cover" />
+          } @else {
+            <div class="grid h-full place-items-center"><mat-icon class="text-gray-300">image</mat-icon></div>
+          }
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-medium text-gray-900">Background image</p>
+          <p class="text-xs text-gray-500">
+            @if (v.backgroundType === 'video') {
+              Shown while the video loads, and to visitors who turn off motion.
+            } @else if (!v.backgroundImage && storeBanner()) {
+              Using your store banner. Upload one to use a different image here.
+            } @else {
+              A wide photo of your food or venue works best.
+            }
+          </p>
+          <input #imageInput type="file" accept="image/*" class="hidden" (change)="pickImage($event)" />
+          <div class="mt-2 flex flex-wrap gap-2">
+            <button type="button" mat-stroked-button [disabled]="uploadingImage()" (click)="imageInput.click()">
+              <mat-icon>upload</mat-icon>
+              {{ uploadingImage() ? 'Uploading…' : v.backgroundImage ? 'Change' : 'Upload image' }}
+            </button>
+            @if (v.backgroundImage) {
+              <button type="button" mat-button (click)="set('backgroundImage', '')">Remove</button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (v.backgroundType === 'video') {
+      <div class="rounded-lg border border-gray-200 p-3">
+        <div class="flex items-start gap-3">
+          <div class="aspect-video w-32 shrink-0 overflow-hidden rounded-md bg-gray-900">
+            @if (v.backgroundVideo) {
+              <video class="h-full w-full object-cover" [src]="v.backgroundVideo" autoplay [muted]="true" loop playsinline></video>
+            } @else {
+              <div class="grid h-full place-items-center"><mat-icon class="text-gray-500">movie</mat-icon></div>
+            }
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium text-gray-900">Background video</p>
+            <p class="text-xs text-gray-500">MP4 or WebM, up to {{ maxVideoMb }} MB. Plays muted on a loop — a 10–20 second clip works best.</p>
+            <input #videoInput type="file" accept="video/mp4,video/webm,video/quicktime" class="hidden" (change)="pickVideo($event)" />
+            @if (videoProgress() !== null) {
+              <mat-progress-bar class="mt-3" mode="determinate" [value]="videoProgress()"></mat-progress-bar>
+              <p class="mt-1 text-xs text-gray-500">Uploading… {{ videoProgress() }}%</p>
+            } @else {
+              <div class="mt-2 flex flex-wrap gap-2">
+                <button type="button" mat-stroked-button (click)="videoInput.click()">
+                  <mat-icon>upload</mat-icon>
+                  {{ v.backgroundVideo ? 'Change' : 'Upload video' }}
+                </button>
+                @if (v.backgroundVideo) {
+                  <button type="button" mat-button (click)="set('backgroundVideo', '')">Remove</button>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </section>
+
+  <!-- Text & buttons -->
+  <section class="space-y-4">
+    <h5 class="text-sm font-semibold text-gray-900">Headline &amp; text</h5>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+      <mat-label>Badge (optional)</mat-label>
+      <input matInput [ngModel]="v.badgeText" (ngModelChange)="set('badgeText', $event)" placeholder="e.g. #1 Burger Spot in Town" maxlength="40" />
+    </mat-form-field>
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Headline</mat-label>
+        <input matInput [ngModel]="v.headline" (ngModelChange)="set('headline', $event)" placeholder="Taste The" maxlength="40" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Highlighted line</mat-label>
+        <input matInput [ngModel]="v.headlineAccent" (ngModelChange)="set('headlineAccent', $event)" placeholder="Perfect Burger" maxlength="40" />
+      </mat-form-field>
+    </div>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+      <mat-label>Text below the headline</mat-label>
+      <textarea
+        matInput
+        rows="3"
+        maxlength="220"
+        [ngModel]="v.subtext"
+        (ngModelChange)="set('subtext', $event)"
+        [placeholder]="p.subtext"
+      ></textarea>
+      <mat-hint>Leave blank to use your store description.</mat-hint>
+    </mat-form-field>
+
+    <h5 class="pt-2 text-sm font-semibold text-gray-900">Buttons</h5>
+    <div class="space-y-3 rounded-lg border border-gray-200 p-3">
+      <div class="grid grid-cols-1 items-center gap-2 sm:grid-cols-[11rem_1fr] sm:gap-3">
+        <mat-slide-toggle [ngModel]="v.showOrderButton" (ngModelChange)="set('showOrderButton', $event)">
+          Order button
+        </mat-slide-toggle>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="min-w-0">
+          <mat-label>Button text</mat-label>
+          <input matInput [disabled]="!v.showOrderButton" [ngModel]="v.orderButtonText" (ngModelChange)="set('orderButtonText', $event)" maxlength="24" />
+        </mat-form-field>
+      </div>
+      <div class="grid grid-cols-1 items-center gap-2 sm:grid-cols-[11rem_1fr] sm:gap-3">
+        <mat-slide-toggle [ngModel]="v.showMenuButton" (ngModelChange)="set('showMenuButton', $event)">
+          Menu button
+        </mat-slide-toggle>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="min-w-0">
+          <mat-label>Button text</mat-label>
+          <input matInput [disabled]="!v.showMenuButton" [ngModel]="v.menuButtonText" (ngModelChange)="set('menuButtonText', $event)" maxlength="24" />
+        </mat-form-field>
+      </div>
+      <p class="text-xs text-gray-500">Both open your menu. The order button also appears in the top bar.</p>
+    </div>
+  </section>
+</div>
+
+<!-- Feature strip -->
+<section class="mt-6 rounded-lg border border-gray-200 p-3">
+  <div class="flex items-center justify-between gap-3">
+    <div>
+      <h5 class="text-sm font-semibold text-gray-900">Feature strip</h5>
+      <p class="text-xs text-gray-500">Up to three short points along the bottom of the page. Leave a title blank to hide that one.</p>
+    </div>
+    <mat-slide-toggle [ngModel]="v.showHighlights" (ngModelChange)="set('showHighlights', $event)" aria-label="Show feature strip"></mat-slide-toggle>
+  </div>
+  @if (v.showHighlights) {
+    <div class="mt-3 space-y-3">
+      @for (h of v.highlights; track $index; let i = $index) {
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-[11rem_1fr_1fr]">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Icon</mat-label>
+            <mat-select [value]="h.icon" (selectionChange)="setHighlight(i, { icon: $event.value })">
+              <mat-select-trigger>
+                <span class="flex items-center gap-2"><mat-icon class="!text-lg">{{ h.icon }}</mat-icon>{{ h.icon.replaceAll('_', ' ') }}</span>
+              </mat-select-trigger>
+              @for (icon of icons; track icon.value) {
+                <mat-option [value]="icon.value"><mat-icon>{{ icon.value }}</mat-icon>{{ icon.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Title</mat-label>
+            <input matInput [ngModel]="h.title" (ngModelChange)="setHighlight(i, { title: $event })" placeholder="Fast delivery" maxlength="28" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Subtitle</mat-label>
+            <input matInput [ngModel]="h.subtitle" (ngModelChange)="setHighlight(i, { subtitle: $event })" placeholder="At your doorstep" maxlength="32" />
+          </mat-form-field>
+        </div>
+      }
+    </div>
+  }
+</section>

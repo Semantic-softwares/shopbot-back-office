@@ -33,6 +33,8 @@ import {
   ImageCropperDialogData,
 } from '../../../shared/components/image-cropper-dialog/image-cropper-dialog.component';
 import { environment } from '../../../../environments/environment';
+import { LandingPageSettingsComponent } from './landing-page-settings/landing-page-settings';
+import { LandingPageSettings, withLandingDefaults } from '../../../shared/models/landing-page.model';
 
 @Component({
   selector: 'app-self-order-settings',
@@ -50,6 +52,7 @@ import { environment } from '../../../../environments/environment';
     MatSliderModule,
     MatProgressSpinnerModule,
     PageHeaderComponent,
+    LandingPageSettingsComponent,
   ],
   templateUrl: './self-order-settings.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -68,6 +71,8 @@ export class SelfOrderSettings implements OnInit {
   saving = signal(false);
 
   enabled = signal(false);
+  /** The public home page (store.shopbot.africa/<slug>), edited by <app-landing-page-settings>. */
+  landingPage = signal<LandingPageSettings>(withLandingDefaults());
   // Independent of the general table-order print settings — off by default,
   // a store opts in deliberately to printing a ticket for unattended orders.
   autoPrintReceipt = signal(false);
@@ -125,6 +130,7 @@ export class SelfOrderSettings implements OnInit {
       this.wifiPassword.set(store.selfOrderSettings.wifi?.password ?? '');
       this.selectedTemplateSlug.set(store.selfOrderSettings.templateSlug || 'classic');
       this.settingsValues.set({ ...(store.selfOrderSettings.settingsValues || {}) });
+      this.landingPage.set(withLandingDefaults(store.selfOrderSettings.landingPage));
     }
   }
 
@@ -481,6 +487,7 @@ export class SelfOrderSettings implements OnInit {
         wifi: { ssid: this.wifiSsid().trim(), password: this.wifiPassword().trim() },
         templateSlug: this.selectedTemplateSlug(),
         settingsValues: this.settingsValues(),
+        landingPage: this.landingPage(),
         qrTemplate: {
           slug: this.qrSelectedSlug(),
           defaultSize: this.qrSize(),
