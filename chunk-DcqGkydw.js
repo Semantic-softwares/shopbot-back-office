@@ -1,1 +1,0 @@
-var t=[{path:``,loadComponent:()=>import(`./chunk-CibcMmqE.js`).then(o=>o.LedgerComponent),children:[{path:``,loadComponent:()=>import(`./chunk-DzxCKi7N.js`).then(o=>o.LedgerListComponent)}]}];export{t as LEDGER_ROUTES};
