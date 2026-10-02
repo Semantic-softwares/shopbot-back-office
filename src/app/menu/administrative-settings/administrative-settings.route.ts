@@ -49,6 +49,27 @@ export const ADMINISTRATIVE_SETTINGS_ROUTES: Routes = [
             (m) => m.SelfOrderSettings,
           ),
       },
+      {
+        path: 'delivery',
+        loadComponent: () =>
+          import('./delivery-settings/delivery-settings').then(
+            (m) => m.DeliverySettings,
+          ),
+      },
+      {
+        path: 'operational-orders',
+        loadComponent: () =>
+          import('./operational-orders-settings/operational-orders-settings').then(
+            (m) => m.OperationalOrdersSettings,
+          ),
+      },
+      {
+        path: 'kitchen-stations',
+        loadComponent: () =>
+          import('./kitchen-stations-settings/kitchen-stations-settings').then(
+            (m) => m.KitchenStationsSettings,
+          ),
+      },
     ],
   },
 ];

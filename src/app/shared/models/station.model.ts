@@ -35,6 +35,41 @@ export interface StationSettings {
     copiesPerOrder: number;
 }
 
+/**
+ * One step in a station's Kitchen Display status flow. Steps come from a
+ * fixed, backend-defined list (GET /kitchen-display/statuses) — admins can
+ * only reorder, remove/restore, and assign an optional F1–F12 `shortcut`.
+ * `order` is the step's position; the backend always marks the last step
+ * `isTerminal` (reaching it clears the ticket off the KDS board). An
+ * empty/missing statusFlow on a station means "use the backend's defaultFlow".
+ */
+export interface StationStatusStep {
+    key: string;
+    label: string;
+    order: number;
+    isTerminal: boolean;
+    shortcut?: string;
+}
+
+/** A status admins may place in a flow (from the backend's fixed list). */
+export interface KdsStatusOption {
+    key: string;
+    label: string;
+}
+
+/** Response of GET /kitchen-display/statuses. */
+export interface KdsStatusCatalog {
+    statuses: KdsStatusOption[];
+    shortcutKeys: string[];
+    defaultFlow: StationStatusStep[];
+}
+
+/** Body item for PUT /stations/:id { statusFlow } — backend derives the rest. */
+export interface StationStatusStepInput {
+    key: string;
+    shortcut?: string;
+}
+
 export interface Station {
     _id: string;
     name: string;
@@ -46,6 +81,7 @@ export interface Station {
     active: boolean;
     printers?: Printer[];
     settings?: StationSettings;
+    statusFlow?: StationStatusStep[];
     createdAt?: Date;
     updatedAt?: Date;
 }

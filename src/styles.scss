@@ -39,3 +39,13 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   }
 }
 
+// Google Places Autocomplete's suggestion dropdown is appended directly to
+// <body>, outside Angular Material's CDK overlay stacking context — its
+// default z-index sits below the CDK overlay container's (1000), so inside
+// any dialog/overlay the suggestions would render but be completely hidden
+// behind it. Applied defensively here, not just where a dialog currently
+// uses it, since the storefront app hit exactly this (see its styles.css).
+.pac-container {
+  z-index: 10000 !important;
+}
+

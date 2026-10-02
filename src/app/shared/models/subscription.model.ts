@@ -4,7 +4,7 @@ export type BillingCycle = 'MONTHLY' | 'YEARLY';
 
 export type BillingCountry = 'NG' | 'MU' | 'USD';
 
-export type ModuleKey = 'PMS' | 'EMS' | 'POS' | 'ERP';
+export type ModuleKey = 'PMS' | 'EMS' | 'POS' | 'ERP' | 'KDS';
 
 export type ModuleStatus = 'ACTIVE' | 'PENDING_REMOVAL';
 

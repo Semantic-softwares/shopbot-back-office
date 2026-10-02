@@ -19,3 +19,4 @@ export * from './cart.model';
 export * from './timesheet.model';
 export * from './subscription.model';
 export * from './estate.model';
+export * from './kitchen-display.model';

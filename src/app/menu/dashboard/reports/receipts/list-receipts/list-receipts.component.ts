@@ -125,6 +125,7 @@ export class ListReceiptsComponent {
     { value: '', label: 'All Channels' },
     { value: 'Point of Sale', label: 'Point of Sale' },
     { value: 'Qrcode', label: 'Self-Order (QR)' },
+    { value: 'Storefront', label: 'Storefront' },
     { value: 'Shopbot', label: 'Shopbot' },
   ];
 
@@ -147,6 +148,7 @@ export class ListReceiptsComponent {
   channelClass(channel: string): string {
     switch (channel) {
       case 'Qrcode': return 'bg-purple-100 text-purple-800';
+      case 'Storefront': return 'bg-indigo-100 text-indigo-800';
       case 'Point of Sale': return 'bg-blue-100 text-blue-800';
       default: return 'bg-gray-100 text-gray-800';
     }

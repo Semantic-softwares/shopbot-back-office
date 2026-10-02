@@ -152,7 +152,7 @@ export const StorefrontStore = signalStore(
         switchMap((storeSlug) =>
           api.resolveBySlug(storeSlug).pipe(
             tapResponse({
-              next: ({ store: resolvedStore }) => {
+              next: (resolvedStore) => {
                 patchState(store, { storeInfo: resolvedStore });
                 loadMenuFor(resolvedStore._id);
               },

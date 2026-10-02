@@ -148,6 +148,7 @@ export enum SalesChannel {
   POINT_OF_SALE = "Point of Sale",
   SHOPBOT = "Shopbot",
   QRCODE = "Qrcode",
+  STOREFRONT = "Storefront",
 }
 
 export interface StatusParams {

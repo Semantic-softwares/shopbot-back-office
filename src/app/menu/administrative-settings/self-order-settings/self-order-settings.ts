@@ -32,6 +32,7 @@ import {
   ImageCropperDialogComponent,
   ImageCropperDialogData,
 } from '../../../shared/components/image-cropper-dialog/image-cropper-dialog.component';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-self-order-settings',
@@ -397,7 +398,7 @@ export class SelfOrderSettings implements OnInit {
 
   previewUrl = computed(() => {
     const slug = this.storeStore.selectedStore()?.slug;
-    return slug ? `${window.location.origin}${window.location.pathname}#/m/${slug}` : null;
+    return slug ? `${environment.storefrontUrl}/${slug}` : null;
   });
 
   openPreview(): void {

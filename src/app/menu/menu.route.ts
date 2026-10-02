@@ -136,6 +136,18 @@ export const MENU_ROUTES: Routes = [
     },
   },
   {
+    path: 'kds',
+    loadChildren: () =>
+      import('./kitchen-display/kitchen-display.routes').then(
+        (m) => m.KITCHEN_DISPLAY_ROUTES,
+      ),
+    canActivate: [roleGuard],
+    data: {
+      requiredPermissions: ['kds.view', 'kds.manage'],
+      permissionMode: 'any',
+    },
+  },
+  {
     path: 'admin',
     loadChildren: () =>
       import('./administrative-settings/administrative-settings.route').then(

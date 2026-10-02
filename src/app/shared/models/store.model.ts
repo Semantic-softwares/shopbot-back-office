@@ -18,6 +18,10 @@ export interface Store {
     deliveryService: DeliveryService;
     paused: boolean;
     businessHours: BusinessHours | any;
+    // Off by default — see the schema field's own comment (store.schema.ts)
+    // for why enforcing this by default would be unsafe for a store that's
+    // never configured businessHours.
+    operationalHours?: { enforceForOrders: boolean };
     rank?: number;
     location?: Location | any;
     owner?: User,

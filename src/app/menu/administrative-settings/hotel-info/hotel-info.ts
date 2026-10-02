@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, inject, OnInit, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -17,7 +17,9 @@ import { StoreService } from '../../../shared/services/store.service';
 import { StoreStore } from '../../../shared/stores/store.store';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { PinAuthorizationDialogComponent, PinAuthorizationDialogResult } from '../../hms/front-desk/reservations/pin-authorization-dialog/pin-authorization-dialog.component';
+import { DeliveryAddressCardComponent } from '../../../shared/components/delivery-address-card/delivery-address-card.component';
 
+declare const google: any;
 
 @Component({
   selector: 'app-hotel-info',
@@ -33,12 +35,13 @@ import { PinAuthorizationDialogComponent, PinAuthorizationDialogResult } from '.
     MatSelectModule,
     MatProgressSpinnerModule,
     PageHeaderComponent,
+    DeliveryAddressCardComponent,
   ],
   templateUrl: './hotel-info.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './hotel-info.scss',
 })
-export class HotelInfo implements OnInit {
+export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
@@ -53,6 +56,21 @@ export class HotelInfo implements OnInit {
   resetting = signal(false);
   resettingPms = signal(false);
   resettingErp = signal(false);
+
+  // Store.location — defaults to a hardcoded placeholder coordinate
+  // (schema-level default, never a real address) for any store that's never
+  // set this. Nothing in the app could set it before this picker: it's
+  // required for the self-order delivery radius/distance-fee features to
+  // compute real distances instead of measuring from that placeholder.
+  private readonly locationSearchInput = viewChild<ElementRef<HTMLInputElement>>('locationSearchInput');
+  latitude = signal<number | null>(null);
+  longitude = signal<number | null>(null);
+  locationLabel = signal('');
+  isLocating = signal(false);
+
+  private autocomplete: any = null;
+  private autocompleteListener: any = null;
+  private autocompletePollTimer: ReturnType<typeof setInterval> | null = null;
 
   readonly emsResetItems: Array<{ key: string; label: string; description: string }> = [
     { key: 'leases', label: 'Leases', description: 'Delete all lease records for this store.' },
@@ -125,6 +143,98 @@ export class HotelInfo implements OnInit {
     { value: 'UTC+11', label: '(GMT+11:00) Magadan, Solomon Islands' },
     { value: 'UTC+12', label: '(GMT+12:00) Auckland, Wellington' }
   ];
+
+  ngAfterViewInit(): void {
+    this.waitForPlacesThenInit();
+  }
+
+  private waitForPlacesThenInit(): void {
+    if (typeof google !== 'undefined' && google.maps) {
+      this.initLocationAutocomplete();
+      return;
+    }
+    let attempts = 0;
+    this.autocompletePollTimer = setInterval(() => {
+      attempts += 1;
+      if (typeof google !== 'undefined' && google.maps) {
+        this.stopPolling();
+        this.initLocationAutocomplete();
+      } else if (attempts > 50) {
+        this.stopPolling();
+      }
+    }, 100);
+  }
+
+  private stopPolling(): void {
+    if (this.autocompletePollTimer) {
+      clearInterval(this.autocompletePollTimer);
+      this.autocompletePollTimer = null;
+    }
+  }
+
+  // google.maps.places.Autocomplete is marked deprecated (March 2025) in
+  // favor of PlaceAutocompleteElement, but verified live (Playwright):
+  // it still constructs and works — the deprecation notice itself says
+  // it's "not scheduled to be discontinued" and still gets bug fixes.
+  // PlaceAutocompleteElement was tried here first; its full-screen mobile
+  // suggestion UI has no documented way to override its
+  // dark-theme-follows-system-only behavior, which looked broken against
+  // this app's light styling. Reverted to the simpler, fully supported
+  // widget attached directly to the input below.
+  private initLocationAutocomplete(): void {
+    const input = this.locationSearchInput()?.nativeElement;
+    if (!input) return;
+
+    this.autocomplete = new google.maps.places.Autocomplete(input, {
+      fields: ['geometry', 'formatted_address', 'name'],
+    });
+    this.autocompleteListener = this.autocomplete.addListener('place_changed', () => {
+      const place = this.autocomplete!.getPlace();
+      const lat = place.geometry?.location?.lat();
+      const lng = place.geometry?.location?.lng();
+      if (lat == null || lng == null) return;
+
+      this.latitude.set(lat);
+      this.longitude.set(lng);
+      this.locationLabel.set(place.name || place.formatted_address || '');
+    });
+  }
+
+  useCurrentLocationForStore(): void {
+    if (!navigator.geolocation) {
+      this.snackBar.open('Location is not available on this device.', 'Close', { duration: 4000 });
+      return;
+    }
+    this.isLocating.set(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        this.isLocating.set(false);
+        const { latitude, longitude } = position.coords;
+        this.latitude.set(latitude);
+        this.longitude.set(longitude);
+
+        if (typeof google === 'undefined' || !google.maps) {
+          this.locationLabel.set(`${latitude.toFixed(5)}, ${longitude.toFixed(5)}`);
+          return;
+        }
+        new google.maps.Geocoder().geocode({ location: { lat: latitude, lng: longitude } }, (results: any, status: any) => {
+          const label =
+            status === 'OK' && results?.[0] ? results[0].formatted_address : `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+          this.locationLabel.set(label);
+        });
+      },
+      () => {
+        this.isLocating.set(false);
+        this.snackBar.open('Could not get your current location.', 'Close', { duration: 4000 });
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.stopPolling();
+    this.autocompleteListener?.remove();
+  }
 
   ngOnInit(): void {
     this.initializeForm();
@@ -201,8 +311,15 @@ export class HotelInfo implements OnInit {
           website: store.contactInfo?.placeName || ''
         },
       });
+
+      const coordinates = store.location?.coordinates;
+      if (coordinates?.length === 2) {
+        this.longitude.set(coordinates[0]);
+        this.latitude.set(coordinates[1]);
+      }
+      this.locationLabel.set(store.contactInfo?.address || '');
     }
-    
+
     this.loading.set(false);
   }
 
@@ -213,6 +330,9 @@ export class HotelInfo implements OnInit {
       const formValue = this.hotelInfoForm.value;
       const currentStore = this.storeStore.selectedStore()!;
       
+      const lat = this.latitude();
+      const lng = this.longitude();
+
       const storeUpdatePayload = {
         name: formValue.hotelName,
         contactInfo: {
@@ -227,7 +347,10 @@ export class HotelInfo implements OnInit {
           placeName: formValue.contactInfo.website,
           placeNumber: currentStore.contactInfo?.placeNumber || ''
         },
-
+        // Only sent once the admin has actually picked a point (search or
+        // current location) — otherwise this stays whatever it already was,
+        // never silently reset to the schema's placeholder default.
+        ...(lat != null && lng != null ? { location: { type: 'Point', coordinates: [lng, lat] } } : {}),
       };
 
       this.storeService.updateStore(currentStore._id, storeUpdatePayload).subscribe({

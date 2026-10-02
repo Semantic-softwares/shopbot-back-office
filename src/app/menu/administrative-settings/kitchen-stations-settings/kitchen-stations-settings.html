@@ -1,0 +1,135 @@
+<div class="px-4">
+  <div class="grid grid-cols-1 gap-6">
+    <app-page-header title="Kitchen Stations" subtitle="Order each station's Kitchen Display columns and assign F1&#8211;F12 shortcuts for moving tickets">
+    </app-page-header>
+
+    @if (loading()) {
+      <div class="flex items-center justify-center py-8">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    } @else if (!catalog()) {
+      <mat-card appearance="outlined">
+        <mat-card-content class="pt-4 text-center text-sm text-gray-500 py-8">
+          Couldn't load the kitchen display statuses. Refresh the page to try again.
+        </mat-card-content>
+      </mat-card>
+    } @else if (!stationDrafts().length) {
+      <mat-card appearance="outlined">
+        <mat-card-content class="pt-4 text-center text-sm text-gray-500 py-8">
+          No stations yet. Create a station first (Items &rarr; Stations), then come back here to set its status flow.
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      @for (draft of stationDrafts(); track draft.id) {
+        @let error = validationError(draft);
+        @let restorable = restorableStatuses(draft);
+        <mat-card appearance="outlined">
+          <mat-card-content class="pt-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div>
+                <h4 class="text-sm font-medium text-gray-900">{{ draft.name }}</h4>
+                <p class="text-xs text-gray-500">{{ getStationTypeLabel(draft.type) }}</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" mat-button (click)="resetToDefault(draft.id)" [disabled]="draft.saving">
+                  Reset to default
+                </button>
+                <button type="button" mat-flat-button color="primary" [disabled]="draft.saving || !!error" (click)="save(draft.id)">
+                  <mat-icon class="mr-1">save</mat-icon>
+                  {{ draft.saving ? 'Saving...' : 'Save' }}
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-2" cdkDropList [cdkDropListData]="draft.steps" [cdkDropListDisabled]="draft.saving"
+              (cdkDropListDropped)="drop(draft.id, $event)">
+              @for (step of draft.steps; track step.key; let i = $index, last = $last, first = $first) {
+                <div cdkDrag cdkDragLockAxis="y"
+                  class="flex flex-wrap items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                  <mat-icon cdkDragHandle class="cursor-move text-gray-400" matTooltip="Drag to reorder" aria-hidden="true">
+                    drag_indicator
+                  </mat-icon>
+
+                  <div class="flex items-center">
+                    <button type="button" mat-icon-button [disabled]="first || draft.saving"
+                      (click)="moveStep(draft.id, i, -1)" [attr.aria-label]="'Move ' + step.label + ' up'">
+                      <mat-icon>arrow_upward</mat-icon>
+                    </button>
+                    <button type="button" mat-icon-button [disabled]="last || draft.saving"
+                      (click)="moveStep(draft.id, i, 1)" [attr.aria-label]="'Move ' + step.label + ' down'">
+                      <mat-icon>arrow_downward</mat-icon>
+                    </button>
+                  </div>
+
+                  <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 text-xs font-medium text-gray-700">
+                    {{ i + 1 }}
+                  </span>
+
+                  <div class="flex flex-col min-w-[8rem]">
+                    <span class="text-sm font-medium text-gray-900">{{ step.label }}</span>
+                    @if (first) {
+                      <span class="text-xs text-gray-500">New tickets land here</span>
+                    }
+                  </div>
+
+                  @if (last) {
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs font-medium">
+                      <mat-icon class="!text-sm !w-4 !h-4">done_all</mat-icon>
+                      Clears ticket
+                    </span>
+                  }
+
+                  <div class="ml-auto flex items-center gap-1">
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-32">
+                      <mat-label>Shortcut</mat-label>
+                      <mat-select [value]="step.shortcut" (selectionChange)="setShortcut(draft.id, i, $event.value)"
+                        [disabled]="draft.saving" [attr.aria-label]="'Keyboard shortcut for ' + step.label">
+                        <mat-option [value]="null">None</mat-option>
+                        @for (key of catalog()!.shortcutKeys; track key) {
+                          <mat-option [value]="key" [disabled]="isShortcutTaken(draft, i, key)">
+                            {{ key }}@if (isShortcutTaken(draft, i, key)) { <span class="text-xs"> (in use)</span> }
+                          </mat-option>
+                        }
+                      </mat-select>
+                      @if (isDuplicateShortcut(draft, i)) {
+                        <mat-hint class="!text-red-600">Duplicate</mat-hint>
+                      }
+                    </mat-form-field>
+
+                    <button type="button" mat-icon-button color="warn"
+                      [disabled]="draft.steps.length <= minSteps || draft.saving"
+                      (click)="removeStep(draft.id, i)" [attr.aria-label]="'Remove ' + step.label"
+                      [matTooltip]="draft.steps.length <= minSteps ? 'A flow needs at least ' + minSteps + ' steps' : 'Remove step'">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+
+            @if (error) {
+              <p class="text-xs text-red-600 mt-2" role="alert">{{ error }}</p>
+            }
+
+            @if (restorable.length) {
+              <button type="button" mat-stroked-button class="mt-3" [matMenuTriggerFor]="restoreMenu" [disabled]="draft.saving">
+                <mat-icon class="mr-1">restore</mat-icon>
+                Restore status
+              </button>
+              <mat-menu #restoreMenu="matMenu">
+                @for (status of restorable; track status.key) {
+                  <button mat-menu-item type="button" (click)="restoreStatus(draft.id, status)">{{ status.label }}</button>
+                }
+              </mat-menu>
+            }
+
+            <p class="text-xs text-gray-400 mt-3">
+              Drag rows (or use the arrows) to set the column order on the Kitchen Display. The last step clears the
+              ticket off the board. Pressing a step's shortcut on the board moves the selected ticket to that step.
+            </p>
+          </mat-card-content>
+        </mat-card>
+      }
+    }
+  </div>
+</div>

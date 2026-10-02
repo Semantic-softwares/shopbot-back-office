@@ -282,6 +282,12 @@
                             {{ item.orderedBy }}
                           </div>
                         }
+                        @if (item.notes) {
+                          <div class="flex items-start gap-1 text-xs italic text-amber-700">
+                            <mat-icon class="!text-sm !w-3.5 !h-3.5">sticky_note_2</mat-icon>
+                            {{ item.notes }}
+                          </div>
+                        }
                       </div>
                     </div>
                   </td>
@@ -346,12 +352,68 @@
 
       <!-- Sidebar Column -->
       <div class="space-y-6">
-        
-        <!-- Customer Information -->
-        @if (order.user) {
+
+        <!-- Order Summary -->
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <mat-card-title>
+              Order Summary
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="space-y-3 mt-4">
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Subtotal:</span>
+                <span class="font-medium">{{ order.subTotal | currency: currency() }}</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Service Fee:</span>
+                <span class="font-medium">{{ order.serviceFee | currency: currency() }}</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Shipping Fee:</span>
+                <span class="font-medium">{{ order.shippingFee | currency: currency() }}</span>
+              </div>
+              @if (order.discount) {
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Discount:</span>
+                  <span class="font-medium text-green-600">-{{ order.discount | currency: currency() }}</span>
+                </div>
+              }
+
+
+              @if (order.driverTip) {
+                <div class="border-t border-gray-300 pt-3 mt-3">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-700 flex items-center gap-1">
+                      <mat-icon class="!text-base text-amber-500">local_taxi</mat-icon>
+                      Driver Tip:
+                    </span>
+                    <span class="font-semibold text-amber-600">{{ order.driverTip | currency: currency() }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+          <mat-card-actions class="border-t border-outline-variant mt-4 pt-4">
+            <div class="flex justify-between w-full text-lg">
+              <span class="font-bold">Total:</span>
+              <span class="font-bold  text-right">{{ order.total | currency: currency() }}</span>
+            </div>
+          </mat-card-actions>
+        </mat-card>
+
+        <!-- Customer — merged with what used to be a separate "Ordered by"
+             card: a self-order's `order.user` (the found-or-created guest
+             User record) and `order.guestName` name the same person, so
+             showing both was just the same name twice in two cards. A plain
+             table order only ever has `guestName` (no User record), so that
+             still falls back cleanly. -->
+        @if (order.user || ((order.salesChannel === 'Qrcode' || order.salesChannel === 'Storefront') && order.guestName)) {
           <mat-card appearance="outlined">
             <mat-card-header>
-              <mat-card-title>
+              <mat-card-title class="flex items-center gap-2">
+                <mat-icon>person</mat-icon>
                 Customer
               </mat-card-title>
             </mat-card-header>
@@ -359,16 +421,20 @@
               <mat-list>
                 <mat-list-item>
                   <span matListItemTitle>Name</span>
-                  <span matListItemMeta>{{ order.user?.name || 'N/A' }}</span>
+                  <span matListItemMeta>{{ order.user?.name || order.guestName || 'N/A' }}</span>
                 </mat-list-item>
-                <mat-list-item>
-                  <span matListItemTitle>Phone</span>
-                  <span matListItemMeta>{{ order.user?.phoneNumber || 'N/A' }}</span>
-                </mat-list-item>
-                <mat-list-item>
-                  <span matListItemTitle>Email</span>
-                  <span matListItemMeta class="break-all">{{ order.user?.email || 'N/A' }}</span>
-                </mat-list-item>
+                @if (order.user?.phoneNumber) {
+                  <mat-list-item>
+                    <span matListItemTitle>Phone</span>
+                    <span matListItemMeta>{{ order.user.phoneNumber }}</span>
+                  </mat-list-item>
+                }
+                @if (order.user?.email) {
+                  <mat-list-item>
+                    <span matListItemTitle>Email</span>
+                    <span matListItemMeta class="break-all">{{ order.user.email }}</span>
+                  </mat-list-item>
+                }
               </mat-list>
             </mat-card-content>
           </mat-card>
@@ -419,24 +485,33 @@
           </mat-card>
         }
 
-        <!-- Customer who placed a self-order — distinct from the staff member
-             serving it below. Only self-orders have a separate orderer. -->
-        @if (order.salesChannel === 'Qrcode' && order.guestName) {
+        <!-- Delivery destination. Storefront orders carry a real pin (map +
+             copy + directions, so staff can hand it straight to a rider);
+             older orders may only have a free-text shipping name, shown
+             plainly in that case. One card — this used to be split into a
+             separate, redundant "Shipping" card below. -->
+        @if (order.shipping) {
           <mat-card appearance="outlined">
             <mat-card-header>
               <mat-card-title class="flex items-center gap-2">
-                <mat-icon>person</mat-icon>
-                Ordered by
+                <mat-icon>local_shipping</mat-icon>
+                Delivery to
               </mat-card-title>
             </mat-card-header>
-            <mat-card-content class="!p-0">
-              <mat-list>
-                <mat-list-item>
-                  <span matListItemTitle>Customer</span>
-                  <span matListItemMeta>{{ order.guestName }}</span>
-                </mat-list-item>
-              </mat-list>
-            </mat-card-content>
+            @if (order.shipping?.latitude != null) {
+              <mat-card-content class="!p-0">
+                <app-delivery-address-card [shipping]="order.shipping" />
+              </mat-card-content>
+            } @else {
+              <mat-card-content>
+                <div class="space-y-3 mt-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                    <div class="text-sm">{{ order.shipping?.name || 'N/A' }}</div>
+                  </div>
+                </div>
+              </mat-card-content>
+            }
           </mat-card>
         }
 
@@ -507,81 +582,6 @@
             </mat-card-content>
           </mat-card>
         }
-
-        <!-- Shipping Information -->
-        @if (order.shipping) {
-          <mat-card appearance="outlined">
-            <mat-card-header>
-              <mat-card-title>
-                Shipping
-              </mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <div class="space-y-3 mt-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                  <div class="text-sm">{{ order.shipping?.name || 'N/A' }}</div>
-                </div>
-                @if (order.shipping?.phone) {
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
-                    <div class="text-sm">{{ order.shipping.phone }}</div>
-                  </div>
-                }
-              </div>
-            </mat-card-content>
-          </mat-card>
-        }
-
-        <!-- Order Summary -->
-        <mat-card appearance="outlined">
-          <mat-card-header>
-            <mat-card-title>
-              Order Summary
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="space-y-3 mt-4">
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Subtotal:</span>
-                <span class="font-medium">{{ order.subTotal | currency: currency() }}</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Service Fee:</span>
-                <span class="font-medium">{{ order.serviceFee | currency: currency() }}</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Shipping Fee:</span>
-                <span class="font-medium">{{ order.shippingFee | currency: currency() }}</span>
-              </div>
-              @if (order.discount) {
-                <div class="flex justify-between text-sm">
-                  <span class="text-gray-600">Discount:</span>
-                  <span class="font-medium text-green-600">-{{ order.discount | currency: currency() }}</span>
-                </div>
-              }
-              
-              
-              @if (order.driverTip) {
-                <div class="border-t border-gray-300 pt-3 mt-3">
-                  <div class="flex justify-between text-sm">
-                    <span class="text-gray-700 flex items-center gap-1">
-                      <mat-icon class="!text-base text-amber-500">local_taxi</mat-icon>
-                      Driver Tip:
-                    </span>
-                    <span class="font-semibold text-amber-600">{{ order.driverTip | currency: currency() }}</span>
-                  </div>
-                </div>
-              }
-            </div>
-          </mat-card-content>
-          <mat-card-actions class="border-t border-outline-variant mt-4 pt-4">
-            <div class="flex justify-between w-full text-lg">
-              <span class="font-bold">Total:</span>
-              <span class="font-bold  text-right">{{ order.total | currency: currency() }}</span>
-            </div>
-          </mat-card-actions>
-        </mat-card>
 
         <!-- Commission Breakdown (if available) -->
         @if (order.vendorCommission && order.vendorCommissionAmount) {

@@ -26,6 +26,7 @@ const MODULE_DEFS: ModuleDef[] = [
   { key: 'EMS', label: 'Estate Management', icon: 'apartment', description: 'Properties, tenants, leases' },
   { key: 'POS', label: 'Point of Sale', icon: 'point_of_sale', description: 'Sales, orders, kitchen display' },
   { key: 'ERP', label: 'Enterprise Resource Planning', icon: 'business', description: 'Inventory, suppliers, staff' },
+  { key: 'KDS', label: 'Kitchen Display System', icon: 'soup_kitchen', description: 'Kitchen order board, station routing, status flow' },
 ];
 
 @Component({

@@ -14,6 +14,7 @@ import { OrderService } from '../../../../../shared/services/orders.service';
 import { StoreService } from '../../../../../shared/services/store.service';
 import { AuthService } from '../../../../../shared/services/auth.service';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
+import { DeliveryAddressCardComponent } from '../../../../../shared/components/delivery-address-card/delivery-address-card.component';
 import { MatListModule } from "@angular/material/list";
 
 
@@ -33,6 +34,7 @@ import { MatListModule } from "@angular/material/list";
     MatTableModule,
     MatChipsModule,
     PageHeaderComponent,
+    DeliveryAddressCardComponent,
     MatListModule,
     RouterModule
 ]
@@ -50,8 +52,15 @@ export class ReceiptsDetailsComponent {
 
   private authService = inject(AuthService);
 
-  /** Self-orders are the only ones an employee claims; POS sales already have an owner. */
-  isSelfOrder = computed(() => this.orderResource.value()?.salesChannel === 'Qrcode');
+  /**
+   * Self-orders are the only ones an employee claims; POS sales already have
+   * an owner. Covers both a table's QR scan and a storefront pickup/delivery
+   * order — both go through the same unassigned-until-claimed flow.
+   */
+  isSelfOrder = computed(() => {
+    const channel = this.orderResource.value()?.salesChannel;
+    return channel === 'Qrcode' || channel === 'Storefront';
+  });
 
   /**
    * Whether anyone has taken this order. Keyed on `status`, not on the staff

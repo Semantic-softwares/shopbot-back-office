@@ -44,6 +44,18 @@ export class SocketService {
   private tableTransferredSubject = new Subject<any>();
   readonly tableTransferred$ = this.tableTransferredSubject.asObservable();
 
+  /**
+   * Kitchen Display signals - both are lightweight {orderId, ...} pings, not
+   * full payloads. The Kitchen Orders page (and the standalone shopbot-kds
+   * board) just re-fetches its current station's order list on either one
+   * rather than trying to merge the partial payload in.
+   */
+  private kitchenOrderNewSubject = new Subject<any>();
+  readonly kitchenOrderNew$ = this.kitchenOrderNewSubject.asObservable();
+
+  private kitchenItemStatusUpdatedSubject = new Subject<any>();
+  readonly kitchenItemStatusUpdated$ = this.kitchenItemStatusUpdatedSubject.asObservable();
+
   /** Audio element for notification sound */
   private notificationAudio: HTMLAudioElement | null = null;
 
@@ -108,6 +120,7 @@ export class SocketService {
     this.setupGlobalPrintJobListeners(socket);
     this.setupGlobalHotelNotificationListeners(socket);
     this.setupGlobalTableOrderListeners(socket);
+    this.setupGlobalKitchenListeners(socket);
   }
 
   disconnect(): void {
@@ -302,6 +315,26 @@ export class SocketService {
     socket.on('table:transferred', (data: any) => {
       console.log('🔀 [GLOBAL SOCKET] table:transferred EVENT RECEIVED', data);
       this.tableTransferredSubject.next(data);
+    });
+  }
+
+  /**
+   * Global Kitchen Display listeners - registered once when the socket
+   * connects, same pattern as the table-order listeners above. Both events
+   * are just signals to re-fetch; nothing to merge, nothing to toast here
+   * (the Kitchen Orders page itself decides how/whether to surface it).
+   */
+  private setupGlobalKitchenListeners(socket: Socket): void {
+    console.log('🎧 [SOCKET SERVICE] Setting up global kitchen-display listeners');
+
+    socket.on('kitchen:order:new', (data: any) => {
+      console.log('🍽️ [GLOBAL SOCKET] kitchen:order:new EVENT RECEIVED', data);
+      this.kitchenOrderNewSubject.next(data);
+    });
+
+    socket.on('kitchen:item:statusUpdated', (data: any) => {
+      console.log('🍽️ [GLOBAL SOCKET] kitchen:item:statusUpdated EVENT RECEIVED', data);
+      this.kitchenItemStatusUpdatedSubject.next(data);
     });
   }
 

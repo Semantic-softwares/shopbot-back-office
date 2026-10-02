@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {  Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Station } from '../models';
+import { Station, StationStatusStepInput } from '../models';
 
 @Injectable({providedIn: 'root'})
 export class StationsService {
@@ -26,6 +26,15 @@ export class StationsService {
 
   updateStation(stationId: string, station: Partial<Station>): Observable<Station> {
     return this._httpClient.put<Station>(`${this.hostServer}/stations/${stationId}`, station);
+  }
+
+  /**
+   * Save a station's KDS status flow via the generic PUT /stations/:id. Only
+   * keys (in order) and optional shortcuts are sent; the backend normalizes
+   * (derives labels, renumbers order, marks the last step terminal).
+   */
+  updateStationStatusFlow(stationId: string, statusFlow: StationStatusStepInput[]): Observable<Station> {
+    return this._httpClient.put<Station>(`${this.hostServer}/stations/${stationId}`, { statusFlow });
   }
 
   deleteStation(stationId: string) {

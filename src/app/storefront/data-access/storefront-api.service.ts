@@ -10,10 +10,6 @@ import {
   SubmitOrderResult,
 } from './storefront.models';
 
-export interface ResolveBySlugResponse {
-  store: StorefrontStoreInfo;
-}
-
 export interface ResolveByQrTokenResponse {
   store: StorefrontStoreInfo;
   table: StorefrontTable;
@@ -41,8 +37,11 @@ export class StorefrontApiService {
 
   constructor(private readonly http: HttpClient) {}
 
-  resolveBySlug(storeSlug: string): Observable<ResolveBySlugResponse> {
-    return this.http.get<ResolveBySlugResponse>(`${this.baseUrl}/stores/slug/${storeSlug}`);
+  // Unlike resolveByQrToken below, the backend returns the store object
+  // directly here — not wrapped in `{ store }` (confirmed against the real
+  // /self-order/stores/slug/:storeSlug response).
+  resolveBySlug(storeSlug: string): Observable<StorefrontStoreInfo> {
+    return this.http.get<StorefrontStoreInfo>(`${this.baseUrl}/stores/slug/${storeSlug}`);
   }
 
   resolveByQrToken(qrToken: string): Observable<ResolveByQrTokenResponse> {
