@@ -1,0 +1,1 @@
+var t=[{path:``,loadComponent:()=>import(`./chunk-OnuyS7qQ.js`).then(o=>o.KitchenDisplay)}];export{t as KITCHEN_DISPLAY_ROUTES};
