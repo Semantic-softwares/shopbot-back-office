@@ -5,8 +5,9 @@ export const environment = {
   subscriptionApiUrl: 'http://localhost:3000/subscriptions',
   usageApiUrl: 'http://localhost:3000/usage',
   appUrl: 'http://localhost:4200',
-  // Standalone storefront app (shopbot-storefront) — run it with `ng serve --port 4300`.
-  storefrontUrl: 'http://localhost:4300',
+  // Standalone storefront app (shopbot-storefront). Points at the live store
+  // even in dev, matching the server's table QR links (STOREFRONT_URL default).
+  storefrontUrl: 'https://store.shopbot.africa',
   paymentReturnUrl: 'http://localhost:4200/#/pricing/payment-callback',
   webhookUrl: 'https://comprisable-glumpy-mildred.ngrok-free.dev/webhooks/paystack',
   // Firebase Web Push (staff on-duty table-order alerts).

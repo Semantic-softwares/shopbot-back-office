@@ -6,6 +6,11 @@
           <mat-icon class="mr-1">visibility</mat-icon>
           Preview
         </button>
+        <button type="button" mat-stroked-button [disabled]="!previewUrl()" (click)="copyStoreLink()"
+          [attr.aria-label]="'Copy store link ' + (previewUrl() ?? '')">
+          <mat-icon class="mr-1">content_copy</mat-icon>
+          Copy link
+        </button>
         <button type="button" mat-flat-button color="primary" [disabled]="saving()" (click)="save()">
           <mat-icon class="mr-1">save</mat-icon>
           {{ saving() ? 'Saving...' : 'Save' }}
@@ -136,14 +141,31 @@
                       </mat-form-field>
                     }
                     @case ('image') {
-                      <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>{{ field.label }} URL</mat-label>
-                        <input
-                          matInput
-                          [ngModel]="settingsValues()[field.key] || ''"
-                          (ngModelChange)="updateSetting(field.key, $event)"
-                        />
-                      </mat-form-field>
+                      <span class="block text-xs text-gray-500 mb-1">{{ field.label }}</span>
+                      <div class="w-full aspect-video rounded-lg border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center">
+                        @if (settingsValues()[field.key]; as imageUrl) {
+                          <img [src]="imageUrl" [alt]="field.label" class="h-full w-full object-cover" />
+                        } @else {
+                          <mat-icon class="!text-4xl !w-10 !h-10 text-gray-300">image</mat-icon>
+                        }
+                      </div>
+                      <input #themeImageInput type="file" accept="image/*" class="hidden" (change)="uploadThemeImage($event, field)" />
+                      <div class="mt-2 flex flex-wrap items-center gap-2">
+                        <button type="button" mat-stroked-button [disabled]="themeImageUploading() === field.key" (click)="themeImageInput.click()">
+                          @if (themeImageUploading() === field.key) {
+                            <mat-spinner diameter="18" class="mr-2 inline-block"></mat-spinner>
+                          } @else {
+                            <mat-icon class="mr-1">upload</mat-icon>
+                          }
+                          {{ themeImageUploading() === field.key ? 'Uploading…' : settingsValues()[field.key] ? 'Change image' : 'Upload image' }}
+                        </button>
+                        @if (settingsValues()[field.key]) {
+                          <button type="button" mat-button (click)="updateSetting(field.key, '')">
+                            <mat-icon class="mr-1">delete</mat-icon>
+                            Remove
+                          </button>
+                        }
+                      </div>
                     }
                     @default {
                       <mat-form-field appearance="outline" class="w-full">

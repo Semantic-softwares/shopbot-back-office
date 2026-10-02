@@ -89,6 +89,62 @@
         </mat-card-content>
       </mat-card>
 
+      <!-- Branding Card -->
+      <mat-card appearance="outlined" class="lg:col-span-2">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="text-purple-600 !flex !items-center !justify-center">palette</mat-icon>
+          <mat-card-title>Branding</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-4">
+          <p class="text-xs text-gray-500 mb-4">
+            Shown on your online store, receipts and QR menu. Each image is saved as soon as it's uploaded.
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
+            <div class="flex flex-col items-start gap-2">
+              <span class="text-sm font-medium text-gray-900">Logo</span>
+              <div class="h-28 w-28 rounded-full border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center">
+                @if (storeStore.selectedStore()?.logo; as logo) {
+                  <img [src]="logo" alt="Store logo" class="h-full w-full object-cover" />
+                } @else {
+                  <mat-icon class="!text-4xl !w-10 !h-10 text-gray-300">storefront</mat-icon>
+                }
+              </div>
+              <input #logoInput type="file" accept="image/*" class="hidden" (change)="uploadBrandImage($event, 'logo')" />
+              <button type="button" mat-stroked-button [disabled]="uploadingLogo()" (click)="logoInput.click()">
+                @if (uploadingLogo()) {
+                  <mat-spinner diameter="18" class="mr-2 inline-block"></mat-spinner>
+                } @else {
+                  <mat-icon class="mr-1">upload</mat-icon>
+                }
+                {{ uploadingLogo() ? 'Uploading…' : storeStore.selectedStore()?.logo ? 'Change logo' : 'Upload logo' }}
+              </button>
+              <span class="text-xs text-gray-500">Square, at least 400×400px.</span>
+            </div>
+
+            <div class="flex flex-col items-start gap-2 min-w-0">
+              <span class="text-sm font-medium text-gray-900">Banner</span>
+              <div class="w-full aspect-[3/1] max-h-48 rounded-lg border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center">
+                @if (storeStore.selectedStore()?.bannerImage; as banner) {
+                  <img [src]="banner" alt="Store banner" class="h-full w-full object-cover" />
+                } @else {
+                  <mat-icon class="!text-4xl !w-10 !h-10 text-gray-300">image</mat-icon>
+                }
+              </div>
+              <input #bannerInput type="file" accept="image/*" class="hidden" (change)="uploadBrandImage($event, 'bannerImage')" />
+              <button type="button" mat-stroked-button [disabled]="uploadingBanner()" (click)="bannerInput.click()">
+                @if (uploadingBanner()) {
+                  <mat-spinner diameter="18" class="mr-2 inline-block"></mat-spinner>
+                } @else {
+                  <mat-icon class="mr-1">upload</mat-icon>
+                }
+                {{ uploadingBanner() ? 'Uploading…' : storeStore.selectedStore()?.bannerImage ? 'Change banner' : 'Upload banner' }}
+              </button>
+              <span class="text-xs text-gray-500">Wide image, at least 1500×500px.</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
       <!-- Store Location Card -->
       <mat-card appearance="outlined" class="lg:col-span-2">
         <mat-card-header>

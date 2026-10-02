@@ -18,6 +18,10 @@ import { StoreStore } from '../../../shared/stores/store.store';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { PinAuthorizationDialogComponent, PinAuthorizationDialogResult } from '../../hms/front-desk/reservations/pin-authorization-dialog/pin-authorization-dialog.component';
 import { DeliveryAddressCardComponent } from '../../../shared/components/delivery-address-card/delivery-address-card.component';
+import {
+  ImageCropperDialogComponent,
+  ImageCropperDialogData,
+} from '../../../shared/components/image-cropper-dialog/image-cropper-dialog.component';
 
 declare const google: any;
 
@@ -67,6 +71,9 @@ export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
   longitude = signal<number | null>(null);
   locationLabel = signal('');
   isLocating = signal(false);
+
+  uploadingLogo = signal(false);
+  uploadingBanner = signal(false);
 
   private autocomplete: any = null;
   private autocompleteListener: any = null;
@@ -234,6 +241,64 @@ export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.stopPolling();
     this.autocompleteListener?.remove();
+  }
+
+  /**
+   * Crop, then upload the store's logo or banner. The upload endpoints save
+   * straight onto the store, so there's nothing to "Save Information" after.
+   * The logo stays PNG so a transparent background survives the crop.
+   */
+  uploadBrandImage(event: Event, field: 'logo' | 'bannerImage'): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    const storeId = this.storeStore.selectedStore()?._id;
+    // Cleared up front so picking the same file again still fires a change.
+    input.value = '';
+    if (!file || !storeId) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.snackBar.open('Please choose an image file.', 'Close', { duration: 4000 });
+      return;
+    }
+
+    const isLogo = field === 'logo';
+    this.dialog
+      .open(ImageCropperDialogComponent, {
+        width: '720px',
+        maxWidth: '95vw',
+        data: {
+          file,
+          aspectRatio: isLogo ? 1 : 3,
+          title: isLogo ? 'Crop logo' : 'Crop banner',
+          hint: isLogo
+            ? 'Your logo is shown in a circle. Drag to reposition, or drag a corner to resize.'
+            : 'The banner fills the top of your online store. Drag to reposition, or drag a corner to resize.',
+          outputType: isLogo ? 'image/png' : 'image/jpeg',
+        } satisfies ImageCropperDialogData,
+      })
+      .afterClosed()
+      .subscribe((blob?: Blob | null) => {
+        if (!blob) return;
+        const formData = new FormData();
+        formData.append('file', new File([blob], isLogo ? 'logo.png' : 'banner.jpg', { type: blob.type }));
+
+        const uploading = isLogo ? this.uploadingLogo : this.uploadingBanner;
+        uploading.set(true);
+        const upload$ = isLogo
+          ? this.storeService.uploadLogo(formData, storeId)
+          : this.storeService.uploadBanner(formData, storeId);
+        upload$.subscribe({
+          next: ({ photo }: { photo: string }) => {
+            uploading.set(false);
+            this.storeStore.updateStore({ [field]: photo });
+            this.snackBar.open(isLogo ? 'Logo updated.' : 'Banner updated.', 'Close', { duration: 3000 });
+          },
+          error: () => {
+            uploading.set(false);
+            this.snackBar.open('Could not upload that image.', 'Close', { duration: 4000 });
+          },
+        });
+      });
   }
 
   ngOnInit(): void {

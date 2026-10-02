@@ -159,6 +159,8 @@ export class SelfOrderSettings implements OnInit {
   qrPreviewUrl = signal<SafeResourceUrl | null>(null);
   qrPreviewLoading = signal(false);
   qrUploading = signal(false);
+  /** Key of the theme image field currently uploading, if any. */
+  themeImageUploading = signal<string | null>(null);
 
   qrSelectedTemplate = computed(
     () => this.qrTemplates().find((t) => t.slug === this.qrSelectedSlug()) ?? null,
@@ -366,6 +368,54 @@ export class SelfOrderSettings implements OnInit {
       });
   }
 
+  /**
+   * Upload a theme image (e.g. the hero photo) instead of pasting a URL.
+   * Saved with the rest of the theme settings on Save, like any other field.
+   */
+  uploadThemeImage(event: Event, field: { key: string; label: string }): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    const storeId = this.storeStore.selectedStore()?._id;
+    input.value = '';
+    if (!file || !storeId) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.snackBar.open('Please choose an image file.', 'Close', { duration: 4000 });
+      return;
+    }
+
+    this.dialog
+      .open(ImageCropperDialogComponent, {
+        width: '720px',
+        maxWidth: '95vw',
+        data: {
+          file,
+          title: `Crop ${field.label.toLowerCase()}`,
+          hint: 'Drag to reposition, or drag a corner to resize.',
+        } satisfies ImageCropperDialogData,
+      })
+      .afterClosed()
+      .subscribe((blob?: Blob | null) => {
+        if (!blob) return;
+        const cropped = new File([blob], `${field.key}.jpg`, { type: 'image/jpeg' });
+
+        this.themeImageUploading.set(field.key);
+        // Same "upload, return the URL, don't touch the store" endpoint the QR
+        // card photos use.
+        this.qrTemplateService.uploadBackground(storeId, cropped).subscribe({
+          next: ({ photo }) => {
+            this.themeImageUploading.set(null);
+            this.updateSetting(field.key, photo);
+            this.snackBar.open('Image uploaded — click Save to publish it.', 'Close', { duration: 4000 });
+          },
+          error: () => {
+            this.themeImageUploading.set(null);
+            this.snackBar.open('Could not upload that image.', 'Close', { duration: 4000 });
+          },
+        });
+      });
+  }
+
   /** Re-crop an image already on the card, without re-picking the file. */
   recropQrBackground(field: QrTemplateSettingField): void {
     const url = this.qrSettings()[field.key];
@@ -406,6 +456,15 @@ export class SelfOrderSettings implements OnInit {
     if (url) {
       window.open(url, '_blank');
     }
+  }
+
+  copyStoreLink(): void {
+    const url = this.previewUrl();
+    if (!url) return;
+    navigator.clipboard.writeText(url).then(
+      () => this.snackBar.open(`Link copied: ${url}`, 'Close', { duration: 3000 }),
+      () => this.snackBar.open('Could not copy the link.', 'Close', { duration: 4000 }),
+    );
   }
 
   save(): void {

@@ -34,6 +34,8 @@ export interface ImageCropperDialogData {
   title?: string;
   /** Shown under the title — where this photo ends up on the card. */
   hint?: string;
+  /** Defaults to JPEG; use 'image/png' to keep transparency (e.g. a logo). */
+  outputType?: 'image/jpeg' | 'image/png';
 }
 
 /**
@@ -268,7 +270,7 @@ export class ImageCropperDialogComponent implements OnDestroy {
     ctx.drawImage(this.image, c.x, c.y, c.width, c.height, 0, 0, canvas.width, canvas.height);
 
     const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, 'image/jpeg', 0.9),
+      canvas.toBlob(resolve, this.data.outputType ?? 'image/jpeg', 0.9),
     );
     this.working.set(false);
     if (!blob) {

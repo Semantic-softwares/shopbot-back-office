@@ -124,12 +124,6 @@ export class MenuComponent implements OnInit, OnDestroy {
     'pos.printing.manage',
   ];
 
-  // KDS (Kitchen Display System) module permissions
-  private readonly KDS_PERMISSIONS = [
-    'kds.view',
-    'kds.manage',
-  ];
-
   // Menu visibility computed signals
   private hasSubscribedModule(moduleKey: ModuleKey): boolean {
     return this.activeSubscribedKeys().includes(moduleKey);
@@ -155,11 +149,6 @@ export class MenuComponent implements OnInit, OnDestroy {
     (this.rolesService.isAdmin() || this.rolesService.hasAny(this.EMS_PERMISSIONS))
   );
 
-  canAccessKDS = computed(() =>
-    this.hasSubscribedModule('KDS') &&
-    (this.rolesService.isAdmin() || this.rolesService.hasAny(this.KDS_PERMISSIONS))
-  );
-
   // Only super admins can access administrative settings
   canAccessAdmin = computed(() => this.rolesService.isAdmin());
 
@@ -175,7 +164,6 @@ export class MenuComponent implements OnInit, OnDestroy {
     if (this.canAccessHMS()) routes.push('/menu/hms');
     if (this.canAccessPOS()) routes.push('/menu/pos');
     if (this.canAccessEMS()) routes.push('/menu/ems');
-    if (this.canAccessKDS()) routes.push('/menu/kds');
     return routes;
   });
 
@@ -229,7 +217,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     // Socket listeners are now managed by SocketService - no cleanup needed here
   }
 
-  navigateToModule(moduleType: 'erp' | 'hotel' | 'pos' | 'ems' | 'kds' | 'admin'): void {
+  navigateToModule(moduleType: 'erp' | 'hotel' | 'pos' | 'ems' | 'admin'): void {
     if (moduleType === 'erp') {
       this.router.navigate(['/menu/erp']);
     } else if (moduleType === 'hotel') {
@@ -238,8 +226,6 @@ export class MenuComponent implements OnInit, OnDestroy {
       this.router.navigate(['/menu/pos']);
     } else if (moduleType === 'ems') {
       this.router.navigate(['/menu/ems']);
-    } else if (moduleType === 'kds') {
-      this.router.navigate(['/menu/kds']);
     } else if (moduleType === 'admin') {
       this.router.navigate(['/menu/admin']);
     }
