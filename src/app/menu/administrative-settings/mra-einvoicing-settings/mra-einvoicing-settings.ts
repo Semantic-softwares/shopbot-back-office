@@ -15,7 +15,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormGroup } from '@angular/forms';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
-import { MraAuditEntry, MraOwnerView, MraStatus, MraTestDriveStatus, MraTestUserKind, MraView } from '../../../shared/models';
+import { MraActivity, MraAuditEntry, MraOwnerView, MraStatus, MraTestDriveStatus, MraTestUserKind, MraView } from '../../../shared/models';
 import { MraEinvoicingService } from '../../../shared/services/mra-einvoicing.service';
 import { StoreStore } from '../../../shared/stores/store.store';
 
@@ -98,6 +98,12 @@ export class MraEinvoicingSettings implements OnInit, OnDestroy {
   /** The owner ticks this to say the MRA portal shows every Test Drive scenario as passed. */
   portalPassConfirmed = signal(false);
   private poll?: Subscription;
+  activity = signal<MraActivity | null>(null);
+  /** The invoice whose "release for resending" form is open. */
+  releasing = signal<string | null>(null);
+  releaseNote = this.fb.nonNullable.control('');
+  releaseConfirmation = this.fb.nonNullable.control('');
+  releaseErrors = signal<Record<string, string>>({});
   liveConfirmOpen = signal(false);
   suspendOpen = signal(false);
 
@@ -183,6 +189,7 @@ export class MraEinvoicingSettings implements OnInit, OnDestroy {
     this.view.set(view);
     if (view.role !== 'OWNER') return;
     this.syncTesting(view);
+    this.syncActivity(view);
     this.businessForm.patchValue(view.business);
     this.registrationForm.patchValue(view.registration);
     this.transmissionForm.patchValue({ username: view.transmissionUser.username, password: '' });
@@ -239,6 +246,50 @@ export class MraEinvoicingSettings implements OnInit, OnDestroy {
     this.run(this.service.saveEbs(storeId, this.ebsForm.getRawValue()), this.ebsForm, () => {
       this.mode.set('status');
       this.snackBar.open('Shopbot is registered for this place of business', 'Close', { duration: 5000 });
+    });
+  }
+
+  // ---- Fiscalisation activity ------------------------------------------------
+
+  /** Once a store reports sales, show what happened to them. */
+  private syncActivity(view: MraOwnerView): void {
+    if (!['LIVE', 'SUSPENDED', 'CONNECTION_ERROR', 'REQUIRES_REAUTHENTICATION'].includes(view.status)) {
+      this.activity.set(null);
+      return;
+    }
+    this.loadActivity();
+  }
+
+  loadActivity(): void {
+    const storeId = this.storeId;
+    if (storeId) this.service.activity(storeId).subscribe({ next: (a) => this.activity.set(a), error: () => undefined });
+  }
+
+  openRelease(invoice: string): void {
+    this.releasing.set(invoice);
+    this.releaseNote.reset('');
+    this.releaseConfirmation.reset('');
+    this.releaseErrors.set({});
+  }
+
+  /** Only after the owner has looked at MRA's portal: the invoice may already be there, and resending would duplicate it. */
+  release(): void {
+    const storeId = this.storeId;
+    const invoice = this.releasing();
+    if (!storeId || !invoice) return;
+    this.saving.set(true);
+    this.service.releaseInvoice(storeId, invoice, this.releaseNote.value, this.releaseConfirmation.value).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.releasing.set(null);
+        this.snackBar.open('Released. Shopbot will send it to MRA again.', 'Close', { duration: 5000 });
+        this.loadActivity();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.saving.set(false);
+        this.releaseErrors.set(err.error?.errors ?? {});
+        this.snackBar.open(err.error?.errors ? 'Check the highlighted fields.' : (err.error?.message ?? 'Could not release this invoice.'), 'Close', { duration: 6000 });
+      },
     });
   }
 

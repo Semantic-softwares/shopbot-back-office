@@ -2,7 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { FiscalisationOverview, MraAuditEntry, MraBusiness, MraRegistration, MraTestDriveStatus, MraTestUserKind, MraView } from '../models/mra-einvoicing.model';
+import { FiscalisationOverview, MraActivity, MraActivityInvoice, MraActivityBucket, MraAuditEntry, MraBusiness, MraRegistration, MraTestDriveStatus, MraTestUserKind, MraView } from '../models/mra-einvoicing.model';
 
 /**
  * A business's MRA e-invoicing setup. All secrets stay on the backend: this
@@ -81,6 +81,16 @@ export class MraEinvoicingService {
 
   suspend(storeId: string, reason: string, confirmation: string): Observable<MraView> {
     return this.http.post<MraView>(`${this.base(storeId)}/live/suspend`, { reason, confirmation });
+  }
+
+  /** What has happened to this place of business's sales at MRA. By default only what needs the owner. */
+  activity(storeId: string, bucket?: MraActivityBucket): Observable<MraActivity> {
+    return this.http.get<MraActivity>(`${this.base(storeId)}/activity`, { params: bucket ? { bucket } : {} });
+  }
+
+  /** Releases an invoice of uncertain outcome for resending, after the owner checked MRA's portal. */
+  releaseInvoice(storeId: string, invoice: string, note: string, confirmation: string): Observable<MraActivityInvoice> {
+    return this.http.post<MraActivityInvoice>(`${this.base(storeId)}/activity/${encodeURIComponent(invoice)}/release`, { note, confirmation });
   }
 
   audit(storeId: string): Observable<MraAuditEntry[]> {

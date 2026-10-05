@@ -134,3 +134,26 @@ export interface MraTestDriveStatus {
   required: number;
   progress: string[];
 }
+
+export type MraActivityBucket = 'FISCALISED' | 'WAITING' | 'NEEDS_CHECKING' | 'NEEDS_ATTENTION';
+
+/** One invoice as the owner sees it: plain status and message, never an MRA code. */
+export interface MraActivityInvoice {
+  invoice: string;
+  status: MraActivityBucket;
+  label: string;
+  irn: string | null;
+  total: string | null;
+  createdAt: string | null;
+  fiscalisedAt: string | null;
+  message: string | null;
+  /** True only for an invoice whose outcome is uncertain: it may already be on MRA, so releasing it is the owner's call. */
+  canRelease: boolean;
+}
+
+export interface MraActivity {
+  counts: Record<MraActivityBucket, number>;
+  needsAction: number;
+  lastFiscalised: { invoice: string; irn: string | null; at: string | null } | null;
+  invoices: MraActivityInvoice[];
+}
