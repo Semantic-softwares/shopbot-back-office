@@ -1,0 +1,302 @@
+<div class="px-4">
+  <div class="grid grid-cols-1 gap-6">
+    <app-page-header title="MRA e-Invoicing" subtitle="Fiscalise your invoices and receipts with the Mauritius Revenue Authority"></app-page-header>
+
+    @if (loading()) {
+      <div class="flex items-center justify-center py-8"><mat-spinner diameter="40"></mat-spinner></div>
+    } @else if (loadFailed() || !view()) {
+      <mat-card appearance="outlined">
+        <mat-card-content class="pt-4 text-center text-sm text-gray-500 py-8">
+          Couldn't load MRA e-invoicing. Refresh the page to try again.
+        </mat-card-content>
+      </mat-card>
+    } @else if (member(); as m) {
+      <mat-card appearance="outlined">
+        <mat-card-content class="pt-4 flex items-center gap-3">
+          <mat-icon [class]="m.fiscalisation.active ? 'text-green-600' : 'text-gray-400'">{{ m.fiscalisation.active ? 'check_circle' : 'remove_circle_outline' }}</mat-icon>
+          <div>
+            <div class="text-sm font-medium text-gray-900">MRA fiscalisation: {{ m.fiscalisation.active ? 'Active' : 'Not active' }}</div>
+            <div class="text-xs text-gray-500">Only the store owner can change MRA settings.</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    } @else if (owner(); as o) {
+      <!-- ============ WIZARD ============ -->
+      @if (mode() === 'wizard') {
+        <mat-card appearance="outlined">
+          <mat-card-content class="pt-4">
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <div class="flex items-center gap-2 text-xs text-gray-500">
+                @for (label of ['Business', 'MRA registration', 'Transmission User', 'Shopbot EBS']; track label; let i = $index) {
+                  <button type="button" class="rounded-full px-3 py-1 font-medium"
+                    [class]="wizardStep() === i + 1 ? 'bg-primary text-white' : o.progress[i].state === 'DONE' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'"
+                    [disabled]="saving() || (i > 0 && o.progress[i - 1].state !== 'DONE')" (click)="goToStep(i + 1)">
+                    {{ i + 1 }}. {{ label }}
+                  </button>
+                }
+              </div>
+              <button type="button" mat-button (click)="leaveWizard()" [disabled]="saving()">Save for later</button>
+            </div>
+
+            @switch (wizardStep()) {
+              @case (1) {
+                <h4 class="text-sm font-medium text-gray-900">Your business</h4>
+                <p class="text-xs text-gray-500 mt-1 mb-4">We've filled in what Shopbot already knows. Check it, and add your tax numbers.</p>
+                <form [formGroup]="businessForm" (ngSubmit)="saveBusiness()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline"><mat-label>Legal business name</mat-label>
+                    <input matInput formControlName="legalName" autocomplete="off" />
+                    @if (businessForm.controls.legalName.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Required</mat-error> }
+                  </mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Trading name</mat-label>
+                    <input matInput formControlName="tradingName" autocomplete="off" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Tax Account Number (TAN)</mat-label>
+                    <input matInput formControlName="tan" placeholder="12345678" autocomplete="off" inputmode="numeric" />
+                    <mat-hint>Used by MRA to identify the seller issuing the invoice.</mat-hint>
+                    @if (businessForm.controls.tan.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Enter your 8-digit TAN.</mat-error> }
+                  </mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Business Registration Number (BRN)</mat-label>
+                    <input matInput formControlName="brn" placeholder="C12345678" autocomplete="off" />
+                    <mat-hint>A letter followed by digits.</mat-hint>
+                    @if (businessForm.controls.brn.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Required</mat-error> }
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="sm:col-span-2"><mat-label>Business address</mat-label>
+                    <input matInput formControlName="businessAddr" autocomplete="off" />
+                    @if (businessForm.controls.businessAddr.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Required</mat-error> }
+                  </mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Business phone</mat-label><input matInput formControlName="businessPhone" autocomplete="off" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Business email</mat-label><input matInput formControlName="businessEmail" autocomplete="off" /></mat-form-field>
+                  <div class="sm:col-span-2 text-xs text-gray-500">TAN and BRN belong to your business, not to any cashier. Currency: {{ o.business.currency }} · Country: {{ o.business.country }}</div>
+                  <div class="sm:col-span-2"><button type="submit" mat-flat-button color="primary" [disabled]="saving()">{{ saving() ? 'Saving...' : 'Save and continue' }}</button></div>
+                </form>
+              }
+              @case (2) {
+                <h4 class="text-sm font-medium text-gray-900">Register with MRA</h4>
+                <div class="mt-2 rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs text-blue-900">
+                  Shopbot is already an MRA-compliant Electronic Billing System. Before your business can issue live fiscalised invoices,
+                  MRA requires your business to register as an Economic Operator, register its places of business, and create a
+                  Transmission User. Shopbot can't do the MRA registration for you: you do it with MRA, then come back here.
+                </div>
+                <div class="mt-3">
+                  <a mat-stroked-button [href]="portalUrl" target="_blank" rel="noopener"><mat-icon>open_in_new</mat-icon> Open the MRA website</a>
+                </div>
+                <form [formGroup]="registrationForm" (ngSubmit)="saveRegistration()" class="mt-4 grid gap-1">
+                  <mat-checkbox formControlName="registeredAsOperator">I have registered my business with MRA as an Economic Operator</mat-checkbox>
+                  <mat-checkbox formControlName="placesOfBusinessRegistered">My places of business are registered with MRA</mat-checkbox>
+                  <mat-checkbox formControlName="transmissionUserCreated">MRA has created my Transmission User and I have set its password</mat-checkbox>
+                  <p class="text-xs text-gray-500 mt-1">These are your own confirmations. Shopbot can't check them with MRA.</p>
+                  <div class="mt-3 flex gap-2">
+                    <button type="submit" mat-flat-button color="primary" [disabled]="saving()">{{ registrationComplete() ? 'Save and continue' : 'Save for later' }}</button>
+                    <button type="button" mat-button (click)="goToStep(1)" [disabled]="saving()">Back</button>
+                  </div>
+                </form>
+              }
+              @case (3) {
+                <h4 class="text-sm font-medium text-gray-900">MRA Transmission User</h4>
+                <p class="text-xs text-gray-500 mt-1 mb-4">
+                  The username is generated by MRA. The password is set by your business on the MRA e-Invoicing Portal. These details let Shopbot
+                  authenticate your EBS when sending invoices to MRA, for all your places of business. They stay on Shopbot's secure servers and are never shown again.
+                </p>
+                <form [formGroup]="transmissionForm" (ngSubmit)="saveTransmissionUser()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline"><mat-label>Transmission User username</mat-label>
+                    <input matInput formControlName="username" autocomplete="off" />
+                    <mat-hint>Generated by MRA.</mat-hint>
+                    @if (transmissionForm.controls.username.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Required</mat-error> }
+                  </mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Transmission User password</mat-label>
+                    <input matInput type="password" formControlName="password" autocomplete="new-password" [placeholder]="o.transmissionUser.passwordSet ? 'Saved — leave blank to keep it' : ''" />
+                    <mat-hint>The password you set on the MRA portal.</mat-hint>
+                    @if (transmissionForm.controls.password.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> }
+                  </mat-form-field>
+                  <p class="sm:col-span-2 text-xs text-gray-500">This is not your MRA e-filing password. Don't enter that here.</p>
+                  <div class="sm:col-span-2 flex gap-2">
+                    <button type="submit" mat-flat-button color="primary" [disabled]="saving()">{{ saving() ? 'Saving...' : 'Save and continue' }}</button>
+                    <button type="button" mat-button (click)="goToStep(2)" [disabled]="saving()">Back</button>
+                  </div>
+                </form>
+              }
+              @case (4) {
+                <h4 class="text-sm font-medium text-gray-900">Shopbot EBS for this place of business</h4>
+                <p class="text-xs text-gray-500 mt-1 mb-4">Each place of business has its own EBS registration with MRA. Enter the details MRA gave you for <strong>{{ o.placeOfBusiness.reference }}</strong>.</p>
+                <form [formGroup]="ebsForm" (ngSubmit)="saveEbs()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline"><mat-label>EBS MRA ID</mat-label>
+                    <input matInput formControlName="ebsMraId" autocomplete="off" />
+                    <mat-hint>Identifies Shopbot's registration as the EBS for this place of business.</mat-hint>
+                    @if (ebsForm.controls.ebsMraId.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Required</mat-error> }
+                  </mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Area code</mat-label>
+                    <input matInput formControlName="areaCode" autocomplete="off" />
+                    <mat-hint>Provided by MRA as part of your EBS configuration.</mat-hint>
+                    @if (ebsForm.controls.areaCode.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Required</mat-error> }
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="sm:col-span-2"><mat-label>Place of business name on MRA</mat-label>
+                    <input matInput formControlName="placeOfBusinessReference" autocomplete="off" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="sm:col-span-2"><mat-label>Who runs the MRA tests?</mat-label>
+                    <mat-select formControlName="testUserKind">
+                      <mat-option value="MERCHANT_STAFF">One of our own staff (our MRA Test User)</mat-option>
+                      <mat-option value="PROVIDER">Someone from Shopbot (the EBS Solution Provider)</mat-option>
+                    </mat-select>
+                    <mat-hint>MRA's Test User registers and tests the EBS, then sends it for onboarding. Only one Test User is allowed per place of business.</mat-hint>
+                    @if (ebsForm.controls.testUserKind.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Required</mat-error> }
+                  </mat-form-field>
+                  <div class="sm:col-span-2">
+                    <mat-checkbox formControlName="ebsRegistered">Shopbot is registered as the EBS for this place of business</mat-checkbox>
+                    @if (ebsForm.controls.ebsRegistered.errors?.['server']; as e) { <div class="text-xs text-red-600 mt-1">{{ e }}</div> }
+                  </div>
+                  <div class="sm:col-span-2 flex gap-2">
+                    <button type="submit" mat-flat-button color="primary" [disabled]="saving()">{{ saving() ? 'Saving...' : 'Register this place of business' }}</button>
+                    <button type="button" mat-button (click)="goToStep(3)" [disabled]="saving()">Back</button>
+                  </div>
+                </form>
+              }
+            }
+          </mat-card-content>
+        </mat-card>
+      } @else if (o.status === 'NOT_CONFIGURED') {
+        <!-- ============ FIRST-TIME ============ -->
+        <mat-card appearance="outlined">
+          <mat-card-content class="pt-4">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div class="max-w-xl">
+                <h4 class="text-base font-medium text-gray-900">Fiscalise your invoices with MRA</h4>
+                <p class="text-xs text-gray-500 mt-1">Shopbot is an MRA-compliant EBS solution. To start fiscalising your own sales:</p>
+              </div>
+              <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">Not connected</span>
+            </div>
+            <ol class="mt-4 grid gap-2 text-sm text-gray-700">
+              @for (step of firstTimeSteps; track step; let i = $index) {
+                <li class="flex items-start gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-medium text-gray-600">{{ i + 1 }}</span><span class="pt-0.5">{{ step }}</span></li>
+              }
+            </ol>
+            <div class="mt-5"><button type="button" mat-flat-button color="primary" (click)="startSetup()">Start setup</button></div>
+          </mat-card-content>
+        </mat-card>
+      } @else {
+        <!-- ============ STATUS ============ -->
+        <mat-card appearance="outlined">
+          <mat-card-content class="pt-4">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div class="max-w-xl">
+                <h4 class="text-sm font-medium text-gray-900">{{ o.business.legalName }}</h4>
+                <p class="text-xs text-gray-500 mt-1">{{ nextAction(o.status) }}</p>
+              </div>
+              <span class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium" [class]="pillClass(o.status)">
+                @if (o.status === 'LIVE') { <span class="h-2 w-2 rounded-full bg-green-500"></span> }
+                {{ o.headline }}
+              </span>
+            </div>
+
+            @if (o.problem) {
+              <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">{{ o.problem }}</div>
+            }
+
+            <ol class="mt-4 grid gap-2">
+              @for (step of o.progress; track step.key) {
+                <li class="flex items-center gap-3 text-sm">
+                  @if (step.state === 'DONE') { <mat-icon class="text-green-600">check_circle</mat-icon> }
+                  @else if (step.state === 'CURRENT') { <mat-icon class="text-primary">radio_button_checked</mat-icon> }
+                  @else { <mat-icon class="text-gray-300">radio_button_unchecked</mat-icon> }
+                  <span [class]="step.state === 'TODO' ? 'text-gray-400' : 'text-gray-900'">{{ step.label }}</span>
+                  @if (step.key === 6 && o.tests.required) { <span class="text-xs text-gray-500">{{ o.tests.passed }} of {{ o.tests.required }} passed</span> }
+                </li>
+              }
+            </ol>
+
+            <dl class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+              <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">TAN</dt><dd class="font-medium text-gray-900">{{ o.business.tan }}</dd></div>
+              <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">BRN</dt><dd class="font-medium text-gray-900">{{ o.business.brn }}</dd></div>
+              <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">Environment</dt><dd class="font-medium text-gray-900">{{ o.environment }}</dd></div>
+              <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">MRA mode</dt><dd class="font-medium text-gray-900">{{ modeLabel(o.ebsMode) }}</dd></div>
+              @if (o.placeOfBusiness.ebsMraId) {
+                <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">EBS</dt><dd class="font-medium text-gray-900">Shopbot POS</dd></div>
+                <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">MRA EBS ID</dt><dd class="font-medium text-gray-900 break-all">{{ o.placeOfBusiness.ebsMraId }}</dd></div>
+              }
+              @if (o.transmissionUser.configured) {
+                <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">Transmission User</dt><dd class="font-medium text-gray-900 break-all">{{ o.transmissionUser.username }}</dd></div>
+              }
+              @if (o.live.activatedAt) {
+                <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">LIVE since</dt><dd class="font-medium text-gray-900">{{ o.live.activatedAt | date: 'medium' }}</dd></div>
+              }
+            </dl>
+            <p class="mt-3 text-xs text-gray-500">{{ o.shopbotEbs.label }}. Your business’s own MRA onboarding and testing is tracked above.</p>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              @if (o.status !== 'LIVE' && o.status !== 'SUSPENDED') {
+                <button type="button" mat-stroked-button (click)="startSetup()">{{ o.progress[3].state === 'DONE' ? 'Review MRA settings' : 'Continue setup' }}</button>
+              }
+              @if (o.onboarding.canSubmit) {
+                <button type="button" mat-flat-button color="primary" (click)="submitOnboarding()" [disabled]="saving()">I've sent the EBS for onboarding on MRA</button>
+              }
+              @if (o.onboarding.canApprove) {
+                <button type="button" mat-flat-button color="primary" (click)="approveOnboarding()" [disabled]="saving()">Our business has approved the onboarding</button>
+              }
+              @if (o.status === 'TEST_FAILED' || o.status === 'TEST_PASSED' || o.status === 'PENDING_ONBOARDING' || o.status === 'READY_FOR_LIVE') {
+                <button type="button" mat-button (click)="resetTesting()" [disabled]="saving()">Restart Test Drive</button>
+              }
+              @if (o.live.canActivate) {
+                <button type="button" mat-flat-button color="primary" (click)="liveConfirmOpen.set(true)">Activate LIVE fiscalisation</button>
+              }
+              @if (o.status === 'SUSPENDED') {
+                <button type="button" mat-flat-button color="primary" (click)="liveConfirmOpen.set(true)">Resume LIVE fiscalisation</button>
+              }
+              @if (o.status === 'LIVE') {
+                <button type="button" mat-button color="warn" (click)="suspendOpen.set(true)">Suspend fiscalisation</button>
+              }
+              <button type="button" mat-button (click)="toggleActivity()">{{ audit() ? 'Hide activity' : 'View activity' }}</button>
+            </div>
+
+            @if (o.progress[3].state === 'DONE' && o.status !== 'LIVE' && o.status !== 'SUSPENDED' && !o.live.canActivate) {
+              <div class="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs text-gray-600">
+                LIVE activation becomes available after your connection is verified, the MRA Test Drive passes, and your business approves the EBS onboarding.
+              </div>
+            }
+
+            @if (liveConfirmOpen()) {
+              <div class="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
+                <h5 class="text-sm font-medium text-red-900">{{ o.status === 'SUSPENDED' ? 'Resume' : 'Activate' }} LIVE fiscalisation?</h5>
+                <p class="mt-1 text-xs text-red-800">
+                  Invoices and receipts from <strong>{{ o.business.legalName }}</strong> (TAN {{ o.business.tan }}, place of business {{ o.placeOfBusiness.reference }}, EBS {{ o.placeOfBusiness.ebsMraId }}) will be sent to MRA in LIVE mode.
+                  This affects real customer transactions.
+                </p>
+                <mat-form-field appearance="outline" class="w-full mt-3">
+                  <mat-label>Type {{ o.live.activationPhrase }} to confirm</mat-label>
+                  <input matInput [formControl]="liveConfirmation" autocomplete="off" />
+                </mat-form-field>
+                <div class="flex gap-2">
+                  <button type="button" mat-flat-button color="warn" [disabled]="saving() || liveConfirmation.value.trim() !== o.live.activationPhrase" (click)="activateLive()">{{ saving() ? 'Activating...' : 'Activate LIVE' }}</button>
+                  <button type="button" mat-button (click)="liveConfirmOpen.set(false)" [disabled]="saving()">Cancel</button>
+                </div>
+              </div>
+            }
+
+            @if (suspendOpen()) {
+              <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                <h5 class="text-sm font-medium text-amber-900">Suspend fiscalisation?</h5>
+                <p class="mt-1 text-xs text-amber-800">New receipts will say “Not Yet Fiscalised” until you resume.</p>
+                <mat-form-field appearance="outline" class="w-full mt-3"><mat-label>Reason</mat-label><input matInput [formControl]="suspendReason" autocomplete="off" /></mat-form-field>
+                <mat-form-field appearance="outline" class="w-full"><mat-label>Type SUSPEND to confirm</mat-label><input matInput [formControl]="suspendConfirmation" autocomplete="off" /></mat-form-field>
+                <div class="flex gap-2">
+                  <button type="button" mat-flat-button color="warn" [disabled]="saving() || suspendConfirmation.value.trim().toUpperCase() !== 'SUSPEND' || !suspendReason.value.trim()" (click)="suspend()">Suspend</button>
+                  <button type="button" mat-button (click)="suspendOpen.set(false)" [disabled]="saving()">Cancel</button>
+                </div>
+              </div>
+            }
+
+            @if (audit(); as entries) {
+              <div class="mt-4 border-t border-gray-200 pt-3">
+                <h5 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Activity</h5>
+                @if (!entries.length) { <p class="text-xs text-gray-500">Nothing yet.</p> }
+                <ul class="grid gap-1">
+                  @for (entry of entries; track entry._id) {
+                    <li class="flex justify-between gap-3 text-xs"><span class="text-gray-800">{{ activityLabel(entry.action) }}</span><span class="text-gray-500 shrink-0">{{ entry.createdAt | date: 'medium' }}</span></li>
+                  }
+                </ul>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+    }
+  </div>
+</div>

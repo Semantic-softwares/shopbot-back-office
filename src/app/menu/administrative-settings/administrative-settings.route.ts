@@ -64,6 +64,13 @@ export const ADMINISTRATIVE_SETTINGS_ROUTES: Routes = [
           ),
       },
       {
+        path: 'mra-einvoicing',
+        loadComponent: () =>
+          import('./mra-einvoicing-settings/mra-einvoicing-settings').then(
+            (m) => m.MraEinvoicingSettings,
+          ),
+      },
+      {
         path: 'kitchen-stations',
         loadComponent: () =>
           import('./kitchen-stations-settings/kitchen-stations-settings').then(
