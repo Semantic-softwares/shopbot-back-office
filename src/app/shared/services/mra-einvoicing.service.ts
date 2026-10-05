@@ -2,7 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { FiscalisationOverview, MraAuditEntry, MraBusiness, MraRegistration, MraTestUserKind, MraView } from '../models/mra-einvoicing.model';
+import { FiscalisationOverview, MraAuditEntry, MraBusiness, MraRegistration, MraTestDriveStatus, MraTestUserKind, MraView } from '../models/mra-einvoicing.model';
 
 /**
  * A business's MRA e-invoicing setup. All secrets stay on the backend: this
@@ -48,12 +48,27 @@ export class MraEinvoicingService {
     return this.http.put<MraView>(`${this.base(storeId)}/ebs`, body);
   }
 
+  /** The owner confirms MRA's portal shows this EBS in Test Drive mode. Shopbot can't read or change the portal. */
+  confirmPortalMode(storeId: string): Observable<MraView> {
+    return this.http.post<MraView>(`${this.base(storeId)}/testing/confirm-portal-mode`, {});
+  }
+
+  /** Starts the Test Drive in the background. */
+  startTesting(storeId: string): Observable<MraView> {
+    return this.http.post<MraView>(`${this.base(storeId)}/testing/start`, {});
+  }
+
+  testingStatus(storeId: string): Observable<MraTestDriveStatus | { role: 'MEMBER' }> {
+    return this.http.get<MraTestDriveStatus | { role: 'MEMBER' }>(`${this.base(storeId)}/testing`);
+  }
+
   resetTesting(storeId: string): Observable<MraView> {
     return this.http.post<MraView>(`${this.base(storeId)}/testing/reset`, {});
   }
 
-  submitOnboarding(storeId: string): Observable<MraView> {
-    return this.http.post<MraView>(`${this.base(storeId)}/onboarding/submit`, {});
+  /** `portalShowsAllPassed` is the owner's confirmation that MRA's portal shows every scenario passed. */
+  submitOnboarding(storeId: string, portalShowsAllPassed: boolean): Observable<MraView> {
+    return this.http.post<MraView>(`${this.base(storeId)}/onboarding/submit`, { portalShowsAllPassed });
   }
 
   approveOnboarding(storeId: string): Observable<MraView> {

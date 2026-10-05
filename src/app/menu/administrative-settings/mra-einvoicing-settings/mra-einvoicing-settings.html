@@ -221,17 +221,70 @@
             </dl>
             <p class="mt-3 text-xs text-gray-500">{{ o.shopbotEbs.label }}. Your business’s own MRA onboarding and testing is tracked above.</p>
 
+            @if (o.status === 'TEST_CONFIGURATION' || o.status === 'TESTING' || o.status === 'TEST_FAILED' || o.status === 'TEST_PASSED') {
+              <div class="mt-4 rounded-lg border border-gray-200 p-4">
+                <h5 class="text-sm font-medium text-gray-900">MRA Test Drive</h5>
+
+                @if (o.status === 'TEST_CONFIGURATION') {
+                  <ol class="mt-2 grid gap-2 text-xs text-gray-700">
+                    <li>
+                      <strong>1. Switch the EBS to Test Drive on the MRA portal.</strong>
+                      Your MRA Test User {{ o.placeOfBusiness.testUserKind === 'PROVIDER' ? '(from Shopbot)' : '(your own staff)' }} does this on MRA's e-Invoicing portal.
+                      Shopbot can't change or check it for you.
+                    </li>
+                    <li>
+                      <strong>2. Confirm it here.</strong> Otherwise MRA would count the Test Drive as Sandbox.
+                    </li>
+                  </ol>
+                  @if (o.testDrive.portalModeConfirmedAt) {
+                    <p class="mt-3 text-xs text-green-700">You confirmed the portal shows Test Drive mode on {{ o.testDrive.portalModeConfirmedAt | date: 'medium' }}.</p>
+                    <button type="button" mat-flat-button color="primary" class="mt-2" (click)="startTestDrive()" [disabled]="saving() || !o.testDrive.canStart">Start Test Drive</button>
+                  } @else {
+                    <button type="button" mat-stroked-button class="mt-3" (click)="confirmPortalMode()" [disabled]="saving()">The MRA portal shows this EBS in Test Drive mode</button>
+                  }
+                }
+
+                @if (testing(); as t) {
+                  @if (o.status === 'TESTING') {
+                    <p class="mt-2 text-xs text-gray-600">Running {{ t.passed }} of {{ t.required }}. This takes a minute; you can leave this page.</p>
+                  }
+                  <ul class="mt-3 grid gap-1">
+                    @for (scenario of t.scenarios; track scenario.id) {
+                      <li class="flex items-center justify-between gap-3 text-sm">
+                        <span class="text-gray-900">{{ scenario.label }}</span>
+                        <span class="shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium" [class]="scenarioClass(scenario.state)">{{ scenarioLabel(scenario.state) }}</span>
+                      </li>
+                    }
+                  </ul>
+                  @if (o.status === 'TESTING' && t.progress.length) {
+                    <p class="mt-2 text-xs text-gray-500">{{ t.progress[t.progress.length - 1] }}</p>
+                  }
+                }
+
+                @if (o.status === 'TEST_FAILED') {
+                  <p class="mt-3 text-xs text-gray-600">MRA restarts a failed Test Drive from scratch. Restart it here, then ask your Test User to switch the EBS back to Test Drive on the MRA portal.</p>
+                }
+
+                @if (o.status === 'TEST_PASSED') {
+                  <div class="mt-3 rounded-lg bg-gray-50 border border-gray-200 p-3">
+                    <mat-checkbox [checked]="portalPassConfirmed()" (change)="portalPassConfirmed.set($event.checked)">The MRA portal shows every Test Drive scenario as passed</mat-checkbox>
+                    <p class="text-xs text-gray-500 mt-1">MRA's portal, not Shopbot, decides whether the Test Drive passed. Check it before sending the EBS for onboarding.</p>
+                  </div>
+                }
+              </div>
+            }
+
             <div class="mt-4 flex flex-wrap gap-2">
               @if (o.status !== 'LIVE' && o.status !== 'SUSPENDED') {
                 <button type="button" mat-stroked-button (click)="startSetup()">{{ o.progress[3].state === 'DONE' ? 'Review MRA settings' : 'Continue setup' }}</button>
               }
               @if (o.onboarding.canSubmit) {
-                <button type="button" mat-flat-button color="primary" (click)="submitOnboarding()" [disabled]="saving()">I've sent the EBS for onboarding on MRA</button>
+                <button type="button" mat-flat-button color="primary" (click)="submitOnboarding()" [disabled]="saving() || !portalPassConfirmed()">I've sent the EBS for onboarding on MRA</button>
               }
               @if (o.onboarding.canApprove) {
                 <button type="button" mat-flat-button color="primary" (click)="approveOnboarding()" [disabled]="saving()">Our business has approved the onboarding</button>
               }
-              @if (o.status === 'TEST_FAILED' || o.status === 'TEST_PASSED' || o.status === 'PENDING_ONBOARDING' || o.status === 'READY_FOR_LIVE') {
+              @if (o.status === 'TESTING' || o.status === 'TEST_FAILED' || o.status === 'TEST_PASSED' || o.status === 'PENDING_ONBOARDING' || o.status === 'READY_FOR_LIVE') {
                 <button type="button" mat-button (click)="resetTesting()" [disabled]="saving()">Restart Test Drive</button>
               }
               @if (o.live.canActivate) {

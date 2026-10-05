@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { Subscription, startWith, timer } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -15,7 +15,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormGroup } from '@angular/forms';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
-import { MraAuditEntry, MraOwnerView, MraStatus, MraTestUserKind, MraView } from '../../../shared/models';
+import { MraAuditEntry, MraOwnerView, MraStatus, MraTestDriveStatus, MraTestUserKind, MraView } from '../../../shared/models';
 import { MraEinvoicingService } from '../../../shared/services/mra-einvoicing.service';
 import { StoreStore } from '../../../shared/stores/store.store';
 
@@ -78,7 +78,7 @@ type Mode = 'status' | 'wizard';
   templateUrl: './mra-einvoicing-settings.html',
   changeDetection: ChangeDetectionStrategy.Eager,
 })
-export class MraEinvoicingSettings implements OnInit {
+export class MraEinvoicingSettings implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
   private service = inject(MraEinvoicingService);
@@ -94,6 +94,10 @@ export class MraEinvoicingSettings implements OnInit {
   wizardStep = signal(1);
   view = signal<MraView | null>(null);
   audit = signal<MraAuditEntry[] | null>(null);
+  testing = signal<MraTestDriveStatus | null>(null);
+  /** The owner ticks this to say the MRA portal shows every Test Drive scenario as passed. */
+  portalPassConfirmed = signal(false);
+  private poll?: Subscription;
   liveConfirmOpen = signal(false);
   suspendOpen = signal(false);
 
@@ -154,6 +158,10 @@ export class MraEinvoicingSettings implements OnInit {
     this.refresh(true);
   }
 
+  ngOnDestroy(): void {
+    this.poll?.unsubscribe();
+  }
+
   private refresh(initial = false): void {
     const storeId = this.storeId;
     if (!storeId) return this.fail();
@@ -174,6 +182,7 @@ export class MraEinvoicingSettings implements OnInit {
   private apply(view: MraView): void {
     this.view.set(view);
     if (view.role !== 'OWNER') return;
+    this.syncTesting(view);
     this.businessForm.patchValue(view.business);
     this.registrationForm.patchValue(view.registration);
     this.transmissionForm.patchValue({ username: view.transmissionUser.username, password: '' });
@@ -233,11 +242,61 @@ export class MraEinvoicingSettings implements OnInit {
     });
   }
 
+  // ---- The MRA Test Drive ---------------------------------------------------
+
+  confirmPortalMode(): void {
+    const storeId = this.storeId;
+    if (storeId) this.run(this.service.confirmPortalMode(storeId), undefined, () => undefined);
+  }
+
+  startTestDrive(): void {
+    const storeId = this.storeId;
+    if (storeId) this.run(this.service.startTesting(storeId), undefined, () => undefined);
+  }
+
+  /** While a Test Drive runs, follow it; otherwise show the last attempt's result once. */
+  private syncTesting(view: MraOwnerView): void {
+    const showsResults = ['TESTING', 'TEST_FAILED', 'TEST_PASSED', 'PENDING_ONBOARDING'].includes(view.status);
+    if (!showsResults) {
+      this.poll?.unsubscribe();
+      this.testing.set(null);
+      return;
+    }
+    if (view.status === 'TESTING') {
+      if (this.poll && !this.poll.closed) return;
+      this.poll = timer(0, 3000).subscribe(() => this.loadTesting());
+    } else {
+      this.poll?.unsubscribe();
+      this.loadTesting();
+    }
+  }
+
+  private loadTesting(): void {
+    const storeId = this.storeId;
+    if (!storeId) return;
+    this.service.testingStatus(storeId).subscribe({
+      next: (status) => {
+        if (status.role !== 'OWNER') return;
+        this.testing.set(status);
+        // The run finished: pick up the new lifecycle state (passed, failed or aborted).
+        if (!status.running && this.view()?.role === 'OWNER' && (this.view() as MraOwnerView).status === 'TESTING') this.refresh();
+      },
+    });
+  }
+
+  scenarioLabel(state: string): string {
+    return state === 'PASS' ? 'PASS' : state === 'FAIL' ? 'FAIL' : state === 'RUNNING' ? 'RUNNING' : 'NOT RUN';
+  }
+
+  scenarioClass(state: string): string {
+    return state === 'PASS' ? 'bg-green-50 text-green-700' : state === 'FAIL' ? 'bg-red-50 text-red-700' : state === 'RUNNING' ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-500';
+  }
+
   // ---- After the MRA Test Drive ------------------------------------------
 
   submitOnboarding(): void {
     const storeId = this.storeId;
-    if (storeId) this.run(this.service.submitOnboarding(storeId), undefined, () => undefined);
+    if (storeId) this.run(this.service.submitOnboarding(storeId, this.portalPassConfirmed()), undefined, () => this.portalPassConfirmed.set(false));
   }
 
   approveOnboarding(): void {

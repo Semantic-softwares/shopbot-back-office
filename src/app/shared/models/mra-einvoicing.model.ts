@@ -87,7 +87,8 @@ export interface MraOwnerView {
     tokenExpiresAt: string | null;
   };
   tests: { status: 'NOT_STARTED' | 'IN_PROGRESS' | 'PASSED' | 'FAILED'; passed: number; required: number; resets: number };
-  onboarding: { canSubmit: boolean; submittedAt: string | null; canApprove: boolean; approvedAt: string | null };
+  testDrive: { generation: number; portalModeConfirmedAt: string | null; canConfirmPortalMode: boolean; canStart: boolean; running: boolean };
+  onboarding: { portalPassConfirmedAt: string | null; canSubmit: boolean; submittedAt: string | null; canApprove: boolean; approvedAt: string | null };
   live: {
     canActivate: boolean;
     activatedAt: string | null;
@@ -113,4 +114,23 @@ export interface MraAuditEntry {
   fromStatus?: string;
   toStatus?: string;
   createdAt: string;
+}
+
+export type MraScenarioState = 'PASS' | 'FAIL' | 'RUNNING' | 'NOT_RUN';
+
+export interface MraTestDriveScenario {
+  id: string;
+  label: string;
+  state: MraScenarioState;
+}
+
+/** The current Test Drive attempt, in plain language: no MRA codes, no payloads. */
+export interface MraTestDriveStatus {
+  role: 'OWNER';
+  generation: number;
+  running: boolean;
+  scenarios: MraTestDriveScenario[];
+  passed: number;
+  required: number;
+  progress: string[];
 }
