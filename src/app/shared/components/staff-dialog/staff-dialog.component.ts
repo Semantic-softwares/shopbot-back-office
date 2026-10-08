@@ -93,11 +93,16 @@ export class StaffDialogComponent implements OnInit {
 
     this.saving.set(true);
 
-    const staffData: any = {
-      ...this.staffForm.value,
-      stores: [this.data.storeId], // Use stores array instead of single store
-      pin: this.generatePin(), // Generate a random PIN
-    };
+    // Only a NEW teammate gets a generated PIN and a store list. Editing someone must never reset their PIN (that
+    // would silently change how they sign in) or overwrite which stores they belong to; their access is kept in
+    // their memberships, and the role is applied to the membership by the server.
+    const staffData: any = this.isEditMode()
+      ? { ...this.staffForm.value }
+      : {
+          ...this.staffForm.value,
+          stores: [this.data.storeId], // Use stores array instead of single store
+          pin: this.generatePin(), // Generate a random PIN
+        };
 
     if (this.isEditMode()) {
       // Update existing staff
