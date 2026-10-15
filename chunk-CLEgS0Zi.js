@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";var l;var o;var a=z(()=>{"use strict";l=[{code:`en`,label:`English`,flag:`🇬🇧`},{code:`fr`,label:`Français`,flag:`🇫🇷`},{code:`es`,label:`Español`,flag:`🇪🇸`},{code:`pt`,label:`Português`,flag:`🇵🇹`},{code:`zh`,label:`中文`,flag:`🇨🇳`}],o=`sf_lang`});export{l as n,o as r,a as t};
