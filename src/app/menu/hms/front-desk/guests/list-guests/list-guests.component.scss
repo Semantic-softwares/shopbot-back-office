@@ -4,33 +4,33 @@
 
 // Guest status classes
 .status-vip {
-  background-color: #f3e8ff;
+  background-color: light-dark(#f3e8ff, #2a1443);
   color: #7c3aed;
-  border: 1px solid #e9d5ff;
+  border: 1px solid light-dark(#e9d5ff, #462b64);
 }
 
 .status-returning {
-  background-color: #dbeafe;
+  background-color: light-dark(#dbeafe, #152842);
   color: #2563eb;
-  border: 1px solid #bfdbfe;
+  border: 1px solid light-dark(#bfdbfe, #2c4463);
 }
 
 .status-new {
-  background-color: #d1fae5;
-  color: #059669;
-  border: 1px solid #a7f3d0;
+  background-color: light-dark(#d1fae5, #183f2b);
+  color: light-dark(#059669, #7bf4ce);
+  border: 1px solid light-dark(#a7f3d0, #325d49);
 }
 
 .status-regular {
-  background-color: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  background-color: light-dark(#f3f4f6, #1c1b1c);
+  color: light-dark(#374151, #d6d2d2);
+  border: 1px solid light-dark(#e5e7eb, #48464b);
 }
 
 .status-blacklisted {
-  background-color: #fee2e2;
+  background-color: light-dark(#fee2e2, #421515);
   color: #dc2626;
-  border: 1px solid #fecaca;
+  border: 1px solid light-dark(#fecaca, #632c2c);
 }
 
 // Snackbar styles
@@ -80,20 +80,20 @@
   }
   
   &.secondary {
-    background-color: #f3f4f6;
-    color: #374151;
+    background-color: light-dark(#f3f4f6, #1c1b1c);
+    color: light-dark(#374151, #d6d2d2);
     
     &:hover {
-      background-color: #e5e7eb;
+      background-color: light-dark(#e5e7eb, #2b2a2a);
     }
   }
   
   &.danger {
-    background-color: #fee2e2;
+    background-color: light-dark(#fee2e2, #421515);
     color: #dc2626;
     
     &:hover {
-      background-color: #fecaca;
+      background-color: light-dark(#fecaca, #421414);
     }
   }
 }
@@ -119,7 +119,7 @@
   }
   
   .mat-form-field-label {
-    color: rgba(0, 0, 0, 0.6);
+    color: light-dark(rgba(0, 0, 0, 0.6), #e6e1e1);
   }
   
   &.mat-focused .mat-form-field-label {

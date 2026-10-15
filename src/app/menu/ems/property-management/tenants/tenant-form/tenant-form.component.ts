@@ -27,12 +27,13 @@ import {
 import {
   PetFormModalComponent,
 } from '../../../../../shared/components/pet-form-modal/pet-form-modal.component';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-tenant-form',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatInputModule,
@@ -76,8 +77,8 @@ export class TenantFormComponent {
   coverPhotoUrl = signal<string>('');
 
   statusOptions = [
-    { value: TenantStatus.ACTIVE, label: 'Active' },
-    { value: TenantStatus.INACTIVE, label: 'Inactive' },
+    { value: TenantStatus.ACTIVE, label: $localize`Active` },
+    { value: TenantStatus.INACTIVE, label: $localize`Inactive` },
   ];
 
   form = this.fb.group({
@@ -290,7 +291,7 @@ export class TenantFormComponent {
         }
       },
       error: () => {
-        this.snackBar.open('Failed to load tenant', 'Close', { duration: 5000 });
+        this.snackBar.open($localize`Failed to load tenant`, $localize`Close`, { duration: 5000 });
       },
     });
   }
@@ -410,7 +411,7 @@ export class TenantFormComponent {
           this.submitTenant(data);
         },
         error: () => {
-          this.snackBar.open('Failed to save vehicles/pets', 'Close', { duration: 5000 });
+          this.snackBar.open($localize`Failed to save vehicles/pets`, $localize`Close`, { duration: 5000 });
           this.isSaving.set(false);
         },
       });
@@ -429,7 +430,7 @@ export class TenantFormComponent {
           this.tenantService.uploadCoverPhoto(res.data._id, coverFile).subscribe({
             next: () => this.navigateAfterSave(res.data._id),
             error: () => {
-              this.snackBar.open('Profile photo upload failed', 'Close', { duration: 3000 });
+              this.snackBar.open($localize`Profile photo upload failed`, $localize`Close`, { duration: 3000 });
               this.navigateAfterSave(res.data._id);
             },
           });
@@ -440,7 +441,7 @@ export class TenantFormComponent {
       error: (err) => {
         this.snackBar.open(
           err?.error?.message || 'Failed to save tenant',
-          'Close',
+          $localize`Close`,
           { duration: 5000 },
         );
         this.isSaving.set(false);
@@ -450,8 +451,8 @@ export class TenantFormComponent {
 
   private navigateAfterSave(tenantId: string): void {
     this.snackBar.open(
-      this.isEditMode() ? 'Tenant updated' : 'Tenant created',
-      'Close',
+      this.isEditMode() ? $localize`Tenant updated` : $localize`Tenant created`,
+      $localize`Close`,
       { duration: 3000 },
     );
     if (this.isEditMode()) {

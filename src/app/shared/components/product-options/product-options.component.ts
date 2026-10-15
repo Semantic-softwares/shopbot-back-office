@@ -15,6 +15,7 @@ import { Product, Option } from '../../models/product.model';
 import { ProductsStore } from '../../stores/product.store';
 import { VariantStore } from '../../stores/variant.store';
 import { StoreStore } from '../../stores/store.store';
+import { TrPipe } from '../../i18n/tr.pipe';
 
 export interface ProductOptionsDialogData {
   product: Product & { activityDateTime?: Date };
@@ -30,7 +31,7 @@ export interface ProductOptionsDialogResult extends Product {
   templateUrl: './product-options.component.html',
   styleUrls: ['./product-options.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
@@ -95,7 +96,7 @@ export class ProductOptionsComponent implements OnInit {
 
   protected submit(): void {
     if (this.isActivity() && !this.product.activityDateTime) {
-      alert('Please select activity date and time');
+      alert($localize`Please select activity date and time`);
       return;
     }
 

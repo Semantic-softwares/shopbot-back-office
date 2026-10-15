@@ -25,6 +25,7 @@ import {
   sanitizeAmountInput,
   suggestedAmount,
 } from './payment-split';
+import { TrPipe } from '../../i18n/tr.pipe';
 
 export interface PaymentDialogData {
   totalAmount: number;
@@ -55,7 +56,7 @@ export interface PaymentDialogResult {
 @Component({
   selector: 'app-payment-dialog',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatDialogModule,
     MatButtonModule,

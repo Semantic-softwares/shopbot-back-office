@@ -2,8 +2,8 @@
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Restock History</h1>
-          <p class="text-gray-600 mt-1">Track all product restocking activities</p>
+          <h1 class="text-3xl font-bold text-gray-900"><ng-container i18n>Restock History</ng-container></h1>
+          <p class="text-gray-600 mt-1"><ng-container i18n>Track all product restocking activities</ng-container></p>
         </div>
         <button
           mat-raised-button
@@ -12,7 +12,7 @@
           class="flex items-center space-x-2"
         >
           <mat-icon>add</mat-icon>
-          <span>Add Stock</span>
+          <span><ng-container i18n>Add Stock</ng-container></span>
         </button>
       </div>
 
@@ -21,19 +21,19 @@
         <mat-card-content class="p-4">
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <mat-form-field appearance="outline">
-              <mat-label>Status</mat-label>
+              <mat-label><ng-container i18n>Status</ng-container></mat-label>
               <mat-select [(ngModel)]="filters.status" (selectionChange)="loadRestocks()">
-                <mat-option value="">All</mat-option>
-                <mat-option value="draft">Draft</mat-option>
-                <mat-option value="completed">Completed</mat-option>
-                <mat-option value="cancelled">Cancelled</mat-option>
+                <mat-option value=""><ng-container i18n>All</ng-container></mat-option>
+                <mat-option value="draft"><ng-container i18n>Draft</ng-container></mat-option>
+                <mat-option value="completed"><ng-container i18n>Completed</ng-container></mat-option>
+                <mat-option value="cancelled"><ng-container i18n>Cancelled</ng-container></mat-option>
               </mat-select>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Supplier</mat-label>
+              <mat-label><ng-container i18n>Supplier</ng-container></mat-label>
               <mat-select [(ngModel)]="filters.supplier" (selectionChange)="loadRestocks()">
-                <mat-option value="">All Suppliers</mat-option>
+                <mat-option value=""><ng-container i18n>All Suppliers</ng-container></mat-option>
                 @for (supplier of suppliers.value(); track supplier._id) {
                   <mat-option [value]="supplier._id">{{ supplier.name }}</mat-option>
                 }
@@ -41,14 +41,14 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>From Date</mat-label>
+              <mat-label><ng-container i18n>From Date</ng-container></mat-label>
               <input matInput [matDatepicker]="fromPicker" [(ngModel)]="filters.dateFrom" (dateChange)="loadRestocks()">
               <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
               <mat-datepicker #fromPicker></mat-datepicker>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>To Date</mat-label>
+              <mat-label><ng-container i18n>To Date</ng-container></mat-label>
               <input matInput [matDatepicker]="toPicker" [(ngModel)]="filters.dateTo" (dateChange)="loadRestocks()">
               <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
               <mat-datepicker #toPicker></mat-datepicker>
@@ -64,13 +64,13 @@
             
             <!-- Invoice Number Column -->
             <ng-container matColumnDef="invoiceNumber">
-              <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Invoice #</ng-container></th>
               <td mat-cell *matCellDef="let restock">{{ restock.invoiceNumber }}</td>
             </ng-container>
 
             <!-- Date Column -->
             <ng-container matColumnDef="date">
-              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Date</ng-container></th>
               <td mat-cell *matCellDef="let restock">
                 {{ restock.invoiceDate | date:'shortDate' }}
               </td>
@@ -78,19 +78,19 @@
 
             <!-- Supplier Column -->
             <ng-container matColumnDef="supplier">
-              <th mat-header-cell *matHeaderCellDef>Supplier</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Supplier</ng-container></th>
               <td mat-cell *matCellDef="let restock">{{ restock.supplier?.name || 'N/A' }}</td>
             </ng-container>
 
             <!-- Items Count Column -->
             <ng-container matColumnDef="items">
-              <th mat-header-cell *matHeaderCellDef>Items</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Items</ng-container></th>
               <td mat-cell *matCellDef="let restock">{{ restock.items?.length || 0 }}</td>
             </ng-container>
 
             <!-- Total Column -->
             <ng-container matColumnDef="total">
-              <th mat-header-cell *matHeaderCellDef>Total</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Total</ng-container></th>
               <td mat-cell *matCellDef="let restock">
                 <span class="font-medium">{{ restock.total | currency:currency():'symbol':'1.2-2' }}</span>
               </td>
@@ -98,7 +98,7 @@
 
             <!-- Status Column -->
             <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
               <td mat-cell *matCellDef="let restock">
                 <span
                   [class]="getStatusClass(restock.status)"
@@ -111,7 +111,7 @@
 
             <!-- Actions Column -->
             <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Actions</ng-container></th>
               <td mat-cell *matCellDef="let restock">
                 <button mat-icon-button [matMenuTriggerFor]="menu">
                   <mat-icon>more_vert</mat-icon>
@@ -119,15 +119,15 @@
                 <mat-menu #menu="matMenu">
                   <button mat-menu-item (click)="viewDetails(restock._id)">
                     <mat-icon>visibility</mat-icon>
-                    <span>View Details</span>
+                    <span><ng-container i18n>View Details</ng-container></span>
                   </button>
                   <button mat-menu-item (click)="editRestock(restock._id)">
                     <mat-icon>edit</mat-icon>
-                    <span>Edit</span>
+                    <span><ng-container i18n>Edit</ng-container></span>
                   </button>
                   <button mat-menu-item (click)="deleteRestock(restock._id)" class="text-red-600">
                     <mat-icon>delete</mat-icon>
-                    <span>Delete</span>
+                    <span><ng-container i18n>Delete</ng-container></span>
                   </button>
                 </mat-menu>
               </td>
@@ -155,10 +155,10 @@
       @if (restocks.value()?.data && restocks.value()!.data.length === 0) {
         <div class="text-center py-12">
           <mat-icon class="text-gray-400 text-6xl mb-4">inventory_2</mat-icon>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">No restock records found</h3>
-          <p class="text-gray-500 mb-4">Start by adding your first stock entry</p>
+          <h3 class="text-lg font-medium text-gray-900 mb-2"><ng-container i18n>No restock records found</ng-container></h3>
+          <p class="text-gray-500 mb-4"><ng-container i18n>Start by adding your first stock entry</ng-container></p>
           <button mat-raised-button color="primary" [routerLink]="['./add']">
-            Add Stock
+            <ng-container i18n>Add Stock</ng-container>
           </button>
         </div>
       }

@@ -61,7 +61,7 @@ export class UpdatePasswordComponent {
           },
           error: (error) => {
             this.isUpdating.set(false);
-            this.snackBar.open(error.message || 'Failed to update password', 'Close', {
+            this.snackBar.open(error.message || 'Failed to update password', $localize`Close`, {
               duration: 3000
             });
           }

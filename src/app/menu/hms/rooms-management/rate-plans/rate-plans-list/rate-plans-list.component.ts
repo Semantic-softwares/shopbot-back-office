@@ -126,17 +126,17 @@ export class RatePlansListComponent {
   }
 
   deleteRatePlan(ratePlan: RatePlan): void {
-    if (!confirm(`Delete rate plan "${ratePlan.name}"? This will also remove all associated inventory records.`)) {
+    if (!confirm($localize`Delete rate plan "${ratePlan.name}"? This will also remove all associated inventory records.`)) {
       return;
     }
 
     this.rateInventoryService.deleteRatePlan(ratePlan._id).subscribe({
       next: () => {
-        this.snackBar.open('Rate plan deleted', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Rate plan deleted`, $localize`Close`, { duration: 3000 });
         this.ratePlansResource.reload();
       },
       error: () => {
-        this.snackBar.open('Failed to delete rate plan', 'Close', { duration: 5000 });
+        this.snackBar.open($localize`Failed to delete rate plan`, $localize`Close`, { duration: 5000 });
       },
     });
   }
@@ -160,13 +160,13 @@ export class RatePlansListComponent {
       .subscribe({
         next: (result) => {
           this.snackBar.open(
-            `Generated ${result.upsertedCount + result.modifiedCount} inventory records for the next 90 days`,
-            'Close',
+            $localize`Generated ${result.upsertedCount + result.modifiedCount} inventory records for the next 90 days`,
+            $localize`Close`,
             { duration: 5000 },
           );
         },
         error: () => {
-          this.snackBar.open('Failed to generate inventory', 'Close', { duration: 5000 });
+          this.snackBar.open($localize`Failed to generate inventory`, $localize`Close`, { duration: 5000 });
         },
       });
   }
@@ -183,8 +183,8 @@ export class RatePlansListComponent {
       next: (updated: RatePlan) => {
         this.syncingPlanId.set(null);
         this.snackBar.open(
-          `Rate plan "${ratePlan.name}" synced to Channex successfully`,
-          'Close',
+          $localize`Rate plan "${ratePlan.name}" synced to Channex successfully`,
+          $localize`Close`,
           { duration: 5000 },
         );
         this.ratePlansResource.reload();
@@ -192,7 +192,7 @@ export class RatePlansListComponent {
       error: (err: any) => {
         this.syncingPlanId.set(null);
         const msg = err.error?.message || err.message || 'Sync failed';
-        this.snackBar.open(`Channex sync failed: ${msg}`, 'Close', { duration: 6000 });
+        this.snackBar.open($localize`Channex sync failed: ${msg}`, $localize`Close`, { duration: 6000 });
       },
     });
   }

@@ -16,7 +16,7 @@
 }
 
 .calendar-scroll::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: light-dark(#f1f1f1, #2b2a2a);
 }
 
 .calendar-scroll::-webkit-scrollbar-thumb {
@@ -37,16 +37,16 @@
   position: sticky;
   top: 0;
   z-index: 30;
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
+  background: light-dark(#fff, #201f20);
+  border-bottom: 1px solid light-dark(#e5e7eb, #48464b);
 }
 
 .calendar-left {
   position: sticky;
   left: 0;
   z-index: 25;
-  background: #fff;
-  border-right: 1px solid #e5e7eb;
+  background: light-dark(#fff, #201f20);
+  border-right: 1px solid light-dark(#e5e7eb, #48464b);
   min-width: 12rem;
   max-width: 12rem;
   display: flex;
@@ -62,11 +62,11 @@
 }
 
 .calendar-group {
-  background: #f3f4f6;
+  background: light-dark(#f3f4f6, #1c1b1c);
 }
 
 .calendar-group .calendar-left {
-  background: #f3f4f6;
+  background: light-dark(#f3f4f6, #1c1b1c);
 }
 
 .calendar-group-cell {
@@ -83,8 +83,8 @@
 
 .calendar-cell {
   flex: 0 0 auto;
-  border-right: 1px solid #e5e7eb;
-  border-bottom: 1px solid #f1f5f9;
+  border-right: 1px solid light-dark(#e5e7eb, #48464b);
+  border-bottom: 1px solid light-dark(#f1f5f9, #48464b);
   position: relative;
   display: flex;
   align-items: center;
@@ -100,7 +100,7 @@
 
 .calendar-cell-group {
   height: 32px;
-  background: #f3f4f6;
+  background: light-dark(#f3f4f6, #1c1b1c);
 }
 
 .calendar-cell-room {
@@ -149,7 +149,7 @@
 .reservation-nights {
   font-size: 10px;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.2);
+  background: light-dark(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.03));
   padding: 0 4px;
   border-radius: 4px;
   flex-shrink: 0;
@@ -166,7 +166,7 @@
   font-weight: 800;
   line-height: 1;
   background: #f59e0b;
-  color: #111827;
+  color: light-dark(#111827, #e6e1e1);
   padding: 1px 4px;
   border-radius: 4px;
 }
@@ -182,7 +182,7 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.2);
+  background: light-dark(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.03));
   border-radius: 999px;
   padding: 2px;
 }
@@ -234,7 +234,7 @@
   justify-content: center;
   font-size: 9px;
   font-weight: 500;
-  color: rgba(107, 114, 128, 0.5); // gray-500 at 50 %
+  color: light-dark(rgba(107, 114, 128, 0.5), #cac5cb); // gray-500 at 50 %
   pointer-events: none;
   user-select: none;
   z-index: 1;

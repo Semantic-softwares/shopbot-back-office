@@ -1,8 +1,8 @@
-<h2 mat-dialog-title>{{ data.title || 'Confirmation' }}</h2>
+<h2 mat-dialog-title>@if (data.title) {<ng-container>{{ data.title }}</ng-container>} @else {<ng-container i18n>Confirmation</ng-container>}</h2>
 <!-- pre-line so a caller can use blank lines to separate "what breaks" from
      "when you actually need this" without resorting to HTML. -->
 <mat-dialog-content class="whitespace-pre-line">{{ data.message }}</mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">{{ data.cancelText || 'Cancel' }}</button>
-  <button mat-button color="warn" (click)="onConfirm()">{{ data.confirmText || 'Confirm' }}</button>
+  <button mat-button (click)="onCancel()">@if (data.cancelText) {<ng-container>{{ data.cancelText }}</ng-container>} @else {<ng-container i18n>Cancel</ng-container>}</button>
+  <button mat-button color="warn" (click)="onConfirm()">@if (data.confirmText) {<ng-container>{{ data.confirmText }}</ng-container>} @else {<ng-container i18n>Confirm</ng-container>}</button>
 </mat-dialog-actions>

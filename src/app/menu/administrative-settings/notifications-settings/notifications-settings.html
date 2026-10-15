@@ -5,7 +5,7 @@
     <section>
       <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
         <mat-icon class="text-blue-600">hotel</mat-icon>
-        Hotel Management (PMS) Notifications
+        <ng-container i18n>Hotel Management (PMS) Notifications</ng-container>
       </h2>
       <form [formGroup]="notificationSettingsForm" (ngSubmit)="savePmsNotificationSettings()">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -14,54 +14,54 @@
           <mat-card appearance="outlined">
             <mat-card-header>
               <mat-icon mat-card-avatar class="text-red-600 !flex !items-center !justify-center">person</mat-icon>
-              <mat-card-title>Guest Notifications</mat-card-title>
+              <mat-card-title><ng-container i18n>Guest Notifications</ng-container></mat-card-title>
             </mat-card-header>
             <mat-card-content class="pt-4 space-y-6">
               <div class="space-y-4">
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="text-sm font-medium text-gray-700">Reservation Confirmation</label>
-                    <p class="text-xs text-gray-500">Send confirmation emails for new reservations</p>
+                    <label class="text-sm font-medium text-gray-700"><ng-container i18n>Reservation Confirmation</ng-container></label>
+                    <p class="text-xs text-gray-500"><ng-container i18n>Send confirmation emails for new reservations</ng-container></p>
                   </div>
                   <mat-slide-toggle formControlName="reservationConfirmation" color="primary"></mat-slide-toggle>
                 </div>
 
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="text-sm font-medium text-gray-700">Check-in Reminder</label>
-                    <p class="text-xs text-gray-500">Remind guests about upcoming check-ins</p>
+                    <label class="text-sm font-medium text-gray-700"><ng-container i18n>Check-in Reminder</ng-container></label>
+                    <p class="text-xs text-gray-500"><ng-container i18n>Remind guests about upcoming check-ins</ng-container></p>
                   </div>
                   <mat-slide-toggle formControlName="checkInReminder" color="primary"></mat-slide-toggle>
                 </div>
 
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="text-sm font-medium text-gray-700">Check-out Reminder</label>
-                    <p class="text-xs text-gray-500">Remind guests about check-out times</p>
+                    <label class="text-sm font-medium text-gray-700"><ng-container i18n>Check-out Reminder</ng-container></label>
+                    <p class="text-xs text-gray-500"><ng-container i18n>Remind guests about check-out times</ng-container></p>
                   </div>
                   <mat-slide-toggle formControlName="checkOutReminder" color="primary"></mat-slide-toggle>
                 </div>
 
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="text-sm font-medium text-gray-700">Payment Confirmation</label>
-                    <p class="text-xs text-gray-500">Send receipts for payments</p>
+                    <label class="text-sm font-medium text-gray-700"><ng-container i18n>Payment Confirmation</ng-container></label>
+                    <p class="text-xs text-gray-500"><ng-container i18n>Send receipts for payments</ng-container></p>
                   </div>
                   <mat-slide-toggle formControlName="paymentConfirmation" color="primary"></mat-slide-toggle>
                 </div>
 
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="text-sm font-medium text-gray-700">Cancellation Notice</label>
-                    <p class="text-xs text-gray-500">Notify guests about cancellations</p>
+                    <label class="text-sm font-medium text-gray-700"><ng-container i18n>Cancellation Notice</ng-container></label>
+                    <p class="text-xs text-gray-500"><ng-container i18n>Notify guests about cancellations</ng-container></p>
                   </div>
                   <mat-slide-toggle formControlName="cancellationNotice" color="primary"></mat-slide-toggle>
                 </div>
 
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="text-sm font-medium text-gray-700">Feedback Request</label>
-                    <p class="text-xs text-gray-500">Request feedback after checkout</p>
+                    <label class="text-sm font-medium text-gray-700"><ng-container i18n>Feedback Request</ng-container></label>
+                    <p class="text-xs text-gray-500"><ng-container i18n>Request feedback after checkout</ng-container></p>
                   </div>
                   <mat-slide-toggle formControlName="guestFeedbackRequest" color="primary"></mat-slide-toggle>
                 </div>
@@ -73,22 +73,22 @@
           <mat-card appearance="outlined">
             <mat-card-header>
               <mat-icon mat-card-avatar class="text-green-600 !flex !items-center !justify-center">communication</mat-icon>
-              <mat-card-title>Communication Channels</mat-card-title>
+              <mat-card-title><ng-container i18n>Communication Channels</ng-container></mat-card-title>
             </mat-card-header>
             <mat-card-content class="pt-4 space-y-6">
               <div class="space-y-4">
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="text-sm font-medium text-gray-700">SMS Notifications</label>
-                    <p class="text-xs text-gray-500">Send important updates via SMS</p>
+                    <label class="text-sm font-medium text-gray-700"><ng-container i18n>SMS Notifications</ng-container></label>
+                    <p class="text-xs text-gray-500"><ng-container i18n>Send important updates via SMS</ng-container></p>
                   </div>
                   <mat-slide-toggle formControlName="smsNotifications" color="primary"></mat-slide-toggle>
                 </div>
 
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="text-sm font-medium text-gray-700">Push Notifications</label>
-                    <p class="text-xs text-gray-500">Send real-time browser notifications</p>
+                    <label class="text-sm font-medium text-gray-700"><ng-container i18n>Push Notifications</ng-container></label>
+                    <p class="text-xs text-gray-500"><ng-container i18n>Send real-time browser notifications</ng-container></p>
                   </div>
                   <mat-slide-toggle formControlName="pushNotifications" color="primary"></mat-slide-toggle>
                 </div>
@@ -97,13 +97,13 @@
               <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <h5 class="font-semibold text-blue-900 mb-2 flex items-center gap-2">
                   <mat-icon class="text-blue-600">tips_and_updates</mat-icon>
-                  Best Practices
+                  <ng-container i18n>Best Practices</ng-container>
                 </h5>
                 <ul class="text-sm text-blue-800 space-y-1">
-                  <li>• Keep notifications relevant and timely</li>
-                  <li>• Avoid overwhelming guests with messages</li>
-                  <li>• Test notification content before enabling</li>
-                  <li>• Respect guest communication preferences</li>
+                  <li><ng-container i18n>• Keep notifications relevant and timely</ng-container></li>
+                  <li><ng-container i18n>• Avoid overwhelming guests with messages</ng-container></li>
+                  <li><ng-container i18n>• Test notification content before enabling</ng-container></li>
+                  <li><ng-container i18n>• Respect guest communication preferences</ng-container></li>
                 </ul>
               </div>
 
@@ -113,7 +113,7 @@
                 color="primary"
                 [disabled]="saving()"
                 class="w-full">
-                {{ saving() ? 'Saving...' : 'Save PMS Notification Settings' }}
+                @if (saving()) {<ng-container i18n>Saving...</ng-container>} @else {<ng-container i18n>Save PMS Notification Settings</ng-container>}
               </button>
             </mat-card-content>
           </mat-card>
@@ -128,7 +128,7 @@
     <section>
       <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
         <mat-icon class="text-teal-600">apartment</mat-icon>
-        Estate Management (EMS) Notifications
+        <ng-container i18n>Estate Management (EMS) Notifications</ng-container>
       </h2>
       <form [formGroup]="emsNotificationSettingsForm" (ngSubmit)="saveEmsNotificationSettings()">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -137,61 +137,61 @@
           <mat-card appearance="outlined">
             <mat-card-header>
               <mat-icon mat-card-avatar class="text-indigo-600 !flex !items-center !justify-center">person</mat-icon>
-              <mat-card-title>Tenant Notifications</mat-card-title>
+              <mat-card-title><ng-container i18n>Tenant Notifications</ng-container></mat-card-title>
             </mat-card-header>
             <mat-card-content class="pt-4 space-y-4">
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Lease Expiry Reminder</label>
-                  <p class="text-xs text-gray-500">Notify tenants before their lease expires</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Lease Expiry Reminder</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Notify tenants before their lease expires</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="leaseExpiryReminder" color="primary"></mat-slide-toggle>
               </div>
 
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Rent Due Reminder</label>
-                  <p class="text-xs text-gray-500">Remind tenants when rent is due</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Rent Due Reminder</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Remind tenants when rent is due</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="rentDueReminder" color="primary"></mat-slide-toggle>
               </div>
 
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Rent Payment Confirmation</label>
-                  <p class="text-xs text-gray-500">Confirm rent payments to tenants</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Rent Payment Confirmation</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Confirm rent payments to tenants</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="rentPaymentConfirmation" color="primary"></mat-slide-toggle>
               </div>
 
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Maintenance Request Update</label>
-                  <p class="text-xs text-gray-500">Notify tenants about maintenance progress</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Maintenance Request Update</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Notify tenants about maintenance progress</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="maintenanceRequestUpdate" color="primary"></mat-slide-toggle>
               </div>
 
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Move-in Instructions</label>
-                  <p class="text-xs text-gray-500">Send move-in details to new tenants</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Move-in Instructions</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Send move-in details to new tenants</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="moveInInstructions" color="primary"></mat-slide-toggle>
               </div>
 
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Move-out Reminder</label>
-                  <p class="text-xs text-gray-500">Remind tenants about upcoming move-out</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Move-out Reminder</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Remind tenants about upcoming move-out</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="moveOutReminder" color="primary"></mat-slide-toggle>
               </div>
 
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Lease Renewal Notice</label>
-                  <p class="text-xs text-gray-500">Notify tenants about renewal options</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Lease Renewal Notice</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Notify tenants about renewal options</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="leaseRenewalNotice" color="primary"></mat-slide-toggle>
               </div>
@@ -202,53 +202,53 @@
           <mat-card appearance="outlined">
             <mat-card-header>
               <mat-icon mat-card-avatar class="text-amber-600 !flex !items-center !justify-center">home_work</mat-icon>
-              <mat-card-title>Property Owner Notifications</mat-card-title>
+              <mat-card-title><ng-container i18n>Property Owner Notifications</ng-container></mat-card-title>
             </mat-card-header>
             <mat-card-content class="pt-4 space-y-4">
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Rent Collection</label>
-                  <p class="text-xs text-gray-500">Notify owners when rent is collected</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Rent Collection</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Notify owners when rent is collected</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="ownerRentCollection" color="primary"></mat-slide-toggle>
               </div>
 
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Maintenance Alert</label>
-                  <p class="text-xs text-gray-500">Alert owners about maintenance requests</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Maintenance Alert</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Alert owners about maintenance requests</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="ownerMaintenanceAlert" color="primary"></mat-slide-toggle>
               </div>
 
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Vacancy Alert</label>
-                  <p class="text-xs text-gray-500">Notify owners when a unit becomes vacant</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Vacancy Alert</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Notify owners when a unit becomes vacant</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="ownerVacancyAlert" color="primary"></mat-slide-toggle>
               </div>
 
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Lease Expiry</label>
-                  <p class="text-xs text-gray-500">Notify owners about expiring leases</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Lease Expiry</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Notify owners about expiring leases</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="ownerLeaseExpiry" color="primary"></mat-slide-toggle>
               </div>
 
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Monthly Report</label>
-                  <p class="text-xs text-gray-500">Send monthly property performance summary</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Monthly Report</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Send monthly property performance summary</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="ownerMonthlyReport" color="primary"></mat-slide-toggle>
               </div>
 
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Property Inspection</label>
-                  <p class="text-xs text-gray-500">Notify owners about scheduled inspections</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Property Inspection</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Notify owners about scheduled inspections</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="ownerPropertyInspection" color="primary"></mat-slide-toggle>
               </div>
@@ -259,56 +259,56 @@
           <mat-card appearance="outlined">
             <mat-card-header>
               <mat-icon mat-card-avatar class="text-teal-600 !flex !items-center !justify-center">groups</mat-icon>
-              <mat-card-title>Staff &amp; Team Notifications</mat-card-title>
+              <mat-card-title><ng-container i18n>Staff &amp; Team Notifications</ng-container></mat-card-title>
             </mat-card-header>
             <mat-card-content class="pt-4 space-y-4">
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Maintenance Assigned</label>
-                  <p class="text-xs text-gray-500">Notify staff when a task is assigned to them</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Maintenance Assigned</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Notify staff when a task is assigned to them</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="staffMaintenanceAssigned" color="primary"></mat-slide-toggle>
               </div>
 
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Inspection Scheduled</label>
-                  <p class="text-xs text-gray-500">Alert staff about upcoming inspections</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Inspection Scheduled</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Alert staff about upcoming inspections</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="staffInspectionScheduled" color="primary"></mat-slide-toggle>
               </div>
 
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Tenant Complaint</label>
-                  <p class="text-xs text-gray-500">Notify staff when a tenant submits a complaint</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Tenant Complaint</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Notify staff when a tenant submits a complaint</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="staffTenantComplaint" color="primary"></mat-slide-toggle>
               </div>
 
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700">Lease Action Required</label>
-                  <p class="text-xs text-gray-500">Alert staff about lease-related tasks</p>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Lease Action Required</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Alert staff about lease-related tasks</ng-container></p>
                 </div>
                 <mat-slide-toggle formControlName="staffLeaseAction" color="primary"></mat-slide-toggle>
               </div>
 
               <div class="border-t border-gray-200 mt-4 pt-4">
-                <h5 class="text-sm font-semibold text-gray-700 mb-3">Communication Channels</h5>
+                <h5 class="text-sm font-semibold text-gray-700 mb-3"><ng-container i18n>Communication Channels</ng-container></h5>
                 <div class="space-y-4">
                   <div class="flex items-center justify-between">
                     <div>
-                      <label class="text-sm font-medium text-gray-700">SMS Notifications</label>
-                      <p class="text-xs text-gray-500">Send important updates via SMS</p>
+                      <label class="text-sm font-medium text-gray-700"><ng-container i18n>SMS Notifications</ng-container></label>
+                      <p class="text-xs text-gray-500"><ng-container i18n>Send important updates via SMS</ng-container></p>
                     </div>
                     <mat-slide-toggle formControlName="smsNotifications" color="primary"></mat-slide-toggle>
                   </div>
 
                   <div class="flex items-center justify-between">
                     <div>
-                      <label class="text-sm font-medium text-gray-700">Push Notifications</label>
-                      <p class="text-xs text-gray-500">Send real-time browser notifications</p>
+                      <label class="text-sm font-medium text-gray-700"><ng-container i18n>Push Notifications</ng-container></label>
+                      <p class="text-xs text-gray-500"><ng-container i18n>Send real-time browser notifications</ng-container></p>
                     </div>
                     <mat-slide-toggle formControlName="pushNotifications" color="primary"></mat-slide-toggle>
                   </div>
@@ -321,7 +321,7 @@
                 color="primary"
                 [disabled]="saving()"
                 class="w-full mt-4">
-                {{ saving() ? 'Saving...' : 'Save EMS Notification Settings' }}
+                @if (saving()) {<ng-container i18n>Saving...</ng-container>} @else {<ng-container i18n>Save EMS Notification Settings</ng-container>}
               </button>
             </mat-card-content>
           </mat-card>
@@ -335,10 +335,10 @@
   @if (!hasPms() && !hasEms()) {
     <div class="flex flex-col items-center justify-center py-16 text-center">
       <mat-icon class="text-gray-300 !text-6xl mb-4">notifications_off</mat-icon>
-      <h3 class="text-lg font-semibold text-gray-600 mb-2">No Notification Modules Active</h3>
+      <h3 class="text-lg font-semibold text-gray-600 mb-2"><ng-container i18n>No Notification Modules Active</ng-container></h3>
       <p class="text-sm text-gray-500 max-w-md">
-        Notification settings are available for the Hotel Management (PMS) and Estate Management (EMS) modules.
-        Subscribe to one of these modules to configure notifications.
+        <ng-container i18n>Notification settings are available for the Hotel Management (PMS) and Estate Management (EMS) modules.
+        Subscribe to one of these modules to configure notifications.</ng-container>
       </p>
     </div>
   }

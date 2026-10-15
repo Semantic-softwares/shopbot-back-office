@@ -4,13 +4,13 @@
       <form [formGroup]="filterForm">
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Search units...</mat-label>
+            <mat-label><ng-container i18n>Search units...</ng-container></mat-label>
             <mat-icon matPrefix class="text-gray-400">search</mat-icon>
-            <input matInput formControlName="search" placeholder="Unit or property name">
+            <input matInput formControlName="search" placeholder="Unit or property name" i18n-placeholder>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Property</mat-label>
+            <mat-label><ng-container i18n>Property</ng-container></mat-label>
             <mat-select formControlName="propertyId">
               @for (property of propertyOptions(); track property.value) {
                 <mat-option [value]="property.value">{{ property.label }}</mat-option>
@@ -19,7 +19,7 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Type</mat-label>
+            <mat-label><ng-container i18n>Type</ng-container></mat-label>
             <mat-select formControlName="type">
               @for (type of unitTypeOptions; track type.value) {
                 <mat-option [value]="type.value">{{ type.label }}</mat-option>
@@ -28,7 +28,7 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Status</mat-label>
+            <mat-label><ng-container i18n>Status</ng-container></mat-label>
             <mat-select formControlName="status">
               @for (status of statusOptions; track status.value) {
                 <mat-option [value]="status.value">{{ status.label }}</mat-option>
@@ -49,18 +49,18 @@
       <div class="flex items-start gap-3">
         <mat-icon class="text-red-500">error</mat-icon>
         <div>
-          <h3 class="font-medium text-red-800">Error loading units</h3>
-          <p class="mt-1 text-sm text-red-700">Please reload to try again.</p>
+          <h3 class="font-medium text-red-800"><ng-container i18n>Error loading units</ng-container></h3>
+          <p class="mt-1 text-sm text-red-700"><ng-container i18n>Please reload to try again.</ng-container></p>
         </div>
       </div>
     </div>
   } @else if (unitGroups().length === 0) {
     <app-no-record
       icon="apartment"
-      title="No Units Found"
+      title="No Units Found" i18n-title
       [message]="filterForm.get('search')?.value || filterForm.get('propertyId')?.value || filterForm.get('type')?.value || filterForm.get('status')?.value
-        ? 'Try adjusting the filters to find matching units.'
-        : 'No units are available yet for the selected properties.'">
+        ? ('Try adjusting the filters to find matching units.' | tr)
+        : ('No units are available yet for the selected properties.' | tr)">
     </app-no-record>
   } @else {
     <div class="space-y-6">
@@ -83,7 +83,7 @@
                   <div class="text-lg font-semibold text-slate-900">{{ group.property.name }}</div>
                   <div class="mt-1 flex items-start gap-2 text-sm text-slate-500">
                     <mat-icon class="!text-base">location_on</mat-icon>
-                    <span>{{ getPropertyAddress(group.property) || 'No address available' }}</span>
+                    <span>@if (getPropertyAddress(group.property)) {<ng-container>{{ getPropertyAddress(group.property) }}</ng-container>} @else {<ng-container i18n>No address available</ng-container>}</span>
                   </div>
                 </div>
               </div>
@@ -132,12 +132,12 @@
                       <div class="mt-3 flex flex-wrap items-center gap-3">
                         @if (shouldShowAddLease(unit)) {
                           <button mat-stroked-button color="primary" (click)="addLease(unit)">
-                            Add Lease
+                            <ng-container i18n>Add Lease</ng-container>
                           </button>
                         }
                         <div class="text-lg font-semibold text-slate-900">
                           {{ unit.rentAmount | currency:(unit.currency || 'NGN') }}
-                          <span class="ml-1 text-xs font-normal uppercase tracking-wide text-slate-400">Market Rent</span>
+                          <span class="ml-1 text-xs font-normal uppercase tracking-wide text-slate-400"><ng-container i18n>Market Rent</ng-container></span>
                         </div>
                       </div>
                     </div>
@@ -145,25 +145,25 @@
 
                   <div class="flex items-center justify-end gap-2">
                     <button mat-stroked-button (click)="viewUnit(unit)">
-                      View unit
+                      <ng-container i18n>View unit</ng-container>
                     </button>
-                    <button mat-icon-button [matMenuTriggerFor]="unitMenu" aria-label="Unit actions">
+                    <button mat-icon-button [matMenuTriggerFor]="unitMenu" aria-label="Unit actions" i18n-aria-label>
                       <mat-icon>more_vert</mat-icon>
                     </button>
                     <mat-menu #unitMenu="matMenu">
                       <button mat-menu-item (click)="viewUnit(unit)">
                         <mat-icon>visibility</mat-icon>
-                        <span>View</span>
+                        <span><ng-container i18n>View</ng-container></span>
                       </button>
                       @if (shouldShowAddLease(unit)) {
                         <button mat-menu-item (click)="addLease(unit)">
                           <mat-icon>description</mat-icon>
-                          <span>Add Lease</span>
+                          <span><ng-container i18n>Add Lease</ng-container></span>
                         </button>
                       }
                       <button mat-menu-item (click)="deleteUnit(unit)" class="!text-red-600" [disabled]="deleting() === unit._id">
                         <mat-icon class="!text-red-600">delete</mat-icon>
-                        <span>{{ deleting() === unit._id ? 'Deleting...' : 'Delete' }}</span>
+                        <span>@if (deleting() === unit._id) {<ng-container i18n>Deleting...</ng-container>} @else {<ng-container i18n>Delete</ng-container>}</span>
                       </button>
                     </mat-menu>
                   </div>

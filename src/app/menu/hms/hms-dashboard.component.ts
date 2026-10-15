@@ -16,11 +16,12 @@ import { StoreStore } from '../../shared/stores/store.store';
 import { Store } from '../../shared/models';
 import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.component';
 import { RolesService } from '../../shared/services/roles.service';
+import { TrPipe } from '../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-hms-dashboard',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     MatSidenavModule,
     MatToolbarModule,
     MatListModule,
@@ -55,7 +56,7 @@ export class HmsDashboardComponent {
       children: [
         {
           icon: 'dashboard',
-          label: 'Overview',
+          label: $localize`Overview`,
           link: './overview',
           permissions: ['hotel.reservations.view', 'hotel.rooms.view'],
         },
@@ -66,19 +67,19 @@ export class HmsDashboardComponent {
       children: [
         {
           icon: 'book_online',
-          label: 'Reservations',
+          label: $localize`Reservations`,
           link: './front-desk/reservations',
           permissions: ['hotel.reservations.view', 'hotel.reservations.create'],
         },
         {
           icon: 'check_in',
-          label: 'Check-In / Check-Out',
+          label: $localize`Check-In / Check-Out`,
           link: './front-desk/check-in-check-out',
           permissions: ['hotel.reservations.checkin', 'hotel.reservations.checkout'],
         },
         {
           icon: 'people',
-          label: 'Guests',
+          label: $localize`Guests`,
           link: './front-desk/guests',
           permissions: ['hotel.guests.view', 'hotel.guests.create'],
         },
@@ -89,31 +90,31 @@ export class HmsDashboardComponent {
       children: [
         {
           icon: 'sync_alt',
-          label: 'Mappings',
+          label: $localize`Mappings`,
           link: './channel-management/mappings',
           permissions: ['hotel.guests.view', 'hotel.guests.create'],
         },
         {
           icon: 'rate_review',
-          label: 'Inventory & Rates',
+          label: $localize`Inventory & Rates`,
           link: './channel-management/inventory-rates',
           permissions: ['hotel.reservations.view', 'hotel.reservations.create'],
         },
         {
           icon: 'tv_options_input_settings',
-          label: 'Settings',
+          label: $localize`Settings`,
           link: './channel-management/settings',
           permissions: ['hotel.reservations.checkin', 'hotel.reservations.checkout'],
         },
         {
           icon: 'live_tv',
-          label: 'Live Booking',
+          label: $localize`Live Booking`,
           link: './channel-management/live-booking',
           permissions: ['hotel.guests.view', 'hotel.guests.create'],
         },
         {
           icon: 'mail',
-          label: 'Messages',
+          label: $localize`Messages`,
           link: './channel-management/messaging',
           permissions: ['hotel.guests.view', 'hotel.guests.create'],
         },
@@ -124,25 +125,25 @@ export class HmsDashboardComponent {
       children: [
         {
           icon: 'hotel',
-          label: 'Rooms',
+          label: $localize`Rooms`,
           link: './rooms-management/rooms',
           permissions: ['hotel.rooms.view', 'hotel.rooms.create', 'hotel.rooms.edit'],
         },
         {
           icon: 'category',
-          label: 'Room Types',
+          label: $localize`Room Types`,
           link: './rooms-management/room-types',
           permissions: ['hotel.roomtypes.view', 'hotel.roomtypes.create'],
         },
         {
           icon: 'price_change',
-          label: 'Rate Plans',
+          label: $localize`Rate Plans`,
           link: './rooms-management/rate-plans',
           permissions: ['hotel.rooms.view', 'hotel.rooms.edit'],
         },
         {
           icon: 'calendar_month',
-          label: 'Inventory Calendar',
+          label: $localize`Inventory Calendar`,
           link: './rooms-management/inventory',
           permissions: ['hotel.rooms.view', 'hotel.rooms.edit'],
         },
@@ -153,19 +154,19 @@ export class HmsDashboardComponent {
       children: [
         {
           icon: 'assessment',
-          label: 'Occupancy Report',
+          label: $localize`Occupancy Report`,
           link: './reports/occupancy',
           permissions: ['finance.reports.view'],
         },
         {
           icon: 'monetization_on',
-          label: 'Revenue Report',
+          label: $localize`Revenue Report`,
           link: './reports/revenue',
           permissions: ['finance.reports.view', 'finance.transactions.view'],
         },
         {
           icon: 'people_outline',
-          label: 'Guest Report',
+          label: $localize`Guest Report`,
           link: './reports/guest',
           permissions: ['finance.reports.view'],
         },

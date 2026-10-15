@@ -201,7 +201,7 @@ export class CreateProductComponent implements OnInit {
       const maxFiles = 5;
 
       if (this.selectedImages.length + files.length > maxFiles) {
-        this.snackBar.open(`You can only upload up to ${maxFiles} images`, 'Close', {
+        this.snackBar.open($localize`You can only upload up to ${maxFiles} images`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -222,8 +222,8 @@ export class CreateProductComponent implements OnInit {
           reader.readAsDataURL(file);
         } else {
           this.snackBar.open(
-            `File ${file.name} is too large or not an image`,
-            'Close',
+            $localize`File ${file.name} is too large or not an image`,
+            $localize`Close`,
             {
               duration: 3000,
               horizontalPosition: 'end',
@@ -301,7 +301,7 @@ export class CreateProductComponent implements OnInit {
         }
       },
       error: (error) => {
-        this.snackBar.open('Error loading product', 'Close', {
+        this.snackBar.open($localize`Error loading product`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top',
@@ -326,8 +326,8 @@ export class CreateProductComponent implements OnInit {
         width: '500px',
         data: {
           invalidControls,
-          title: 'Form Validation Errors',
-          message: 'Please fix the following errors before submitting:'
+          title: $localize`Form Validation Errors`,
+          message: $localize`Please fix the following errors before submitting:`
         }
       });
       
@@ -370,8 +370,8 @@ export class CreateProductComponent implements OnInit {
       catchError(error => {
         console.error('Error in product submission:', error);
         this.snackBar.open(
-          `Error ${this.isEditMode() ? 'updating' : 'creating'} product`,
-          'Close',
+          $localize`Error ${this.isEditMode() ? 'updating' : 'creating'} product`,
+          $localize`Close`,
           {
             duration: 3000,
             horizontalPosition: 'end',
@@ -452,8 +452,8 @@ export class CreateProductComponent implements OnInit {
         
         // Show error but don't fail the entire operation
         this.snackBar.open(
-          'Product saved but some images failed to upload',
-          'Close',
+          $localize`Product saved but some images failed to upload`,
+          $localize`Close`,
           {
             duration: 3000,
             horizontalPosition: 'end',
@@ -468,8 +468,8 @@ export class CreateProductComponent implements OnInit {
 
   private showSuccessMessage() {
     this.snackBar.open(
-      `Product ${this.isEditMode() ? 'updated' : 'created'} successfully`,
-      'Close',
+      $localize`Product ${this.isEditMode() ? 'updated' : 'created'} successfully`,
+      $localize`Close`,
       {
         duration: 3000,
         horizontalPosition: 'end',

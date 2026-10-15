@@ -22,6 +22,7 @@ import { OrderService } from '../../../../shared/services/orders.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
 import { QueryParamService } from '../../../../shared/services/query-param.service';
 import { ExportService } from '../../../../shared/services/export.service';
+import { ChartThemeService } from '../../../../shared/services/chart-theme.service';
 
 @Component({
   selector: 'sales-by-item',
@@ -50,6 +51,8 @@ import { ExportService } from '../../../../shared/services/export.service';
   styleUrl: './sales-by-item.component.scss',
 })
 export class SalesByItemComponent {
+  // Keeps Chart.js text/grid colours in step with the light/dark theme.
+  private readonly chartTheme = inject(ChartThemeService);
   private orderService = inject(OrderService);
   public storeStore = inject(StoreStore);
   private queryParamsService = inject(QueryParamService);

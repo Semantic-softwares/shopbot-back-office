@@ -37,7 +37,9 @@
             "styles": [
               "src/styles.scss",
               "src/tokens.scss",
-              "src/app/ngm-dev-blocks/styles/ngm-dev-blocks-styles.scss"
+              "src/app/ngm-dev-blocks/styles/ngm-dev-blocks-styles.scss",
+              "src/dark-palette.scss",
+              "src/dark-theme.scss"
             ],
             "scripts": []
           },

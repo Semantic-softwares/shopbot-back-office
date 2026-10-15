@@ -7,10 +7,10 @@
     <div class="flex items-center gap-2">
       <mat-icon class="text-red-500">error</mat-icon>
       <div>
-        <h3 class="text-red-800 font-medium">Error loading lease</h3>
+        <h3 class="text-red-800 font-medium"><ng-container i18n>Error loading lease</ng-container></h3>
         <button mat-button color="warn" (click)="reload()" class="mt-2 !text-red-600">
           <mat-icon class="mr-1">refresh</mat-icon>
-          Retry
+          <ng-container i18n>Retry</ng-container>
         </button>
       </div>
     </div>
@@ -20,12 +20,12 @@
     <ng-container actions>
       <a mat-button (click)="goBack()">
         <mat-icon class="mr-1">arrow_back</mat-icon>
-        Back
+        <ng-container i18n>Back</ng-container>
       </a>
       @if (isDraft()) {
         <button mat-flat-button (click)="completeDraft()">
           <mat-icon class="mr-1">edit_note</mat-icon>
-          Complete Draft Lease
+          <ng-container i18n>Complete Draft Lease</ng-container>
         </button>
       }
       <app-lease-actions-menu
@@ -44,9 +44,9 @@
 
   @if (lease()?.status === 'ENDED') {
     <div class="mx-4 mt-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-      Lease ended
+      <ng-container i18n>Lease ended</ng-container>
       @if (lease()?.endedAt) {
-        <span class="font-medium"> on {{ $safeNavigationMigration(lease()?.endedAt) | date: 'mediumDate' }}</span>
+        <span class="font-medium"> <ng-container i18n>on {{ $safeNavigationMigration(lease()?.endedAt) | date: 'mediumDate' }}</ng-container></span>
       }
       @if (lease()?.endReason) {
         <span> · {{ lease()?.endReason }}</span>

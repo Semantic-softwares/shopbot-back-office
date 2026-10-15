@@ -3,10 +3,10 @@
     <!-- Roles List Column -->
     <div class="bg-white rounded-lg shadow">
       <div class="p-4 border-b flex justify-between items-center">
-        <h2 class="text-xl font-semibold">Roles</h2>
+        <h2 class="text-xl font-semibold"><ng-container i18n>Roles</ng-container></h2>
         <button mat-flat-button color="primary" (click)="onAdd()">
           <mat-icon>add</mat-icon>
-          New Role
+          <ng-container i18n>New Role</ng-container>
         </button>
       </div>
       
@@ -26,11 +26,11 @@
                 <mat-menu #menu="matMenu">
                   <button mat-menu-item (click)="onEdit(role)">
                     <mat-icon>edit</mat-icon>
-                    <span>Edit</span>
+                    <span><ng-container i18n>Edit</ng-container></span>
                   </button>
                   <button mat-menu-item (click)="onDelete(role)">
                     <mat-icon>delete</mat-icon>
-                    <span>Delete</span>
+                    <span><ng-container i18n>Delete</ng-container></span>
                   </button>
                 </mat-menu>
               </div>
@@ -45,19 +45,19 @@
       @if (selectedRole()) {
         <div class="p-4 border-b flex justify-between items-center">
           <div>
-            <h2 class="text-xl font-semibold">{{ selectedRole()?.name }} Permissions</h2>
+            <h2 class="text-xl font-semibold"><ng-container i18n>{{ selectedRole()?.name }} Permissions</ng-container></h2>
             <p class="text-gray-600 mt-1">{{ selectedRole()?.description }}</p>
           </div>
           <button mat-flat-button color="primary" (click)="onAddPermission()">
             <mat-icon>add</mat-icon>
-            New Permission
+            <ng-container i18n>New Permission</ng-container>
           </button>
         </div>
         <div class="p-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Granted Permissions Column -->
             <div class="bg-gray-50 rounded-lg p-4">
-              <h3 class="text-lg font-medium mb-3">Granted Permissions</h3>
+              <h3 class="text-lg font-medium mb-3"><ng-container i18n>Granted Permissions</ng-container></h3>
               @if (selectedRolePermissionsGranted.hasValue() && selectedRolePermissionsGranted.value()!.length > 0) {
                 @for (category of groupedGrantedPermissions(); track $index) {
                   <div class="mb-6">
@@ -77,7 +77,7 @@
               } @else {
                 <mat-list>
                   <mat-list-item>
-                    <span class="text-gray-500">No permissions granted</span>
+                    <span class="text-gray-500"><ng-container i18n>No permissions granted</ng-container></span>
                   </mat-list-item>
                 </mat-list>
               }
@@ -85,7 +85,7 @@
 
             <!-- Not Granted Permissions Column -->
             <div class="bg-gray-50 rounded-lg p-4">
-              <h3 class="text-lg font-medium mb-3">Not Granted Permissions</h3>
+              <h3 class="text-lg font-medium mb-3"><ng-container i18n>Not Granted Permissions</ng-container></h3>
               @if (permissions.hasValue() && selectedRolePermissionsNotGranted()!.length > 0) {
                 @for (category of groupedNotGrantedPermissions(); track $index) {
                   <div class="mb-6">
@@ -106,8 +106,8 @@
                 <mat-list>
                   <mat-list-item>
                     <div class="text-gray-500">
-                      <p class="font-medium">This role has full access!</p>
-                      <p class="text-sm">Any team member with this role can access all the sections of the dashboard.</p>
+                      <p class="font-medium"><ng-container i18n>This role has full access!</ng-container></p>
+                      <p class="text-sm"><ng-container i18n>Any team member with this role can access all the sections of the dashboard.</ng-container></p>
                     </div>
                   </mat-list-item>
                 </mat-list>
@@ -118,10 +118,10 @@
       } @else {
         <div class="flex flex-col items-center justify-center p-8 text-gray-500">
           <mat-icon class="text-6xl mb-4">policy</mat-icon>
-          <p>Select a role to view its permissions</p>
+          <p><ng-container i18n>Select a role to view its permissions</ng-container></p>
           <button mat-flat-button color="primary" (click)="onAddPermission()">
             <mat-icon>add</mat-icon>
-            New Permission
+            <ng-container i18n>New Permission</ng-container>
           </button>
         </div>
       }

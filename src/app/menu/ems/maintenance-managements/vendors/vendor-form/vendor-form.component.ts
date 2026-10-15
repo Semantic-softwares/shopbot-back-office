@@ -22,12 +22,13 @@ import { PageHeaderComponent } from '../../../../../shared/components/page-heade
 import { MaintenanceCategorySelectComponent } from '../../../../../shared/components/maintenance-category-select/maintenance-category-select.component';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { MaintenanceVendorService } from '../../../../../shared/services/maintenance-vendor.service';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-vendor-form',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
@@ -95,7 +96,7 @@ export class VendorFormComponent {
         }
       },
       error: () => {
-        this.snackBar.open('Failed to load vendor', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Failed to load vendor`, $localize`Close`, { duration: 4000 });
       },
     });
   }
@@ -134,7 +135,7 @@ export class VendorFormComponent {
         const uploadRes = await firstValueFrom(this.vendorService.uploadProfileImage(storeId, imageFile));
         profileImage = uploadRes.data.photos?.[0];
       } catch {
-        this.snackBar.open('Failed to upload profile image', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Failed to upload profile image`, $localize`Close`, { duration: 4000 });
         this.submitting.set(false);
         return;
       }
@@ -159,12 +160,12 @@ export class VendorFormComponent {
     request$.subscribe({
       next: () => {
         const msg = this.vendorId ? 'Vendor updated' : 'Vendor created';
-        this.snackBar.open(msg, 'Close', { duration: 3000 });
+        this.snackBar.open(msg, $localize`Close`, { duration: 3000 });
         this.goBack();
       },
       error: (error) => {
         const message = error?.error?.message || 'Failed to save vendor';
-        this.snackBar.open(message, 'Close', { duration: 4000 });
+        this.snackBar.open(message, $localize`Close`, { duration: 4000 });
         this.submitting.set(false);
       },
     });

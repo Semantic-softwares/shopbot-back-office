@@ -1,12 +1,12 @@
-<app-page-header [title]="invoice()?.invoiceNumber || 'Invoice'" subtitle="Invoice details">
+<app-page-header [title]="invoice()?.invoiceNumber || ('Invoice' | tr)" subtitle="Invoice details" i18n-subtitle>
   <ng-container actions>
     <button mat-button (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
-      Back to Invoices
+      <ng-container i18n>Back to Invoices</ng-container>
     </button>
     <button mat-stroked-button (click)="exportInvoiceToPDF()" [disabled]="exportingPdf() || !invoice()">
       <mat-icon>print</mat-icon>
-      {{ exportingPdf() ? 'Preparing...' : 'Print Invoice' }}
+      @if (exportingPdf()) {<ng-container i18n>Preparing...</ng-container>} @else {<ng-container i18n>Print Invoice</ng-container>}
     </button>
     
     @if (invoice(); as inv) {
@@ -32,7 +32,7 @@
       <div class="px-8 pt-8 pb-6 border-b border-gray-100">
         <div class="flex items-start justify-between gap-6">
           <div>
-            <h1 class="text-3xl font-bold text-slate-800 tracking-tight">INVOICE</h1>
+            <h1 class="text-3xl font-bold text-slate-800 tracking-tight"><ng-container i18n>INVOICE</ng-container></h1>
             <p class="text-lg font-semibold text-slate-600 mt-1">{{ inv.invoiceNumber }}</p>
           </div>
           <div class="text-right space-y-1">
@@ -48,7 +48,7 @@
       <div class="px-8 py-6 grid grid-cols-1 md:grid-cols-3 gap-6 border-b border-gray-100">
         <!-- From (Payer) -->
         <div>
-          <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">From (Payer)</p>
+          <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2"><ng-container i18n>From (Payer)</ng-container></p>
           <div class="flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold">
               {{ tenantInitials(primaryPayerName(inv)) }}
@@ -61,7 +61,7 @@
 
         <!-- To (Payee) -->
         <div>
-          <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">To (Payee)</p>
+          <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2"><ng-container i18n>To (Payee)</ng-container></p>
           <div class="flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-700 text-sm font-bold">
               {{ tenantInitials(primaryPayeeName(inv)) }}
@@ -78,26 +78,26 @@
         <!-- Invoice Details -->
         <div class="space-y-2 text-sm">
           <div class="flex justify-between">
-            <span class="text-slate-500">Issue Date</span>
+            <span class="text-slate-500"><ng-container i18n>Issue Date</ng-container></span>
             <span class="font-medium text-slate-800">{{ inv.issueDate | date: 'MMM d, y' }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-slate-500">Due Date</span>
+            <span class="text-slate-500"><ng-container i18n>Due Date</ng-container></span>
             <span class="font-medium text-slate-800">{{ inv.dueDate | date: 'MMM d, y' }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-slate-500">Property</span>
+            <span class="text-slate-500"><ng-container i18n>Property</ng-container></span>
             <span class="font-medium text-slate-800">{{ propertyName(inv) }}</span>
           </div>
           @if (unitName(inv)) {
             <div class="flex justify-between">
-              <span class="text-slate-500">Unit</span>
+              <span class="text-slate-500"><ng-container i18n>Unit</ng-container></span>
               <span class="font-medium text-slate-800">{{ unitName(inv) }}</span>
             </div>
           }
           @if (inv.leaseId) {
             <div class="flex justify-between">
-              <span class="text-slate-500">Lease</span>
+              <span class="text-slate-500"><ng-container i18n>Lease</ng-container></span>
               <span class="font-medium text-slate-800">{{ typeof inv.leaseId === 'string' ? inv.leaseId : $any(inv.leaseId).leaseNumber || inv.leaseId }}</span>
             </div>
           }
@@ -107,16 +107,16 @@
       <!-- Line Items (from metadata) -->
       @if (lineItems(inv).length > 0) {
         <div class="px-8 py-6 border-b border-gray-100">
-          <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">Line Items</p>
+          <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4"><ng-container i18n>Line Items</ng-container></p>
           <div class="overflow-x-auto">
             <table class="w-full text-sm">
               <thead>
                 <tr class="border-b-2 border-slate-200">
-                  <th class="text-left py-3 px-2 font-semibold text-slate-600 w-16">QTY</th>
-                  <th class="text-left py-3 px-2 font-semibold text-slate-600">Account</th>
-                  <th class="text-left py-3 px-2 font-semibold text-slate-600">Description</th>
-                  <th class="text-right py-3 px-2 font-semibold text-slate-600 w-28">Price</th>
-                  <th class="text-right py-3 px-2 font-semibold text-slate-600 w-28">Total</th>
+                  <th class="text-left py-3 px-2 font-semibold text-slate-600 w-16"><ng-container i18n>QTY</ng-container></th>
+                  <th class="text-left py-3 px-2 font-semibold text-slate-600"><ng-container i18n>Account</ng-container></th>
+                  <th class="text-left py-3 px-2 font-semibold text-slate-600"><ng-container i18n>Description</ng-container></th>
+                  <th class="text-right py-3 px-2 font-semibold text-slate-600 w-28"><ng-container i18n>Price</ng-container></th>
+                  <th class="text-right py-3 px-2 font-semibold text-slate-600 w-28"><ng-container i18n>Total</ng-container></th>
                 </tr>
               </thead>
               <tbody>
@@ -140,15 +140,15 @@
         <div class="flex justify-end">
           <div class="w-72 space-y-3 text-sm">
             <div class="flex justify-between">
-              <span class="text-slate-500">Subtotal</span>
+              <span class="text-slate-500"><ng-container i18n>Subtotal</ng-container></span>
               <span class="font-medium text-slate-800">{{ inv.currency }} {{ formatCurrency(inv.amount) }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-slate-500">Amount Paid</span>
+              <span class="text-slate-500"><ng-container i18n>Amount Paid</ng-container></span>
               <span class="font-medium text-green-700">- {{ inv.currency }} {{ formatCurrency(inv.amountPaid) }}</span>
             </div>
             <div class="border-t border-slate-200 pt-3 flex justify-between">
-              <span class="text-base font-bold text-slate-800">Balance Due</span>
+              <span class="text-base font-bold text-slate-800"><ng-container i18n>Balance Due</ng-container></span>
               <span class="text-base font-bold text-slate-800">{{ inv.currency }} {{ formatCurrency(amountLeft(inv)) }}</span>
             </div>
           </div>
@@ -158,8 +158,8 @@
         <div class="mt-4 space-y-2">
           <mat-progress-bar class="rounded-full overflow-hidden" mode="determinate" [value]="paymentProgress()"></mat-progress-bar>
           <div class="flex items-center justify-between text-xs text-slate-500">
-            <span>{{ inv.currency }} {{ formatCurrency(amountLeft(inv)) }} remaining</span>
-            <span>{{ paymentProgress() | number: '1.0-0' }}% paid</span>
+            <span><ng-container i18n>{{ inv.currency }} {{ formatCurrency(amountLeft(inv)) }} remaining</ng-container></span>
+            <span><ng-container i18n>{{ paymentProgress() | number: '1.0-0' }}% paid</ng-container></span>
           </div>
         </div>
       </div>
@@ -167,24 +167,24 @@
       <!-- Additional Details -->
       <div class="px-8 py-6 border-b border-gray-100 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
         <div>
-          <p class="text-slate-500 mb-1">Type</p>
+          <p class="text-slate-500 mb-1"><ng-container i18n>Type</ng-container></p>
           <p class="font-medium text-slate-800">{{ typeSummary(inv) }}</p>
         </div>
         <div>
-          <p class="text-slate-500 mb-1">Source</p>
+          <p class="text-slate-500 mb-1"><ng-container i18n>Source</ng-container></p>
           <p class="font-medium text-slate-800">{{ sourceLabel(inv.source) }}</p>
         </div>
         <div>
-          <p class="text-slate-500 mb-1">Transaction ID</p>
+          <p class="text-slate-500 mb-1"><ng-container i18n>Transaction ID</ng-container></p>
           <p class="font-medium text-slate-800">{{ transactionId(inv) }}</p>
         </div>
         <div>
-          <p class="text-slate-500 mb-1">Created by</p>
+          <p class="text-slate-500 mb-1"><ng-container i18n>Created by</ng-container></p>
           <p class="font-medium text-slate-800">{{ initiatorName(inv) }}</p>
         </div>
         @if (inv.billingPeriodStart && inv.billingPeriodEnd) {
           <div>
-            <p class="text-slate-500 mb-1">Billing Period</p>
+            <p class="text-slate-500 mb-1"><ng-container i18n>Billing Period</ng-container></p>
             <p class="font-medium text-slate-800">
               {{ inv.billingPeriodStart | date: 'MMM d' }} – {{ inv.billingPeriodEnd | date: 'MMM d, y' }}
             </p>
@@ -192,7 +192,7 @@
         }
         @if (inv.description) {
           <div class="col-span-2 md:col-span-4">
-            <p class="text-slate-500 mb-1">Description</p>
+            <p class="text-slate-500 mb-1"><ng-container i18n>Description</ng-container></p>
             <p class="font-medium text-slate-800">{{ inv.description }}</p>
           </div>
         }
@@ -200,7 +200,7 @@
 
       <!-- Payments & Activity -->
       <div class="px-8 py-6">
-        <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">
+        <p i18n class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">
           Payments & Activity
           <span class="text-slate-300 ml-1">({{ paymentActivities().length }} record{{ paymentActivities().length === 1 ? '' : 's' }})</span>
         </p>
@@ -209,36 +209,36 @@
           <div class="overflow-x-auto border border-gray-200 rounded-lg">
             <table mat-table [dataSource]="paymentActivities()" class="w-full">
               <ng-container matColumnDef="date">
-                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">Date</th>
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600"><ng-container i18n>Date</ng-container></th>
                 <td mat-cell *matCellDef="let item" class="py-3 text-sm text-slate-700">{{ item.date | date: 'MMM d, y' }}</td>
               </ng-container>
 
               <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">Status</th>
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600"><ng-container i18n>Status</ng-container></th>
                 <td mat-cell *matCellDef="let item" class="py-3">
                   <mat-chip [ngClass]="item.statusClass">{{ item.status }}</mat-chip>
                 </td>
               </ng-container>
 
               <ng-container matColumnDef="method">
-                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">Method</th>
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600"><ng-container i18n>Method</ng-container></th>
                 <td mat-cell *matCellDef="let item" class="py-3 text-sm text-slate-700">{{ item.method }}</td>
               </ng-container>
 
               <ng-container matColumnDef="amount">
-                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 text-right!">Amount</th>
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 text-right!"><ng-container i18n>Amount</ng-container></th>
                 <td mat-cell *matCellDef="let item" class="py-3 text-sm font-semibold text-slate-800 text-right!">
                   {{ inv.currency }} {{ formatCurrency(item.amount) }}
                 </td>
               </ng-container>
 
               <ng-container matColumnDef="payer">
-                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">Payer</th>
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600"><ng-container i18n>Payer</ng-container></th>
                 <td mat-cell *matCellDef="let item" class="py-3 text-sm text-slate-700">{{ item.payer }}</td>
               </ng-container>
 
               <ng-container matColumnDef="description">
-                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">Details</th>
+                <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600"><ng-container i18n>Details</ng-container></th>
                 <td mat-cell *matCellDef="let item" class="py-3 text-sm text-slate-500">{{ item.description }}</td>
               </ng-container>
 
@@ -249,8 +249,8 @@
         } @else {
           <app-no-record
             icon="payments"
-            title="No Payment Activity"
-            message="No payment activity has been recorded for this invoice yet."
+            title="No Payment Activity" i18n-title
+            message="No payment activity has been recorded for this invoice yet." i18n-message
           ></app-no-record>
         }
       </div>
@@ -259,12 +259,12 @@
   } @else {
     <app-no-record
       icon="error_outline"
-      title="Invoice Not Found"
-      message="The invoice could not be found or may have been deleted."
+      title="Invoice Not Found" i18n-title
+      message="The invoice could not be found or may have been deleted." i18n-message
     >
       <button mat-button (click)="goBack()">
         <mat-icon>arrow_back</mat-icon>
-        Back to Invoices
+        <ng-container i18n>Back to Invoices</ng-container>
       </button>
     </app-no-record>
   }

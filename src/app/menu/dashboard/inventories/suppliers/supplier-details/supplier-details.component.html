@@ -11,8 +11,8 @@
         </svg>
       </button>
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Supplier Details</h1>
-        <p class="text-gray-600 mt-1">View and manage supplier information</p>
+        <h1 class="text-2xl font-bold text-gray-900"><ng-container i18n>Supplier Details</ng-container></h1>
+        <p class="text-gray-600 mt-1"><ng-container i18n>View and manage supplier information</ng-container></p>
       </div>
     </div>
 
@@ -22,7 +22,7 @@
           (click)="editSupplier()"
           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
           >
-          Edit Supplier
+          <ng-container i18n>Edit Supplier</ng-container>
         </button>
       </div>
     }
@@ -80,7 +80,7 @@
                 'bg-red-100 text-red-800': !supplier()!.active
               }"
               >
-              {{ supplier()!.active ? 'Active' : 'Inactive' }}
+              @if (supplier()!.active) {<ng-container i18n>Active</ng-container>} @else {<ng-container i18n>Inactive</ng-container>}
             </span>
             <button
               (click)="toggleSupplierStatus()"
@@ -90,7 +90,7 @@
                 'border-green-300 text-green-700 hover:bg-green-50': !supplier()!.active
               }"
               >
-              {{ supplier()!.active ? 'Deactivate' : 'Activate' }}
+              @if (supplier()!.active) {<ng-container i18n>Deactivate</ng-container>} @else {<ng-container i18n>Activate</ng-container>}
             </button>
           </div>
         </div>
@@ -99,27 +99,27 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Contact Information -->
           <div>
-            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">Contact Information</h3>
+            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3"><ng-container i18n>Contact Information</ng-container></h3>
             <div class="space-y-3">
               <div>
-                <label class="block text-sm font-medium text-gray-700">Email</label>
+                <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Email</ng-container></label>
                 <p class="mt-1 text-sm text-gray-900">{{ supplier()!.email }}</p>
               </div>
               @if (supplier()!.phone) {
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Phone</label>
+                  <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Phone</ng-container></label>
                   <p class="mt-1 text-sm text-gray-900">{{ supplier()!.phone }}</p>
                 </div>
               }
               @if (supplier()!.contactPerson) {
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Contact Person</label>
+                  <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Contact Person</ng-container></label>
                   <p class="mt-1 text-sm text-gray-900">{{ supplier()!.contactPerson }}</p>
                 </div>
               }
               @if (supplier()!.website) {
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Website</label>
+                  <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Website</ng-container></label>
                   <a
                     [href]="supplier()!.website"
                     target="_blank"
@@ -133,23 +133,23 @@
           </div>
           <!-- Business Information -->
           <div>
-            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">Business Information</h3>
+            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3"><ng-container i18n>Business Information</ng-container></h3>
             <div class="space-y-3">
               @if (supplier()!.taxId) {
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Tax ID</label>
+                  <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Tax ID</ng-container></label>
                   <p class="mt-1 text-sm text-gray-900">{{ supplier()!.taxId }}</p>
                 </div>
               }
               @if (supplier()!.paymentTerms) {
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Payment Terms</label>
+                  <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Payment Terms</ng-container></label>
                   <p class="mt-1 text-sm text-gray-900">{{ supplier()!.paymentTerms }}</p>
                 </div>
               }
               @if (supplier()!.creditLimit) {
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Credit Limit</label>
+                  <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Credit Limit</ng-container></label>
                   <p class="mt-1 text-sm text-gray-900">${{ supplier()!.creditLimit | number:'1.2-2' }}</p>
                 </div>
               }
@@ -162,7 +162,7 @@
     @if (supplier()!.address && hasAddressInfo()) {
       <div class="bg-white shadow-sm rounded-lg">
         <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">Address Information</h3>
+          <h3 class="text-lg font-medium text-gray-900"><ng-container i18n>Address Information</ng-container></h3>
         </div>
         <div class="px-6 py-4">
           <div class="text-sm text-gray-900">
@@ -191,7 +191,7 @@
     @if (supplier()!.notes) {
       <div class="bg-white shadow-sm rounded-lg">
         <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">Notes</h3>
+          <h3 class="text-lg font-medium text-gray-900"><ng-container i18n>Notes</ng-container></h3>
         </div>
         <div class="px-6 py-4">
           <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ supplier()!.notes }}</p>
@@ -201,19 +201,19 @@
     <!-- Metadata -->
     <div class="bg-white shadow-sm rounded-lg">
       <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">Record Information</h3>
+        <h3 class="text-lg font-medium text-gray-900"><ng-container i18n>Record Information</ng-container></h3>
       </div>
       <div class="px-6 py-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           @if (supplier()!.createdAt) {
             <div>
-              <label class="block text-sm font-medium text-gray-700">Created At</label>
+              <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Created At</ng-container></label>
               <p class="mt-1 text-sm text-gray-900">{{ supplier()!.createdAt | date:'medium' }}</p>
             </div>
           }
           @if (supplier()!.updatedAt) {
             <div>
-              <label class="block text-sm font-medium text-gray-700">Last Updated</label>
+              <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Last Updated</ng-container></label>
               <p class="mt-1 text-sm text-gray-900">{{ supplier()!.updatedAt | date:'medium' }}</p>
             </div>
           }
@@ -226,20 +226,20 @@
         (click)="deleteSupplier()"
         class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
         >
-        Delete Supplier
+        <ng-container i18n>Delete Supplier</ng-container>
       </button>
       <div class="flex space-x-3">
         <button
           (click)="goBack()"
           class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 font-medium transition-colors"
           >
-          Back to List
+          <ng-container i18n>Back to List</ng-container>
         </button>
         <button
           (click)="editSupplier()"
           class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
           >
-          Edit Supplier
+          <ng-container i18n>Edit Supplier</ng-container>
         </button>
       </div>
     </div>
@@ -248,8 +248,8 @@
         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2M4 13h2m13-8l-4 4m0 0l-4-4m4 4V3" />
         </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">Supplier Not Found</h3>
-        <p class="mt-1 text-sm text-gray-500">The requested supplier could not be found.</p>
+        <h3 class="mt-2 text-sm font-medium text-gray-900"><ng-container i18n>Supplier Not Found</ng-container></h3>
+        <p class="mt-1 text-sm text-gray-500"><ng-container i18n>The requested supplier could not be found.</ng-container></p>
       </div>
     }
   </div>

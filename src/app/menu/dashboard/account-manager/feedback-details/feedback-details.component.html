@@ -3,10 +3,10 @@
     <div class="flex items-center space-x-2 text-gray-600">
       <button class="hover:text-primary flex items-center space-x-1" (click)="goBack()">
         <mat-icon class="text-sm">arrow_back</mat-icon>
-        <span>Back to Feedback</span>
+        <span><ng-container i18n>Back to Feedback</ng-container></span>
       </button>
       <mat-icon class="text-sm">chevron_right</mat-icon>
-      <span class="text-gray-900">Feedback Details</span>
+      <span class="text-gray-900"><ng-container i18n>Feedback Details</ng-container></span>
     </div>
   </div>
 
@@ -18,7 +18,7 @@
 
   @if (surveyFeedbackResponse.error()) {
     <mat-card class="p-4 bg-red-50">
-      <p class="text-red-600">An error occurred while loading the feedback details.</p>
+      <p class="text-red-600"><ng-container i18n>An error occurred while loading the feedback details.</ng-container></p>
     </mat-card>
   }
 
@@ -31,17 +31,17 @@
       <mat-card-content class="p-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="border-b md:border-b-0 md:border-r border-gray-200 p-4">
-            <h3 class="font-semibold mb-2">Survey Details</h3>
-            <p class="text-gray-600"><span class="font-medium">Touch Point:</span> {{feedback.survey.touchPoint.name}}</p>
-            <p class="text-gray-600"><span class="font-medium">Type:</span> {{feedback.survey.feedbackType}}</p>
-            <p class="text-gray-600"><span class="font-medium">Period:</span> {{formatDate(feedback.survey.startDate)}} - {{formatDate(feedback.survey.endDate)}}</p>
-            <p class="text-gray-600"><span class="font-medium">Responded At:</span> {{formatDate(feedback?.respondedAt)}}</p>
+            <h3 class="font-semibold mb-2"><ng-container i18n>Survey Details</ng-container></h3>
+            <p class="text-gray-600"><span class="font-medium"><ng-container i18n>Touch Point:</ng-container></span> {{feedback.survey.touchPoint.name}}</p>
+            <p class="text-gray-600"><span class="font-medium"><ng-container i18n>Type:</ng-container></span> {{feedback.survey.feedbackType}}</p>
+            <p class="text-gray-600"><span class="font-medium"><ng-container i18n>Period:</ng-container></span> {{formatDate(feedback.survey.startDate)}} - {{formatDate(feedback.survey.endDate)}}</p>
+            <p class="text-gray-600"><span class="font-medium"><ng-container i18n>Responded At:</ng-container></span> {{formatDate(feedback?.respondedAt)}}</p>
           </div>
           <div class="p-4">
-            <h3 class="font-semibold mb-2">Respondent Details</h3>
-            <p class="text-gray-600"><span class="font-medium">Name:</span> {{feedback.user.name}}</p>
-            <p class="text-gray-600"><span class="font-medium">Email:</span> {{feedback.user.email}}</p>
-            <p class="text-gray-600"><span class="font-medium">Department:</span> {{feedback.user.department}}</p>
+            <h3 class="font-semibold mb-2"><ng-container i18n>Respondent Details</ng-container></h3>
+            <p class="text-gray-600"><span class="font-medium"><ng-container i18n>Name:</ng-container></span> {{feedback.user.name}}</p>
+            <p class="text-gray-600"><span class="font-medium"><ng-container i18n>Email:</ng-container></span> {{feedback.user.email}}</p>
+            <p class="text-gray-600"><span class="font-medium"><ng-container i18n>Department:</ng-container></span> {{feedback.user.department}}</p>
           </div>
         </div>
       </mat-card-content>
@@ -88,8 +88,8 @@
         <mat-card>
           <mat-card-content class="p-8 text-center">
             <mat-icon class="text-gray-400 text-5xl mb-4">feedback</mat-icon>
-            <h3 class="text-xl font-medium text-gray-600 mb-2">No Responses Yet</h3>
-            <p class="text-gray-500">The respondent hasn't provided any feedback for this survey.</p>
+            <h3 class="text-xl font-medium text-gray-600 mb-2"><ng-container i18n>No Responses Yet</ng-container></h3>
+            <p class="text-gray-500"><ng-container i18n>The respondent hasn't provided any feedback for this survey.</ng-container></p>
           </mat-card-content>
         </mat-card>
       }

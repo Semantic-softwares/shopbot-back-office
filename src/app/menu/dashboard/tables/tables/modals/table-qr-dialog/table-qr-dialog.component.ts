@@ -90,7 +90,7 @@ export class TableQrDialogComponent implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-        this.snackBar.open('Could not generate a QR code for this table', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Could not generate a QR code for this table`, $localize`Close`, { duration: 3000 });
       },
     });
   }
@@ -99,7 +99,7 @@ export class TableQrDialogComponent implements OnInit {
     const url = this.qrUrl();
     if (!url) return;
     navigator.clipboard.writeText(url);
-    this.snackBar.open('Link copied', 'Close', { duration: 2000 });
+    this.snackBar.open($localize`Link copied`, $localize`Close`, { duration: 2000 });
   }
 
   /**
@@ -116,13 +116,13 @@ export class TableQrDialogComponent implements OnInit {
       .open(ConfirmationDialogComponent, {
         width: '460px',
         data: {
-          title: 'Issue a new QR link?',
+          title: $localize`Issue a new QR link?`,
           message:
             `Every card already printed for ${table.name} will stop working and has to be reprinted. ` +
             `Guests scanning an old card will see "this QR code is no longer valid".\n\n` +
             `You don't need this to change the design, size or language — those keep the same code. ` +
             `Only do this if the current code has to be retired, for example because a card was lost or shared publicly.`,
-          confirmText: 'Issue new link',
+          confirmText: $localize`Issue new link`,
         },
       })
       .afterClosed()
@@ -135,13 +135,13 @@ export class TableQrDialogComponent implements OnInit {
             this.qrDataUrl.set(qrDataUrl);
             this.qrUrl.set(url);
             this.isLoading.set(false);
-            this.snackBar.open('New QR link issued — reprint this table\'s card.', 'Close', {
+            this.snackBar.open($localize`New QR link issued — reprint this table's card.`, $localize`Close`, {
               duration: 6000,
             });
           },
           error: () => {
             this.isLoading.set(false);
-            this.snackBar.open('Could not issue a new link', 'Close', { duration: 4000 });
+            this.snackBar.open($localize`Could not issue a new link`, $localize`Close`, { duration: 4000 });
           },
         });
       });
@@ -169,7 +169,7 @@ export class TableQrDialogComponent implements OnInit {
       },
       error: async (err) => {
         this.isDownloading.set(false);
-        this.snackBar.open(await this.readError(err), 'Close', { duration: 5000 });
+        this.snackBar.open(await this.readError(err), $localize`Close`, { duration: 5000 });
       },
     });
   }

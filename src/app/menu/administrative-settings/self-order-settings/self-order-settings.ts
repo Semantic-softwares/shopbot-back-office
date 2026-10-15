@@ -35,11 +35,12 @@ import {
 import { environment } from '../../../../environments/environment';
 import { LandingPageSettingsComponent } from './landing-page-settings/landing-page-settings';
 import { LandingPageSettings, withLandingDefaults } from '../../../shared/models/landing-page.model';
+import { TrPipe } from '../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-self-order-settings',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     FormsModule,
     MatButtonModule,
@@ -114,7 +115,7 @@ export class SelfOrderSettings implements OnInit {
       },
       error: () => {
         this.loading.set(false);
-        this.snackBar.open('Could not load storefront themes.', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Could not load storefront themes.`, $localize`Close`, { duration: 4000 });
       },
     });
   }
@@ -253,7 +254,7 @@ export class SelfOrderSettings implements OnInit {
   private loadQrTemplates(): void {
     this.qrTemplateService.getOptions().subscribe({
       next: (options) => this.qrOptions.set(options),
-      error: () => this.snackBar.open('Could not load QR card options.', 'Close', { duration: 4000 }),
+      error: () => this.snackBar.open($localize`Could not load QR card options.`, $localize`Close`, { duration: 4000 }),
     });
 
     this.qrTemplateService.getTemplates().subscribe({
@@ -262,7 +263,7 @@ export class SelfOrderSettings implements OnInit {
         this.seedQrDefaults();
         this.refreshQrPreview();
       },
-      error: () => this.snackBar.open('Could not load QR card designs.', 'Close', { duration: 4000 }),
+      error: () => this.snackBar.open($localize`Could not load QR card designs.`, $localize`Close`, { duration: 4000 }),
     });
   }
 
@@ -336,7 +337,7 @@ export class SelfOrderSettings implements OnInit {
     if (!file || !storeId) return;
 
     if (!file.type.startsWith('image/')) {
-      this.snackBar.open('Please choose an image file.', 'Close', { duration: 4000 });
+      this.snackBar.open($localize`Please choose an image file.`, $localize`Close`, { duration: 4000 });
       return;
     }
 
@@ -368,7 +369,7 @@ export class SelfOrderSettings implements OnInit {
           },
           error: () => {
             this.qrUploading.set(false);
-            this.snackBar.open('Could not upload that image.', 'Close', { duration: 4000 });
+            this.snackBar.open($localize`Could not upload that image.`, $localize`Close`, { duration: 4000 });
           },
         });
       });
@@ -386,7 +387,7 @@ export class SelfOrderSettings implements OnInit {
     if (!file || !storeId) return;
 
     if (!file.type.startsWith('image/')) {
-      this.snackBar.open('Please choose an image file.', 'Close', { duration: 4000 });
+      this.snackBar.open($localize`Please choose an image file.`, $localize`Close`, { duration: 4000 });
       return;
     }
 
@@ -412,11 +413,11 @@ export class SelfOrderSettings implements OnInit {
           next: ({ photo }) => {
             this.themeImageUploading.set(null);
             this.updateSetting(field.key, photo);
-            this.snackBar.open('Image uploaded — click Save to publish it.', 'Close', { duration: 4000 });
+            this.snackBar.open($localize`Image uploaded — click Save to publish it.`, $localize`Close`, { duration: 4000 });
           },
           error: () => {
             this.themeImageUploading.set(null);
-            this.snackBar.open('Could not upload that image.', 'Close', { duration: 4000 });
+            this.snackBar.open($localize`Could not upload that image.`, $localize`Close`, { duration: 4000 });
           },
         });
       });
@@ -445,8 +446,8 @@ export class SelfOrderSettings implements OnInit {
       .catch(() => {
         this.qrUploading.set(false);
         this.snackBar.open(
-          'Could not load that image to re-crop — upload it again instead.',
-          'Close',
+          $localize`Could not load that image to re-crop — upload it again instead.`,
+          $localize`Close`,
           { duration: 5000 },
         );
       });
@@ -468,8 +469,8 @@ export class SelfOrderSettings implements OnInit {
     const url = this.previewUrl();
     if (!url) return;
     navigator.clipboard.writeText(url).then(
-      () => this.snackBar.open(`Link copied: ${url}`, 'Close', { duration: 3000 }),
-      () => this.snackBar.open('Could not copy the link.', 'Close', { duration: 4000 }),
+      () => this.snackBar.open($localize`Link copied: ${url}`, $localize`Close`, { duration: 3000 }),
+      () => this.snackBar.open($localize`Could not copy the link.`, $localize`Close`, { duration: 4000 }),
     );
   }
 
@@ -504,17 +505,17 @@ export class SelfOrderSettings implements OnInit {
             this.storeStore.updateStore(updatedStore);
             this.storeService.saveStoreLocally(updatedStore);
             this.saving.set(false);
-            this.snackBar.open('Self-order settings saved.', 'Close', { duration: 3000 });
+            this.snackBar.open($localize`Self-order settings saved.`, $localize`Close`, { duration: 3000 });
           },
           error: () => {
             this.saving.set(false);
-            this.snackBar.open('Saved, but failed to refresh local data.', 'Close', { duration: 4000 });
+            this.snackBar.open($localize`Saved, but failed to refresh local data.`, $localize`Close`, { duration: 4000 });
           },
         });
       },
       error: () => {
         this.saving.set(false);
-        this.snackBar.open('Failed to save self-order settings.', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Failed to save self-order settings.`, $localize`Close`, { duration: 4000 });
       },
     });
   }

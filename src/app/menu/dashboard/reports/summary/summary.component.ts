@@ -36,6 +36,7 @@ import { QueryParamService } from '../../../../shared/services/query-param.servi
 import { OrderService } from '../../../../shared/services/orders.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
 import { ExportService } from '../../../../shared/services/export.service';
+import { ChartThemeService } from '../../../../shared/services/chart-theme.service';
 
 @Component({
   selector: 'shopbot-summary',
@@ -64,6 +65,8 @@ import { ExportService } from '../../../../shared/services/export.service';
   styleUrl: './summary.component.scss',
 })
 export class SummaryComponent implements OnInit {
+  // Keeps Chart.js text/grid colours in step with the light/dark theme.
+  private readonly chartTheme = inject(ChartThemeService);
   public isGridView = window.innerWidth < 768;
 
   toggleView(event: any) {
@@ -131,10 +134,10 @@ export class SummaryComponent implements OnInit {
   pageSizeOptions: number[] = [5, 10, 25, 100];
 
   chartPeriods = [
-    { value: 'daily', label: 'Days' },
-    { value: 'weekly', label: 'Weeks' },
-    { value: 'monthly', label: 'Months' },
-    { value: 'yearly', label: 'Years' },
+    { value: 'daily', label: $localize`Days` },
+    { value: 'weekly', label: $localize`Weeks` },
+    { value: 'monthly', label: $localize`Months` },
+    { value: 'yearly', label: $localize`Years` },
   ];
 
   @ViewChild('salesChart') canvas!: ElementRef<HTMLCanvasElement>;

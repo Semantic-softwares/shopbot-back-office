@@ -1,18 +1,18 @@
-<app-page-header title="Guests" subtitle="Manage guest profiles and information">
+<app-page-header title="Guests" i18n-title subtitle="Manage guest profiles and information" i18n-subtitle>
   <ng-container actions>
     <button matButton="outlined" (click)="clearFilters()">
       <mat-icon>clear</mat-icon>
-      Clear Filters
+      <ng-container i18n>Clear Filters</ng-container>
     </button>
 
     <button matButton="outlined" (click)="reloadData()">
       <mat-icon class="mr-1">refresh</mat-icon>
-      Reload
+      <ng-container i18n>Reload</ng-container>
     </button>
 
     <button matButton="filled" (click)="createGuest()">
       <mat-icon class="mr-1">person_add</mat-icon>
-      New Guest
+      <ng-container i18n>New Guest</ng-container>
     </button>
   </ng-container>
 </app-page-header>
@@ -22,42 +22,42 @@
   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
-        <div class="text-sm text-gray-600">Total</div>
+        <div class="text-sm text-gray-600"><ng-container i18n>Total</ng-container></div>
         <div class="text-2xl font-bold">{{ totalGuests() }}</div>
       </mat-card-content>
     </mat-card>
 
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
-        <div class="text-sm text-gray-600">VIP</div>
+        <div class="text-sm text-gray-600"><ng-container i18n>VIP</ng-container></div>
         <div class="text-2xl font-bold">{{ vipCount() }}</div>
       </mat-card-content>
     </mat-card>
 
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
-        <div class="text-sm text-gray-600">Returning</div>
+        <div class="text-sm text-gray-600"><ng-container i18n>Returning</ng-container></div>
         <div class="text-2xl font-bold">{{ returningCount() }}</div>
       </mat-card-content>
     </mat-card>
 
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
-        <div class="text-sm text-gray-600">New</div>
+        <div class="text-sm text-gray-600"><ng-container i18n>New</ng-container></div>
         <div class="text-2xl font-bold">{{ newCount() }}</div>
       </mat-card-content>
     </mat-card>
 
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
-        <div class="text-sm text-gray-600">Recent</div>
+        <div class="text-sm text-gray-600"><ng-container i18n>Recent</ng-container></div>
         <div class="text-2xl font-bold">{{ recentCount() }}</div>
       </mat-card-content>
     </mat-card>
 
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
-        <div class="text-sm text-gray-600">Blacklisted</div>
+        <div class="text-sm text-gray-600"><ng-container i18n>Blacklisted</ng-container></div>
         <div class="text-2xl font-bold">{{ blacklistedCount() }}</div>
       </mat-card-content>
     </mat-card>
@@ -72,16 +72,16 @@
         <!-- Search Input -->
         <div class="lg:col-span-2">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Search guests...</mat-label>
+            <mat-label><ng-container i18n>Search guests...</ng-container></mat-label>
             <mat-icon matPrefix class="text-gray-400">search</mat-icon>
-            <input matInput placeholder="Name, email, or phone" formControlName="search">
+            <input matInput placeholder="Name, email, or phone" i18n-placeholder formControlName="search">
           </mat-form-field>
         </div>
 
         <!-- Status Filter -->
         <div>
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Status</mat-label>
+            <mat-label><ng-container i18n>Status</ng-container></mat-label>
             <mat-select formControlName="status">
               @for (status of statusOptions; track status.value) {
                 <mat-option [value]="status.value">{{ status.label }}</mat-option>
@@ -93,7 +93,7 @@
         <!-- Guest Type Filter -->
         <div>
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Guest Type</mat-label>
+            <mat-label><ng-container i18n>Guest Type</ng-container></mat-label>
             <mat-select formControlName="guestType">
               @for (type of guestTypeOptions; track type.value) {
                 <mat-option [value]="type.value">{{ type.label }}</mat-option>
@@ -111,7 +111,7 @@
 
         <!-- Guest Information Column -->
         <ng-container matColumnDef="guest">
-          <th mat-header-cell *matHeaderCellDef>Guest</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Guest</ng-container></th>
           <td mat-cell *matCellDef="let guest">
             <div class="flex items-center">
               <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold mr-3">
@@ -129,7 +129,7 @@
 
         <!-- Email Column -->
         <ng-container matColumnDef="email">
-          <th mat-header-cell *matHeaderCellDef>Email</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Email</ng-container></th>
           <td mat-cell *matCellDef="let guest">
             <div class="text-sm">{{ guest.email }}</div>
           </td>
@@ -137,7 +137,7 @@
 
         <!-- Phone Column -->
         <ng-container matColumnDef="phone">
-          <th mat-header-cell *matHeaderCellDef>Phone</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Phone</ng-container></th>
           <td mat-cell *matCellDef="let guest">
             <div class="text-sm">{{ guest.phone }}</div>
           </td>
@@ -145,15 +145,15 @@
 
         <!-- Stats Column -->
         <ng-container matColumnDef="stats">
-          <th mat-header-cell *matHeaderCellDef>Stays</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Stays</ng-container></th>
           <td mat-cell *matCellDef="let guest">
-            <div class="font-medium">{{ guest.totalStays || 0 }} stays</div>
+            <div class="font-medium"><ng-container i18n>{{ guest.totalStays || 0 }} stays</ng-container></div>
           </td>
         </ng-container>
 
         <!-- Spent Column -->
         <ng-container matColumnDef="spent">
-          <th mat-header-cell *matHeaderCellDef>Total Spent</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Total Spent</ng-container></th>
           <td mat-cell *matCellDef="let guest">
             <div class="font-bold">{{ (guest.totalSpent || 0) | currency:(storeStore.selectedStore()?.currency || 'USD') }}</div>
           </td>
@@ -161,7 +161,7 @@
 
         <!-- Last Stay Column -->
         <ng-container matColumnDef="lastStay">
-          <th mat-header-cell *matHeaderCellDef>Last Stay</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Last Stay</ng-container></th>
           <td mat-cell *matCellDef="let guest">
             {{ formatDate(guest.lastStayDate) }}
           </td>
@@ -169,7 +169,7 @@
 
         <!-- Status Column -->
         <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
           <td mat-cell *matCellDef="let guest">
             <mat-chip [ngClass]="getStatusChipClass(getGuestStatus(guest))">
               {{ getGuestStatus(guest) | titlecase }}
@@ -179,7 +179,7 @@
 
         <!-- Actions Column -->
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Actions</ng-container></th>
           <td mat-cell *matCellDef="let guest">
             <button mat-icon-button [matMenuTriggerFor]="actionMenu" (click)="$event.stopPropagation()">
               <mat-icon>more_vert</mat-icon>
@@ -188,28 +188,28 @@
             <mat-menu #actionMenu="matMenu">
               <button mat-menu-item (click)="viewGuestDetails(guest)" [disabled]="isUpdating()">
                 <mat-icon>visibility</mat-icon>
-                <span>View Details</span>
+                <span><ng-container i18n>View Details</ng-container></span>
               </button>
               @if (canEdit(guest)) {
                 <button mat-menu-item (click)="editGuest(guest)" [disabled]="isUpdating()">
                   <mat-icon>edit</mat-icon>
-                  <span>Edit Guest</span>
+                  <span><ng-container i18n>Edit Guest</ng-container></span>
                 </button>
               }
               <mat-divider></mat-divider>
               <button mat-menu-item (click)="toggleVipStatus(guest)" [disabled]="isUpdating()">
                 <mat-icon>{{ guest.isVip ? 'star_border' : 'star' }}</mat-icon>
-                <span>{{ guest.isVip ? 'Remove VIP' : 'Make VIP' }}</span>
+                <span>@if (guest.isVip) {<ng-container i18n>Remove VIP</ng-container>} @else {<ng-container i18n>Make VIP</ng-container>}</span>
               </button>
               <button mat-menu-item (click)="toggleBlacklistStatus(guest)" [disabled]="isUpdating()">
                 <mat-icon>{{ guest.blacklisted ? 'check_circle' : 'block' }}</mat-icon>
-                <span>{{ guest.blacklisted ? 'Remove from Blacklist' : 'Add to Blacklist' }}</span>
+                <span>@if (guest.blacklisted) {<ng-container i18n>Remove from Blacklist</ng-container>} @else {<ng-container i18n>Add to Blacklist</ng-container>}</span>
               </button>
               @if (canDelete(guest)) {
                 <mat-divider></mat-divider>
                 <button mat-menu-item (click)="deleteGuest(guest)" [disabled]="isUpdating()">
                   <mat-icon color="warn">delete</mat-icon>
-                  <span>Delete Guest</span>
+                  <span><ng-container i18n>Delete Guest</ng-container></span>
                 </button>
               }
             </mat-menu>
@@ -239,15 +239,13 @@
         <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
           <mat-icon class="text-4xl text-gray-400">people</mat-icon>
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">No guests found</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2"><ng-container i18n>No guests found</ng-container></h3>
         <p class="text-gray-500 mb-6">
-          {{ filterForm.get('search')?.value
-            ? 'Try adjusting your search to find matching guests.'
-            : 'Get started by creating your first guest profile.' }}
+          @if (filterForm.get('search')?.value) {<ng-container i18n>Try adjusting your search to find matching guests.</ng-container>} @else {<ng-container i18n>Get started by creating your first guest profile.</ng-container>}
         </p>
         <button matButton="filled" (click)="createGuest()">
           <mat-icon>person_add</mat-icon>
-          Create New Guest
+          <ng-container i18n>Create New Guest</ng-container>
         </button>
       </div>
     }
@@ -258,12 +256,12 @@
       <div class="flex">
         <mat-icon class="text-red-500 mr-2">error</mat-icon>
         <div>
-          <h3 class="text-red-800 font-medium">Error loading guests</h3>
+          <h3 class="text-red-800 font-medium"><ng-container i18n>Error loading guests</ng-container></h3>
           <p class="text-red-700 text-sm mt-1">{{ guests.error() }}</p>
           <div class="mt-3 flex space-x-3">
             <button mat-button color="warn" (click)="reloadData()" class="!text-red-600">
               <mat-icon class="mr-1">refresh</mat-icon>
-              Retry
+              <ng-container i18n>Retry</ng-container>
             </button>
           </div>
         </div>

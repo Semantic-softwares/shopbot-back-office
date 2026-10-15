@@ -91,22 +91,22 @@ export class ChannelManagementMapping implements OnInit {
   protected setupSteps = signal<SetupStep[]>([
     {
       id: 1,
-      title: 'Sync Property',
-      description: 'Register your hotel with Channex',
+      title: $localize`Sync Property`,
+      description: $localize`Register your hotel with Channex`,
       status: 'pending',
       icon: 'hotel',
     },
     {
       id: 2,
-      title: 'Sync Room Types',
-      description: 'Map your room types to distribution channels',
+      title: $localize`Sync Room Types`,
+      description: $localize`Map your room types to distribution channels`,
       status: 'pending',
       icon: 'meeting_room',
     },
     {
       id: 3,
-      title: 'Connect Channels',
-      description: 'Link to Booking.com, Airbnb, etc.',
+      title: $localize`Connect Channels`,
+      description: $localize`Link to Booking.com, Airbnb, etc.`,
       status: 'pending',
       icon: 'link',
     },
@@ -371,7 +371,7 @@ export class ChannelManagementMapping implements OnInit {
       property_id: propertyId,
       url: `${baseUrl}/webhooks/channex/reservations`,
       events: [
-        { id: 'booking', title: 'Booking' },
+        { id: 'booking', title: $localize`Booking` },
       ],
       is_active: true,
       send_data: true,
@@ -382,7 +382,7 @@ export class ChannelManagementMapping implements OnInit {
       property_id: propertyId,
       url: `${baseUrl}/webhooks/channex/messages`,
       events: [
-        { id: 'message', title: 'Message' },
+        { id: 'message', title: $localize`Message` },
       ],
       send_data: true,
       is_active: true,
@@ -586,7 +586,7 @@ export class ChannelManagementMapping implements OnInit {
    * Show success message
    */
   private showSuccess(message: string): void {
-    this.snackBar.open(message, 'Close', {
+    this.snackBar.open(message, $localize`Close`, {
       duration: 5000,
       horizontalPosition: 'end',
       verticalPosition: 'top',
@@ -598,7 +598,7 @@ export class ChannelManagementMapping implements OnInit {
    * Show error message
    */
   private showError(message: string): void {
-    this.snackBar.open(message, 'Close', {
+    this.snackBar.open(message, $localize`Close`, {
       duration: 7000,
       horizontalPosition: 'end',
       verticalPosition: 'top',

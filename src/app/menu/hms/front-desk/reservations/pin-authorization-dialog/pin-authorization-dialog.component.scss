@@ -11,8 +11,8 @@
 .dialog-content {
   .mat-mdc-form-field {
     .mdc-text-field--outlined {
-      background-color: #f9fafb;
-      border-color: #e5e7eb;
+      background-color: light-dark(#f9fafb, #1c1b1c);
+      border-color: light-dark(#e5e7eb, #48464b);
       
       &:hover {
         border-color: #3b82f6;

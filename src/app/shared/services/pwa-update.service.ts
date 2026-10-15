@@ -42,8 +42,8 @@ export class PwaUpdateService {
     this.swUpdate.unrecoverable.subscribe((evt) => {
       console.error('⚠️ Service Worker unrecoverable state:', evt.reason);
       const ref = this.snackBar.open(
-        'An error occurred. Please reload the app.',
-        'Reload',
+        $localize`An error occurred. Please reload the app.`,
+        $localize`Reload`,
         { duration: 0 }
       );
       ref.onAction().subscribe(() => {
@@ -74,8 +74,8 @@ export class PwaUpdateService {
 
   private promptUpdate(): void {
     const snackBarRef = this.snackBar.open(
-      '🚀 A new version is available!',
-      'Update Now',
+      $localize`🚀 A new version is available!`,
+      $localize`Update Now`,
       {
         duration: 0,
         horizontalPosition: 'center',

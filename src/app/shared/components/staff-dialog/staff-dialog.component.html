@@ -1,49 +1,49 @@
 <h2 mat-dialog-title class="!m-0 !p-6 !pb-4">
-      {{ isEditMode() ? 'Edit Staff Member' : 'Add Staff Member' }}
+      @if (isEditMode()) {<ng-container i18n>Edit Staff Member</ng-container>} @else {<ng-container i18n>Add Staff Member</ng-container>}
     </h2>
 
     <mat-dialog-content class="!px-6 !py-0">
       <form [formGroup]="staffForm" class="flex flex-col gap-4">
         <!-- Name -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Full Name</mat-label>
-          <input matInput formControlName="name" placeholder="Enter full name">
+          <mat-label><ng-container i18n>Full Name</ng-container></mat-label>
+          <input matInput formControlName="name" placeholder="Enter full name" i18n-placeholder>
           <mat-icon matSuffix>person</mat-icon>
           @if (staffForm.get('name')?.hasError('required') && staffForm.get('name')?.touched) {
-            <mat-error>Name is required</mat-error>
+            <mat-error><ng-container i18n>Name is required</ng-container></mat-error>
           }
         </mat-form-field>
 
         <!-- Email -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Email Address</mat-label>
-          <input matInput formControlName="email" type="email" placeholder="Enter email address">
+          <mat-label><ng-container i18n>Email Address</ng-container></mat-label>
+          <input matInput formControlName="email" type="email" placeholder="Enter email address" i18n-placeholder>
           <mat-icon matSuffix>email</mat-icon>
           @if (staffForm.get('email')?.hasError('required') && staffForm.get('email')?.touched) {
-            <mat-error>Email is required</mat-error>
+            <mat-error><ng-container i18n>Email is required</ng-container></mat-error>
           }
           @if (staffForm.get('email')?.hasError('email') && staffForm.get('email')?.touched) {
-            <mat-error>Please enter a valid email</mat-error>
+            <mat-error><ng-container i18n>Please enter a valid email</ng-container></mat-error>
           }
         </mat-form-field>
 
         <!-- Phone Number -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Phone Number</mat-label>
-          <input matInput formControlName="phoneNumber" placeholder="Enter phone number">
+          <mat-label><ng-container i18n>Phone Number</ng-container></mat-label>
+          <input matInput formControlName="phoneNumber" placeholder="Enter phone number" i18n-placeholder>
           <mat-icon matSuffix>phone</mat-icon>
           @if (staffForm.get('phoneNumber')?.hasError('required') && staffForm.get('phoneNumber')?.touched) {
-            <mat-error>Phone number is required</mat-error>
+            <mat-error><ng-container i18n>Phone number is required</ng-container></mat-error>
           }
         </mat-form-field>
 
         <!-- Gender -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Gender</mat-label>
+          <mat-label><ng-container i18n>Gender</ng-container></mat-label>
           <mat-select formControlName="gender">
-            <mat-option value="male">Male</mat-option>
-            <mat-option value="female">Female</mat-option>
-            <mat-option value="other">Other</mat-option>
+            <mat-option value="male"><ng-container i18n>Male</ng-container></mat-option>
+            <mat-option value="female"><ng-container i18n>Female</ng-container></mat-option>
+            <mat-option value="other"><ng-container i18n>Other</ng-container></mat-option>
           </mat-select>
           <mat-icon matSuffix>wc</mat-icon>
         </mat-form-field>
@@ -51,16 +51,16 @@
         @if (!isEditMode()) {
           <div class="flex items-start gap-2 text-sm text-gray-500 bg-gray-50 rounded-lg p-3">
             <mat-icon class="!text-lg !w-5 !h-5 text-gray-400 mt-0.5">mail_outline</mat-icon>
-            <span>They'll be emailed a link to set their own password and log in.</span>
+            <span><ng-container i18n>They'll be emailed a link to set their own password and log in.</ng-container></span>
           </div>
         }
 
         <!-- Role -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Role</mat-label>
+          <mat-label><ng-container i18n>Role</ng-container></mat-label>
           <mat-select formControlName="role">
             @if (rolesResource.isLoading()) {
-              <mat-option disabled>Loading roles...</mat-option>
+              <mat-option disabled><ng-container i18n>Loading roles...</ng-container></mat-option>
             } @else {
               @for (role of rolesResource.value(); track role._id) {
                 <mat-option [value]="role._id">
@@ -73,19 +73,19 @@
           </mat-select>
           <mat-icon matSuffix>admin_panel_settings</mat-icon>
           @if (staffForm.get('role')?.hasError('required') && staffForm.get('role')?.touched) {
-            <mat-error>Role is required</mat-error>
+            <mat-error><ng-container i18n>Role is required</ng-container></mat-error>
           }
         </mat-form-field>
       </form>
     </mat-dialog-content>
 
     <mat-dialog-actions align="end" class="!px-6 !py-4">
-      <button mat-button mat-dialog-close [disabled]="saving()">Cancel</button>
+      <button mat-button mat-dialog-close [disabled]="saving()"><ng-container i18n>Cancel</ng-container></button>
       <button mat-flat-button color="primary" (click)="saveStaff()" 
               [disabled]="staffForm.invalid || saving()">
         @if (saving()) {
           <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
         }
-        {{ isEditMode() ? 'Update' : 'Create' }}
+        @if (isEditMode()) {<ng-container i18n>Update</ng-container>} @else {<ng-container i18n>Create</ng-container>}
       </button>
     </mat-dialog-actions>

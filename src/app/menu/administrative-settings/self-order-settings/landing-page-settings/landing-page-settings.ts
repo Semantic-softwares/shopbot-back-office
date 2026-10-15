@@ -21,6 +21,7 @@ import {
   LandingHighlight,
   LandingPageSettings,
 } from '../../../../shared/models/landing-page.model';
+import { TrPipe } from '../../../../shared/i18n/tr.pipe';
 
 const MAX_VIDEO_MB = 40;
 
@@ -32,7 +33,7 @@ const MAX_VIDEO_MB = 40;
 @Component({
   selector: 'app-landing-page-settings',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     FormsModule,
     MatButtonModule,
     MatButtonToggleModule,
@@ -97,7 +98,7 @@ export class LandingPageSettingsComponent {
     input.value = '';
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      this.snackBar.open('Please choose an image file.', 'Close', { duration: 4000 });
+      this.snackBar.open($localize`Please choose an image file.`, $localize`Close`, { duration: 4000 });
       return;
     }
 
@@ -108,7 +109,7 @@ export class LandingPageSettingsComponent {
         data: {
           file,
           aspectRatio: 16 / 9,
-          title: 'Crop background image',
+          title: $localize`Crop background image`,
           hint: 'Wide images work best. On computers the text sits on the left, so keep the main subject to the right.',
         } satisfies ImageCropperDialogData,
       })
@@ -126,7 +127,7 @@ export class LandingPageSettingsComponent {
             },
             error: () => {
               this.uploadingImage.set(false);
-              this.snackBar.open('Could not upload that image.', 'Close', { duration: 4000 });
+              this.snackBar.open($localize`Could not upload that image.`, $localize`Close`, { duration: 4000 });
             },
           });
       });
@@ -138,11 +139,11 @@ export class LandingPageSettingsComponent {
     input.value = '';
     if (!file) return;
     if (!file.type.startsWith('video/')) {
-      this.snackBar.open('Please choose a video file (MP4 or WebM).', 'Close', { duration: 4000 });
+      this.snackBar.open($localize`Please choose a video file (MP4 or WebM).`, $localize`Close`, { duration: 4000 });
       return;
     }
     if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
-      this.snackBar.open(`That video is over ${MAX_VIDEO_MB} MB. Trim or compress it and try again.`, 'Close', {
+      this.snackBar.open($localize`That video is over ${MAX_VIDEO_MB} MB. Trim or compress it and try again.`, $localize`Close`, {
         duration: 6000,
       });
       return;
@@ -161,7 +162,7 @@ export class LandingPageSettingsComponent {
       },
       error: () => {
         this.videoProgress.set(null);
-        this.snackBar.open('Could not upload that video.', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Could not upload that video.`, $localize`Close`, { duration: 4000 });
       },
     });
   }

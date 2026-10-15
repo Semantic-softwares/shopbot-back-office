@@ -22,13 +22,14 @@ import {
   ImageCropperDialogComponent,
   ImageCropperDialogData,
 } from '../../../shared/components/image-cropper-dialog/image-cropper-dialog.component';
+import { TrPipe } from '../../../shared/i18n/tr.pipe';
 
 declare const google: any;
 
 @Component({
   selector: 'app-hotel-info',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
@@ -124,31 +125,31 @@ export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
   hotelInfoForm!: FormGroup;
 
   timezoneOptions = [
-    { value: 'UTC-12', label: '(GMT-12:00) International Date Line West' },
-    { value: 'UTC-11', label: '(GMT-11:00) Midway Island, Samoa' },
-    { value: 'UTC-10', label: '(GMT-10:00) Hawaii' },
-    { value: 'UTC-9', label: '(GMT-09:00) Alaska' },
-    { value: 'UTC-8', label: '(GMT-08:00) Pacific Time (US & Canada)' },
-    { value: 'UTC-7', label: '(GMT-07:00) Mountain Time (US & Canada)' },
-    { value: 'UTC-6', label: '(GMT-06:00) Central Time (US & Canada)' },
-    { value: 'UTC-5', label: '(GMT-05:00) Eastern Time (US & Canada)' },
-    { value: 'UTC-4', label: '(GMT-04:00) Atlantic Time (Canada)' },
-    { value: 'UTC-3', label: '(GMT-03:00) Buenos Aires, Georgetown' },
-    { value: 'UTC-2', label: '(GMT-02:00) Mid-Atlantic' },
-    { value: 'UTC-1', label: '(GMT-01:00) Azores, Cape Verde Islands' },
-    { value: 'UTC+0', label: '(GMT+00:00) Greenwich Mean Time' },
-    { value: 'UTC+1', label: '(GMT+01:00) Amsterdam, Berlin, Rome' },
-    { value: 'UTC+2', label: '(GMT+02:00) Cairo, Athens, Istanbul' },
-    { value: 'UTC+3', label: '(GMT+03:00) Moscow, Kuwait, Riyadh' },
-    { value: 'UTC+4', label: '(GMT+04:00) Abu Dhabi, Muscat' },
-    { value: 'UTC+5', label: '(GMT+05:00) Islamabad, Karachi' },
-    { value: 'UTC+6', label: '(GMT+06:00) Almaty, Dhaka' },
-    { value: 'UTC+7', label: '(GMT+07:00) Bangkok, Hanoi, Jakarta' },
-    { value: 'UTC+8', label: '(GMT+08:00) Beijing, Perth, Singapore' },
-    { value: 'UTC+9', label: '(GMT+09:00) Tokyo, Seoul, Osaka' },
-    { value: 'UTC+10', label: '(GMT+10:00) Eastern Australia, Guam' },
-    { value: 'UTC+11', label: '(GMT+11:00) Magadan, Solomon Islands' },
-    { value: 'UTC+12', label: '(GMT+12:00) Auckland, Wellington' }
+    { value: 'UTC-12', label: $localize`(GMT-12:00) International Date Line West` },
+    { value: 'UTC-11', label: $localize`(GMT-11:00) Midway Island, Samoa` },
+    { value: 'UTC-10', label: $localize`(GMT-10:00) Hawaii` },
+    { value: 'UTC-9', label: $localize`(GMT-09:00) Alaska` },
+    { value: 'UTC-8', label: $localize`(GMT-08:00) Pacific Time (US & Canada)` },
+    { value: 'UTC-7', label: $localize`(GMT-07:00) Mountain Time (US & Canada)` },
+    { value: 'UTC-6', label: $localize`(GMT-06:00) Central Time (US & Canada)` },
+    { value: 'UTC-5', label: $localize`(GMT-05:00) Eastern Time (US & Canada)` },
+    { value: 'UTC-4', label: $localize`(GMT-04:00) Atlantic Time (Canada)` },
+    { value: 'UTC-3', label: $localize`(GMT-03:00) Buenos Aires, Georgetown` },
+    { value: 'UTC-2', label: $localize`(GMT-02:00) Mid-Atlantic` },
+    { value: 'UTC-1', label: $localize`(GMT-01:00) Azores, Cape Verde Islands` },
+    { value: 'UTC+0', label: $localize`(GMT+00:00) Greenwich Mean Time` },
+    { value: 'UTC+1', label: $localize`(GMT+01:00) Amsterdam, Berlin, Rome` },
+    { value: 'UTC+2', label: $localize`(GMT+02:00) Cairo, Athens, Istanbul` },
+    { value: 'UTC+3', label: $localize`(GMT+03:00) Moscow, Kuwait, Riyadh` },
+    { value: 'UTC+4', label: $localize`(GMT+04:00) Abu Dhabi, Muscat` },
+    { value: 'UTC+5', label: $localize`(GMT+05:00) Islamabad, Karachi` },
+    { value: 'UTC+6', label: $localize`(GMT+06:00) Almaty, Dhaka` },
+    { value: 'UTC+7', label: $localize`(GMT+07:00) Bangkok, Hanoi, Jakarta` },
+    { value: 'UTC+8', label: $localize`(GMT+08:00) Beijing, Perth, Singapore` },
+    { value: 'UTC+9', label: $localize`(GMT+09:00) Tokyo, Seoul, Osaka` },
+    { value: 'UTC+10', label: $localize`(GMT+10:00) Eastern Australia, Guam` },
+    { value: 'UTC+11', label: $localize`(GMT+11:00) Magadan, Solomon Islands` },
+    { value: 'UTC+12', label: $localize`(GMT+12:00) Auckland, Wellington` }
   ];
 
   ngAfterViewInit(): void {
@@ -209,7 +210,7 @@ export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
 
   useCurrentLocationForStore(): void {
     if (!navigator.geolocation) {
-      this.snackBar.open('Location is not available on this device.', 'Close', { duration: 4000 });
+      this.snackBar.open($localize`Location is not available on this device.`, $localize`Close`, { duration: 4000 });
       return;
     }
     this.isLocating.set(true);
@@ -232,7 +233,7 @@ export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
       },
       () => {
         this.isLocating.set(false);
-        this.snackBar.open('Could not get your current location.', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Could not get your current location.`, $localize`Close`, { duration: 4000 });
       },
       { enableHighAccuracy: true, timeout: 10000 },
     );
@@ -257,7 +258,7 @@ export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
     if (!file || !storeId) return;
 
     if (!file.type.startsWith('image/')) {
-      this.snackBar.open('Please choose an image file.', 'Close', { duration: 4000 });
+      this.snackBar.open($localize`Please choose an image file.`, $localize`Close`, { duration: 4000 });
       return;
     }
 
@@ -291,11 +292,11 @@ export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
           next: ({ photo }: { photo: string }) => {
             uploading.set(false);
             this.storeStore.updateStore({ [field]: photo });
-            this.snackBar.open(isLogo ? 'Logo updated.' : 'Banner updated.', 'Close', { duration: 3000 });
+            this.snackBar.open(isLogo ? $localize`Logo updated.` : $localize`Banner updated.`, $localize`Close`, { duration: 3000 });
           },
           error: () => {
             uploading.set(false);
-            this.snackBar.open('Could not upload that image.', 'Close', { duration: 4000 });
+            this.snackBar.open($localize`Could not upload that image.`, $localize`Close`, { duration: 4000 });
           },
         });
       });
@@ -425,19 +426,19 @@ export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
               this.storeStore.updateStore(updatedStore);
               this.storeService.saveStoreLocally(updatedStore);
               this.saving.set(false);
-              this.snackBar.open('Hotel information saved successfully!', 'Close', { duration: 3000 });
+              this.snackBar.open($localize`Hotel information saved successfully!`, $localize`Close`, { duration: 3000 });
             },
             error: (fetchError) => {
               console.error('Error fetching updated store:', fetchError);
               this.saving.set(false);
-              this.snackBar.open('Settings saved but failed to update local data.', 'Close', { duration: 5000 });
+              this.snackBar.open($localize`Settings saved but failed to update local data.`, $localize`Close`, { duration: 5000 });
             }
           });
         },
         error: (error) => {
           console.error('Error saving hotel info:', error);
           this.saving.set(false);
-          this.snackBar.open('Failed to save hotel information.', 'Close', { duration: 5000 });
+          this.snackBar.open($localize`Failed to save hotel information.`, $localize`Close`, { duration: 5000 });
         }
       });
     }
@@ -524,14 +525,14 @@ export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
           next: (response) => {
             this.resetting.set(false);
             this.selectedResetTargets.set([]);
-            this.snackBar.open(response.message || 'Selected EMS data reset successfully.', 'Close', {
+            this.snackBar.open(response.message || 'Selected EMS data reset successfully.', $localize`Close`, {
               duration: 4500,
             });
           },
           error: (error) => {
             this.resetting.set(false);
             const message = error?.error?.message || 'Failed to reset selected EMS data.';
-            this.snackBar.open(message, 'Close', { duration: 5000 });
+            this.snackBar.open(message, $localize`Close`, { duration: 5000 });
           },
         });
     });
@@ -567,14 +568,14 @@ export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
           next: (response) => {
             this.resettingPms.set(false);
             this.selectedPmsResetTargets.set([]);
-            this.snackBar.open(response.message || 'Selected PMS data reset successfully.', 'Close', {
+            this.snackBar.open(response.message || 'Selected PMS data reset successfully.', $localize`Close`, {
               duration: 4500,
             });
           },
           error: (error) => {
             this.resettingPms.set(false);
             const message = error?.error?.message || 'Failed to reset selected PMS data.';
-            this.snackBar.open(message, 'Close', { duration: 5000 });
+            this.snackBar.open(message, $localize`Close`, { duration: 5000 });
           },
         });
     });
@@ -610,14 +611,14 @@ export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
           next: (response) => {
             this.resettingErp.set(false);
             this.selectedErpResetTargets.set([]);
-            this.snackBar.open(response.message || 'Selected ERP data reset successfully.', 'Close', {
+            this.snackBar.open(response.message || 'Selected ERP data reset successfully.', $localize`Close`, {
               duration: 4500,
             });
           },
           error: (error) => {
             this.resettingErp.set(false);
             const message = error?.error?.message || 'Failed to reset selected ERP data.';
-            this.snackBar.open(message, 'Close', { duration: 5000 });
+            this.snackBar.open(message, $localize`Close`, { duration: 5000 });
           },
         });
     });

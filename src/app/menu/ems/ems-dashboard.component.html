@@ -48,7 +48,7 @@
 
     <mat-sidenav-content>
       <app-toolbar
-        [title]="!isMobile() ? 'Estate Management System' : 'EMS'"
+        [title]="!isMobile() ? ('Estate Management System' | tr) : ('EMS' | tr)"
         (menuToggle)="toggleSidenav()">
       </app-toolbar>
       <div class="h-[calc(100vh-64px)] overflow-scroll">

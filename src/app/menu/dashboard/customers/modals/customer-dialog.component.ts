@@ -97,8 +97,8 @@ export class CustomerDialogComponent {
           }, (err) => {
             this.isLoading.set(false);
             this.snackBar.open(
-              "Server or internet error please try again",
-              "Close",
+              $localize`Server or internet error please try again`,
+              $localize`Close`,
               { duration: 3000 }
             );
           }
@@ -110,15 +110,15 @@ export class CustomerDialogComponent {
               if (data.err.keyPattern.hasOwnProperty("email")) {
               this.isLoading.set(false);
               this.snackBar.open(
-                "Email has already been used.",
-                "Close",
+                $localize`Email has already been used.`,
+                $localize`Close`,
                 { duration: 3000 }
               );
             } else if (data.err.keyPattern.hasOwnProperty("phoneNumber")) {
               this.isLoading.set(false);
               this.snackBar.open(
-                "Phone number has already been used.",
-                "Close",
+                $localize`Phone number has already been used.`,
+                $localize`Close`,
                 { duration: 3000 }
               );
             }
@@ -129,8 +129,8 @@ export class CustomerDialogComponent {
         (err) => {
           this.isLoading.set(false);
           this.snackBar.open(
-            "Server or internet error please try again",
-            "Close",
+            $localize`Server or internet error please try again`,
+            $localize`Close`,
             { duration: 3000 }
           );
         }

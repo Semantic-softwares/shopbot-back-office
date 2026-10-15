@@ -1,13 +1,13 @@
- <h2 mat-dialog-title>Edit Room Pricing ({{numberOfNights()}}) night(s)</h2>
+ <h2 mat-dialog-title><ng-container i18n>Edit Room Pricing ({{numberOfNights()}}) night(s)</ng-container></h2>
 <mat-dialog-content>
   <form [formGroup]="pricingForm" class="space-y-4">
     <!-- Base Price Section -->
     <div class="space-y-3">
-      <div class="text-sm font-semibold text-gray-700">Base Price (Before Discount)</div>
+      <div class="text-sm font-semibold text-gray-700"><ng-container i18n>Base Price (Before Discount)</ng-container></div>
       <div class="grid grid-cols-2 gap-2">
         <!-- Price Per Night (Read-only) -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Price/Night</mat-label>
+          <mat-label><ng-container i18n>Price/Night</ng-container></mat-label>
           <input matInput
             currencyMask
             [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
@@ -18,14 +18,14 @@
 
         <!-- Subtotal (Read-only) - BEFORE any adjustments -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Subtotal</mat-label>
+          <mat-label><ng-container i18n>Subtotal</ng-container></mat-label>
           <input matInput 
             currencyMask 
             [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
             formControlName="subtotal" 
             readonly>
           <mat-icon matPrefix>{{storeStore.selectedStore()?.currency}}</mat-icon>
-          <mat-hint>{{ pricePerNight() | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency) }} × {{ numberOfNights() }} nights</mat-hint>
+          <mat-hint><ng-container i18n>{{ pricePerNight() | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency) }} × {{ numberOfNights() }} nights</ng-container></mat-hint>
         </mat-form-field>
       </div>
     </div>
@@ -34,11 +34,11 @@
 
     <!-- Discount Section -->
     <div class="space-y-3">
-      <div class="text-sm font-semibold text-gray-700">Discount</div>
+      <div class="text-sm font-semibold text-gray-700"><ng-container i18n>Discount</ng-container></div>
       <div class="grid grid-cols-2 gap-2">
         <!-- Discount Type Select -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Discount Type</mat-label>
+          <mat-label><ng-container i18n>Discount Type</ng-container></mat-label>
           <mat-select formControlName="discountType">
             @for (option of discountTypeOptions; track option.value) {
               <mat-option [value]="option.value">
@@ -51,7 +51,7 @@
 
         <!-- Discount Value -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Discount Value</mat-label>
+          <mat-label><ng-container i18n>Discount Value</ng-container></mat-label>
           <input matInput 
             type="number" 
             formControlName="discount" 
@@ -59,12 +59,12 @@
           <mat-icon matPrefix>money_off</mat-icon>
           @if (pricingForm.get('discountType')?.value === 'percentage') {
             <mat-hint>
-              % of subtotal (= {{ (subtotal() * discount() / 100).toFixed(2) | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency)}})
+              <ng-container i18n>% of subtotal (= {{ (subtotal() * discount() / 100).toFixed(2) | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency)}})</ng-container>
             </mat-hint>
           }
           @if (pricingForm.get('discountType')?.value === 'amount') {
             <mat-hint>
-              Fixed amount
+              <ng-container i18n>Fixed amount</ng-container>
             </mat-hint>
           }
         </mat-form-field>
@@ -75,11 +75,11 @@
 
     <!-- Taxes Section -->
     <div class="space-y-3">
-      <div class="text-sm font-semibold text-gray-700">Taxes & Fees</div>
+      <div class="text-sm font-semibold text-gray-700"><ng-container i18n>Taxes & Fees</ng-container></div>
       
       <!-- Taxes -->
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Taxes</mat-label>
+        <mat-label><ng-container i18n>Taxes</ng-container></mat-label>
         <input matInput 
           currencyMask 
           [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
@@ -91,7 +91,7 @@
       <div formGroupName="fees" class="space-y-3">
         <!-- Service Fee -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Service Fee</mat-label>
+          <mat-label><ng-container i18n>Service Fee</ng-container></mat-label>
           <input matInput 
             currencyMask 
             [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
@@ -102,7 +102,7 @@
 
         <!-- Cleaning Fee -->
         <mat-form-field appearance="outline" class="w-full" >
-          <mat-label>Cleaning Fee</mat-label>
+          <mat-label><ng-container i18n>Cleaning Fee</ng-container></mat-label>
           <input matInput 
             currencyMask 
             [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
@@ -113,7 +113,7 @@
 
         <!-- Resort Fee -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Resort Fee</mat-label>
+          <mat-label><ng-container i18n>Resort Fee</ng-container></mat-label>
           <input matInput 
             currencyMask 
             [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
@@ -124,7 +124,7 @@
 
         <!-- Other Fee -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Other Fee</mat-label>
+          <mat-label><ng-container i18n>Other Fee</ng-container></mat-label>
           <input matInput 
             currencyMask 
             [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
@@ -139,9 +139,9 @@
 
     <!-- Total Price (Read-only calculated) -->
     <div class="space-y-3">
-      <div class="text-sm font-semibold text-gray-700">Total Price (After Discount)</div>
+      <div class="text-sm font-semibold text-gray-700"><ng-container i18n>Total Price (After Discount)</ng-container></div>
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Total</mat-label>
+        <mat-label><ng-container i18n>Total</ng-container></mat-label>
         <input matInput 
           currencyMask 
           [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) }"
@@ -149,7 +149,7 @@
           readonly
           class="text-lg font-bold">
         <mat-icon matPrefix>{{storeStore.selectedStore()?.currency}}</mat-icon>
-        <mat-hint>Subtotal - Discount + Taxes + Fees</mat-hint>
+        <mat-hint><ng-container i18n>Subtotal - Discount + Taxes + Fees</ng-container></mat-hint>
       </mat-form-field>
     </div>
   </form>
@@ -158,9 +158,9 @@
 <!-- Dialog Actions -->
 <mat-dialog-actions align="end">
   <button matButton="outlined" (click)="onCancel()">
-    Cancel
+    <ng-container i18n>Cancel</ng-container>
   </button>
   <button matButton="filled" color="primary" (click)="onSave()" [disabled]="!pricingForm.valid">
-    Save Changes
+    <ng-container i18n>Save Changes</ng-container>
   </button>
 </mat-dialog-actions>

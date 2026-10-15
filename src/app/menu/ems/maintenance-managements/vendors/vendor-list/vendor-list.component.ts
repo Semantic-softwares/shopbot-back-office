@@ -80,9 +80,9 @@ export class VendorListComponent {
   displayedColumns = ['profileImage', 'name', 'contact', 'category', 'status', 'actions'];
 
   activeOptions = [
-    { value: '', label: 'All' },
-    { value: 'true', label: 'Active' },
-    { value: 'false', label: 'Inactive' },
+    { value: '', label: $localize`All` },
+    { value: 'true', label: $localize`Active` },
+    { value: 'false', label: $localize`Inactive` },
   ];
 
   readonly categoriesResource = rxResource({
@@ -94,7 +94,7 @@ export class VendorListComponent {
   readonly categoryOptions = computed(() => {
     const data = this.categoriesResource.value()?.data;
     return [
-      { value: '', label: 'All Categories' },
+      { value: '', label: $localize`All Categories` },
       ...(data?.map((c: { name: string }) => ({ value: c.name, label: c.name })) ?? []),
     ];
   });
@@ -184,10 +184,10 @@ export class VendorListComponent {
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title: 'Delete Vendor',
-        message: `Are you sure you want to delete vendor "${vendor.name}"? This action cannot be undone.`,
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
+        title: $localize`Delete Vendor`,
+        message: $localize`Are you sure you want to delete vendor "${vendor.name}"? This action cannot be undone.`,
+        confirmText: $localize`Delete`,
+        cancelText: $localize`Cancel`,
       },
     });
 
@@ -196,12 +196,12 @@ export class VendorListComponent {
 
       this.vendorService.delete(storeId, vendor._id).subscribe({
         next: () => {
-          this.snackBar.open('Vendor deleted', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Vendor deleted`, $localize`Close`, { duration: 3000 });
           this.vendorsResource.reload();
         },
         error: (error) => {
           const message = error?.error?.message || 'Failed to delete vendor';
-          this.snackBar.open(message, 'Close', { duration: 4000 });
+          this.snackBar.open(message, $localize`Close`, { duration: 4000 });
         },
       });
     });

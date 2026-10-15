@@ -29,6 +29,7 @@ import {
 import { StoreStore } from '../../../../shared/stores/store.store';
 import { ExportService } from '../../../../shared/services/export.service';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { ChartThemeService } from '../../../../shared/services/chart-theme.service';
 
 // Currency symbol to ISO code mapping
 const currencySymbolToCode: Record<string, string> = {
@@ -65,6 +66,8 @@ const currencySymbolToCode: Record<string, string> = {
   styleUrl: './guest-report.component.scss',
 })
 export class GuestReportComponent {
+  // Keeps Chart.js text/grid colours in step with the light/dark theme.
+  private readonly chartTheme = inject(ChartThemeService);
   private fb = inject(FormBuilder);
   private guestService = inject(GuestService);
   private storeStore = inject(StoreStore);
@@ -126,7 +129,7 @@ export class GuestReportComponent {
       datasets: [
         {
           data: data.map(d => d.totalGuests),
-          label: 'Total Guests',
+          label: $localize`Total Guests`,
           backgroundColor: 'rgba(59, 130, 246, 0.1)',
           borderColor: 'rgba(59, 130, 246, 1)',
           borderWidth: 2,
@@ -135,7 +138,7 @@ export class GuestReportComponent {
         },
         {
           data: data.map(d => d.newGuests),
-          label: 'New Guests',
+          label: $localize`New Guests`,
           backgroundColor: 'rgba(34, 197, 94, 0.1)',
           borderColor: 'rgba(34, 197, 94, 1)',
           borderWidth: 2,
@@ -144,7 +147,7 @@ export class GuestReportComponent {
         },
         {
           data: data.map(d => d.returningGuests),
-          label: 'Returning Guests',
+          label: $localize`Returning Guests`,
           backgroundColor: 'rgba(168, 85, 247, 0.1)',
           borderColor: 'rgba(168, 85, 247, 1)',
           borderWidth: 2,
@@ -200,14 +203,14 @@ export class GuestReportComponent {
         display: true,
         title: {
           display: true,
-          text: 'Date'
+          text: $localize`Date`
         }
       },
       y: {
         display: true,
         title: {
           display: true,
-          text: 'Number of Guests'
+          text: $localize`Number of Guests`
         },
         beginAtZero: true
       }

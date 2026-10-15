@@ -97,8 +97,8 @@ export class InvoiceActionsMenuComponent {
           .subscribe({
             next: () => {
               this.snackBar.open(
-                'Payment recorded and applied to invoice',
-                'Close',
+                $localize`Payment recorded and applied to invoice`,
+                $localize`Close`,
                 { duration: 3500 },
               );
               this.actionCompleted.emit('paid');
@@ -106,7 +106,7 @@ export class InvoiceActionsMenuComponent {
             error: (err: { error?: { message?: string } }) => {
               this.snackBar.open(
                 err?.error?.message || 'Failed to record payment',
-                'Close',
+                $localize`Close`,
                 { duration: 5000 },
               );
             },
@@ -117,7 +117,7 @@ export class InvoiceActionsMenuComponent {
   voidInvoice(): void {
     this.invoiceService.voidInvoice(this.invoice()._id).subscribe({
       next: () => {
-        this.snackBar.open('Invoice voided successfully', 'Close', {
+        this.snackBar.open($localize`Invoice voided successfully`, $localize`Close`, {
           duration: 3000,
         });
         this.actionCompleted.emit('voided');
@@ -125,7 +125,7 @@ export class InvoiceActionsMenuComponent {
       error: (err: { error?: { message?: string } }) => {
         this.snackBar.open(
           err?.error?.message || 'Failed to void invoice',
-          'Close',
+          $localize`Close`,
           { duration: 5000 },
         );
       },
@@ -135,7 +135,7 @@ export class InvoiceActionsMenuComponent {
   unvoidInvoice(): void {
     this.invoiceService.unvoidInvoice(this.invoice()._id).subscribe({
       next: () => {
-        this.snackBar.open('Invoice restored successfully', 'Close', {
+        this.snackBar.open($localize`Invoice restored successfully`, $localize`Close`, {
           duration: 3000,
         });
         this.actionCompleted.emit('unvoided');
@@ -143,7 +143,7 @@ export class InvoiceActionsMenuComponent {
       error: (err: { error?: { message?: string } }) => {
         this.snackBar.open(
           err?.error?.message || 'Failed to restore invoice',
-          'Close',
+          $localize`Close`,
           { duration: 5000 },
         );
       },
@@ -154,10 +154,10 @@ export class InvoiceActionsMenuComponent {
     const inv = this.invoice();
     const confirmRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title: 'Delete Invoice',
-        message: `Are you sure you want to delete invoice ${inv.invoiceNumber}? This action cannot be undone.`,
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
+        title: $localize`Delete Invoice`,
+        message: $localize`Are you sure you want to delete invoice ${inv.invoiceNumber}? This action cannot be undone.`,
+        confirmText: $localize`Delete`,
+        cancelText: $localize`Cancel`,
       },
     });
 
@@ -182,13 +182,13 @@ export class InvoiceActionsMenuComponent {
 
         this.invoiceService.deleteInvoice(inv._id).subscribe({
           next: () => {
-            this.snackBar.open('Invoice deleted', 'Close', { duration: 3000 });
+            this.snackBar.open($localize`Invoice deleted`, $localize`Close`, { duration: 3000 });
             this.actionCompleted.emit('deleted');
           },
           error: (err: { error?: { message?: string } }) => {
             this.snackBar.open(
               err?.error?.message || 'Failed to delete invoice',
-              'Close',
+              $localize`Close`,
               { duration: 5000 },
             );
           },

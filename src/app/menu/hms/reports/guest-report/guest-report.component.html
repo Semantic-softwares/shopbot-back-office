@@ -1,29 +1,29 @@
 <div class="p-6 min-h-screen">
   <!-- Header Section -->
   <app-page-header
-    title="Guest Report"
-    subtitle="Track and analyze guest occupancy patterns and trends">
+    title="Guest Report" i18n-title
+    subtitle="Track and analyze guest occupancy patterns and trends" i18n-subtitle>
      <ng-container actions>
     <button matButton="outlined" (click)="loadData()" [disabled]="loading()">
       <mat-icon>refresh</mat-icon>
-      Refresh
+      <ng-container i18n>Refresh</ng-container>
     </button>
     <button matButton="filled" color="primary"  [matMenuTriggerFor]="exportMenu">
       <mat-icon>file_download</mat-icon>
-      Export
+      <ng-container i18n>Export</ng-container>
     </button>
     <mat-menu #exportMenu="matMenu">
       <button mat-menu-item (click)="exportData('pdf')">
         <mat-icon>picture_as_pdf</mat-icon>
-        <span>Export as PDF</span>
+        <span><ng-container i18n>Export as PDF</ng-container></span>
       </button>
       <button mat-menu-item (click)="exportData('csv')">
         <mat-icon>description</mat-icon>
-        <span>Export as CSV</span>
+        <span><ng-container i18n>Export as CSV</ng-container></span>
       </button>
       <button mat-menu-item (click)="exportData('excel')">
         <mat-icon>table_chart</mat-icon>
-        <span>Export as Excel</span>
+        <span><ng-container i18n>Export as Excel</ng-container></span>
       </button>
     </mat-menu>
     </ng-container>
@@ -45,13 +45,13 @@
   <!-- Filters Section -->
   <mat-card appearance="outlined" class="mb-6">
     <mat-card-header>
-      <mat-card-title>Report Filters</mat-card-title>
+      <mat-card-title><ng-container i18n>Report Filters</ng-container></mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <form [formGroup]="filterForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
         <!-- Start Date -->
         <mat-form-field appearance="outline">
-          <mat-label>Start Date</mat-label>
+          <mat-label><ng-container i18n>Start Date</ng-container></mat-label>
           <input matInput [matDatepicker]="startPicker" formControlName="startDate">
           <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
           <mat-datepicker #startPicker></mat-datepicker>
@@ -59,7 +59,7 @@
 
         <!-- End Date -->
         <mat-form-field appearance="outline">
-          <mat-label>End Date</mat-label>
+          <mat-label><ng-container i18n>End Date</ng-container></mat-label>
           <input matInput [matDatepicker]="endPicker" formControlName="endDate">
           <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
           <mat-datepicker #endPicker></mat-datepicker>
@@ -67,35 +67,35 @@
 
         <!-- Report Type -->
         <mat-form-field appearance="outline">
-          <mat-label>Report Type</mat-label>
+          <mat-label><ng-container i18n>Report Type</ng-container></mat-label>
           <mat-select formControlName="reportType">
-            <mat-option value="daily">Daily</mat-option>
-            <mat-option value="weekly">Weekly</mat-option>
-            <mat-option value="monthly">Monthly</mat-option>
+            <mat-option value="daily"><ng-container i18n>Daily</ng-container></mat-option>
+            <mat-option value="weekly"><ng-container i18n>Weekly</ng-container></mat-option>
+            <mat-option value="monthly"><ng-container i18n>Monthly</ng-container></mat-option>
           </mat-select>
         </mat-form-field>
 
         <!-- Guest Type Filter -->
         <mat-form-field appearance="outline">
-          <mat-label>Guest Type</mat-label>
+          <mat-label><ng-container i18n>Guest Type</ng-container></mat-label>
           <mat-select formControlName="guestType">
-            <mat-option value="all">All Types</mat-option>
-            <mat-option value="business">Business</mat-option>
-            <mat-option value="leisure">Leisure</mat-option>
-            <mat-option value="group">Group</mat-option>
-            <mat-option value="extended">Extended Stay</mat-option>
+            <mat-option value="all"><ng-container i18n>All Types</ng-container></mat-option>
+            <mat-option value="business"><ng-container i18n>Business</ng-container></mat-option>
+            <mat-option value="leisure"><ng-container i18n>Leisure</ng-container></mat-option>
+            <mat-option value="group"><ng-container i18n>Group</ng-container></mat-option>
+            <mat-option value="extended"><ng-container i18n>Extended Stay</ng-container></mat-option>
           </mat-select>
         </mat-form-field>
 
         <!-- Room Type Filter -->
         <mat-form-field appearance="outline">
-          <mat-label>Room Type</mat-label>
+          <mat-label><ng-container i18n>Room Type</ng-container></mat-label>
           <mat-select formControlName="roomType">
-            <mat-option value="all">All Rooms</mat-option>
-            <mat-option value="standard">Standard</mat-option>
-            <mat-option value="deluxe">Deluxe</mat-option>
-            <mat-option value="suite">Suite</mat-option>
-            <mat-option value="executive">Executive</mat-option>
+            <mat-option value="all"><ng-container i18n>All Rooms</ng-container></mat-option>
+            <mat-option value="standard"><ng-container i18n>Standard</ng-container></mat-option>
+            <mat-option value="deluxe"><ng-container i18n>Deluxe</ng-container></mat-option>
+            <mat-option value="suite"><ng-container i18n>Suite</ng-container></mat-option>
+            <mat-option value="executive"><ng-container i18n>Executive</ng-container></mat-option>
           </mat-select>
         </mat-form-field>
       </form>
@@ -110,7 +110,7 @@
         <mat-card-content class="p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Guests</p>
+              <p class="text-sm font-medium text-gray-500 uppercase tracking-wide"><ng-container i18n>Total Guests</ng-container></p>
               <p class="text-2xl font-bold text-gray-900">{{ formatNumber(guestStats()!.totalGuests) }}</p>
               @if (guestStats()!.guestGrowth !== 0) {
                 <p class="text-sm mt-1 flex items-center gap-1" [ngClass]="getGrowthClass(guestStats()!.guestGrowth)">
@@ -135,10 +135,10 @@
         <mat-card-content class="p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Check-ins</p>
+              <p class="text-sm font-medium text-gray-500 uppercase tracking-wide"><ng-container i18n>Total Check-ins</ng-container></p>
               <p class="text-2xl font-bold text-gray-900">{{ formatNumber(guestStats()!.totalCheckIns) }}</p>
               <p class="text-sm text-gray-600 mt-1">
-                Check-outs: {{ formatNumber(guestStats()!.totalCheckOuts) }}
+                <ng-container i18n>Check-outs: {{ formatNumber(guestStats()!.totalCheckOuts) }}</ng-container>
               </p>
             </div>
             <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -153,10 +153,10 @@
         <mat-card-content class="p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Avg Stay Duration</p>
+              <p class="text-sm font-medium text-gray-500 uppercase tracking-wide"><ng-container i18n>Avg Stay Duration</ng-container></p>
               <p class="text-2xl font-bold text-gray-900">{{ formatDuration(guestStats()!.averageStayDuration) }}</p>
               <p class="text-sm text-gray-600 mt-1">
-                Occupancy: {{ formatPercent(guestStats()!.occupancyRate) }}
+                <ng-container i18n>Occupancy: {{ formatPercent(guestStats()!.occupancyRate) }}</ng-container>
               </p>
             </div>
             <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -171,9 +171,9 @@
         <mat-card-content class="p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Monthly Projection</p>
+              <p class="text-sm font-medium text-gray-500 uppercase tracking-wide"><ng-container i18n>Monthly Projection</ng-container></p>
               <p class="text-2xl font-bold text-gray-900">{{ formatNumber(guestStats()!.monthlyProjection) }}</p>
-              <p class="text-sm text-gray-600 mt-1">Based on current trends</p>
+              <p class="text-sm text-gray-600 mt-1"><ng-container i18n>Based on current trends</ng-container></p>
             </div>
             <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
               <mat-icon class="text-orange-600">trending_up</mat-icon>
@@ -188,7 +188,7 @@
       <!-- Guest Trend Chart -->
       <mat-card appearance="outlined">
         <mat-card-header>
-          <mat-card-title>Guest Trends</mat-card-title>
+          <mat-card-title><ng-container i18n>Guest Trends</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content>
           @if (guestData().length > 0) {
@@ -204,7 +204,7 @@
             <div class="h-80 flex items-center justify-center text-gray-500">
               <div class="text-center">
                 <mat-icon class="!w-12 !h-12 !text-5xl text-gray-400">bar_chart</mat-icon>
-                <p class="mt-2">No guest data available</p>
+                <p class="mt-2"><ng-container i18n>No guest data available</ng-container></p>
               </div>
             </div>
           }
@@ -214,7 +214,7 @@
       <!-- Guest Type Breakdown Chart -->
       <mat-card appearance="outlined">
         <mat-card-header>
-          <mat-card-title>Guest Type Breakdown</mat-card-title>
+          <mat-card-title><ng-container i18n>Guest Type Breakdown</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content>
           @if (guestBreakdown().length > 0) {
@@ -230,7 +230,7 @@
             <div class="h-80 flex items-center justify-center text-gray-500">
               <div class="text-center">
                 <mat-icon class="!w-12 !h-12 !text-5xl text-gray-400">pie_chart</mat-icon>
-                <p class="mt-2">No breakdown data available</p>
+                <p class="mt-2"><ng-container i18n>No breakdown data available</ng-container></p>
               </div>
             </div>
           }
@@ -242,25 +242,25 @@
     @if (guestBreakdown().length > 0) {
       <mat-card appearance="outlined" class="mb-6">
         <mat-card-header>
-          <mat-card-title>Guest Type Details</mat-card-title>
+          <mat-card-title><ng-container i18n>Guest Type Details</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content>
           <table mat-table [dataSource]="guestBreakdown()" class="w-full">
             <!-- Category Column -->
             <ng-container matColumnDef="category">
-              <th mat-header-cell *matHeaderCellDef>Guest Type</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Guest Type</ng-container></th>
               <td mat-cell *matCellDef="let item">{{ item.category }}</td>
             </ng-container>
 
             <!-- Count Column -->
             <ng-container matColumnDef="count">
-              <th mat-header-cell *matHeaderCellDef>Count</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Count</ng-container></th>
               <td mat-cell *matCellDef="let item">{{ formatNumber(item.value) }}</td>
             </ng-container>
 
             <!-- Percentage Column -->
             <ng-container matColumnDef="percentage">
-              <th mat-header-cell *matHeaderCellDef>Percentage</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Percentage</ng-container></th>
               <td mat-cell *matCellDef="let item">
                 <div class="flex items-center gap-2">
                   <mat-progress-bar 
@@ -275,7 +275,7 @@
 
             <!-- Avg Stay Column -->
             <ng-container matColumnDef="avgStay">
-              <th mat-header-cell *matHeaderCellDef>Avg Stay Duration</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Avg Stay Duration</ng-container></th>
               <td mat-cell *matCellDef="let item">{{ formatDuration(item.averageStay) }}</td>
             </ng-container>
 
@@ -290,57 +290,57 @@
     @if (guestData().length > 0) {
       <mat-card appearance="outlined">
         <mat-card-header>
-          <mat-card-title>Daily Guest Data</mat-card-title>
-          <mat-card-subtitle>{{ guestData().length }} records found</mat-card-subtitle>
+          <mat-card-title><ng-container i18n>Daily Guest Data</ng-container></mat-card-title>
+          <mat-card-subtitle><ng-container i18n>{{ guestData().length }} records found</ng-container></mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
           <div class="overflow-x-auto">
             <table mat-table [dataSource]="guestData()" class="w-full">
               <!-- Date Column -->
               <ng-container matColumnDef="date">
-                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Date</ng-container></th>
                 <td mat-cell *matCellDef="let item">{{ formatDate(item.date) }}</td>
               </ng-container>
 
               <!-- Total Guests Column -->
               <ng-container matColumnDef="totalGuests">
-                <th mat-header-cell *matHeaderCellDef>Total Guests</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Total Guests</ng-container></th>
                 <td mat-cell *matCellDef="let item" class="font-medium">{{ formatNumber(item.totalGuests) }}</td>
               </ng-container>
 
               <!-- New Guests Column -->
               <ng-container matColumnDef="newGuests">
-                <th mat-header-cell *matHeaderCellDef>New Guests</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>New Guests</ng-container></th>
                 <td mat-cell *matCellDef="let item">{{ formatNumber(item.newGuests) }}</td>
               </ng-container>
 
               <!-- Returning Guests Column -->
               <ng-container matColumnDef="returningGuests">
-                <th mat-header-cell *matHeaderCellDef>Returning Guests</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Returning Guests</ng-container></th>
                 <td mat-cell *matCellDef="let item">{{ formatNumber(item.returningGuests) }}</td>
               </ng-container>
 
               <!-- Check-ins Column -->
               <ng-container matColumnDef="checkIns">
-                <th mat-header-cell *matHeaderCellDef>Check-ins</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Check-ins</ng-container></th>
                 <td mat-cell *matCellDef="let item">{{ formatNumber(item.checkIns) }}</td>
               </ng-container>
 
               <!-- Check-outs Column -->
               <ng-container matColumnDef="checkOuts">
-                <th mat-header-cell *matHeaderCellDef>Check-outs</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Check-outs</ng-container></th>
                 <td mat-cell *matCellDef="let item">{{ formatNumber(item.checkOuts) }}</td>
               </ng-container>
 
               <!-- Average Stay Duration Column -->
               <ng-container matColumnDef="averageStayDuration">
-                <th mat-header-cell *matHeaderCellDef>Avg Stay</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Avg Stay</ng-container></th>
                 <td mat-cell *matCellDef="let item">{{ formatDuration(item.averageStayDuration) }}</td>
               </ng-container>
 
               <!-- Occupancy Rate Column -->
               <ng-container matColumnDef="occupancyRate">
-                <th mat-header-cell *matHeaderCellDef>Occupancy</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Occupancy</ng-container></th>
                 <td mat-cell *matCellDef="let item">
                   <div class="flex items-center gap-2">
                     <mat-progress-bar 
@@ -368,8 +368,8 @@
     <mat-card appearance="outlined" class="p-12">
       <div class="flex flex-col items-center justify-center">
         <mat-spinner diameter="48" class="mb-4"></mat-spinner>
-        <p class="text-lg text-gray-600">Loading guest data...</p>
-        <p class="text-sm text-gray-500 mt-1">This may take a few moments</p>
+        <p class="text-lg text-gray-600"><ng-container i18n>Loading guest data...</ng-container></p>
+        <p class="text-sm text-gray-500 mt-1"><ng-container i18n>This may take a few moments</ng-container></p>
       </div>
     </mat-card>
   }

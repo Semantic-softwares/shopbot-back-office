@@ -21,11 +21,12 @@ import { EstatePropertyService } from '../../../../../../shared/services/estate-
 import { Property, PropertyType, PropertyStatus } from '../../../../../../shared/models/estate.model';
 import { StoreStore } from '../../../../../../shared/stores/store.store';
 import { NoRecordComponent } from '../../../../../../shared/components/no-record/no-record.component';
+import { TrPipe } from '../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-property-list',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatTableModule,
@@ -68,7 +69,7 @@ export class PropertyListComponent {
   displayedColumns = ['name', 'type', 'location', 'units', 'status', 'actions'];
 
   typeOptions = [
-    { value: '', label: 'All Types' },
+    { value: '', label: $localize`All Types` },
     ...Object.values(PropertyType).map((t) => ({
       value: t,
       label: t.replace(/_/g, ' '),
@@ -76,10 +77,10 @@ export class PropertyListComponent {
   ];
 
   statusOptions = [
-    { value: '', label: 'All Status' },
-    { value: PropertyStatus.ACTIVE, label: 'Active' },
-    { value: PropertyStatus.OCCUPIED, label: 'Occupied' },
-    { value: PropertyStatus.INACTIVE, label: 'Inactive' },
+    { value: '', label: $localize`All Status` },
+    { value: PropertyStatus.ACTIVE, label: $localize`Active` },
+    { value: PropertyStatus.OCCUPIED, label: $localize`Occupied` },
+    { value: PropertyStatus.INACTIVE, label: $localize`Inactive` },
   ];
 
   private filterParams = computed(() => ({
@@ -162,19 +163,19 @@ export class PropertyListComponent {
 
   async deleteProperty(property: Property): Promise<void> {
     const confirmDelete = confirm(
-      `Delete property "${property.name}"? This action cannot be undone.`,
+      $localize`Delete property "${property.name}"? This action cannot be undone.`,
     );
     if (!confirmDelete) return;
 
     this.isUpdating.set(true);
     try {
       await this.propertyService.deleteProperty(property._id).toPromise();
-      this.snackBar.open(`Property "${property.name}" deleted`, 'Close', {
+      this.snackBar.open($localize`Property "${property.name}" deleted`, $localize`Close`, {
         duration: 3000,
       });
       this.reloadData();
     } catch {
-      this.snackBar.open('Failed to delete property', 'Close', {
+      this.snackBar.open($localize`Failed to delete property`, $localize`Close`, {
         duration: 5000,
       });
     } finally {

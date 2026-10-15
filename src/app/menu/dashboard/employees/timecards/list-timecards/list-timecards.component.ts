@@ -161,7 +161,7 @@ export class ListTimecardsComponent {
   approveTimecard(timesheet: Timesheet) {
     this.timesheetService.approveTimesheet(timesheet._id).subscribe({
       next: () => {
-        this.snackBar.open('Timecard approved successfully', 'Close', {
+        this.snackBar.open($localize`Timecard approved successfully`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -170,7 +170,7 @@ export class ListTimecardsComponent {
       },
       error: (error) => {
         console.error('Error approving timecard:', error);
-        this.snackBar.open('Error approving timecard', 'Close', {
+        this.snackBar.open($localize`Error approving timecard`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -195,7 +195,7 @@ export class ListTimecardsComponent {
       if (result) {
         this.timesheetService.deleteTimesheet(timesheet._id).subscribe({
           next: () => {
-            this.snackBar.open('Timecard deleted successfully', 'Close', {
+            this.snackBar.open($localize`Timecard deleted successfully`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -204,7 +204,7 @@ export class ListTimecardsComponent {
           },
           error: (error) => {
             console.error('Error deleting timecard:', error);
-            this.snackBar.open('Error deleting timecard', 'Close', {
+            this.snackBar.open($localize`Error deleting timecard`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -219,7 +219,7 @@ export class ListTimecardsComponent {
     const storeId = this.storeStore.selectedStore()?._id;
     
     if (!storeId) {
-      this.snackBar.open('No store selected', 'Close', {
+      this.snackBar.open($localize`No store selected`, $localize`Close`, {
         duration: 3000,
         horizontalPosition: 'end',
         verticalPosition: 'top'
@@ -236,7 +236,7 @@ export class ListTimecardsComponent {
         link.click();
         window.URL.revokeObjectURL(url);
         
-        this.snackBar.open('Export completed successfully', 'Close', {
+        this.snackBar.open($localize`Export completed successfully`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -244,7 +244,7 @@ export class ListTimecardsComponent {
       },
       error: (error) => {
         console.error('Error exporting timecards:', error);
-        this.snackBar.open('Error exporting timecards', 'Close', {
+        this.snackBar.open($localize`Error exporting timecards`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'

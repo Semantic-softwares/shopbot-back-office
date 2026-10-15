@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartOptions } from 'chart.js';
+import { ChartThemeService } from '../../../../shared/services/chart-theme.service';
 
 @Component({
   selector: 'home',
@@ -11,6 +12,8 @@ import { ChartOptions } from 'chart.js';
   styleUrl: './home.component.scss',
 })
 export class HomeComponent  {
+  // Keeps Chart.js text/grid colours in step with the light/dark theme.
+  private readonly chartTheme = inject(ChartThemeService);
   users = [
     { id: 1, name: 'User 1', status: 'active' },
     { id: 2, name: 'User 2', status: 'inactive' }

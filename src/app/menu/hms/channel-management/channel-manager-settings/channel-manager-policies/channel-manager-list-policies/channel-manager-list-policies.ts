@@ -22,11 +22,12 @@ import { NoRecordComponent } from '../../../../../../shared/components/no-record
 import { PageHeaderComponent } from '../../../../../../shared/components/page-header/page-header.component';
 import { HotelPolicyService } from '../../../../../../shared/services/hotel-policy.service';
 import { StoreStore } from '../../../../../../shared/stores/store.store';
+import { TrPipe } from '../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-channel-manager-list-policies',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatTableModule,
     MatPaginatorModule,
@@ -114,7 +115,7 @@ export class ChannelManagerListPolicies {
   deletePolicy(policy: any) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
-        title: 'Delete Policy',
+        title: $localize`Delete Policy`,
         message: `Are you sure you want to delete the policy "${policy.attributes?.title}"?`,
       },
     });
@@ -123,12 +124,12 @@ export class ChannelManagerListPolicies {
       if (result) {
         this.hotelPolicyService.deleteHotelPolicy(policy.id).subscribe({
           next: () => {
-            this.snackBar.open('Policy deleted successfully', 'Close', { duration: 3000 });
+            this.snackBar.open($localize`Policy deleted successfully`, $localize`Close`, { duration: 3000 });
             this.policies.reload();
           },
           error: (error) => {
             const errorMessage = error.error?.message || 'Failed to delete policy';
-            this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+            this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
           },
         });
       }

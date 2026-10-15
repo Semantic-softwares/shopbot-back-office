@@ -10,12 +10,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatListModule } from '@angular/material/list';
 import { PropertyDetailComponent } from '../../property-detail.component';
 import { Property, PropertyCategory, PropertyOwner } from '../../../../../../../shared/models/estate.model';
+import { TrPipe } from '../../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-property-summary',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatCardModule,
     MatIconModule,

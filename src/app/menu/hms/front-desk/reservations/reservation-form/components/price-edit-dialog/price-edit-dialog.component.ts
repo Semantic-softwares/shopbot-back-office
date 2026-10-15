@@ -65,8 +65,8 @@ export class PriceEditDialogComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   discountTypeOptions = [
-    { value: 'percentage', label: 'Percentage (%)' },
-    { value: 'amount', label: 'Fixed Amount' },
+    { value: 'percentage', label: $localize`Percentage (%)` },
+    { value: 'amount', label: $localize`Fixed Amount` },
   ];
 
   // Handle both cases: roomIndex (from rooms list) or pricing data (from room-sharers)

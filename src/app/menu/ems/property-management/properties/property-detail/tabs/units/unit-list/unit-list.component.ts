@@ -21,11 +21,12 @@ import { Unit, UnitType, UnitStatus, Property } from '../../../../../../../../sh
 import { StoreStore } from '../../../../../../../../shared/stores/store.store';
 import { PageHeaderComponent } from '../../../../../../../../shared/components/page-header/page-header.component';
 import { NoRecordComponent } from '../../../../../../../../shared/components/no-record/no-record.component';
+import { TrPipe } from '../../../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-unit-list',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatTableModule,
@@ -72,7 +73,7 @@ export class UnitListComponent {
   displayedColumns = ['name', 'property', 'type', 'rent', 'status', 'actions'];
 
   typeOptions = [
-    { value: '', label: 'All Types' },
+    { value: '', label: $localize`All Types` },
     ...Object.values(UnitType).map((t) => ({
       value: t,
       label: t.replace(/_/g, ' '),
@@ -80,7 +81,7 @@ export class UnitListComponent {
   ];
 
   statusOptions = [
-    { value: '', label: 'All Status' },
+    { value: '', label: $localize`All Status` },
     ...Object.values(UnitStatus).map((s) => ({
       value: s,
       label: s.replace(/_/g, ' '),
@@ -186,19 +187,19 @@ export class UnitListComponent {
 
   async deleteUnit(unit: Unit): Promise<void> {
     const confirmDelete = confirm(
-      `Delete unit "${unit.name}"? This action cannot be undone.`,
+      $localize`Delete unit "${unit.name}"? This action cannot be undone.`,
     );
     if (!confirmDelete) return;
 
     this.isUpdating.set(true);
     try {
       await this.unitService.deleteUnit(unit._id).toPromise();
-      this.snackBar.open(`Unit "${unit.name}" deleted`, 'Close', {
+      this.snackBar.open($localize`Unit "${unit.name}" deleted`, $localize`Close`, {
         duration: 3000,
       });
       this.reloadData();
     } catch {
-      this.snackBar.open('Failed to delete unit', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`Failed to delete unit`, $localize`Close`, { duration: 5000 });
     } finally {
       this.isUpdating.set(false);
     }

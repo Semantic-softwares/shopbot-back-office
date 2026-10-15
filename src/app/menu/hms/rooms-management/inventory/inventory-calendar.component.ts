@@ -179,7 +179,7 @@ export class InventoryCalendarComponent implements OnInit {
           this.loading.set(false);
         },
         error: () => {
-          this.snackBar.open('Failed to load inventory', 'Close', { duration: 5000 });
+          this.snackBar.open($localize`Failed to load inventory`, $localize`Close`, { duration: 5000 });
           this.loading.set(false);
         },
       });
@@ -630,12 +630,12 @@ export class InventoryCalendarComponent implements OnInit {
       next: () => {
         this.saving.set(false);
         this.pendingChanges.set(new Map());
-        this.snackBar.open(`Saved ${calls.length} change(s) successfully`, 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Saved ${calls.length} change(s) successfully`, $localize`Close`, { duration: 4000 });
         this.loadData(); // Reload to get fresh data
       },
       error: () => {
         this.saving.set(false);
-        this.snackBar.open('Some changes failed to save', 'Close', { duration: 5000 });
+        this.snackBar.open($localize`Some changes failed to save`, $localize`Close`, { duration: 5000 });
       },
     });
   }
@@ -685,8 +685,8 @@ export class InventoryCalendarComponent implements OnInit {
         if (result) {
           const total = (result.modifiedCount || 0) + (result.upsertedCount || 0);
           this.snackBar.open(
-            `Updated ${total} inventory records`,
-            'Close',
+            $localize`Updated ${total} inventory records`,
+            $localize`Close`,
             { duration: 4000 },
           );
           this.loadData();
@@ -712,7 +712,7 @@ export class InventoryCalendarComponent implements OnInit {
       .afterClosed()
       .subscribe((result) => {
         if (result) {
-          this.snackBar.open(`Rate plan "${result.name}" created`, 'Close', { duration: 4000 });
+          this.snackBar.open($localize`Rate plan "${result.name}" created`, $localize`Close`, { duration: 4000 });
           this.loadData();
         }
       });
@@ -727,13 +727,13 @@ export class InventoryCalendarComponent implements OnInit {
     const store = this.storeStore.selectedStore();
     const propertyId = store?.channex?.propertyId;
     if (!propertyId) {
-      this.snackBar.open('Store is not synced with Channex', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`Store is not synced with Channex`, $localize`Close`, { duration: 5000 });
       return;
     }
 
     const changes = this.channexPendingChanges();
     if (changes.size === 0) {
-      this.snackBar.open('No changes to sync — make edits first', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`No changes to sync — make edits first`, $localize`Close`, { duration: 5000 });
       return;
     }
 
@@ -825,7 +825,7 @@ export class InventoryCalendarComponent implements OnInit {
 
     if (restrictionValues.length === 0 && availabilityValues.length === 0) {
       this.syncing.set(false);
-      this.snackBar.open('No Channex-eligible changes to sync', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`No Channex-eligible changes to sync`, $localize`Close`, { duration: 5000 });
       return;
     }
 
@@ -860,12 +860,12 @@ export class InventoryCalendarComponent implements OnInit {
         const msg = `Synced to Channex: ${result.availabilityCount} availability, ${result.restrictionsCount} rate records`;
 
         if (allWarnings.length > 0) {
-          this.snackBar.open(`${msg} — ${allWarnings.length} warning(s)`, 'View', { duration: 8000 })
+          this.snackBar.open($localize`${msg} — ${allWarnings.length} warning(s)`, $localize`View`, { duration: 8000 })
             .onAction()
             .subscribe(() => this.showSyncWarnings(result));
           this.showSyncWarnings(result);
         } else {
-          this.snackBar.open(msg, 'Close', { duration: 6000 });
+          this.snackBar.open(msg, $localize`Close`, { duration: 6000 });
         }
 
         // Clear Channex pending changes after successful sync
@@ -874,7 +874,7 @@ export class InventoryCalendarComponent implements OnInit {
       error: (err) => {
         this.syncing.set(false);
         const errorMsg = err.error?.message || err.message || 'Sync failed';
-        this.snackBar.open(`Channex sync failed: ${errorMsg}`, 'Close', { duration: 6000 });
+        this.snackBar.open($localize`Channex sync failed: ${errorMsg}`, $localize`Close`, { duration: 6000 });
       },
     });
   }
@@ -888,27 +888,27 @@ export class InventoryCalendarComponent implements OnInit {
     const store = this.storeStore.selectedStore();
     const propertyId = store?.channex?.propertyId;
     if (!propertyId) {
-      this.snackBar.open('Store is not connected to Channex', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`Store is not connected to Channex`, $localize`Close`, { duration: 5000 });
       return;
     }
 
     const roomTypes = this.roomTypes();
     if (roomTypes.length === 0) {
-      this.snackBar.open('No room types found', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`No room types found`, $localize`Close`, { duration: 5000 });
       return;
     }
 
     // Validate all room types have Channex IDs
     const missingRoomTypes = roomTypes.filter((rt) => !rt['channexRoomTypeId']);
     if (missingRoomTypes.length > 0) {
-      this.snackBar.open(`${missingRoomTypes.length} room type(s) missing Channex mapping`, 'Close', { duration: 6000 });
+      this.snackBar.open($localize`${missingRoomTypes.length} room type(s) missing Channex mapping`, $localize`Close`, { duration: 6000 });
       return;
     }
 
     const allRatePlans = roomTypes.flatMap((rt) => (rt.ratePlans || []).map((rp) => ({ rt, rp })));
     const missingRatePlans = allRatePlans.filter((x) => !x.rp.channex?.ratePlanId);
     if (missingRatePlans.length > 0) {
-      this.snackBar.open(`${missingRatePlans.length} rate plan(s) missing Channex mapping`, 'Close', { duration: 6000 });
+      this.snackBar.open($localize`${missingRatePlans.length} rate plan(s) missing Channex mapping`, $localize`Close`, { duration: 6000 });
       return;
     }
 
@@ -921,7 +921,7 @@ export class InventoryCalendarComponent implements OnInit {
     if (dates.length !== 500) {
       this.fullSyncing.set(false);
       this.fullSyncProgress.set('');
-      this.snackBar.open(`Expected 500 days but generated ${dates.length}`, 'Close', { duration: 6000 });
+      this.snackBar.open($localize`Expected 500 days but generated ${dates.length}`, $localize`Close`, { duration: 6000 });
       return;
     }
 
@@ -1044,7 +1044,7 @@ export class InventoryCalendarComponent implements OnInit {
         this.fullSyncProgress.set('');
         const errorMsg = err.error?.message || err.message || 'Full sync failed';
         console.error('Full Sync Error:', err);
-        this.snackBar.open(`Full sync failed: ${errorMsg}`, 'Close', { duration: 8000 });
+        this.snackBar.open($localize`Full sync failed: ${errorMsg}`, $localize`Close`, { duration: 8000 });
       },
     });
   }

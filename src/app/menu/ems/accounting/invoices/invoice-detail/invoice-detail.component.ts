@@ -35,11 +35,12 @@ import {
   Tenant,
   Unit,
 } from '../../../../../shared/models/estate.model';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-invoice-detail',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatButtonModule,
     MatCardModule,
@@ -163,7 +164,7 @@ export class InvoiceDetailComponent {
         error instanceof Error
           ? error.message
           : 'Failed to export invoice PDF';
-      this.snackBar.open(message, 'Close', {
+      this.snackBar.open(message, $localize`Close`, {
         duration: 4000,
         panelClass: ['error-snackbar'],
       });

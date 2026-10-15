@@ -1,7 +1,7 @@
 <!-- Page Header -->
 <app-page-header 
-  title="Rates & Availability" 
-  description="Manage room rates, availability, and restrictions for Channex distribution">
+  title="Rates & Availability" i18n-title 
+  description="Manage room rates, availability, and restrictions for Channex distribution" i18n-description>
   <ng-container actions>
     <!-- Action Buttons -->
   <button 
@@ -10,7 +10,7 @@
     [disabled]="!getHasUnsavedChanges()"
     class="text-gray-700">
     <mat-icon matButtonIcon>refresh</mat-icon>
-    Reset
+    <ng-container i18n>Reset</ng-container>
   </button>
 
   @if (getIsSaving()) {
@@ -20,7 +20,7 @@
       disabled
       class="relative">
       <mat-icon matButtonIcon>hourglass_empty</mat-icon>
-      Saving...
+      <ng-container i18n>Saving...</ng-container>
     </button>
   } @else {
     <button 
@@ -29,7 +29,7 @@
       (click)="saveChanges()"
       [disabled]="!getHasUnsavedChanges()">
       <mat-icon matButtonIcon>save</mat-icon>
-      Save
+      <ng-container i18n>Save</ng-container>
     </button>
   }
 
@@ -62,7 +62,7 @@
         <div class="flex items-start gap-4">
           <mat-icon class="text-orange-600 mt-1">warning</mat-icon>
           <div class="flex-1">
-            <h3 class="font-semibold text-orange-900 mb-2">Channex Setup Required</h3>
+            <h3 class="font-semibold text-orange-900 mb-2"><ng-container i18n>Channex Setup Required</ng-container></h3>
             <p class="text-orange-800 text-sm mb-4">
               {{ getChannexSyncError() }}
             </p>
@@ -72,7 +72,7 @@
               routerLink="/admin/channel-management"
               class="text-sm">
               <mat-icon>settings</mat-icon>
-              Go to Channel Management
+              <ng-container i18n>Go to Channel Management</ng-container>
             </button>
           </div>
         </div>
@@ -89,7 +89,7 @@
         <button 
           mat-icon-button 
           (click)="navigateToPreviousPeriod()"
-          matTooltip="Previous period">
+          matTooltip="Previous period" i18n-matTooltip>
           <mat-icon>chevron_left</mat-icon>
         </button>
 
@@ -101,14 +101,14 @@
         <button 
           mat-icon-button 
           (click)="navigateToNextPeriod()"
-          matTooltip="Next period">
+          matTooltip="Next period" i18n-matTooltip>
           <mat-icon>chevron_right</mat-icon>
         </button>
       </div>
 
       <!-- Restrictions Filter Dropdown (Right) -->
       <mat-form-field appearance="outline" class="min-w-72">
-        <mat-label>Show Restrictions</mat-label>
+        <mat-label><ng-container i18n>Show Restrictions</ng-container></mat-label>
         <mat-select 
           [value]="getSelectedRestrictions()"
           (selectionChange)="onRestrictionsChange($event.value)"
@@ -127,14 +127,14 @@
       @if (getIsLoading()) {
         <div class="flex items-center justify-center py-12">
           <mat-spinner diameter="40"></mat-spinner>
-          <span class="ml-4 text-gray-600">Loading room types...</span>
+          <span class="ml-4 text-gray-600"><ng-container i18n>Loading room types...</ng-container></span>
         </div>
       }
 
       <!-- Error State -->
       @if (getError()) {
         <div class="bg-red-50 border border-red-200 rounded-md p-4 text-red-700">
-          <p class="font-medium">Failed to load room types</p>
+          <p class="font-medium"><ng-container i18n>Failed to load room types</ng-container></p>
           <p class="text-sm mt-1">{{ getError() | json }}</p>
         </div>
       }
@@ -143,7 +143,7 @@
       @if (getIsLoadingARI()) {
         <div class="flex items-center justify-center py-4 bg-blue-50 border border-blue-200 rounded-md gap-3 mb-4">
           <mat-spinner diameter="20"></mat-spinner>
-          <span class="text-sm text-blue-700">Loading rates and availability from Channex...</span>
+          <span class="text-sm text-blue-700"><ng-container i18n>Loading rates and availability from Channex...</ng-container></span>
         </div>
       }
 
@@ -151,7 +151,7 @@
       @if (getARILoadError()) {
         <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 text-yellow-700 mb-4">
           <p class="font-medium text-sm">⚠ {{ getARILoadError() }}</p>
-          <p class="text-xs mt-1">Displaying cached data. Please refresh or contact support if the issue persists.</p>
+          <p class="text-xs mt-1"><ng-container i18n>Displaying cached data. Please refresh or contact support if the issue persists.</ng-container></p>
         </div>
       }
 
@@ -164,7 +164,7 @@
             <thead>
               <tr class="border-b border-gray-200">
                 <th class="sticky left-0 border-r border-gray-200 w-56 text-left font-semibold text-gray-700 px-4 py-3 bg-[var(--mat-sys-surface)]">
-                  Room Type / Rate Plan
+                  <ng-container i18n>Room Type / Rate Plan</ng-container>
                 </th>
                 @for (date of getCalendarDates(); track $index) {
                   <th class="text-center font-medium text-gray-600 text-xs whitespace-nowrap border-r border-gray-200 px-3 py-2 min-w-24">
@@ -173,7 +173,7 @@
                   </th>
                 }
                 <th class="sticky right-0 border-l border-gray-200 w-16 text-center font-semibold text-gray-700 px-4 py-3 bg-[var(--mat-sys-surface)]">
-                  Actions
+                  <ng-container i18n>Actions</ng-container>
                 </th>
               </tr>
             </thead>
@@ -186,7 +186,7 @@
                   <td class="sticky left-0 border-r border-gray-300 px-4 py-3 bg-[var(--mat-sys-surface)]">
                     <div class="text-sm font-bold text-gray-900">{{ group.roomType.name }}</div>
                     <div class="text-xs text-gray-600 mt-1">
-                      Availability {{ group.roomType.totalInventory > 0 ? '(Total: ' + group.roomType.totalInventory + ')' : '' }}
+                      <ng-container i18n>Availability {{ group.roomType.totalInventory > 0 ? ('(Total: ' | tr) + group.roomType.totalInventory + ')' : '' }}</ng-container>
                     </div>
                   </td>
                   @for (date of getCalendarDates(); track $index) {
@@ -203,7 +203,7 @@
                       mat-icon-button 
                       [matMenuTriggerFor]="roomTypeMenu"
                       class="text-gray-600 hover:text-gray-900"
-                      matTooltip="Room type options">
+                      matTooltip="Room type options" i18n-matTooltip>
                       <mat-icon>more_vert</mat-icon>
                     </button>
                     <mat-menu #roomTypeMenu="matMenu">
@@ -211,7 +211,7 @@
                         mat-menu-item 
                         (click)="createRatePlan(group.roomType.id, group.roomType.name)">
                         <mat-icon>add_circle_outline</mat-icon>
-                        <span>Create Rate Plan</span>
+                        <span><ng-container i18n>Create Rate Plan</ng-container></span>
                       </button>
                     </mat-menu>
                   </td>
@@ -225,7 +225,7 @@
                       <tr class="border-b border-gray-200 hover:bg-amber-50">
                         <td class="sticky left-0 border-r border-gray-200 px-6 py-3 pl-8 bg-[var(--mat-sys-surface)]">
                           <div class="text-sm font-medium text-gray-700">{{ ratePlan.name }}</div>
-                          <div class="text-xs text-gray-500 mt-0.5">Rate</div>
+                          <div class="text-xs text-gray-500 mt-0.5"><ng-container i18n>Rate</ng-container></div>
                         </td>
                         @for (date of getCalendarDates(); track getDateString(date)) {
                           <td class="px-3 py-3 border-r border-gray-200 text-center cursor-pointer hover:bg-orange-50 transition-colors"
@@ -236,7 +236,7 @@
                                 <!-- Stop sell: show rate with red background and tooltip -->
                                 <span 
                                   class="text-sm font-semibold text-white bg-red-500 px-2 py-1 rounded inline-block"
-                                  [matTooltip]="'Stop Sell enabled - Rate: ' + (getRateForRatePlan(ratePlan.id, date) | number:'1.0-2')">
+                                  [matTooltip]="('Stop Sell enabled - Rate: ' | tr) + (getRateForRatePlan(ratePlan.id, date) | number:'1.0-2')">
                                   {{ getRateForRatePlan(ratePlan.id, date) | number:'1.0-2' }}
                                 </span>
                               } @else {
@@ -246,7 +246,7 @@
                                 </span>
                               }
                             } @else {
-                              <span class="text-xs text-gray-400">No rate</span>
+                              <span class="text-xs text-gray-400"><ng-container i18n>No rate</ng-container></span>
                             }
                           </td>
                         }
@@ -259,7 +259,7 @@
                     @if (isRestrictionSelected('availability')) {
                       <tr class="border-b border-gray-200">
                         <td class="sticky left-0 border-r border-gray-200 px-6 py-2 pl-8 bg-[var(--mat-sys-surface)]">
-                          <div class="text-xs font-medium text-gray-600">Availability</div>
+                          <div class="text-xs font-medium text-gray-600"><ng-container i18n>Availability</ng-container></div>
                         </td>
                         @for (date of getCalendarDates(); track getDateString(date)) {
                           <td class="px-3 py-2 border-r border-gray-200 text-center text-xs cursor-pointer hover:bg-gray-100"
@@ -275,7 +275,7 @@
                     @if (isRestrictionSelected('cta')) {
                       <tr class="border-b border-gray-200">
                         <td class="sticky left-0 border-r border-gray-200 px-6 py-2 pl-8 bg-[var(--mat-sys-surface)]">
-                          <div class="text-xs font-medium text-gray-600">CTA</div>
+                          <div class="text-xs font-medium text-gray-600"><ng-container i18n>CTA</ng-container></div>
                         </td>
                         @for (date of getCalendarDates(); track getDateString(date)) {
                           <td class="px-3 py-2 border-r border-gray-200 text-center text-xs cursor-pointer hover:bg-gray-100"
@@ -295,7 +295,7 @@
                     @if (isRestrictionSelected('ctd')) {
                       <tr class="border-b border-gray-200">
                         <td class="sticky left-0 border-r border-gray-200 px-6 py-2 pl-8 bg-[var(--mat-sys-surface)]">
-                          <div class="text-xs font-medium text-gray-600">CTD</div>
+                          <div class="text-xs font-medium text-gray-600"><ng-container i18n>CTD</ng-container></div>
                         </td>
                         @for (date of getCalendarDates(); track getDateString(date)) {
                           <td class="px-3 py-2 border-r border-gray-200 text-center text-xs cursor-pointer hover:bg-gray-100"
@@ -315,7 +315,7 @@
                     @if (isRestrictionSelected('min-stay')) {
                       <tr class="border-b border-gray-200">
                         <td class="sticky left-0 border-r border-gray-200 px-6 py-2 pl-8 bg-[var(--mat-sys-surface)]">
-                          <div class="text-xs font-medium text-gray-600">Min Stay</div>
+                          <div class="text-xs font-medium text-gray-600"><ng-container i18n>Min Stay</ng-container></div>
                         </td>
                         @for (date of getCalendarDates(); track getDateString(date)) {
                           <td class="px-3 py-2 border-r border-gray-200 text-center text-xs cursor-pointer hover:bg-gray-100"
@@ -331,7 +331,7 @@
                     @if (isRestrictionSelected('max-stay')) {
                       <tr class="border-b border-gray-200">
                         <td class="sticky left-0 border-r border-gray-200 px-6 py-2 pl-8 bg-[var(--mat-sys-surface)]">
-                          <div class="text-xs font-medium text-gray-600">Max Stay</div>
+                          <div class="text-xs font-medium text-gray-600"><ng-container i18n>Max Stay</ng-container></div>
                         </td>
                         @for (date of getCalendarDates(); track getDateString(date)) {
                           <td class="px-3 py-2 border-r border-gray-200 text-center text-xs cursor-pointer hover:bg-gray-100"
@@ -347,7 +347,7 @@
                     @if (isRestrictionSelected('stop-sell')) {
                       <tr class="border-b border-gray-200">
                         <td class="sticky left-0 border-r border-gray-200 px-6 py-2 pl-8 bg-[var(--mat-sys-surface)]">
-                          <div class="text-xs font-medium text-gray-600">Stop Sell</div>
+                          <div class="text-xs font-medium text-gray-600"><ng-container i18n>Stop Sell</ng-container></div>
                         </td>
                         @for (date of getCalendarDates(); track getDateString(date)) {
                           <td class="px-3 py-2 border-r border-gray-200 text-center text-xs cursor-pointer hover:bg-gray-100"
@@ -373,7 +373,7 @@
       @if (!getIsLoading() && !getError() && getCalendarDates().length === 0) {
         <div class="text-center py-12">
           <mat-icon class="text-gray-400 mx-auto" style="font-size: 48px; width: 48px; height: 48px;">calendar_today</mat-icon>
-          <p class="text-gray-600 mt-4">Select a date range to view the calendar</p>
+          <p class="text-gray-600 mt-4"><ng-container i18n>Select a date range to view the calendar</ng-container></p>
         </div>
       }
     </mat-card-content>
@@ -384,8 +384,8 @@
     <div class="bg-green-50 border border-green-200 rounded-md p-4 text-green-700 flex items-center gap-3 animate-in fade-in duration-300">
       <mat-icon class="text-green-600">check_circle</mat-icon>
       <div>
-        <p class="font-medium">Rates & restrictions synced successfully</p>
-        <p class="text-sm">Your changes have been pushed to Channex and will be distributed to OTA partners.</p>
+        <p class="font-medium"><ng-container i18n>Rates & restrictions synced successfully</ng-container></p>
+        <p class="text-sm"><ng-container i18n>Your changes have been pushed to Channex and will be distributed to OTA partners.</ng-container></p>
       </div>
     </div>
   }
@@ -396,7 +396,7 @@
       <div class="flex items-start gap-3">
         <mat-icon class="text-yellow-600 mt-1">warning</mat-icon>
         <div class="flex-1">
-          <p class="font-medium mb-2">Sync completed with warnings</p>
+          <p class="font-medium mb-2"><ng-container i18n>Sync completed with warnings</ng-container></p>
           <ul class="text-sm space-y-1">
             @for (warning of getSaveWarnings(); track warning) {
               <li class="flex items-start gap-2">
@@ -414,8 +414,8 @@
     <div class="bg-red-50 border border-red-200 rounded-md p-4 text-red-700 flex items-center gap-3 animate-in fade-in duration-300">
       <mat-icon class="text-red-600">error</mat-icon>
       <div>
-        <p class="font-medium">Failed to sync rates & restrictions</p>
-        <p class="text-sm">Please check your connection and try again.</p>
+        <p class="font-medium"><ng-container i18n>Failed to sync rates & restrictions</ng-container></p>
+        <p class="text-sm"><ng-container i18n>Please check your connection and try again.</ng-container></p>
       </div>
     </div>
   }

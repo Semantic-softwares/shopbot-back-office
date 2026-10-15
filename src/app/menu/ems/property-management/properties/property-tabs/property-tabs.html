@@ -1,8 +1,8 @@
-<app-page-header title="Properties" subtitle="Manage your estate properties and units">
+<app-page-header title="Properties" i18n-title subtitle="Manage your estate properties and units" i18n-subtitle>
   <ng-container actions>
     <a mat-flat-button [routerLink]="['/menu/ems/properties/properties/create']">
        <mat-icon class="mr-1">add_home</mat-icon>
-      New Property
+      <ng-container i18n>New Property</ng-container>
     </a>
   </ng-container>
 </app-page-header>

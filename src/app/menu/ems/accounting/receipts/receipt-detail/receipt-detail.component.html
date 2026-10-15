@@ -4,16 +4,16 @@
   </div>
 } @else if (receipt(); as data) {
   <app-page-header
-    [title]="data.receiptNumber ? 'Receipt ' + data.receiptNumber : 'Receipt Details'"
+    [title]="data.receiptNumber ? ('Receipt ' | tr) + data.receiptNumber : ('Receipt Details' | tr)"
     [subtitle]="(data.receiptDate | date: 'MMM d, y') ?? ''">
     <ng-container actions>
       <button mat-button (click)="goBack()">
         <mat-icon class="mr-1">arrow_back</mat-icon>
-        Back
+        <ng-container i18n>Back</ng-container>
       </button>
       <button mat-stroked-button (click)="printReceipt()" [disabled]="exportingPdf()">
         <mat-icon class="mr-1">print</mat-icon>
-        {{ exportingPdf() ? 'Preparing...' : 'Print Receipt' }}
+        @if (exportingPdf()) {<ng-container i18n>Preparing...</ng-container>} @else {<ng-container i18n>Print Receipt</ng-container>}
       </button>
 
     </ng-container>
@@ -24,7 +24,7 @@
       <mat-card appearance="outlined" class="lg:col-span-2 border-amber-200/60">
         <mat-card-content class="p-4! space-y-4">
           <div class="flex items-center justify-between border-b border-amber-100 pb-3">
-            <h2 class="text-xl font-semibold text-gray-900">Receipt Summary</h2>
+            <h2 class="text-xl font-semibold text-gray-900"><ng-container i18n>Receipt Summary</ng-container></h2>
             <span class="text-sm px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">
               {{ data.receiptDate | date: 'MMM d, y' }}
             </span>
@@ -32,11 +32,11 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="rounded-lg border border-gray-100 p-3">
-              <p class="text-xs uppercase tracking-wide text-gray-500">Tenant</p>
+              <p class="text-xs uppercase tracking-wide text-gray-500"><ng-container i18n>Tenant</ng-container></p>
               <p class="text-sm font-medium text-gray-900 mt-1">{{ tenantName(data) }}</p>
             </div>
             <div class="rounded-lg border border-gray-100 p-3">
-              <p class="text-xs uppercase tracking-wide text-gray-500">Payment Method</p>
+              <p class="text-xs uppercase tracking-wide text-gray-500"><ng-container i18n>Payment Method</ng-container></p>
               <p class="text-sm font-medium text-gray-900 mt-1">{{ methodLabel(data.paymentMethod) }}</p>
             </div>
             <div class="rounded-lg border p-3" [ngClass]="amountClass(data)">
@@ -49,18 +49,18 @@
 
       <mat-card appearance="outlined" class="border-gray-200">
         <mat-card-content class="p-4! space-y-2">
-          <p class="text-xs uppercase tracking-wide text-gray-500">Quick Facts</p>
+          <p class="text-xs uppercase tracking-wide text-gray-500"><ng-container i18n>Quick Facts</ng-container></p>
           <mat-list>
             <mat-list-item>
-              <span matListItemTitle>Receipt Number</span>
+              <span matListItemTitle><ng-container i18n>Receipt Number</ng-container></span>
               <span matListItemMeta class="font-medium text-gray-900">{{ data.receiptNumber }}</span>
             </mat-list-item>
             <mat-list-item>
-              <span matListItemTitle>Allocations</span>
+              <span matListItemTitle><ng-container i18n>Allocations</ng-container></span>
               <span matListItemMeta class="font-medium text-gray-900">{{ data.allocations.length }}</span>
             </mat-list-item>
             <mat-list-item>
-              <span matListItemTitle>Currency</span>
+              <span matListItemTitle><ng-container i18n>Currency</ng-container></span>
               <span matListItemMeta class="font-medium text-gray-900">{{ data.currency }}</span>
             </mat-list-item>
           </mat-list>
@@ -71,7 +71,7 @@
     <mat-card appearance="outlined" class="print:shadow-none print:border-0 overflow-hidden">
       <mat-card-content class="p-0!">
         <div class="px-4 py-3 border-b border-outline-variant bg-gray-50">
-          <h3 class="text-lg font-semibold text-gray-900">Allocation Breakdown</h3>
+          <h3 class="text-lg font-semibold text-gray-900"><ng-container i18n>Allocation Breakdown</ng-container></h3>
         </div>
 
         <mat-list>

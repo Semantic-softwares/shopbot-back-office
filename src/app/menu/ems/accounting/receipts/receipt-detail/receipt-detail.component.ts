@@ -23,11 +23,12 @@ import {
   Receipt,
   Tenant,
 } from '../../../../../shared/models/estate.model';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-receipt-detail',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatButtonModule,
     MatCardModule,
@@ -89,7 +90,7 @@ export class ReceiptDetailComponent {
         error instanceof Error
           ? error.message
           : 'Failed to export receipt PDF';
-      this.snackBar.open(message, 'Close', {
+      this.snackBar.open(message, $localize`Close`, {
         duration: 4000,
         panelClass: ['error-snackbar'],
       });

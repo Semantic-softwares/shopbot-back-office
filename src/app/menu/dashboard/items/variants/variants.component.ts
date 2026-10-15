@@ -132,7 +132,7 @@ export class VariantsComponent {
     const updatedVariant = { ...variant, enabled: !variant.enabled };
     this.productService.updateVariant(updatedVariant, variant._id).subscribe({
       next: () => {
-        this.snackBar.open('Variant status updated successfully', 'Close', {
+        this.snackBar.open($localize`Variant status updated successfully`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -140,7 +140,7 @@ export class VariantsComponent {
         this.variants.reload();
       },
       error: () => {
-        this.snackBar.open('Error updating variant status', 'Close', {
+        this.snackBar.open($localize`Error updating variant status`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'

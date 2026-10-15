@@ -3,11 +3,11 @@
     <mat-card-content class="p-5!">
       <div class="flex items-start justify-between gap-4">
         <div>
-          <div class="text-sm text-slate-500">Total Overdue</div>
+          <div class="text-sm text-slate-500"><ng-container i18n>Total Overdue</ng-container></div>
           <div class="mt-2 text-3xl font-semibold text-slate-900">
             {{ $safeNavigationMigration(summary?.totalOverdueAmount) | currency: currencyCode(): 'symbol':'1.2-2' }}
           </div>
-          <div class="mt-2 text-xs text-slate-500">Across all leases</div>
+          <div class="mt-2 text-xs text-slate-500"><ng-container i18n>Across all leases</ng-container></div>
         </div>
         <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-100">
           <mat-icon class="text-rose-700!">warning</mat-icon>
@@ -20,11 +20,11 @@
     <mat-card-content class="p-5!">
       <div class="flex items-start justify-between gap-4">
         <div>
-          <div class="text-sm text-slate-500">Overdue Tenants</div>
+          <div class="text-sm text-slate-500"><ng-container i18n>Overdue Tenants</ng-container></div>
           <div class="mt-2 text-3xl font-semibold text-slate-900">
             {{ summary?.overdueTenantCount ?? 0 }}
           </div>
-          <div class="mt-2 text-xs text-slate-500">Tenants with arrears</div>
+          <div class="mt-2 text-xs text-slate-500"><ng-container i18n>Tenants with arrears</ng-container></div>
         </div>
         <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100">
           <mat-icon class="text-amber-700!">group</mat-icon>
@@ -37,11 +37,11 @@
     <mat-card-content class="p-5!">
       <div class="flex items-start justify-between gap-4">
         <div>
-          <div class="text-sm text-slate-500">Overdue Leases</div>
+          <div class="text-sm text-slate-500"><ng-container i18n>Overdue Leases</ng-container></div>
           <div class="mt-2 text-3xl font-semibold text-slate-900">
             {{ summary?.overdueLeaseCount ?? 0 }}
           </div>
-          <div class="mt-2 text-xs text-slate-500">Active leases in arrears</div>
+          <div class="mt-2 text-xs text-slate-500"><ng-container i18n>Active leases in arrears</ng-container></div>
         </div>
         <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-100">
           <mat-icon class="text-sky-700!">description</mat-icon>
@@ -54,12 +54,12 @@
     <mat-card-content class="p-5!">
       <div class="flex items-start justify-between gap-4">
         <div>
-          <div class="text-sm text-slate-500">Oldest Debt</div>
+          <div class="text-sm text-slate-500"><ng-container i18n>Oldest Debt</ng-container></div>
           <div class="mt-2 text-3xl font-semibold text-slate-900">
-            {{ summary?.oldestUnpaidInvoiceDays ?? 0 }} <span class="text-lg font-medium text-slate-600">days</span>
+            {{ summary?.oldestUnpaidInvoiceDays ?? 0 }} <span class="text-lg font-medium text-slate-600"><ng-container i18n>days</ng-container></span>
           </div>
           <div class="mt-2 text-xs text-slate-500">
-            Since {{ $safeNavigationMigration(summary?.oldestUnpaidInvoiceDate) | date: 'MMM dd, yyyy' }}
+            <ng-container i18n>Since {{ $safeNavigationMigration(summary?.oldestUnpaidInvoiceDate) | date: 'MMM dd, yyyy' }}</ng-container>
           </div>
         </div>
         <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-100">

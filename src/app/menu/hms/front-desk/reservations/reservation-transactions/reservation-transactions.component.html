@@ -2,7 +2,7 @@
   <!-- Header -->
   <mat-card-header>
     <mat-card-title>
-      Payment Transactions
+      <ng-container i18n>Payment Transactions</ng-container>
     </mat-card-title>
   </mat-card-header>
 
@@ -11,7 +11,7 @@
     @if (isLoading()) {
     <div class="flex justify-center items-center py-8">
       <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
-      <span class="ml-3 text-gray-600">Loading transactions...</span>
+      <span class="ml-3 text-gray-600"><ng-container i18n>Loading transactions...</ng-container></span>
     </div>
   } @else if (error()) {
     <!-- Error State -->
@@ -19,8 +19,8 @@
       <div class="flex items-start">
         <mat-icon class="text-red-500 mr-3 mt-1">error</mat-icon>
         <div>
-          <h4 class="text-red-800 font-medium">Failed to load transactions</h4>
-          <p class="text-red-700 text-sm mt-1">{{ error()?.message || 'An error occurred while loading transactions.' }}</p>
+          <h4 class="text-red-800 font-medium"><ng-container i18n>Failed to load transactions</ng-container></h4>
+          <p class="text-red-700 text-sm mt-1">@if (error()?.message) {<ng-container>{{ error()?.message }}</ng-container>} @else {<ng-container i18n>An error occurred while loading transactions.</ng-container>}</p>
         </div>
       </div>
     </div>
@@ -28,8 +28,8 @@
     <!-- Empty State -->
     <app-no-record 
       icon="payment" 
-      title="No Transactions" 
-      message="No payment transactions recorded for this reservation yet."
+      title="No Transactions" i18n-title 
+      message="No payment transactions recorded for this reservation yet." i18n-message
     />
   } @else {
     <!-- Transactions Table -->
@@ -37,7 +37,7 @@
       <table mat-table [dataSource]="transactions()" class="w-full">
         <!-- Date Column -->
         <ng-container matColumnDef="date">
-          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Date</ng-container></th>
           <td mat-cell *matCellDef="let element">
             {{ element.createdAt | date:'medium' }}
           </td>
@@ -45,7 +45,7 @@
 
         <!-- Amount Column -->
         <ng-container matColumnDef="amount">
-          <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
+          <th mat-header-cell *matHeaderCellDef class="text-right"><ng-container i18n>Amount</ng-container></th>
           <td mat-cell *matCellDef="let element" class="text-right font-semibold">
             {{ element.amount | currency: getCurrencyFormat() }}
           </td>
@@ -53,7 +53,7 @@
 
         <!-- Type Column -->
         <ng-container matColumnDef="type">
-          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Type</ng-container></th>
           <td mat-cell *matCellDef="let element">
             <span class="px-2 py-1 rounded text-xs font-semibold" [ngClass]="getTransactionTypeClass(element.type)">
               {{ element.type | titlecase }}
@@ -63,7 +63,7 @@
 
         <!-- Method Column -->
         <ng-container matColumnDef="method">
-          <th mat-header-cell *matHeaderCellDef>Method</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Method</ng-container></th>
           <td mat-cell *matCellDef="let element">
             <span class="px-2 py-1 rounded text-xs font-semibold bg-blue-100 text-blue-800">
               {{ element.method | titlecase }}
@@ -73,7 +73,7 @@
 
         <!-- Notes Column -->
         <ng-container matColumnDef="notes">
-          <th mat-header-cell *matHeaderCellDef>Notes</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Notes</ng-container></th>
           <td mat-cell *matCellDef="let element" class="text-gray-600">
             @if (element.notes) {
               <span [matTooltip]="element.notes" matTooltipPosition="above">
@@ -87,7 +87,7 @@
 
         <!-- Balance Column -->
         <ng-container matColumnDef="balance">
-          <th mat-header-cell *matHeaderCellDef class="text-right">Balance After</th>
+          <th mat-header-cell *matHeaderCellDef class="text-right"><ng-container i18n>Balance After</ng-container></th>
           <td mat-cell *matCellDef="let element" class="text-right font-semibold" 
               [class]="element.balanceAfterTransaction > 0 ? 'text-red-600' : 'text-green-600'">
             {{ element.balanceAfterTransaction | currency: getCurrencyFormat() }}

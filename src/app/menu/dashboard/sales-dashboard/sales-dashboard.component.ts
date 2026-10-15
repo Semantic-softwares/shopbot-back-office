@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy, computed, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, effect, inject, signal } from '@angular/core';
+import { ThemeService } from '../../../shared/services/theme.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,6 +17,7 @@ import { StoreStore } from '../../../shared/stores/store.store';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { DateRangeSelectorComponent } from '../../../shared/components/date-range-selector/date-range-selector.component';
 import { EmployeeSelectorComponent } from '../../../shared/components/employee-selector/employee-selector.component';
+import { TrPipe } from '../../../shared/i18n/tr.pipe';
 
 type Period = 'daily' | 'weekly' | 'monthly';
 
@@ -43,8 +45,12 @@ const COLORS = {
 };
 const SERIES_PALETTE = [COLORS.primary, COLORS.green, COLORS.amber, COLORS.violet, COLORS.teal, COLORS.pink, COLORS.sky, COLORS.red];
 
-const AXIS_LABEL = { color: '#64748b', fontSize: 11 };
-const SPLIT_LINE = { lineStyle: { color: '#eef2f7' } };
+// Chart colours follow the app theme. Module-level signal so the (computed) chart options below
+// re-run when the theme flips; the component keeps it in sync with ThemeService.
+const darkChart = signal(false);
+const ct = () => (darkChart() ? { text: '#a9b4c6', axis: '#334155', grid: '#1e293b' } : { text: '#64748b', axis: '#e2e8f0', grid: '#eef2f7' });
+const axisLabel = () => ({ color: ct().text, fontSize: 11 });
+const splitLine = () => ({ lineStyle: { color: ct().grid } });
 const TOOLTIP = {
   backgroundColor: '#1e293b',
   borderColor: '#334155',
@@ -66,7 +72,7 @@ function parseIsoDate(value: string): Date {
 @Component({
   selector: 'app-sales-dashboard',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     RouterLink,
     MatButtonModule,
@@ -84,6 +90,8 @@ function parseIsoDate(value: string): Date {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SalesDashboardComponent {
+  private readonly theme = inject(ThemeService);
+  private readonly syncChartTheme = effect(() => darkChart.set(this.theme.isDark()));
   private readonly orderService = inject(OrderService);
   private readonly queryParams = inject(QueryParamService);
   private readonly router = inject(Router);
@@ -93,9 +101,9 @@ export class SalesDashboardComponent {
   private readonly query = toSignal(this.queryParams.getAllParams$, { initialValue: {} as Record<string, any> });
 
   protected readonly periodOptions: { value: Period; label: string }[] = [
-    { value: 'daily', label: 'Day' },
-    { value: 'weekly', label: 'Week' },
-    { value: 'monthly', label: 'Month' },
+    { value: 'daily', label: $localize`Day` },
+    { value: 'weekly', label: $localize`Week` },
+    { value: 'monthly', label: $localize`Month` },
   ];
 
   private readonly range = computed(() => {
@@ -245,12 +253,12 @@ export class SalesDashboardComponent {
     const avgTicket = transactions > 0 ? net / transactions : 0;
 
     return [
-      { label: 'Net sales', value: this.money(net), icon: 'payments', accent: 'kpi--azure', note: 'vs previous period', delta: this.percentChange(net, prev('netSales')), higherIsBetter: true },
-      { label: 'Gross sales', value: this.money(gross), icon: 'point_of_sale', accent: 'kpi--sky', note: 'vs previous period', delta: this.percentChange(gross, prev('grossSales')), higherIsBetter: true },
-      { label: 'Gross profit', value: this.money(profit), icon: 'trending_up', accent: 'kpi--green', note: `${margin.toFixed(1)}% margin`, delta: this.percentChange(profit, prev('grossProfit')), higherIsBetter: true },
-      { label: 'Transactions', value: transactions.toLocaleString(), icon: 'receipt_long', accent: 'kpi--violet', note: `${this.money(avgTicket)} avg. ticket`, delta: null, higherIsBetter: true },
-      { label: 'Refunds', value: this.money(refunds), icon: 'undo', accent: 'kpi--red', note: `${refundCount} refunded receipt${refundCount === 1 ? '' : 's'}`, delta: this.percentChange(refunds, prev('refunds')), higherIsBetter: false },
-      { label: 'Discounts', value: this.money(discounts), icon: 'sell', accent: 'kpi--amber', note: 'vs previous period', delta: this.percentChange(discounts, prev('discounts')), higherIsBetter: false },
+      { label: $localize`Net sales`, value: this.money(net), icon: 'payments', accent: 'kpi--azure', note: 'vs previous period', delta: this.percentChange(net, prev('netSales')), higherIsBetter: true },
+      { label: $localize`Gross sales`, value: this.money(gross), icon: 'point_of_sale', accent: 'kpi--sky', note: 'vs previous period', delta: this.percentChange(gross, prev('grossSales')), higherIsBetter: true },
+      { label: $localize`Gross profit`, value: this.money(profit), icon: 'trending_up', accent: 'kpi--green', note: `${margin.toFixed(1)}% margin`, delta: this.percentChange(profit, prev('grossProfit')), higherIsBetter: true },
+      { label: $localize`Transactions`, value: transactions.toLocaleString(), icon: 'receipt_long', accent: 'kpi--violet', note: `${this.money(avgTicket)} avg. ticket`, delta: null, higherIsBetter: true },
+      { label: $localize`Refunds`, value: this.money(refunds), icon: 'undo', accent: 'kpi--red', note: `${refundCount} refunded receipt${refundCount === 1 ? '' : 's'}`, delta: this.percentChange(refunds, prev('refunds')), higherIsBetter: false },
+      { label: $localize`Discounts`, value: this.money(discounts), icon: 'sell', accent: 'kpi--amber', note: 'vs previous period', delta: this.percentChange(discounts, prev('discounts')), higherIsBetter: false },
     ];
   });
 
@@ -267,10 +275,10 @@ export class SalesDashboardComponent {
     });
     return {
       tooltip: { ...TOOLTIP, trigger: 'axis', valueFormatter: (v: any) => this.money(Number(v)) },
-      legend: { bottom: 0, icon: 'roundRect', itemWidth: 10, itemHeight: 10, textStyle: { color: COLORS.slate } },
+      legend: { bottom: 0, icon: 'roundRect', itemWidth: 10, itemHeight: 10, textStyle: { color: ct().text } },
       grid: { left: 8, right: 12, top: 16, bottom: 40, containLabel: true },
-      xAxis: { type: 'category', data: labels, axisLabel: AXIS_LABEL, axisLine: { lineStyle: { color: '#e2e8f0' } }, axisTick: { show: false } },
-      yAxis: { type: 'value', axisLabel: { ...AXIS_LABEL, formatter: (v: number) => this.compactMoney(v) }, splitLine: SPLIT_LINE },
+      xAxis: { type: 'category', data: labels, axisLabel: axisLabel(), axisLine: { lineStyle: { color: ct().axis } }, axisTick: { show: false } },
+      yAxis: { type: 'value', axisLabel: { ...axisLabel(), formatter: (v: number) => this.compactMoney(v) }, splitLine: splitLine() },
       // Gross as bars, net as a line: the two are usually within a few percent,
       // so two lines would sit on top of each other and hide one.
       series: [
@@ -291,7 +299,7 @@ export class SalesDashboardComponent {
     return {
       color: SERIES_PALETTE,
       tooltip: { ...TOOLTIP, trigger: 'item', formatter: (p: any) => `${p.name}<br/><b>${this.money(p.value)}</b> · ${p.percent}%` },
-      legend: { bottom: 0, type: 'scroll', icon: 'circle', itemWidth: 8, textStyle: { color: COLORS.slate } },
+      legend: { bottom: 0, type: 'scroll', icon: 'circle', itemWidth: 8, textStyle: { color: ct().text } },
       series: [{
         type: 'pie',
         radius: ['58%', '82%'],
@@ -319,11 +327,11 @@ export class SalesDashboardComponent {
         },
       },
       grid: { left: 8, right: 56, top: 8, bottom: 8, containLabel: true },
-      xAxis: { type: 'value', axisLabel: { ...AXIS_LABEL, formatter: (v: number) => this.compactMoney(v) }, splitLine: SPLIT_LINE },
+      xAxis: { type: 'value', axisLabel: { ...axisLabel(), formatter: (v: number) => this.compactMoney(v) }, splitLine: splitLine() },
       yAxis: {
         type: 'category',
         data: rows.map((r: any) => r.name),
-        axisLabel: { ...AXIS_LABEL, width: 110, overflow: 'truncate' },
+        axisLabel: { ...axisLabel(), width: 110, overflow: 'truncate' },
         axisLine: { show: false },
         axisTick: { show: false },
       },
@@ -335,7 +343,7 @@ export class SalesDashboardComponent {
           borderRadius: [0, 6, 6, 0],
           color: { type: 'linear', x: 0, y: 0, x2: 1, y2: 0, colorStops: [{ offset: 0, color: COLORS.sky }, { offset: 1, color: COLORS.primary }] },
         },
-        label: { show: true, position: 'right', color: COLORS.slate, fontSize: 11, formatter: (p: any) => this.compactMoney(p.value) },
+        label: { show: true, position: 'right', color: ct().text, fontSize: 11, formatter: (p: any) => this.compactMoney(p.value) },
       }],
     };
   });
@@ -356,11 +364,11 @@ export class SalesDashboardComponent {
         },
       },
       grid: { left: 8, right: 48, top: 8, bottom: 8, containLabel: true },
-      xAxis: { type: 'value', axisLabel: { ...AXIS_LABEL, formatter: (v: number) => this.compactMoney(v) }, splitLine: SPLIT_LINE },
+      xAxis: { type: 'value', axisLabel: { ...axisLabel(), formatter: (v: number) => this.compactMoney(v) }, splitLine: splitLine() },
       yAxis: {
         type: 'category',
         data: ordered.map((c: any) => c.category || 'Uncategorized'),
-        axisLabel: { ...AXIS_LABEL, width: 120, overflow: 'truncate' },
+        axisLabel: { ...axisLabel(), width: 120, overflow: 'truncate' },
         axisLine: { show: false },
         axisTick: { show: false },
       },
@@ -373,7 +381,7 @@ export class SalesDashboardComponent {
           color: { type: 'linear', x: 0, y: 0, x2: 1, y2: 0, colorStops: [{ offset: 0, color: COLORS.teal }, { offset: 1, color: COLORS.green }] },
         },
         label: {
-          show: true, position: 'right', color: COLORS.slate, fontSize: 11,
+          show: true, position: 'right', color: ct().text, fontSize: 11,
           formatter: (p: any) => (total > 0 ? `${Math.round((p.value / total) * 100)}%` : ''),
         },
       }],
@@ -389,7 +397,7 @@ export class SalesDashboardComponent {
     const colorFor: Record<string, string> = { 'Point of Sale': COLORS.primary, 'Self-order (QR)': COLORS.violet, Shopbot: COLORS.teal };
     return {
       tooltip: { ...TOOLTIP, trigger: 'item', formatter: (p: any) => `${p.name}<br/><b>${this.money(p.value)}</b> · ${p.percent}%` },
-      legend: { bottom: 0, icon: 'circle', itemWidth: 8, textStyle: { color: COLORS.slate } },
+      legend: { bottom: 0, icon: 'circle', itemWidth: 8, textStyle: { color: ct().text } },
       series: [{
         type: 'pie',
         radius: ['50%', '78%'],
@@ -422,8 +430,8 @@ export class SalesDashboardComponent {
         },
       },
       grid: { left: 8, right: 8, top: 16, bottom: 8, containLabel: true },
-      xAxis: { type: 'category', data: rows.map(([name]) => title(name)), axisLabel: AXIS_LABEL, axisLine: { lineStyle: { color: '#e2e8f0' } }, axisTick: { show: false } },
-      yAxis: { type: 'value', axisLabel: { ...AXIS_LABEL, formatter: (v: number) => this.compactMoney(v) }, splitLine: SPLIT_LINE },
+      xAxis: { type: 'category', data: rows.map(([name]) => title(name)), axisLabel: axisLabel(), axisLine: { lineStyle: { color: ct().axis } }, axisTick: { show: false } },
+      yAxis: { type: 'value', axisLabel: { ...axisLabel(), formatter: (v: number) => this.compactMoney(v) }, splitLine: splitLine() },
       series: [{
         type: 'bar',
         barMaxWidth: 42,
@@ -457,11 +465,11 @@ export class SalesDashboardComponent {
         formatter: (p: any) => `${DAY_NAMES[p.value[1]]} ${HOURS[p.value[0]]}<br/><b>${p.value[2]}</b> order${p.value[2] === 1 ? '' : 's'}`,
       },
       grid: { left: 8, right: 8, top: 8, bottom: 48, containLabel: true },
-      xAxis: { type: 'category', data: HOURS, splitArea: { show: true }, axisLabel: { ...AXIS_LABEL, interval: 2 }, axisTick: { show: false }, axisLine: { show: false } },
-      yAxis: { type: 'category', data: DAY_NAMES, splitArea: { show: true }, axisLabel: AXIS_LABEL, axisTick: { show: false }, axisLine: { show: false } },
+      xAxis: { type: 'category', data: HOURS, splitArea: { show: true }, axisLabel: { ...axisLabel(), interval: 2 }, axisTick: { show: false }, axisLine: { show: false } },
+      yAxis: { type: 'category', data: DAY_NAMES, splitArea: { show: true }, axisLabel: axisLabel(), axisTick: { show: false }, axisLine: { show: false } },
       visualMap: {
         min: 0, max, calculable: false, orient: 'horizontal', left: 'center', bottom: 0, itemWidth: 12, itemHeight: 120,
-        textStyle: { color: COLORS.slate, fontSize: 11 },
+        textStyle: { color: ct().text, fontSize: 11 },
         inRange: { color: ['#eef5ff', '#9cc3f5', COLORS.sky, COLORS.primary] },
       },
       series: [{
@@ -489,11 +497,11 @@ export class SalesDashboardComponent {
       xAxis: {
         type: 'category',
         data: rows.map((r: any) => (r.name ? String(r.name).split(' ')[0] : 'Removed user')),
-        axisLabel: { ...AXIS_LABEL, interval: 0, width: 72, overflow: 'truncate' },
-        axisLine: { lineStyle: { color: '#e2e8f0' } },
+        axisLabel: { ...axisLabel(), interval: 0, width: 72, overflow: 'truncate' },
+        axisLine: { lineStyle: { color: ct().axis } },
         axisTick: { show: false },
       },
-      yAxis: { type: 'value', axisLabel: { ...AXIS_LABEL, formatter: (v: number) => this.compactMoney(v) }, splitLine: SPLIT_LINE },
+      yAxis: { type: 'value', axisLabel: { ...axisLabel(), formatter: (v: number) => this.compactMoney(v) }, splitLine: splitLine() },
       series: [{
         type: 'bar',
         barMaxWidth: 36,

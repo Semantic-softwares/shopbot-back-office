@@ -8,12 +8,12 @@
       </div>
     } @else if (menus.error()) {
       <div class="text-red-600 p-4 bg-red-50 rounded">
-        Error loading menus. Please try again.
+        <ng-container i18n>Error loading menus. Please try again.</ng-container>
       </div>
     } @else {
       <form [formGroup]="form" class="space-y-4">
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Menu</mat-label>
+          <mat-label><ng-container i18n>Menu</ng-container></mat-label>
           <mat-select formControlName="menuId">
             @if (menus.hasValue() && menus.value()) {
               @for (menu of menus.value(); track menu._id) {
@@ -22,13 +22,13 @@
             }
           </mat-select>
           @if (form.get('menuId')?.hasError('required')) {
-            <mat-error>Please select a menu</mat-error>
+            <mat-error><ng-container i18n>Please select a menu</ng-container></mat-error>
           }
         </mat-form-field>
 
         <div class="grid grid-cols-2 gap-4">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Cost Price</mat-label>
+            <mat-label><ng-container i18n>Cost Price</ng-container></mat-label>
             <span matPrefix>{{ storeStore.selectedStore()?.currency }}&nbsp;</span>
             <input matInput 
               currencyMask
@@ -36,15 +36,15 @@
               step="0.01"
               formControlName="costPrice">
             @if (form.get('costPrice')?.hasError('required')) {
-              <mat-error>Cost price is required</mat-error>
+              <mat-error><ng-container i18n>Cost price is required</ng-container></mat-error>
             }
             @if (form.get('costPrice')?.hasError('min')) {
-              <mat-error>Cost price must be 0 or greater</mat-error>
+              <mat-error><ng-container i18n>Cost price must be 0 or greater</ng-container></mat-error>
             }
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Selling Price</mat-label>
+            <mat-label><ng-container i18n>Selling Price</ng-container></mat-label>
             <span matPrefix>{{ storeStore.selectedStore()?.currency }}&nbsp;</span>
             <input matInput 
               currencyMask
@@ -52,34 +52,34 @@
               step="0.01"
               formControlName="sellingPrice">
             @if (form.get('sellingPrice')?.hasError('required')) {
-              <mat-error>Selling price is required</mat-error>
+              <mat-error><ng-container i18n>Selling price is required</ng-container></mat-error>
             }
             @if (form.get('sellingPrice')?.hasError('min')) {
-              <mat-error>Selling price must be 0 or greater</mat-error>
+              <mat-error><ng-container i18n>Selling price must be 0 or greater</ng-container></mat-error>
             }
           </mat-form-field>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Quantity</mat-label>
+            <mat-label><ng-container i18n>Quantity</ng-container></mat-label>
             <input matInput type="number" min="1" step="1" formControlName="quantity">
             @if (form.get('quantity')?.hasError('required')) {
-              <mat-error>Quantity is required</mat-error>
+              <mat-error><ng-container i18n>Quantity is required</ng-container></mat-error>
             }
             @if (form.get('quantity')?.hasError('min')) {
-              <mat-error>Quantity must be at least 1</mat-error>
+              <mat-error><ng-container i18n>Quantity must be at least 1</ng-container></mat-error>
             }
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Status</mat-label>
+            <mat-label><ng-container i18n>Status</ng-container></mat-label>
             <mat-select formControlName="active">
-              <mat-option [value]="true">Active</mat-option>
-              <mat-option [value]="false">Inactive</mat-option>
+              <mat-option [value]="true"><ng-container i18n>Active</ng-container></mat-option>
+              <mat-option [value]="false"><ng-container i18n>Inactive</ng-container></mat-option>
             </mat-select>
             @if (form.get('active')?.hasError('required')) {
-              <mat-error>Status is required</mat-error>
+              <mat-error><ng-container i18n>Status is required</ng-container></mat-error>
             }
           </mat-form-field>
         </div>
@@ -89,14 +89,14 @@
 
   <mat-dialog-actions align="end" class="mt-6 pt-4 border-t">
     <button mat-button (click)="onCancel()" [disabled]="loading()">
-      Cancel
+      <ng-container i18n>Cancel</ng-container>
     </button>
     <button 
       matButton="filled" 
       color="primary" 
       (click)="onSubmit()" 
       [disabled]="form.invalid || loading()">
-      {{loading() ? 'Converting...' : 'Convert'}}
+      @if (loading()) {<ng-container i18n>Converting...</ng-container>} @else {<ng-container i18n>Convert</ng-container>}
     </button>
   </mat-dialog-actions>
 

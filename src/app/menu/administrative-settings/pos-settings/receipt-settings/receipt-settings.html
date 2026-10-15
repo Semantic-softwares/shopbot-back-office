@@ -2,8 +2,8 @@
   <div class="grid grid-cols-1 gap-6">
     <!-- Header with action buttons -->
     <app-page-header
-      title="Receipt Settings"
-      subtitle="Configure how receipts are displayed and printed">
+      title="Receipt Settings" i18n-title
+      subtitle="Configure how receipts are displayed and printed" i18n-subtitle>
       <div actions class="flex items-center gap-2">
         <button 
           type="button" 
@@ -11,7 +11,7 @@
           (click)="resetForm()"
           [disabled]="saving()">
           <mat-icon class="mr-1">refresh</mat-icon>
-          Reset
+          <ng-container i18n>Reset</ng-container>
         </button>
         <button 
           type="button" 
@@ -20,7 +20,7 @@
           [disabled]="posSettingsForm.invalid || saving()"
           (click)="saveReceiptSettings()">
           <mat-icon class="mr-1">save</mat-icon>
-          {{ saving() ? 'Saving...' : 'Save' }}
+          @if (saving()) {<ng-container i18n>Saving...</ng-container>} @else {<ng-container i18n>Save</ng-container>}
         </button>
       </div>
     </app-page-header>
@@ -39,8 +39,8 @@
               <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="text-sm font-semibold text-gray-900">Require Payment Before Checkout</label>
-                    <p class="text-xs text-gray-600 mt-1">Customers must complete payment before checking out</p>
+                    <label class="text-sm font-semibold text-gray-900"><ng-container i18n>Require Payment Before Checkout</ng-container></label>
+                    <p class="text-xs text-gray-600 mt-1"><ng-container i18n>Customers must complete payment before checking out</ng-container></p>
                   </div>
                   <mat-slide-toggle 
                     formControlName="requireOrdersPaymentBeforeCheckout" 
@@ -51,13 +51,13 @@
 
               <!-- Receipt Settings Group -->
               <div formGroupName="receiptSettings" class="space-y-4">
-                <h3 class="font-semibold text-gray-900 mb-4">Receipt Content</h3>
+                <h3 class="font-semibold text-gray-900 mb-4"><ng-container i18n>Receipt Content</ng-container></h3>
 
                 <!-- Show Note -->
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                   <div>
-                    <label class="text-sm font-medium text-gray-700">Show Notes</label>
-                    <p class="text-xs text-gray-600">Display special notes on receipts</p>
+                    <label class="text-sm font-medium text-gray-700"><ng-container i18n>Show Notes</ng-container></label>
+                    <p class="text-xs text-gray-600"><ng-container i18n>Display special notes on receipts</ng-container></p>
                   </div>
                   <mat-slide-toggle formControlName="showNote" color="primary"></mat-slide-toggle>
                 </div>
@@ -65,8 +65,8 @@
                 <!-- Show Tax -->
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                   <div>
-                    <label class="text-sm font-medium text-gray-700">Show Tax</label>
-                    <p class="text-xs text-gray-600">Display tax breakdown on receipts</p>
+                    <label class="text-sm font-medium text-gray-700"><ng-container i18n>Show Tax</ng-container></label>
+                    <p class="text-xs text-gray-600"><ng-container i18n>Display tax breakdown on receipts</ng-container></p>
                   </div>
                   <mat-slide-toggle formControlName="showTax" color="primary"></mat-slide-toggle>
                 </div>
@@ -74,8 +74,8 @@
                 <!-- Show Store Details -->
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                   <div>
-                    <label class="text-sm font-medium text-gray-700">Show Store Details</label>
-                    <p class="text-xs text-gray-600">Display store name and address</p>
+                    <label class="text-sm font-medium text-gray-700"><ng-container i18n>Show Store Details</ng-container></label>
+                    <p class="text-xs text-gray-600"><ng-container i18n>Display store name and address</ng-container></p>
                   </div>
                   <mat-slide-toggle formControlName="showStoreDetails" color="primary"></mat-slide-toggle>
                 </div>
@@ -83,8 +83,8 @@
                 <!-- Show Seller Info -->
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                   <div>
-                    <label class="text-sm font-medium text-gray-700">Show Seller Info</label>
-                    <p class="text-xs text-gray-600">Display staff/seller information</p>
+                    <label class="text-sm font-medium text-gray-700"><ng-container i18n>Show Seller Info</ng-container></label>
+                    <p class="text-xs text-gray-600"><ng-container i18n>Display staff/seller information</ng-container></p>
                   </div>
                   <mat-slide-toggle formControlName="showSellerInfo" color="primary"></mat-slide-toggle>
                 </div>
@@ -92,8 +92,8 @@
                 <!-- Show Customer Name -->
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                   <div>
-                    <label class="text-sm font-medium text-gray-700">Show Customer Name</label>
-                    <p class="text-xs text-gray-600">Display customer information on receipts</p>
+                    <label class="text-sm font-medium text-gray-700"><ng-container i18n>Show Customer Name</ng-container></label>
+                    <p class="text-xs text-gray-600"><ng-container i18n>Display customer information on receipts</ng-container></p>
                   </div>
                   <mat-slide-toggle formControlName="showCustomerName" color="primary"></mat-slide-toggle>
                 </div>
@@ -101,16 +101,16 @@
                 <!-- Print After Finish -->
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                   <div>
-                    <label class="text-sm font-medium text-gray-700">Auto Print After Order Complete</label>
-                    <p class="text-xs text-gray-600">Automatically print receipt when order is completed</p>
+                    <label class="text-sm font-medium text-gray-700"><ng-container i18n>Auto Print After Order Complete</ng-container></label>
+                    <p class="text-xs text-gray-600"><ng-container i18n>Automatically print receipt when order is completed</ng-container></p>
                   </div>
                   <mat-slide-toggle formControlName="printAfterFinish" color="primary"></mat-slide-toggle>
                 </div>
 
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                   <div>
-                    <label class="text-sm font-medium text-gray-700">Print Pending Table Orders</label>
-                    <p class="text-xs text-gray-600">Print a ticket as soon as a table order is saved, even before the tab is paid or completed — so the kitchen gets it right away</p>
+                    <label class="text-sm font-medium text-gray-700"><ng-container i18n>Print Pending Table Orders</ng-container></label>
+                    <p class="text-xs text-gray-600"><ng-container i18n>Print a ticket as soon as a table order is saved, even before the tab is paid or completed — so the kitchen gets it right away</ng-container></p>
                   </div>
                   <mat-slide-toggle formControlName="printPendingTableOrders" color="primary"></mat-slide-toggle>
                 </div>
@@ -119,39 +119,39 @@
                 <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-3">
                   <div class="flex items-center justify-between">
                     <div>
-                      <label class="text-sm font-medium text-gray-700">Use Custom Business Name</label>
-                      <p class="text-xs text-gray-600">Display a different business name on receipts instead of the store name</p>
+                      <label class="text-sm font-medium text-gray-700"><ng-container i18n>Use Custom Business Name</ng-container></label>
+                      <p class="text-xs text-gray-600"><ng-container i18n>Display a different business name on receipts instead of the store name</ng-container></p>
                     </div>
                     <mat-slide-toggle formControlName="useCustomBusinessName" color="primary"></mat-slide-toggle>
                   </div>
                   @if (posSettingsForm.get('receiptSettings.useCustomBusinessName')?.value) {
                     <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Business Name</mat-label>
-                      <input matInput formControlName="businessName" placeholder="Enter business name for receipts">
+                      <mat-label><ng-container i18n>Business Name</ng-container></mat-label>
+                      <input matInput formControlName="businessName" placeholder="Enter business name for receipts" i18n-placeholder>
                       <mat-icon matSuffix>storefront</mat-icon>
                     </mat-form-field>
-                    <p class="text-xs text-gray-500">This name will appear on receipts instead of the store name</p>
+                    <p class="text-xs text-gray-500"><ng-container i18n>This name will appear on receipts instead of the store name</ng-container></p>
                   }
                 </div>
 
                 <!-- Footer Message -->
                 <div>
                   <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Footer Message</mat-label>
-                    <textarea matInput formControlName="footerMessage" rows="2" placeholder="Thank you for your patronage"></textarea>
+                    <mat-label><ng-container i18n>Footer Message</ng-container></mat-label>
+                    <textarea matInput formControlName="footerMessage" rows="2" placeholder="Thank you for your patronage" i18n-placeholder></textarea>
                     <mat-icon matSuffix>message</mat-icon>
                   </mat-form-field>
-                  <p class="text-xs text-gray-500 mt-1">Message displayed at the bottom of receipts</p>
+                  <p class="text-xs text-gray-500 mt-1"><ng-container i18n>Message displayed at the bottom of receipts</ng-container></p>
                 </div>
 
                 <!-- Disclaimer -->
                 <div>
                   <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Disclaimer (Optional)</mat-label>
-                    <textarea matInput formControlName="disclaimer" rows="2" placeholder="Enter any disclaimer text..."></textarea>
+                    <mat-label><ng-container i18n>Disclaimer (Optional)</ng-container></mat-label>
+                    <textarea matInput formControlName="disclaimer" rows="2" placeholder="Enter any disclaimer text..." i18n-placeholder></textarea>
                     <mat-icon matSuffix>info</mat-icon>
                   </mat-form-field>
-                  <p class="text-xs text-gray-500 mt-1">Optional legal disclaimer to include on receipts</p>
+                  <p class="text-xs text-gray-500 mt-1"><ng-container i18n>Optional legal disclaimer to include on receipts</ng-container></p>
                 </div>
               </div>
 
@@ -166,13 +166,13 @@
     <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
       <h5 class="font-semibold text-blue-900 mb-2 flex items-center gap-2">
         <mat-icon class="text-blue-600">info</mat-icon>
-        Receipt Configuration Guide
+        <ng-container i18n>Receipt Configuration Guide</ng-container>
       </h5>
       <ul class="text-sm text-blue-800 space-y-1">
-        <li>• These settings control how receipts appear to customers</li>
-        <li>• Toggle options ON/OFF to show or hide information on receipts</li>
-        <li>• Custom footer and disclaimer text will appear at the bottom</li>
-        <li>• Changes take effect immediately for new transactions</li>
+        <li><ng-container i18n>• These settings control how receipts appear to customers</ng-container></li>
+        <li><ng-container i18n>• Toggle options ON/OFF to show or hide information on receipts</ng-container></li>
+        <li><ng-container i18n>• Custom footer and disclaimer text will appear at the bottom</ng-container></li>
+        <li><ng-container i18n>• Changes take effect immediately for new transactions</ng-container></li>
       </ul>
     </div>
   </div>

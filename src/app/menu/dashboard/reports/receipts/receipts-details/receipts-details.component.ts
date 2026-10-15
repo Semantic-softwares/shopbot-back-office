@@ -16,6 +16,7 @@ import { AuthService } from '../../../../../shared/services/auth.service';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { DeliveryAddressCardComponent } from '../../../../../shared/components/delivery-address-card/delivery-address-card.component';
 import { MatListModule } from "@angular/material/list";
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 
 @Component({
@@ -24,7 +25,7 @@ import { MatListModule } from "@angular/material/list";
   styleUrl: './receipts-details.component.scss',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatCardModule,
     MatIconModule,
@@ -107,15 +108,15 @@ export class ReceiptsDetailsComponent {
       next: (result) => {
         this.claiming.set(false);
         if (result.success) {
-          this.snackBar.open('You are now serving this table', 'Close', { duration: 4000 });
+          this.snackBar.open($localize`You are now serving this table`, $localize`Close`, { duration: 4000 });
           // Flip the card immediately rather than waiting on the refetch — the
           // claim already succeeded server-side, so the UI shouldn't keep
           // offering an Accept button while the reload is in flight.
           this.markAssignedLocally();
         } else {
           this.snackBar.open(
-            result.assignedTo ? `Already taken by ${result.assignedTo}` : 'Someone else already took this order',
-            'Close',
+            result.assignedTo ? $localize`Already taken by ${result.assignedTo}` : $localize`Someone else already took this order`,
+            $localize`Close`,
             { duration: 5000 },
           );
         }
@@ -126,8 +127,8 @@ export class ReceiptsDetailsComponent {
         this.claiming.set(false);
         const taken = err?.error?.assignedTo;
         this.snackBar.open(
-          taken ? `Already taken by ${taken}` : 'Could not accept this order',
-          'Close',
+          taken ? $localize`Already taken by ${taken}` : $localize`Could not accept this order`,
+          $localize`Close`,
           { duration: 5000 },
         );
         this.orderResource.reload();
@@ -164,7 +165,7 @@ export class ReceiptsDetailsComponent {
 
   /** Declining is local only — the order stays open for any other employee. */
   declineOrder(): void {
-    this.snackBar.open('Left for another team member', 'Close', { duration: 3000 });
+    this.snackBar.open($localize`Left for another team member`, $localize`Close`, { duration: 3000 });
     this.goBack();
   }
 
@@ -210,13 +211,13 @@ export class ReceiptsDetailsComponent {
   private async exportDocument(type: 'receipt' | 'invoice'): Promise<void> {
     const order = this.orderResource.value();
     if (!order) {
-      this.snackBar.open('Order data not available', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Order data not available`, $localize`Close`, { duration: 3000 });
       return;
     }
 
     const currencyCode = this.currency();
     if (!currencyCode) {
-      this.snackBar.open('Currency information not available', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Currency information not available`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -242,11 +243,11 @@ export class ReceiptsDetailsComponent {
           printWindow.print();
         }, 500);
       } else {
-        this.snackBar.open('Please allow pop-ups to export', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Please allow pop-ups to export`, $localize`Close`, { duration: 3000 });
       }
     } catch (error) {
       console.error(`Error exporting ${type}:`, error);
-      this.snackBar.open(`Failed to export ${type}`, 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Failed to export ${type}`, $localize`Close`, { duration: 3000 });
     } finally {
       this.exporting.set(false);
     }

@@ -76,7 +76,7 @@ export class PermissionsComponent  {
       const dialogRef = this.dialog.open(ConfirmDialogComponent, {
         width: '400px',
         data: {
-          title: 'Delete Permission',
+          title: $localize`Delete Permission`,
           message: `Are you sure you want to delete the permission "${permission.name}"?`
         }
       });
@@ -87,13 +87,13 @@ export class PermissionsComponent  {
             .subscribe({
               next: () => {
                 this.permissions.reload();
-                this.snackBar.open('Permission deleted successfully', 'Close', {
+                this.snackBar.open($localize`Permission deleted successfully`, $localize`Close`, {
                   duration: 3000,
                   panelClass: ['success-snackbar']
                 });
               },
               error: (error) => {
-                this.snackBar.open('Failed to delete permission', 'Close', {
+                this.snackBar.open($localize`Failed to delete permission`, $localize`Close`, {
                   duration: 3000,
                   panelClass: ['error-snackbar']
                 });

@@ -32,8 +32,8 @@ table {
     }
 
     &:disabled {
-      background-color: #f3f4f6;
-      color: #6b7280;
+      background-color: light-dark(#f3f4f6, #1c1b1c);
+      color: light-dark(#6b7280, #cac5cb);
       cursor: not-allowed;
     }
   }

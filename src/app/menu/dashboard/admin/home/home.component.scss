@@ -4,7 +4,7 @@
 
 .dashboard {
   padding: 2rem;
-  background: #f8fafc;
+  background: light-dark(#f8fafc, #1c1b1c);
   min-height: 100vh;
 }
 
@@ -14,12 +14,12 @@
   h1 {
     font-size: 1.875rem;
     font-weight: 600;
-    color: #1e293b;
+    color: light-dark(#1e293b, #e6e1e1);
     margin: 0;
   }
   
   .date {
-    color: #64748b;
+    color: light-dark(#64748b, #cac5cb);
     margin-top: 0.5rem;
   }
 }
@@ -32,7 +32,7 @@
 }
 
 .stat-card {
-  background: white;
+  background: light-dark(white, #201f20);
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -61,7 +61,7 @@
 
     .label {
       font-weight: 500;
-      color: #64748b;
+      color: light-dark(#64748b, #cac5cb);
     }
   }
 
@@ -69,7 +69,7 @@
     h3 {
       font-size: 1.875rem;
       font-weight: 600;
-      color: #1e293b;
+      color: light-dark(#1e293b, #e6e1e1);
       margin: 0;
     }
 
@@ -80,12 +80,12 @@
       gap: 0.5rem;
 
       .trend-up {
-        color: #10b981;
+        color: light-dark(#10b981, #82eeca);
         font-weight: 500;
       }
 
       .period {
-        color: #64748b;
+        color: light-dark(#64748b, #cac5cb);
         font-size: 0.875rem;
       }
     }
@@ -103,7 +103,7 @@
 }
 
 .chart-card {
-  background: white;
+  background: light-dark(white, #201f20);
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -117,7 +117,7 @@
     h2 {
       font-size: 1.25rem;
       font-weight: 600;
-      color: #1e293b;
+      color: light-dark(#1e293b, #e6e1e1);
       margin: 0;
     }
   }
@@ -130,8 +130,8 @@
       padding: 0.5rem 1rem;
       border: none;
       border-radius: 0.5rem;
-      background: #f1f5f9;
-      color: #64748b;
+      background: light-dark(#f1f5f9, #1c1b1c);
+      color: light-dark(#64748b, #cac5cb);
       cursor: pointer;
       transition: all 0.2s ease;
 
@@ -144,7 +144,7 @@
 }
 
 .recent-activity-card {
-  background: white;
+  background: light-dark(white, #201f20);
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -152,7 +152,7 @@
   h2 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #1e293b;
+    color: light-dark(#1e293b, #e6e1e1);
     margin: 0 0 1.5rem;
   }
 }
@@ -162,7 +162,7 @@
     display: flex;
     align-items: flex-start;
     padding: 1rem 0;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid light-dark(#e2e8f0, #48464b);
 
     &:last-child {
       border-bottom: none;
@@ -184,13 +184,13 @@
 
       .activity-text {
         margin: 0;
-        color: #1e293b;
+        color: light-dark(#1e293b, #e6e1e1);
         font-weight: 500;
       }
 
       .activity-time {
         font-size: 0.875rem;
-        color: #64748b;
+        color: light-dark(#64748b, #cac5cb);
       }
     }
   }

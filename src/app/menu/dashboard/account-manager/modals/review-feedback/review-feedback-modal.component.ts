@@ -22,38 +22,38 @@ import { FeedbackService } from '../../../../shared/services/feedback.service';
     ReactiveFormsModule
   ],
   template: `
-    <h2 mat-dialog-title>Review Feedback</h2>
+    <h2 mat-dialog-title><ng-container i18n>Review Feedback</ng-container></h2>
     <form [formGroup]="reviewForm" (ngSubmit)="onSubmit()">
       <mat-dialog-content>
         <div class="flex flex-col gap-4">
           <mat-form-field appearance="outline">
-            <mat-label>Impact</mat-label>
+            <mat-label><ng-container i18n>Impact</ng-container></mat-label>
             <mat-select formControlName="impact">
-              <mat-option [value]="1">1 - High</mat-option>
+              <mat-option [value]="1"><ng-container i18n>1 - High</ng-container></mat-option>
               <mat-option [value]="2">2</mat-option>
               <mat-option [value]="3">3</mat-option>
               <mat-option [value]="4">4</mat-option>
-              <mat-option [value]="5">5 - Low</mat-option>
+              <mat-option [value]="5"><ng-container i18n>5 - Low</ng-container></mat-option>
             </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Complexity</mat-label>
+            <mat-label><ng-container i18n>Complexity</ng-container></mat-label>
             <mat-select formControlName="complexity">
-              <mat-option [value]="1">1 - Easy</mat-option>
+              <mat-option [value]="1"><ng-container i18n>1 - Easy</ng-container></mat-option>
               <mat-option [value]="2">2</mat-option>
               <mat-option [value]="3">3</mat-option>
               <mat-option [value]="4">4</mat-option>
-              <mat-option [value]="5">5 - Hard</mat-option>
+              <mat-option [value]="5"><ng-container i18n>5 - Hard</ng-container></mat-option>
             </mat-select>
           </mat-form-field>
         </div>
       </mat-dialog-content>
       <mat-dialog-actions align="end">
-        <button mat-button mat-dialog-close [disabled]="isSubmitting()">Cancel</button>
+        <button mat-button mat-dialog-close [disabled]="isSubmitting()"><ng-container i18n>Cancel</ng-container></button>
         <button mat-flat-button color="primary" type="submit" 
           [disabled]="!reviewForm.valid || isSubmitting()">
-          {{isSubmitting() ? 'Submitting...' : 'Submit'}}
+          @if (isSubmitting()) {<ng-container i18n>Submitting...</ng-container>} @else {<ng-container i18n>Submit</ng-container>}
         </button>
       </mat-dialog-actions>
     </form>
@@ -82,7 +82,7 @@ export class ReviewFeedbackModalComponent {
         .subscribe({
           next: (result) => {
             this.isSubmitting.set(false);
-            this.snackBar.open('Feedback reviewed successfully', 'Close', {
+            this.snackBar.open($localize`Feedback reviewed successfully`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -91,7 +91,7 @@ export class ReviewFeedbackModalComponent {
           },
           error: (error) => {
             this.isSubmitting.set(false);
-            this.snackBar.open('Error reviewing feedback. Please try again.', 'Close', {
+            this.snackBar.open($localize`Error reviewing feedback. Please try again.`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top',

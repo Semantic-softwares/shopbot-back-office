@@ -1,12 +1,12 @@
 <div [formGroup]="tenantsGroup" class="grid grid-cols-1 gap-4">
   <mat-form-field appearance="outline" class="w-full">
-    <mat-label>Tenants</mat-label>
+    <mat-label><ng-container i18n>Tenants</ng-container></mat-label>
 
-    <mat-chip-grid #chipGrid aria-label="Selected tenants">
+    <mat-chip-grid #chipGrid aria-label="Selected tenants" i18n-aria-label>
       @for (tenantId of selectedTenantIds(); track tenantId) {
         <mat-chip-row (removed)="removeTenant(tenantId)">
           {{ selectedTenantLabel(tenantId) }}
-          <button matChipRemove type="button" aria-label="Remove tenant">
+          <button matChipRemove type="button" aria-label="Remove tenant" i18n-aria-label>
             <mat-icon>cancel</mat-icon>
           </button>
         </mat-chip-row>
@@ -15,7 +15,7 @@
         [formControl]="tenantSearchControl"
         [matChipInputFor]="chipGrid"
         [matAutocomplete]="tenantAuto"
-        placeholder="Search and select tenant">
+        placeholder="Search and select tenant" i18n-placeholder>
     </mat-chip-grid>
 
     <mat-autocomplete #tenantAuto="matAutocomplete" (optionSelected)="selectTenant($event)">
@@ -25,21 +25,21 @@
     </mat-autocomplete>
 
     @if (tenantsGroup.get('tenantIds')?.invalid && tenantsGroup.get('tenantIds')?.touched) {
-      <mat-error>Please select at least one tenant</mat-error>
+      <mat-error><ng-container i18n>Please select at least one tenant</ng-container></mat-error>
     }
   </mat-form-field>
 
   <div class="flex items-center gap-1 -mt-2">
-    <span class="text-sm text-gray-500">Can't find a tenant?</span>
+    <span class="text-sm text-gray-500"><ng-container i18n>Can't find a tenant?</ng-container></span>
     <button
       mat-button
       type="button"
       color="primary"
       class="!text-sm !px-2 !min-w-0"
       (click)="openCreateTenantDialog()"
-      aria-label="Create a new tenant">
+      aria-label="Create a new tenant" i18n-aria-label>
       <mat-icon class="!text-base !w-4 !h-4 mr-1">person_add</mat-icon>
-      Create New Tenant
+      <ng-container i18n>Create New Tenant</ng-container>
     </button>
   </div>
 </div>

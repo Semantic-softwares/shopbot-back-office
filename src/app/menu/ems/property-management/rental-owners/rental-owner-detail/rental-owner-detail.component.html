@@ -7,10 +7,10 @@
     <div class="flex items-center gap-2">
       <mat-icon class="text-red-500">error</mat-icon>
       <div>
-        <h3 class="text-red-800 font-medium">Error loading rental owner</h3>
+        <h3 class="text-red-800 font-medium"><ng-container i18n>Error loading rental owner</ng-container></h3>
         <button mat-button color="warn" (click)="reload()" class="mt-2 !text-red-600">
           <mat-icon class="mr-1">refresh</mat-icon>
-          Retry
+          <ng-container i18n>Retry</ng-container>
         </button>
       </div>
     </div>
@@ -23,11 +23,11 @@
     <ng-container actions>
       <a mat-button (click)="goBack()">
         <mat-icon class="mr-1">arrow_back</mat-icon>
-        Back
+        <ng-container i18n>Back</ng-container>
       </a>
       <a mat-flat-button [routerLink]="['../', owner()!._id, 'edit']">
         <mat-icon class="mr-1">edit</mat-icon>
-        Edit
+        <ng-container i18n>Edit</ng-container>
       </a>
     </ng-container>
   </app-page-header>

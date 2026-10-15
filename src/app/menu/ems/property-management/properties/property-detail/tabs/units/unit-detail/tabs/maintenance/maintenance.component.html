@@ -1,14 +1,14 @@
 <div class="space-y-4">
   <div class="flex items-center justify-between">
-    <h3 class="text-lg font-semibold text-gray-900">Maintenance Requests</h3>
+    <h3 class="text-lg font-semibold text-gray-900"><ng-container i18n>Maintenance Requests</ng-container></h3>
     <div class="flex items-center gap-2">
       <button mat-button (click)="clearFilters()">
         <mat-icon>filter_alt_off</mat-icon>
-        Clear Filters
+        <ng-container i18n>Clear Filters</ng-container>
       </button>
       <button mat-flat-button (click)="goToCreate()">
         <mat-icon>add</mat-icon>
-        New Request
+        <ng-container i18n>New Request</ng-container>
       </button>
     </div>
   </div>
@@ -16,20 +16,20 @@
   <!-- Filters -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <mat-form-field appearance="outline">
-      <mat-label>Search</mat-label>
+      <mat-label><ng-container i18n>Search</ng-container></mat-label>
       <input
         matInput
         [value]="search()"
         (keyup.enter)="onSearch(($any($event.target)).value)"
-        placeholder="Request number, title..."
+        placeholder="Request number, title..." i18n-placeholder
       />
-      <button mat-icon-button matSuffix (click)="onSearch(search())" aria-label="Search requests">
+      <button mat-icon-button matSuffix (click)="onSearch(search())" aria-label="Search requests" i18n-aria-label>
         <mat-icon>search</mat-icon>
       </button>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Status</mat-label>
+      <mat-label><ng-container i18n>Status</ng-container></mat-label>
       <mat-select [value]="status()" (valueChange)="onStatusChange($event)">
         @for (option of statusOptions; track option.value) {
           <mat-option [value]="option.value">{{ option.label }}</mat-option>
@@ -38,7 +38,7 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Priority</mat-label>
+      <mat-label><ng-container i18n>Priority</ng-container></mat-label>
       <mat-select [value]="priority()" (valueChange)="onPriorityChange($event)">
         @for (option of priorityOptions; track option.value) {
           <mat-option [value]="option.value">{{ option.label }}</mat-option>
@@ -54,14 +54,14 @@
   } @else if (requests().length === 0) {
     <app-no-record
       icon="handyman"
-      title="No Maintenance Requests"
-      message="No maintenance requests found for this unit."
+      title="No Maintenance Requests" i18n-title
+      message="No maintenance requests found for this unit." i18n-message
     ></app-no-record>
   } @else {
     <div class="overflow-auto">
       <table mat-table [dataSource]="requests()" class="w-full">
         <ng-container matColumnDef="requestNumber">
-          <th mat-header-cell *matHeaderCellDef>Request</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Request</ng-container></th>
           <td mat-cell *matCellDef="let row">
             <button mat-button (click)="goToDetails(row._id)" class="!px-0">
               <mat-chip>{{ row.requestNumber }}</mat-chip>
@@ -70,64 +70,64 @@
         </ng-container>
 
         <ng-container matColumnDef="title">
-          <th mat-header-cell *matHeaderCellDef>Title</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Title</ng-container></th>
           <td mat-cell *matCellDef="let row">
             <div class="font-medium text-gray-900">{{ row.title }}</div>
-            <div class="text-xs text-gray-500">{{ row.description || 'No description' }}</div>
+            <div class="text-xs text-gray-500">@if (row.description) {<ng-container>{{ row.description }}</ng-container>} @else {<ng-container i18n>No description</ng-container>}</div>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="vendor">
-          <th mat-header-cell *matHeaderCellDef>Vendor</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Vendor</ng-container></th>
           <td mat-cell *matCellDef="let row">{{ getVendorName(row.vendorId) }}</td>
         </ng-container>
 
         <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
           <td mat-cell *matCellDef="let row">
             <mat-chip>{{ getStatusLabel(row.status) }}</mat-chip>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="priority">
-          <th mat-header-cell *matHeaderCellDef>Priority</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Priority</ng-container></th>
           <td mat-cell *matCellDef="let row">
             <mat-chip>{{ getPriorityLabel(row.priority) }}</mat-chip>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="cost">
-          <th mat-header-cell *matHeaderCellDef>Cost</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Cost</ng-container></th>
           <td mat-cell *matCellDef="let row">
             <span class="font-medium">{{ getPartsLaborTotal(row) | currency: currencyCode() : 'symbol' : '1.2-2' }}</span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="createdAt">
-          <th mat-header-cell *matHeaderCellDef>Created</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Created</ng-container></th>
           <td mat-cell *matCellDef="let row">{{ row.createdAt | date: 'mediumDate' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let row">
-            <button mat-icon-button [matMenuTriggerFor]="actionMenu" aria-label="Open request actions">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu" aria-label="Open request actions" i18n-aria-label>
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #actionMenu="matMenu">
               <button mat-menu-item (click)="goToDetails(row._id)">
                 <mat-icon>visibility</mat-icon>
-                <span>View Request</span>
+                <span><ng-container i18n>View Request</ng-container></span>
               </button>
               @if (row.expenseInvoiceId) {
                 <button mat-menu-item (click)="viewInvoice(row.expenseInvoiceId)">
                   <mat-icon>receipt_long</mat-icon>
-                  <span>View Invoice</span>
+                  <span><ng-container i18n>View Invoice</ng-container></span>
                 </button>
               }
               <button mat-menu-item (click)="goToEdit(row._id)">
                 <mat-icon>edit</mat-icon>
-                <span>Edit Request</span>
+                <span><ng-container i18n>Edit Request</ng-container></span>
               </button>
             </mat-menu>
           </td>

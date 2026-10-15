@@ -9,7 +9,7 @@
 
 mat-card {
   &[appearance='outlined'] {
-    --mdc-theme-surface: rgb(255, 255, 255);
+    --mdc-theme-surface: light-dark(rgb(255, 255, 255), #201f20);
   }
 }
 

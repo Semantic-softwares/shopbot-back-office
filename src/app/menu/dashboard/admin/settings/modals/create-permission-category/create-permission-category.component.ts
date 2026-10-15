@@ -8,11 +8,12 @@ import { MatInputModule } from '@angular/material/input';
 import { PermissionService } from '../../../../../shared/services/permission.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PermissionCategory } from '../../../../../../shared/models/permission.model';
+import { TrPipe } from '../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-create-permission-category',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
@@ -54,16 +55,16 @@ export class CreatePermissionCategoryComponent {
       operation.subscribe({
         next: () => {
           this.snackBar.open(
-            `Category ${this.isEditMode ? 'updated' : 'created'} successfully`,
-            'Close',
+            $localize`Category ${this.isEditMode ? 'updated' : 'created'} successfully`,
+            $localize`Close`,
             { duration: 3000, panelClass: ['success-snackbar'] }
           );
           this.dialogRef.close(true);
         },
         error: () => {
           this.snackBar.open(
-            `Failed to ${this.isEditMode ? 'update' : 'create'} category`,
-            'Close',
+            $localize`Failed to ${this.isEditMode ? 'update' : 'create'} category`,
+            $localize`Close`,
             { duration: 3000, panelClass: ['error-snackbar'] }
           );
         }

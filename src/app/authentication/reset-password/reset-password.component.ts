@@ -9,11 +9,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../shared/services/auth.service';
 import { CommonModule } from '@angular/common';
+import { TrPipe } from '../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatCardModule,
     MatButtonModule,
@@ -94,8 +95,8 @@ export class ResetPasswordComponent implements OnInit {
             this.loading.set(false);
             this.resetComplete.set(true);
             this.snackBar.open(
-              'Password reset successfully!',
-              'Close',
+              $localize`Password reset successfully!`,
+              $localize`Close`,
               {
                 duration: 5000,
                 horizontalPosition: 'end',
@@ -111,7 +112,7 @@ export class ResetPasswordComponent implements OnInit {
             this.loading.set(false);
             this.snackBar.open(
               error.error?.msg || error.message || 'Failed to reset password. Please try again.',
-              'Close',
+              $localize`Close`,
               {
                 duration: 5000,
                 horizontalPosition: 'end',

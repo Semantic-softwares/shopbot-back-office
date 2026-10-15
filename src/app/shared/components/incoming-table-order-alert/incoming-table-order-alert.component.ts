@@ -81,8 +81,8 @@ export class IncomingTableOrderAlertComponent {
             .subscribe(() => this.router.navigate(['/menu/pos/orders', order.orderId, 'details']));
         } else {
           this.snackBar.open(
-            result.assignedTo ? `Already taken by ${result.assignedTo}` : 'Someone else already took this table',
-            'Close',
+            result.assignedTo ? $localize`Already taken by ${result.assignedTo}` : $localize`Someone else already took this table`,
+            $localize`Close`,
             { duration: 4000 },
           );
         }
@@ -90,7 +90,7 @@ export class IncomingTableOrderAlertComponent {
       error: () => {
         this.claiming.set(false);
         this.queue.update((list) => list.filter((o) => o.orderId !== order.orderId));
-        this.snackBar.open('Could not claim this table — please check the orders list', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Could not claim this table — please check the orders list`, $localize`Close`, { duration: 4000 });
       },
     });
   }

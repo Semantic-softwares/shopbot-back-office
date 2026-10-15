@@ -1,11 +1,11 @@
 <!-- Header Section -->
 <app-page-header 
-  [title]="orderResource.hasValue() ? 'Receipt #' + orderResource.value().reference : 'Receipt Details'"
-  [subtitle]="orderResource.hasValue() ? 'Created on ' + (orderResource.value().createdAt | date: 'medium') : 'Loading receipt...'">
+  [title]="orderResource.hasValue() ? ('Receipt #' | tr) + orderResource.value().reference : ('Receipt Details' | tr)"
+  [subtitle]="orderResource.hasValue() ? ('Created on ' | tr) + (orderResource.value().createdAt | date: 'medium') : ('Loading receipt...' | tr)">
   <ng-container actions>
     <button mat-stroked-button (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
-      Back
+      <ng-container i18n>Back</ng-container>
     </button>
 
     @if (orderResource.hasValue() && !orderResource.isLoading()) {
@@ -13,17 +13,17 @@
         matButton="outlined"
         [matMenuTriggerFor]="exportMenu"
         [disabled]="exporting()">
-        <mat-icon>{{exporting() ? 'refresh' : 'print'}}</mat-icon> {{exporting() ? 'Exporting...' : 'Export'}}
+        <mat-icon>{{exporting() ? 'refresh' : 'print'}}</mat-icon> @if (exporting()) {<ng-container i18n>Exporting...</ng-container>} @else {<ng-container i18n>Export</ng-container>}
       </button>
       
       <mat-menu #exportMenu="matMenu">
         <button mat-menu-item (click)="exportReceipt()">
           <mat-icon>receipt</mat-icon>
-          <span>Generate Receipt</span>
+          <span><ng-container i18n>Generate Receipt</ng-container></span>
         </button>
         <button mat-menu-item (click)="exportInvoice()">
           <mat-icon>description</mat-icon>
-          <span>Generate Invoice</span>
+          <span><ng-container i18n>Generate Invoice</ng-container></span>
         </button>
       </mat-menu>
       
@@ -44,10 +44,10 @@
     <mat-card appearance="outlined">
       <mat-card-content class="text-center py-8">
         <mat-icon class="!text-6xl text-red-500 mb-4">error_outline</mat-icon>
-        <h3 class="text-lg font-semibold mb-2">Failed to Load Receipt</h3>
-        <p class="text-gray-600 mb-4">{{ orderResource.error()?.message || 'An error occurred' }}</p>
+        <h3 class="text-lg font-semibold mb-2"><ng-container i18n>Failed to Load Receipt</ng-container></h3>
+        <p class="text-gray-600 mb-4">@if (orderResource.error()?.message) {<ng-container>{{ orderResource.error()?.message }}</ng-container>} @else {<ng-container i18n>An error occurred</ng-container>}</p>
         <button mat-flat-button color="warn" (click)="goBack()">
-          Back to Receipts
+          <ng-container i18n>Back to Receipts</ng-container>
         </button>
       </mat-card-content>
     </mat-card>
@@ -73,20 +73,20 @@
             </mat-icon>
             <div>
               @if (canAccept()) {
-                <h3 class="font-medium">This table hasn't been picked up yet</h3>
-                <p class="text-sm text-gray-600">Accept it to serve this table — it will show in your orders.</p>
+                <h3 class="font-medium"><ng-container i18n>This table hasn't been picked up yet</ng-container></h3>
+                <p class="text-sm text-gray-600"><ng-container i18n>Accept it to serve this table — it will show in your orders.</ng-container></p>
               } @else if (isMine()) {
-                <h3 class="font-medium">You are serving this table</h3>
-                <p class="text-sm text-gray-600">It appears in your POS orders list.</p>
+                <h3 class="font-medium"><ng-container i18n>You are serving this table</ng-container></h3>
+                <p class="text-sm text-gray-600"><ng-container i18n>It appears in your POS orders list.</ng-container></p>
               } @else {
                 <h3 class="font-medium">
                   @if (assignedStaffName()) {
-                    Already taken by {{ assignedStaffName() }}
+                    <ng-container i18n>Already taken by {{ assignedStaffName() }}</ng-container>
                   } @else {
-                    Already taken
+                    <ng-container i18n>Already taken</ng-container>
                   }
                 </h3>
-                <p class="text-sm text-gray-600">Another team member is serving this table.</p>
+                <p class="text-sm text-gray-600"><ng-container i18n>Another team member is serving this table.</ng-container></p>
               }
             </div>
           </div>
@@ -94,13 +94,13 @@
           @if (canAccept()) {
             <div class="flex gap-2">
               <button mat-stroked-button [disabled]="claiming()" (click)="declineOrder()">
-                Decline
+                <ng-container i18n>Decline</ng-container>
               </button>
               <button mat-flat-button color="primary" [disabled]="claiming()" (click)="acceptOrder()">
                 @if (claiming()) {
                   <mat-icon class="animate-spin">refresh</mat-icon>
                 } @else {
-                  Accept order
+                  <ng-container i18n>Accept order</ng-container>
                 }
               </button>
             </div>
@@ -116,8 +116,8 @@
         <mat-card-content class="flex items-center gap-3 py-3">
           <mat-icon class="text-blue-600">schedule</mat-icon>
           <div>
-            <h3 class="font-medium">Scheduled Delivery</h3>
-            <p class="text-sm text-gray-600">
+            <h3 class="font-medium"><ng-container i18n>Scheduled Delivery</ng-container></h3>
+            <p i18n class="text-sm text-gray-600">
               This order is scheduled for <strong>{{ order.deliveryTime.date }}</strong> at <strong>{{ order.deliveryTime.time }}</strong>
             </p>
           </div>
@@ -131,9 +131,9 @@
         <mat-card-content class="flex items-center gap-3 py-3">
           <mat-icon class="text-pink-600">card_giftcard</mat-icon>
           <div>
-            <h3 class="font-medium">🎁 Gift Order</h3>
+            <h3 class="font-medium"><ng-container i18n>🎁 Gift Order</ng-container></h3>
             <p class="text-sm text-gray-600">
-              This is a gift order {{ order.receiver?.surprise ? '(Surprise)' : '' }}
+              <ng-container i18n>This is a gift order {{ order.receiver?.surprise ? '(Surprise)' : '' }}</ng-container>
             </p>
           </div>
         </mat-card-content>
@@ -149,7 +149,7 @@
             <div>
               <h2 class="text-2xl font-bold">{{ order.reference }}</h2>
               <p class="text-sm text-gray-600">
-                Created on {{ order.createdAt | date: 'medium' }}
+                <ng-container i18n>Created on {{ order.createdAt | date: 'medium' }}</ng-container>
               </p>
             </div>
           </div>
@@ -185,21 +185,21 @@
         <mat-card appearance="outlined">
           <mat-card-header>
             <mat-card-title>
-              Order Information
+              <ng-container i18n>Order Information</ng-container>
             </mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Order Reference</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Order Reference</ng-container></label>
                 <div class="text-lg font-semibold">{{ order.reference }}</div>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Order Date</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Order Date</ng-container></label>
                 <div class="text-sm">{{ order.createdAt | date: 'medium' }}</div>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Payment Method</ng-container></label>
                 <!-- A split bill lists each tender with what it settled;
                      anything else reads as the single method it always did. -->
                 @if ((order.payments || []).length > 1) {
@@ -214,12 +214,12 @@
                 }
                 @if ((order.changeDue || 0) > 0) {
                   <div class="text-xs text-gray-500 mt-1">
-                    Change given {{ order.changeDue | currency: currency() : 'symbol' : '1.2-2' }}
+                    <ng-container i18n>Change given {{ order.changeDue | currency: currency() : 'symbol' : '1.2-2' }}</ng-container>
                   </div>
                 }
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Payment Status</ng-container></label>
                 <mat-chip 
                   [class.!bg-green-100]="order.paymentStatus === 'paid'"
                   [class.!text-green-800]="order.paymentStatus === 'paid'"
@@ -231,16 +231,16 @@
                 </mat-chip>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Order Type</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Order Type</ng-container></label>
                 <div class="text-sm">{{ order.orderType | titlecase }}</div>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Delivery Type</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Delivery Type</ng-container></label>
                 <div class="text-sm">{{ order.deliveryType | titlecase }}</div>
               </div>
               @if (order.note) {
               <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Note</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Note</ng-container></label>
                 <div class="text-sm whitespace-pre-line bg-amber-50 rounded-md p-3">{{ order.note }}</div>
               </div>
               }
@@ -252,7 +252,7 @@
         <mat-card appearance="outlined" class="PY">
           <mat-card-header>
             <mat-card-title>
-              Order Items
+              <ng-container i18n>Order Items</ng-container>
             </mat-card-title>
           </mat-card-header>
           <mat-card-content class="!p-0">
@@ -261,7 +261,7 @@
                 
                 <!-- Product Column -->
                 <ng-container matColumnDef="product">
-                  <th mat-header-cell *matHeaderCellDef>Product</th>
+                  <th mat-header-cell *matHeaderCellDef><ng-container i18n>Product</ng-container></th>
                   <td mat-cell *matCellDef="let item">
                     <div class="flex items-center gap-3 py-2">
                       @if (item.image) {
@@ -295,7 +295,7 @@
 
                 <!-- Options Column -->
                 <ng-container matColumnDef="options">
-                  <th mat-header-cell *matHeaderCellDef>Options</th>
+                  <th mat-header-cell *matHeaderCellDef><ng-container i18n>Options</ng-container></th>
                   <td mat-cell *matCellDef="let item">
                     @if (item.options && item.options.length > 0) {
                       <div class="space-y-1">
@@ -317,7 +317,7 @@
 
                 <!-- Quantity Column -->
                 <ng-container matColumnDef="quantity">
-                  <th mat-header-cell *matHeaderCellDef class="text-center">Qty</th>
+                  <th mat-header-cell *matHeaderCellDef class="text-center"><ng-container i18n>Qty</ng-container></th>
                   <td mat-cell *matCellDef="let item" class="text-center">
                     <span class="inline-flex items-center justify-center w-8 h-8 bg-indigo-100 text-indigo-700 rounded-full font-semibold text-sm">
                       {{ item.quantity }}
@@ -327,7 +327,7 @@
 
                 <!-- Price Column -->
                 <ng-container matColumnDef="price">
-                  <th mat-header-cell *matHeaderCellDef class="text-right">Price</th>
+                  <th mat-header-cell *matHeaderCellDef class="text-right"><ng-container i18n>Price</ng-container></th>
                   <td mat-cell *matCellDef="let item" class="text-right font-medium">
                     {{ item.price | currency: currency() }}
                   </td>
@@ -335,7 +335,7 @@
 
                 <!-- Subtotal Column -->
                 <ng-container matColumnDef="subtotal">
-                  <th mat-header-cell *matHeaderCellDef class="text-right">Subtotal</th>
+                  <th mat-header-cell *matHeaderCellDef class="text-right"><ng-container i18n>Subtotal</ng-container></th>
                   <td mat-cell *matCellDef="let item" class="text-right font-bold">
                     {{ getProductSubtotal(item) | currency: currency() }}
                   </td>
@@ -357,26 +357,26 @@
         <mat-card appearance="outlined">
           <mat-card-header>
             <mat-card-title>
-              Order Summary
+              <ng-container i18n>Order Summary</ng-container>
             </mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <div class="space-y-3 mt-4">
               <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Subtotal:</span>
+                <span class="text-gray-600"><ng-container i18n>Subtotal:</ng-container></span>
                 <span class="font-medium">{{ order.subTotal | currency: currency() }}</span>
               </div>
               <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Service Fee:</span>
+                <span class="text-gray-600"><ng-container i18n>Service Fee:</ng-container></span>
                 <span class="font-medium">{{ order.serviceFee | currency: currency() }}</span>
               </div>
               <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Shipping Fee:</span>
+                <span class="text-gray-600"><ng-container i18n>Shipping Fee:</ng-container></span>
                 <span class="font-medium">{{ order.shippingFee | currency: currency() }}</span>
               </div>
               @if (order.discount) {
                 <div class="flex justify-between text-sm">
-                  <span class="text-gray-600">Discount:</span>
+                  <span class="text-gray-600"><ng-container i18n>Discount:</ng-container></span>
                   <span class="font-medium text-green-600">-{{ order.discount | currency: currency() }}</span>
                 </div>
               }
@@ -387,7 +387,7 @@
                   <div class="flex justify-between text-sm">
                     <span class="text-gray-700 flex items-center gap-1">
                       <mat-icon class="!text-base text-amber-500">local_taxi</mat-icon>
-                      Driver Tip:
+                      <ng-container i18n>Driver Tip:</ng-container>
                     </span>
                     <span class="font-semibold text-amber-600">{{ order.driverTip | currency: currency() }}</span>
                   </div>
@@ -397,7 +397,7 @@
           </mat-card-content>
           <mat-card-actions class="border-t border-outline-variant mt-4 pt-4">
             <div class="flex justify-between w-full text-lg">
-              <span class="font-bold">Total:</span>
+              <span class="font-bold"><ng-container i18n>Total:</ng-container></span>
               <span class="font-bold  text-right">{{ order.total | currency: currency() }}</span>
             </div>
           </mat-card-actions>
@@ -414,24 +414,24 @@
             <mat-card-header>
               <mat-card-title class="flex items-center gap-2">
                 <mat-icon>person</mat-icon>
-                Customer
+                <ng-container i18n>Customer</ng-container>
               </mat-card-title>
             </mat-card-header>
             <mat-card-content class="!p-0">
               <mat-list>
                 <mat-list-item>
-                  <span matListItemTitle>Name</span>
+                  <span matListItemTitle><ng-container i18n>Name</ng-container></span>
                   <span matListItemMeta>{{ order.user?.name || order.guestName || 'N/A' }}</span>
                 </mat-list-item>
                 @if (order.user?.phoneNumber) {
                   <mat-list-item>
-                    <span matListItemTitle>Phone</span>
+                    <span matListItemTitle><ng-container i18n>Phone</ng-container></span>
                     <span matListItemMeta>{{ order.user.phoneNumber }}</span>
                   </mat-list-item>
                 }
                 @if (order.user?.email) {
                   <mat-list-item>
-                    <span matListItemTitle>Email</span>
+                    <span matListItemTitle><ng-container i18n>Email</ng-container></span>
                     <span matListItemMeta class="break-all">{{ order.user.email }}</span>
                   </mat-list-item>
                 }
@@ -446,36 +446,36 @@
             <mat-card-header>
               <mat-card-title class="flex items-center gap-2">
                 <mat-icon>person</mat-icon>
-                Guest
+                <ng-container i18n>Guest</ng-container>
               </mat-card-title>
             </mat-card-header>
             <mat-card-content class="!p-0">
               <mat-list>
                 <mat-list-item>
-                  <span matListItemTitle>Name</span>
+                  <span matListItemTitle><ng-container i18n>Name</ng-container></span>
                   <span matListItemMeta>{{ order.guest?.firstName }} {{ order.guest?.lastName }}</span>
                 </mat-list-item>
                 <mat-list-item>
-                  <span matListItemTitle>Phone</span>
+                  <span matListItemTitle><ng-container i18n>Phone</ng-container></span>
                   <span matListItemMeta>{{ order.guest?.phone || 'N/A' }}</span>
                 </mat-list-item>
                 <mat-list-item>
-                  <span matListItemTitle>Email</span>
+                  <span matListItemTitle><ng-container i18n>Email</ng-container></span>
                   <span matListItemMeta class="break-all">{{ order.guest?.email || 'N/A' }}</span>
                 </mat-list-item>
                 @if (order.guest?.nationality) {
                   <mat-list-item>
-                    <span matListItemTitle>Nationality</span>
+                    <span matListItemTitle><ng-container i18n>Nationality</ng-container></span>
                     <span matListItemMeta>{{ order.guest?.nationality }}</span>
                   </mat-list-item>
                 }
                 @if (order.reservation) {
                   <mat-list-item>
-                    <span matListItemTitle>Reservation</span>
+                    <span matListItemTitle><ng-container i18n>Reservation</ng-container></span>
                     <span matListItemMeta>
                       <a [routerLink]="['/menu/hms/front-desk/reservations', order.reservation]" 
                          class="font-medium text-indigo-600 hover:text-indigo-800 underline">
-                        View Reservation
+                        <ng-container i18n>View Reservation</ng-container>
                       </a>
                     </span>
                   </mat-list-item>
@@ -495,7 +495,7 @@
             <mat-card-header>
               <mat-card-title class="flex items-center gap-2">
                 <mat-icon>local_shipping</mat-icon>
-                Delivery to
+                <ng-container i18n>Delivery to</ng-container>
               </mat-card-title>
             </mat-card-header>
             @if (order.shipping?.latitude != null) {
@@ -506,7 +506,7 @@
               <mat-card-content>
                 <div class="space-y-3 mt-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Address</ng-container></label>
                     <div class="text-sm">{{ order.shipping?.name || 'N/A' }}</div>
                   </div>
                 </div>
@@ -521,21 +521,21 @@
             <mat-card-header>
               <mat-card-title class="flex items-center gap-2">
                 <mat-icon>room_service</mat-icon>
-                Served by
+                <ng-container i18n>Served by</ng-container>
               </mat-card-title>
             </mat-card-header>
             <mat-card-content class="!p-0">
               <mat-list>
                 <mat-list-item>
-                  <span matListItemTitle>Name</span>
+                  <span matListItemTitle><ng-container i18n>Name</ng-container></span>
                   <span matListItemMeta>{{ order.staff?.name || 'N/A' }}</span>
                 </mat-list-item>
                 <mat-list-item>
-                  <span matListItemTitle>Phone</span>
+                  <span matListItemTitle><ng-container i18n>Phone</ng-container></span>
                   <span matListItemMeta>{{ order.staff?.phoneNumber || 'N/A' }}</span>
                 </mat-list-item>
                 <mat-list-item>
-                  <span matListItemTitle>Email</span>
+                  <span matListItemTitle><ng-container i18n>Email</ng-container></span>
                   <span matListItemMeta class="break-all">{{ order.staff?.email || 'N/A' }}</span>
                 </mat-list-item>
               </mat-list>
@@ -548,25 +548,25 @@
           <mat-card appearance="outlined" class="!border-l-4 !border-l-pink-500">
             <mat-card-header>
               <mat-card-title class="flex items-center gap-2">
-                Gift Receiver
+                <ng-container i18n>Gift Receiver</ng-container>
                 @if (order.receiver.surprise) {
-                  <mat-chip class="!text-xs !bg-pink-100 !text-pink-700">Surprise</mat-chip>
+                  <mat-chip class="!text-xs !bg-pink-100 !text-pink-700"><ng-container i18n>Surprise</ng-container></mat-chip>
                 }
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
               <div class="space-y-4 mt-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Name</ng-container></label>
                   <div class="text-sm">{{ order.receiver.name || 'N/A' }}</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Phone</ng-container></label>
                   <div class="text-sm">{{ order.receiver.phoneNumber || 'N/A' }}</div>
                 </div>
                 @if (order.receiver.address) {
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Delivery Address</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Delivery Address</ng-container></label>
                     <div class="text-sm">
                       {{ order.receiver.address.name }} {{ order.receiver.address.administrativeArea }} {{ order.receiver.address.locality }}
                     </div>
@@ -574,7 +574,7 @@
                 }
                 @if (order.receiver.note) {
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Gift Note</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Gift Note</ng-container></label>
                     <div class="text-sm bg-pink-50 p-3 rounded border border-pink-100">{{ order.receiver.note }}</div>
                   </div>
                 }
@@ -588,14 +588,14 @@
           <mat-card appearance="outlined">
             <mat-card-header>
               <mat-card-title>
-                Revenue Breakdown
+                <ng-container i18n>Revenue Breakdown</ng-container>
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
               <div class="space-y-3 mt-4">
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-medium text-blue-900">Vendor Commission</span>
+                    <span class="text-sm font-medium text-blue-900"><ng-container i18n>Vendor Commission</ng-container></span>
                     <mat-chip class="!text-xs !bg-blue-100 !text-blue-700">{{ order.vendorCommission }}%</mat-chip>
                   </div>
                   <div class="text-2xl font-bold text-blue-600">{{ order.vendorCommissionAmount | currency: currency() }}</div>
@@ -603,7 +603,7 @@
                 
                 <div class="bg-pink-50 border border-pink-200 rounded-lg p-4">
                   <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-medium text-pink-900">Vendor Receives</span>
+                    <span class="text-sm font-medium text-pink-900"><ng-container i18n>Vendor Receives</ng-container></span>
                   </div>
                   <div class="text-2xl font-bold text-pink-600">
                     {{ (order.subTotal - order.vendorCommissionAmount) | currency: currency() }}
@@ -612,7 +612,7 @@
                 
                 <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-medium text-green-900">Platform Receives</span>
+                    <span class="text-sm font-medium text-green-900"><ng-container i18n>Platform Receives</ng-container></span>
                   </div>
                   <div class="text-2xl font-bold text-green-600">
                     {{ (order.total - (order.subTotal - order.vendorCommissionAmount)) | currency: currency() }}

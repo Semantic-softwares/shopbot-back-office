@@ -17,11 +17,12 @@ import { StoreStore } from '../../shared/stores/store.store';
 import { RolesService } from '../../shared/services/roles.service';
 import { Store } from '../../shared/models/store.model';
 import { PendingInvitesDialogComponent } from '../../shared/components/pending-invites-dialog/pending-invites-dialog.component';
+import { TrPipe } from '../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'login',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     MatCardModule,
     MatButtonModule,
     MatInputModule,
@@ -111,7 +112,7 @@ export class LoginComponent {
             if (stores.length === 1) {
               // Only one store — nothing to pick, go straight in.
               this.storeStore.setSelectedStore(stores[0]);
-              this.snackBar.open('Login successful!', 'Close', {
+              this.snackBar.open($localize`Login successful!`, $localize`Close`, {
                 duration: 3000,
                 horizontalPosition: 'end',
                 verticalPosition: 'top',
@@ -131,7 +132,7 @@ export class LoginComponent {
           catchError((error) => {
             this.snackBar.open(
               error.error?.message || error.message || 'Login failed. Please try again.',
-              'Close',
+              $localize`Close`,
               {
                 duration: 5000,
                 horizontalPosition: 'end',

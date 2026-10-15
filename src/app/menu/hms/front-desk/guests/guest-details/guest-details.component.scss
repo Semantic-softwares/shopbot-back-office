@@ -6,12 +6,12 @@
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-      border: 1px solid #e5e7eb;
+      border: 1px solid light-dark(#e5e7eb, #48464b);
     }
 
     .mat-mdc-tab-header {
-      background-color: #f9fafb;
-      border-bottom: 1px solid #e5e7eb;
+      background-color: light-dark(#f9fafb, #1c1b1c);
+      border-bottom: 1px solid light-dark(#e5e7eb, #48464b);
     }
 
     .mat-mdc-tab-labels {
@@ -23,12 +23,12 @@
       padding: 0 1.5rem;
       height: 48px;
       font-weight: 500;
-      color: #6b7280;
+      color: light-dark(#6b7280, #cac5cb);
       transition: all 0.2s ease;
 
       &.mdc-tab--active {
         color: #7c3aed;
-        background-color: white;
+        background-color: light-dark(white, #201f20);
         
         .mdc-tab__text-label {
           font-weight: 600;
@@ -36,8 +36,8 @@
       }
 
       &:hover:not(.mdc-tab--active) {
-        background-color: #f3f4f6;
-        color: #374151;
+        background-color: light-dark(#f3f4f6, #1c1b1c);
+        color: light-dark(#374151, #d6d2d2);
       }
 
       .mdc-tab__text-label {
@@ -56,7 +56,7 @@
     }
 
     .mat-mdc-tab-body-wrapper {
-      background-color: white;
+      background-color: light-dark(white, #201f20);
     }
 
     .mat-mdc-tab-body-content {
@@ -198,20 +198,20 @@
     border-radius: 6px;
     
     &:hover {
-      background-color: #f8fafc;
+      background-color: light-dark(#f8fafc, #1c1b1c);
       transform: translateX(4px);
     }
     
     label {
       font-size: 0.875rem;
       font-weight: 500;
-      color: #6b7280;
+      color: light-dark(#6b7280, #cac5cb);
       margin-bottom: 0.25rem;
       display: block;
     }
     
     p {
-      color: #111827;
+      color: light-dark(#111827, #e6e1e1);
       font-weight: 500;
       margin: 0;
     }
@@ -225,7 +225,7 @@
   gap: 0.5rem;
   font-size: 1.125rem;
   font-weight: 600;
-  color: #111827;
+  color: light-dark(#111827, #e6e1e1);
   
   mat-icon {
     color: #7c3aed;
@@ -238,7 +238,7 @@
 // Empty state styling
 .empty-state {
   .empty-icon {
-    background-color: #f9fafb;
+    background-color: light-dark(#f9fafb, #1c1b1c);
     border-radius: 50%;
     width: 6rem;
     height: 6rem;
@@ -248,7 +248,7 @@
     margin: 0 auto 1rem;
     
     mat-icon {
-      color: #9ca3af;
+      color: light-dark(#9ca3af, #a9a5ab);
       font-size: 3rem;
       width: 3rem;
       height: 3rem;
@@ -264,9 +264,9 @@
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 500;
-  background-color: #dbeafe;
-  color: #1e40af;
-  border: 1px solid #bfdbfe;
+  background-color: light-dark(#dbeafe, #152842);
+  color: light-dark(#1e40af, #8a9fe5);
+  border: 1px solid light-dark(#bfdbfe, #2c4463);
   transition: all 0.2s ease;
   
   &:hover {
@@ -278,13 +278,13 @@
 // Notes section styling
 .notes-section {
   .notes-content {
-    background-color: #f9fafb;
+    background-color: light-dark(#f9fafb, #1c1b1c);
     border-radius: 0.5rem;
     padding: 1rem;
-    border: 1px solid #e5e7eb;
+    border: 1px solid light-dark(#e5e7eb, #48464b);
     
     p {
-      color: #111827;
+      color: light-dark(#111827, #e6e1e1);
       white-space: pre-wrap;
       line-height: 1.6;
       margin: 0;
@@ -327,37 +327,6 @@
     grid-template-columns: 1fr !important;
   }
 }
-
-// Dark mode support (if enabled)
-@media (prefers-color-scheme: dark) {
-  .guest-details-tabs {
-    ::ng-deep {
-      .mat-mdc-tab-header {
-        background-color: #1f2937;
-        border-bottom-color: #374151;
-      }
-      
-      .mat-mdc-tab {
-        color: #9ca3af;
-        
-        &.mdc-tab--active {
-          color: #a78bfa;
-          background-color: #111827;
-        }
-        
-        &:hover:not(.mdc-tab--active) {
-          background-color: #374151;
-          color: #d1d5db;
-        }
-      }
-      
-      .mat-mdc-tab-body-wrapper {
-        background-color: #111827;
-      }
-    }
-  }
-}
-
 // Print styles
 @media print {
   .guest-details-header {

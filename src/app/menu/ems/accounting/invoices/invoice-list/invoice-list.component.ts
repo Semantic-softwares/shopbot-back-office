@@ -90,27 +90,27 @@ export class InvoiceListComponent {
   ];
 
   readonly statusOptions = [
-    { value: '', label: 'All Statuses' },
-    { value: InvoiceStatus.UNPAID, label: 'Unpaid' },
-    { value: InvoiceStatus.PARTIALLY_PAID, label: 'Partially Paid' },
-    { value: InvoiceStatus.PAID, label: 'Paid' },
-    { value: InvoiceStatus.OVERDUE, label: 'Overdue' },
-    { value: InvoiceStatus.VOID, label: 'Void' },
+    { value: '', label: $localize`All Statuses` },
+    { value: InvoiceStatus.UNPAID, label: $localize`Unpaid` },
+    { value: InvoiceStatus.PARTIALLY_PAID, label: $localize`Partially Paid` },
+    { value: InvoiceStatus.PAID, label: $localize`Paid` },
+    { value: InvoiceStatus.OVERDUE, label: $localize`Overdue` },
+    { value: InvoiceStatus.VOID, label: $localize`Void` },
   ];
 
   readonly typeOptions = [
-    { value: '', label: 'All Categories' },
-    { value: InvoiceType.RENT, label: 'Rent' },
-    { value: InvoiceType.DEPOSIT, label: 'Deposit' },
-    { value: InvoiceType.RECURRING_CHARGE, label: 'Recurring Charge' },
-    { value: InvoiceType.ONE_TIME_CHARGE, label: 'One-time Charge' },
-    { value: InvoiceType.LATE_FEE, label: 'Late Fee' },
+    { value: '', label: $localize`All Categories` },
+    { value: InvoiceType.RENT, label: $localize`Rent` },
+    { value: InvoiceType.DEPOSIT, label: $localize`Deposit` },
+    { value: InvoiceType.RECURRING_CHARGE, label: $localize`Recurring Charge` },
+    { value: InvoiceType.ONE_TIME_CHARGE, label: $localize`One-time Charge` },
+    { value: InvoiceType.LATE_FEE, label: $localize`Late Fee` },
   ];
 
   readonly flowOptions = [
-    { value: '', label: 'All Flows' },
-    { value: 'INCOME', label: 'Income' },
-    { value: 'EXPENSE', label: 'Outflow' },
+    { value: '', label: $localize`All Flows` },
+    { value: 'INCOME', label: $localize`Income` },
+    { value: 'EXPENSE', label: $localize`Outflow` },
   ];
 
   // ── Resources ─────────────────────────────────────────────────────

@@ -13,10 +13,11 @@ import { StoreStore } from '../shared/stores/store.store';
 import { RolesService } from '../shared/services/roles.service';
 import { SubscriptionService } from '../shared/services/subscription.service';
 import { ModuleKey } from '../shared/models';
+import { TrPipe } from '../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-menu',
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatIconModule,
     MatCardModule,

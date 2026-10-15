@@ -21,35 +21,35 @@
   @if (showView) {
     <button mat-menu-item (click)="onView($event)">
       <mat-icon>visibility</mat-icon>
-      <span>View Details</span>
+      <span><ng-container i18n>View Details</ng-container></span>
     </button>
   }
 
   @if (showEdit) {
     <button mat-menu-item (click)="onEdit($event)">
       <mat-icon>edit</mat-icon>
-      <span>Edit Lease</span>
+      <span><ng-container i18n>Edit Lease</ng-container></span>
     </button>
   }
 
   @if (isDraft()) {
     <button mat-menu-item (click)="onCompleteDraft($event)">
       <mat-icon>edit_note</mat-icon>
-      <span>Complete Draft</span>
+      <span><ng-container i18n>Complete Draft</ng-container></span>
     </button>
   }
 
   @if (isActive()) {
     <button mat-menu-item (click)="onEndLease($event)">
       <mat-icon>event_busy</mat-icon>
-      <span>End Lease</span>
+      <span><ng-container i18n>End Lease</ng-container></span>
     </button>
   }
 
   @if (showDelete) {
     <button mat-menu-item (click)="onDelete($event)">
       <mat-icon class="text-red-600">delete</mat-icon>
-      <span class="text-red-600">Delete Lease</span>
+      <span class="text-red-600"><ng-container i18n>Delete Lease</ng-container></span>
     </button>
   }
 </mat-menu>

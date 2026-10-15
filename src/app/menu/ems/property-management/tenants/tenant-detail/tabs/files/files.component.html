@@ -1,12 +1,12 @@
 @if (attachments().length === 0) {
   <div class="flex flex-col items-center justify-center py-16 text-gray-400">
     <mat-icon class="!text-6xl !w-16 !h-16 mb-4">folder_open</mat-icon>
-    <h3 class="text-lg font-medium text-gray-600 mb-1">No files yet</h3>
-    <p class="text-sm">Upload files from the tenant edit form.</p>
+    <h3 class="text-lg font-medium text-gray-600 mb-1"><ng-container i18n>No files yet</ng-container></h3>
+    <p class="text-sm"><ng-container i18n>Upload files from the tenant edit form.</ng-container></p>
   </div>
 } @else {
   <div class="mb-8">
-    <h3 class="text-sm font-bold text-gray-500 tracking-wider uppercase mb-4">Documents</h3>
+    <h3 class="text-sm font-bold text-gray-500 tracking-wider uppercase mb-4"><ng-container i18n>Documents</ng-container></h3>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       @for (url of attachments(); track url) {
         <a [href]="url" target="_blank" rel="noopener noreferrer"

@@ -1,27 +1,27 @@
-<h2 mat-dialog-title>Create Invoice Category</h2>
+<h2 mat-dialog-title><ng-container i18n>Create Invoice Category</ng-container></h2>
 
 <mat-dialog-content>
   <form [formGroup]="form" class="grid grid-cols-1 gap-3 pt-1">
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Name</mat-label>
-      <input matInput formControlName="name" placeholder="e.g. Cleaning Fee" />
+      <mat-label><ng-container i18n>Name</ng-container></mat-label>
+      <input matInput formControlName="name" placeholder="e.g. Cleaning Fee" i18n-placeholder />
     </mat-form-field>
 
     <div class="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto] md:items-start">
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Code</mat-label>
+        <mat-label><ng-container i18n>Code</ng-container></mat-label>
         <input
           matInput
           formControlName="code"
-          placeholder="e.g. CLEANING_FEE"
+          placeholder="e.g. CLEANING_FEE" i18n-placeholder
           (blur)="normalizeCode()"
         />
       </mat-form-field>
-      <button mat-stroked-button type="button" (click)="useNameAsCode()">Use Name</button>
+      <button mat-stroked-button type="button" (click)="useNameAsCode()"><ng-container i18n>Use Name</ng-container></button>
     </div>
 
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Financial Side</mat-label>
+      <mat-label><ng-container i18n>Financial Side</ng-container></mat-label>
       <mat-select formControlName="side">
         @for (side of sideOptions; track side) {
           <mat-option [value]="side">{{ side }}</mat-option>
@@ -30,18 +30,18 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Description (optional)</mat-label>
+      <mat-label><ng-container i18n>Description (optional)</ng-container></mat-label>
       <textarea matInput rows="3" formControlName="description"></textarea>
     </mat-form-field>
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button type="button" (click)="close()">Cancel</button>
+  <button mat-button type="button" (click)="close()"><ng-container i18n>Cancel</ng-container></button>
   <button mat-flat-button type="button" [disabled]="form.invalid || isSaving()" (click)="save()">
     @if (isSaving()) {
       <mat-spinner diameter="16" class="mr-2"></mat-spinner>
     }
-    Create
+    <ng-container i18n>Create</ng-container>
   </button>
 </mat-dialog-actions>

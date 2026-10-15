@@ -35,7 +35,7 @@ export class PricingComponent {
     this.isProcessing.set(true);
     this.subscriptionService.createTrial().subscribe({
       next: () => {
-        this.snackBar.open('Trial activated! Enjoy 30 days free access.', 'Close', {
+        this.snackBar.open($localize`Trial activated! Enjoy 30 days free access.`, $localize`Close`, {
           duration: 5000,
         });
         this.router.navigate(['/menu/hms']);
@@ -44,7 +44,7 @@ export class PricingComponent {
         this.isProcessing.set(false);
         this.snackBar.open(
           error.error?.message || 'Failed to start trial',
-          'Close',
+          $localize`Close`,
           { duration: 5000 },
         );
       },
@@ -62,7 +62,7 @@ export class PricingComponent {
         this.isProcessing.set(false);
         this.snackBar.open(
           error.error?.message || 'Failed to initiate payment',
-          'Close',
+          $localize`Close`,
           { duration: 5000 },
         );
       },

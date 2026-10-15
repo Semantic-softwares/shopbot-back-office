@@ -60,7 +60,7 @@ export class CancelSubscriptionDialogComponent {
     this.subscriptionService.cancelSubscription(finalReason).subscribe({
       next: (response) => {
         this.isSubmitting.set(false);
-        this.snackBar.open('Subscription cancelled successfully', 'Close', {
+        this.snackBar.open($localize`Subscription cancelled successfully`, $localize`Close`, {
           duration: 5000,
           panelClass: ['success-snackbar'],
           horizontalPosition: 'end',
@@ -76,7 +76,7 @@ export class CancelSubscriptionDialogComponent {
       error: (error) => {
         this.isSubmitting.set(false);
         const errorMessage = error?.error?.message || 'Failed to cancel subscription. Please try again.';
-        this.snackBar.open(errorMessage, 'Close', {
+        this.snackBar.open(errorMessage, $localize`Close`, {
           duration: 6000,
           panelClass: ['error-snackbar'],
           horizontalPosition: 'end',

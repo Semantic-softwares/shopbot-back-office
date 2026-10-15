@@ -1,35 +1,35 @@
 <h2 mat-dialog-title>
-    Transaction Management ({{ data.reservation.confirmationNumber }})
+    <ng-container i18n>Transaction Management ({{ data.reservation.confirmationNumber }})</ng-container>
 </h2>
 
 <mat-dialog-content>
     <!-- Payment Breakdown Section -->
     <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-        <h3 class="text-sm font-semibold mb-4">Payment Breakdown</h3>
+        <h3 class="text-sm font-semibold mb-4"><ng-container i18n>Payment Breakdown</ng-container></h3>
 
         <!-- Summary Grid -->
         <div class="grid grid-cols-2 gap-4 mb-4">
             <div class="bg-white p-3 rounded border border-gray-200">
-                <div class="text-xs text-gray-600 mb-1">Total Amount</div>
+                <div class="text-xs text-gray-600 mb-1"><ng-container i18n>Total Amount</ng-container></div>
                 <div class="text-lg font-bold">{{ totalAmount() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
                 </div>
             </div>
 
             <div class="bg-white p-3 rounded border border-gray-200">
-                <div class="text-xs text-gray-600 mb-1">Amount Paid</div>
+                <div class="text-xs text-gray-600 mb-1"><ng-container i18n>Amount Paid</ng-container></div>
                 <div class="text-lg font-bold text-green-600">{{ paidAmount() | currency:
                     $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</div>
             </div>
 
             <div class="bg-white p-3 rounded border border-gray-200">
-                <div class="text-xs text-gray-600 mb-1">Balance Due</div>
+                <div class="text-xs text-gray-600 mb-1"><ng-container i18n>Balance Due</ng-container></div>
                 <div class="text-lg font-bold" [class]="balanceAmount() > 0 ? 'text-red-600' : 'text-green-600'">
                     {{ balanceAmount() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
                 </div>
             </div>
 
             <div class="bg-white p-3 rounded border border-gray-200">
-                <div class="text-xs text-gray-600 mb-1">Payment Status</div>
+                <div class="text-xs text-gray-600 mb-1"><ng-container i18n>Payment Status</ng-container></div>
                 <div class="text-sm font-bold" [class]="getCurrentStatusClass()">
                     {{ getCurrentPaymentStatus() | titlecase }}
                 </div>
@@ -39,7 +39,7 @@
         <!-- Payment Progress Bar -->
         <div class="mb-4">
             <div class="flex justify-between items-center mb-1">
-                <span class="text-xs font-medium">Payment Progress</span>
+                <span class="text-xs font-medium"><ng-container i18n>Payment Progress</ng-container></span>
                 <span class="text-xs font-semibold">{{ paymentPercentage() }}%</span>
             </div>
             <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -59,10 +59,10 @@
     <!-- Tab Content -->
     <mat-tab-group animationDuration="300">
         <!-- New Transaction Tab -->
-        <mat-tab label="Add Transaction" [disabled]="loadingTransactions()">
+        <mat-tab label="Add Transaction" i18n-label [disabled]="loadingTransactions()">
             <ng-template mat-tab-label>
                 <mat-icon class="mr-2">add_circle_outline</mat-icon>
-                Add Transaction
+                <ng-container i18n>Add Transaction</ng-container>
             </ng-template>
 
             <!-- Payment Form -->
@@ -72,16 +72,16 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Transaction Type: Payment or Refund -->
                     <mat-form-field appearance="outline" class="w-full" *ngIf="balanceAmount() < 0">
-                        <mat-label>Transaction Type</mat-label>
+                        <mat-label><ng-container i18n>Transaction Type</ng-container></mat-label>
                         <mat-select formControlName="type">
-                            <mat-option value="refund">Refund</mat-option>
-                            <mat-option value="payment">Payment</mat-option>
+                            <mat-option value="refund"><ng-container i18n>Refund</ng-container></mat-option>
+                            <mat-option value="payment"><ng-container i18n>Payment</ng-container></mat-option>
                         </mat-select>
                     </mat-form-field>
 
                     <!-- Payment/Refund Amount -->
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>{{ paymentForm.get('type')?.value === 'refund' ? 'Refund Amount' : 'Payment Amount' }}</mat-label>
+                        <mat-label>@if (paymentForm.get('type')?.value === 'refund') {<ng-container i18n>Refund Amount</ng-container>} @else {<ng-container i18n>Payment Amount</ng-container>}</mat-label>
                         <span matPrefix>{{ storeStore.selectedStore()?.currency }}&nbsp;</span>
                         <input matInput 
                             currencyMask
@@ -91,55 +91,55 @@
                             [max]="paymentForm.get('type')?.value === 'refund' ? absBalanceAmount() : balanceAmount()"
                             formControlName="amount" placeholder="0.00">
                         @if (paymentForm.get('amount')?.hasError('required')) {
-                        <mat-error>Amount is required</mat-error>
+                        <mat-error><ng-container i18n>Amount is required</ng-container></mat-error>
                         }
                         @if (paymentForm.get('amount')?.hasError('min')) {
-                        <mat-error>Amount must be greater than 0</mat-error>
+                        <mat-error><ng-container i18n>Amount must be greater than 0</ng-container></mat-error>
                         }
                         @if (paymentForm.get('amount')?.hasError('max')) {
                         <mat-error>
-                            Amount cannot exceed {{ paymentForm.get('type')?.value === 'refund' ? 'refund due' : 'balance due' }}
+                            <ng-container i18n>Amount cannot exceed {{ paymentForm.get('type')?.value === 'refund' ? ('refund due' | tr) : ('balance due' | tr) }}</ng-container>
                         </mat-error>
                         }
                     </mat-form-field>
 
                     <!-- Payment/Refund Method -->
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>{{ paymentForm.get('type')?.value === 'refund' ? 'Refund Method' : 'Payment Method' }}</mat-label>
+                        <mat-label>@if (paymentForm.get('type')?.value === 'refund') {<ng-container i18n>Refund Method</ng-container>} @else {<ng-container i18n>Payment Method</ng-container>}</mat-label>
                         <mat-select formControlName="method">
-                            <mat-option value="cash">Cash</mat-option>
-                            <mat-option value="card">Credit/Debit Card</mat-option>
-                            <mat-option value="bank_transfer">Bank Transfer</mat-option>
-                            <mat-option value="mobile_money">Mobile Money</mat-option>
-                            <mat-option value="check">Check</mat-option>
-                            <mat-option value="online">Online Payment</mat-option>
-                            <mat-option value="refund">Refund</mat-option>
+                            <mat-option value="cash"><ng-container i18n>Cash</ng-container></mat-option>
+                            <mat-option value="card"><ng-container i18n>Credit/Debit Card</ng-container></mat-option>
+                            <mat-option value="bank_transfer"><ng-container i18n>Bank Transfer</ng-container></mat-option>
+                            <mat-option value="mobile_money"><ng-container i18n>Mobile Money</ng-container></mat-option>
+                            <mat-option value="check"><ng-container i18n>Check</ng-container></mat-option>
+                            <mat-option value="online"><ng-container i18n>Online Payment</ng-container></mat-option>
+                            <mat-option value="refund"><ng-container i18n>Refund</ng-container></mat-option>
                         </mat-select>
                         @if (paymentForm.get('method')?.hasError('required')) {
-                        <mat-error>{{ paymentForm.get('type')?.value === 'refund' ? 'Refund method' : 'Payment method' }} is required</mat-error>
+                        <mat-error><ng-container i18n>{{ paymentForm.get('type')?.value === 'refund' ? ('Refund method' | tr) : ('Payment method' | tr) }} is required</ng-container></mat-error>
                         }
                     </mat-form-field>
                 </div>
 
                 <!-- Reference Number -->
                 <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Reference Number (Optional)</mat-label>
-                    <input matInput formControlName="reference" placeholder="Transaction ID, Receipt number, etc.">
+                    <mat-label><ng-container i18n>Reference Number (Optional)</ng-container></mat-label>
+                    <input matInput formControlName="reference" placeholder="Transaction ID, Receipt number, etc." i18n-placeholder>
                 </mat-form-field>
 
                 <!-- Notes -->
                 <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Notes (Optional)</mat-label>
+                    <mat-label><ng-container i18n>Notes (Optional)</ng-container></mat-label>
                     <textarea matInput formControlName="notes" rows="3"
-                        placeholder="Additional payment notes..."></textarea>
+                        placeholder="Additional payment notes..." i18n-placeholder></textarea>
                 </mat-form-field>
 
                 <!-- Quick Amount Buttons -->
                 <div *ngIf="paymentForm.get('type')?.value !== 'refund'">
-                    <h4 class="text-sm font-medium mb-2">Quick Amounts</h4>
+                    <h4 class="text-sm font-medium mb-2"><ng-container i18n>Quick Amounts</ng-container></h4>
                     <div class="flex flex-wrap gap-2">
                         <button type="button" mat-stroked-button (click)="setAmount(balanceAmount())">
-                            Full Balance ({{ balanceAmount() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }})
+                            <ng-container i18n>Full Balance ({{ balanceAmount() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }})</ng-container>
                         </button>
                         @if (balanceAmount() >= 100) {
                         <button type="button" mat-stroked-button (click)="setAmount(100)">
@@ -156,49 +156,49 @@
                 } @else { <!-- Status-based form for regular updates -->
                 <!-- Payment Status -->
                 <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Payment Status</mat-label>
+                    <mat-label><ng-container i18n>Payment Status</ng-container></mat-label>
                     <mat-select formControlName="status">
-                        <mat-option value="pending">Pending Payment</mat-option>
-                        <mat-option value="partial">Partial Payment</mat-option>
-                        <mat-option value="paid">Paid in Full</mat-option>
+                        <mat-option value="pending"><ng-container i18n>Pending Payment</ng-container></mat-option>
+                        <mat-option value="partial"><ng-container i18n>Partial Payment</ng-container></mat-option>
+                        <mat-option value="paid"><ng-container i18n>Paid in Full</ng-container></mat-option>
                     </mat-select>
                     @if (paymentForm.get('status')?.hasError('required')) {
-                    <mat-error>Payment status is required</mat-error>
+                    <mat-error><ng-container i18n>Payment status is required</ng-container></mat-error>
                     }
                 </mat-form-field>
 
                 <!-- Payment Method -->
                 <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Payment Method</mat-label>
+                    <mat-label><ng-container i18n>Payment Method</ng-container></mat-label>
                     <mat-select formControlName="method">
-                        <mat-option value="cash">Cash</mat-option>
-                        <mat-option value="card">Credit/Debit Card</mat-option>
-                        <mat-option value="bank_transfer">Bank Transfer</mat-option>
-                        <mat-option value="mobile_money">Mobile Money</mat-option>
-                        <mat-option value="check">Check</mat-option>
-                        <mat-option value="online">Online Payment</mat-option>
+                        <mat-option value="cash"><ng-container i18n>Cash</ng-container></mat-option>
+                        <mat-option value="card"><ng-container i18n>Credit/Debit Card</ng-container></mat-option>
+                        <mat-option value="bank_transfer"><ng-container i18n>Bank Transfer</ng-container></mat-option>
+                        <mat-option value="mobile_money"><ng-container i18n>Mobile Money</ng-container></mat-option>
+                        <mat-option value="check"><ng-container i18n>Check</ng-container></mat-option>
+                        <mat-option value="online"><ng-container i18n>Online Payment</ng-container></mat-option>
                     </mat-select>
                     @if (paymentForm.get('method')?.hasError('required')) {
-                    <mat-error>Payment method is required</mat-error>
+                    <mat-error><ng-container i18n>Payment method is required</ng-container></mat-error>
                     }
                 </mat-form-field>
 
                 <!-- Reference Number -->
                 <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Transaction Reference (Optional)</mat-label>
-                    <input matInput formControlName="reference" placeholder="Transaction ID, Receipt number, etc.">
+                    <mat-label><ng-container i18n>Transaction Reference (Optional)</ng-container></mat-label>
+                    <input matInput formControlName="reference" placeholder="Transaction ID, Receipt number, etc." i18n-placeholder>
                 </mat-form-field>
 
                 <!-- Notes -->
                 <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Payment Notes (Optional)</mat-label>
+                    <mat-label><ng-container i18n>Payment Notes (Optional)</ng-container></mat-label>
                     <textarea matInput formControlName="notes" rows="3"
-                        placeholder="Additional notes about the payment..."></textarea>
+                        placeholder="Additional notes about the payment..." i18n-placeholder></textarea>
                 </mat-form-field>
 
                 <!-- Balance Warning for "Paid" Status -->
                 @if (paymentForm.get('status')?.value === 'paid' && balanceAmount() > 0) {
-                <mat-error class="block">
+                <mat-error i18n class="block">
                     <strong>Cannot mark as "Paid in Full":</strong>
                     There is still an outstanding balance of
                     <strong>{{ balanceAmount() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</strong>.
@@ -210,16 +210,16 @@
         </mat-tab>
 
         <!-- Transaction History Tab -->
-        <mat-tab label="Transaction History" [disabled]="loadingTransactions()">
+        <mat-tab label="Transaction History" i18n-label [disabled]="loadingTransactions()">
             <ng-template mat-tab-label>
                 <mat-icon class="mr-2">history</mat-icon>
-                History ({{ transactions().length }})
+                <ng-container i18n>History ({{ transactions().length }})</ng-container>
             </ng-template>
 
             <div class="mt-6">
                 @if (loadError()) {
                 <div class="p-4 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-700 mb-4">
-                    <strong>⚠️ Note:</strong> {{ loadError() }}
+                    <strong><ng-container i18n>⚠️ Note:</ng-container></strong> {{ loadError() }}
                 </div>
                 }
 
@@ -230,13 +230,13 @@
                 } @else if (transactions().length === 0) {
                 <div class="text-center py-8 text-gray-500">
                     <mat-icon class="block text-4xl mb-2 opacity-30">payment</mat-icon>
-                    <p>No transactions recorded yet</p>
+                    <p><ng-container i18n>No transactions recorded yet</ng-container></p>
                 </div>
                 } @else {
                 <table mat-table [dataSource]="transactions()" class="w-full mt-4">
                     <!-- Date Column -->
                     <ng-container matColumnDef="date">
-                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold">Date</th>
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold"><ng-container i18n>Date</ng-container></th>
                         <td mat-cell *matCellDef="let element" class="text-sm">
                             {{ element.createdAt | date:'short' }}
                         </td>
@@ -244,7 +244,7 @@
 
                     <!-- Amount Column -->
                     <ng-container matColumnDef="amount">
-                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-right">Amount</th>
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-right"><ng-container i18n>Amount</ng-container></th>
                         <td mat-cell *matCellDef="let element" class="text-sm text-right font-semibold">
                             {{ element.amount | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
                         </td>
@@ -252,7 +252,7 @@
 
                     <!-- Method Column -->
                     <ng-container matColumnDef="method">
-                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold">Method</th>
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold"><ng-container i18n>Method</ng-container></th>
                         <td mat-cell *matCellDef="let element" class="text-sm">
                             <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
                                 {{ element.method | titlecase }}
@@ -262,7 +262,7 @@
 
                     <!-- Type Column -->
                     <ng-container matColumnDef="type">
-                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold">Type</th>
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold"><ng-container i18n>Type</ng-container></th>
                         <td mat-cell *matCellDef="let element" class="text-sm">
                             <span [class]="element.type === 'payment' 
                   ? 'px-2 py-1 bg-green-100 text-green-800 rounded text-xs'
@@ -274,7 +274,7 @@
 
                     <!-- Notes Column -->
                     <ng-container matColumnDef="notes">
-                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold">Notes</th>
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold"><ng-container i18n>Notes</ng-container></th>
                         <td mat-cell *matCellDef="let element" class="text-sm text-gray-600">
                             {{ element.notes || '-' }}
                         </td>
@@ -282,7 +282,7 @@
 
                     <!-- Balance Column -->
                     <ng-container matColumnDef="balance">
-                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-right">Balance After
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold text-right"><ng-container i18n>Balance After</ng-container>
                         </th>
                         <td mat-cell *matCellDef="let element" class="text-sm text-right">
                             {{ element.balanceAfterTransaction | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
@@ -299,9 +299,9 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-    <a mat-button (click)="onCancel()">Cancel</a>
+    <a mat-button (click)="onCancel()"><ng-container i18n>Cancel</ng-container></a>
     <a mat-raised-button color="primary" [disabled]="!canSave() || processing()" (click)="onConfirm()">
-        {{processing() ? 'Processing...' : 'Save Transaction'}}
+        @if (processing()) {<ng-container i18n>Processing...</ng-container>} @else {<ng-container i18n>Save Transaction</ng-container>}
 
     </a>
 </mat-dialog-actions>

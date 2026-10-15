@@ -1,7 +1,7 @@
 <div class="p-4 bg-gray-50 min-h-screen">
     <div class="bg-white rounded-lg shadow-sm">
         <div class="p-4 sm:p-6">
-            <h1 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Store Settings</h1>
+            <h1 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6"><ng-container i18n>Store Settings</ng-container></h1>
 
             <form [formGroup]="storeForm" (ngSubmit)="onSubmit()" class="w-full max-w-4xl mx-auto">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
@@ -12,7 +12,7 @@
                   @if (!logoPreview && !storeForm.get('logo')?.value) {
                     <div class="text-center cursor-pointer transition-all hover:opacity-75" (click)="logoInput.click()">
                       <mat-icon class="text-4xl sm:text-5xl text-gray-400">add_photo_alternate</mat-icon>
-                      <p class="mt-2 text-sm sm:text-base text-gray-600">Click to upload store logo</p>
+                      <p class="mt-2 text-sm sm:text-base text-gray-600"><ng-container i18n>Click to upload store logo</ng-container></p>
                     </div>
                   } @else {
                     <div class="relative w-full h-full">
@@ -30,7 +30,7 @@
                   @if (!bannerPreview && !storeForm.get('bannerImage')?.value) {
                     <div class="text-center cursor-pointer transition-all hover:opacity-75" (click)="bannerInput.click()">
                       <mat-icon class="text-4xl sm:text-5xl text-gray-400">add_photo_alternate</mat-icon>
-                      <p class="mt-2 text-sm sm:text-base text-gray-600">Click to upload store banner</p>
+                      <p class="mt-2 text-sm sm:text-base text-gray-600"><ng-container i18n>Click to upload store banner</ng-container></p>
                     </div>
                   } @else {
                     <div class="relative w-full h-full">
@@ -43,32 +43,32 @@
                 </div>
               </div>
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Store Name</mat-label>
+                        <mat-label><ng-container i18n>Store Name</ng-container></mat-label>
                         <input matInput formControlName="name">
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Description</mat-label>
+                        <mat-label><ng-container i18n>Description</ng-container></mat-label>
                         <textarea matInput formControlName="description" rows="3"></textarea>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Currency</mat-label>
+                        <mat-label><ng-container i18n>Currency</ng-container></mat-label>
                         <input matInput formControlName="currency">
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Currency Code</mat-label>
+                        <mat-label><ng-container i18n>Currency Code</ng-container></mat-label>
                         <input matInput formControlName="currencyCode">
                     </mat-form-field> <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Tax (%)</mat-label>
+                        <mat-label><ng-container i18n>Tax (%)</ng-container></mat-label>
                         <input matInput type="number" formControlName="tax">
                     </mat-form-field>
 
 
 
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Category</mat-label>
+                        <mat-label><ng-container i18n>Category</ng-container></mat-label>
                         <mat-select formControlName="category">
                             @if (categories.hasValue()) {
                             @for (category of categories.value(); track category._id) {
@@ -79,10 +79,10 @@
                     </mat-form-field>
 
                     <div class="col-span-full mt-6">
-                        <h3 class="text-lg font-semibold mb-4">Contact Information</h3>
+                        <h3 class="text-lg font-semibold mb-4"><ng-container i18n>Contact Information</ng-container></h3>
                         <div formGroupName="contactInfo" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                             <mat-form-field appearance="outline" class="w-full">
-                                <mat-label>Country</mat-label>
+                                <mat-label><ng-container i18n>Country</ng-container></mat-label>
                                 <mat-select formControlName="country">
 
                                     @for (deliveryZone of deliveryZones.value(); track $index) {
@@ -92,7 +92,7 @@
                             </mat-form-field>
 
                             <mat-form-field appearance="outline" class="w-full">
-                                <mat-label>State</mat-label>
+                                <mat-label><ng-container i18n>State</ng-container></mat-label>
                                 <mat-select formControlName="state">
 
                                     @for (state of states(); track state) {
@@ -103,7 +103,7 @@
                             </mat-form-field>
 
                             <mat-form-field appearance="outline" class="w-full">
-                                <mat-label>City</mat-label>
+                                <mat-label><ng-container i18n>City</ng-container></mat-label>
                                 <mat-select formControlName="city">
 
                                     @for (city of localities(); track $index) {
@@ -114,19 +114,19 @@
                             </mat-form-field>
 
                             <mat-form-field appearance="outline" class="w-full">
-                                <mat-label>Address</mat-label>
+                                <mat-label><ng-container i18n>Address</ng-container></mat-label>
                                 <input matInput formControlName="placeName">
                             </mat-form-field>
 
 
 
                             <mat-form-field appearance="outline" class="w-full">
-                                <mat-label>Email</mat-label>
+                                <mat-label><ng-container i18n>Email</ng-container></mat-label>
                                 <input matInput formControlName="email" type="email">
                             </mat-form-field>
 
                             <mat-form-field appearance="outline" class="w-full">
-                                <mat-label>Phone</mat-label>
+                                <mat-label><ng-container i18n>Phone</ng-container></mat-label>
                                 <input matInput formControlName="phone">
                             </mat-form-field>
                         </div>
@@ -139,9 +139,9 @@
                         class="w-full sm:w-auto px-6">
                         @if (isSubmitting) {
                           <mat-spinner diameter="20" class="mr-2"></mat-spinner>
-                          Updating...
+                          <ng-container i18n>Updating...</ng-container>
                         } @else {
-                          Update Store
+                          <ng-container i18n>Update Store</ng-container>
                         }
                     </button>
                 </div>

@@ -192,7 +192,7 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
   public retryJob(job: PrintJob) {
     this.printJobService.retryPrintJob(job._id).subscribe({
       next: () => {
-        this.snackBar.open('Print job retry initiated', 'Close', {
+        this.snackBar.open($localize`Print job retry initiated`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top',
@@ -200,7 +200,7 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
         this.loadData();
       },
       error: () => {
-        this.snackBar.open('Failed to retry print job', 'Close', {
+        this.snackBar.open($localize`Failed to retry print job`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top',
@@ -212,10 +212,10 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
   public cancelJob(job: PrintJob) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
-        title: 'Cancel Print Job',
-        message: `Are you sure you want to cancel this print job?`,
-        confirmText: 'Cancel Job',
-        cancelText: 'Close',
+        title: $localize`Cancel Print Job`,
+        message: $localize`Are you sure you want to cancel this print job?`,
+        confirmText: $localize`Cancel Job`,
+        cancelText: $localize`Close`,
       },
     });
 
@@ -223,7 +223,7 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
       if (confirmed) {
         this.printJobService.cancelPrintJob(job._id).subscribe({
           next: () => {
-            this.snackBar.open('Print job cancelled', 'Close', {
+            this.snackBar.open($localize`Print job cancelled`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top',
@@ -231,7 +231,7 @@ export class PrintJobsComponent implements OnInit, OnDestroy {
             this.loadData();
           },
           error: () => {
-            this.snackBar.open('Failed to cancel print job', 'Close', {
+            this.snackBar.open($localize`Failed to cancel print job`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top',

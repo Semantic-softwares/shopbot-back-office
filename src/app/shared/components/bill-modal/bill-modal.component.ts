@@ -136,7 +136,7 @@ export class BillModalComponent {
     if (this.order()?._id) {
       this.printJobService.printOrder(this.order()._id).subscribe({
         next: (res) => {
-          this.snackBar.open('Print job created successfully', 'Close', {
+          this.snackBar.open($localize`Print job created successfully`, $localize`Close`, {
             duration: 3000,
           });
           this.isPrinting.set(false);
@@ -144,7 +144,7 @@ export class BillModalComponent {
         },
         error: (err) => {
           console.error('Failed to create print job:', err);
-          this.snackBar.open('Failed to create print job', 'Close', {
+          this.snackBar.open($localize`Failed to create print job`, $localize`Close`, {
             duration: 3000,
           });
           this.isPrinting.set(false);

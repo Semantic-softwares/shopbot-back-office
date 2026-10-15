@@ -199,14 +199,14 @@ export class StoreSettingsComponent implements OnInit {
         // Then handle image uploads sequentially
         await this.uploadImages(storeId);
 
-        this.snackBar.open('Store updated successfully', 'Close', {
+        this.snackBar.open($localize`Store updated successfully`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
         });
       } catch (error) {
         console.error('Error updating store:', error);
-        this.snackBar.open('Failed to update store', 'Close', {
+        this.snackBar.open($localize`Failed to update store`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'

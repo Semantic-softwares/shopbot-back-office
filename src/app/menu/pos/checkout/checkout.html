@@ -15,7 +15,7 @@
           </app-search>
         </div>
         <div class="hidden lg:flex items-center gap-2 shrink-0">
-          <span class="text-sm text-gray-600 whitespace-nowrap">Barcode Scanner</span>
+          <span class="text-sm text-gray-600 whitespace-nowrap"><ng-container i18n>Barcode Scanner</ng-container></span>
           <mat-slide-toggle
             [checked]="storeStore.selectedStore()?.posSettings?.useBarcodeScanner ?? false"
             (change)="toggleBarcodeScanner($event.checked)"
@@ -31,7 +31,7 @@
         @if (categoryStore.isLoading()) {
           <mat-spinner diameter="20"></mat-spinner>
         } @else {
-          <mat-chip-listbox aria-label="Select a category" class="flex-nowrap">
+          <mat-chip-listbox aria-label="Select a category" i18n-aria-label class="flex-nowrap">
             @for (category of categoryStore.categories(); track category._id) {
               <mat-chip-option 
                 [selected]="categoryStore.selectedCategory()?._id === category._id"
@@ -57,8 +57,8 @@
       } @else if (productStore.filteredProducts().length === 0) {
         <div class="flex flex-col items-center justify-center h-full text-gray-400">
           <mat-icon class="!text-6xl !w-16 !h-16 mb-4">inventory_2</mat-icon>
-          <p class="text-lg font-medium">No products found</p>
-          <p class="text-sm">Select a category or search for products</p>
+          <p class="text-lg font-medium"><ng-container i18n>No products found</ng-container></p>
+          <p class="text-sm"><ng-container i18n>Select a category or search for products</ng-container></p>
         </div>
       } @else {
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 lg:gap-4">

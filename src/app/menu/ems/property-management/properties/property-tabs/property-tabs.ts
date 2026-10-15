@@ -25,7 +25,7 @@ import { PageHeaderComponent } from '../../../../../shared/components/page-heade
 })
 export class PropertyTabs {
   readonly tabs = [
-    { label: 'Properties', link: 'properties', icon: 'domain' },
-    { label: 'Units', link: 'units', icon: 'apartment' },
+    { label: $localize`Properties`, link: 'properties', icon: 'domain' },
+    { label: $localize`Units`, link: 'units', icon: 'apartment' },
   ];
 }

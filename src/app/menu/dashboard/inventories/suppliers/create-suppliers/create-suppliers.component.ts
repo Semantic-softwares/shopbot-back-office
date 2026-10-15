@@ -132,7 +132,7 @@ export class CreateSuppliersComponent implements OnInit {
       const updateDto: UpdateSupplierDto = formValue;
       this.suppliersService.updateSupplier(this.supplierId, updateDto, storeId).subscribe({
         next: () => {
-          this.snackBar.open('Supplier updated successfully', 'Close', {
+          this.snackBar.open($localize`Supplier updated successfully`, $localize`Close`, {
             duration: 3000,
             horizontalPosition: 'end',
             verticalPosition: 'top'
@@ -142,7 +142,7 @@ export class CreateSuppliersComponent implements OnInit {
         error: (error) => {
           this.error.set('Failed to update supplier');
           this.loading.set(false);
-          this.snackBar.open('Failed to update supplier', 'Close', {
+          this.snackBar.open($localize`Failed to update supplier`, $localize`Close`, {
             duration: 3000,
             horizontalPosition: 'end',
             verticalPosition: 'top'
@@ -160,7 +160,7 @@ export class CreateSuppliersComponent implements OnInit {
       
       this.suppliersService.createSupplier(createDto).subscribe({
         next: () => {
-          this.snackBar.open('Supplier created successfully', 'Close', {
+          this.snackBar.open($localize`Supplier created successfully`, $localize`Close`, {
             duration: 3000,
             horizontalPosition: 'end',
             verticalPosition: 'top'
@@ -170,7 +170,7 @@ export class CreateSuppliersComponent implements OnInit {
         error: (error) => {
           this.error.set('Failed to create supplier');
           this.loading.set(false);
-          this.snackBar.open('Failed to create supplier', 'Close', {
+          this.snackBar.open($localize`Failed to create supplier`, $localize`Close`, {
             duration: 3000,
             horizontalPosition: 'end',
             verticalPosition: 'top'

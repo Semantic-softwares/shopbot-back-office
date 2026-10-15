@@ -24,11 +24,12 @@ import { RoomTypeRatePlanService, RoomTypeWithRatePlans } from '../../../../../.
 import { Tax } from '../../../../../../shared/services/tax.service';
 import { StoreStore } from '../../../../../../shared/stores/store.store';
 import { TaxSelectionModalComponent, TaxSelectionDialogData } from './tax-selection-modal/tax-selection-modal';
+import { TrPipe } from '../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-channel-manager-create-tax-sets',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -100,7 +101,7 @@ export class ChannelManagerCreateTaxSets implements OnInit {
   private loadRoomTypesAndRatePlans() {
     const propertyId = this.storeStore.selectedStore()?.channex?.propertyId;
     if (!propertyId) {
-      this.snackBar.open('Property ID not found', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Property ID not found`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -116,7 +117,7 @@ export class ChannelManagerCreateTaxSets implements OnInit {
         error: (error) => {
           this.isLoadingRoomTypes.set(false);
           const errorMessage = error.error?.message || 'Failed to load room types';
-          this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+          this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
           console.error('Error loading room types:', error);
         },
       });
@@ -154,7 +155,7 @@ export class ChannelManagerCreateTaxSets implements OnInit {
         },
         error: (error) => {
           const errorMessage = error.error?.message || 'Failed to load tax set';
-          this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+          this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
           console.error('Error loading tax set:', error);
         },
       });
@@ -217,7 +218,7 @@ export class ChannelManagerCreateTaxSets implements OnInit {
           );
           // Trigger change detection for OnPush strategy
           this.cdr.markForCheck();
-          this.snackBar.open(`Tax "${selectedTax.title}" added successfully`, 'Close', {
+          this.snackBar.open($localize`Tax "${selectedTax.title}" added successfully`, $localize`Close`, {
             duration: 3000,
           });
         }
@@ -351,7 +352,7 @@ export class ChannelManagerCreateTaxSets implements OnInit {
 
   saveTaxSet() {
     if (!this.taxSetForm.valid) {
-      this.snackBar.open('Please fill in all required fields', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Please fill in all required fields`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -376,13 +377,13 @@ export class ChannelManagerCreateTaxSets implements OnInit {
         next: () => {
           this.isSaving = false;
           const message = this.isEditing ? 'Tax set updated successfully' : 'Tax set created successfully';
-          this.snackBar.open(message, 'Close', { duration: 3000 });
+          this.snackBar.open(message, $localize`Close`, { duration: 3000 });
           this.cancel();
         },
         error: (error) => {
           this.isSaving = false;
           const errorMessage = error.error?.message || 'Failed to save tax set';
-          this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+          this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
           console.error('Error saving tax set:', error);
         },
       });

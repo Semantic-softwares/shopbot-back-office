@@ -33,11 +33,12 @@ import { StoreStore } from '../../../../../../shared/stores/store.store';
 import { ConfirmationDialogComponent } from '../../../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { NoRecordComponent } from '../../../../../../shared/components/no-record/no-record.component';
 import { tap } from 'rxjs';
+import { TrPipe } from '../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-list-webhooks',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatButtonModule,
     MatCardModule,
@@ -138,7 +139,7 @@ export class ListWebhooks {
     dialog.afterClosed().subscribe((result) => {
       if (result) {
         this.webhooks.reload();
-        this.snackBar.open('Webhook created successfully', 'Close', {
+        this.snackBar.open($localize`Webhook created successfully`, $localize`Close`, {
           duration: 3000,
         });
       }
@@ -154,7 +155,7 @@ export class ListWebhooks {
     dialog.afterClosed().subscribe((result) => {
       if (result) {
         this.webhooks.reload();
-        this.snackBar.open('Webhook updated successfully', 'Close', {
+        this.snackBar.open($localize`Webhook updated successfully`, $localize`Close`, {
           duration: 3000,
         });
       }
@@ -163,13 +164,13 @@ export class ListWebhooks {
 
   deleteWebhook(webhook: Webhook): void {
     if (!webhook.id) {
-      this.snackBar.open('Invalid webhook', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Invalid webhook`, $localize`Close`, { duration: 3000 });
       return;
     }
 
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
-        title: 'Delete Webhook',
+        title: $localize`Delete Webhook`,
         message: `Are you sure you want to delete the webhook "${webhook.url}"?`,
       },
     });
@@ -178,7 +179,7 @@ export class ListWebhooks {
       if (result && webhook.id) {
         this.webhookService.deleteWebhook(webhook.id).subscribe({
           next: () => {
-            this.snackBar.open('Webhook deleted successfully', 'Close', {
+            this.snackBar.open($localize`Webhook deleted successfully`, $localize`Close`, {
               duration: 3000,
             });
             this.webhooks.reload();
@@ -186,7 +187,7 @@ export class ListWebhooks {
           error: (error) => {
             const errorMessage =
               error.error?.message || 'Failed to delete webhook';
-            this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+            this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
           },
         });
       }

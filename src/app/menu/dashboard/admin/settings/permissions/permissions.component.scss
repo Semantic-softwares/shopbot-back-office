@@ -26,5 +26,5 @@ tr.group-row:not(.expanded-row):hover {
 }
 
 tr.group-row:not(.expanded-row):active {
-  background: #efefef;
+  background: light-dark(#efefef, #2b2a2a);
 }

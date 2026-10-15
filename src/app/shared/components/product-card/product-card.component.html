@@ -14,11 +14,11 @@
         <!-- Stock Badge -->
         @if (isOutOfStock()) {
         <div class="absolute top-2 right-2 px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-700">
-            Out of stock
+            <ng-container i18n>Out of stock</ng-container>
         </div>
         } @else if (isLowStock()) {
         <div class="absolute top-2 right-2 px-2 py-0.5 text-xs font-medium rounded-full bg-amber-100 text-amber-700">
-            Low: {{ product().qty }}
+            <ng-container i18n>Low: {{ product().qty }}</ng-container>
         </div>
         }
     </div>
@@ -68,7 +68,7 @@
             <button matButton="outlined" color="primary" class="w-full" [disabled]="isOutOfStock()"
                 (click)="onAddToCart($event)">
                 <mat-icon>add_shopping_cart</mat-icon>
-                Add
+                <ng-container i18n>Add</ng-container>
             </button>
             }
         } @else {
@@ -76,7 +76,7 @@
             <button matButton="outlined" color="accent" class="w-full" [disabled]="isOutOfStock()"
                 (click)="onOpenOptions($event)">
                 <mat-icon>tune</mat-icon>
-                Options
+                <ng-container i18n>Options</ng-container>
             </button>
         
         }

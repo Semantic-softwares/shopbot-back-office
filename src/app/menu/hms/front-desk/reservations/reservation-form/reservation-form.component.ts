@@ -67,11 +67,12 @@ import { RoomChangeDialogComponent, RoomChangeDialogData, RoomChangeResult } fro
 import { RoomChangeHistoryComponent } from '../room-change-history/room-change-history.component';
 import { ReservationTransactionsComponent } from '../reservation-transactions/reservation-transactions.component';
 import { ReservationOrdersComponent } from '../reservation-orders/reservation-orders.component';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-reservation-form',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -199,8 +200,8 @@ export class ReservationFormComponent implements OnDestroy {
         window.URL.revokeObjectURL(url);
         
         this.snackBar.open(
-          `Reservation details exported to PDF successfully!`, 
-          'Close', 
+          $localize`Reservation details exported to PDF successfully!`, 
+          $localize`Close`, 
           { duration: 3000 }
         );
       }
@@ -208,7 +209,7 @@ export class ReservationFormComponent implements OnDestroy {
       console.error('Error exporting reservation to PDF:', error);
       
       const errorMessage = error instanceof Error ? error.message : 'Failed to export reservation to PDF';
-      this.snackBar.open(errorMessage, 'Close', { 
+      this.snackBar.open(errorMessage, $localize`Close`, { 
         duration: 5000,
         panelClass: ['error-snackbar']
       });
@@ -318,7 +319,7 @@ export class ReservationFormComponent implements OnDestroy {
       if (!reservation) return;
   
       if (reservation.status !== ReservationStatus.CANCELLED && reservation.status !== ReservationStatus.CHECKED_OUT && reservation.status !== ReservationStatus.NO_SHOW) {
-        this.snackBar.open('Only cancelled, checked-out, or no-show reservations can be reopened', 'Close', {
+        this.snackBar.open($localize`Only cancelled, checked-out, or no-show reservations can be reopened`, $localize`Close`, {
           duration: 5000,
           panelClass: ['error-snackbar']
         });
@@ -327,7 +328,7 @@ export class ReservationFormComponent implements OnDestroy {
   
       const storeId = this.storeStore.selectedStore()?._id;
       if (!storeId) {
-        this.snackBar.open('Store information not available', 'Close', {
+        this.snackBar.open($localize`Store information not available`, $localize`Close`, {
           duration: 5000,
           panelClass: ['error-snackbar']
         });
@@ -357,7 +358,7 @@ export class ReservationFormComponent implements OnDestroy {
   
             if (updatedReservation) {
               this.reservation.set(updatedReservation);
-              this.snackBar.open('Reservation reopened successfully', 'Close', { 
+              this.snackBar.open($localize`Reservation reopened successfully`, $localize`Close`, { 
                 duration: 3000,
                 panelClass: ['success-snackbar']
               });
@@ -373,7 +374,7 @@ export class ReservationFormComponent implements OnDestroy {
               errorMessage = (error as any).message;
             }
             
-            this.snackBar.open(errorMessage, 'Close', { 
+            this.snackBar.open(errorMessage, $localize`Close`, { 
               duration: 5000,
               panelClass: ['error-snackbar']
             });
@@ -435,7 +436,7 @@ export class ReservationFormComponent implements OnDestroy {
   // Guest Management Methods
   onAddGuest() {
     // TODO: Open guest creation dialog
-    this.snackBar.open('Guest creation dialog will be implemented', 'Close', {
+    this.snackBar.open($localize`Guest creation dialog will be implemented`, $localize`Close`, {
       duration: 3000,
     });
   }
@@ -445,7 +446,7 @@ export class ReservationFormComponent implements OnDestroy {
     if (!guest) return;
 
     // TODO: Open guest edit dialog with selected guest data
-    this.snackBar.open('Guest edit dialog will be implemented', 'Close', {
+    this.snackBar.open($localize`Guest edit dialog will be implemented`, $localize`Close`, {
       duration: 3000,
     });
   }
@@ -469,8 +470,8 @@ export class ReservationFormComponent implements OnDestroy {
         });
     }
     this.snackBar.open(
-      `Guest ${this.guestService.getGuestName(guest)} selected`,
-      'Close',
+      $localize`Guest ${this.guestService.getGuestName(guest)} selected`,
+      $localize`Close`,
       {
         duration: 2000,
         panelClass: ['success-snackbar'],
@@ -493,8 +494,8 @@ export class ReservationFormComponent implements OnDestroy {
 
     if (this.isSingleBooking() && hasOtherGuestsAssigned) {
       this.snackBar.open(
-        'Cannot remove primary guest while there are other sharers assigned. Please remove sharers first.',
-        'Close',
+        $localize`Cannot remove primary guest while there are other sharers assigned. Please remove sharers first.`,
+        $localize`Close`,
         {
           duration: 3000,
           panelClass: ['error-snackbar'],
@@ -509,7 +510,7 @@ export class ReservationFormComponent implements OnDestroy {
       meta: null,
       guestType: null,
     });
-    this.snackBar.open('Guest removed', 'Close', {
+    this.snackBar.open($localize`Guest removed`, $localize`Close`, {
       duration: 2000,
       panelClass: ['success-snackbar'],
     });
@@ -595,8 +596,8 @@ export class ReservationFormComponent implements OnDestroy {
       this.dialog.open(ValidationErrorsDialogComponent, {
         data: {
           invalidControls,
-          title: 'Form Validation Errors',
-          message: 'Please fix the following errors before submitting:'
+          title: $localize`Form Validation Errors`,
+          message: $localize`Please fix the following errors before submitting:`
         } as ValidationErrorsDialogData,
         width: '500px',
         maxWidth: '90vw',
@@ -608,7 +609,7 @@ export class ReservationFormComponent implements OnDestroy {
 
     const guest = this.selectedGuest();
     if (!guest) {
-      this.snackBar.open('Please select a guest', 'Close', {
+      this.snackBar.open($localize`Please select a guest`, $localize`Close`, {
         duration: 3000,
         panelClass: ['error-snackbar'],
       });
@@ -650,7 +651,7 @@ export class ReservationFormComponent implements OnDestroy {
     const store = this.storeStore.selectedStore();
 
     if (!store?._id) {
-      this.snackBar.open('No store selected', 'Close', {
+      this.snackBar.open($localize`No store selected`, $localize`Close`, {
         duration: 3000,
         panelClass: ['error-snackbar'],
       });
@@ -671,7 +672,7 @@ export class ReservationFormComponent implements OnDestroy {
       .subscribe({
         next: (reservation) => {
           this.isSubmitted.set(false);
-          this.snackBar.open('Reservation created successfully', 'Close', {
+          this.snackBar.open($localize`Reservation created successfully`, $localize`Close`, {
             duration: 3000,
             panelClass: ['success-snackbar'],
           });
@@ -687,8 +688,8 @@ export class ReservationFormComponent implements OnDestroy {
           this.isSubmitted.set(false);
           console.error('Error creating reservation:', error);
           this.snackBar.open(
-            'Failed to create reservation. Please try again.',
-            'Close',
+            $localize`Failed to create reservation. Please try again.`,
+            $localize`Close`,
             {
               duration: 3000,
               panelClass: ['error-snackbar'],
@@ -708,7 +709,7 @@ export class ReservationFormComponent implements OnDestroy {
       .subscribe({
         next: (reservation) => {
           this.isSubmitted.set(false);
-          this.snackBar.open('Reservation updated successfully', 'Close', {
+          this.snackBar.open($localize`Reservation updated successfully`, $localize`Close`, {
             duration: 3000,
             panelClass: ['success-snackbar'],
           });
@@ -718,8 +719,8 @@ export class ReservationFormComponent implements OnDestroy {
           console.error('Error updating reservation:', error);
           this.isSubmitted.set(false);
           this.snackBar.open(
-            'Failed to update reservation. Please try again.',
-            'Close',
+            $localize`Failed to update reservation. Please try again.`,
+            $localize`Close`,
             {
               duration: 3000,
               panelClass: ['error-snackbar'],
@@ -732,7 +733,7 @@ export class ReservationFormComponent implements OnDestroy {
   // Room Sharers Methods
   onAddSharer() {
     // TODO: Open guest search/selection dialog
-    this.snackBar.open('Guest selection dialog will be implemented', 'Close', {
+    this.snackBar.open($localize`Guest selection dialog will be implemented`, $localize`Close`, {
       duration: 3000,
     });
   }
@@ -740,14 +741,14 @@ export class ReservationFormComponent implements OnDestroy {
   onEditSharer(event: any) {
     const { index, sharer } = event;
     // TODO: Open guest search/selection dialog for editing
-    this.snackBar.open(`Editing sharer at index ${index}`, 'Close', {
+    this.snackBar.open($localize`Editing sharer at index ${index}`, $localize`Close`, {
       duration: 3000,
     });
   }
 
   onDeleteSharer(event: any) {
     const { index } = event;
-    this.snackBar.open(`Sharer at index ${index} deleted`, 'Close', {
+    this.snackBar.open($localize`Sharer at index ${index} deleted`, $localize`Close`, {
       duration: 2000,
       panelClass: ['success-snackbar'],
     });
@@ -775,8 +776,8 @@ export class ReservationFormComponent implements OnDestroy {
       if (updatedReservation) {
         this.reservation.set(updatedReservation);
         this.snackBar.open(
-          'Guest checked out successfully! Room status updated to cleaning.',
-          'Close',
+          $localize`Guest checked out successfully! Room status updated to cleaning.`,
+          $localize`Close`,
           { duration: 5000 }
         );
       }
@@ -785,7 +786,7 @@ export class ReservationFormComponent implements OnDestroy {
 
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to check out guest';
-      this.snackBar.open(errorMessage, 'Close', {
+      this.snackBar.open(errorMessage, $localize`Close`, {
         duration: 5000,
         panelClass: ['error-snackbar'],
       });
@@ -825,8 +826,8 @@ export class ReservationFormComponent implements OnDestroy {
         if (updatedReservation && updatedReservation.pricing.balance <= 0) {
           // Full payment cleared - show success message
           this.snackBar.open(
-            '✓ Payment completed! Checkout is now available.',
-            'Close',
+            $localize`✓ Payment completed! Checkout is now available.`,
+            $localize`Close`,
             {
               duration: 5000,
               panelClass: ['success-snackbar'],
@@ -838,8 +839,8 @@ export class ReservationFormComponent implements OnDestroy {
           // Partial payment made - show warning that full payment is required
           const remainingBalance = updatedReservation ? updatedReservation.pricing.balance : 0;
           this.snackBar.open(
-            `⚠️ Checkout Requires Full Payment - Outstanding balance: ${this.storeStore.selectedStore()?.currency} ${remainingBalance}. Please collect full payment before checkout.`,
-            'Continue Collecting',
+            $localize`⚠️ Checkout Requires Full Payment - Outstanding balance: ${this.storeStore.selectedStore()?.currency} ${remainingBalance}. Please collect full payment before checkout.`,
+            $localize`Continue Collecting`,
             {
               duration: 0,
               panelClass: ['warning-snackbar'],
@@ -856,9 +857,9 @@ export class ReservationFormComponent implements OnDestroy {
         const updatedReservation = this.reservation.value();
         if (updatedReservation && this.requiresPaymentBeforeCheckout(updatedReservation)) {
           this.snackBar.open(
-            `⚠️ Checkout Requires Full Payment - Outstanding balance: 
+            $localize`⚠️ Checkout Requires Full Payment - Outstanding balance: 
             ${this.storeStore.selectedStore()?.currency} ${updatedReservation.pricing.balance}. Please collect full payment before checkout.`,
-            'Close',
+            $localize`Close`,
             {
               duration: 5000,
               panelClass: ['warning-snackbar'],
@@ -931,7 +932,7 @@ export class ReservationFormComponent implements OnDestroy {
 
     // Confirm status change for critical statuses
     if (newStatus === ReservationStatus.CANCELLED || newStatus === ReservationStatus.NO_SHOW) {
-      const confirmed = confirm(`Are you sure you want to change the status to ${newStatus}?`);
+      const confirmed = confirm($localize`Are you sure you want to change the status to ${newStatus}?`);
       if (!confirmed) return;
     }
 
@@ -957,8 +958,8 @@ export class ReservationFormComponent implements OnDestroy {
       if (updatedReservation) {
         this.reservation.set(updatedReservation);
         this.snackBar.open(
-          `Reservation status updated to ${newStatus}`,
-          'Close',
+          $localize`Reservation status updated to ${newStatus}`,
+          $localize`Close`,
           { duration: 3000, panelClass: ['success-snackbar'] }
         );
       }
@@ -969,7 +970,7 @@ export class ReservationFormComponent implements OnDestroy {
         error instanceof Error
           ? error.message
           : 'Failed to update reservation status';
-      this.snackBar.open(errorMessage, 'Close', {
+      this.snackBar.open(errorMessage, $localize`Close`, {
         duration: 5000,
         panelClass: ['error-snackbar'],
       });
@@ -1011,8 +1012,8 @@ export class ReservationFormComponent implements OnDestroy {
       if (updatedReservation) {
         this.reservation.set(updatedReservation);
         this.snackBar.open(
-          'Guest checked in successfully! Room status updated to occupied.',
-          'Close',
+          $localize`Guest checked in successfully! Room status updated to occupied.`,
+          $localize`Close`,
           { duration: 5000 }
         );
       }
@@ -1021,7 +1022,7 @@ export class ReservationFormComponent implements OnDestroy {
 
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to check in guest';
-      this.snackBar.open(errorMessage, 'Close', {
+      this.snackBar.open(errorMessage, $localize`Close`, {
         duration: 5000,
         panelClass: ['error-snackbar'],
       });
@@ -1043,7 +1044,7 @@ export class ReservationFormComponent implements OnDestroy {
     const reservationData = this.reservation.value();
     
     if (!reservationData || !this.canChangeRooms()) {
-      this.snackBar.open('Cannot change rooms for this reservation', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Cannot change rooms for this reservation`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -1072,14 +1073,14 @@ export class ReservationFormComponent implements OnDestroy {
         try {
           const response = await this.reservationService.changeRooms(reservationData._id, result).toPromise();
           if (response?.success) {
-            this.snackBar.open('Room changed successfully', 'Close', { duration: 3000 });
+            this.snackBar.open($localize`Room changed successfully`, $localize`Close`, { duration: 3000 });
             // Reload the reservation data
             this.reservation.reload();
           }
         } catch (error: any) {
           console.error('Error changing rooms:', error);
           const errorMessage = error?.error?.error || error?.error?.message || error?.message || 'Failed to change rooms';
-          this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+          this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
         }
       }
     });

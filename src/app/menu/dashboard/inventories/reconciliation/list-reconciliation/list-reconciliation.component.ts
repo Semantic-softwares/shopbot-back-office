@@ -189,7 +189,7 @@ export class ListReconciliationComponent implements OnInit {
   }
 
   deleteReconciliation(id: string): void {
-    if (confirm('Are you sure you want to delete this reconciliation? This action cannot be undone.')) {
+    if (confirm($localize`Are you sure you want to delete this reconciliation? This action cannot be undone.`)) {
       this.reconciliationService.delete(id).subscribe(() => {
         this.reconciliations.reload();
       });

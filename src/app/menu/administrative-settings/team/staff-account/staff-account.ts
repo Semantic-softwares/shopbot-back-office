@@ -150,11 +150,11 @@ export class StaffAccount {
 
     this.userService.resendStaffInvite(storeId, member.merchant._id).subscribe({
       next: () => {
-        this.snackBar.open(`Invite re-sent to ${member.merchant.email}`, 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Invite re-sent to ${member.merchant.email}`, $localize`Close`, { duration: 3000 });
         this.team.reload();
       },
       error: (err) => {
-        this.snackBar.open(err.error?.message || 'Failed to resend invite', 'Close', { duration: 5000 });
+        this.snackBar.open(err.error?.message || 'Failed to resend invite', $localize`Close`, { duration: 5000 });
       }
     });
   }
@@ -169,13 +169,13 @@ export class StaffAccount {
       next: () => {
         this.snackBar.open(
           `${member.merchant.name} ${newStatus === 'SUSPENDED' ? 'deactivated' : 'activated'}`,
-          'Close',
+          $localize`Close`,
           { duration: 3000 }
         );
         this.team.reload();
       },
       error: (err) => {
-        this.snackBar.open(err.error?.message || 'Failed to update status', 'Close', { duration: 5000 });
+        this.snackBar.open(err.error?.message || 'Failed to update status', $localize`Close`, { duration: 5000 });
       }
     });
   }
@@ -187,9 +187,9 @@ export class StaffAccount {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
-        title: 'Remove from Workspace',
-        message: `Remove ${member.merchant.name} from this workspace? They'll lose access to this store, but their account (and any other stores they belong to) stays intact.`,
-        confirmText: 'Remove',
+        title: $localize`Remove from Workspace`,
+        message: $localize`Remove ${member.merchant.name} from this workspace? They'll lose access to this store, but their account (and any other stores they belong to) stays intact.`,
+        confirmText: $localize`Remove`,
       }
     });
 
@@ -197,11 +197,11 @@ export class StaffAccount {
       if (confirmed) {
         this.userService.removeStaffFromStore(member.merchant._id, storeId).subscribe({
           next: () => {
-            this.snackBar.open(`${member.merchant.name} removed from this workspace`, 'Close', { duration: 3000 });
+            this.snackBar.open($localize`${member.merchant.name} removed from this workspace`, $localize`Close`, { duration: 3000 });
             this.team.reload();
           },
           error: (err) => {
-            this.snackBar.open(err.error?.message || 'Failed to remove from workspace', 'Close', { duration: 5000 });
+            this.snackBar.open(err.error?.message || 'Failed to remove from workspace', $localize`Close`, { duration: 5000 });
           }
         });
       }
@@ -215,9 +215,9 @@ export class StaffAccount {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
-        title: 'Transfer Ownership',
-        message: `Make ${member.merchant.name} the owner of this workspace? You'll no longer be the owner — this can only be undone by ${member.merchant.name} transferring it back to you.`,
-        confirmText: 'Transfer Ownership',
+        title: $localize`Transfer Ownership`,
+        message: $localize`Make ${member.merchant.name} the owner of this workspace? You'll no longer be the owner — this can only be undone by ${member.merchant.name} transferring it back to you.`,
+        confirmText: $localize`Transfer Ownership`,
       }
     });
 
@@ -225,11 +225,11 @@ export class StaffAccount {
       if (confirmed) {
         this.storeService.transferOwnership(storeId, member.merchant._id).subscribe({
           next: () => {
-            this.snackBar.open(`${member.merchant.name} is now the owner`, 'Close', { duration: 4000 });
+            this.snackBar.open($localize`${member.merchant.name} is now the owner`, $localize`Close`, { duration: 4000 });
             this.team.reload();
           },
           error: (err) => {
-            this.snackBar.open(err.error?.message || 'Failed to transfer ownership', 'Close', { duration: 5000 });
+            this.snackBar.open(err.error?.message || 'Failed to transfer ownership', $localize`Close`, { duration: 5000 });
           }
         });
       }

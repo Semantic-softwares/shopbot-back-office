@@ -26,10 +26,10 @@ import { VariantDialogComponent } from '../../../variants/variant-dialog/variant
   template: `
     <div class="p-6">
       <div class="flex items-center justify-between mb-4">
-        <h2 mat-dialog-title class="text-xl font-bold">Select Variants</h2>
+        <h2 mat-dialog-title class="text-xl font-bold"><ng-container i18n>Select Variants</ng-container></h2>
         <button mat-stroked-button color="primary" (click)="createNewVariant()">
           <mat-icon class="mr-2">add</mat-icon>
-          New Variant
+          <ng-container i18n>New Variant</ng-container>
         </button>
       </div>
 
@@ -38,12 +38,12 @@ import { VariantDialogComponent } from '../../../variants/variant-dialog/variant
           <mat-spinner diameter="40"></mat-spinner>
         </div>
       } @else if (variants.error()) {
-        <p class="text-red-500">Error loading variants</p>
+        <p class="text-red-500"><ng-container i18n>Error loading variants</ng-container></p>
       } @else if (variants.hasValue() && variants.value().length === 0) {
         <app-no-record 
           icon="tune"
-          title="No Variants Available"
-          message="Create your first variant to customize product options like sizes, colors, or flavors.">
+          title="No Variants Available" i18n-title
+          message="Create your first variant to customize product options like sizes, colors, or flavors." i18n-message>
         </app-no-record>
       } @else if (variants.hasValue()) {
         <mat-selection-list #variantList [multiple]="true">
@@ -53,7 +53,7 @@ import { VariantDialogComponent } from '../../../variants/variant-dialog/variant
                            togglePosition="before">
               {{variant.name}}
               <div class="text-sm text-gray-500">
-                At least: {{variant.atLeast}} | At most: {{variant.atMost}}
+                <ng-container i18n>At least: {{variant.atLeast}} | At most: {{variant.atMost}}</ng-container>
               </div>
             </mat-list-option>
           }
@@ -61,11 +61,11 @@ import { VariantDialogComponent } from '../../../variants/variant-dialog/variant
       }
 
       <div class="flex justify-end space-x-2 mt-6 pt-4 border-t border-gray-200">
-        <button mat-button type="button" (click)="onCancel()">Cancel</button>
+        <button mat-button type="button" (click)="onCancel()"><ng-container i18n>Cancel</ng-container></button>
         <button mat-raised-button color="primary" 
                 [disabled]="!variants.hasValue() || variants.value().length === 0"
                 (click)="onSave(variantList!.selectedOptions!.selected)">
-          Save
+          <ng-container i18n>Save</ng-container>
         </button>
       </div>
     </div>

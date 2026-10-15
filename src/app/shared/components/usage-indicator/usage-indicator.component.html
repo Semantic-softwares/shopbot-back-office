@@ -2,9 +2,9 @@
   @if (!subscriptionService.isUnlimited()) {
     <div class="usage-header flex justify-between items-center mb-3">
       <div>
-        <h4 class="text-sm font-medium text-gray-700">Storage Usage</h4>
+        <h4 class="text-sm font-medium text-gray-700"><ng-container i18n>Storage Usage</ng-container></h4>
         @if (subscriptionService.currentSubscription(); as subscription) {
-          <span class="text-xs text-gray-500">{{ subscription.tierInfo.name }} Plan</span>
+          <span class="text-xs text-gray-500"><ng-container i18n>{{ subscription.tierInfo.name }} Plan</ng-container></span>
         }
       </div>
       @if (subscriptionService.usageData(); as usage) {
@@ -22,19 +22,19 @@
           class="h-2 rounded-full">
         </mat-progress-bar>
         <div class="text-xs text-gray-500 mt-1 text-center">
-          {{ usage.percentageUsed.toFixed(1) }}% used
+          <ng-container i18n>{{ usage.percentageUsed.toFixed(1) }}% used</ng-container>
         </div>
       </div>
       
       @if (subscriptionService.shouldShowUsageError()) {
         <div class="error-message p-2 mb-2 bg-red-50 border border-red-200 rounded text-xs text-red-600">
           <mat-icon class="text-red-500 mr-1" style="font-size: 14px; height: 14px; width: 14px;">warning</mat-icon>
-          Storage limit exceeded!
+          <ng-container i18n>Storage limit exceeded!</ng-container>
         </div>
       } @else if (subscriptionService.shouldShowUsageWarning()) {
         <div class="warning-message p-2 mb-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-600">
           <mat-icon class="text-orange-500 mr-1" style="font-size: 14px; height: 14px; width: 14px;">info</mat-icon>
-          Nearly at storage limit
+          <ng-container i18n>Nearly at storage limit</ng-container>
         </div>
       }
     }
@@ -45,9 +45,9 @@
       (click)="showUpgradeDialog()"
       [color]="subscriptionService.shouldShowUsageError() ? 'warn' : 'primary'">
       @if (subscriptionService.shouldShowUsageError()) {
-        Upgrade Now
+        <ng-container i18n>Upgrade Now</ng-container>
       } @else {
-        Upgrade Plan
+        <ng-container i18n>Upgrade Plan</ng-container>
       }
     </button>
   } @else {
@@ -55,8 +55,8 @@
       <mat-icon class="text-green-500 mb-2" style="font-size: 32px; height: 32px; width: 32px;">
         all_inclusive
       </mat-icon>
-      <h4 class="text-sm font-medium text-gray-700 mb-1">Unlimited Plan</h4>
-      <p class="text-xs text-gray-500">Unlimited storage</p>
+      <h4 class="text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Unlimited Plan</ng-container></h4>
+      <p class="text-xs text-gray-500"><ng-container i18n>Unlimited storage</ng-container></p>
     </div>
   }
 </div>

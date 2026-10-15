@@ -129,7 +129,7 @@ export class ChannelManagerCreateTaxModal {
 
   saveTax() {
     if (!this.taxForm.valid) {
-      this.snackBar.open('Please fill in all required fields', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Please fill in all required fields`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -155,13 +155,13 @@ export class ChannelManagerCreateTaxModal {
         next: (response) => {
           this.isSaving.set(false);
           const message = this.isEditing() ? 'Tax updated successfully' : 'Tax created successfully';
-          this.snackBar.open(message, 'Close', { duration: 3000 });
+          this.snackBar.open(message, $localize`Close`, { duration: 3000 });
           this.dialogRef.close(response);
         },
         error: (error) => {
           this.isSaving.set(false);
           const errorMessage = error.error?.message || 'Failed to save tax';
-          this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+          this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
           console.error('Error saving tax:', error);
         },
       });

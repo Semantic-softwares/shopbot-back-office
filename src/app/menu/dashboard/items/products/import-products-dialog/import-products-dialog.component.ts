@@ -12,6 +12,7 @@ import { firstValueFrom } from 'rxjs';
 import { ProductService } from '../../../../../shared/services/product.service';
 import { CategoryService } from '../../../../../shared/services/category.service';
 import { Category } from '../../../../../shared/models/category.model';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 interface ImportRow {
   externalId: string;
@@ -40,7 +41,7 @@ const NEW_MENU = 'new';
 @Component({
   selector: 'app-import-products-dialog',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatDialogModule,
     MatButtonModule,

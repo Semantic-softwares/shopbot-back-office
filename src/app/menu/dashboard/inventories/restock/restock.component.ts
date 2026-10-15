@@ -125,7 +125,7 @@ export class RestockComponent implements OnInit {
     const storeId = this.subscriptionService.currentStoreId();
     
     if (!storeId) {
-      this.snackBar.open('Please select a store first', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Please select a store first`, $localize`Close`, { duration: 3000 });
       this.loading.set(false);
       return;
     }
@@ -137,7 +137,7 @@ export class RestockComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading suppliers:', error);
-        this.snackBar.open('Error loading suppliers', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Error loading suppliers`, $localize`Close`, { duration: 3000 });
         this.loading.set(false);
       }
     });
@@ -178,7 +178,7 @@ export class RestockComponent implements OnInit {
 
   onSubmit() {
     if (this.restockForm.invalid) {
-      this.snackBar.open('Please fill in all required fields', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Please fill in all required fields`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -210,7 +210,7 @@ export class RestockComponent implements OnInit {
       error: (error) => {
         console.error('Error during restock:', error);
         this.submitting.set(false);
-        this.snackBar.open('Error during restock operation', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Error during restock operation`, $localize`Close`, { duration: 3000 });
       }
     });
   }
@@ -224,7 +224,7 @@ export class RestockComponent implements OnInit {
       message += `, ${failed} failed`;
     }
     
-    this.snackBar.open(message, 'Close', { 
+    this.snackBar.open(message, $localize`Close`, { 
       duration: 5000,
       panelClass: failed > 0 ? ['warn-snackbar'] : ['success-snackbar']
     });

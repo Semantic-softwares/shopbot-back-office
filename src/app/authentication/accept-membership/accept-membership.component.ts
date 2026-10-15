@@ -10,6 +10,9 @@ import { AuthService } from '../../shared/services/auth.service';
 import { MembershipsService } from '../../shared/services/memberships.service';
 import { StoreStore } from '../../shared/stores/store.store';
 import { Store } from '../../shared/models/store.model';
+import { ThemeToggleComponent } from '../../shared/components/theme-toggle/theme-toggle.component';
+import { LanguageMenuComponent } from '../../shared/components/language-menu/language-menu.component';
+import { TrPipe } from '../../shared/i18n/tr.pipe';
 
 type ViewState = 'accepting' | 'success' | 'not-found' | 'error';
 
@@ -23,7 +26,7 @@ type ViewState = 'accepting' | 'success' | 'not-found' | 'error';
 @Component({
   selector: 'app-accept-membership',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [TrPipe, ThemeToggleComponent, LanguageMenuComponent, CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './accept-membership.component.html',
   styleUrl: './accept-membership.component.scss',

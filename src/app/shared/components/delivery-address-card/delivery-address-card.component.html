@@ -4,7 +4,7 @@
     @if (mapFailed()) {
       <div class="absolute inset-0 flex flex-col items-center justify-center gap-1 text-gray-400">
         <mat-icon>map</mat-icon>
-        <span class="text-xs">Map unavailable</span>
+        <span class="text-xs"><ng-container i18n>Map unavailable</ng-container></span>
       </div>
     }
   </div>
@@ -22,7 +22,7 @@
       (click)="copyAddress()"
     >
       <mat-icon class="!text-base">{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
-      {{ copied() ? 'Copied' : 'Copy address' }}
+      @if (copied()) {<ng-container i18n>Copied</ng-container>} @else {<ng-container i18n>Copy address</ng-container>}
     </button>
     <a
       mat-button
@@ -32,7 +32,7 @@
       class="!flex-1 !rounded-none border-l border-gray-200"
     >
       <mat-icon class="!text-base">directions</mat-icon>
-      Get directions
+      <ng-container i18n>Get directions</ng-container>
     </a>
   </div>
 </div>

@@ -5,12 +5,13 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { Unit, Property, NON_LIVABLE_UNIT_TYPES } from '../../../../../../../../../../shared/models/estate.model';
 import { UnitDetailComponent } from '../../unit-detail.component';
+import { TrPipe } from '../../../../../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-unit-summary',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatCardModule,
     MatChipsModule,

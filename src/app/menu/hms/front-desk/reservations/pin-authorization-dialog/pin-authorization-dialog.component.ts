@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { StoreService } from '../../../../../shared/services/store.service';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 export interface PinAuthorizationDialogData {
   storeId: string;
@@ -23,7 +24,7 @@ export interface PinAuthorizationDialogResult {
 @Component({
   selector: 'app-pin-authorization-dialog',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     ReactiveFormsModule,
     MatDialogModule,
     MatButtonModule,

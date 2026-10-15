@@ -26,6 +26,7 @@ import {
 } from '../../../../../../shared/models/estate.model';
 import { StoreStore } from '../../../../../../shared/stores/store.store';
 import { NoRecordComponent } from '../../../../../../shared/components/no-record/no-record.component';
+import { TrPipe } from '../../../../../../shared/i18n/tr.pipe';
 
 type UnitGroup = {
   property: Property;
@@ -35,7 +36,7 @@ type UnitGroup = {
 @Component({
   selector: 'app-property-tabs-unit-list',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
@@ -75,7 +76,7 @@ export class PropertyTabsUnitListComponent {
   });
 
   readonly unitTypeOptions = [
-    { value: '', label: 'All Types' },
+    { value: '', label: $localize`All Types` },
     ...Object.values(UnitType).map((value) => ({
       value,
       label: value.replace(/_/g, ' '),
@@ -83,7 +84,7 @@ export class PropertyTabsUnitListComponent {
   ];
 
   readonly statusOptions = [
-    { value: '', label: 'All Status' },
+    { value: '', label: $localize`All Status` },
     ...Object.values(UnitStatus).map((value) => ({
       value,
       label: value.replace(/_/g, ' '),
@@ -126,7 +127,7 @@ export class PropertyTabsUnitListComponent {
   readonly units = computed(() => this.unitsResource.value()?.data?.items ?? []);
 
   readonly propertyOptions = computed(() => [
-    { value: '', label: 'All Properties' },
+    { value: '', label: $localize`All Properties` },
     ...this.properties().map((property) => ({
       value: property._id,
       label: property.name,
@@ -280,20 +281,20 @@ export class PropertyTabsUnitListComponent {
   }
 
   deleteUnit(unit: Unit): void {
-    if (!confirm(`Are you sure you want to delete unit "${unit.name}"? This action cannot be undone.`)) {
+    if (!confirm($localize`Are you sure you want to delete unit "${unit.name}"? This action cannot be undone.`)) {
       return;
     }
 
     this.deleting.set(unit._id);
     this.unitService.deleteUnit(unit._id).subscribe({
       next: () => {
-        this.snackBar.open(`Unit "${unit.name}" deleted successfully`, 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Unit "${unit.name}" deleted successfully`, $localize`Close`, { duration: 3000 });
         this.deleting.set(null);
         this.reloadData();
       },
       error: (err) => {
         const msg = err?.error?.message || 'Failed to delete unit';
-        this.snackBar.open(msg, 'Close', { duration: 5000 });
+        this.snackBar.open(msg, $localize`Close`, { duration: 5000 });
         this.deleting.set(null);
       },
     });

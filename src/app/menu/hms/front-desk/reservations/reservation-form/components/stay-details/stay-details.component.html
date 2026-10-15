@@ -1,7 +1,7 @@
 <mat-card appearance="outlined">
   <mat-card-header >
     <mat-card-title>
-      Stay Details
+      <ng-container i18n>Stay Details</ng-container>
     </mat-card-title>
   </mat-card-header>
   <mat-card-content>
@@ -10,29 +10,29 @@
         <div class="space-y-4 py-3">
           <!-- Check-in and Check-out Date Range -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Stay Dates</mat-label>
+            <mat-label><ng-container i18n>Stay Dates</ng-container></mat-label>
             <mat-date-range-input [rangePicker]="stayPicker">
               <input
                 matStartDate
                 formControlName="checkInDate"
-                placeholder="Check-in date"
+                placeholder="Check-in date" i18n-placeholder
                 (change)="onDateChange()"
               />
               <input
                 matEndDate
                 formControlName="checkOutDate"
-                placeholder="Check-out date"
+                placeholder="Check-out date" i18n-placeholder
                 (change)="onDateChange()"
               />
             </mat-date-range-input>
             <mat-datepicker-toggle matSuffix [for]="stayPicker"></mat-datepicker-toggle>
-            <mat-hint>{{ numberOfNights() }} night(s)</mat-hint>
+            <mat-hint><ng-container i18n>{{ numberOfNights() }} night(s)</ng-container></mat-hint>
             <mat-date-range-picker #stayPicker></mat-date-range-picker>
           </mat-form-field>
 
           <!-- Sales Person (Read-only) -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Sales Person</mat-label>
+            <mat-label><ng-container i18n>Sales Person</ng-container></mat-label>
             <input
               
               matInput
@@ -42,7 +42,7 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Number of Nights</mat-label>
+            <mat-label><ng-container i18n>Number of Nights</ng-container></mat-label>
             <input
             formControlName="numberOfNights"
               matInput
@@ -53,18 +53,18 @@
 
           <!-- Booking Source -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Booking Source</mat-label>
+            <mat-label><ng-container i18n>Booking Source</ng-container></mat-label>
             <mat-select formControlName="bookingSource">
-              <mat-option value="">-- Select Source --</mat-option>
-              <mat-option value="direct">Direct</mat-option>
-              <mat-option value="phone">Phone</mat-option>
-              <mat-option value="online">Online</mat-option>
-              <mat-option value="walk_in">Walk-in</mat-option>
-              <mat-option value="booking.com">Booking.com</mat-option>
-              <mat-option value="expedia">Expedia</mat-option>
-              <mat-option value="airbnb">Airbnb</mat-option>
-              <mat-option value="travel_agent">Travel Agent</mat-option>
-              <mat-option value="corporate">Corporate</mat-option>
+              <mat-option value=""><ng-container i18n>-- Select Source --</ng-container></mat-option>
+              <mat-option value="direct"><ng-container i18n>Direct</ng-container></mat-option>
+              <mat-option value="phone"><ng-container i18n>Phone</ng-container></mat-option>
+              <mat-option value="online"><ng-container i18n>Online</ng-container></mat-option>
+              <mat-option value="walk_in"><ng-container i18n>Walk-in</ng-container></mat-option>
+              <mat-option value="booking.com"><ng-container i18n>Booking.com</ng-container></mat-option>
+              <mat-option value="expedia"><ng-container i18n>Expedia</ng-container></mat-option>
+              <mat-option value="airbnb"><ng-container i18n>Airbnb</ng-container></mat-option>
+              <mat-option value="travel_agent"><ng-container i18n>Travel Agent</ng-container></mat-option>
+              <mat-option value="corporate"><ng-container i18n>Corporate</ng-container></mat-option>
             </mat-select>
           </mat-form-field>
         </div>

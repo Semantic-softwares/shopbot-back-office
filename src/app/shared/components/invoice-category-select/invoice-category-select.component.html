@@ -2,7 +2,7 @@
   <mat-label>{{ label }}</mat-label>
   <mat-select [formControl]="control" [disabled]="lockSelection">
     @if (categoriesResource.isLoading()) {
-      <mat-option disabled>Loading categories...</mat-option>
+      <mat-option disabled><ng-container i18n>Loading categories...</ng-container></mat-option>
     } @else {
       @for (item of options(); track item._id) {
         <mat-option [value]="item.code">{{ item.name }}</mat-option>
@@ -13,7 +13,7 @@
   @if (canShowAdd()) {
     <mat-hint align="end">
       <a class="category-hint-link" role="button" tabindex="0" (click)="createCategory()" (keydown.enter)="createCategory()">
-        Add category
+        <ng-container i18n>Add category</ng-container>
       </a>
     </mat-hint>
   }

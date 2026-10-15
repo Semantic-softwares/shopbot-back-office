@@ -13,6 +13,7 @@ import { CancelSubscriptionDialogComponent } from './cancel-subscription-dialog/
 import { SubscriptionWithModules, ModuleKey, BillingCycle } from '../../../../shared/models/subscription.model';
 import { environment } from '../../../../../environments/environment';
 import { SubscriptionService } from '../../../../shared/services/subscription.service';
+import { TrPipe } from '../../../../shared/i18n/tr.pipe';
 
 interface ModuleDef {
   key: ModuleKey;
@@ -22,17 +23,17 @@ interface ModuleDef {
 }
 
 const MODULE_DEFS: ModuleDef[] = [
-  { key: 'PMS', label: 'Property Management', icon: 'hotel', description: 'Hotel rooms, reservations, guests' },
-  { key: 'EMS', label: 'Estate Management', icon: 'apartment', description: 'Properties, tenants, leases' },
-  { key: 'POS', label: 'Point of Sale', icon: 'point_of_sale', description: 'Sales, orders, kitchen display' },
-  { key: 'ERP', label: 'Enterprise Resource Planning', icon: 'business', description: 'Inventory, suppliers, staff' },
-  { key: 'KDS', label: 'Kitchen Display System', icon: 'soup_kitchen', description: 'Kitchen order board, station routing, status flow' },
+  { key: 'PMS', label: $localize`Property Management`, icon: 'hotel', description: $localize`Hotel rooms, reservations, guests` },
+  { key: 'EMS', label: $localize`Estate Management`, icon: 'apartment', description: $localize`Properties, tenants, leases` },
+  { key: 'POS', label: $localize`Point of Sale`, icon: 'point_of_sale', description: $localize`Sales, orders, kitchen display` },
+  { key: 'ERP', label: $localize`Enterprise Resource Planning`, icon: 'business', description: $localize`Inventory, suppliers, staff` },
+  { key: 'KDS', label: $localize`Kitchen Display System`, icon: 'soup_kitchen', description: $localize`Kitchen order board, station routing, status flow` },
 ];
 
 @Component({
   selector: 'app-current-plan',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatButtonModule,
     MatProgressSpinnerModule,
@@ -98,7 +99,7 @@ export class CurrentPlanComponent {
         },
         error: (error) => {
           console.error('Failed to initiate payment:', error);
-          this.snackBar.open('Failed to initiate payment', 'Close', { duration: 4000 });
+          this.snackBar.open($localize`Failed to initiate payment`, $localize`Close`, { duration: 4000 });
         },
       });
   }
@@ -120,13 +121,13 @@ export class CurrentPlanComponent {
     this.addingModule.set(key);
     this.subscriptionService.addModule(key).subscribe({
       next: () => {
-        this.snackBar.open(`${this.getModuleDef(key).label} added`, 'Close', { duration: 3000 });
+        this.snackBar.open($localize`${this.getModuleDef(key).label} added`, $localize`Close`, { duration: 3000 });
         this.addingModule.set(null);
         this.subscriptionChanged.emit();
       },
       error: (err) => {
         console.error('Failed to add module:', err);
-        this.snackBar.open('Failed to add module', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Failed to add module`, $localize`Close`, { duration: 4000 });
         this.addingModule.set(null);
       },
     });
@@ -139,13 +140,13 @@ export class CurrentPlanComponent {
         const msg = this.subscription().status === 'TRIAL'
           ? `${this.getModuleDef(key).label} removed`
           : `${this.getModuleDef(key).label} marked for removal at end of billing cycle`;
-        this.snackBar.open(msg, 'Close', { duration: 4000 });
+        this.snackBar.open(msg, $localize`Close`, { duration: 4000 });
         this.removingModule.set(null);
         this.subscriptionChanged.emit();
       },
       error: (err) => {
         console.error('Failed to remove module:', err);
-        this.snackBar.open('Failed to remove module', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Failed to remove module`, $localize`Close`, { duration: 4000 });
         this.removingModule.set(null);
       },
     });
@@ -156,13 +157,13 @@ export class CurrentPlanComponent {
     this.changingCycle.set(true);
     this.subscriptionService.changeBillingCycle(newCycle).subscribe({
       next: () => {
-        this.snackBar.open(`Billing cycle changed to ${newCycle.toLowerCase()}`, 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Billing cycle changed to ${newCycle.toLowerCase()}`, $localize`Close`, { duration: 3000 });
         this.changingCycle.set(false);
         this.subscriptionChanged.emit();
       },
       error: (err) => {
         console.error('Failed to change billing cycle:', err);
-        this.snackBar.open('Failed to change billing cycle', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Failed to change billing cycle`, $localize`Close`, { duration: 4000 });
         this.changingCycle.set(false);
       },
     });

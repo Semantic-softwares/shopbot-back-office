@@ -1,22 +1,22 @@
 <app-page-header 
-  [title]="station()?.name || 'Station Details'" 
-  [subtitle]="'Manage station configuration and printers'"
+  [title]="station()?.name || ('Station Details' | tr)" 
+  [subtitle]="('Manage station configuration and printers' | tr)"
   [showViewToggle]="false">
   
   <ng-container actions>
     <button matButton="outlined" (click)="goBack()">
       <mat-icon class="mr-1">arrow_back</mat-icon>
-      Back to Stations
+      <ng-container i18n>Back to Stations</ng-container>
     </button>
 
     <button matButton="outlined" (click)="editStation()" [disabled]="!station()">
       <mat-icon class="mr-1">edit</mat-icon>
-      Edit Station
+      <ng-container i18n>Edit Station</ng-container>
     </button>
 
     <button matButton="outlined" color="warn" (click)="deleteStation()" [disabled]="!station()">
       <mat-icon class="mr-1">delete</mat-icon>
-      Delete
+      <ng-container i18n>Delete</ng-container>
     </button>
   </ng-container>
 </app-page-header>
@@ -32,10 +32,10 @@
     <div class="flex">
       <mat-icon class="text-red-500 mr-2">error</mat-icon>
       <div>
-        <h3 class="text-red-800 font-medium">Error loading station</h3>
+        <h3 class="text-red-800 font-medium"><ng-container i18n>Error loading station</ng-container></h3>
         <p class="text-red-700 text-sm mt-1">{{ error() }}</p>
         <button mat-button color="warn" (click)="goBack()" class="!text-red-600 mt-2">
-          Go Back
+          <ng-container i18n>Go Back</ng-container>
         </button>
       </div>
     </div>
@@ -47,17 +47,17 @@
     <!-- Basic Information Card -->
     <mat-card appearance="outlined">
       <mat-card-header>
-        <mat-card-title>Basic Information</mat-card-title>
+        <mat-card-title><ng-container i18n>Basic Information</ng-container></mat-card-title>
       </mat-card-header>
       <mat-card-content class="p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Station Name</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Station Name</ng-container></label>
             <p class="text-lg font-semibold">{{ station()!.name }}</p>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Type</ng-container></label>
             <mat-chip [class]="getStationTypeClass(station()!.type)">
               {{ getStationTypeLabel(station()!.type) }}
             </mat-chip>
@@ -65,20 +65,20 @@
 
           @if (station()!.description) {
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Description</ng-container></label>
               <p class="text-gray-600">{{ station()!.description }}</p>
             </div>
           }
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Status</ng-container></label>
             @if (station()!.active) {
               <span class="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">
-                Active
+                <ng-container i18n>Active</ng-container>
               </span>
             } @else {
               <span class="px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-800">
-                Inactive
+                <ng-container i18n>Inactive</ng-container>
               </span>
             }
           </div>
@@ -89,30 +89,30 @@
     <!-- Print Settings Card -->
     <mat-card appearance="outlined">
       <mat-card-header>
-        <mat-card-title>Print Settings</mat-card-title>
+        <mat-card-title><ng-container i18n>Print Settings</ng-container></mat-card-title>
       </mat-card-header>
       <mat-card-content class="p-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Auto Print</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Auto Print</ng-container></label>
             <div class="flex items-center mt-2">
               @if (station()!.settings?.autoPrint) {
                 <mat-icon class="text-green-600 mr-2">check_circle</mat-icon>
-                <span class="text-green-600 font-medium">Enabled</span>
+                <span class="text-green-600 font-medium"><ng-container i18n>Enabled</ng-container></span>
               } @else {
                 <mat-icon class="text-gray-400 mr-2">cancel</mat-icon>
-                <span class="text-gray-600">Disabled</span>
+                <span class="text-gray-600"><ng-container i18n>Disabled</ng-container></span>
               }
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Paper Size</label>
-            <p class="text-lg">{{ station()!.settings?.paperSize || '80mm' }}</p>
+            <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Paper Size</ng-container></label>
+            <p class="text-lg">@if (station()!.settings?.paperSize) {<ng-container>{{ station()!.settings?.paperSize }}</ng-container>} @else {<ng-container i18n>80mm</ng-container>}</p>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Copies Per Order</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Copies Per Order</ng-container></label>
             <p class="text-lg">{{ station()!.settings?.copiesPerOrder || 1 }}</p>
           </div>
         </div>
@@ -122,7 +122,7 @@
     <!-- Printers Card -->
     <mat-card appearance="outlined">
       <mat-card-header>
-        <mat-card-title>Printers</mat-card-title>
+        <mat-card-title><ng-container i18n>Printers</ng-container></mat-card-title>
       </mat-card-header>
       <mat-card-content class="p-6">
         @if (station()!.printers && station()!.printers!.length > 0) {
@@ -153,23 +153,23 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span class="text-gray-600 font-medium">Connection Details:</span>
+                    <span class="text-gray-600 font-medium"><ng-container i18n>Connection Details:</ng-container></span>
                     <p class="mt-1 font-mono text-gray-900">{{ getPrinterConnectionDetails(printer) }}</p>
                   </div>
                   
                   <div>
-                    <span class="text-gray-600 font-medium">Capabilities:</span>
+                    <span class="text-gray-600 font-medium"><ng-container i18n>Capabilities:</ng-container></span>
                     @if (printer.capabilities) {
                       <div class="mt-1 flex gap-2 flex-wrap">
-                        <span class="px-2 py-0.5 text-xs bg-gray-200 rounded">{{ printer.capabilities.paperWidth }}mm</span>
+                        <span class="px-2 py-0.5 text-xs bg-gray-200 rounded"><ng-container i18n>{{ printer.capabilities.paperWidth }}mm</ng-container></span>
                         @if (printer.capabilities.supportsQr) {
-                          <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">QR</span>
+                          <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded"><ng-container i18n>QR</ng-container></span>
                         }
                         @if (printer.capabilities.supportsLogo) {
-                          <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">Logo</span>
+                          <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded"><ng-container i18n>Logo</ng-container></span>
                         }
                         @if (printer.capabilities.supportsCut) {
-                          <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">Cut</span>
+                          <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded"><ng-container i18n>Cut</ng-container></span>
                         }
                       </div>
                     }
@@ -181,7 +181,7 @@
         } @else {
           <div class="text-center py-8 text-gray-500">
             <mat-icon class="text-4xl mb-2">print_disabled</mat-icon>
-            <p>No printers configured for this station</p>
+            <p><ng-container i18n>No printers configured for this station</ng-container></p>
           </div>
         }
       </mat-card-content>

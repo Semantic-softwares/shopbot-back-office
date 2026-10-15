@@ -1,7 +1,7 @@
 <mat-card appearance="outlined">
   <mat-card-header>
     <mat-card-title>
-      Special Requests & Notes
+      <ng-container i18n>Special Requests & Notes</ng-container>
     </mat-card-title>
   </mat-card-header>
 
@@ -9,28 +9,28 @@
     <div [formGroup]="getReservationForm()" class="space-y-4">
       <!-- Special Requests Field -->
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Special Requests</mat-label>
+        <mat-label><ng-container i18n>Special Requests</ng-container></mat-label>
         <textarea
           matInput
           formControlName="specialRequests"
-          placeholder="e.g., High floor, late arrival, anniversary celebration, dietary requirements..."
+          placeholder="e.g., High floor, late arrival, anniversary celebration, dietary requirements..." i18n-placeholder
           rows="3"
           class="text-sm"
         ></textarea>
-        <mat-hint>Enter any special requests from the guest (visible to guest)</mat-hint>
+        <mat-hint><ng-container i18n>Enter any special requests from the guest (visible to guest)</ng-container></mat-hint>
       </mat-form-field>
 
       <!-- Internal Notes Field -->
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Internal Notes</mat-label>
+        <mat-label><ng-container i18n>Internal Notes</ng-container></mat-label>
         <textarea
           matInput
           formControlName="internalNotes"
-          placeholder="e.g., Guest prefers quiet hours, previous complaints, VIP notes, maintenance issues..."
+          placeholder="e.g., Guest prefers quiet hours, previous complaints, VIP notes, maintenance issues..." i18n-placeholder
           rows="3"
           class="text-sm"
         ></textarea>
-        <mat-hint>Internal notes visible only to staff (not shown to guest)</mat-hint>
+        <mat-hint><ng-container i18n>Internal notes visible only to staff (not shown to guest)</ng-container></mat-hint>
       </mat-form-field>
     </div>
   </mat-card-content>

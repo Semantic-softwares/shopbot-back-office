@@ -9,22 +9,22 @@
    <mat-chip class="capitalize">{{ reservationType() }}</mat-chip>
    <mat-chip>{{ confirmationNumber() }}</mat-chip>
    @if (isModified()) {
-     <mat-chip color="warn">Modified</mat-chip>
+     <mat-chip color="warn"><ng-container i18n>Modified</ng-container></mat-chip>
    }
 </mat-chip-set>
 
   <!-- Stay Information (from room assignment) -->
   <mat-list>
-    <div mat-subheader>Stay</div>
-    <mat-list-item>
+    <div mat-subheader><ng-container i18n>Stay</ng-container></div>
+    <mat-list-item i18n>
       Check-in
       <span matListItemMeta>{{ roomCheckIn() | date:'dd/MM/yyyy' }}</span>
     </mat-list-item>
-    <mat-list-item>
+    <mat-list-item i18n>
       Check-out
       <span matListItemMeta>{{ roomCheckOut() | date:'dd/MM/yyyy' }}</span>
     </mat-list-item>
-    <mat-list-item>
+    <mat-list-item i18n>
       Source
       <span matListItemMeta class="capitalize">{{ bookingSource() }}</span>
     </mat-list-item>
@@ -34,7 +34,7 @@
 
   <!-- Room Information -->
   <mat-list>
-    <div mat-subheader>Room</div>
+    <div mat-subheader><ng-container i18n>Room</ng-container></div>
     @if (isOtaUnassigned() && otaRooms().length) {
       @for (room of otaRooms(); track room?.booking_room_id || room?.room_type_id || $index; let i = $index) {
         <mat-list-item>
@@ -46,17 +46,17 @@
         </mat-list-item>
       }
     } @else {
-      <mat-list-item>
+      <mat-list-item i18n>
         Room
         <span matListItemMeta>{{ roomTypeName() }}</span>
       </mat-list-item>
-      <mat-list-item>
+      <mat-list-item i18n>
         Price
         <span matListItemMeta>
           {{ (hasRoomAssignment() ? roomTotal() : bookingAmount()) | currency: bookingCurrency() }}
         </span>
       </mat-list-item>
-      <mat-list-item>
+      <mat-list-item i18n>
         Dates
         <span matListItemMeta>
           {{ roomCheckIn() | date:'dd/MM/yyyy' }} → {{ roomCheckOut() | date:'dd/MM/yyyy' }}
@@ -69,26 +69,26 @@
 
   <!-- Payment Information -->
   <mat-list>
-    <div mat-subheader>Payment</div>
-    <mat-list-item>
+    <div mat-subheader><ng-container i18n>Payment</ng-container></div>
+    <mat-list-item i18n>
       Payment Mode
       <span matListItemMeta class="capitalize">{{ paymentMethod() }}</span>
     </mat-list-item>
     @if (hasRoomAssignment()) {
-      <mat-list-item>
+      <mat-list-item i18n>
         Room Total
         <span matListItemMeta>{{ roomTotal() | currency: bookingCurrency() }}</span>
       </mat-list-item>
     }
-    <mat-list-item>
+    <mat-list-item i18n>
       Booking Total
       <span matListItemMeta class="font-semibold">{{ bookingAmount() | currency: bookingCurrency() }}</span>
     </mat-list-item>
-    <mat-list-item>
+    <mat-list-item i18n>
       Amount Paid
       <span matListItemMeta>{{ amountPaid() | currency: bookingCurrency() }}</span>
     </mat-list-item>
-    <mat-list-item>
+    <mat-list-item i18n>
       Balance
       <span matListItemMeta>{{ bookingBalance() | currency: bookingCurrency() }}</span>
     </mat-list-item>
@@ -96,6 +96,6 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="gap-2">
-  <button matButton="outlined" (click)="openReservation()">View</button>
-  <button matButton="outlined" (click)="close()">Close</button>
+  <button matButton="outlined" (click)="openReservation()"><ng-container i18n>View</ng-container></button>
+  <button matButton="outlined" (click)="close()"><ng-container i18n>Close</ng-container></button>
 </mat-dialog-actions>

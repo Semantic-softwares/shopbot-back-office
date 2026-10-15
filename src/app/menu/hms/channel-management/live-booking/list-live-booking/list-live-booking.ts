@@ -25,11 +25,12 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { LiveBookingService, LiveBookingFilters } from '../../../../../shared/services/live-booking.service';
 import { LiveBookingModel } from '../../../../../shared/models/live-booking.model';
 import { LiveBooking } from '../live-booking';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-list-live-booking',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatTableModule,
@@ -129,19 +130,19 @@ export class ListLiveBooking {
 
   // OTA options
   otaOptions = [
-    { value: 'BookingCom', label: 'Booking.com' },
-    { value: 'Airbnb', label: 'Airbnb' },
-    { value: 'Expedia', label: 'Expedia' },
-    { value: 'Hotels.com', label: 'Hotels.com' },
-    { value: 'VRBO', label: 'VRBO' },
+    { value: 'BookingCom', label: $localize`Booking.com` },
+    { value: 'Airbnb', label: $localize`Airbnb` },
+    { value: 'Expedia', label: $localize`Expedia` },
+    { value: 'Hotels.com', label: $localize`Hotels.com` },
+    { value: 'VRBO', label: $localize`VRBO` },
   ];
 
   // Status options
   statusOptions = [
-    { value: '', label: 'All Status' },
-    { value: 'new', label: 'New' },
-    { value: 'modified', label: 'Modified' },
-    { value: 'cancelled', label: 'Cancelled' },
+    { value: '', label: $localize`All Status` },
+    { value: 'new', label: $localize`New` },
+    { value: 'modified', label: $localize`Modified` },
+    { value: 'cancelled', label: $localize`Cancelled` },
   ];
 
   // rxResource for loading bookings

@@ -1,11 +1,11 @@
 <app-page-header
-  [title]="isEditMode() ? 'Edit Vendor' : 'New Vendor'"
-  subtitle="Manage vendor contact and specialty information"
+  [title]="isEditMode() ? ('Edit Vendor' | tr) : ('New Vendor' | tr)"
+  subtitle="Manage vendor contact and specialty information" i18n-subtitle
 >
   <ng-container actions>
     <button mat-button (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
-      Back
+      <ng-container i18n>Back</ng-container>
     </button>
   </ng-container>
 </app-page-header>
@@ -18,12 +18,12 @@
         <div class="flex items-center gap-4">
           <div class="relative w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-100 flex items-center justify-center">
             @if (profileImagePreview()) {
-              <img [src]="profileImagePreview()" alt="Vendor profile" class="w-full h-full object-cover" />
+              <img [src]="profileImagePreview()" alt="Vendor profile" i18n-alt class="w-full h-full object-cover" />
               <button
                 type="button"
                 class="absolute top-0 right-0 bg-white/90 rounded-full p-0.5"
                 (click)="removeProfileImage()"
-                aria-label="Remove profile image"
+                aria-label="Remove profile image" i18n-aria-label
               >
                 <mat-icon class="!text-sm">close</mat-icon>
               </button>
@@ -36,64 +36,64 @@
               <input type="file" accept="image/*" class="hidden" (change)="onProfileImageSelected($event)" />
               <span class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">
                 <mat-icon>upload</mat-icon>
-                {{ profileImagePreview() ? 'Change Photo' : 'Upload Photo' }}
+                @if (profileImagePreview()) {<ng-container i18n>Change Photo</ng-container>} @else {<ng-container i18n>Upload Photo</ng-container>}
               </span>
             </label>
-            <p class="text-xs text-gray-500 mt-1">Vendor profile picture</p>
+            <p class="text-xs text-gray-500 mt-1"><ng-container i18n>Vendor profile picture</ng-container></p>
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>{{ form.controls.company.value ? 'Company Name' : 'Vendor Name' }}</mat-label>
-            <input matInput formControlName="name" [placeholder]="form.controls.company.value ? 'Enter company name' : 'Enter vendor name'" />
+            <mat-label>@if (form.controls.company.value) {<ng-container i18n>Company Name</ng-container>} @else {<ng-container i18n>Vendor Name</ng-container>}</mat-label>
+            <input matInput formControlName="name" [placeholder]="form.controls.company.value ? ('Enter company name' | tr) : ('Enter vendor name' | tr)" />
             @if (form.controls.name.hasError('required')) {
-              <mat-error>Name is required</mat-error>
+              <mat-error><ng-container i18n>Name is required</ng-container></mat-error>
             }
           </mat-form-field>
 
           <div class="flex items-center">
             <mat-slide-toggle formControlName="company" color="primary">
-              Is a Company
+              <ng-container i18n>Is a Company</ng-container>
             </mat-slide-toggle>
           </div>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Email</mat-label>
-            <input matInput formControlName="email" type="email" placeholder="vendor@example.com" />
+            <mat-label><ng-container i18n>Email</ng-container></mat-label>
+            <input matInput formControlName="email" type="email" placeholder="vendor@example.com" i18n-placeholder />
             @if (form.controls.email.hasError('email')) {
-              <mat-error>Please enter a valid email</mat-error>
+              <mat-error><ng-container i18n>Please enter a valid email</ng-container></mat-error>
             }
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Phone</mat-label>
-            <input matInput formControlName="phone" placeholder="Phone number" />
+            <mat-label><ng-container i18n>Phone</ng-container></mat-label>
+            <input matInput formControlName="phone" placeholder="Phone number" i18n-placeholder />
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Specialty</mat-label>
-            <input matInput formControlName="specialty" placeholder="e.g. Plumbing, Electrical" />
+            <mat-label><ng-container i18n>Specialty</ng-container></mat-label>
+            <input matInput formControlName="specialty" placeholder="e.g. Plumbing, Electrical" i18n-placeholder />
           </mat-form-field>
 
           <app-maintenance-category-select
             [control]="$any(form.controls.category)"
-            label="Category"
+            label="Category" i18n-label
           />
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Address</mat-label>
-            <input matInput formControlName="address" placeholder="Vendor address" />
+            <mat-label><ng-container i18n>Address</ng-container></mat-label>
+            <input matInput formControlName="address" placeholder="Vendor address" i18n-placeholder />
           </mat-form-field>
         </div>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Notes</mat-label>
-          <textarea matInput formControlName="notes" rows="3" placeholder="Additional notes"></textarea>
+          <mat-label><ng-container i18n>Notes</ng-container></mat-label>
+          <textarea matInput formControlName="notes" rows="3" placeholder="Additional notes" i18n-placeholder></textarea>
         </mat-form-field>
 
         <div class="flex justify-end gap-2 pt-2">
-          <button mat-button type="button" (click)="goBack()">Cancel</button>
+          <button mat-button type="button" (click)="goBack()"><ng-container i18n>Cancel</ng-container></button>
           <button
             mat-flat-button
             type="submit"
@@ -102,7 +102,7 @@
             @if (submitting()) {
               <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
             }
-            {{ isEditMode() ? 'Update Vendor' : 'Create Vendor' }}
+            @if (isEditMode()) {<ng-container i18n>Update Vendor</ng-container>} @else {<ng-container i18n>Create Vendor</ng-container>}
           </button>
         </div>
       </form>

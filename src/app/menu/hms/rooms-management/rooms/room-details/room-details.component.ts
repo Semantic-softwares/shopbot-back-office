@@ -24,11 +24,12 @@ import {
 } from '../../../../../shared/models/room.model';
 import { MatDivider } from "@angular/material/divider";
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-room-details',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatButtonModule,
     MatIconModule,
@@ -186,7 +187,7 @@ export class RoomDetailsComponent implements OnDestroy {
     const room = this.room();
     if (!room) return;
 
-    if (confirm(`Are you sure you want to delete room ${room.roomNumber}? This action cannot be undone.`)) {
+    if (confirm($localize`Are you sure you want to delete room ${room.roomNumber}? This action cannot be undone.`)) {
       this.roomsService.deleteRoom(room._id!)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
@@ -202,14 +203,14 @@ export class RoomDetailsComponent implements OnDestroy {
   }
 
   private showSuccess(message: string): void {
-    this.snackBar.open(message, 'Close', {
+    this.snackBar.open(message, $localize`Close`, {
       duration: 3000,
       panelClass: ['bg-green-500', 'text-white']
     });
   }
 
   private showError(message: string): void {
-    this.snackBar.open(message, 'Close', {
+    this.snackBar.open(message, $localize`Close`, {
       duration: 5000,
       panelClass: ['bg-red-500', 'text-white']
     });

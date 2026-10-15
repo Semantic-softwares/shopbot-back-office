@@ -1,10 +1,10 @@
 <div class="px-4">
   <div class="grid grid-cols-1 gap-6">
-    <app-page-header title="Operational Orders" subtitle="Set your weekly hours and whether orders are blocked outside them">
+    <app-page-header title="Operational Orders" i18n-title subtitle="Set your weekly hours and whether orders are blocked outside them" i18n-subtitle>
       <div actions class="flex items-center gap-2">
         <button type="button" mat-flat-button color="primary" [disabled]="saving()" (click)="save()">
           <mat-icon class="mr-1">save</mat-icon>
-          {{ saving() ? 'Saving...' : 'Save' }}
+          @if (saving()) {<ng-container i18n>Saving...</ng-container>} @else {<ng-container i18n>Save</ng-container>}
         </button>
       </div>
     </app-page-header>
@@ -17,10 +17,10 @@
       <mat-card appearance="outlined">
         <mat-card-content class="pt-4">
           <div class="flex items-center justify-between">
-            <h4 class="text-sm font-medium text-gray-900">Weekly hours</h4>
+            <h4 class="text-sm font-medium text-gray-900"><ng-container i18n>Weekly hours</ng-container></h4>
             <mat-chip [class.!bg-green-100]="isOpenNow()" [class.!text-green-700]="isOpenNow()"
                       [class.!bg-gray-200]="!isOpenNow()" [class.!text-gray-700]="!isOpenNow()">
-              {{ isOpenNow() ? 'Currently open' : 'Currently closed' }}
+              @if (isOpenNow()) {<ng-container i18n>Currently open</ng-container>} @else {<ng-container i18n>Currently closed</ng-container>}
             </mat-chip>
           </div>
 
@@ -36,7 +36,7 @@
                       <mat-timepicker-toggle matIconSuffix [for]="opensPicker" />
                       <mat-timepicker #opensPicker />
                     </mat-form-field>
-                    <span class="text-sm text-gray-600">to</span>
+                    <span class="text-sm text-gray-600"><ng-container i18n>to</ng-container></span>
                     <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-36">
                       <input matInput [matTimepicker]="closesPicker" [ngModel]="day.closesAt" (ngModelChange)="setClosesAt(day.key, $event)" />
                       <mat-timepicker-toggle matIconSuffix [for]="closesPicker" />
@@ -44,7 +44,7 @@
                     </mat-form-field>
                   </div>
                 } @else {
-                  <span class="text-sm text-gray-400">Closed all day</span>
+                  <span class="text-sm text-gray-400"><ng-container i18n>Closed all day</ng-container></span>
                 }
               </div>
             }
@@ -56,10 +56,10 @@
         <mat-card-content class="pt-4">
           <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
             <div>
-              <h4 class="text-sm font-medium text-gray-900">Lock ordering when the store is closed</h4>
+              <h4 class="text-sm font-medium text-gray-900"><ng-container i18n>Lock ordering when the store is closed</ng-container></h4>
               <p class="text-xs text-gray-500">
-                When on, both table (QR scan) and storefront orders are refused outside the hours set above, and the
-                menu shows a "closed" notice. Leave off if you'd rather accept orders any time regardless of these hours.
+                <ng-container i18n>When on, both table (QR scan) and storefront orders are refused outside the hours set above, and the
+                menu shows a "closed" notice. Leave off if you'd rather accept orders any time regardless of these hours.</ng-container>
               </p>
             </div>
             <mat-slide-toggle [ngModel]="enforceForOrders()" (ngModelChange)="enforceForOrders.set($event)" color="primary"></mat-slide-toggle>

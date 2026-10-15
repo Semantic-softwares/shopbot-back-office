@@ -51,6 +51,7 @@ import { CountrySelectComponent } from '../../../../../shared/components/country
 import { PropertyManagerSelectorComponent } from '../../../../../shared/components/property-manager-selector/property-manager-selector.component';
 import { PropertyOwnerSelectorComponent } from '../../../../../shared/components/property-owner-selector/property-owner-selector.component';
 import { Employee } from '../../../../../shared/models/employee.model';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 declare const google: any;
 
@@ -63,7 +64,7 @@ interface FilePreview {
   selector: 'app-property-form',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatInputModule,
@@ -134,8 +135,8 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
   }));
 
   sizeUnits = [
-    { value: SizeUnit.SQFT, label: 'sq ft' },
-    { value: SizeUnit.SQM, label: 'sq m' },
+    { value: SizeUnit.SQFT, label: $localize`sq ft` },
+    { value: SizeUnit.SQM, label: $localize`sq m` },
   ];
 
   selectedCategory = signal<PropertyCategory>(PropertyCategory.MULTI_UNIT);
@@ -353,7 +354,7 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
         this.isLoading.set(false);
       },
       error: () => {
-        this.snackBar.open('Failed to load property', 'Close', { duration: 5000 });
+        this.snackBar.open($localize`Failed to load property`, $localize`Close`, { duration: 5000 });
         this.isLoading.set(false);
       },
     });
@@ -399,7 +400,7 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
       },
       error: (err) => {
         console.error('Failed to load property units:', err);
-        this.snackBar.open('Failed to load units', 'Close', { duration: 5000 });
+        this.snackBar.open($localize`Failed to load units`, $localize`Close`, { duration: 5000 });
       },
     });
   }
@@ -589,7 +590,7 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
     }
 
     if (this.ownershipExceeds100) {
-      this.snackBar.open('Total ownership percentage cannot exceed 100%', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`Total ownership percentage cannot exceed 100%`, $localize`Close`, { duration: 5000 });
       return;
     }
 
@@ -671,7 +672,7 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
         const msg =
           err?.error?.message ||
           `Failed to ${this.isEditMode() ? 'update' : 'create'} property`;
-        this.snackBar.open(msg, 'Close', { duration: 5000 });
+        this.snackBar.open(msg, $localize`Close`, { duration: 5000 });
         this.isSaving.set(false);
       },
     });
@@ -702,7 +703,7 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
       this.propertyService.uploadCoverPhoto(propertyId, coverFile).subscribe({
         next: () => checkDone(),
         error: () => {
-          this.snackBar.open('Cover photo upload failed', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Cover photo upload failed`, $localize`Close`, { duration: 3000 });
           checkDone();
         },
       });
@@ -712,7 +713,7 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
       this.propertyService.uploadGalleryPhotos(propertyId, newGalleryFiles).subscribe({
         next: () => checkDone(),
         error: () => {
-          this.snackBar.open('Gallery upload failed', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Gallery upload failed`, $localize`Close`, { duration: 3000 });
           checkDone();
         },
       });
@@ -722,7 +723,7 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
       this.propertyService.uploadAttachments(propertyId, newAttachmentFiles).subscribe({
         next: () => checkDone(),
         error: () => {
-          this.snackBar.open('Attachments upload failed', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Attachments upload failed`, $localize`Close`, { duration: 3000 });
           checkDone();
         },
       });
@@ -731,8 +732,8 @@ export class PropertyFormComponent implements OnInit, AfterViewInit {
 
   private onSaveComplete(): void {
     this.snackBar.open(
-      `Property ${this.isEditMode() ? 'updated' : 'created'} successfully`,
-      'Close',
+      $localize`Property ${this.isEditMode() ? 'updated' : 'created'} successfully`,
+      $localize`Close`,
       { duration: 3000 },
     );
     this.isSaving.set(false);

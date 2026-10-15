@@ -34,7 +34,7 @@
       <!-- Mobile: Summary Grid (No Tabs, No Interaction) -->
       <div class="block md:hidden">
         <div class="p-4">
-          <h2 class="text-lg font-medium mb-4">Summary</h2>
+          <h2 class="text-lg font-medium mb-4"><ng-container i18n>Summary</ng-container></h2>
           <div class="grid grid-cols-2 gap-4">
             @for (item of summaryItems; track item) {
               <div class="bg-gray-50 rounded-lg p-4 text-center border">
@@ -138,34 +138,34 @@
   } @else if (dataSource.hasValue()) {
     <div class="bg-white rounded-lg shadow-sm mt-6">
       <div class="p-4 sm:p-6 flex flex-wrap gap-4 justify-between items-center border-b">
-        <h2 class="text-lg font-medium">Transaction Details</h2>
+        <h2 class="text-lg font-medium"><ng-container i18n>Transaction Details</ng-container></h2>
         <div class="flex items-center gap-2 sm:gap-4">
           <mat-button-toggle-group class="hidden md:block" [value]="isGridView" (change)="toggleView($event)">
-            <mat-button-toggle [value]="true" aria-label="Grid view">
+            <mat-button-toggle [value]="true" aria-label="Grid view" i18n-aria-label>
               <mat-icon class="!h-5 !w-5 text-sm">grid_view</mat-icon>
             </mat-button-toggle>
-            <mat-button-toggle [value]="false" aria-label="List view">
+            <mat-button-toggle [value]="false" aria-label="List view" i18n-aria-label>
               <mat-icon class="!h-5 !w-5 text-sm">list</mat-icon>
             </mat-button-toggle>
           </mat-button-toggle-group>
           <button mat-flat-button color="primary" [matMenuTriggerFor]="exportMenu" class="min-w-[120px]">
             <mat-icon class="mr-2">file_download</mat-icon>
-            <span class="hidden sm:inline">Export Data</span>
-            <span class="sm:hidden">Export</span>
+            <span class="hidden sm:inline"><ng-container i18n>Export Data</ng-container></span>
+            <span class="sm:hidden"><ng-container i18n>Export</ng-container></span>
           </button>
         </div>
         <mat-menu #exportMenu="matMenu">
           <button mat-menu-item (click)="exportData('pdf')">
             <mat-icon>picture_as_pdf</mat-icon>
-            <span>Export as PDF</span>
+            <span><ng-container i18n>Export as PDF</ng-container></span>
           </button>
           <button mat-menu-item (click)="exportData('csv')">
             <mat-icon>description</mat-icon>
-            <span>Export as CSV</span>
+            <span><ng-container i18n>Export as CSV</ng-container></span>
           </button>
           <button mat-menu-item (click)="exportData('excel')">
             <mat-icon>table_chart</mat-icon>
-            <span>Export as Excel</span>
+            <span><ng-container i18n>Export as Excel</ng-container></span>
           </button>
         </mat-menu>
       </div>
@@ -219,23 +219,23 @@
               <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-4 sm:p-5 border">
                 <div class="space-y-3 sm:space-y-4">
                   <div class="flex justify-between items-center pb-2 border-b">
-                    <span class="font-medium text-gray-600">Period</span>
+                    <span class="font-medium text-gray-600"><ng-container i18n>Period</ng-container></span>
                     <span class="text-gray-900">{{item.period}}</span>
                   </div>
                   <div class="flex justify-between items-center">
-                    <span class="font-medium text-gray-600">Gross Sales</span>
+                    <span class="font-medium text-gray-600"><ng-container i18n>Gross Sales</ng-container></span>
                     <span class="text-gray-900">{{item.grossSales | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
                   </div>
                   <div class="flex justify-between items-center">
-                    <span class="font-medium text-gray-600">Net Sales</span>
+                    <span class="font-medium text-gray-600"><ng-container i18n>Net Sales</ng-container></span>
                     <span class="text-gray-900">{{item.netSales | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
                   </div>
                   <div class="flex justify-between items-center">
-                    <span class="font-medium text-gray-600">Gross Profit</span>
+                    <span class="font-medium text-gray-600"><ng-container i18n>Gross Profit</ng-container></span>
                     <span class="text-gray-900">{{item.grossProfit | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
                   </div>
                   <div class="flex justify-between items-center pt-2 border-t">
-                    <span class="font-medium text-gray-600">Margin</span>
+                    <span class="font-medium text-gray-600"><ng-container i18n>Margin</ng-container></span>
                     <span class="text-gray-900">{{item.margin | percent:'1.0-2'}}</span>
                   </div>
                 </div>

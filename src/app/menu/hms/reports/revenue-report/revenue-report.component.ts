@@ -30,6 +30,7 @@ import {
 import { StoreStore } from '../../../../shared/stores/store.store';
 import { ExportService } from '../../../../shared/services/export.service';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { ChartThemeService } from '../../../../shared/services/chart-theme.service';
 
 @Component({
   selector: 'app-revenue-report',
@@ -60,6 +61,8 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
   styleUrl: './revenue-report.component.scss',
 })
 export class RevenueReportComponent {
+  // Keeps Chart.js text/grid colours in step with the light/dark theme.
+  private readonly chartTheme = inject(ChartThemeService);
   private fb = inject(FormBuilder);
   private revenueService = inject(RevenueService);
   private storeStore = inject(StoreStore);
@@ -137,7 +140,7 @@ export class RevenueReportComponent {
       datasets: [
         {
           data: data.map(d => d.totalRevenue),
-          label: 'Total Revenue',
+          label: $localize`Total Revenue`,
           backgroundColor: 'rgba(59, 130, 246, 0.1)',
           borderColor: 'rgba(59, 130, 246, 1)',
           borderWidth: 2,
@@ -146,7 +149,7 @@ export class RevenueReportComponent {
         },
         {
           data: data.map(d => d.roomRevenue),
-          label: 'Room Revenue',
+          label: $localize`Room Revenue`,
           backgroundColor: 'rgba(34, 197, 94, 0.1)',
           borderColor: 'rgba(34, 197, 94, 1)',
           borderWidth: 2,
@@ -207,7 +210,7 @@ export class RevenueReportComponent {
         display: true,
         title: {
           display: true,
-          text: 'Date'
+          text: $localize`Date`
         }
       },
       y: {

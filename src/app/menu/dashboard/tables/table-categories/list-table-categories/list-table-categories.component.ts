@@ -119,7 +119,7 @@ export class ListTableCategoriesComponent {
       if (result) {
         this.tableCategoryService.deleteTableCategory(category._id).subscribe({
           next: () => {
-            this.snackBar.open('Table category deleted successfully', 'Close', {
+            this.snackBar.open($localize`Table category deleted successfully`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -128,7 +128,7 @@ export class ListTableCategoriesComponent {
           },
           error: (error) => {
             console.error('Error deleting table category:', error);
-            this.snackBar.open('Error deleting table category', 'Close', {
+            this.snackBar.open($localize`Error deleting table category`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -143,7 +143,7 @@ export class ListTableCategoriesComponent {
     const updatedCategory = { active: !category.active };
     this.tableCategoryService.updateTableCategory(category._id, updatedCategory).subscribe({
       next: () => {
-        this.snackBar.open('Table category status updated successfully', 'Close', {
+        this.snackBar.open($localize`Table category status updated successfully`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -151,7 +151,7 @@ export class ListTableCategoriesComponent {
         this.dataSource.reload();
       },
       error: () => {
-        this.snackBar.open('Error updating table category status', 'Close', {
+        this.snackBar.open($localize`Error updating table category status`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'

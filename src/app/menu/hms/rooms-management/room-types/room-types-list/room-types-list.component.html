@@ -1,27 +1,27 @@
-<app-page-header title="Room Types Management" subtitle="Manage room types, pricing, and configurations">
+<app-page-header title="Room Types Management" i18n-title subtitle="Manage room types, pricing, and configurations" i18n-subtitle>
   <ng-container actions>
     <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)">
-      <mat-button-toggle value="table" matTooltip="Table View">
+      <mat-button-toggle value="table" matTooltip="Table View" i18n-matTooltip>
         <mat-icon>table_view</mat-icon>
       </mat-button-toggle>
-      <mat-button-toggle value="grid" matTooltip="Grid View">
+      <mat-button-toggle value="grid" matTooltip="Grid View" i18n-matTooltip>
         <mat-icon>grid_view</mat-icon>
       </mat-button-toggle>
     </mat-button-toggle-group>
 
     <button mat-stroked-button (click)="clearFilters()">
       <mat-icon>clear</mat-icon>
-      Clear Filters
+      <ng-container i18n>Clear Filters</ng-container>
     </button>
 
     <button mat-stroked-button (click)="roomTypesResource.reload()">
       <mat-icon>refresh</mat-icon>
-      Reload
+      <ng-container i18n>Reload</ng-container>
     </button>
 
     <button mat-flat-button color="primary" routerLink="../create">
       <mat-icon>add</mat-icon>
-      Add Room Type
+      <ng-container i18n>Add Room Type</ng-container>
     </button>
   </ng-container>
 </app-page-header>
@@ -37,7 +37,7 @@
           </div>
           <div>
             <div class="text-2xl font-bold">{{ roomTypeStats().total }}</div>
-            <div class="text-sm text-gray-600">Total Types</div>
+            <div class="text-sm text-gray-600"><ng-container i18n>Total Types</ng-container></div>
           </div>
         </div>
       </mat-card-content>
@@ -51,7 +51,7 @@
           </div>
           <div>
             <div class="text-2xl font-bold text-green-600">{{ roomTypeStats().active }}</div>
-            <div class="text-sm text-gray-600">Active</div>
+            <div class="text-sm text-gray-600"><ng-container i18n>Active</ng-container></div>
           </div>
         </div>
       </mat-card-content>
@@ -65,7 +65,7 @@
           </div>
           <div>
             <div class="text-2xl font-bold text-red-600">{{ roomTypeStats().inactive }}</div>
-            <div class="text-sm text-gray-600">Inactive</div>
+            <div class="text-sm text-gray-600"><ng-container i18n>Inactive</ng-container></div>
           </div>
         </div>
       </mat-card-content>
@@ -79,7 +79,7 @@
           </div>
           <div>
             <div class="text-2xl font-bold text-purple-600">{{ formatPrice(roomTypeStats().averagePrice) }}</div>
-            <div class="text-sm text-gray-600">Avg. Price</div>
+            <div class="text-sm text-gray-600"><ng-container i18n>Avg. Price</ng-container></div>
           </div>
         </div>
       </mat-card-content>
@@ -95,20 +95,20 @@
         <!-- Search Input -->
         <div class="lg:col-span-2">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Search room types...</mat-label>
+            <mat-label><ng-container i18n>Search room types...</ng-container></mat-label>
             <mat-icon matPrefix class="text-gray-400">search</mat-icon>
-            <input matInput formControlName="search" placeholder="Name or description...">
+            <input matInput formControlName="search" placeholder="Name or description..." i18n-placeholder>
           </mat-form-field>
         </div>
 
         <!-- Status Filter -->
         <div>
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Status</mat-label>
+            <mat-label><ng-container i18n>Status</ng-container></mat-label>
             <mat-select formControlName="active">
-              <mat-option [value]="null">All</mat-option>
-              <mat-option [value]="true">Active</mat-option>
-              <mat-option [value]="false">Inactive</mat-option>
+              <mat-option [value]="null"><ng-container i18n>All</ng-container></mat-option>
+              <mat-option [value]="true"><ng-container i18n>Active</ng-container></mat-option>
+              <mat-option [value]="false"><ng-container i18n>Inactive</ng-container></mat-option>
             </mat-select>
           </mat-form-field>
         </div>
@@ -116,7 +116,7 @@
         <!-- Min Price -->
         <div>
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Min Price</mat-label>
+            <mat-label><ng-container i18n>Min Price</ng-container></mat-label>
             <input matInput type="number" formControlName="minPrice" min="0">
             <span matPrefix>$&nbsp;</span>
           </mat-form-field>
@@ -125,7 +125,7 @@
         <!-- Max Price -->
         <div>
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Max Price</mat-label>
+            <mat-label><ng-container i18n>Max Price</ng-container></mat-label>
             <input matInput type="number" formControlName="maxPrice" min="0">
             <span matPrefix>$&nbsp;</span>
           </mat-form-field>
@@ -134,9 +134,9 @@
 
       <!-- Quick Filters -->
       <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-sm font-medium text-gray-600 mr-2">Quick filters:</span>
-        <mat-chip (click)="applyQuickFilter({active: true})">Active Only</mat-chip>
-        <mat-chip (click)="applyQuickFilter({active: false})">Inactive Only</mat-chip>
+        <span class="text-sm font-medium text-gray-600 mr-2"><ng-container i18n>Quick filters:</ng-container></span>
+        <mat-chip (click)="applyQuickFilter({active: true})"><ng-container i18n>Active Only</ng-container></mat-chip>
+        <mat-chip (click)="applyQuickFilter({active: false})"><ng-container i18n>Inactive Only</ng-container></mat-chip>
       </div>
     </form>
   </div>
@@ -145,19 +145,19 @@
   @if (selectedRoomTypes().length > 0) {
     <div class="mx-3 mb-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
       <div class="flex justify-between items-center flex-wrap gap-4">
-        <span class="text-blue-800 font-semibold">{{ selectedRoomTypes().length }} room type(s) selected</span>
+        <span class="text-blue-800 font-semibold"><ng-container i18n>{{ selectedRoomTypes().length }} room type(s) selected</ng-container></span>
         <div class="flex gap-2 flex-wrap">
           <button mat-flat-button color="primary" (click)="bulkToggleActive(true)">
             <mat-icon>check_circle</mat-icon>
-            Activate
+            <ng-container i18n>Activate</ng-container>
           </button>
           <button mat-flat-button color="warn" (click)="bulkToggleActive(false)">
             <mat-icon>cancel</mat-icon>
-            Deactivate
+            <ng-container i18n>Deactivate</ng-container>
           </button>
           <button mat-stroked-button (click)="clearSelection()">
             <mat-icon>clear</mat-icon>
-            Clear Selection
+            <ng-container i18n>Clear Selection</ng-container>
           </button>
         </div>
       </div>
@@ -177,11 +177,11 @@
       <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
         <mat-icon class="text-4xl text-red-500">error</mat-icon>
       </div>
-      <h3 class="text-lg font-semibold text-gray-900 mb-2">Error Loading Room Types</h3>
-      <p class="text-gray-500 mb-4">Failed to load room types. Please try again.</p>
+      <h3 class="text-lg font-semibold text-gray-900 mb-2"><ng-container i18n>Error Loading Room Types</ng-container></h3>
+      <p class="text-gray-500 mb-4"><ng-container i18n>Failed to load room types. Please try again.</ng-container></p>
       <button mat-flat-button color="primary" (click)="roomTypesResource.reload()">
         <mat-icon>refresh</mat-icon>
-        Retry
+        <ng-container i18n>Retry</ng-container>
       </button>
     </div>
   }
@@ -209,7 +209,7 @@
 
       <!-- Room Type Column -->
       <ng-container matColumnDef="roomType">
-        <th mat-header-cell *matHeaderCellDef>Room Type</th>
+        <th mat-header-cell *matHeaderCellDef><ng-container i18n>Room Type</ng-container></th>
         <td mat-cell *matCellDef="let roomType">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -227,19 +227,19 @@
 
       <!-- Capacity & Pricing Column -->
       <ng-container matColumnDef="capacityPricing">
-        <th mat-header-cell *matHeaderCellDef>Capacity & Pricing</th>
+        <th mat-header-cell *matHeaderCellDef><ng-container i18n>Capacity & Pricing</ng-container></th>
         <td mat-cell *matCellDef="let roomType">
           <div class="font-medium">{{ getCapacityText(roomType) }}</div>
-          <div class="text-sm text-green-600">{{ formatPrice(roomType.basePrice) }}/night</div>
+          <div class="text-sm text-green-600"><ng-container i18n>{{ formatPrice(roomType.basePrice) }}/night</ng-container></div>
           @if (roomType.size) {
-            <div class="text-xs text-gray-500">{{ roomType.size }} sq ft</div>
+            <div class="text-xs text-gray-500"><ng-container i18n>{{ roomType.size }} sq ft</ng-container></div>
           }
         </td>
       </ng-container>
 
       <!-- Amenities Column -->
       <ng-container matColumnDef="amenities">
-        <th mat-header-cell *matHeaderCellDef>Amenities</th>
+        <th mat-header-cell *matHeaderCellDef><ng-container i18n>Amenities</ng-container></th>
         <td mat-cell *matCellDef="let roomType">
           <div class="flex flex-wrap gap-1">
             @for (amenity of getAmenitiesList(roomType).slice(0, 3); track amenity) {
@@ -254,20 +254,20 @@
 
       <!-- Status Column -->
       <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <th mat-header-cell *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
         <td mat-cell *matCellDef="let roomType">
           <mat-chip [ngClass]="{
             'bg-green-100! text-green-800!': roomType.active,
             'bg-red-100! text-red-800!': !roomType.active
           }">
-            {{ roomType.active ? 'Active' : 'Inactive' }}
+            @if (roomType.active) {<ng-container i18n>Active</ng-container>} @else {<ng-container i18n>Inactive</ng-container>}
           </mat-chip>
         </td>
       </ng-container>
 
       <!-- Actions Column -->
       <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <th mat-header-cell *matHeaderCellDef><ng-container i18n>Actions</ng-container></th>
         <td mat-cell *matCellDef="let roomType">
           <button mat-icon-button [matMenuTriggerFor]="actionMenu" (click)="$event.stopPropagation()">
             <mat-icon>more_vert</mat-icon>
@@ -276,20 +276,20 @@
           <mat-menu #actionMenu="matMenu">
             <button mat-menu-item [routerLink]="['../', roomType._id || roomType.id, 'details']">
               <mat-icon>visibility</mat-icon>
-              <span>View Details</span>
+              <span><ng-container i18n>View Details</ng-container></span>
             </button>
             <button mat-menu-item [routerLink]="['../', roomType._id || roomType.id, 'edit']">
               <mat-icon>edit</mat-icon>
-              <span>Edit Room Type</span>
+              <span><ng-container i18n>Edit Room Type</ng-container></span>
             </button>
             <mat-divider></mat-divider>
             <button mat-menu-item (click)="toggleRoomTypeActive(roomType)">
               <mat-icon>{{ roomType.active ? 'cancel' : 'check_circle' }}</mat-icon>
-              <span>{{ roomType.active ? 'Deactivate' : 'Activate' }}</span>
+              <span>@if (roomType.active) {<ng-container i18n>Deactivate</ng-container>} @else {<ng-container i18n>Activate</ng-container>}</span>
             </button>
             <button mat-menu-item (click)="deleteRoomType(roomType)" class="text-red-600!">
               <mat-icon class="text-red-600!">delete</mat-icon>
-              <span>Delete</span>
+              <span><ng-container i18n>Delete</ng-container></span>
             </button>
           </mat-menu>
         </td>
@@ -307,11 +307,11 @@
         <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <mat-icon class="text-4xl text-gray-400">hotel_class</mat-icon>
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">No room types found</h3>
-        <p class="text-gray-500 mb-6">Try adjusting your filters or create a new room type.</p>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2"><ng-container i18n>No room types found</ng-container></h3>
+        <p class="text-gray-500 mb-6"><ng-container i18n>Try adjusting your filters or create a new room type.</ng-container></p>
         <button mat-flat-button color="primary" routerLink="../create">
           <mat-icon>add</mat-icon>
-          Add Room Type
+          <ng-container i18n>Add Room Type</ng-container>
         </button>
       </div>
     }
@@ -337,7 +337,7 @@
                   </div>
                   <div>
                     <h3 class="text-lg font-bold text-gray-900">{{ roomType.name }}</h3>
-                    <p class="text-sm text-green-600 font-medium">{{ formatPrice(roomType.basePrice) }}/night</p>
+                    <p class="text-sm text-green-600 font-medium"><ng-container i18n>{{ formatPrice(roomType.basePrice) }}/night</ng-container></p>
                   </div>
                 </div>
               </div>
@@ -345,7 +345,7 @@
                 'bg-green-100! text-green-800!': roomType.active,
                 'bg-red-100! text-red-800!': !roomType.active
               }" class="text-xs!">
-                {{ roomType.active ? 'Active' : 'Inactive' }}
+                @if (roomType.active) {<ng-container i18n>Active</ng-container>} @else {<ng-container i18n>Inactive</ng-container>}
               </mat-chip>
             </div>
 
@@ -363,14 +363,14 @@
               @if (roomType.size) {
                 <div class="flex items-center gap-2 text-sm text-gray-600">
                   <mat-icon class="text-base text-gray-400">fullscreen</mat-icon>
-                  <span>{{ roomType.size }} sq ft</span>
+                  <span><ng-container i18n>{{ roomType.size }} sq ft</ng-container></span>
                 </div>
               }
 
               <!-- Amenities -->
               @if (getAmenitiesList(roomType).length > 0) {
                 <div class="pt-3 border-t border-gray-100">
-                  <div class="text-sm font-medium text-gray-600 mb-2">Amenities:</div>
+                  <div class="text-sm font-medium text-gray-600 mb-2"><ng-container i18n>Amenities:</ng-container></div>
                   <div class="flex flex-wrap gap-1">
                     @for (amenity of getAmenitiesList(roomType).slice(0, 4); track amenity) {
                       <mat-chip class="text-xs!">{{ amenity }}</mat-chip>
@@ -386,11 +386,11 @@
             <div class="flex gap-2 pt-4 border-t border-gray-100">
               <button mat-flat-button color="primary" class="flex-1" [routerLink]="['../', roomType._id || roomType.id, 'details']">
                 <mat-icon>visibility</mat-icon>
-                View
+                <ng-container i18n>View</ng-container>
               </button>
               <button mat-stroked-button class="flex-1" [routerLink]="['../', roomType._id || roomType.id, 'edit']">
                 <mat-icon>edit</mat-icon>
-                Edit
+                <ng-container i18n>Edit</ng-container>
               </button>
             </div>
           </mat-card-content>
@@ -402,11 +402,11 @@
           <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <mat-icon class="text-4xl text-gray-400">hotel_class</mat-icon>
           </div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-2">No room types found</h3>
-          <p class="text-gray-500 mb-6">Try adjusting your filters or create a new room type.</p>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2"><ng-container i18n>No room types found</ng-container></h3>
+          <p class="text-gray-500 mb-6"><ng-container i18n>Try adjusting your filters or create a new room type.</ng-container></p>
           <button mat-flat-button color="primary" routerLink="../create">
             <mat-icon>add</mat-icon>
-            Add Room Type
+            <ng-container i18n>Add Room Type</ng-container>
           </button>
         </div>
       }

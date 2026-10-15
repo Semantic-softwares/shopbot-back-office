@@ -95,7 +95,7 @@ export class MaintenanceListComponent {
   ];
 
   readonly statusOptions = [
-    { value: '', label: 'All statuses' },
+    { value: '', label: $localize`All statuses` },
     ...Object.values(MaintenanceStatus).map((value) => ({
       value,
       label: STATUS_LABEL[value],
@@ -103,7 +103,7 @@ export class MaintenanceListComponent {
   ];
 
   readonly priorityOptions = [
-    { value: '', label: 'All priorities' },
+    { value: '', label: $localize`All priorities` },
     ...Object.values(MaintenancePriority).map((value) => ({
       value,
       label: PRIORITY_LABEL[value],
@@ -121,12 +121,12 @@ export class MaintenanceListComponent {
     const data = categories?.data;
     if (data && data.length > 0) {
       return [
-        { value: '', label: 'All categories' },
+        { value: '', label: $localize`All categories` },
         ...data.map((c: { name: string }) => ({ value: c.name, label: c.name })),
       ];
     }
     return [
-      { value: '', label: 'All categories' },
+      { value: '', label: $localize`All categories` },
       ...Object.values(MaintenanceCategory).map((value) => ({
         value,
         label: CATEGORY_LABEL[value],
@@ -255,10 +255,10 @@ export class MaintenanceListComponent {
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title: 'Delete Maintenance Request',
-        message: 'Are you sure you want to delete this maintenance request? This action cannot be undone.',
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
+        title: $localize`Delete Maintenance Request`,
+        message: $localize`Are you sure you want to delete this maintenance request? This action cannot be undone.`,
+        confirmText: $localize`Delete`,
+        cancelText: $localize`Cancel`,
       },
     });
 
@@ -267,13 +267,13 @@ export class MaintenanceListComponent {
 
       this.maintenanceService.delete(storeId, id).subscribe({
         next: () => {
-          this.snackBar.open('Maintenance request deleted', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Maintenance request deleted`, $localize`Close`, { duration: 3000 });
           this.requestsResource.reload();
           this.summaryResource.reload();
         },
         error: (error) => {
           const message = error?.error?.message || 'Failed to delete maintenance request';
-          this.snackBar.open(message, 'Close', { duration: 4000 });
+          this.snackBar.open(message, $localize`Close`, { duration: 4000 });
         },
       });
     });

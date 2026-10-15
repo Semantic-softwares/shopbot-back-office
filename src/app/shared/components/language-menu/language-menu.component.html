@@ -1,0 +1,16 @@
+<button mat-icon-button [matMenuTriggerFor]="menu" [matTooltip]="tooltip" [attr.aria-label]="tooltip">
+  <mat-icon>translate</mat-icon>
+</button>
+
+<mat-menu #menu="matMenu" xPosition="before">
+  @for (lang of language.languages; track lang.code) {
+    <button mat-menu-item (click)="language.set(lang.code)" [attr.lang]="lang.code" [attr.aria-pressed]="language.current().code === lang.code">
+      <span class="flex w-full min-w-32 items-center justify-between gap-4">
+        {{ lang.label }}
+        @if (language.current().code === lang.code) {
+          <mat-icon class="!m-0 text-primary">check</mat-icon>
+        }
+      </span>
+    </button>
+  }
+</mat-menu>

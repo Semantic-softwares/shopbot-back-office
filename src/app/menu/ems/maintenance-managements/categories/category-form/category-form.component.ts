@@ -18,12 +18,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { MaintenanceCategoryService } from '../../../../../shared/services/maintenance-category.service';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-category-form',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
@@ -73,7 +74,7 @@ export class CategoryFormComponent {
         });
       },
       error: () => {
-        this.snackBar.open('Failed to load category', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Failed to load category`, $localize`Close`, { duration: 4000 });
       },
     });
   }
@@ -102,12 +103,12 @@ export class CategoryFormComponent {
     request$.subscribe({
       next: () => {
         const msg = this.categoryId ? 'Category updated' : 'Category created';
-        this.snackBar.open(msg, 'Close', { duration: 3000 });
+        this.snackBar.open(msg, $localize`Close`, { duration: 3000 });
         this.goBack();
       },
       error: (error) => {
         const message = error?.error?.message || 'Failed to save category';
-        this.snackBar.open(message, 'Close', { duration: 4000 });
+        this.snackBar.open(message, $localize`Close`, { duration: 4000 });
         this.submitting.set(false);
       },
     });

@@ -1,22 +1,22 @@
 <div [formGroup]="utilitiesGroup" class="rounded-xl border border-gray-200 p-4">
   <div class="flex items-center justify-between mb-3">
-    <div class="text-sm font-semibold text-gray-700">Utility Responsibilities</div>
+    <div class="text-sm font-semibold text-gray-700"><ng-container i18n>Utility Responsibilities</ng-container></div>
     <button mat-stroked-button type="button" (click)="addUtilityResponsibility()">
       <mat-icon class="mr-1">add</mat-icon>
-      Add Utility
+      <ng-container i18n>Add Utility</ng-container>
     </button>
   </div>
 
   <div formArrayName="responsibilities" class="flex flex-col gap-3">
     @if (responsibilitiesArray.length === 0) {
-      <p class="text-sm text-gray-400">No utility responsibilities added.</p>
+      <p class="text-sm text-gray-400"><ng-container i18n>No utility responsibilities added.</ng-container></p>
     }
 
     @for (utility of responsibilitiesArray.controls; track $index) {
       <div [formGroupName]="$index" class="rounded-lg border border-gray-200 bg-gray-50 p-3">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Utility Type</mat-label>
+            <mat-label><ng-container i18n>Utility Type</ng-container></mat-label>
             <mat-select formControlName="utilityType">
               @for (type of utilityTypes; track type) {
                 <mat-option [value]="type">{{ type }}</mat-option>
@@ -25,12 +25,12 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Custom Utility Name</mat-label>
-            <input matInput formControlName="customUtilityName" placeholder="Only for OTHER">
+            <mat-label><ng-container i18n>Custom Utility Name</ng-container></mat-label>
+            <input matInput formControlName="customUtilityName" placeholder="Only for OTHER" i18n-placeholder>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full md:col-span-2">
-            <mat-label>Responsible Party</mat-label>
+            <mat-label><ng-container i18n>Responsible Party</ng-container></mat-label>
             <mat-select formControlName="responsibleParty">
               @for (party of parties; track party) {
                 <mat-option [value]="party">{{ party }}</mat-option>

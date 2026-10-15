@@ -76,7 +76,7 @@ export class ListPrintersComponent implements OnInit {
   constructor() {
     effect(() => {
       if (this.error()) {
-        this.snackBar.open('Error loading printers', 'Close', {
+        this.snackBar.open($localize`Error loading printers`, $localize`Close`, {
           duration: 3000,
           panelClass: ['error-snackbar'],
         });
@@ -86,7 +86,7 @@ export class ListPrintersComponent implements OnInit {
 
   ngOnInit() {
     if (!this.storeId()) {
-      this.snackBar.open('Store not selected', 'Close', {
+      this.snackBar.open($localize`Store not selected`, $localize`Close`, {
         duration: 3000,
         panelClass: ['error-snackbar'],
       });
@@ -132,17 +132,17 @@ export class ListPrintersComponent implements OnInit {
   }
 
   deletePrinter(printerId: string) {
-    if (confirm('Are you sure you want to delete this printer?')) {
+    if (confirm($localize`Are you sure you want to delete this printer?`)) {
       this.printerService.remove(printerId).subscribe({
         next: () => {
-          this.snackBar.open('Printer deleted successfully', 'Close', {
+          this.snackBar.open($localize`Printer deleted successfully`, $localize`Close`, {
             duration: 3000,
             panelClass: ['success-snackbar'],
           });
           this.reload();
         },
         error: (error) => {
-          this.snackBar.open('Error deleting printer', 'Close', {
+          this.snackBar.open($localize`Error deleting printer`, $localize`Close`, {
             duration: 3000,
             panelClass: ['error-snackbar'],
           });

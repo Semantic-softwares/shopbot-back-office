@@ -1,6 +1,6 @@
-<h2 mat-dialog-title>Store invitations</h2>
+<h2 mat-dialog-title><ng-container i18n>Store invitations</ng-container></h2>
 <mat-dialog-content>
-    <p class="text-sm text-gray-600 mb-4">You've been invited to join the following store(s).</p>
+    <p class="text-sm text-gray-600 mb-4"><ng-container i18n>You've been invited to join the following store(s).</ng-container></p>
     <div class="flex flex-col gap-3">
         @for (row of rows(); track row.membership._id) {
             <div class="flex items-center justify-between gap-3 p-3 rounded-lg border border-gray-200">
@@ -15,23 +15,23 @@
                     <div class="min-w-0">
                         <p class="font-medium text-gray-900 truncate">{{ row.store?.name }}</p>
                         @if (row.role?.name) {
-                            <p class="text-xs text-gray-500">as {{ row.role?.name }}</p>
+                            <p class="text-xs text-gray-500"><ng-container i18n>as {{ row.role?.name }}</ng-container></p>
                         }
                     </div>
                 </div>
 
                 @if (row.resolved === 'accepted') {
                     <span class="text-sm text-green-600 flex items-center gap-1 flex-shrink-0">
-                        <mat-icon class="!text-base !w-4 !h-4">check_circle</mat-icon> Joined
+                        <mat-icon class="!text-base !w-4 !h-4">check_circle</mat-icon> <ng-container i18n>Joined</ng-container>
                     </span>
                 } @else if (row.resolved === 'declined') {
-                    <span class="text-sm text-gray-400 flex-shrink-0">Declined</span>
+                    <span class="text-sm text-gray-400 flex-shrink-0"><ng-container i18n>Declined</ng-container></span>
                 } @else if (row.resolving) {
                     <mat-spinner diameter="20"></mat-spinner>
                 } @else {
                     <div class="flex gap-2 flex-shrink-0">
-                        <button mat-button (click)="decline(row)">Decline</button>
-                        <button matButton="filled" color="primary" (click)="accept(row)">Accept</button>
+                        <button mat-button (click)="decline(row)"><ng-container i18n>Decline</ng-container></button>
+                        <button matButton="filled" color="primary" (click)="accept(row)"><ng-container i18n>Accept</ng-container></button>
                     </div>
                 }
             </div>
@@ -40,6 +40,6 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end">
     <button matButton="filled" color="primary" [mat-dialog-close]="true">
-        {{ allResolved() ? 'Continue' : 'Skip for now' }}
+        @if (allResolved()) {<ng-container i18n>Continue</ng-container>} @else {<ng-container i18n>Skip for now</ng-container>}
     </button>
 </mat-dialog-actions>

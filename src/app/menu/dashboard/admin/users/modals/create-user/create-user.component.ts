@@ -14,11 +14,12 @@ import { rxResource, takeUntilDestroyed, toSignal } from '@angular/core/rxjs-int
 import { RolesService } from '../../../../../shared/services/role.service';
 import { CompanyService } from '../../../../../shared/services/company.service';
 import { map } from 'rxjs/operators';
+import { TrPipe } from '../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-user-modal',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

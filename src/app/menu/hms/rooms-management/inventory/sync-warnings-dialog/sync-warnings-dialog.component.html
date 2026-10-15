@@ -2,31 +2,31 @@
 <!-- Full Sync Result (Certification) -->
 <h2 mat-dialog-title class="flex items-center gap-2">
   <mat-icon class="text-green-600">check_circle</mat-icon>
-  Full Sync Complete — 500 Days
+  <ng-container i18n>Full Sync Complete — 500 Days</ng-container>
 </h2>
 
 <mat-dialog-content>
   <div class="space-y-4">
     <!-- Summary -->
     <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-      <p class="text-sm text-green-800 font-medium mb-2">Successfully synced to Channex</p>
+      <p class="text-sm text-green-800 font-medium mb-2"><ng-container i18n>Successfully synced to Channex</ng-container></p>
       <ul class="text-sm text-green-700 space-y-1">
-        <li>📦 Availability records: <strong>{{ data.availabilityCount }}</strong></li>
-        <li>💰 Rates & restrictions records: <strong>{{ data.restrictionsCount }}</strong></li>
+        <li i18n>📦 Availability records: <strong>{{ data.availabilityCount }}</strong></li>
+        <li i18n>💰 Rates & restrictions records: <strong>{{ data.restrictionsCount }}</strong></li>
       </ul>
     </div>
 
     <!-- Task IDs -->
     <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-      <p class="text-sm font-semibold text-purple-800 mb-3">🔑 Channex Task IDs (submit these for certification)</p>
+      <p class="text-sm font-semibold text-purple-800 mb-3"><ng-container i18n>🔑 Channex Task IDs (submit these for certification)</ng-container></p>
 
       <div class="space-y-3">
         <div>
-          <label class="text-xs text-purple-600 font-medium">Availability Task ID:</label>
+          <label class="text-xs text-purple-600 font-medium"><ng-container i18n>Availability Task ID:</ng-container></label>
           <div class="flex items-center gap-2 mt-1">
             <code class="bg-white border border-purple-300 rounded px-3 py-2 text-sm font-mono flex-1 select-all break-all">{{ data.availabilityTaskId || 'Not returned' }}</code>
             @if (data.availabilityTaskId) {
-              <button mat-icon-button (click)="copyToClipboard(data.availabilityTaskId!)" matTooltip="Copy to clipboard">
+              <button mat-icon-button (click)="copyToClipboard(data.availabilityTaskId!)" matTooltip="Copy to clipboard" i18n-matTooltip>
                 <mat-icon class="text-purple-600">content_copy</mat-icon>
               </button>
             }
@@ -34,11 +34,11 @@
         </div>
 
         <div>
-          <label class="text-xs text-purple-600 font-medium">Restrictions Task ID:</label>
+          <label class="text-xs text-purple-600 font-medium"><ng-container i18n>Restrictions Task ID:</ng-container></label>
           <div class="flex items-center gap-2 mt-1">
             <code class="bg-white border border-purple-300 rounded px-3 py-2 text-sm font-mono flex-1 select-all break-all">{{ data.restrictionsTaskId || 'Not returned' }}</code>
             @if (data.restrictionsTaskId) {
-              <button mat-icon-button (click)="copyToClipboard(data.restrictionsTaskId!)" matTooltip="Copy to clipboard">
+              <button mat-icon-button (click)="copyToClipboard(data.restrictionsTaskId!)" matTooltip="Copy to clipboard" i18n-matTooltip>
                 <mat-icon class="text-purple-600">content_copy</mat-icon>
               </button>
             }
@@ -50,7 +50,7 @@
     <!-- Raw responses (collapsed) -->
     @if (data.availabilityResponse || data.restrictionsResponse) {
       <details class="text-xs">
-        <summary class="cursor-pointer text-gray-500 hover:text-gray-700 py-1">View raw API responses</summary>
+        <summary class="cursor-pointer text-gray-500 hover:text-gray-700 py-1"><ng-container i18n>View raw API responses</ng-container></summary>
         <pre class="mt-2 bg-gray-50 border rounded p-3 overflow-auto max-h-48 text-xs whitespace-pre-wrap">Availability:
 {{ data.availabilityResponse | json }}
 
@@ -62,14 +62,14 @@ Restrictions:
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-flat-button color="primary" mat-dialog-close>Close</button>
+  <button mat-flat-button color="primary" mat-dialog-close><ng-container i18n>Close</ng-container></button>
 </mat-dialog-actions>
 
 } @else {
 <!-- Normal Sync Warnings -->
 <h2 mat-dialog-title class="flex items-center gap-2">
   <mat-icon class="text-amber-500">warning</mat-icon>
-  Channex Sync Results
+  <ng-container i18n>Channex Sync Results</ng-container>
 </h2>
 
 <mat-dialog-content class="max-h-[60vh]">
@@ -77,15 +77,15 @@ Restrictions:
   <div class="flex flex-wrap gap-4 mb-4 p-3 bg-gray-50 rounded-lg text-sm">
     <div class="flex items-center gap-1">
       <mat-icon class="text-green-600 !text-[18px] !w-[18px] !h-[18px]">check_circle</mat-icon>
-      <span>{{ data.availabilityCount }} availability synced</span>
+      <span><ng-container i18n>{{ data.availabilityCount }} availability synced</ng-container></span>
     </div>
     <div class="flex items-center gap-1">
       <mat-icon class="text-green-600 !text-[18px] !w-[18px] !h-[18px]">check_circle</mat-icon>
-      <span>{{ data.restrictionsCount }} rate records synced</span>
+      <span><ng-container i18n>{{ data.restrictionsCount }} rate records synced</ng-container></span>
     </div>
     <div class="flex items-center gap-1">
       <mat-icon class="text-amber-500 !text-[18px] !w-[18px] !h-[18px]">warning</mat-icon>
-      <span class="font-medium">{{ data.warnings.length }} warning(s) from {{ groupedWarnings().length }} issue(s)</span>
+      <span class="font-medium"><ng-container i18n>{{ data.warnings.length }} warning(s) from {{ groupedWarnings().length }} issue(s)</ng-container></span>
     </div>
   </div>
 
@@ -125,20 +125,20 @@ Restrictions:
                   <mat-icon class="!text-[14px] !w-[14px] !h-[14px]">calendar_today</mat-icon>
                   {{ getDateRange(group.dates) }}
                   @if (group.dates.length > 2) {
-                    <span class="text-gray-400">({{ group.dates.length }} dates)</span>
+                    <span class="text-gray-400"><ng-container i18n>({{ group.dates.length }} dates)</ng-container></span>
                   }
                 </span>
               }
               @if (group.ratePlanIds.length > 0) {
                 <span class="flex items-center gap-1">
                   <mat-icon class="!text-[14px] !w-[14px] !h-[14px]">receipt_long</mat-icon>
-                  {{ group.ratePlanIds.length }} rate plan(s)
+                  <ng-container i18n>{{ group.ratePlanIds.length }} rate plan(s)</ng-container>
                 </span>
               }
               @if (group.sampleRate !== undefined) {
                 <span class="flex items-center gap-1">
                   <mat-icon class="!text-[14px] !w-[14px] !h-[14px]">payments</mat-icon>
-                  Sample rate sent: {{ group.sampleRate | number:'1.2-2' }}
+                  <ng-container i18n>Sample rate sent: {{ group.sampleRate | number:'1.2-2' }}</ng-container>
                 </span>
               }
             </div>
@@ -150,6 +150,6 @@ Restrictions:
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-flat-button mat-dialog-close>Close</button>
+  <button mat-flat-button mat-dialog-close><ng-container i18n>Close</ng-container></button>
 </mat-dialog-actions>
 }

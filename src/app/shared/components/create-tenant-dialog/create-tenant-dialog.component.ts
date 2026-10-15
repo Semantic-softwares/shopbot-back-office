@@ -78,13 +78,13 @@ export class CreateTenantDialogComponent {
 
     this.tenantService.createTenant(data).subscribe({
       next: (res) => {
-        this.snackBar.open('Tenant created', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Tenant created`, $localize`Close`, { duration: 3000 });
         this.dialogRef.close(res.data);
       },
       error: (err) => {
         this.snackBar.open(
           err?.error?.message || 'Failed to create tenant',
-          'Close',
+          $localize`Close`,
           { duration: 5000 },
         );
         this.isSaving.set(false);

@@ -1,7 +1,7 @@
 <mat-card appearance="outlined">
     <mat-card-header>
         <mat-card-title>
-            {{bookingType() === 'single' ? 'Guest Details' : 'Booking Owner Details'}}
+            @if (bookingType() === 'single') {<ng-container i18n>Guest Details</ng-container>} @else {<ng-container i18n>Booking Owner Details</ng-container>}
 
         </mat-card-title>
         <!-- <mat-card-subtitle>Primary guest and contact information</mat-card-subtitle> -->
@@ -13,11 +13,11 @@
             <!-- Empty State Icon -->
             <div class="text-center py-4">
                 <mat-icon class="text-gray-300 text-6xl mb-4 inline-block">person_outline</mat-icon>
-                <p class="text-gray-500 text-sm mb-4">No guest selected</p>
+                <p class="text-gray-500 text-sm mb-4"><ng-container i18n>No guest selected</ng-container></p>
             </div>
 
             <!-- Guest Search Component -->
-            <app-guest-search placeholder="Search for existing guest..." label="Select Guest"
+            <app-guest-search placeholder="Search for existing guest..." i18n-placeholder label="Select Guest" i18n-label
                 [guestType]="bookingType() === 'group' ? 'group' : 'single'"
                 (guestSelected)="onGuestSearchSelected($event)"></app-guest-search>
         </div>
@@ -44,7 +44,7 @@
                 @if (guest()?.email) {
                 <mat-list-item>
                     <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">mail_outline</mat-icon>
-                    <div matListItemTitle class="text-sm text-gray-600!">Email</div>
+                    <div matListItemTitle class="text-sm text-gray-600!"><ng-container i18n>Email</ng-container></div>
                     <div matListItemLine class="text-gray-900 font-medium">{{ guest()?.email }}</div>
                 </mat-list-item>
                 }
@@ -53,7 +53,7 @@
                 @if (guest()?.phone) {
                 <mat-list-item>
                     <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">phone_outline</mat-icon>
-                    <div matListItemTitle class="text-sm text-gray-600!">Phone</div>
+                    <div matListItemTitle class="text-sm text-gray-600!"><ng-container i18n>Phone</ng-container></div>
                     <div matListItemLine class="text-gray-900 font-medium">{{ guest()?.phone }}</div>
                 </mat-list-item>
                 }
@@ -62,7 +62,7 @@
                 @if (bookingType() === 'single' && guest()?.dateOfBirth) {
                 <mat-list-item>
                     <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">cake_outline</mat-icon>
-                    <div matListItemTitle class="text-sm text-gray-600!">Date of Birth</div>
+                    <div matListItemTitle class="text-sm text-gray-600!"><ng-container i18n>Date of Birth</ng-container></div>
                     <div matListItemLine class="text-gray-900 font-medium">
                         {{ $safeNavigationMigration(guest()?.dateOfBirth) | date: 'MMM dd, yyyy' }}
                     </div>
@@ -73,7 +73,7 @@
                 @if (bookingType() === 'group' && guest()?.companyRegistrationNumber) {
                 <mat-list-item>
                     <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">verified_outline</mat-icon>
-                    <div matListItemTitle class="text-sm text-gray-600!">Registration Number</div>
+                    <div matListItemTitle class="text-sm text-gray-600!"><ng-container i18n>Registration Number</ng-container></div>
                     <div matListItemLine class="text-gray-900 font-medium">
                         {{ guest()?.companyRegistrationNumber }}
                     </div>
@@ -85,7 +85,7 @@
                 <mat-list-item>
                     <mat-icon matListItemIcon
                         class="text-gray-600! material-icons-outlined">location_on_outline</mat-icon>
-                    <div matListItemTitle class="text-sm text-gray-600!">Address</div>
+                    <div matListItemTitle class="text-sm text-gray-600!"><ng-container i18n>Address</ng-container></div>
                     <div matListItemLine class="text-gray-900 font-medium">
                         @if (guest()?.address?.street) {
                         <span>{{ guest()?.address?.street }}, </span>
@@ -109,16 +109,16 @@
         @if (!guest()) {
         <button type="button" matButton="filled" color="primary" (click)="onAddGuest()">
             <mat-icon class="mr-2">person_add_outline</mat-icon>
-            Add Guest
+            <ng-container i18n>Add Guest</ng-container>
         </button>
         } @else {
         <button type="button" mat-button (click)="onEditGuest()" color="primary">
             <mat-icon class="mr-2">edit_outline</mat-icon>
-            Edit
+            <ng-container i18n>Edit</ng-container>
         </button>
         <button type="button" mat-button (click)="onDeleteGuest()" color="warn">
             <mat-icon class="mr-2">delete_outline</mat-icon>
-            Delete
+            <ng-container i18n>Delete</ng-container>
         </button>
         }
     </mat-card-actions>

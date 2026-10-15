@@ -8,16 +8,16 @@ mat-dialog-content {
   display: block;
   padding: 0.5rem;
   border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid light-dark(#e5e7eb, #48464b);
   transition: all 0.2s ease;
   
   &:hover {
-    background-color: #f9fafb;
-    border-color: #d1d5db;
+    background-color: light-dark(#f9fafb, #1c1b1c);
+    border-color: light-dark(#d1d5db, #48464b);
   }
   
   &.mat-mdc-radio-checked {
-    background-color: #eff6ff;
+    background-color: light-dark(#eff6ff, #142843);
     border-color: #3b82f6;
   }
 }

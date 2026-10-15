@@ -96,15 +96,15 @@ export class LeaseBillingComponent {
       next: (res) => {
         const count = (res as any).data?.count ?? 0;
         this.snackBar.open(
-          count > 0 ? `${count} invoice(s) generated` : 'No new invoices to generate',
-          'OK',
+          count > 0 ? $localize`${count} invoice(s) generated` : $localize`No new invoices to generate`,
+          $localize`OK`,
           { duration: 3000 },
         );
         this.invoicesResource.reload();
         this.generating.set(false);
       },
       error: (err) => {
-        this.snackBar.open('Failed to generate invoices', 'OK', { duration: 4000 });
+        this.snackBar.open($localize`Failed to generate invoices`, $localize`OK`, { duration: 4000 });
         this.generating.set(false);
       },
     });

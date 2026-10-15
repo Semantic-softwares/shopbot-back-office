@@ -1,7 +1,7 @@
 <mat-card appearance="outlined" class="rounded-2xl border-slate-200 shadow-sm">
   <mat-card-header class="px-6 pt-6">
-    <mat-card-title>Top Properties by Arrears</mat-card-title>
-    <mat-card-subtitle>Highest overdue balances</mat-card-subtitle>
+    <mat-card-title><ng-container i18n>Top Properties by Arrears</ng-container></mat-card-title>
+    <mat-card-subtitle><ng-container i18n>Highest overdue balances</ng-container></mat-card-subtitle>
   </mat-card-header>
 
   <mat-card-content class="p-0!">
@@ -14,7 +14,7 @@
                 <div class="flex-1">
                   <h4 class="font-semibold text-slate-900">{{ property.propertyName }}</h4>
                   <p class="text-sm text-slate-500">
-                    {{ property.overdueLeaseCount }} lease(s) • {{ property.overdueInvoiceCount }} invoice(s)
+                    <ng-container i18n>{{ property.overdueLeaseCount }} lease(s) • {{ property.overdueInvoiceCount }} invoice(s)</ng-container>
                   </p>
                 </div>
                 <p class="text-lg font-semibold text-rose-700">{{ property.totalArrears | currency }}</p>
@@ -22,7 +22,7 @@
               <div class="flex gap-2">
                 <button mat-stroked-button (click)="viewProperty(property.propertyId)" class="!text-xs">
                   <mat-icon matIconPrefix class="!text-base">location_city</mat-icon>
-                  View Property
+                  <ng-container i18n>View Property</ng-container>
                 </button>
               </div>
             </div>
@@ -32,7 +32,7 @@
     } @else {
       <div class="p-6 text-center text-slate-500">
         <mat-icon class="mb-2 text-4xl opacity-50">home_work</mat-icon>
-        <p>No properties with arrears</p>
+        <p><ng-container i18n>No properties with arrears</ng-container></p>
       </div>
     }
   </mat-card-content>

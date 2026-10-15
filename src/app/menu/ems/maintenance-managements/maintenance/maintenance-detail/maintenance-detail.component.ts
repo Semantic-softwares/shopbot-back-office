@@ -98,7 +98,7 @@ export class MaintenanceDetailComponent {
       if (!params.storeId || !params.id) {
         return of({
           success: true,
-          message: 'Maintenance request not ready',
+          message: $localize`Maintenance request not ready`,
           data: {
             request: undefined,
             activities: [],
@@ -202,11 +202,11 @@ export class MaintenanceDetailComponent {
         next: () => {
           this.newComment.set('');
           this.detailResource.reload();
-          this.snackBar.open('Comment added', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Comment added`, $localize`Close`, { duration: 3000 });
         },
         error: (error) => {
           const message = error?.error?.message || 'Failed to add comment';
-          this.snackBar.open(message, 'Close', { duration: 4000 });
+          this.snackBar.open(message, $localize`Close`, { duration: 4000 });
         },
       });
   }
@@ -228,12 +228,12 @@ export class MaintenanceDetailComponent {
           this.statusNote.set('');
           this.updatingStatus.set(false);
           this.detailResource.reload();
-          this.snackBar.open('Status updated', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Status updated`, $localize`Close`, { duration: 3000 });
         },
         error: (error) => {
           this.updatingStatus.set(false);
           const message = error?.error?.message || 'Failed to update status';
-          this.snackBar.open(message, 'Close', { duration: 4000 });
+          this.snackBar.open(message, $localize`Close`, { duration: 4000 });
         },
       });
   }
@@ -253,11 +253,11 @@ export class MaintenanceDetailComponent {
         next: () => {
           this.assignNote.set('');
           this.detailResource.reload();
-          this.snackBar.open('Request assigned', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Request assigned`, $localize`Close`, { duration: 3000 });
         },
         error: (error) => {
           const message = error?.error?.message || 'Failed to assign request';
-          this.snackBar.open(message, 'Close', { duration: 4000 });
+          this.snackBar.open(message, $localize`Close`, { duration: 4000 });
         },
       });
   }
@@ -276,11 +276,11 @@ export class MaintenanceDetailComponent {
         next: () => {
           this.costNote.set('');
           this.detailResource.reload();
-          this.snackBar.open('Cost updated', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Cost updated`, $localize`Close`, { duration: 3000 });
         },
         error: (error) => {
           const message = error?.error?.message || 'Failed to update cost';
-          this.snackBar.open(message, 'Close', { duration: 4000 });
+          this.snackBar.open(message, $localize`Close`, { duration: 4000 });
         },
       });
   }
@@ -291,10 +291,10 @@ export class MaintenanceDetailComponent {
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title: 'Delete Maintenance Request',
-        message: 'Are you sure you want to delete this maintenance request? This action cannot be undone.',
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
+        title: $localize`Delete Maintenance Request`,
+        message: $localize`Are you sure you want to delete this maintenance request? This action cannot be undone.`,
+        confirmText: $localize`Delete`,
+        cancelText: $localize`Cancel`,
       },
     });
 
@@ -303,12 +303,12 @@ export class MaintenanceDetailComponent {
 
       this.maintenanceService.delete(storeId, this.requestId).subscribe({
         next: () => {
-          this.snackBar.open('Maintenance request deleted', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Maintenance request deleted`, $localize`Close`, { duration: 3000 });
           this.backToList();
         },
         error: (error) => {
           const message = error?.error?.message || 'Failed to delete maintenance request';
-          this.snackBar.open(message, 'Close', { duration: 4000 });
+          this.snackBar.open(message, $localize`Close`, { duration: 4000 });
         },
       });
     });

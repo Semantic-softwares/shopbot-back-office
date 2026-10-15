@@ -16,7 +16,7 @@
   mat-card-title {
     font-size: 1rem;
     font-weight: 500;
-    color: #374151;
+    color: light-dark(#374151, #d6d2d2);
     margin-bottom: 1rem;
   }
 
@@ -25,13 +25,13 @@
   }
 
   .break-item {
-    border: 1px solid #e5e7eb;
+    border: 1px solid light-dark(#e5e7eb, #48464b);
     border-radius: 8px;
     padding: 1rem;
-    background-color: #f9fafb;
+    background-color: light-dark(#f9fafb, #1c1b1c);
 
     &:hover {
-      background-color: #f3f4f6;
+      background-color: light-dark(#f3f4f6, #1c1b1c);
     }
   }
 
@@ -44,14 +44,14 @@
     h5 {
       font-size: 0.875rem;
       font-weight: 500;
-      color: #374151;
+      color: light-dark(#374151, #d6d2d2);
     }
   }
 
   .no-breaks {
     text-align: center;
     padding: 2rem;
-    color: #6b7280;
+    color: light-dark(#6b7280, #cac5cb);
 
     mat-icon {
       font-size: 3rem;
@@ -66,7 +66,7 @@
     h4 {
       font-size: 0.875rem;
       font-weight: 500;
-      color: #374151;
+      color: light-dark(#374151, #d6d2d2);
       margin-bottom: 0.5rem;
     }
   }

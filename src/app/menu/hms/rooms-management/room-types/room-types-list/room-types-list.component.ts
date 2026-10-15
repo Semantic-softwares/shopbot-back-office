@@ -226,7 +226,7 @@ export class RoomTypesListComponent {
   }
 
   async deleteRoomType(roomType: RoomType): Promise<void> {
-    if (!confirm(`Are you sure you want to delete "${roomType.name}"? This action cannot be undone.`)) {
+    if (!confirm($localize`Are you sure you want to delete "${roomType.name}"? This action cannot be undone.`)) {
       return;
     }
 
@@ -297,14 +297,14 @@ export class RoomTypesListComponent {
   }
 
   private showSuccess(message: string): void {
-    this.snackBar.open(message, 'Close', {
+    this.snackBar.open(message, $localize`Close`, {
       duration: 3000,
       panelClass: ['success-snackbar']
     });
   }
 
   private showError(message: string): void {
-    this.snackBar.open(message, 'Close', {
+    this.snackBar.open(message, $localize`Close`, {
       duration: 5000,
       panelClass: ['error-snackbar']
     });

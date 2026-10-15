@@ -23,6 +23,7 @@ import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { CurrencyPipe } from '@angular/common';
 import { map } from 'rxjs/operators';
 import type { Reservation, ReservationStatus } from '../../../../../../shared/models/reservation.model';
+import { TrPipe } from '../../../../../../shared/i18n/tr.pipe';
 
 interface DateRange {
   key: string;
@@ -66,7 +67,7 @@ interface DragSelection {
 @Component({
   selector: 'app-reservations-calendar',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatButtonModule,
     MatIconModule,

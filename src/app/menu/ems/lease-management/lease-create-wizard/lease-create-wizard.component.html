@@ -1,14 +1,14 @@
 <app-page-header
-  [title]="isDraftEdit() ? 'Complete Draft Lease' : isEditMode() ? 'Edit Lease' : 'Create Lease'"
-  [subtitle]="'Guided lease creation wizard'">
+  [title]="isDraftEdit() ? ('Complete Draft Lease' | tr) : isEditMode() ? ('Edit Lease' | tr) : ('Create Lease' | tr)"
+  [subtitle]="('Guided lease creation wizard' | tr)">
   <ng-container actions>
     <button mat-button (click)="cancel()">
       <mat-icon class="mr-1">arrow_back</mat-icon>
-      Back
+      <ng-container i18n>Back</ng-container>
     </button>
     <button mat-stroked-button (click)="saveDraft()" [disabled]="isSubmitting()">
       <mat-icon class="mr-1">save</mat-icon>
-      Save Draft
+      <ng-container i18n>Save Draft</ng-container>
     </button>
     <button mat-flat-button (click)="activateLease()" [disabled]="isSubmitting()">
       @if (isSubmitting()) {
@@ -16,7 +16,7 @@
       } @else {
         <mat-icon class="mr-1">check_circle</mat-icon>
       }
-      {{ isDraftEdit() ? 'Activate Lease' : 'Submit Lease' }}
+      @if (isDraftEdit()) {<ng-container i18n>Activate Lease</ng-container>} @else {<ng-container i18n>Submit Lease</ng-container>}
     </button>
   </ng-container>
 </app-page-header>
@@ -25,7 +25,7 @@
   <mat-card appearance="outlined">
     <mat-card-content class="p-4!">
       <mat-stepper class="lease-stepper" orientation="vertical" linear>
-        <mat-step [stepControl]="termsGroup" label="Terms">
+        <mat-step [stepControl]="termsGroup" label="Terms" i18n-label>
           <div class="pt-4">
             <app-lease-step-terms
               [termsGroup]="termsGroup"
@@ -34,11 +34,11 @@
             </app-lease-step-terms>
           </div>
           <div class="mt-4 flex justify-end">
-            <button mat-flat-button matStepperNext [disabled]="termsGroup.invalid">Next</button>
+            <button mat-flat-button matStepperNext [disabled]="termsGroup.invalid"><ng-container i18n>Next</ng-container></button>
           </div>
         </mat-step>
 
-        <mat-step [stepControl]="tenantsGroup" label="Tenants">
+        <mat-step [stepControl]="tenantsGroup" label="Tenants" i18n-label>
           <div class="pt-4">
             <app-lease-step-tenants
               [tenantsGroup]="tenantsGroup"
@@ -46,12 +46,12 @@
             </app-lease-step-tenants>
           </div>
           <div class="mt-4 flex justify-between">
-            <button mat-button matStepperPrevious>Previous</button>
-            <button mat-flat-button matStepperNext [disabled]="tenantsGroup.invalid">Next</button>
+            <button mat-button matStepperPrevious><ng-container i18n>Previous</ng-container></button>
+            <button mat-flat-button matStepperNext [disabled]="tenantsGroup.invalid"><ng-container i18n>Next</ng-container></button>
           </div>
         </mat-step>
 
-        <mat-step [stepControl]="transactionsGroup" label="Lease Transactions">
+        <mat-step [stepControl]="transactionsGroup" label="Lease Transactions" i18n-label>
           <div class="pt-4">
             <app-lease-step-transactions
               [transactionsGroup]="transactionsGroup"
@@ -66,12 +66,12 @@
             </app-lease-step-transactions>
           </div>
           <div class="mt-4 flex justify-between">
-            <button mat-button matStepperPrevious>Previous</button>
-            <button mat-flat-button matStepperNext [disabled]="transactionsGroup.invalid">Next</button>
+            <button mat-button matStepperPrevious><ng-container i18n>Previous</ng-container></button>
+            <button mat-flat-button matStepperNext [disabled]="transactionsGroup.invalid"><ng-container i18n>Next</ng-container></button>
           </div>
         </mat-step>
 
-        <mat-step [stepControl]="utilitiesGroup" label="Utilities">
+        <mat-step [stepControl]="utilitiesGroup" label="Utilities" i18n-label>
           <div class="pt-4">
             <app-lease-step-utilities
               [utilitiesGroup]="utilitiesGroup"
@@ -81,12 +81,12 @@
             </app-lease-step-utilities>
           </div>
           <div class="mt-4 flex justify-between">
-            <button mat-button matStepperPrevious>Previous</button>
-            <button mat-flat-button matStepperNext [disabled]="utilitiesGroup.invalid">Next</button>
+            <button mat-button matStepperPrevious><ng-container i18n>Previous</ng-container></button>
+            <button mat-flat-button matStepperNext [disabled]="utilitiesGroup.invalid"><ng-container i18n>Next</ng-container></button>
           </div>
         </mat-step>
 
-        <mat-step label="Summary">
+        <mat-step label="Summary" i18n-label>
           <div class="pt-4">
             <app-lease-step-summary
               [leaseForm]="leaseForm"
@@ -97,7 +97,7 @@
           </div>
 
           <div class="mt-4 flex justify-start">
-            <button mat-button matStepperPrevious>Previous</button>
+            <button mat-button matStepperPrevious><ng-container i18n>Previous</ng-container></button>
           </div>
         </mat-step>
       </mat-stepper>

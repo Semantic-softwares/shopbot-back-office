@@ -79,8 +79,8 @@ export class ListCorrectiveActionsComponent {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Corrective Action',
-        message: 'Are you sure you want to delete this corrective action?',
+        title: $localize`Delete Corrective Action`,
+        message: $localize`Are you sure you want to delete this corrective action?`,
         confirmButtonText: 'Delete',
         showCancelButton: true,
       },
@@ -90,7 +90,7 @@ export class ListCorrectiveActionsComponent {
       if (result) {
         this.service.deleteCorrectiveAction(id).subscribe({
           next: () => {
-            this.snackBar.open('Corrective action deleted successfully', 'Close', {
+            this.snackBar.open($localize`Corrective action deleted successfully`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -98,7 +98,7 @@ export class ListCorrectiveActionsComponent {
             this.actions.reload();
           },
           error: (error) => {
-            this.snackBar.open('Failed to delete corrective action', 'Close', {
+            this.snackBar.open($localize`Failed to delete corrective action`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top',

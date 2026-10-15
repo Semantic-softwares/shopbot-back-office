@@ -1,6 +1,6 @@
 <h2 mat-dialog-title class="flex items-center gap-2">
   <mat-icon class="text-blue-600">bed</mat-icon>
-  Assign Rooms to Booking
+  <ng-container i18n>Assign Rooms to Booking</ng-container>
 </h2>
 
 <mat-dialog-content class="max-h-[70vh] overflow-y-auto">
@@ -11,7 +11,7 @@
   } @else if (availableRoomsByType().size === 0) {
     <div class="text-center py-8 text-gray-600">
       <mat-icon class="text-4xl! text-gray-400 mb-2">no_rooms</mat-icon>
-      <p>No available rooms found</p>
+      <p><ng-container i18n>No available rooms found</ng-container></p>
     </div>
   } @else {
     <!-- Currency Conversion Banner -->
@@ -21,15 +21,15 @@
           <div class="flex items-start gap-3">
             <mat-icon class="text-amber-600 mt-0.5">currency_exchange</mat-icon>
             <div class="flex-1">
-              <h4 class="font-semibold text-gray-900 mb-1">Currency Conversion Required</h4>
-              <p class="text-sm text-gray-600 mb-3">
+              <h4 class="font-semibold text-gray-900 mb-1"><ng-container i18n>Currency Conversion Required</ng-container></h4>
+              <p i18n class="text-sm text-gray-600 mb-3">
                 This booking is in <span class="font-semibold text-blue-700">{{ bookingCurrencyCode() }}</span>
                 but your store uses <span class="font-semibold text-green-700">{{ storeCurrencyCode() }}</span>.
                 Enter the conversion rate to calculate local amounts.
               </p>
 
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Conversion Rate (1 {{ bookingCurrencyCode() }} = ? {{ storeCurrencyCode() }})</mat-label>
+                <mat-label><ng-container i18n>Conversion Rate (1 {{ bookingCurrencyCode() }} = ? {{ storeCurrencyCode() }})</ng-container></mat-label>
                 <input
                   matInput
                   type="number"
@@ -40,7 +40,7 @@
                 />
                 <mat-icon matPrefix class="text-gray-500">swap_horiz</mat-icon>
                 @if (conversionRateControl.invalid && conversionRateControl.touched) {
-                  <mat-error>A valid conversion rate is required</mat-error>
+                  <mat-error><ng-container i18n>A valid conversion rate is required</ng-container></mat-error>
                 }
                 @if (conversionRate() > 0) {
                   <mat-hint>
@@ -86,7 +86,7 @@
               </div>
             </div>
             <div class="text-right">
-              <div class="text-sm text-gray-600">Price ({{ bookingCurrencyCode() }})</div>
+              <div class="text-sm text-gray-600"><ng-container i18n>Price ({{ bookingCurrencyCode() }})</ng-container></div>
               <div class="text-lg font-semibold text-blue-600">
                 {{ otaRoom.amount | currency: data.currency }}
               </div>
@@ -100,21 +100,21 @@
 
           <!-- Room Selection Dropdown -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Select Available Room</mat-label>
+            <mat-label><ng-container i18n>Select Available Room</ng-container></mat-label>
             <mat-select [formControlName]="'room_' + i">
               @if ((getAvailableRoomsForType($safeNavigationMigration(otaRoom?.room_type_id)) || []).length === 0) {
-                <mat-option disabled>No available rooms</mat-option>
+                <mat-option disabled><ng-container i18n>No available rooms</ng-container></mat-option>
               } @else {
                 @for (room of getAvailableRoomsForType($safeNavigationMigration(otaRoom?.room_type_id)); track room._id) {
                   <mat-option [value]="room._id">
                     <span class="font-semibold">{{ room.roomNumber }}</span>
-                    <span class="text-gray-600 ml-2">- {{ room.roomType?.name || 'Standard' }}</span>
+                    <span class="text-gray-600 ml-2">- {{ room.roomType?.name || ('Standard' | tr) }}</span>
                   </mat-option>
                 }
               }
             </mat-select>
             @if (assignmentForm.get('room_' + i)?.invalid && assignmentForm.get('room_' + i)?.touched) {
-              <mat-error>Please select a room</mat-error>
+              <mat-error><ng-container i18n>Please select a room</ng-container></mat-error>
             }
           </mat-form-field>
 
@@ -124,12 +124,12 @@
               @if (availRoom._id === assignmentForm.get('room_' + i)?.value) {
                 <div class="mt-3 pt-3 border-t border-gray-200 text-sm text-gray-600">
                   <div class="flex justify-between">
-                    <span>Room Type:</span>
+                    <span><ng-container i18n>Room Type:</ng-container></span>
                     <span class="font-medium">{{ availRoom.roomType?.name }}</span>
                   </div>
                   @if (availRoom.floor) {
                     <div class="flex justify-between mt-1">
-                      <span>Floor:</span>
+                      <span><ng-container i18n>Floor:</ng-container></span>
                       <span class="font-medium">{{ availRoom.floor }}</span>
                     </div>
                   }
@@ -147,38 +147,38 @@
         <mat-card-content class="p-4!">
           <h4 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
             <mat-icon class="text-base">receipt_long</mat-icon>
-            Conversion Summary
+            <ng-container i18n>Conversion Summary</ng-container>
           </h4>
           <div class="space-y-2 text-sm">
             <div class="flex justify-between">
-              <span class="text-gray-600">Subtotal ({{ bookingCurrencyCode() }})</span>
+              <span class="text-gray-600"><ng-container i18n>Subtotal ({{ bookingCurrencyCode() }})</ng-container></span>
               <span class="font-medium">{{ bookingSubtotal() | currency: data.currency }}</span>
             </div>
             @if (bookingTax() > 0) {
               <div class="flex justify-between">
-                <span class="text-gray-600">Taxes ({{ bookingCurrencyCode() }})</span>
+                <span class="text-gray-600"><ng-container i18n>Taxes ({{ bookingCurrencyCode() }})</ng-container></span>
                 <span class="font-medium">{{ bookingTax() | currency: data.currency }}</span>
               </div>
             }
             <div class="flex justify-between font-semibold text-gray-900 border-t border-gray-300 pt-2">
-              <span>Total ({{ bookingCurrencyCode() }})</span>
+              <span><ng-container i18n>Total ({{ bookingCurrencyCode() }})</ng-container></span>
               <span>{{ bookingTotal() | currency: data.currency }}</span>
             </div>
 
             <div class="border-t border-dashed border-gray-300 my-2"></div>
 
             <div class="flex justify-between text-green-700">
-              <span>Subtotal ({{ storeCurrencyCode() }})</span>
+              <span><ng-container i18n>Subtotal ({{ storeCurrencyCode() }})</ng-container></span>
               <span class="font-medium">{{ localSubtotal() | currency: storeCurrencyCode() }}</span>
             </div>
             @if (localTax() > 0) {
               <div class="flex justify-between text-green-700">
-                <span>Taxes ({{ storeCurrencyCode() }})</span>
+                <span><ng-container i18n>Taxes ({{ storeCurrencyCode() }})</ng-container></span>
                 <span class="font-medium">{{ localTax() | currency: storeCurrencyCode() }}</span>
               </div>
             }
             <div class="flex justify-between font-bold text-green-800 text-base border-t border-green-300 pt-2">
-              <span>Total ({{ storeCurrencyCode() }})</span>
+              <span><ng-container i18n>Total ({{ storeCurrencyCode() }})</ng-container></span>
               <span>{{ localTotal() | currency: storeCurrencyCode() }}</span>
             </div>
           </div>
@@ -189,13 +189,13 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="gap-2">
-  <button matButton (click)="cancel()">Cancel</button>
+  <button matButton (click)="cancel()"><ng-container i18n>Cancel</ng-container></button>
   <button
     matButton="filled"
     color="primary"
     [disabled]="!isFormValid() || submitting()"
     (click)="submit()"
   >
-    {{submitting() ? 'Assigning...' : 'Assign Rooms'}}
+    @if (submitting()) {<ng-container i18n>Assigning...</ng-container>} @else {<ng-container i18n>Assign Rooms</ng-container>}
   </button>
 </mat-dialog-actions>

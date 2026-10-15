@@ -144,7 +144,7 @@ export class ListTablesComponent {
       if (result) {
         this.tableService.deleteTable(table._id).subscribe({
           next: () => {
-            this.snackBar.open('Table deleted successfully', 'Close', {
+            this.snackBar.open($localize`Table deleted successfully`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -153,7 +153,7 @@ export class ListTablesComponent {
           },
           error: (error) => {
             console.error('Error deleting table:', error);
-            this.snackBar.open('Error deleting table', 'Close', {
+            this.snackBar.open($localize`Error deleting table`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -189,7 +189,7 @@ export class ListTablesComponent {
     const updatedTable = { active: !table.active };
     this.tableService.updateTable(table._id, updatedTable).subscribe({
       next: () => {
-        this.snackBar.open('Table status updated successfully', 'Close', {
+        this.snackBar.open($localize`Table status updated successfully`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -197,7 +197,7 @@ export class ListTablesComponent {
         this.dataSource.reload();
       },
       error: () => {
-        this.snackBar.open('Error updating table status', 'Close', {
+        this.snackBar.open($localize`Error updating table status`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'

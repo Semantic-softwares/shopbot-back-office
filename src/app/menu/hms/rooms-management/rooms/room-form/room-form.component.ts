@@ -35,11 +35,12 @@ import {
   BED_CONFIGURATIONS,
   Amenity
 } from '../../../../../shared/models/room.model';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-room-form',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
@@ -88,18 +89,18 @@ export class RoomFormComponent implements OnInit, OnDestroy {
 
   // Options
   roomStatusOptions: { value: RoomStatus; label: string; color: string }[] = [
-    { value: 'available', label: 'Available', color: 'green' },
-    { value: 'occupied', label: 'Occupied', color: 'purple' },
-    { value: 'maintenance', label: 'Maintenance', color: 'orange' },
-    { value: 'cleaning', label: 'Cleaning', color: 'cyan' },
-    { value: 'out_of_order', label: 'Out of Order', color: 'red' }
+    { value: 'available', label: $localize`Available`, color: 'green' },
+    { value: 'occupied', label: $localize`Occupied`, color: 'purple' },
+    { value: 'maintenance', label: $localize`Maintenance`, color: 'orange' },
+    { value: 'cleaning', label: $localize`Cleaning`, color: 'cyan' },
+    { value: 'out_of_order', label: $localize`Out of Order`, color: 'red' }
   ];
 
   housekeepingStatusOptions: { value: HousekeepingStatus; label: string; color: string }[] = [
-    { value: 'clean', label: 'Clean', color: 'green' },
-    { value: 'dirty', label: 'Dirty', color: 'orange' },
-    { value: 'inspected', label: 'Inspected', color: 'cyan' },
-    { value: 'out_of_order', label: 'Out of Order', color: 'red' }
+    { value: 'clean', label: $localize`Clean`, color: 'green' },
+    { value: 'dirty', label: $localize`Dirty`, color: 'orange' },
+    { value: 'inspected', label: $localize`Inspected`, color: 'cyan' },
+    { value: 'out_of_order', label: $localize`Out of Order`, color: 'red' }
   ];
 
   viewTypeOptions = VIEW_TYPE_OPTIONS;
@@ -109,10 +110,10 @@ export class RoomFormComponent implements OnInit, OnDestroy {
   floorOptions = Array.from({ length: 20 }, (_, i) => ({ value: i + 1, label: `Floor ${i + 1}` }));
   
   sizeOptions = [
-    { value: 'small', label: 'Small (< 200 sq ft)' },
-    { value: 'medium', label: 'Medium (200-400 sq ft)' },
-    { value: 'large', label: 'Large (400-600 sq ft)' },
-    { value: 'extra-large', label: 'Extra Large (> 600 sq ft)' }
+    { value: 'small', label: $localize`Small (< 200 sq ft)` },
+    { value: 'medium', label: $localize`Medium (200-400 sq ft)` },
+    { value: 'large', label: $localize`Large (400-600 sq ft)` },
+    { value: 'extra-large', label: $localize`Extra Large (> 600 sq ft)` }
   ];
 
   // Helper method to convert size string to numeric value
@@ -135,11 +136,11 @@ export class RoomFormComponent implements OnInit, OnDestroy {
   }
 
   qualityRatingOptions = [
-    { value: 1, label: '1 Star' },
-    { value: 2, label: '2 Stars' },
-    { value: 3, label: '3 Stars' },
-    { value: 4, label: '4 Stars' },
-    { value: 5, label: '5 Stars' }
+    { value: 1, label: $localize`1 Star` },
+    { value: 2, label: $localize`2 Stars` },
+    { value: 3, label: $localize`3 Stars` },
+    { value: 4, label: $localize`4 Stars` },
+    { value: 5, label: $localize`5 Stars` }
   ];
 
   ngOnInit(): void {
@@ -473,14 +474,14 @@ export class RoomFormComponent implements OnInit, OnDestroy {
   }
 
   private showSuccess(message: string): void {
-    this.snackBar.open(message, 'Close', {
+    this.snackBar.open(message, $localize`Close`, {
       duration: 3000,
       panelClass: ['success-snackbar']
     });
   }
 
   private showError(message: string): void {
-    this.snackBar.open(message, 'Close', {
+    this.snackBar.open(message, $localize`Close`, {
       duration: 5000,
       panelClass: ['error-snackbar']
     });

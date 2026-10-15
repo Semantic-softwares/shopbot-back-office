@@ -24,6 +24,7 @@ import { PrinterService, Printer } from '../../../../../shared/services/printer.
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { PrinterFormModalComponent } from '../../../../administrative-settings/pos-settings/printers/printer-form-modal/printer-form-modal.component';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-create-station',
@@ -31,7 +32,7 @@ import { PrinterFormModalComponent } from '../../../../administrative-settings/p
   styleUrls: ['./create-station.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatCardModule,
     PageHeaderComponent,
@@ -73,16 +74,16 @@ export class CreateStationComponent implements OnInit {
   stationForm: FormGroup;
 
   stationTypes = [
-    { value: 'preparation', label: 'Preparation' },
-    { value: 'bar', label: 'Bar' },
-    { value: 'pastry', label: 'Pastry' },
-    { value: 'grill', label: 'Grill' },
-    { value: 'other', label: 'Other' },
+    { value: 'preparation', label: $localize`Preparation` },
+    { value: 'bar', label: $localize`Bar` },
+    { value: 'pastry', label: $localize`Pastry` },
+    { value: 'grill', label: $localize`Grill` },
+    { value: 'other', label: $localize`Other` },
   ];
 
   paperSizes = [
-    { value: '80mm', label: '80mm (Standard)' },
-    { value: '58mm', label: '58mm (Compact)' },
+    { value: '80mm', label: $localize`80mm (Standard)` },
+    { value: '58mm', label: $localize`58mm (Compact)` },
   ];
 
   constructor() {
@@ -187,7 +188,7 @@ export class CreateStationComponent implements OnInit {
         }
       },
       error: (error) => {
-        this.snackBar.open('Error loading station', 'Close', {
+        this.snackBar.open($localize`Error loading station`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top',
@@ -220,8 +221,8 @@ export class CreateStationComponent implements OnInit {
     request$.subscribe({
       next: (response) => {
         this.snackBar.open(
-          `Station ${this.isEditMode() ? 'updated' : 'created'} successfully`,
-          'Close',
+          $localize`Station ${this.isEditMode() ? 'updated' : 'created'} successfully`,
+          $localize`Close`,
           {
             duration: 3000,
             horizontalPosition: 'end',
@@ -232,8 +233,8 @@ export class CreateStationComponent implements OnInit {
       },
       error: (error) => {
         this.snackBar.open(
-          `Error ${this.isEditMode() ? 'updating' : 'creating'} station`,
-          'Close',
+          $localize`Error ${this.isEditMode() ? 'updating' : 'creating'} station`,
+          $localize`Close`,
           {
             duration: 3000,
             horizontalPosition: 'end',

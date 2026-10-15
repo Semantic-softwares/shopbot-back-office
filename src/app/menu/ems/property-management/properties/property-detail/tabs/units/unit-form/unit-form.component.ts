@@ -135,8 +135,8 @@ export class UnitFormComponent implements OnInit {
   }));
 
   sizeUnits = [
-    { value: SizeUnit.SQM, label: 'Square Meters' },
-    { value: SizeUnit.SQFT, label: 'Square Feet' },
+    { value: SizeUnit.SQM, label: $localize`Square Meters` },
+    { value: SizeUnit.SQFT, label: $localize`Square Feet` },
   ];
 
   form: FormGroup = this.fb.group({
@@ -257,7 +257,7 @@ export class UnitFormComponent implements OnInit {
         this.isLoading.set(false);
       },
       error: () => {
-        this.snackBar.open('Failed to load unit', 'Close', { duration: 5000 });
+        this.snackBar.open($localize`Failed to load unit`, $localize`Close`, { duration: 5000 });
         this.isLoading.set(false);
       },
     });
@@ -428,7 +428,7 @@ export class UnitFormComponent implements OnInit {
         const msg =
           err?.error?.message ||
           `Failed to ${this.isEditMode() ? 'update' : 'create'} unit`;
-        this.snackBar.open(msg, 'Close', { duration: 5000 });
+        this.snackBar.open(msg, $localize`Close`, { duration: 5000 });
         this.isSaving.set(false);
       },
     });
@@ -459,7 +459,7 @@ export class UnitFormComponent implements OnInit {
       this.unitService.uploadCoverPhoto(unitId, coverFile).subscribe({
         next: () => checkDone(),
         error: () => {
-          this.snackBar.open('Cover photo upload failed', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Cover photo upload failed`, $localize`Close`, { duration: 3000 });
           checkDone();
         },
       });
@@ -469,7 +469,7 @@ export class UnitFormComponent implements OnInit {
       this.unitService.uploadGalleryPhotos(unitId, newGalleryFiles).subscribe({
         next: () => checkDone(),
         error: () => {
-          this.snackBar.open('Gallery upload failed', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Gallery upload failed`, $localize`Close`, { duration: 3000 });
           checkDone();
         },
       });
@@ -479,7 +479,7 @@ export class UnitFormComponent implements OnInit {
       this.unitService.uploadAttachments(unitId, newAttachmentFiles).subscribe({
         next: () => checkDone(),
         error: () => {
-          this.snackBar.open('Attachments upload failed', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Attachments upload failed`, $localize`Close`, { duration: 3000 });
           checkDone();
         },
       });
@@ -488,8 +488,8 @@ export class UnitFormComponent implements OnInit {
 
   private onSaveComplete(): void {
     this.snackBar.open(
-      `Unit ${this.isEditMode() ? 'updated' : 'created'} successfully`,
-      'Close',
+      $localize`Unit ${this.isEditMode() ? 'updated' : 'created'} successfully`,
+      $localize`Close`,
       { duration: 3000 },
     );
     this.isSaving.set(false);

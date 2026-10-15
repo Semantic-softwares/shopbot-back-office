@@ -96,19 +96,19 @@ export class ReceiptSettings implements OnInit {
               this.storeStore.updateStore(updatedStore);
               this.storeService.saveStoreLocally(updatedStore);
               this.saving.set(false);
-              this.snackBar.open('Receipt settings saved successfully!', 'Close', { duration: 3000 });
+              this.snackBar.open($localize`Receipt settings saved successfully!`, $localize`Close`, { duration: 3000 });
             },
             error: (fetchError) => {
               console.error('Error fetching updated store:', fetchError);
               this.saving.set(false);
-              this.snackBar.open('Settings saved but failed to update local data.', 'Close', { duration: 5000 });
+              this.snackBar.open($localize`Settings saved but failed to update local data.`, $localize`Close`, { duration: 5000 });
             }
           });
         },
         error: (error) => {
           console.error('Error saving receipt settings:', error);
           this.saving.set(false);
-          this.snackBar.open('Failed to save receipt settings.', 'Close', { duration: 5000 });
+          this.snackBar.open($localize`Failed to save receipt settings.`, $localize`Close`, { duration: 5000 });
         }
       });
     }

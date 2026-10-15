@@ -10,11 +10,12 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.component';
 import { RolesService } from '../../shared/services/roles.service';
+import { TrPipe } from '../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-ems-dashboard',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     MatSidenavModule,
     MatToolbarModule,
     MatListModule,
@@ -44,7 +45,7 @@ export class EmsDashboardComponent {
       children: [
         {
           icon: 'dashboard',
-          label: 'Overview',
+          label: $localize`Overview`,
           link: './overview',
           permissions: ['estate.properties.view'],
         },
@@ -55,19 +56,19 @@ export class EmsDashboardComponent {
       children: [
         {
           icon: 'domain',
-          label: 'Properties',
+          label: $localize`Properties`,
           link: './properties',
           permissions: ['estate.properties.view', 'estate.properties.create'],
         },
         {
           icon: 'person',
-          label: 'Rental Owners',
+          label: $localize`Rental Owners`,
           link: './properties/rental-owners',
           permissions: ['estate.properties.view', 'estate.properties.create'],
         },
         {
           icon: 'groups',
-          label: 'Tenants',
+          label: $localize`Tenants`,
           link: './properties/tenants',
           permissions: ['estate.properties.view', 'estate.properties.create'],
         },
@@ -78,7 +79,7 @@ export class EmsDashboardComponent {
       children: [
         {
           icon: 'description',
-          label: 'Leases',
+          label: $localize`Leases`,
           link: './leases',
           permissions: ['estate.leases.view', 'estate.leases.create'],
         },
@@ -89,25 +90,25 @@ export class EmsDashboardComponent {
       children: [
         {
           icon: 'receipt_long',
-          label: 'Invoices',
+          label: $localize`Invoices`,
           link: './accounting/invoices',
           permissions: ['estate.leases.view'],
         },
         {
           icon: 'payments',
-          label: 'Payments',
+          label: $localize`Payments`,
           link: './accounting/payments',
           permissions: ['estate.leases.view'],
         },
         {
           icon: 'receipt',
-          label: 'Receipts',
+          label: $localize`Receipts`,
           link: './accounting/receipts',
           permissions: ['estate.leases.view'],
         },
         {
           icon: 'timeline',
-          label: 'Ledger',
+          label: $localize`Ledger`,
           link: './accounting/ledger',
           permissions: ['estate.leases.view'],
         },
@@ -118,7 +119,7 @@ export class EmsDashboardComponent {
       children: [
         {
           icon: 'warning_amber',
-          label: 'Arrears & Collections',
+          label: $localize`Arrears & Collections`,
           link: './collections/arrears',
           permissions: ['estate.leases.view', 'estate.leases.create'],
         },
@@ -129,19 +130,19 @@ export class EmsDashboardComponent {
       children: [
         {
           icon: 'handyman',
-          label: 'Maintenance Requests',
+          label: $localize`Maintenance Requests`,
           link: './maintenance/maintenances',
           permissions: ['estate.properties.view', 'estate.units.view', 'estate.leases.view'],
         },
         {
           icon: 'engineering',
-          label: 'Vendors',
+          label: $localize`Vendors`,
           link: './maintenance/vendors',
           permissions: ['estate.properties.view', 'estate.units.view', 'estate.leases.view'],
         },
         {
           icon: 'category',
-          label: 'Categories',
+          label: $localize`Categories`,
           link: './maintenance/categories',
           permissions: ['estate.properties.view', 'estate.units.view', 'estate.leases.view'],
         },

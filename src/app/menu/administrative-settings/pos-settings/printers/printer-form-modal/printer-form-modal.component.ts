@@ -15,6 +15,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Printer, PrinterService } from '../../../../../shared/services/printer.service';
 import { StoreStore } from '../../../../../shared/stores/store.store';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-printer-form-modal',
@@ -22,7 +23,7 @@ import { StoreStore } from '../../../../../shared/stores/store.store';
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./printer-form-modal.component.scss'],
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
@@ -51,21 +52,21 @@ export class PrinterFormModalComponent implements OnInit {
   printerForm: FormGroup;
 
   connectionTypes = [
-    { value: 'network', label: 'Network (TCP/IP)' },
-    { value: 'usb-os', label: 'USB (OS Device)' },
-    { value: 'usb-raw', label: 'USB (Raw Driver)' },
-    { value: 'bluetooth', label: 'Bluetooth' },
+    { value: 'network', label: $localize`Network (TCP/IP)` },
+    { value: 'usb-os', label: $localize`USB (OS Device)` },
+    { value: 'usb-raw', label: $localize`USB (Raw Driver)` },
+    { value: 'bluetooth', label: $localize`Bluetooth` },
   ];
 
   roles = [
-    { value: 'station', label: 'Station' },
-    { value: 'master', label: 'Master' },
-    { value: 'backup', label: 'Backup' },
+    { value: 'station', label: $localize`Station` },
+    { value: 'master', label: $localize`Master` },
+    { value: 'backup', label: $localize`Backup` },
   ];
 
   paperSizes = [
-    { value: 58, label: '58mm (Compact)' },
-    { value: 80, label: '80mm (Standard)' },
+    { value: 58, label: $localize`58mm (Compact)` },
+    { value: 80, label: $localize`80mm (Standard)` },
   ];
 
   selectedConnectionType = signal<string>('network');
@@ -144,7 +145,7 @@ export class PrinterFormModalComponent implements OnInit {
 
   onSubmit() {
     if (!this.printerForm.valid) {
-      this.snackBar.open('Please fill all required fields', 'Close', {
+      this.snackBar.open($localize`Please fill all required fields`, $localize`Close`, {
         duration: 3000,
         panelClass: ['error-snackbar'],
       });
@@ -155,7 +156,7 @@ export class PrinterFormModalComponent implements OnInit {
     const storeId = this.storeStore.selectedStore()?._id;
 
     if (!storeId) {
-      this.snackBar.open('Store not selected', 'Close', {
+      this.snackBar.open($localize`Store not selected`, $localize`Close`, {
         duration: 3000,
         panelClass: ['error-snackbar'],
       });
@@ -181,8 +182,8 @@ export class PrinterFormModalComponent implements OnInit {
     request$.subscribe({
       next: (result) => {
         this.snackBar.open(
-          `Printer ${this.data.printer ? 'updated' : 'created'} successfully`,
-          'Close',
+          $localize`Printer ${this.data.printer ? 'updated' : 'created'} successfully`,
+          $localize`Close`,
           {
             duration: 3000,
             panelClass: ['success-snackbar'],
@@ -192,8 +193,8 @@ export class PrinterFormModalComponent implements OnInit {
       },
       error: (error) => {
         this.snackBar.open(
-          `Error ${this.data.printer ? 'updating' : 'creating'} printer`,
-          'Close',
+          $localize`Error ${this.data.printer ? 'updating' : 'creating'} printer`,
+          $localize`Close`,
           {
             duration: 3000,
             panelClass: ['error-snackbar'],

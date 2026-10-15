@@ -2,15 +2,15 @@
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 16px;
-  color: #333;
+  color: light-dark(#333, #d6d2d2);
   display: flex;
   align-items: center;
 }
 
 .printer-card {
-  border: 1px solid #e0e0e0;
+  border: 1px solid light-dark(#e0e0e0, #48464b);
   padding: 16px;
-  background-color: #fafafa;
+  background-color: light-dark(#fafafa, #1c1b1c);
 }
 
 .alert {
@@ -20,8 +20,8 @@
 }
 
 .alert-info {
-  background-color: #e3f2fd;
-  border: 1px solid #90caf9;
+  background-color: light-dark(#e3f2fd, #172f40);
+  border: 1px solid light-dark(#90caf9, #2e4a61);
   color: #1976d2;
 }
 

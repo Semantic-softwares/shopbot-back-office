@@ -59,8 +59,8 @@ export class VerifyResetTokenComponent implements OnInit {
             this.loading.set(false);
             this.verified.set(true);
             this.snackBar.open(
-              'Token verified successfully!',
-              'Close',
+              $localize`Token verified successfully!`,
+              $localize`Close`,
               {
                 duration: 5000,
                 horizontalPosition: 'end',
@@ -82,7 +82,7 @@ export class VerifyResetTokenComponent implements OnInit {
             this.verified.set(false);
             this.snackBar.open(
               error.error?.msg || error.message || 'Invalid token. Please try again.',
-              'Close',
+              $localize`Close`,
               {
                 duration: 5000,
                 horizontalPosition: 'end',

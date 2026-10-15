@@ -1,11 +1,11 @@
 <app-page-header
-  [title]="isEditMode() ? 'Edit Category' : 'New Category'"
-  subtitle="Define a category for maintenance requests"
+  [title]="isEditMode() ? ('Edit Category' | tr) : ('New Category' | tr)"
+  subtitle="Define a category for maintenance requests" i18n-subtitle
 >
   <ng-container actions>
     <button mat-button (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
-      Back
+      <ng-container i18n>Back</ng-container>
     </button>
   </ng-container>
 </app-page-header>
@@ -15,26 +15,26 @@
     <mat-card-content class="p-4!">
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Category Name</mat-label>
-          <input matInput formControlName="name" placeholder="e.g. Plumbing, Electrical" />
+          <mat-label><ng-container i18n>Category Name</ng-container></mat-label>
+          <input matInput formControlName="name" placeholder="e.g. Plumbing, Electrical" i18n-placeholder />
           @if (form.controls.name.hasError('required')) {
-            <mat-error>Name is required</mat-error>
+            <mat-error><ng-container i18n>Name is required</ng-container></mat-error>
           }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Description</mat-label>
-          <textarea matInput formControlName="description" rows="3" placeholder="Brief description of this category"></textarea>
+          <mat-label><ng-container i18n>Description</ng-container></mat-label>
+          <textarea matInput formControlName="description" rows="3" placeholder="Brief description of this category" i18n-placeholder></textarea>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Icon (Material Icon Name)</mat-label>
-          <input matInput formControlName="icon" placeholder="e.g. plumbing, electrical_services" />
-          <mat-hint>Use Material Design icon names</mat-hint>
+          <mat-label><ng-container i18n>Icon (Material Icon Name)</ng-container></mat-label>
+          <input matInput formControlName="icon" placeholder="e.g. plumbing, electrical_services" i18n-placeholder />
+          <mat-hint><ng-container i18n>Use Material Design icon names</ng-container></mat-hint>
         </mat-form-field>
 
         <div class="flex justify-end gap-2 pt-2">
-          <button mat-button type="button" (click)="goBack()">Cancel</button>
+          <button mat-button type="button" (click)="goBack()"><ng-container i18n>Cancel</ng-container></button>
           <button
             mat-flat-button
             type="submit"
@@ -43,7 +43,7 @@
             @if (submitting()) {
               <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
             }
-            {{ isEditMode() ? 'Update Category' : 'Create Category' }}
+            @if (isEditMode()) {<ng-container i18n>Update Category</ng-container>} @else {<ng-container i18n>Create Category</ng-container>}
           </button>
         </div>
       </form>

@@ -1,17 +1,17 @@
-<app-page-header title="Categories" subtitle="Manage your menu categories">
-  <button matButton (click)="reloadCategories()" actions title="Reload categories" matTooltip="Reload">
+<app-page-header title="Categories" i18n-title subtitle="Manage your menu categories" i18n-subtitle>
+  <button matButton (click)="reloadCategories()" actions title="Reload categories" i18n-title matTooltip="Reload" i18n-matTooltip>
     <mat-icon>refresh</mat-icon>
-    Refresh
+    <ng-container i18n>Refresh</ng-container>
   </button>
-  <button matButton="filled" color="primary" (click)="addCategory()" actions>+ ADD CATEGORY</button>
+  <button matButton="filled" color="primary" (click)="addCategory()" actions><ng-container i18n>+ ADD CATEGORY</ng-container></button>
 </app-page-header>
 
 <mat-card class="py-4" appearance="outlined">
   <mat-card-content>
     <div class="filters mb-4">
       <mat-form-field appearance="outline">
-        <mat-label>Search</mat-label>
-        <input matInput (keyup)="applyFilter($event)" [(ngModel)]="searchText" placeholder="Search categories">
+        <mat-label><ng-container i18n>Search</ng-container></mat-label>
+        <input matInput (keyup)="applyFilter($event)" [(ngModel)]="searchText" placeholder="Search categories" i18n-placeholder>
       </mat-form-field>
     </div>
     @if (categories.isLoading()) {
@@ -22,8 +22,8 @@
     } @else if (categories.hasValue() && categories.value().length === 0) {
       <app-no-record 
         icon="category" 
-        title="No Categories" 
-        message="No categories found matching your criteria.">
+        title="No Categories" i18n-title 
+        message="No categories found matching your criteria." i18n-message>
       </app-no-record>
     } @else if (categories.hasValue()) {
       <div class="table-container !bg-white">
@@ -36,12 +36,12 @@
         </ng-container>
 
         <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header><ng-container i18n>Name</ng-container></th>
           <td mat-cell *matCellDef="let element">{{element.name}}</td>
         </ng-container>
 
         <ng-container matColumnDef="color">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Color</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header><ng-container i18n>Color</ng-container></th>
           <td mat-cell *matCellDef="let element">
             <div class="color-preview" [style.background-color]="element.color">
               {{element.color}}
@@ -50,31 +50,31 @@
         </ng-container>
 
         <ng-container matColumnDef="icon">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Icon</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header><ng-container i18n>Icon</ng-container></th>
           <td mat-cell *matCellDef="let element">
             <mat-icon>{{element?.icon}}</mat-icon>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="items">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Items</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header><ng-container i18n>Items</ng-container></th>
           <td mat-cell *matCellDef="let element">{{element.items}}</td>
         </ng-container>
 
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="w-20">Actions</th>
+          <th mat-header-cell *matHeaderCellDef class="w-20"><ng-container i18n>Actions</ng-container></th>
           <td mat-cell *matCellDef="let category">
-            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Category actions">
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Category actions" i18n-aria-label>
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #menu="matMenu">
               <button mat-menu-item (click)="onEditCategory(category)">
                 <mat-icon>edit</mat-icon>
-                <span>Edit</span>
+                <span><ng-container i18n>Edit</ng-container></span>
               </button>
               <button mat-menu-item (click)="deleteCategory(category)">
                 <mat-icon>delete</mat-icon>
-                <span>Delete</span>
+                <span><ng-container i18n>Delete</ng-container></span>
               </button>
             </mat-menu>
           </td>
@@ -84,7 +84,7 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" cdkDrag [cdkDragData]="row"></tr>
       </table>
 
-      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of categories">
+      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of categories" i18n-aria-label>
       </mat-paginator>
     </div>
   }

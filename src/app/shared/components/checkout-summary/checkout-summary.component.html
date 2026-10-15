@@ -1,25 +1,25 @@
 <div class="p-2">
   <div class="space-y-2 mb-4">
     <div class="flex justify-between text-sm">
-      <span class="text-on-surface-variant">Delivery Fee</span>
+      <span class="text-on-surface-variant"><ng-container i18n>Delivery Fee</ng-container></span>
       <span class="font-medium">{{ cartTotals().deliveryFee | currency:  currency() : 'symbol' : '1.0-0' }}</span>
     </div>
     <div class="flex justify-between text-sm">
-      <span class="text-on-surface-variant">Discount</span>
+      <span class="text-on-surface-variant"><ng-container i18n>Discount</ng-container></span>
       <span class="font-medium">{{ cartTotals().discount | currency:  currency() : 'symbol' : '1.0-0' }}</span>
     </div>
     <div class="flex justify-between text-sm">
-      <span class="text-on-surface-variant">Subtotal</span>
+      <span class="text-on-surface-variant"><ng-container i18n>Subtotal</ng-container></span>
       <span class="font-medium">{{ cartTotals().subtotal | currency:  currency() : 'symbol' : '1.0-0' }}</span>
     </div>
     @if (storeStore.selectedStore()?.tax! > 0) {
       <div class="flex justify-between text-sm">
-        <span class="text-on-surface-variant">Tax ({{ storeStore.selectedStore()?.tax  }}%)</span>
+        <span class="text-on-surface-variant"><ng-container i18n>Tax ({{ storeStore.selectedStore()?.tax  }}%)</ng-container></span>
         <span class="font-medium">{{ cartTotals().tax |  currency: currency() : 'symbol' : '1.0-0' }}</span>
       </div>
     }
     <div class="flex justify-between text-lg font-bold pt-3 border-t border-outline-variant">
-      <span>Total</span>
+      <span><ng-container i18n>Total</ng-container></span>
       <span class="primary-text">{{ cartTotals().totalCost | currency: currency() : 'symbol' : '1.0-0' }}</span>
     </div>
   </div>

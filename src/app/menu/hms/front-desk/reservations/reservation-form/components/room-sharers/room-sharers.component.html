@@ -4,17 +4,17 @@
     <div class="flex justify-between items-center w-full">
       <div>
         <mat-card-title>
-          Room Sharers
+          <ng-container i18n>Room Sharers</ng-container>
         </mat-card-title>
         <mat-card-subtitle>
           <!-- Room Type / Room / Rate Plan selectors -->
           <div class="flex items-center gap-3 mt-2 flex-wrap">
             <!-- Room Type Dropdown -->
             <mat-form-field appearance="outline" class="min-w-[180px] w-[180px]" subscriptSizing="dynamic">
-              <mat-label>Room Type</mat-label>
+              <mat-label><ng-container i18n>Room Type</ng-container></mat-label>
               <mat-select [value]="selectedRoomTypeId()" (selectionChange)="onRoomTypeChange($event.value)"
                 [disabled]="isEditing()">
-                <mat-option value="">-- Select --</mat-option>
+                <mat-option value=""><ng-container i18n>-- Select --</ng-container></mat-option>
                 @for (rt of roomTypesResource.value() || []; track rt._id) {
                   <mat-option [value]="rt._id">{{ rt.name }}</mat-option>
                 }
@@ -23,10 +23,10 @@
 
             <!-- Room Dropdown -->
             <mat-form-field appearance="outline" class="min-w-[180px] w-[180px]" subscriptSizing="dynamic">
-              <mat-label>Room</mat-label>
+              <mat-label><ng-container i18n>Room</ng-container></mat-label>
               <mat-select [value]="selectedRoomId()" (selectionChange)="onRoomChange($event.value)"
                 [disabled]="isEditing() || !selectedRoomTypeId()">
-                <mat-option value="">-- Select --</mat-option>
+                <mat-option value=""><ng-container i18n>-- Select --</ng-container></mat-option>
                 @for (room of filteredRooms(); track room._id) {
                   <mat-option [value]="room._id">
                     {{ room.name || room.roomNumber }}
@@ -37,29 +37,29 @@
                 }
               </mat-select>
               @if (!selectedRoomTypeId()) {
-                <mat-hint>Select a room type first</mat-hint>
+                <mat-hint><ng-container i18n>Select a room type first</ng-container></mat-hint>
               }
             </mat-form-field>
 
             <!-- Rate Plan Dropdown -->
             <mat-form-field appearance="outline" class="min-w-[180px] w-[180px]" subscriptSizing="dynamic">
-              <mat-label>Rate Plan</mat-label>
+              <mat-label><ng-container i18n>Rate Plan</ng-container></mat-label>
               <mat-select [value]="selectedRatePlanId()" (selectionChange)="onRatePlanChangeHeader($event.value)"
                 [disabled]="isEditing() || !selectedRoomTypeId()">
-                <mat-option value="">-- Default --</mat-option>
+                <mat-option value=""><ng-container i18n>-- Default --</ng-container></mat-option>
                 @if (loadingRatePlans()) {
-                  <mat-option disabled>Loading...</mat-option>
+                  <mat-option disabled><ng-container i18n>Loading...</ng-container></mat-option>
                 } @else {
                   @for (plan of ratePlans(); track plan._id) {
                     <mat-option [value]="plan._id">
                       {{ plan.name }}
-                      @if (plan.isDefault) { <span class="text-xs text-gray-400 ml-1">(default)</span> }
+                      @if (plan.isDefault) { <span class="text-xs text-gray-400 ml-1"><ng-container i18n>(default)</ng-container></span> }
                     </mat-option>
                   }
                 }
               </mat-select>
               @if (!selectedRoomTypeId()) {
-                <mat-hint>Select a room type first</mat-hint>
+                <mat-hint><ng-container i18n>Select a room type first</ng-container></mat-hint>
               }
             </mat-form-field>
           </div>
@@ -69,17 +69,17 @@
       <div class="flex gap-2">
         <a matButton color="accent" [disabled]="roomsResource.isLoading()" (click)="onEditRoomPricing()">
           <mat-icon class="material-icons-outlined">edit</mat-icon>
-          Edit Pricing
+          <ng-container i18n>Edit Pricing</ng-container>
         </a>
         <a matButton="tonal" color="secondary"  (click)="onAddInfants()" [disabled]="!hasPrimaryGuest() || roomsResource.isLoading()"
           [matTooltip]="!hasPrimaryGuest() ? 'Please assign a primary guest first' : ''">
           <mat-icon class="material-icons-outlined">child_care</mat-icon>
-          Add Infant
+          <ng-container i18n>Add Infant</ng-container>
         </a>
 
         <a matButton="filled" color="primary" [disabled]="roomsResource.isLoading()" (click)="onCreateGuest()">
           <mat-icon class="material-icons-outlined">person_add</mat-icon>
-          ADD ROOM SHARER
+          <ng-container i18n>ADD ROOM SHARER</ng-container>
         </a>
       </div>
     </div>
@@ -98,7 +98,7 @@
           <div class="flex items-center gap-3 p-4">
             <!-- ID Badge -->
             <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold min-w-fit">
-              P{{ i + 1 }}
+              <ng-container i18n>P{{ i + 1 }}</ng-container>
             </span>
 
             <!-- Guest Name -->
@@ -106,25 +106,25 @@
               <mat-icon class="text-gray-400">person</mat-icon>
               <div class="flex flex-col">
                 <span class="font-medium text-gray-900 truncate">
-                  {{ getSharerName(element) || 'Unassigned Guest' }}
+                  @if (getSharerName(element)) {<ng-container>{{ getSharerName(element) }}</ng-container>} @else {<ng-container i18n>Unassigned Guest</ng-container>}
                 </span>
                 <span class="text-xs text-gray-500 uppercase">
-                  {{ element.get('ageGrade')?.value || 'Adult' }}
+                  @if (element.get('ageGrade')?.value) {<ng-container>{{ element.get('ageGrade')?.value }}</ng-container>} @else {<ng-container i18n>Adult</ng-container>}
                 </span>
               </div>
             </div>
 
             <!-- Date Range Picker -->
             <mat-form-field appearance="outline" class="min-w-[220px] w-[220px]">
-              <mat-label>Check-in to Check-out</mat-label>
+              <mat-label><ng-container i18n>Check-in to Check-out</ng-container></mat-label>
               <mat-date-range-input [rangePicker]="picker">
-                <input matStartDate formControlName="checkInDate" placeholder="Start date" />
-                <input matEndDate formControlName="checkOutDate" placeholder="End date" />
+                <input matStartDate formControlName="checkInDate" placeholder="Start date" i18n-placeholder />
+                <input matEndDate formControlName="checkOutDate" placeholder="End date" i18n-placeholder />
               </mat-date-range-input>
               <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-date-range-picker #picker></mat-date-range-picker>
-              <mat-hint>{{ calculateNights($safeNavigationMigration(element.get('checkInDate')?.value), $safeNavigationMigration(element.get('checkOutDate')?.value)) }}
-                night(s)</mat-hint>
+              <mat-hint><ng-container i18n>{{ calculateNights($safeNavigationMigration(element.get('checkInDate')?.value), $safeNavigationMigration(element.get('checkOutDate')?.value)) }}
+                night(s)</ng-container></mat-hint>
             </mat-form-field>
 
             <!-- Action Buttons -->
@@ -136,7 +136,7 @@
                 [ngClass]="!hasPrimaryGuest() && element.get('ageGrade')?.value === 'child' ? 'text-gray-300' : 'text-blue-600 hover:bg-blue-50'">
                 <mat-icon class="material-icons-outlined">edit</mat-icon>
               </a>
-              <a mat-icon-button matTooltip="Delete Guest" [disabled]="i === 0" (click)="deleteSharer(i)"
+              <a mat-icon-button matTooltip="Delete Guest" i18n-matTooltip [disabled]="i === 0" (click)="deleteSharer(i)"
                 [ngClass]="i === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-red-600 hover:bg-red-50'">
                 <mat-icon class="material-icons-outlined">delete</mat-icon>
               </a>
@@ -150,7 +150,7 @@
         } @empty {
         <div class="text-center py-8 text-gray-500">
           <mat-icon class="text-4xl text-gray-300 mb-2">group_off</mat-icon>
-          <p class="text-sm">No guests added yet</p>
+          <p class="text-sm"><ng-container i18n>No guests added yet</ng-container></p>
         </div>
         }
 
@@ -159,14 +159,14 @@
         <div class="mt-4 mb-2 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm">
             <div class="flex items-center gap-2 text-yellow-600">
                 <mat-spinner diameter="16"></mat-spinner>
-                <span>Checking restrictions...</span>
+                <span><ng-container i18n>Checking restrictions...</ng-container></span>
             </div>
         </div>
         } @else if (restrictionIssues(); as issues) {
         <div class="mt-4 mb-2 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm">
             <div class="flex items-center gap-2 text-red-700 font-medium mb-2">
                 <mat-icon class="text-base! text-red-600">block</mat-icon>
-                <span>Booking Restricted</span>
+                <span><ng-container i18n>Booking Restricted</ng-container></span>
             </div>
             <div class="space-y-1">
                 @for (issue of issues; track issue.date + issue.type) {
@@ -179,7 +179,7 @@
                 }
             </div>
             <div class="mt-2 pt-2 border-t border-red-200 text-xs text-red-500">
-                This booking cannot proceed while restrictions are active for the selected dates.
+                <ng-container i18n>This booking cannot proceed while restrictions are active for the selected dates.</ng-container>
             </div>
         </div>
         }
@@ -190,7 +190,7 @@
         <div class="mt-4 mb-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
             <div class="flex items-center gap-2 text-gray-400">
                 <mat-spinner diameter="16"></mat-spinner>
-                <span>Updating rates for new dates...</span>
+                <span><ng-container i18n>Updating rates for new dates...</ng-container></span>
             </div>
         </div>
         } @else if (rateBreakdown(); as breakdown) {
@@ -199,19 +199,19 @@
             <div class="flex items-center gap-2 mb-2">
                 @if (breakdown.hasRatePlan) {
                 <mat-icon class="text-green-600 text-base h-4 w-4">local_offer</mat-icon>
-                <span class="font-semibold text-green-700">Rate Plan Applied — Nightly Breakdown</span>
+                <span class="font-semibold text-green-700"><ng-container i18n>Rate Plan Applied — Nightly Breakdown</ng-container></span>
                 } @else {
                 <mat-icon class="text-blue-600 text-base h-4 w-4">calendar_today</mat-icon>
-                <span class="font-semibold text-gray-700">Nightly Rate Breakdown</span>
+                <span class="font-semibold text-gray-700"><ng-container i18n>Nightly Rate Breakdown</ng-container></span>
                 }
             </div>
             @if (breakdown.hasRatePlan) {
-            <div class="text-xs text-gray-500 mb-2">
+            <div i18n class="text-xs text-gray-500 mb-2">
                 Avg: <span class="font-semibold text-green-700">{{ breakdown.averageRate | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}</span>/night
             </div>
             } @else {
             <div class="text-xs text-gray-500 mb-2">
-                {{ breakdown.averageRate | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}/night × {{ breakdown.numberOfNights }} nights
+                <ng-container i18n>{{ breakdown.averageRate | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}/night × {{ breakdown.numberOfNights }} nights</ng-container>
             </div>
             }
             <div class="border-t border-gray-200 pt-2 space-y-1">
@@ -229,16 +229,16 @@
                 </div>
                 }
                 <div class="flex justify-between pt-2 border-t border-gray-200 font-semibold text-sm text-gray-800">
-                    <span>Total ({{ breakdown.numberOfNights }} nights)</span>
+                    <span><ng-container i18n>Total ({{ breakdown.numberOfNights }} nights)</ng-container></span>
                     <span>{{ breakdown.totalRate | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}</span>
                 </div>
             </div>
             <!-- Legend -->
             <div class="flex items-center gap-3 mt-2 text-[10px] text-gray-400">
                 @if (breakdown.hasRatePlan) {
-                <span><span class="text-green-600">★</span> Day-of-week rate</span>
+                <span i18n><span class="text-green-600">★</span> Day-of-week rate</span>
                 }
-                <span><span class="text-blue-500">●</span> Inventory rate</span>
+                <span i18n><span class="text-blue-500">●</span> Inventory rate</span>
             </div>
         </div>
         }
@@ -249,7 +249,7 @@
         } @else {
         <div class="text-center py-8 text-gray-500">
           <mat-icon class="text-4xl text-gray-300 mb-2">meeting_room</mat-icon>
-          <p class="text-sm">No rooms assigned yet</p>
+          <p class="text-sm"><ng-container i18n>No rooms assigned yet</ng-container></p>
         </div>
         }
 

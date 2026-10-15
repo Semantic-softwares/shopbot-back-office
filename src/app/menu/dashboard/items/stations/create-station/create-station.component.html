@@ -1,11 +1,11 @@
 <app-page-header 
   [title]="pageTitle()" 
-  [subtitle]="isEditMode() ? 'Update station configuration and printer settings' : 'Add a new station to manage kitchen printers'">
+  [subtitle]="isEditMode() ? ('Update station configuration and printer settings' | tr) : 'Add a new station to manage kitchen printers'">
   
   <ng-container actions>
     <button mat-stroked-button (click)="onCancel()">
       <mat-icon>close</mat-icon>
-      Cancel
+      <ng-container i18n>Cancel</ng-container>
     </button>
 
     <button mat-flat-button color="primary" type="submit" form="stationForm" [disabled]="isSubmitting()">
@@ -25,24 +25,24 @@
     <!-- Basic Information Section -->
     <mat-card appearance="outlined">
       <mat-card-header>
-        <mat-card-title>Basic Information</mat-card-title>
+        <mat-card-title><ng-container i18n>Basic Information</ng-container></mat-card-title>
       </mat-card-header>
       <mat-card-content class="p-6! space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Station Name</mat-label>
-              <input matInput formControlName="name" placeholder="e.g., Main Kitchen" required />
+              <mat-label><ng-container i18n>Station Name</ng-container></mat-label>
+              <input matInput formControlName="name" placeholder="e.g., Main Kitchen" i18n-placeholder required />
               <mat-icon matSuffix class="text-gray-400">restaurant</mat-icon>
               @if (stationForm.get('name')?.hasError('required') && stationForm.get('name')?.touched) {
-                <mat-error>Station name is required</mat-error>
+                <mat-error><ng-container i18n>Station name is required</ng-container></mat-error>
               }
             </mat-form-field>
           </div>
 
           <div>
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Station Type</mat-label>
+              <mat-label><ng-container i18n>Station Type</ng-container></mat-label>
               <mat-select formControlName="type" required>
                 @for (type of stationTypes; track type.value) {
                   <mat-option [value]="type.value">{{ type.label }}</mat-option>
@@ -54,8 +54,8 @@
 
         <div>
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Description</mat-label>
-            <textarea matInput formControlName="description" rows="2" placeholder="Optional description"></textarea>
+            <mat-label><ng-container i18n>Description</ng-container></mat-label>
+            <textarea matInput formControlName="description" rows="2" placeholder="Optional description" i18n-placeholder></textarea>
           </mat-form-field>
         </div>
       </mat-card-content>
@@ -64,7 +64,7 @@
     <!-- Print Settings Section -->
     <mat-card appearance="outlined" formGroupName="settings">
       <mat-card-header>
-        <mat-card-title>Print Settings</mat-card-title>
+        <mat-card-title><ng-container i18n>Print Settings</ng-container></mat-card-title>
       </mat-card-header>
       <mat-card-content class="p-6! space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -72,14 +72,14 @@
             <mat-slide-toggle formControlName="autoPrint" color="primary">
               <span class="flex items-center gap-2">
                 <mat-icon class="text-lg text-gray-600">print</mat-icon>
-                Auto Print Orders
+                <ng-container i18n>Auto Print Orders</ng-container>
               </span>
             </mat-slide-toggle>
           </div>
 
           <div>
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Paper Size</mat-label>
+              <mat-label><ng-container i18n>Paper Size</ng-container></mat-label>
               <mat-select formControlName="paperSize">
                 @for (size of paperSizes; track size.value) {
                   <mat-option [value]="size.value">{{ size.label }}</mat-option>
@@ -90,14 +90,14 @@
 
           <div>
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Copies Per Order</mat-label>
+              <mat-label><ng-container i18n>Copies Per Order</ng-container></mat-label>
               <input matInput type="number" formControlName="copiesPerOrder" min="1" />
             </mat-form-field>
           </div>
         </div>
         <div class="text-sm text-gray-600">
           <mat-icon class="text-lg align-middle mr-1">info</mat-icon>
-          Automatically print when orders arrive at this station
+          <ng-container i18n>Automatically print when orders arrive at this station</ng-container>
         </div>
       </mat-card-content>
     </mat-card>
@@ -105,35 +105,35 @@
     <!-- Printers Section -->
     <mat-card appearance="outlined">
       <mat-card-header>
-        <mat-card-title>Printers</mat-card-title>
-        <mat-card-subtitle>Select printers to assign to this station</mat-card-subtitle>
+        <mat-card-title><ng-container i18n>Printers</ng-container></mat-card-title>
+        <mat-card-subtitle><ng-container i18n>Select printers to assign to this station</ng-container></mat-card-subtitle>
       </mat-card-header>
       <mat-card-content class="p-6! space-y-6">
         @if (loadingPrinters()) {
           <div class="flex items-center justify-center py-8">
             <mat-spinner diameter="40"></mat-spinner>
-            <span class="ml-4 text-gray-600">Loading printers...</span>
+            <span class="ml-4 text-gray-600"><ng-container i18n>Loading printers...</ng-container></span>
           </div>
         } @else {
           <div formArrayName="printers" class="space-y-4">
             @if (availablePrinters().length === 0) {
               <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                 <mat-icon class="text-4xl text-gray-400 mb-2">print_disabled</mat-icon>
-                <p class="text-gray-600 mb-4">No printers available. Create a printer first.</p>
+                <p class="text-gray-600 mb-4"><ng-container i18n>No printers available. Create a printer first.</ng-container></p>
                 <a matButton="outlined" color="primary" (click)="openCreatePrinterDialog()">
                   <mat-icon>add</mat-icon>
-                  Create New Printer
+                  <ng-container i18n>Create New Printer</ng-container>
                 </a>
               </div>
             } @else {
               @if (printers.length === 0) {
                 <div class="text-center py-4 text-gray-600">
-                  <p class="mb-4">No printers selected. Choose printers below or add new ones.</p>
+                  <p class="mb-4"><ng-container i18n>No printers selected. Choose printers below or add new ones.</ng-container></p>
                 </div>
               }
 
               <div class="space-y-3 mb-4">
-                <label class="text-sm font-semibold text-gray-700">Select Printers for This Station</label>
+                <label class="text-sm font-semibold text-gray-700"><ng-container i18n>Select Printers for This Station</ng-container></label>
                 @for (printer of availablePrinters(); track printer._id) {
                   @if (printer._id) {
                     <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
@@ -179,7 +179,7 @@
 
               <a matButton="outlined" color="primary" (click)="openCreatePrinterDialog()">
                 <mat-icon>add</mat-icon>
-                Create New Printer
+                <ng-container i18n>Create New Printer</ng-container>
               </a>
             }
           </div>
@@ -190,20 +190,20 @@
     <!-- Status Section -->
     <mat-card appearance="outlined">
       <mat-card-header>
-        <mat-card-title>Station Status</mat-card-title>
+        <mat-card-title><ng-container i18n>Station Status</ng-container></mat-card-title>
       </mat-card-header>
       <mat-card-content class="p-6! space-y-6">
         <div class="flex items-center">
           <mat-slide-toggle formControlName="active" color="primary">
             <span class="flex items-center gap-2">
               <mat-icon class="text-lg text-gray-600">power_settings_new</mat-icon>
-              Station Active
+              <ng-container i18n>Station Active</ng-container>
             </span>
           </mat-slide-toggle>
         </div>
         <div class="text-sm text-gray-600">
           <mat-icon class="text-lg align-middle mr-1">info</mat-icon>
-          Inactive stations will not receive print jobs
+          <ng-container i18n>Inactive stations will not receive print jobs</ng-container>
         </div>
       </mat-card-content>
     </mat-card>

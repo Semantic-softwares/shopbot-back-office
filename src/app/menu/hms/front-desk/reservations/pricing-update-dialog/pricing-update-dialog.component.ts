@@ -151,7 +151,7 @@ export class PricingUpdateDialogComponent {
 
   onSave(): void {
     if (this.pricingForm.invalid) {
-      this.snackBar.open('Please fill in all required fields correctly', 'Close', {
+      this.snackBar.open($localize`Please fill in all required fields correctly`, $localize`Close`, {
         duration: 3000,
         panelClass: ['error-snackbar']
       });

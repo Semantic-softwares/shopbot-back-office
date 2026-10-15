@@ -1,7 +1,7 @@
 @if (lease(); as lease) {
   <mat-card appearance="outlined">
     <mat-card-content class="p-4!">
-      <div class="text-xs font-semibold text-gray-500 mb-2">UTILITIES</div>
+      <div class="text-xs font-semibold text-gray-500 mb-2"><ng-container i18n>UTILITIES</ng-container></div>
       @for (utility of lease.utilityResponsibilities; track $index) {
         <div class="border border-gray-200 rounded-md p-2 mb-2">
           <div class="text-sm font-semibold text-gray-800">
@@ -10,13 +10,13 @@
               ({{ utility.customUtilityName }})
             }
           </div>
-          <div class="text-xs text-gray-600">Responsible: {{ utility.responsibleParty }}</div>
+          <div class="text-xs text-gray-600"><ng-container i18n>Responsible: {{ utility.responsibleParty }}</ng-container></div>
         </div>
       } @empty {
         <app-no-record
           icon="bolt"
-          title="No Utility Responsibilities"
-          message="No utility responsibilities configured."
+          title="No Utility Responsibilities" i18n-title
+          message="No utility responsibilities configured." i18n-message
         ></app-no-record>
       }
     </mat-card-content>

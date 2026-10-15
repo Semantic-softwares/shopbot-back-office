@@ -1,8 +1,8 @@
-<h2 mat-dialog-title>Cancel Subscription</h2>
+<h2 mat-dialog-title><ng-container i18n>Cancel Subscription</ng-container></h2>
 
 <mat-dialog-content>
   <p class="text-sm text-gray-600 mb-6">
-    We'd like to understand why you're cancelling. Your feedback helps us improve.
+    <ng-container i18n>We'd like to understand why you're cancelling. Your feedback helps us improve.</ng-container>
   </p>
 
   <mat-radio-group [(ngModel)]="selectedReason" class="block mb-4">
@@ -19,11 +19,11 @@
 
   @if (selectedReason === 'Other') {
     <mat-form-field appearance="outline" class="w-full mt-4">
-      <mat-label>Please tell us more</mat-label>
+      <mat-label><ng-container i18n>Please tell us more</ng-container></mat-label>
       <textarea
         matInput
         [(ngModel)]="reason"
-        placeholder="Why are you cancelling?"
+        placeholder="Why are you cancelling?" i18n-placeholder
         rows="4"
       ></textarea>
     </mat-form-field>
@@ -32,7 +32,7 @@
 
 <mat-dialog-actions align="end">
   <button matButton="outlined" (click)="onCancel()" [disabled]="isSubmitting()">
-    Keep Subscription
+    <ng-container i18n>Keep Subscription</ng-container>
   </button>
   <button
     matButton="filled"
@@ -42,9 +42,9 @@
   >
     @if (isSubmitting()) {
       <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
-      Cancelling...
+      <ng-container i18n>Cancelling...</ng-container>
     } @else {
-      Cancel Subscription
+      <ng-container i18n>Cancel Subscription</ng-container>
     }
   </button>
 </mat-dialog-actions>

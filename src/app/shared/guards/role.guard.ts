@@ -29,7 +29,7 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   
   // Check if user has a role assigned
   if (!role) {
-    snackBar.open('Please login to access this page', 'Close', {
+    snackBar.open($localize`Please login to access this page`, $localize`Close`, {
       duration: 3000,
       horizontalPosition: 'end',
       verticalPosition: 'top'
@@ -66,7 +66,7 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
     : rolesService.hasAny(permissions);
 
   if (!hasAccess) {
-    snackBar.open('Access denied: Insufficient permissions', 'Close', {
+    snackBar.open($localize`Access denied: Insufficient permissions`, $localize`Close`, {
       duration: 3000,
       horizontalPosition: 'end',
       verticalPosition: 'top'

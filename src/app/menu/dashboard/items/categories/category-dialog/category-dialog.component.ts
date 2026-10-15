@@ -101,7 +101,7 @@ export class CategoryDialogComponent implements OnInit {
           this.isSubmitting.set(false);
         },
         error: () => {
-          this.snackBar.open('Error saving category', 'Close', {
+          this.snackBar.open($localize`Error saving category`, $localize`Close`, {
             duration: 3000,
             horizontalPosition: 'end',
             verticalPosition: 'top',

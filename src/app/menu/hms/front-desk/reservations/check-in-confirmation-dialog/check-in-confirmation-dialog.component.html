@@ -1,18 +1,18 @@
 <h2 mat-dialog-title>
-  Confirm Check-In ({{ data.reservation.confirmationNumber }})
+  <ng-container i18n>Confirm Check-In ({{ data.reservation.confirmationNumber }})</ng-container>
 </h2>
 
 <mat-dialog-content>
   <!-- Guest Info -->
   <div class="bg-gray-50 rounded-lg p-4 mb-6">
-    <h3 class="font-semibold text-gray-900 mb-3">Guest Information</h3>
+    <h3 class="font-semibold text-gray-900 mb-3"><ng-container i18n>Guest Information</ng-container></h3>
     <div class="grid grid-cols-2 gap-4 text-sm">
       <div>
-        <span class="text-gray-600">Name:</span>
+        <span class="text-gray-600"><ng-container i18n>Name:</ng-container></span>
         <div class="font-medium text-gray-900">{{ data.reservation.guest | getGuestName }}</div>
       </div>
       <div>
-        <span class="text-gray-600">Room(s):</span>
+        <span class="text-gray-600"><ng-container i18n>Room(s):</ng-container></span>
         <div class="font-medium text-gray-900">{{ roomNumbers }}</div>
       </div>
     </div>
@@ -20,29 +20,29 @@
 
   <!-- Room Readiness Checklist -->
   <form [formGroup]="checkInForm" class="space-y-4">
-    <h3 class="font-semibold text-gray-900">Room Readiness Checklist</h3>
+    <h3 class="font-semibold text-gray-900"><ng-container i18n>Room Readiness Checklist</ng-container></h3>
 
     <div class="space-y-3">
       <div class="flex items-center gap-3">
         <mat-checkbox formControlName="isClean" color="primary"></mat-checkbox>
-        <span class="text-sm text-gray-700">Room is clean and housekeeping complete</span>
+        <span class="text-sm text-gray-700"><ng-container i18n>Room is clean and housekeeping complete</ng-container></span>
       </div>
 
       <div class="flex items-center gap-3">
         <mat-checkbox formControlName="isMaintained" color="primary"></mat-checkbox>
-        <span class="text-sm text-gray-700">All maintenance issues resolved</span>
+        <span class="text-sm text-gray-700"><ng-container i18n>All maintenance issues resolved</ng-container></span>
       </div>
 
       <div class="flex items-center gap-3">
         <mat-checkbox formControlName="amenitiesReady" color="primary"></mat-checkbox>
-        <span class="text-sm text-gray-700">Amenities and supplies are stocked</span>
+        <span class="text-sm text-gray-700"><ng-container i18n>Amenities and supplies are stocked</ng-container></span>
       </div>
     </div>
 
     <!-- Notes -->
     <mat-form-field appearance="outline" class="w-full mt-6">
-      <mat-label>Check-in Notes (Optional)</mat-label>
-      <textarea matInput formControlName="notes" rows="3" placeholder="Any special notes or observations..."></textarea>
+      <mat-label><ng-container i18n>Check-in Notes (Optional)</ng-container></mat-label>
+      <textarea matInput formControlName="notes" rows="3" placeholder="Any special notes or observations..." i18n-placeholder></textarea>
     </mat-form-field>
   </form>
 
@@ -52,7 +52,7 @@
     <div class="flex items-center gap-2">
       <mat-icon class="text-amber-600 text-sm">warning</mat-icon>
       <span class="text-xs text-amber-800 font-medium">
-        Please confirm all room readiness requirements before proceeding.
+        <ng-container i18n>Please confirm all room readiness requirements before proceeding.</ng-container>
       </span>
     </div>
   </div>
@@ -60,9 +60,9 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button (click)="onCancel()"><ng-container i18n>Cancel</ng-container></button>
   <button matButton="filled" color="primary" [disabled]="!isFormValid || loading()" (click)="onConfirm()">
     <mat-icon class="mr-2">check_circle</mat-icon>
-    Confirm Check-In
+    <ng-container i18n>Confirm Check-In</ng-container>
   </button>
 </mat-dialog-actions>

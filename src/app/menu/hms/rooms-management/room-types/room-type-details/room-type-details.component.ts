@@ -17,11 +17,12 @@ import { RoomsService } from '../../../../../shared/services/rooms.service';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { RoomType } from '../../../../../shared/models/room.model';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-room-type-details',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     RouterModule,
     MatButtonModule,
@@ -139,17 +140,17 @@ export class RoomTypeDetailsComponent implements OnDestroy {
     const id = roomType._id || roomType.id;
     if (!id) return;
 
-    if (confirm(`Are you sure you want to delete "${roomType.name}"? This action cannot be undone.`)) {
+    if (confirm($localize`Are you sure you want to delete "${roomType.name}"? This action cannot be undone.`)) {
       this.roomsService.deleteRoomType(id).pipe(
         takeUntil(this.destroy$)
       ).subscribe({
         next: () => {
-          this.snackBar.open('Room type deleted successfully', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Room type deleted successfully`, $localize`Close`, { duration: 3000 });
           this.router.navigate(['../../room-types'], { relativeTo: this.route });
         },
         error: (error) => {
           console.error('Error deleting room type:', error);
-          this.snackBar.open('Failed to delete room type', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Failed to delete room type`, $localize`Close`, { duration: 3000 });
         }
       });
     }
@@ -169,12 +170,12 @@ export class RoomTypeDetailsComponent implements OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe({
       next: () => {
-        this.snackBar.open(`Room type ${action}d successfully`, 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Room type ${action}d successfully`, $localize`Close`, { duration: 3000 });
         this.roomTypeResource.reload();
       },
       error: (error) => {
         console.error(`Error ${action}ing room type:`, error);
-        this.snackBar.open(`Failed to ${action} room type`, 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Failed to ${action} room type`, $localize`Close`, { duration: 3000 });
       }
     });
   }

@@ -12,7 +12,7 @@ export const noAuthGuard = () => {
   return authService.currentUser.pipe(
     map(currentUser => {
       if (currentUser) {
-        snackBar.open('You are already logged in', 'Close', {
+        snackBar.open($localize`You are already logged in`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'

@@ -12,8 +12,8 @@ import { MatButtonModule } from '@angular/material/button';
     <h2 mat-dialog-title>{{ data.title }}</h2>
     <mat-dialog-content>{{ data.message }}</mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button [mat-dialog-close]="false">{{ data.cancelText || 'Cancel' }}</button>
-      <button matButton="filled" color="warn" [mat-dialog-close]="true">{{ data.confirmText || 'Confirm' }}</button>
+      <button mat-button [mat-dialog-close]="false">@if (data.cancelText) {<ng-container>{{ data.cancelText }}</ng-container>} @else {<ng-container i18n>Cancel</ng-container>}</button>
+      <button matButton="filled" color="warn" [mat-dialog-close]="true">@if (data.confirmText) {<ng-container>{{ data.confirmText }}</ng-container>} @else {<ng-container i18n>Confirm</ng-container>}</button>
     </mat-dialog-actions>
   `
 })

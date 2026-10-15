@@ -1,9 +1,9 @@
 <mat-form-field appearance="outline" class="w-full">
-  <mat-label>Country</mat-label>
+  <mat-label><ng-container i18n>Country</ng-container></mat-label>
   <input matInput
     [formControl]="searchControl"
     [matAutocomplete]="countryAuto"
-    placeholder="Search country..."
+    placeholder="Search country..." i18n-placeholder
     (blur)="onBlur()">
   <mat-icon matSuffix>public</mat-icon>
   <mat-autocomplete #countryAuto="matAutocomplete"

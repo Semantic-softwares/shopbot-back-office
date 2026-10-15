@@ -14,6 +14,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RoomsService } from '../../../../../shared/services/rooms.service';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 export interface AssignRoomDialogData {
   bookingId: string;
@@ -40,7 +41,7 @@ export interface RoomAssignment {
 @Component({
   selector: 'app-assign-room-dialog',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
@@ -324,7 +325,7 @@ export class AssignRoomDialogComponent {
         this.submitting.set(false);
         this.snackBar.open(
           err?.error?.message || 'Failed to assign rooms. Please try again.',
-          'Close',
+          $localize`Close`,
           { duration: 5000 },
         );
       },

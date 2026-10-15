@@ -114,8 +114,8 @@ export class ListFeedbackComponent {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Preference',
-        message: 'Are you sure you want to delete this preference?',
+        title: $localize`Delete Preference`,
+        message: $localize`Are you sure you want to delete this preference?`,
         confirmButtonText: 'Delete',
         showCancelButton: true,
       },
@@ -131,8 +131,8 @@ export class ListFeedbackComponent {
             this.dialog.open(ConfirmationDialogComponent, {
               width: '400px',
               data: {
-                title: 'Error',
-                message: 'Failed to delete preference. Please try again.',
+                title: $localize`Error`,
+                message: $localize`Failed to delete preference. Please try again.`,
                 confirmButtonText: 'OK',
                 showCancelButton: false,
               },
@@ -160,7 +160,7 @@ export class ListFeedbackComponent {
               this.feedbackService.updateFeedback(feedbackId, { status: 'PENDING CORRECTIVE ACTION' })
                 .subscribe({
                   next: () => {
-                    this.snackBar.open('Corrective action created and linked successfully', 'Close', {
+                    this.snackBar.open($localize`Corrective action created and linked successfully`, $localize`Close`, {
                       duration: 3000,
                       horizontalPosition: 'end',
                       verticalPosition: 'top'
@@ -168,7 +168,7 @@ export class ListFeedbackComponent {
                     this.feedbacks.reload();
                   },
                   error: (error) => {
-                    this.snackBar.open('Error updating feedback status', 'Close', {
+                    this.snackBar.open($localize`Error updating feedback status`, $localize`Close`, {
                       duration: 3000,
                       horizontalPosition: 'end',
                       verticalPosition: 'top'
@@ -177,7 +177,7 @@ export class ListFeedbackComponent {
                 });
             },
             error: (error) => {
-              this.snackBar.open('Error linking feedback to corrective action', 'Close', {
+              this.snackBar.open($localize`Error linking feedback to corrective action`, $localize`Close`, {
                 duration: 3000,
                 horizontalPosition: 'end',
                 verticalPosition: 'top'
@@ -196,7 +196,7 @@ export class ListFeedbackComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.snackBar.open('Feedback linked to corrective action successfully', 'Close', {
+        this.snackBar.open($localize`Feedback linked to corrective action successfully`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -210,8 +210,8 @@ export class ListFeedbackComponent {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '400px',
       data: {
-        title: 'Archive Feedback',
-        message: 'Are you sure you want to archive this feedback?',
+        title: $localize`Archive Feedback`,
+        message: $localize`Are you sure you want to archive this feedback?`,
         confirmButtonText: 'Archive',
         showCancelButton: true,
       },
@@ -221,7 +221,7 @@ export class ListFeedbackComponent {
       if (result) {
         this.feedbackService.updateFeedback(feedbackId, {status: 'ARCHIVED'}).subscribe({
           next: () => {
-            this.snackBar.open('Feedback archived successfully', 'Close', {
+            this.snackBar.open($localize`Feedback archived successfully`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -229,7 +229,7 @@ export class ListFeedbackComponent {
             this.feedbacks.reload();
           },
           error: (error) => {
-            this.snackBar.open('Failed to archive feedback. Please try again.', 'Close', {
+            this.snackBar.open($localize`Failed to archive feedback. Please try again.`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top',

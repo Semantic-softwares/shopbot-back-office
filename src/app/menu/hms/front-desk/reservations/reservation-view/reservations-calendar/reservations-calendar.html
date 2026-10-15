@@ -1,6 +1,6 @@
 <app-page-header 
-  title="Reservations" 
-  subtitle="Manage hotel reservations and guest bookings"
+  title="Reservations" i18n-title 
+  subtitle="Manage hotel reservations and guest bookings" i18n-subtitle
   [showViewToggle]="true"
   [hideActions]="isMobile()"
   viewToggleRoute="/menu/hms/front-desk/reservations/view">
@@ -8,17 +8,17 @@
   <ng-container actions>
     <button matButton="outlined" (click)="clearFilters()">
       <mat-icon>clear</mat-icon>
-      Clear Filters
+      <ng-container i18n>Clear Filters</ng-container>
     </button>
 
     <button matButton="outlined" (click)="reloadData()">
       <mat-icon class="mr-1">refresh</mat-icon>
-      Reload
+      <ng-container i18n>Reload</ng-container>
     </button>
     
     <button matButton="filled" (click)="createReservation()">
       <mat-icon class="mr-1">add</mat-icon>
-      Create Reservation
+      <ng-container i18n>Create Reservation</ng-container>
     </button>
   </ng-container>
   
@@ -36,17 +36,17 @@
           <mat-icon class="ml-1">expand_more</mat-icon>
         </button>
         <mat-menu #viewMenu="matMenu">
-          <button mat-menu-item (click)="onViewModeChange('weekly')">Weekly</button>
-          <button mat-menu-item (click)="onViewModeChange('monthly')">Monthly</button>
+          <button mat-menu-item (click)="onViewModeChange('weekly')"><ng-container i18n>Weekly</ng-container></button>
+          <button mat-menu-item (click)="onViewModeChange('monthly')"><ng-container i18n>Monthly</ng-container></button>
         </mat-menu>
 
         <!-- Status Filter -->
         <button mat-stroked-button [matMenuTriggerFor]="statusMenu">
-          Status: {{ selectedStatus() | titlecase }}
+          <ng-container i18n>Status: {{ selectedStatus() | titlecase }}</ng-container>
           <mat-icon class="ml-1">expand_more</mat-icon>
         </button>
         <mat-menu #statusMenu="matMenu">
-          <button mat-menu-item (click)="onStatusChange('all')">All</button>
+          <button mat-menu-item (click)="onStatusChange('all')"><ng-container i18n>All</ng-container></button>
           @for (s of reservationStatuses; track s) {
             <button mat-menu-item (click)="onStatusChange(s)">{{ s | titlecase }}</button>
           }
@@ -55,13 +55,13 @@
         <!-- Navigation -->
         <button matButton="tonal" (click)="previousWeek()">
           <mat-icon class="mr-1">chevron_left</mat-icon>
-          Previous
+          <ng-container i18n>Previous</ng-container>
         </button>
         <button matButton color="warn" class="min-w-48">
           {{getPeriodLabel()}}
         </button>
         <button matButton="tonal" (click)="nextWeek()">
-          Next
+          <ng-container i18n>Next</ng-container>
           <mat-icon class="ml-1">chevron_right</mat-icon>
         </button>
       </div>
@@ -72,11 +72,11 @@
   <!-- Mobile: Compact navigation bar -->
   @if (isMobile()) {
     <div class="flex items-center justify-between px-3 py-2 border-b border-gray-200">
-      <button mat-icon-button (click)="previousWeek()" aria-label="Previous period">
+      <button mat-icon-button (click)="previousWeek()" aria-label="Previous period" i18n-aria-label>
         <mat-icon>chevron_left</mat-icon>
       </button>
       <span class="text-sm font-semibold text-gray-800 truncate">{{ getPeriodLabel() }}</span>
-      <button mat-icon-button (click)="nextWeek()" aria-label="Next period">
+      <button mat-icon-button (click)="nextWeek()" aria-label="Next period" i18n-aria-label>
         <mat-icon>chevron_right</mat-icon>
       </button>
     </div>
@@ -95,7 +95,7 @@
       <!-- Header Row (sticky top) -->
       <div class="calendar-row calendar-header">
         <div class="calendar-left calendar-cell-left calendar-header-cell">
-          <span class="text-xs font-semibold text-gray-700 uppercase">Rooms</span>
+          <span class="text-xs font-semibold text-gray-700 uppercase"><ng-container i18n>Rooms</ng-container></span>
         </div>
         <div class="calendar-row-cells" [style.width.px]="dateRange().length * cellWidthPx()">
           @for (date of dateRange(); track date.key) {
@@ -140,11 +140,11 @@
                       </span>
                       }
                       @if (groupCellInfo.restrictions?.stopSell) {
-                        <span class="cell-restriction-badge bg-red-100 text-red-600">SS</span>
+                        <span class="cell-restriction-badge bg-red-100 text-red-600"><ng-container i18n>SS</ng-container></span>
                       } @else if (groupCellInfo.restrictions?.closedToArrival) {
-                        <span class="cell-restriction-badge bg-amber-100 text-amber-600">CTA</span>
+                        <span class="cell-restriction-badge bg-amber-100 text-amber-600"><ng-container i18n>CTA</ng-container></span>
                       } @else if (groupCellInfo.restrictions?.closedToDeparture) {
-                        <span class="cell-restriction-badge bg-purple-100 text-purple-600">CTD</span>
+                        <span class="cell-restriction-badge bg-purple-100 text-purple-600"><ng-container i18n>CTD</ng-container></span>
                       }
                     </div>
                   }
@@ -157,7 +157,7 @@
             <div
               class="calendar-left calendar-cell-left calendar-room-cell"
               [ngClass]="getHousekeepingStatusClass(row.housekeepingStatus)"
-              [matTooltip]="'Housekeeping: ' + (row.housekeepingStatus | titlecase) + ' (Right-click to change)'"
+              [matTooltip]="('Housekeeping: ' | tr) + (row.housekeepingStatus | titlecase) + (' (Right-click to change)' | tr)"
               matTooltipPosition="right"
               [cdkContextMenuTriggerFor]="housekeepingMenu"
               [cdkContextMenuTriggerData]="{ roomId: row.roomId, currentStatus: row.housekeepingStatus }">
@@ -207,7 +207,7 @@
                             <div class="reservation-meta">
                               <span class="reservation-nights">{{ getReservationNightsLabel(reservation) }}</span>
                               @if (isReservationModified(reservation)) {
-                                <span class="reservation-modified">MOD</span>
+                                <span class="reservation-modified"><ng-container i18n>MOD</ng-container></span>
                               }
                             </div>
                             <span class="reservation-name">{{ getReservationBlockLabel(reservation) }}</span>
@@ -245,7 +245,7 @@
   <button mat-fab
           class="!fixed bottom-6 right-6 z-50"
           color="primary"
-          aria-label="Actions menu"
+          aria-label="Actions menu" i18n-aria-label
           [matMenuTriggerFor]="fabMenu">
     <mat-icon>more_vert</mat-icon>
   </button>
@@ -253,44 +253,44 @@
   <mat-menu #fabMenu="matMenu" class="fab-actions-menu">
     <button mat-menu-item (click)="createReservation()">
       <mat-icon>add</mat-icon>
-      <span>New Reservation</span>
+      <span><ng-container i18n>New Reservation</ng-container></span>
     </button>
     <button mat-menu-item (click)="reloadData()">
       <mat-icon>refresh</mat-icon>
-      <span>Reload</span>
+      <span><ng-container i18n>Reload</ng-container></span>
     </button>
     <button mat-menu-item (click)="clearFilters()">
       <mat-icon>filter_list_off</mat-icon>
-      <span>Clear Filters</span>
+      <span><ng-container i18n>Clear Filters</ng-container></span>
     </button>
     <mat-divider></mat-divider>
     <button mat-menu-item (click)="navigateToView('list')">
       <mat-icon>list</mat-icon>
-      <span>List View</span>
+      <span><ng-container i18n>List View</ng-container></span>
     </button>
     <button mat-menu-item (click)="navigateToView('calendar')">
       <mat-icon>calendar_month</mat-icon>
-      <span>Calendar View</span>
+      <span><ng-container i18n>Calendar View</ng-container></span>
     </button>
     <mat-divider></mat-divider>
     <button mat-menu-item (click)="onViewModeChange('weekly')">
       <mat-icon>view_week</mat-icon>
-      <span>Weekly</span>
+      <span><ng-container i18n>Weekly</ng-container></span>
     </button>
     <button mat-menu-item (click)="onViewModeChange('monthly')">
       <mat-icon>calendar_view_month</mat-icon>
-      <span>Monthly</span>
+      <span><ng-container i18n>Monthly</ng-container></span>
     </button>
     <mat-divider></mat-divider>
     <button mat-menu-item [matMenuTriggerFor]="mobileStatusMenu">
       <mat-icon>filter_list</mat-icon>
-      <span>Status: {{ selectedStatus() | titlecase }}</span>
+      <span><ng-container i18n>Status: {{ selectedStatus() | titlecase }}</ng-container></span>
     </button>
   </mat-menu>
 
   <mat-menu #mobileStatusMenu="matMenu">
     <button mat-menu-item (click)="onStatusChange('all')">
-      <span>All</span>
+      <span><ng-container i18n>All</ng-container></span>
     </button>
     @for (s of reservationStatuses; track s) {
       <button mat-menu-item (click)="onStatusChange(s)">
@@ -304,7 +304,7 @@
 <ng-template #housekeepingMenu let-roomId="roomId" let-currentStatus="currentStatus">
   <div class="bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[200px]" cdkMenu>
     <div class="px-4 py-2 border-b border-gray-100">
-      <span class="text-xs font-semibold text-gray-500 uppercase">Update Housekeeping Status</span>
+      <span class="text-xs font-semibold text-gray-500 uppercase"><ng-container i18n>Update Housekeeping Status</ng-container></span>
     </div>
     @for (status of housekeepingStatuses; track status.key) {
       <button 

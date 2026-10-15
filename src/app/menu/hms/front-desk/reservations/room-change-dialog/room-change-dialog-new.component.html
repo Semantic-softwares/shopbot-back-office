@@ -2,7 +2,7 @@
 <h1 mat-dialog-title>
   <div class="flex items-center gap-2">
     <mat-icon>swap_horiz</mat-icon>
-    {{ swapMode() ? 'Swap Rooms' : 'Change Room Selection' }}
+    @if (swapMode()) {<ng-container i18n>Swap Rooms</ng-container>} @else {<ng-container i18n>Change Room Selection</ng-container>}
   </div>
 </h1>
 
@@ -16,10 +16,10 @@
         [checked]="swapMode()"
         (change)="toggleSwapMode()"
         color="primary">
-        <span class="font-medium">Swap Specific Rooms</span>
+        <span class="font-medium"><ng-container i18n>Swap Specific Rooms</ng-container></span>
       </mat-checkbox>
       <div class="text-sm text-gray-600">
-        {{ swapMode() ? 'Select current rooms and assign replacements one-by-one' : 'Replace all rooms with new selection' }}
+        @if (swapMode()) {<ng-container i18n>Select current rooms and assign replacements one-by-one</ng-container>} @else {<ng-container i18n>Replace all rooms with new selection</ng-container>}
       </div>
     </div>
 
@@ -31,7 +31,7 @@
         <div class="space-y-4">
           <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
             <mat-icon class="text-blue-600">meeting_room</mat-icon>
-            Step 1: Select Rooms to Swap
+            <ng-container i18n>Step 1: Select Rooms to Swap</ng-container>
           </h3>
           
           <div class="space-y-2 max-h-80 overflow-y-auto">
@@ -49,11 +49,11 @@
                       color="primary">
                     </mat-checkbox>
                     <div class="flex-1">
-                      <div class="font-medium text-gray-900">Room {{ currentRoom.room.roomNumber }}</div>
+                      <div class="font-medium text-gray-900"><ng-container i18n>Room {{ currentRoom.room.roomNumber }}</ng-container></div>
                       <div class="text-sm text-gray-600">{{ currentRoom.room.roomType?.name }}</div>
                       <div class="text-sm text-green-600 font-medium">
                         {{ data.currency }}{{ getRoomTotalCost(currentRoom.room) | number:'1.2-2' }}
-                        <span class="text-xs text-gray-500">{{ data.numberOfNights }} nights</span>
+                        <span class="text-xs text-gray-500"><ng-container i18n>{{ data.numberOfNights }} nights</ng-container></span>
                       </div>
                     </div>
                   </div>
@@ -67,14 +67,14 @@
         <div class="space-y-4">
           <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
             <mat-icon class="text-green-600">swap_horiz</mat-icon>
-            Step 2: Assign Replacements
+            <ng-container i18n>Step 2: Assign Replacements</ng-container>
           </h3>
           
           @if (swapPairs().length === 0) {
             <div class="text-center py-12 text-gray-500">
               <mat-icon class="text-6xl mb-4 text-gray-300">arrow_back</mat-icon>
-              <div class="text-lg font-medium">Select current rooms to swap</div>
-              <div class="text-sm">Choose rooms from Step 1 to create swap pairs</div>
+              <div class="text-lg font-medium"><ng-container i18n>Select current rooms to swap</ng-container></div>
+              <div class="text-sm"><ng-container i18n>Choose rooms from Step 1 to create swap pairs</ng-container></div>
             </div>
           } @else {
             <div class="space-y-4 max-h-80 overflow-y-auto">
@@ -87,7 +87,7 @@
                       <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                           <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
-                            Swap {{ i + 1 }}
+                            <ng-container i18n>Swap {{ i + 1 }}</ng-container>
                           </span>
                         </div>
                         <button mat-icon-button 
@@ -102,7 +102,7 @@
                       <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
                         <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
                         <div class="flex-1">
-                          <div class="font-medium text-blue-900">Room {{ pair.currentRoom.roomNumber }}</div>
+                          <div class="font-medium text-blue-900"><ng-container i18n>Room {{ pair.currentRoom.roomNumber }}</ng-container></div>
                           <div class="text-sm text-blue-700">{{ pair.currentRoom.roomType?.name }}</div>
                         </div>
                         <div class="text-sm font-medium text-blue-900">
@@ -118,7 +118,7 @@
                       <!-- Replacement Room Selection -->
                       <div>
                         <mat-form-field appearance="outline" class="w-full">
-                          <mat-label>Select Replacement Room</mat-label>
+                          <mat-label><ng-container i18n>Select Replacement Room</ng-container></mat-label>
                           <mat-select 
                             [value]="pair.replacementRoom?._id" 
                             (selectionChange)="assignReplacementRoom(pair.currentRoom._id, $event.source.triggerValue)">
@@ -126,7 +126,7 @@
                               <mat-option [value]="room">
                                 <div class="flex justify-between items-center w-full py-1">
                                   <div>
-                                    <span class="font-medium">Room {{ room.roomNumber }}</span>
+                                    <span class="font-medium"><ng-container i18n>Room {{ room.roomNumber }}</ng-container></span>
                                     <span class="text-sm text-gray-600 ml-2">{{ room.roomType?.name }}</span>
                                   </div>
                                   <span class="text-sm font-medium text-green-600">
@@ -150,7 +150,7 @@
                             <div class="flex items-center gap-3 mb-2">
                               <div class="w-3 h-3 bg-green-500 rounded-full"></div>
                               <div class="flex-1">
-                                <div class="font-medium text-green-900">Room {{ pair.replacementRoom.roomNumber }}</div>
+                                <div class="font-medium text-green-900"><ng-container i18n>Room {{ pair.replacementRoom.roomNumber }}</ng-container></div>
                                 <div class="text-sm text-green-700">{{ pair.replacementRoom.roomType?.name }}</div>
                               </div>
                               <div class="text-sm font-medium text-green-900">
@@ -167,13 +167,13 @@
                                    [class.text-red-700]="pair.priceDifference > 0">
                                 @if (pair.priceDifference > 0) {
                                   <mat-icon class="!text-sm mr-1">add</mat-icon>
-                                  {{ data.currency }}{{ pair.priceDifference | number:'1.2-2' }} Additional Payment
+                                  <ng-container i18n>{{ data.currency }}{{ pair.priceDifference | number:'1.2-2' }} Additional Payment</ng-container>
                                 } @else if (pair.priceDifference < 0) {
                                   <mat-icon class="!text-sm mr-1">remove</mat-icon>
-                                  {{ data.currency }}{{ Math.abs(pair.priceDifference) | number:'1.2-2' }} Refund
+                                  <ng-container i18n>{{ data.currency }}{{ Math.abs(pair.priceDifference) | number:'1.2-2' }} Refund</ng-container>
                                 } @else {
                                   <mat-icon class="!text-sm mr-1 text-gray-600">check</mat-icon>
-                                  <span class="text-gray-600">Same Price</span>
+                                  <span class="text-gray-600"><ng-container i18n>Same Price</ng-container></span>
                                 }
                               </div>
                             </div>
@@ -196,7 +196,7 @@
       <div class="mb-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
           <mat-icon class="text-blue-600">bed</mat-icon>
-          Current Room Assignment
+          <ng-container i18n>Current Room Assignment</ng-container>
         </h3>
         <div class="space-y-3">
           @for (room of data.currentRooms; track room.room._id) {
@@ -205,11 +205,11 @@
                 <div class="flex justify-between items-center">
                   <div>
                     <div class="font-medium text-gray-900 text-base">
-                      Room {{ room.room.roomNumber }} - {{ room.room.roomType?.name }}
+                      <ng-container i18n>Room {{ room.room.roomNumber }} - {{ room.room.roomType?.name }}</ng-container>
                     </div>
                     <div class="text-sm text-gray-600 mt-1">{{ room.room.roomType?.description }}</div>
                     <div class="flex gap-4 text-xs text-gray-500 mt-2">
-                      <span>Max: {{ room.room.roomType?.capacity?.adults + room.room.roomType?.capacity?.children }} guests</span>
+                      <span><ng-container i18n>Max: {{ room.room.roomType?.capacity?.adults + room.room.roomType?.capacity?.children }} guests</ng-container></span>
                       <span>{{ room.room.roomType?.bedConfiguration }}</span>
                     </div>
                   </div>
@@ -217,9 +217,9 @@
                     <div class="text-lg font-semibold text-gray-900">
                       {{ data.currency }}{{ getRoomTotalCost(room.room) | number:'1.2-2' }}
                     </div>
-                    <div class="text-sm text-gray-500">{{ data.numberOfNights }} nights</div>
+                    <div class="text-sm text-gray-500"><ng-container i18n>{{ data.numberOfNights }} nights</ng-container></div>
                     <div class="text-xs text-gray-400">
-                      {{ data.currency }}{{ getRoomRate(room.room) | number:'1.2-2' }}/night
+                      <ng-container i18n>{{ data.currency }}{{ getRoomRate(room.room) | number:'1.2-2' }}/night</ng-container>
                     </div>
                   </div>
                 </div>
@@ -233,7 +233,7 @@
       <div class="mb-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
           <mat-icon class="text-green-600">hotel</mat-icon>
-          Select New Rooms
+          <ng-container i18n>Select New Rooms</ng-container>
           @if (loadingRooms()) {
             <mat-spinner diameter="20" strokeWidth="3"></mat-spinner>
           }
@@ -243,7 +243,7 @@
           <div class="flex items-center justify-center py-12">
             <div class="text-center">
               <mat-spinner diameter="40"></mat-spinner>
-              <p class="mt-4 text-gray-600">Loading available rooms...</p>
+              <p class="mt-4 text-gray-600"><ng-container i18n>Loading available rooms...</ng-container></p>
             </div>
           </div>
         } @else {
@@ -251,7 +251,7 @@
             <mat-card class="!shadow-sm border border-gray-200">
               <mat-card-content class="!p-8 text-center">
                 <mat-icon class="text-4xl text-gray-400 mb-2">info</mat-icon>
-                <p class="text-gray-600">No rooms available for the selected dates</p>
+                <p class="text-gray-600"><ng-container i18n>No rooms available for the selected dates</ng-container></p>
               </mat-card-content>
             </mat-card>
           } @else {
@@ -273,7 +273,7 @@
                         <div class="flex justify-between items-start mb-2">
                           <div>
                             <div class="font-medium text-gray-900">
-                              Room {{ room.roomNumber }} - {{ room.roomType?.name }}
+                              <ng-container i18n>Room {{ room.roomNumber }} - {{ room.roomType?.name }}</ng-container>
                             </div>
                             <div class="text-sm text-gray-600 mt-1">{{ room.roomType?.description }}</div>
                           </div>
@@ -281,7 +281,7 @@
                         
                         <div class="flex justify-between items-center mt-3">
                           <div class="flex gap-4 text-xs text-gray-500">
-                            <span>Max: {{ room.roomType?.capacity?.adults + room.roomType?.capacity?.children }} guests</span>
+                            <span><ng-container i18n>Max: {{ room.roomType?.capacity?.adults + room.roomType?.capacity?.children }} guests</ng-container></span>
                             <span>{{ room.roomType?.bedConfiguration }}</span>
                           </div>
                           <div class="text-right">
@@ -289,7 +289,7 @@
                               {{ data.currency }}{{ getRoomTotalCost(room) | number:'1.2-2' }}
                             </div>
                             <div class="text-xs text-gray-500">
-                              {{ data.currency }}{{ getRoomRate(room) | number:'1.2-2' }}/night
+                              <ng-container i18n>{{ data.currency }}{{ getRoomRate(room) | number:'1.2-2' }}/night</ng-container>
                             </div>
                           </div>
                         </div>
@@ -309,26 +309,26 @@
       <mat-card-content class="!p-4">
         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
           <mat-icon class="text-purple-600">calculate</mat-icon>
-          Pricing Summary
+          <ng-container i18n>Pricing Summary</ng-container>
         </h3>
         
         <div class="space-y-2">
           <div class="flex justify-between items-center">
-            <span class="text-gray-700">Current Total:</span>
+            <span class="text-gray-700"><ng-container i18n>Current Total:</ng-container></span>
             <span class="font-semibold text-gray-900">{{ data.currency }}{{ currentTotal() | number:'1.2-2' }}</span>
           </div>
           
           @if (swapMode()) {
             @if (swapPairs().length > 0) {
               <div class="flex justify-between items-center">
-                <span class="text-gray-700">New Total:</span>
+                <span class="text-gray-700"><ng-container i18n>New Total:</ng-container></span>
                 <span class="font-semibold text-gray-900">{{ data.currency }}{{ newTotal() | number:'1.2-2' }}</span>
               </div>
             }
           } @else {
             @if (selectedRooms().length > 0) {
               <div class="flex justify-between items-center">
-                <span class="text-gray-700">New Total:</span>
+                <span class="text-gray-700"><ng-container i18n>New Total:</ng-container></span>
                 <span class="font-semibold text-gray-900">{{ data.currency }}{{ newTotal() | number:'1.2-2' }}</span>
               </div>
             }
@@ -342,11 +342,11 @@
                  [class.text-gray-700]="priceDifference() === 0">
               <span>
                 @if (priceDifference() > 0) {
-                  Additional Payment Required:
+                  <ng-container i18n>Additional Payment Required:</ng-container>
                 } @else if (priceDifference() < 0) {
-                  Refund Amount:
+                  <ng-container i18n>Refund Amount:</ng-container>
                 } @else {
-                  No Price Change
+                  <ng-container i18n>No Price Change</ng-container>
                 }
               </span>
               @if (priceDifference() !== 0) {
@@ -362,18 +362,18 @@
 
     <!-- Reason for Change -->
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Reason for Room Change</mat-label>
+      <mat-label><ng-container i18n>Reason for Room Change</ng-container></mat-label>
       <textarea 
         matInput 
         formControlName="reason"
-        placeholder="Please provide a reason for changing rooms (minimum 10 characters)"
+        placeholder="Please provide a reason for changing rooms (minimum 10 characters)" i18n-placeholder
         rows="3">
       </textarea>
       <mat-error *ngIf="roomChangeForm.get('reason')?.hasError('required')">
-        Reason is required
+        <ng-container i18n>Reason is required</ng-container>
       </mat-error>
       <mat-error *ngIf="roomChangeForm.get('reason')?.hasError('minlength')">
-        Reason must be at least 10 characters long
+        <ng-container i18n>Reason must be at least 10 characters long</ng-container>
       </mat-error>
     </mat-form-field>
   </form>
@@ -384,7 +384,7 @@
   <button mat-button 
           (click)="onCancel()" 
           [disabled]="submitting()">
-    Cancel
+    <ng-container i18n>Cancel</ng-container>
   </button>
   
   <button mat-raised-button 
@@ -393,12 +393,12 @@
           [disabled]="!canSubmit()">
     @if (submitting()) {
       <mat-spinner diameter="20" strokeWidth="3" class="mr-2"></mat-spinner>
-      Processing...
+      <ng-container i18n>Processing...</ng-container>
     } @else {
       @if (swapMode()) {
-        Process Room Swaps
+        <ng-container i18n>Process Room Swaps</ng-container>
       } @else {
-        Change Rooms
+        <ng-container i18n>Change Rooms</ng-container>
       }
     }
   </button>

@@ -50,7 +50,7 @@ import { debounceTime } from 'rxjs/operators';
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Count Inventory</h1>
+          <h1 class="text-3xl font-bold text-gray-900"><ng-container i18n>Count Inventory</ng-container></h1>
           @if (reconciliation()) {
             <p class="text-gray-600 mt-1">{{ reconciliation()!.name }}</p>
           }
@@ -58,7 +58,7 @@ import { debounceTime } from 'rxjs/operators';
         <div class="flex space-x-4">
           <button mat-button [routerLink]="['../..']" class="text-gray-600">
             <mat-icon>arrow_back</mat-icon>
-            Back to List
+            <ng-container i18n>Back to List</ng-container>
           </button>
           @if (reconciliation()) {
             <button 
@@ -70,7 +70,7 @@ import { debounceTime } from 'rxjs/operators';
               @if (isSaving()) {
                 <mat-icon>refresh</mat-icon>
               }
-              Save Progress
+              <ng-container i18n>Save Progress</ng-container>
             </button>
           }
         </div>
@@ -83,19 +83,19 @@ import { debounceTime } from 'rxjs/operators';
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div class="text-center">
                 <div class="text-2xl font-bold text-blue-600">{{ reconciliation()!.totalProducts }}</div>
-                <div class="text-sm text-gray-600">Total Products</div>
+                <div class="text-sm text-gray-600"><ng-container i18n>Total Products</ng-container></div>
               </div>
               <div class="text-center">
                 <div class="text-2xl font-bold text-green-600">{{ reconciliation()!.countedProducts }}</div>
-                <div class="text-sm text-gray-600">Counted</div>
+                <div class="text-sm text-gray-600"><ng-container i18n>Counted</ng-container></div>
               </div>
               <div class="text-center">
                 <div class="text-2xl font-bold text-orange-600">{{ remainingProducts() }}</div>
-                <div class="text-sm text-gray-600">Remaining</div>
+                <div class="text-sm text-gray-600"><ng-container i18n>Remaining</ng-container></div>
               </div>
               <div class="text-center">
                 <div class="text-2xl font-bold text-red-600">{{ reconciliation()!.discrepancyCount }}</div>
-                <div class="text-sm text-gray-600">Discrepancies</div>
+                <div class="text-sm text-gray-600"><ng-container i18n>Discrepancies</ng-container></div>
               </div>
             </div>
             <mat-progress-bar 
@@ -104,7 +104,7 @@ import { debounceTime } from 'rxjs/operators';
               color="primary">
             </mat-progress-bar>
             <div class="text-center mt-2 text-sm text-gray-600">
-              {{ progressPercentage() }}% Complete
+              <ng-container i18n>{{ progressPercentage() }}% Complete</ng-container>
             </div>
           </mat-card-content>
         </mat-card>
@@ -114,26 +114,26 @@ import { debounceTime } from 'rxjs/operators';
           <mat-card-content class="p-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <mat-form-field appearance="outline">
-                <mat-label>Search products</mat-label>
-                <input matInput [(ngModel)]="searchTerm" placeholder="Product name or SKU">
+                <mat-label><ng-container i18n>Search products</ng-container></mat-label>
+                <input matInput [(ngModel)]="searchTerm" placeholder="Product name or SKU" i18n-placeholder>
                 <mat-icon matSuffix>search</mat-icon>
               </mat-form-field>
               
               <mat-form-field appearance="outline">
-                <mat-label>Filter by status</mat-label>
+                <mat-label><ng-container i18n>Filter by status</ng-container></mat-label>
                 <mat-select [(ngModel)]="statusFilter">
-                  <mat-option value="">All</mat-option>
-                  <mat-option value="pending">Pending</mat-option>
-                  <mat-option value="counted">Counted</mat-option>
-                  <mat-option value="approved">Approved</mat-option>
+                  <mat-option value=""><ng-container i18n>All</ng-container></mat-option>
+                  <mat-option value="pending"><ng-container i18n>Pending</ng-container></mat-option>
+                  <mat-option value="counted"><ng-container i18n>Counted</ng-container></mat-option>
+                  <mat-option value="approved"><ng-container i18n>Approved</ng-container></mat-option>
                 </mat-select>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>Show discrepancies only</mat-label>
+                <mat-label><ng-container i18n>Show discrepancies only</ng-container></mat-label>
                 <mat-select [(ngModel)]="discrepancyFilter">
-                  <mat-option value="">All items</mat-option>
-                  <mat-option value="true">Discrepancies only</mat-option>
+                  <mat-option value=""><ng-container i18n>All items</ng-container></mat-option>
+                  <mat-option value="true"><ng-container i18n>Discrepancies only</ng-container></mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
@@ -147,12 +147,12 @@ import { debounceTime } from 'rxjs/operators';
               
               <!-- Product Name Column -->
               <ng-container matColumnDef="product">
-                <th mat-header-cell *matHeaderCellDef class="font-semibold">Product</th>
+                <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Product</ng-container></th>
                 <td mat-cell *matCellDef="let item" class="py-4">
                   <div>
                     <div class="font-medium">{{ item.productName }}</div>
                     @if (item.productSku) {
-                      <div class="text-sm text-gray-500">SKU: {{ item.productSku }}</div>
+                      <div class="text-sm text-gray-500"><ng-container i18n>SKU: {{ item.productSku }}</ng-container></div>
                     }
                   </div>
                 </td>
@@ -160,7 +160,7 @@ import { debounceTime } from 'rxjs/operators';
 
               <!-- System Quantity Column -->
               <ng-container matColumnDef="systemQuantity">
-                <th mat-header-cell *matHeaderCellDef class="font-semibold">System Qty</th>
+                <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>System Qty</ng-container></th>
                 <td mat-cell *matCellDef="let item" class="py-4">
                   <span class="font-medium">{{ item.systemQuantity }}</span>
                 </td>
@@ -168,7 +168,7 @@ import { debounceTime } from 'rxjs/operators';
 
               <!-- Physical Count Column -->
               <ng-container matColumnDef="physicalQuantity">
-                <th mat-header-cell *matHeaderCellDef class="font-semibold">Physical Count</th>
+                <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Physical Count</ng-container></th>
                 <td mat-cell *matCellDef="let item" class="py-4">
                   <mat-form-field appearance="outline" class="w-32">
                     <input 
@@ -185,7 +185,7 @@ import { debounceTime } from 'rxjs/operators';
 
               <!-- Variance Column -->
               <ng-container matColumnDef="variance">
-                <th mat-header-cell *matHeaderCellDef class="font-semibold">Variance</th>
+                <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Variance</ng-container></th>
                 <td mat-cell *matCellDef="let item" class="py-4">
                   <span 
                     [class.text-red-600]="item.variance < 0"
@@ -200,7 +200,7 @@ import { debounceTime } from 'rxjs/operators';
 
               <!-- Variance Value Column -->
               <ng-container matColumnDef="varianceValue">
-                <th mat-header-cell *matHeaderCellDef class="font-semibold">Value Impact</th>
+                <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Value Impact</ng-container></th>
                 <td mat-cell *matCellDef="let item" class="py-4">
                   <span 
                     [class.text-red-600]="item.varianceValue < 0"
@@ -215,22 +215,22 @@ import { debounceTime } from 'rxjs/operators';
 
               <!-- Reason Column -->
               <ng-container matColumnDef="reason">
-                <th mat-header-cell *matHeaderCellDef class="font-semibold">Reason</th>
+                <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Reason</ng-container></th>
                 <td mat-cell *matCellDef="let item" class="py-4">
                   @if (item.variance !== 0 && item.physicalQuantity !== undefined) {
                     <mat-form-field appearance="outline" class="w-40">
                       <mat-select 
                         [value]="item.reason || ''"
                         (selectionChange)="updateReason(item, $event.value)"
-                        placeholder="Select reason"
+                        placeholder="Select reason" i18n-placeholder
                       >
-                        <mat-option value="damage">Damage</mat-option>
-                        <mat-option value="theft">Theft</mat-option>
-                        <mat-option value="expiry">Expiry</mat-option>
-                        <mat-option value="supplier_error">Supplier Error</mat-option>
-                        <mat-option value="counting_error">Counting Error</mat-option>
-                        <mat-option value="system_error">System Error</mat-option>
-                        <mat-option value="other">Other</mat-option>
+                        <mat-option value="damage"><ng-container i18n>Damage</ng-container></mat-option>
+                        <mat-option value="theft"><ng-container i18n>Theft</ng-container></mat-option>
+                        <mat-option value="expiry"><ng-container i18n>Expiry</ng-container></mat-option>
+                        <mat-option value="supplier_error"><ng-container i18n>Supplier Error</ng-container></mat-option>
+                        <mat-option value="counting_error"><ng-container i18n>Counting Error</ng-container></mat-option>
+                        <mat-option value="system_error"><ng-container i18n>System Error</ng-container></mat-option>
+                        <mat-option value="other"><ng-container i18n>Other</ng-container></mat-option>
                       </mat-select>
                     </mat-form-field>
                   }
@@ -239,7 +239,7 @@ import { debounceTime } from 'rxjs/operators';
 
               <!-- Status Column -->
               <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef class="font-semibold">Status</th>
+                <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Status</ng-container></th>
                 <td mat-cell *matCellDef="let item" class="py-4">
                   <span [class]="getStatusClass(item.status)" class="px-2 py-1 rounded-full text-xs font-medium">
                     {{ item.status | titlecase }}
@@ -249,14 +249,14 @@ import { debounceTime } from 'rxjs/operators';
 
               <!-- Actions Column -->
               <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef class="font-semibold">Actions</th>
+                <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Actions</ng-container></th>
                 <td mat-cell *matCellDef="let item" class="py-4">
                   @if (item.physicalQuantity !== undefined && item.status === 'pending') {
                     <button 
                       mat-icon-button 
                       color="primary"
                       (click)="markAsCounted(item)"
-                      matTooltip="Mark as counted"
+                      matTooltip="Mark as counted" i18n-matTooltip
                     >
                       <mat-icon>check</mat-icon>
                     </button>
@@ -266,7 +266,7 @@ import { debounceTime } from 'rxjs/operators';
                       mat-icon-button 
                       color="warn"
                       (click)="resetCount(item)"
-                      matTooltip="Reset count"
+                      matTooltip="Reset count" i18n-matTooltip
                     >
                       <mat-icon>undo</mat-icon>
                     </button>
@@ -283,8 +283,8 @@ import { debounceTime } from 'rxjs/operators';
           @if (filteredItems().length === 0) {
             <div class="text-center py-12">
               <mat-icon class="text-gray-400 text-6xl mb-4">inventory_2</mat-icon>
-              <h3 class="text-lg font-medium text-gray-900 mb-2">No items found</h3>
-              <p class="text-gray-500">Try adjusting your search or filter criteria</p>
+              <h3 class="text-lg font-medium text-gray-900 mb-2"><ng-container i18n>No items found</ng-container></h3>
+              <p class="text-gray-500"><ng-container i18n>Try adjusting your search or filter criteria</ng-container></p>
             </div>
           }
         </mat-card>
@@ -292,7 +292,7 @@ import { debounceTime } from 'rxjs/operators';
         <!-- Action Buttons -->
         <div class="flex justify-between items-center mt-6">
           <div class="text-sm text-gray-600">
-            {{ reconciliation()!.countedProducts }} of {{ reconciliation()!.totalProducts }} items counted
+            <ng-container i18n>{{ reconciliation()!.countedProducts }} of {{ reconciliation()!.totalProducts }} items counted</ng-container>
           </div>
           <div class="space-x-4">
             <button 
@@ -301,7 +301,7 @@ import { debounceTime } from 'rxjs/operators';
               (click)="saveProgress()"
               [disabled]="isSaving()"
             >
-              Save Progress
+              <ng-container i18n>Save Progress</ng-container>
             </button>
             <button 
               mat-raised-button 
@@ -309,7 +309,7 @@ import { debounceTime } from 'rxjs/operators';
               (click)="proceedToReview()"
               [disabled]="!canProceedToReview()"
             >
-              Review & Complete
+              <ng-container i18n>Review & Complete</ng-container>
             </button>
           </div>
         </div>
@@ -414,7 +414,7 @@ export class CountInventoryComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading reconciliation:', error);
-        this.snackBar.open('Error loading reconciliation', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Error loading reconciliation`, $localize`Close`, { duration: 3000 });
       }
     });
   }
@@ -484,7 +484,7 @@ export class CountInventoryComponent implements OnInit {
       return updatedRec;
     });
 
-    this.snackBar.open('Item marked as counted', 'Close', { duration: 2000 });
+    this.snackBar.open($localize`Item marked as counted`, $localize`Close`, { duration: 2000 });
   }
 
   resetCount(item: ReconciliationItem): void {
@@ -515,7 +515,7 @@ export class CountInventoryComponent implements OnInit {
       return updatedRec;
     });
 
-    this.snackBar.open('Count reset', 'Close', { duration: 2000 });
+    this.snackBar.open($localize`Count reset`, $localize`Close`, { duration: 2000 });
   }
 
   saveProgress(): void {
@@ -528,12 +528,12 @@ export class CountInventoryComponent implements OnInit {
       next: (updatedRec) => {
         this.reconciliation.set(updatedRec);
         this.isSaving.set(false);
-        this.snackBar.open('Progress saved successfully', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Progress saved successfully`, $localize`Close`, { duration: 3000 });
       },
       error: (error) => {
         console.error('Error saving progress:', error);
         this.isSaving.set(false);
-        this.snackBar.open('Error saving progress', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Error saving progress`, $localize`Close`, { duration: 3000 });
       }
     });
   }

@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Select Hotel Guest</h2>
+<h2 mat-dialog-title><ng-container i18n>Select Hotel Guest</ng-container></h2>
 
 <mat-dialog-content >
   <mat-tab-group (selectedTabChange)="onTabChange($event.index)">
@@ -6,12 +6,12 @@
     <mat-tab>
       <ng-template mat-tab-label>
         <mat-icon class="mr-2">search</mat-icon>
-        Search Guest
+        <ng-container i18n>Search Guest</ng-container>
       </ng-template>
       <div class="pt-4">
         <app-guest-search
-          label="Search Guest"
-          placeholder="Search by name, email or phone..."
+          label="Search Guest" i18n-label
+          placeholder="Search by name, email or phone..." i18n-placeholder
           (guestSelected)="onGuestSelected($event)"
         />
       </div>
@@ -21,28 +21,28 @@
     <mat-tab>
       <ng-template mat-tab-label>
         <mat-icon class="mr-2">hotel</mat-icon>
-        Select by Room
+        <ng-container i18n>Select by Room</ng-container>
       </ng-template>
       <div class="pt-4">
         <!-- Room Selector -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Select Occupied Room</mat-label>
+          <mat-label><ng-container i18n>Select Occupied Room</ng-container></mat-label>
           <mat-select (selectionChange)="onRoomSelected($event.value)">
             @if (loadingRooms()) {
               <mat-option disabled>
                 <div class="flex items-center gap-2">
                   <mat-spinner diameter="20"></mat-spinner>
-                  <span>Loading rooms...</span>
+                  <span><ng-container i18n>Loading rooms...</ng-container></span>
                 </div>
               </mat-option>
             } @else if (occupiedRooms().length === 0) {
-              <mat-option disabled>No occupied rooms found</mat-option>
+              <mat-option disabled><ng-container i18n>No occupied rooms found</ng-container></mat-option>
             } @else {
               @for (room of occupiedRooms(); track room._id) {
                 <mat-option [value]="room">
                   <div class="flex items-center gap-2">
                     <mat-icon class="text-primary">door_front</mat-icon>
-                    <span class="font-medium">Room {{ room.roomNumber }}</span>
+                    <span class="font-medium"><ng-container i18n>Room {{ room.roomNumber }}</ng-container></span>
                     @if (room.currentGuest) {
                       <span class="text-gray-500 text-sm">
                         - {{ getRoomGuestName(room) }}
@@ -59,13 +59,13 @@
         @if (selectedRoom()) {
           <div class="mt-4">
             <h4 class="text-sm font-medium text-gray-600 mb-2">
-              Guests in Room {{ selectedRoom()?.roomNumber }}
+              <ng-container i18n>Guests in Room {{ selectedRoom()?.roomNumber }}</ng-container>
             </h4>
             
             @if (availableRoomGuests().length === 0) {
               <div class="text-gray-500 text-sm p-4 bg-gray-50 rounded-lg text-center">
                 <mat-icon class="text-gray-400">person_off</mat-icon>
-                <p class="mt-2">No guest information available for this room</p>
+                <p class="mt-2"><ng-container i18n>No guest information available for this room</ng-container></p>
               </div>
             } @else {
               <mat-radio-group 
@@ -79,7 +79,7 @@
                       <div>
                         <div class="font-medium">{{ guestService.getGuestName(guest) }}</div>
                         <div class="text-gray-500 text-sm">
-                          {{ guest.email || guest.phone || 'No contact info' }}
+                          {{ guest.email || guest.phone || ('No contact info' | tr) }}
                         </div>
                       </div>
                     </div>
@@ -102,11 +102,11 @@
           <div>
             <div class="font-medium text-green-800">{{ guestService.getGuestName(selectedGuest()) }}</div>
             <div class="text-green-600 text-sm">
-              {{ selectedGuest()?.email || selectedGuest()?.phone || 'No contact info' }}
+              {{ selectedGuest()?.email || selectedGuest()?.phone || ('No contact info' | tr) }}
             </div>
           </div>
         </div>
-        <button mat-icon-button color="warn" (click)="removeGuest()" matTooltip="Remove selection">
+        <button mat-icon-button color="warn" (click)="removeGuest()" matTooltip="Remove selection" i18n-matTooltip>
           <mat-icon>close</mat-icon>
         </button>
       </div>
@@ -115,10 +115,10 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button mat-dialog-close><ng-container i18n>Cancel</ng-container></button>
   @if (selectedGuest()) {
     <button matButton="filled" color="primary" (click)="confirmSelection()">
-      Confirm
+      <ng-container i18n>Confirm</ng-container>
     </button>
   }
 </mat-dialog-actions>

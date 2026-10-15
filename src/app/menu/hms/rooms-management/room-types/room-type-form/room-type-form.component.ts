@@ -27,11 +27,12 @@ import {
   BED_CONFIGURATIONS,
   Amenity
 } from '../../../../../shared/models/room.model';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-room-type-form',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -154,7 +155,7 @@ export class RoomTypeFormComponent implements OnInit, OnDestroy {
         console.error('Error loading room type:', error);
         this.error.set('Failed to load room type');
         this.loading.set(false);
-        this.snackBar.open('Failed to load room type', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Failed to load room type`, $localize`Close`, { duration: 3000 });
       }
     });
   }
@@ -263,7 +264,7 @@ export class RoomTypeFormComponent implements OnInit, OnDestroy {
         next: (roomType) => {
           this.saving.set(false);
           const action = this.isEditMode() ? 'updated' : 'created';
-          this.snackBar.open(`Room type ${action} successfully`, 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Room type ${action} successfully`, $localize`Close`, { duration: 3000 });
           this.router.navigate(['/menu/hms/rooms-management/room-types/room-types']);
         },
         error: (error) => {
@@ -271,7 +272,7 @@ export class RoomTypeFormComponent implements OnInit, OnDestroy {
           this.saving.set(false);
           const action = this.isEditMode() ? 'update' : 'create';
           this.error.set(`Failed to ${action} room type`);
-          this.snackBar.open(`Failed to ${action} room type`, 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Failed to ${action} room type`, $localize`Close`, { duration: 3000 });
         }
       });
     } else {
@@ -283,7 +284,7 @@ export class RoomTypeFormComponent implements OnInit, OnDestroy {
         }
       });
       
-      this.snackBar.open('Please correct the errors in the form', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Please correct the errors in the form`, $localize`Close`, { duration: 3000 });
     }
   }
 
@@ -316,7 +317,7 @@ export class RoomTypeFormComponent implements OnInit, OnDestroy {
   private getFieldLabel(controlName: string): string {
     const labels: Record<string, string> = {
       name: 'Room type name',
-      description: 'Description',
+      description: $localize`Description`,
       basePrice: 'Base price',
       maxOccupancy: 'Maximum occupancy',
       size: 'Room size',

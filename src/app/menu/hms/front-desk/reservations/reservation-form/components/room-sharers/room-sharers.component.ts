@@ -755,8 +755,8 @@ export class RoomSharersComponent {
     const fromStr = this.formatLocalDate(earliestCheckIn);
     const toStr = this.formatLocalDate(latestCheckOut);
     this.snackBar.open(
-      `Reservation dates auto-adjusted to ${fromStr} → ${toStr} (${nights} night${nights !== 1 ? 's' : ''})`,
-      'Close',
+      $localize`Reservation dates auto-adjusted to ${fromStr} → ${toStr} (${nights} night${nights !== 1 ? 's' : ''})`,
+      $localize`Close`,
       {
         duration: 5000,
         horizontalPosition: 'end',

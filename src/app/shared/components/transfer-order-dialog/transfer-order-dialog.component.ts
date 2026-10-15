@@ -15,6 +15,7 @@ import {
   TableSelectionDialogData,
   TableSelectionDialogResult,
 } from '../table-selection-dialog/table-selection-dialog.component';
+import { TrPipe } from '../../i18n/tr.pipe';
 
 export interface TransferOrderDialogData {
   orderId: string;
@@ -40,7 +41,7 @@ interface TransferLine {
 @Component({
   selector: 'app-transfer-order-dialog',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     CurrencyPipe,
     MatDialogModule,
@@ -149,7 +150,7 @@ export class TransferOrderDialogComponent {
     const data: TableSelectionDialogData = {
       mode: this.pickerMode(),
       excludeTableId: this.data.fromTable._id,
-      title: 'Move to which table?',
+      title: $localize`Move to which table?`,
     };
 
     this.dialog
@@ -189,7 +190,7 @@ export class TransferOrderDialogComponent {
         // The backend puts its reason code in the error body; anything else
         // falls back to a generic message rather than surfacing a raw 500.
         const reason = error?.error?.reason;
-        this.snackBar.open(transferFailureMessage(reason, toTable.name), 'Close', { duration: 6000 });
+        this.snackBar.open(transferFailureMessage(reason, toTable.name), $localize`Close`, { duration: 6000 });
 
         // Someone else took the table while this dialog was open — clear the
         // stale choice so the operator has to pick a table that still exists.

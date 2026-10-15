@@ -19,11 +19,12 @@ import { NoRecordComponent } from '../../../../../shared/components/no-record/no
 import { map, tap } from 'rxjs';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { PageHeaderComponent } from "../../../../../shared/components/page-header/page-header.component";
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-channel-manager-settings-general',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -121,7 +122,7 @@ export class ChannelManagerSettingsGeneral  {
 
   saveSettings() {
     if (!this.settingsForm || !this.settingsForm.valid) {
-      this.snackBar.open('Please fix the form errors', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Please fix the form errors`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -148,14 +149,14 @@ export class ChannelManagerSettingsGeneral  {
     this.propertySettingsService.updatePropertySettings(propertyId, dataToSend).subscribe({
       next: () => {
         this.isSaving.set(false);
-        this.snackBar.open('Settings saved successfully', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Settings saved successfully`, $localize`Close`, { duration: 3000 });
         // Reload the data
         this.propertyResource.reload();
       },
       error: (error) => {
         this.isSaving.set(false);
         const errorMessage = error.error?.message || 'Failed to save settings';
-        this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+        this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
       },
     });
   }

@@ -85,7 +85,7 @@ export class SupplierDetailsComponent implements OnInit {
     const storeId = this.storeStore.selectedStore()?._id;
     if (!storeId) return;
     
-    if (confirm(`Are you sure you want to delete supplier "${currentSupplier.name}"?`)) {
+    if (confirm($localize`Are you sure you want to delete supplier "${currentSupplier.name}"?`)) {
       this.suppliersService.deleteSupplier(this.supplierId, storeId).subscribe({
         next: () => {
           this.router.navigate(['/menu/erp/inventory/suppliers']);

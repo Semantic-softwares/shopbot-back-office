@@ -41,11 +41,11 @@ export class PropertyDetailComponent {
   );
 
   readonly tabs = [
-    { label: 'Summary', link: 'summary', icon: 'dashboard' },
-    { label: 'Units', link: 'units', icon: 'apartment' },
-    { label: 'Notes', link: 'notes', icon: 'sticky_note_2' },
-    { label: 'Files', link: 'files', icon: 'folder' },
-    { label: 'Maintenance', link: 'maintenance', icon: 'handyman' },
+    { label: $localize`Summary`, link: 'summary', icon: 'dashboard' },
+    { label: $localize`Units`, link: 'units', icon: 'apartment' },
+    { label: $localize`Notes`, link: 'notes', icon: 'sticky_note_2' },
+    { label: $localize`Files`, link: 'files', icon: 'folder' },
+    { label: $localize`Maintenance`, link: 'maintenance', icon: 'handyman' },
   ];
 
   propertyResource = rxResource({

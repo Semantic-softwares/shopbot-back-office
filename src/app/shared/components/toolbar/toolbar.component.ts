@@ -18,11 +18,14 @@ import { HotelNotificationService, HotelNotification } from '../../services/hote
 import { StoreStore } from '../../stores/store.store';
 import { RolesService } from '../../services/roles.service';
 import { Store } from '../../models/store.model';
+import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
+import { LanguageMenuComponent } from '../language-menu/language-menu.component';
+import { TrPipe } from '../../i18n/tr.pipe';
 
 @Component({
   selector: 'app-toolbar',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatToolbarModule,
     MatIconModule,
@@ -32,6 +35,8 @@ import { Store } from '../../models/store.model';
     MatBadgeModule,
     MatSnackBarModule,
     MatTooltipModule,
+    ThemeToggleComponent,
+    LanguageMenuComponent,
   ],
   templateUrl: './toolbar.component.html',
   styleUrls: ['./toolbar.component.scss'],
@@ -86,7 +91,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     this.rolesService.loadForStore(merchantId, store._id).subscribe({
       next: () => {
         this.switchingStore.set(false);
-        this.snackBar.open(`Switched to ${store.name}`, 'Close', {
+        this.snackBar.open($localize`Switched to ${store.name}`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top',
@@ -97,7 +102,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.switchingStore.set(false);
-        this.snackBar.open('Could not switch stores — please try again.', 'Close', {
+        this.snackBar.open($localize`Could not switch stores — please try again.`, $localize`Close`, {
           duration: 5000,
           horizontalPosition: 'end',
           verticalPosition: 'top',
@@ -124,7 +129,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     // The retry inside toggleDuty() can take ~10s when the server is waking
     // from idle. Without this the button just sits there looking broken.
     const waking = setTimeout(
-      () => this.snackBar.open('Waking the server, one moment…', '', { duration: 8000 }),
+      () => this.snackBar.open($localize`Waking the server, one moment…`, '', { duration: 8000 }),
       2500,
     );
 
@@ -132,7 +137,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       next: () => {
         clearTimeout(waking);
         this.togglingDuty.set(false);
-        this.snackBar.open(next ? 'You\'re on duty — you\'ll be alerted about new table orders' : 'You\'re off duty', 'Close', { duration: 3000 });
+        this.snackBar.open(next ? $localize`You're on duty — you'll be alerted about new table orders` : $localize`You're off duty`, $localize`Close`, { duration: 3000 });
       },
       error: (err) => {
         clearTimeout(waking);
@@ -142,9 +147,9 @@ export class ToolbarComponent implements OnInit, OnDestroy {
         const timedOut = err?.status === 504 || err?.status === 502 || err?.status === 0;
         this.snackBar.open(
           timedOut
-            ? 'The server did not respond in time. It may be waking up — try once more in a few seconds.'
-            : 'Could not update duty status — please sign out and back in.',
-          'Close',
+            ? $localize`The server did not respond in time. It may be waking up — try once more in a few seconds.`
+            : $localize`Could not update duty status — please sign out and back in.`,
+          $localize`Close`,
           { duration: 6000 },
         );
       },
@@ -177,8 +182,8 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     }
     if (this.pushPermission() === 'denied') {
       this.snackBar.open(
-        'Alerts are blocked for this site. Enable notifications in your browser settings to be told about new table orders.',
-        'Close',
+        $localize`Alerts are blocked for this site. Enable notifications in your browser settings to be told about new table orders.`,
+        $localize`Close`,
         { duration: 7000 },
       );
     }
@@ -233,7 +238,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
         // Toast snackbar
         this.snackBar.open(
           `🏨 ${notification.title}`,
-          'View',
+          $localize`View`,
           {
             duration: 6000,
             horizontalPosition: 'end',

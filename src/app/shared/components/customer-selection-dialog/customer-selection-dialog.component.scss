@@ -14,11 +14,11 @@ mat-dialog-content {
   transition: all 0.2s ease;
   
   &:hover {
-    background-color: #f9fafb;
-    border-color: #e5e7eb;
+    background-color: light-dark(#f9fafb, #1c1b1c);
+    border-color: light-dark(#e5e7eb, #48464b);
   }
   
   &.bg-blue-50 {
-    border-color: #93c5fd;
+    border-color: light-dark(#93c5fd, #2c4663);
   }
 }

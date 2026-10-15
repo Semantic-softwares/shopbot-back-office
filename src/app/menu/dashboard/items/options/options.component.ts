@@ -117,7 +117,7 @@ export class OptionsComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.snackBar.open('Option converted to product successfully!', 'Close', {
+        this.snackBar.open($localize`Option converted to product successfully!`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -148,7 +148,7 @@ export class OptionsComponent {
     const updatedOption = { ...option, inStock: !option.inStock };
     this.productService.updateOption(updatedOption, option._id).subscribe({
       next: () => {
-        this.snackBar.open('Option status updated successfully', 'Close', {
+        this.snackBar.open($localize`Option status updated successfully`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -156,7 +156,7 @@ export class OptionsComponent {
         this.options.reload();
       },
       error: () => {
-        this.snackBar.open('Error updating option status', 'Close', {
+        this.snackBar.open($localize`Error updating option status`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'

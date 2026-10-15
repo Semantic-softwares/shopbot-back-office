@@ -341,7 +341,7 @@ export class LiveBookingDetails {
     // Check if this is an OTA booking with unassigned rooms
     const isOtaUnassigned = booking.rooms.every((room: any) => !room.room || !room.room._id);
     if (!isOtaUnassigned) {
-      this.snackBar.open('All rooms are already assigned', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`All rooms are already assigned`, $localize`Close`, { duration: 5000 });
       return;
     }
 
@@ -361,7 +361,7 @@ export class LiveBookingDetails {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result?.success) {
-        this.snackBar.open('Rooms assigned successfully', 'Close', { duration: 5000 });
+        this.snackBar.open($localize`Rooms assigned successfully`, $localize`Close`, { duration: 5000 });
         // Refresh booking details and PMS reservation lookup
         void this.bookingResource.reload();
         void this.pmsReservationResource.reload();

@@ -13,6 +13,7 @@ import { TableCategoryService } from '../../../../../../shared/services/table-ca
 import { StoreStore } from '../../../../../../shared/stores/store.store';
 import { Table, TableCategory } from '../../../../../../shared/models';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { TrPipe } from '../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-create-table',
@@ -20,7 +21,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
   styleUrls: ['./create-table.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
+  imports: [TrPipe, 
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -98,7 +99,7 @@ export class CreateTableComponent implements OnInit {
       if (this.isEdit) {
         this.tableService.updateTable(this.data.table._id, formValue).subscribe({
           next: () => {
-            this.snackBar.open('Table updated successfully', 'Close', {
+            this.snackBar.open($localize`Table updated successfully`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -107,7 +108,7 @@ export class CreateTableComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error updating table:', error);
-            this.snackBar.open('Error updating table', 'Close', {
+            this.snackBar.open($localize`Error updating table`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -118,7 +119,7 @@ export class CreateTableComponent implements OnInit {
       } else {
         this.tableService.createTable(formValue).subscribe({
           next: () => {
-            this.snackBar.open('Table created successfully', 'Close', {
+            this.snackBar.open($localize`Table created successfully`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -127,7 +128,7 @@ export class CreateTableComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error creating table:', error);
-            this.snackBar.open('Error creating table', 'Close', {
+            this.snackBar.open($localize`Error creating table`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'

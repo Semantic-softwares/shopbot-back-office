@@ -1,56 +1,56 @@
 <div class="p-6">
-  <h1 mat-dialog-title class="text-xl font-semibold mb-4">Create New Permission</h1>
+  <h1 mat-dialog-title class="text-xl font-semibold mb-4"><ng-container i18n>Create New Permission</ng-container></h1>
   
   <div mat-dialog-content>
     <form [formGroup]="form" class="grid gap-4">
       <!-- Name field in its own row -->
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Name</mat-label>
-        <input matInput formControlName="name" placeholder="Enter permission name">
+        <mat-label><ng-container i18n>Name</ng-container></mat-label>
+        <input matInput formControlName="name" placeholder="Enter permission name" i18n-placeholder>
         @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
-          <mat-error>Name is required</mat-error>
+          <mat-error><ng-container i18n>Name is required</ng-container></mat-error>
         }
       </mat-form-field>
 
       <!-- Category selection and button in their own row -->
       <div class="space-y-2">
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Category</mat-label>
+          <mat-label><ng-container i18n>Category</ng-container></mat-label>
           <mat-select formControlName="categoryId">
             @for (category of categories.value(); track category._id) {
               <mat-option [value]="category._id">{{ category.name }}</mat-option>
             }
           </mat-select>
           @if (form.get('categoryId')?.hasError('required') && form.get('categoryId')?.touched) {
-            <mat-error>Category is required</mat-error>
+            <mat-error><ng-container i18n>Category is required</ng-container></mat-error>
           }
         </mat-form-field>
         <button mat-button color="primary" type="button" (click)="onCreateCategory()">
-          <mat-icon>add</mat-icon> Create New Category
+          <mat-icon>add</mat-icon> <ng-container i18n>Create New Category</ng-container>
         </button>
       </div>
 
       <!-- Description field -->
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Description</mat-label>
-        <textarea matInput formControlName="description" rows="3" placeholder="Enter description"></textarea>
+        <mat-label><ng-container i18n>Description</ng-container></mat-label>
+        <textarea matInput formControlName="description" rows="3" placeholder="Enter description" i18n-placeholder></textarea>
       </mat-form-field>
 
       <!-- Action and Resource fields -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Action</mat-label>
-          <input matInput formControlName="action" placeholder="Enter action">
+          <mat-label><ng-container i18n>Action</ng-container></mat-label>
+          <input matInput formControlName="action" placeholder="Enter action" i18n-placeholder>
           @if (form.get('action')?.hasError('required') && form.get('action')?.touched) {
-            <mat-error>Action is required</mat-error>
+            <mat-error><ng-container i18n>Action is required</ng-container></mat-error>
           }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Resource</mat-label>
-          <input matInput formControlName="resource" placeholder="Enter resource">
+          <mat-label><ng-container i18n>Resource</ng-container></mat-label>
+          <input matInput formControlName="resource" placeholder="Enter resource" i18n-placeholder>
           @if (form.get('resource')?.hasError('required') && form.get('resource')?.touched) {
-            <mat-error>Resource is required</mat-error>
+            <mat-error><ng-container i18n>Resource is required</ng-container></mat-error>
           }
         </mat-form-field>
       </div>
@@ -58,12 +58,12 @@
   </div>
 
   <div mat-dialog-actions class="flex justify-end gap-2 mt-4">
-    <button mat-stroked-button (click)="onCancel()">Cancel</button>
+    <button mat-stroked-button (click)="onCancel()"><ng-container i18n>Cancel</ng-container></button>
     <button mat-flat-button 
             color="primary" 
             (click)="onSave()" 
             [disabled]="form.invalid || isLoading()">
-      {{isLoading() ? 'Loading...' : 'Save'}}
+      @if (isLoading()) {<ng-container i18n>Loading...</ng-container>} @else {<ng-container i18n>Save</ng-container>}
     </button>
   </div>
 </div>

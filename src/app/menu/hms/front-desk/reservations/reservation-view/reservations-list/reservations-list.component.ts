@@ -152,13 +152,13 @@ export class ReservationsListComponent {
 
   // Status options
   statusOptions: { value: ReservationStatus | '', label: string, color: string }[] = [
-    { value: '', label: 'All Statuses', color: 'gray' },
-    { value: 'pending', label: 'Pending', color: 'orange' },
-    { value: 'confirmed', label: 'Confirmed', color: 'blue' },
-    { value: 'checked_in', label: 'Checked In', color: 'green' },
-    { value: 'checked_out', label: 'Checked Out', color: 'purple' },
-    { value: 'cancelled', label: 'Cancelled', color: 'red' },
-    { value: 'no_show', label: 'No Show', color: 'gray' }
+    { value: '', label: $localize`All Statuses`, color: 'gray' },
+    { value: 'pending', label: $localize`Pending`, color: 'orange' },
+    { value: 'confirmed', label: $localize`Confirmed`, color: 'blue' },
+    { value: 'checked_in', label: $localize`Checked In`, color: 'green' },
+    { value: 'checked_out', label: $localize`Checked Out`, color: 'purple' },
+    { value: 'cancelled', label: $localize`Cancelled`, color: 'red' },
+    { value: 'no_show', label: $localize`No Show`, color: 'gray' }
   ];
 
   constructor() {
@@ -383,7 +383,7 @@ export class ReservationsListComponent {
   /** Open room change dialog */
   async openRoomChangeDialog(reservation: Reservation) {
     if (!this.canChangeRooms(reservation)) {
-      this.snackBar.open('Cannot change rooms for this reservation', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Cannot change rooms for this reservation`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -411,13 +411,13 @@ export class ReservationsListComponent {
         try {
           const response = await this.reservationService.changeRooms(reservation._id, result).toPromise();
           if (response?.success) {
-            this.snackBar.open('Room changed successfully', 'Close', { duration: 3000 });
+            this.snackBar.open($localize`Room changed successfully`, $localize`Close`, { duration: 3000 });
             this.reloadData();
           }
         } catch (error: any) {
           console.error('Error changing rooms:', error);
           const errorMessage = error?.error?.error || error?.error?.message || error?.message || 'Failed to change rooms';
-          this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+          this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
         }
       }
     });
@@ -432,7 +432,7 @@ export class ReservationsListComponent {
   deleteReservation(reservation: Reservation) {
     const selectedStore = this.storeStore.selectedStore();
     if (!selectedStore?._id) {
-      this.snackBar.open('No store selected', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`No store selected`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -472,8 +472,8 @@ export class ReservationsListComponent {
         // this.totalReservations.set(this.totalReservations() - 1);
         
         this.snackBar.open(
-          `Reservation ${reservation.confirmationNumber} deleted successfully`, 
-          'Close', 
+          $localize`Reservation ${reservation.confirmationNumber} deleted successfully`, 
+          $localize`Close`, 
           { duration: 5000 }
         );
       },
@@ -481,7 +481,7 @@ export class ReservationsListComponent {
         console.error('Error deleting reservation:', error);
         this.snackBar.open(
           error.message || 'Failed to delete reservation', 
-          'Close', 
+          $localize`Close`, 
           { duration: 5000, panelClass: ['error-snackbar'] }
         );
       },
@@ -497,12 +497,12 @@ export class ReservationsListComponent {
   // Status management methods (similar to reservation details)
   // Available status options for dropdowns
   allStatusOptions = [
-    { value: 'pending', label: 'Pending', icon: 'schedule', color: '#f59e0b' },
-    { value: 'confirmed', label: 'Confirmed', icon: 'check_circle', color: '#10b981' },
-    { value: 'checked_in', label: 'Checked In', icon: 'login', color: '#3b82f6' },
-    { value: 'checked_out', label: 'Checked Out', icon: 'logout', color: '#6b7280' },
-    { value: 'cancelled', label: 'Cancelled', icon: 'cancel', color: '#ef4444' },
-    { value: 'no_show', label: 'No Show', icon: 'person_off', color: '#f97316' }
+    { value: 'pending', label: $localize`Pending`, icon: 'schedule', color: '#f59e0b' },
+    { value: 'confirmed', label: $localize`Confirmed`, icon: 'check_circle', color: '#10b981' },
+    { value: 'checked_in', label: $localize`Checked In`, icon: 'login', color: '#3b82f6' },
+    { value: 'checked_out', label: $localize`Checked Out`, icon: 'logout', color: '#6b7280' },
+    { value: 'cancelled', label: $localize`Cancelled`, icon: 'cancel', color: '#ef4444' },
+    { value: 'no_show', label: $localize`No Show`, icon: 'person_off', color: '#f97316' }
   ];
 
   // Business rule validation for status transitions
@@ -925,13 +925,13 @@ export class ReservationsListComponent {
         link.click();
         document.body.removeChild(link);
         
-        this.snackBar.open('Reservations exported successfully', 'Close', { 
+        this.snackBar.open($localize`Reservations exported successfully`, $localize`Close`, { 
           duration: 3000 
         });
       }
     } catch (error) {
       console.error('Error exporting reservations:', error);
-      this.snackBar.open('Failed to export reservations', 'Close', { 
+      this.snackBar.open($localize`Failed to export reservations`, $localize`Close`, { 
         duration: 5000,
         panelClass: ['error-snackbar']
       });

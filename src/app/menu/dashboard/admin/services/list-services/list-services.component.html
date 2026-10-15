@@ -1,14 +1,14 @@
 <mat-card class="mat-elevation-z2 !px-2">
   <div class="p-4 flex justify-between items-center gap-4">
     <mat-form-field appearance="outline" class="w-80">
-      <mat-label>Search services</mat-label>
-      <input matInput (input)="onSearch($event)" [value]="searchTerm()" placeholder="Search by name, category or provider">
+      <mat-label><ng-container i18n>Search services</ng-container></mat-label>
+      <input matInput (input)="onSearch($event)" [value]="searchTerm()" placeholder="Search by name, category or provider" i18n-placeholder>
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
 
     <button mat-flat-button color="primary" (click)="onAdd()">
       <mat-icon>add</mat-icon>
-      Add Service
+      <ng-container i18n>Add Service</ng-container>
     </button>
   </div>
 
@@ -19,37 +19,37 @@
   } @else {
     <table mat-table [dataSource]="filteredServices()" class="w-full">
       <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef> Name </th>
+        <th mat-header-cell *matHeaderCellDef> <ng-container i18n>Name</ng-container> </th>
         <td mat-cell *matCellDef="let service"> {{service.name}} </td>
       </ng-container>
 
       <ng-container matColumnDef="category">
-        <th mat-header-cell *matHeaderCellDef> Category </th>
+        <th mat-header-cell *matHeaderCellDef> <ng-container i18n>Category</ng-container> </th>
         <td mat-cell *matCellDef="let service"> {{service.category}} </td>
       </ng-container>
 
       <ng-container matColumnDef="price">
-        <th mat-header-cell *matHeaderCellDef> Price </th>
+        <th mat-header-cell *matHeaderCellDef> <ng-container i18n>Price</ng-container> </th>
         <td mat-cell *matCellDef="let service"> {{service.price}} </td>
       </ng-container>
 
       <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef> Status </th>
+        <th mat-header-cell *matHeaderCellDef> <ng-container i18n>Status</ng-container> </th>
         <td mat-cell *matCellDef="let service"> {{service.status}} </td>
       </ng-container>
 
       <ng-container matColumnDef="provider">
-        <th mat-header-cell *matHeaderCellDef> Provider </th>
+        <th mat-header-cell *matHeaderCellDef> <ng-container i18n>Provider</ng-container> </th>
         <td mat-cell *matCellDef="let service"> {{service.provider}} </td>
       </ng-container>
 
       <ng-container matColumnDef="description">
-        <th mat-header-cell *matHeaderCellDef> Description </th>
+        <th mat-header-cell *matHeaderCellDef> <ng-container i18n>Description</ng-container> </th>
         <td mat-cell *matCellDef="let service"> {{service.description}} </td>
       </ng-container>
 
       <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef class="w-20"> Actions </th>
+        <th mat-header-cell *matHeaderCellDef class="w-20"> <ng-container i18n>Actions</ng-container> </th>
         <td mat-cell *matCellDef="let service">
           <button mat-icon-button [matMenuTriggerFor]="menu">
             <mat-icon>more_vert</mat-icon>
@@ -57,11 +57,11 @@
           <mat-menu #menu="matMenu">
             <button mat-menu-item (click)="onEdit(service)">
               <mat-icon>edit</mat-icon>
-              <span>Edit</span>
+              <span><ng-container i18n>Edit</ng-container></span>
             </button>
             <button mat-menu-item (click)="onDelete(service)">
               <mat-icon>delete</mat-icon>
-              <span>Delete</span>
+              <span><ng-container i18n>Delete</ng-container></span>
             </button>
           </mat-menu>
         </td>

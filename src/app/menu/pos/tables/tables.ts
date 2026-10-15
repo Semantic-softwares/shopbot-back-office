@@ -98,7 +98,7 @@ export class Tables implements OnInit {
         if (data?.fromTableName && data?.toTableName) {
           this.snackBar.open(
             `${data.fromTableName} → ${data.toTableName}`,
-            'Close',
+            $localize`Close`,
             { duration: 4000 },
           );
         }
@@ -215,19 +215,19 @@ export class Tables implements OnInit {
   public printOrder(table: Table): void {
     const orderId = table.orderId?._id;
     if (!orderId) {
-      this.snackBar.open('No order found for this table', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`No order found for this table`, $localize`Close`, { duration: 3000 });
       return;
     }
-    const loadingSnackBar = this.snackBar.open('Sending to printer...', '', { duration: 0 });
+    const loadingSnackBar = this.snackBar.open($localize`Sending to printer...`, '', { duration: 0 });
     this.printJobService.printOrder(orderId).subscribe({
       next: (res) => {
         loadingSnackBar.dismiss();
-        this.snackBar.open(res.message || 'Print job created successfully', 'Close', { duration: 3000 });
+        this.snackBar.open(res.message || 'Print job created successfully', $localize`Close`, { duration: 3000 });
       },
       error: (err) => {
         loadingSnackBar.dismiss();
         console.error('Failed to create print job:', err);
-        this.snackBar.open('Failed to create print job', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Failed to create print job`, $localize`Close`, { duration: 3000 });
       },
     });
   }
@@ -236,18 +236,18 @@ export class Tables implements OnInit {
   public onEditOrder(table: Table): void {
       const order = table?.orderId;
       if (order?.category === 'Complete' && order?.paymentStatus === 'Paid') {
-        this.snackBar.open('This order is complete and paid — it can no longer be edited.', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`This order is complete and paid — it can no longer be edited.`, $localize`Close`, { duration: 3000 });
         return;
       }
 
       if (!order?.cart) {
-        this.snackBar.open('Invalid cart data', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Invalid cart data`, $localize`Close`, { duration: 3000 });
         console.error('Invalid cart data');
         return;
       }
   
       // Show loading snackbar
-      const loadingSnackBar = this.snackBar.open('Loading order for editing...', '', {
+      const loadingSnackBar = this.snackBar.open($localize`Loading order for editing...`, '', {
         duration: 0,
         horizontalPosition: 'center',
         verticalPosition: 'bottom',
@@ -267,7 +267,7 @@ export class Tables implements OnInit {
         error: (error) => {
           // Dismiss loading and show error
           loadingSnackBar.dismiss();
-          this.snackBar.open('Failed to load order for editing', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Failed to load order for editing`, $localize`Close`, { duration: 3000 });
           console.error('Error loading cart:', error);
           
           // Cart loading failed
@@ -285,7 +285,7 @@ export class Tables implements OnInit {
   public onTransferOrder(table: Table): void {
     const orderId = table.orderId?._id;
     if (!orderId) {
-      this.snackBar.open('No order on this table to move', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`No order on this table to move`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -309,9 +309,9 @@ export class Tables implements OnInit {
         }
         this.snackBar.open(
           result.type === 'full'
-            ? `Order moved to ${result.toTableName}`
-            : `Items moved to ${result.toTableName}`,
-          'Close',
+            ? $localize`Order moved to ${result.toTableName}`
+            : $localize`Items moved to ${result.toTableName}`,
+          $localize`Close`,
           { duration: 4000 },
         );
       });

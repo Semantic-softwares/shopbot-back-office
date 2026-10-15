@@ -1,7 +1,7 @@
 <!-- Page Header -->
 <app-page-header
-  title="Taxes"
-  subtitle="Manage all taxes for your property">
+  title="Taxes" i18n-title
+  subtitle="Manage all taxes for your property" i18n-subtitle>
   <ng-container actions>
     <button
       matButton="filled"
@@ -11,7 +11,7 @@
       class="px-4"
     >
       <mat-icon class="mr-2">add</mat-icon>
-      Create Tax
+      <ng-container i18n>Create Tax</ng-container>
     </button>
   </ng-container>
 </app-page-header>
@@ -25,16 +25,16 @@
       </div>
     } @else if (taxes().length === 0) {
       <div class="text-center py-8">
-        <p class="text-gray-500 mb-4">No taxes found</p>
+        <p class="text-gray-500 mb-4"><ng-container i18n>No taxes found</ng-container></p>
         <button matButton color="primary" (click)="createTax()">
-          Create Tax
+          <ng-container i18n>Create Tax</ng-container>
         </button>
       </div>
     } @else {
       <table mat-table [dataSource]="taxes()" class="w-full">
         <!-- Title Column -->
         <ng-container matColumnDef="title">
-          <th mat-header-cell *matHeaderCellDef>Title</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Title</ng-container></th>
           <td mat-cell *matCellDef="let tax">
             <span class="font-medium text-gray-900">{{ tax.title }}</span>
           </td>
@@ -42,7 +42,7 @@
 
         <!-- Type Column -->
         <ng-container matColumnDef="type">
-          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Type</ng-container></th>
           <td mat-cell *matCellDef="let tax">
             <span class="text-gray-700 capitalize">{{ tax.type || '-' }}</span>
           </td>
@@ -50,7 +50,7 @@
 
         <!-- Rate Column -->
         <ng-container matColumnDef="rate">
-          <th mat-header-cell *matHeaderCellDef>Rate</th>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Rate</ng-container></th>
           <td mat-cell *matCellDef="let tax">
             <span class="text-gray-700">{{ tax.rate || '-' }}%</span>
           </td>
@@ -58,12 +58,12 @@
 
         <!-- Actions Column -->
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="text-right">Actions</th>
+          <th mat-header-cell *matHeaderCellDef class="text-right"><ng-container i18n>Actions</ng-container></th>
           <td mat-cell *matCellDef="let tax" class="text-right">
             <button
               mat-icon-button
               [matMenuTriggerFor]="menu"
-              matTooltip="More options"
+              matTooltip="More options" i18n-matTooltip
               class="text-gray-600"
             >
               <mat-icon>more_vert</mat-icon>
@@ -75,7 +75,7 @@
                 class="text-blue-600"
               >
                 <mat-icon>edit</mat-icon>
-                <span>Edit</span>
+                <span><ng-container i18n>Edit</ng-container></span>
               </button>
               <button
                 mat-menu-item
@@ -83,7 +83,7 @@
                 class="text-red-600"
               >
                 <mat-icon>delete</mat-icon>
-                <span>Delete</span>
+                <span><ng-container i18n>Delete</ng-container></span>
               </button>
             </mat-menu>
           </td>

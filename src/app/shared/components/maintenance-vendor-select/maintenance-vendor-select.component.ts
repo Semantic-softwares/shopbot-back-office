@@ -28,10 +28,10 @@ import { MaintenanceVendorService } from '../../services/maintenance-vendor.serv
       <mat-label>{{ label }}</mat-label>
       <mat-select [formControl]="control">
         @if (vendorsResource.isLoading()) {
-          <mat-option disabled>Loading...</mat-option>
+          <mat-option disabled><ng-container i18n>Loading...</ng-container></mat-option>
         } @else {
           @if (showNone) {
-            <mat-option value="">None</mat-option>
+            <mat-option value=""><ng-container i18n>None</ng-container></mat-option>
           }
           @for (vendor of options(); track vendor._id) {
             <mat-option [value]="vendor._id">{{ vendor.name }}</mat-option>
@@ -42,7 +42,7 @@ import { MaintenanceVendorService } from '../../services/maintenance-vendor.serv
         <mat-hint align="end">
           <a class="text-blue-600 cursor-pointer text-xs hover:underline" role="button" tabindex="0"
             (click)="createVendor()" (keydown.enter)="createVendor()">
-            Add vendor
+            <ng-container i18n>Add vendor</ng-container>
           </a>
         </mat-hint>
       }

@@ -13,19 +13,19 @@
 
 /* Dialog title styling */
 .mat-mdc-dialog-title {
-  border-bottom: 1px solid #e5e7eb;
-  background-color: #f9fafb;
+  border-bottom: 1px solid light-dark(#e5e7eb, #48464b);
+  background-color: light-dark(#f9fafb, #1c1b1c);
 }
 
 /* Dialog content styling */
 .mat-mdc-dialog-content {
-  background-color: white;
+  background-color: light-dark(white, #201f20);
 }
 
 /* Dialog actions styling */
 .mat-mdc-dialog-actions {
-  border-top: 1px solid #e5e7eb;
-  background-color: #f9fafb;
+  border-top: 1px solid light-dark(#e5e7eb, #48464b);
+  background-color: light-dark(#f9fafb, #1c1b1c);
 }
 
 /* Form field styling */
@@ -38,8 +38,8 @@
 }
 
 .pricing-summary {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background-color: light-dark(#f8fafc, #1c1b1c);
+  border: 1px solid light-dark(#e2e8f0, #48464b);
   border-radius: 0.5rem;
   padding: 1rem;
   
@@ -56,7 +56,7 @@
     &.total-row {
       font-weight: 600;
       font-size: 1.125rem;
-      border-top: 2px solid #cbd5e1;
+      border-top: 2px solid light-dark(#cbd5e1, #40474f);
       padding-top: 0.75rem;
       margin-top: 0.75rem;
     }
@@ -64,8 +64,8 @@
 }
 
 .reference-pricing {
-  background-color: #f0f9ff;
-  border: 1px solid #bae6fd;
+  background-color: light-dark(#f0f9ff, #143043);
+  border: 1px solid light-dark(#bae6fd, #2c5062);
   border-radius: 0.5rem;
   padding: 1rem;
   font-size: 0.875rem;
@@ -92,7 +92,7 @@
   
   &:disabled {
     background-color: #9ca3af !important;
-    color: #6b7280 !important;
+    color: light-dark(#6b7280, #cac5cb) !important;
   }
 }
 

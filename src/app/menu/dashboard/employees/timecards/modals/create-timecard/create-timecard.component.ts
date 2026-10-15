@@ -19,6 +19,7 @@ import { StoreStore } from '../../../../../../shared/stores/store.store';
 import { Timesheet, BreakRecord } from '../../../../../../shared/models';
 import { Employee } from '../../../../../../shared/models/employee.model';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { TrPipe } from '../../../../../../shared/i18n/tr.pipe';
 
 interface CreateTimecardData {
   mode: 'create' | 'edit';
@@ -73,7 +74,7 @@ function breakTimeValidator(): ValidatorFn {
   styleUrls: ['./create-timecard.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
+  imports: [TrPipe, 
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -110,15 +111,15 @@ export class CreateTimecardComponent implements OnInit {
   });
 
   public breakTypes = [
-    { value: 'lunch', label: 'Lunch Break' },
-    { value: 'short', label: 'Short Break' },
-    { value: 'other', label: 'Other' }
+    { value: 'lunch', label: $localize`Lunch Break` },
+    { value: 'short', label: $localize`Short Break` },
+    { value: 'other', label: $localize`Other` }
   ];
 
   public statusOptions = [
-    { value: 'clocked-in', label: 'Clocked In' },
-    { value: 'clocked-out', label: 'Clocked Out' },
-    { value: 'incomplete', label: 'Incomplete' }
+    { value: 'clocked-in', label: $localize`Clocked In` },
+    { value: 'clocked-out', label: $localize`Clocked Out` },
+    { value: 'incomplete', label: $localize`Incomplete` }
   ];
 
   ngOnInit() {
@@ -243,7 +244,7 @@ export class CreateTimecardComponent implements OnInit {
     const storeId = this.storeStore.selectedStore()?._id;
     
     if (!storeId) {
-      this.snackBar.open('No store selected', 'Close', {
+      this.snackBar.open($localize`No store selected`, $localize`Close`, {
         duration: 3000,
         horizontalPosition: 'end',
         verticalPosition: 'top'
@@ -253,7 +254,7 @@ export class CreateTimecardComponent implements OnInit {
     }
 
     if (!formValue.staff) {
-      this.snackBar.open('Employee selection is required', 'Close', {
+      this.snackBar.open($localize`Employee selection is required`, $localize`Close`, {
         duration: 3000,
         horizontalPosition: 'end',
         verticalPosition: 'top'
@@ -278,7 +279,7 @@ export class CreateTimecardComponent implements OnInit {
     // Create timesheet with complete data in a single API call
     this.timesheetService.clockIn(clockInData).subscribe({
       next: (newTimesheet) => {
-        this.snackBar.open('Timecard created successfully', 'Close', {
+        this.snackBar.open($localize`Timecard created successfully`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -295,7 +296,7 @@ export class CreateTimecardComponent implements OnInit {
           ? 'Employee already has an active timecard.'
           : 'Error creating timecard';
         
-        this.snackBar.open(errorMessage, 'Close', {
+        this.snackBar.open(errorMessage, $localize`Close`, {
           duration: 5000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -308,7 +309,7 @@ export class CreateTimecardComponent implements OnInit {
   private updateTimecard(formValue: any) {
     this.timesheetService.updateTimesheet(this.data.timesheet!._id, formValue).subscribe({
       next: (result) => {
-        this.snackBar.open('Timecard updated successfully', 'Close', {
+        this.snackBar.open($localize`Timecard updated successfully`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -317,7 +318,7 @@ export class CreateTimecardComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error updating timecard:', error);
-        this.snackBar.open('Error updating timecard', 'Close', {
+        this.snackBar.open($localize`Error updating timecard`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'

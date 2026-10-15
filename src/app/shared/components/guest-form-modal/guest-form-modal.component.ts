@@ -386,14 +386,14 @@ export class GuestFormModalComponent implements OnInit, OnDestroy {
   }
 
   private showSuccess(message: string) {
-    this.snackBar.open(message, 'Close', {
+    this.snackBar.open(message, $localize`Close`, {
       duration: 3000,
       panelClass: ['success-snackbar']
     });
   }
 
   private showError(message: string) {
-    this.snackBar.open(message, 'Close', {
+    this.snackBar.open(message, $localize`Close`, {
       duration: 5000,
       panelClass: ['error-snackbar']
     });

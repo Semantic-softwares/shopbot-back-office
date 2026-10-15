@@ -104,7 +104,7 @@ export class CustomerListComponent {
 
   deleteCustomer(customer: User) {
     if (customer.role?.name === 'Owner') {
-      this.snackBar.open('Cannot delete an owner', 'Close', {
+      this.snackBar.open($localize`Cannot delete an owner`, $localize`Close`, {
         duration: 3000,
         horizontalPosition: 'end',
         verticalPosition: 'top'
@@ -121,7 +121,7 @@ export class CustomerListComponent {
       if (result) {
         this.customerService.deleteCustomer(customer._id!).subscribe({
           next: () => {
-            this.snackBar.open('Customer deleted successfully', 'Close', {
+            this.snackBar.open($localize`Customer deleted successfully`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -129,7 +129,7 @@ export class CustomerListComponent {
             this.customers.reload();
           },
           error: () => {
-            this.snackBar.open('Error deleting customer', 'Close', {
+            this.snackBar.open($localize`Error deleting customer`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'

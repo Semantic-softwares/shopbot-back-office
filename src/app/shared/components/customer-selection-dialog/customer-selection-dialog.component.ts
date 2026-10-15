@@ -16,6 +16,7 @@ import { StoreStore } from '../../stores/store.store';
 import { CustomerDialogComponent } from '../../../menu/dashboard/customers/modals/customer-dialog.component';
 import { debounceTime, Subject, switchMap, of, catchError } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TrPipe } from '../../i18n/tr.pipe';
 
 export interface CustomerSelectionDialogData {
   selectedCustomer: User | null;
@@ -29,7 +30,7 @@ export interface CustomerSelectionDialogResult {
 @Component({
   selector: 'app-customer-selection-dialog',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatDialogModule,
     MatButtonModule,

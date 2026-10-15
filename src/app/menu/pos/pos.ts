@@ -13,10 +13,11 @@ import { Store } from '../../shared/models';
 import { AuthService } from '../../shared/services/auth.service';
 import { RolesService } from '../../shared/services/roles.service';
 import { StoreStore } from '../../shared/stores/store.store';
+import { TrPipe } from '../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-pos',
-  imports: [
+  imports: [TrPipe, 
     RouterModule,
     ToolbarComponent,
     MatSidenavModule,
@@ -55,17 +56,17 @@ export class Pos {
   private navItemsConfig = [
     {
       icon: 'point_of_sale',
-      label: 'Checkout',
+      label: $localize`Checkout`,
       link: './checkout',
     },
     {
       icon: 'table_restaurant',
-      label: 'Tables',
+      label: $localize`Tables`,
       link: './tables',
     },
     {
       icon: 'receipt_long',
-      label: 'Orders',
+      label: $localize`Orders`,
       link: './orders',
     },
   ];

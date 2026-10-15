@@ -1,12 +1,12 @@
-<app-page-header title="Vendors" subtitle="Manage maintenance vendors for your properties">
+<app-page-header title="Vendors" i18n-title subtitle="Manage maintenance vendors for your properties" i18n-subtitle>
   <ng-container actions>
     <button mat-button (click)="clearFilters()">
       <mat-icon>filter_alt_off</mat-icon>
-      Clear Filters
+      <ng-container i18n>Clear Filters</ng-container>
     </button>
     <button mat-flat-button (click)="goToCreate()">
       <mat-icon>add</mat-icon>
-      New Vendor
+      <ng-container i18n>New Vendor</ng-container>
     </button>
   </ng-container>
 </app-page-header>
@@ -21,17 +21,17 @@
       } @else {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <mat-form-field appearance="outline">
-            <mat-label>Search</mat-label>
+            <mat-label><ng-container i18n>Search</ng-container></mat-label>
             <input
               matInput
               [formControl]="filterForm.controls.search"
-              placeholder="Name, company, specialty, email"
+              placeholder="Name, company, specialty, email" i18n-placeholder
             />
             <mat-icon matSuffix>search</mat-icon>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Category</mat-label>
+            <mat-label><ng-container i18n>Category</ng-container></mat-label>
             <mat-select [formControl]="filterForm.controls.category">
               @for (option of categoryOptions(); track option.value) {
                 <mat-option [value]="option.value">{{ option.label }}</mat-option>
@@ -40,7 +40,7 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Status</mat-label>
+            <mat-label><ng-container i18n>Status</ng-container></mat-label>
             <mat-select [formControl]="filterForm.controls.isActive">
               @for (option of activeOptions; track option.value) {
                 <mat-option [value]="option.value">{{ option.label }}</mat-option>
@@ -52,8 +52,8 @@
         @if (vendorsResource.value()?.data?.items?.length === 0) {
           <app-no-record
             icon="engineering"
-            title="No Vendors Found"
-            message="No maintenance vendors found. Add a vendor to get started."
+            title="No Vendors Found" i18n-title
+            message="No maintenance vendors found. Add a vendor to get started." i18n-message
           ></app-no-record>
         } @else {
           <div class="overflow-auto">
@@ -72,19 +72,19 @@
               </ng-container>
 
               <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Name</ng-container></th>
                 <td mat-cell *matCellDef="let row">
                   <button mat-button (click)="goToDetail(row)" class="!px-0">
                     <span class="font-medium">{{ row.name }}</span>
                   </button>
                   @if (row.company) {
-                    <div class="text-xs text-gray-500">Company</div>
+                    <div class="text-xs text-gray-500"><ng-container i18n>Company</ng-container></div>
                   }
                 </td>
               </ng-container>
 
               <ng-container matColumnDef="contact">
-                <th mat-header-cell *matHeaderCellDef>Contact</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Contact</ng-container></th>
                 <td mat-cell *matCellDef="let row">
                   <div class="text-sm">{{ row.email || '-' }}</div>
                   <div class="text-xs text-gray-500">{{ row.phone || '-' }}</div>
@@ -92,7 +92,7 @@
               </ng-container>
 
               <ng-container matColumnDef="category">
-                <th mat-header-cell *matHeaderCellDef>Category</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Category</ng-container></th>
                 <td mat-cell *matCellDef="let row">
                   @if (row.category) {
                     <mat-chip>{{ row.category }}</mat-chip>
@@ -103,32 +103,32 @@
               </ng-container>
 
               <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
                 <td mat-cell *matCellDef="let row">
                   <mat-chip [class]="row.isActive ? 'bg-green-600! text-white!' : 'bg-gray-500! text-white!'">
-                    {{ row.isActive ? 'Active' : 'Inactive' }}
+                    @if (row.isActive) {<ng-container i18n>Active</ng-container>} @else {<ng-container i18n>Inactive</ng-container>}
                   </mat-chip>
                 </td>
               </ng-container>
 
               <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Actions</ng-container></th>
                 <td mat-cell *matCellDef="let row">
-                  <button mat-icon-button [matMenuTriggerFor]="actionMenu" aria-label="Open vendor actions">
+                  <button mat-icon-button [matMenuTriggerFor]="actionMenu" aria-label="Open vendor actions" i18n-aria-label>
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #actionMenu="matMenu">
                     <button mat-menu-item (click)="goToDetail(row)">
                       <mat-icon>visibility</mat-icon>
-                      <span>View Details</span>
+                      <span><ng-container i18n>View Details</ng-container></span>
                     </button>
                     <button mat-menu-item (click)="goToEdit(row)">
                       <mat-icon>edit</mat-icon>
-                      <span>Edit Vendor</span>
+                      <span><ng-container i18n>Edit Vendor</ng-container></span>
                     </button>
                     <button mat-menu-item (click)="onDelete(row)">
                       <mat-icon>delete</mat-icon>
-                      <span>Delete Vendor</span>
+                      <span><ng-container i18n>Delete Vendor</ng-container></span>
                     </button>
                   </mat-menu>
                 </td>

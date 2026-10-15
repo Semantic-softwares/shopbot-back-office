@@ -18,7 +18,7 @@ export const reservationRoutes: Routes = [
           import('./reservation-view/reservations-view.routes').then(
             (c) => c.RESERVATION_VIEW_ROUTES
           ),
-        title: 'Reservations - Hotel Management',
+        title: $localize`Reservations - Hotel Management`,
         canActivate: [roleGuard],
         data: { requiredPermission: 'hotel.reservations.view' }
       },
@@ -29,7 +29,7 @@ export const reservationRoutes: Routes = [
           import('./reservation-form/reservation-form.component').then(
             (c) => c.ReservationFormComponent
           ),
-        title: 'New Reservation - Hotel Management',
+        title: $localize`New Reservation - Hotel Management`,
         canActivate: [roleGuard],
         data: { requiredPermission: 'hotel.reservations.create' }
       },
@@ -39,7 +39,7 @@ export const reservationRoutes: Routes = [
           import('./reservation-form/reservation-form.component').then(
             (c) => c.ReservationFormComponent
           ),
-        title: 'Edit Reservation - Hotel Management',
+        title: $localize`Edit Reservation - Hotel Management`,
         canActivate: [roleGuard],
         data: { requiredPermission: 'hotel.reservations.edit' }
       },
@@ -49,7 +49,7 @@ export const reservationRoutes: Routes = [
           import('./reservation-details/reservation-details.component').then(
             (c) => c.ReservationDetailsComponent
           ),
-        title: 'Reservation Details - Hotel Management',
+        title: $localize`Reservation Details - Hotel Management`,
         canActivate: [roleGuard],
         data: { requiredPermission: 'hotel.reservations.view' }
       },

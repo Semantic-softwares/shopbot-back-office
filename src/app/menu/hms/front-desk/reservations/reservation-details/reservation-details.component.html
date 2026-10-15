@@ -12,12 +12,12 @@
         <div>
           @if (reservation()) {
             <h1 class="text-3xl font-bold text-gray-900 mb-1">
-              Reservation Details
+              <ng-container i18n>Reservation Details</ng-container>
             </h1>
-            <p class="text-sm text-gray-600">Confirmation: {{ reservation()!.confirmationNumber }}</p>
+            <p class="text-sm text-gray-600"><ng-container i18n>Confirmation: {{ reservation()!.confirmationNumber }}</ng-container></p>
           } @else {
-            <h1 class="text-3xl font-bold text-gray-900 mb-1">Reservation Details</h1>
-            <p class="text-sm text-gray-600">Loading reservation information...</p>
+            <h1 class="text-3xl font-bold text-gray-900 mb-1"><ng-container i18n>Reservation Details</ng-container></h1>
+            <p class="text-sm text-gray-600"><ng-container i18n>Loading reservation information...</ng-container></p>
           }
         </div>
       </div>
@@ -44,11 +44,11 @@
             <!-- Status Change Menu -->
             <mat-menu #statusMenu="matMenu" class="!shadow-xl !border !border-gray-200 !rounded-lg">
               <div class="px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
-                Change Status
+                <ng-container i18n>Change Status</ng-container>
               </div>
               @if (getAvailableStatusOptions().length === 0) {
                 <div class="px-3 py-2 text-xs text-gray-400 italic">
-                  No status changes available
+                  <ng-container i18n>No status changes available</ng-container>
                 </div>
               }
               @for (status of getAvailableStatusOptions(); track status.value) {
@@ -64,12 +64,12 @@
               }
               @if (reservation() && reservation()!.status === 'pending') {
                 <div class="px-3 py-2 text-xs text-amber-600 bg-amber-50 border-t border-amber-100 mt-1">
-                  💡 Confirm reservation before check-in
+                  <ng-container i18n>💡 Confirm reservation before check-in</ng-container>
                 </div>
               }
               @if (reservation() && reservation()!.status === 'confirmed') {
                 <div class="px-3 py-2 text-xs text-blue-600 bg-blue-50 border-t border-blue-100 mt-1">
-                  💡 Ready for check-in
+                  <ng-container i18n>💡 Ready for check-in</ng-container>
                 </div>
               }
             </mat-menu>
@@ -81,7 +81,7 @@
               (click)="editReservation()"
               class="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 flex items-center gap-2">
               <mat-icon class="text-lg">edit</mat-icon>
-              Edit Reservation
+              <ng-container i18n>Edit Reservation</ng-container>
             </button>
           }
           
@@ -92,7 +92,7 @@
               [disabled]="statusUpdating()"
               class="px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 hover:border-green-300 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
               <mat-icon class="text-lg">schedule</mat-icon>
-              Extend Stay
+              <ng-container i18n>Extend Stay</ng-container>
             </button>
           }
           
@@ -111,7 +111,7 @@
 @if (loading()) {
   <div class="flex justify-center items-center py-12 bg-white">
     <mat-spinner diameter="40" class="!text-blue-600"></mat-spinner>
-    <span class="ml-3 text-gray-600">Loading reservation details...</span>
+    <span class="ml-3 text-gray-600"><ng-container i18n>Loading reservation details...</ng-container></span>
   </div>
 }
 
@@ -122,13 +122,13 @@
       <div class="w-16 h-16 bg-red-200 rounded-full flex items-center justify-center mx-auto mb-4">
         <mat-icon class="text-4xl text-red-500">error_outline</mat-icon>
       </div>
-      <h3 class="text-lg font-semibold text-red-900 mb-2">Failed to Load Reservation</h3>
+      <h3 class="text-lg font-semibold text-red-900 mb-2"><ng-container i18n>Failed to Load Reservation</ng-container></h3>
       <p class="text-red-700 mb-4">{{ error() }}</p>
       <button 
         type="button"
         (click)="goBack()"
         class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
-        Back to Reservations
+        <ng-container i18n>Back to Reservations</ng-container>
       </button>
     </div>
   </div>
@@ -147,32 +147,32 @@
           <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <mat-icon class="text-blue-600">person</mat-icon>
-              Guest Information
+              <ng-container i18n>Guest Information</ng-container>
             </h3>
           </div>
           <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Guest Name</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Guest Name</ng-container></label>
                 <div class="text-lg font-semibold text-gray-900">{{ guestName() }}</div>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Email</ng-container></label>
                 <div class="text-sm text-gray-600">{{ guestEmail() }}</div>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Phone</ng-container></label>
                 <div class="text-sm text-gray-600">{{ guestPhone() }}</div>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Occupancy</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Occupancy</ng-container></label>
                 <div class="text-sm text-gray-600">
                   @if (hasAdditionalGuests()) {
                     @for (guest of reservation()!.additionalGuests; track $index) {
-                      <div>{{ getGuestName(guest.guest) }}: {{ guest.totalAdults }} Adults, {{ guest.totalChildren }} Children</div>
+                      <div><ng-container i18n>{{ getGuestName(guest.guest) }}: {{ guest.totalAdults }} Adults, {{ guest.totalChildren }} Children</ng-container></div>
                     }
                   } @else {
-                    <div>No additional guests</div>
+                    <div><ng-container i18n>No additional guests</ng-container></div>
                   }
                 </div>
               </div>
@@ -185,31 +185,31 @@
           <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <mat-icon class="text-green-600">calendar_today</mat-icon>
-              Stay Information
+              <ng-container i18n>Stay Information</ng-container>
             </h3>
           </div>
           <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Check-in Date</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Check-in Date</ng-container></label>
                 <div class="text-lg font-semibold text-gray-900">{{ formatDate(reservation()!.checkInDate) }}</div>
                 @if (reservation()!.expectedCheckInTime) {
-                  <div class="text-sm text-gray-600">Expected: {{ reservation()!.expectedCheckInTime }}</div>
+                  <div class="text-sm text-gray-600"><ng-container i18n>Expected: {{ reservation()!.expectedCheckInTime }}</ng-container></div>
                 }
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Check-out Date</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Check-out Date</ng-container></label>
                 <div class="text-lg font-semibold text-gray-900">{{ formatDate(reservation()!.checkOutDate) }}</div>
                 @if (reservation()!.expectedCheckOutTime) {
-                  <div class="text-sm text-gray-600">Expected: {{ reservation()!.expectedCheckOutTime }}</div>
+                  <div class="text-sm text-gray-600"><ng-container i18n>Expected: {{ reservation()!.expectedCheckOutTime }}</ng-container></div>
                 }
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Number of Nights</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Number of Nights</ng-container></label>
                 <div class="text-lg font-semibold text-gray-900">{{ reservation()!.numberOfNights }}</div>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Booking Source</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Booking Source</ng-container></label>
                 <div class="text-sm text-gray-600">{{ reservation()!.bookingSource | titlecase }}</div>
               </div>
             </div>
@@ -222,9 +222,9 @@
             <div class="bg-gradient-to-r from-orange-50 to-amber-50 px-6 py-4 border-b border-orange-200">
               <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
                 <mat-icon class="text-orange-600">schedule</mat-icon>
-                Stay Extensions
+                <ng-container i18n>Stay Extensions</ng-container>
                 <span class="ml-2 px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
-                  {{ getExtensions().length }} Extension{{ getExtensions().length > 1 ? 's' : '' }}
+                  <ng-container i18n>{{ getExtensions().length }} Extension{{ getExtensions().length > 1 ? 's' : '' }}</ng-container>
                 </span>
               </h3>
             </div>
@@ -238,7 +238,7 @@
                           <mat-icon class="text-orange-600 text-sm">hotel_class</mat-icon>
                         </div>
                         <div>
-                          <h4 class="font-medium text-gray-900">Extension Request</h4>
+                          <h4 class="font-medium text-gray-900"><ng-container i18n>Extension Request</ng-container></h4>
                           <p class="text-sm text-gray-600">{{ formatExtensionDate(extension.requestedAt) }}</p>
                         </div>
                       </div>
@@ -255,26 +255,26 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Original Check-out</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Original Check-out</ng-container></label>
                         <div class="text-sm text-gray-900">{{ formatExtensionDate(extension.originalCheckOutDate) }}</div>
                       </div>
                       <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Extended Check-out</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Extended Check-out</ng-container></label>
                         <div class="text-sm text-gray-900 font-medium">{{ formatExtensionDate(extension.newCheckOutDate) }}</div>
                       </div>
                       <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Additional Nights</label>
-                        <div class="text-sm text-gray-900">{{ extension.additionalNights }} night{{ extension.additionalNights > 1 ? 's' : '' }}</div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Additional Nights</ng-container></label>
+                        <div class="text-sm text-gray-900"><ng-container i18n>{{ extension.additionalNights }} night{{ extension.additionalNights > 1 ? 's' : '' }}</ng-container></div>
                       </div>
                       <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Extension Cost</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Extension Cost</ng-container></label>
                         <div class="text-sm font-medium text-orange-600">{{ extension.additionalCost | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</div>
                       </div>
                     </div>
 
                     @if (extension.notes) {
                       <div class="mb-3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Notes</ng-container></label>
                         <div class="text-sm text-gray-600 bg-white p-3 rounded border">{{ extension.notes }}</div>
                       </div>
                     }
@@ -291,7 +291,7 @@
                           } @else {
                             <mat-icon class="text-sm">check_circle</mat-icon>
                           }
-                          Approve Extension
+                          <ng-container i18n>Approve Extension</ng-container>
                         </button>
                         <button 
                           type="button"
@@ -303,7 +303,7 @@
                           } @else {
                             <mat-icon class="text-sm">cancel</mat-icon>
                           }
-                          Reject Extension
+                          <ng-container i18n>Reject Extension</ng-container>
                         </button>
                       </div>
                     }
@@ -311,7 +311,7 @@
                     @if (extension.status === 'approved' && extension.approvedAt) {
                       <div class="flex items-center gap-2 text-sm text-green-600">
                         <mat-icon class="text-sm">check_circle</mat-icon>
-                        Approved on {{ formatExtensionDate(extension.approvedAt) }}
+                        <ng-container i18n>Approved on {{ formatExtensionDate(extension.approvedAt) }}</ng-container>
                       </div>
                       
                       <!-- Payment Information for Approved Extensions -->
@@ -319,11 +319,11 @@
                         <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
                           <div class="flex items-center gap-2 text-sm text-blue-600 mb-2">
                             <mat-icon class="text-sm">payment</mat-icon>
-                            <span class="font-medium">Payment Information</span>
+                            <span class="font-medium"><ng-container i18n>Payment Information</ng-container></span>
                           </div>
                           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                             <div>
-                              <span class="text-gray-600">Status:</span>
+                              <span class="text-gray-600"><ng-container i18n>Status:</ng-container></span>
                               <span class="ml-2 px-2 py-1 rounded-full text-xs font-medium"
                                     [ngClass]="{
                                       'bg-green-100 text-green-800': extension.paymentInfo.status === 'paid',
@@ -334,23 +334,23 @@
                               </span>
                             </div>
                             <div>
-                              <span class="text-gray-600">Method:</span>
+                              <span class="text-gray-600"><ng-container i18n>Method:</ng-container></span>
                               <span class="ml-2 font-medium text-gray-900">{{ extension.paymentInfo.method | titlecase }}</span>
                             </div>
                             <div>
-                              <span class="text-gray-600">Amount:</span>
+                              <span class="text-gray-600"><ng-container i18n>Amount:</ng-container></span>
                               <span class="ml-2 font-medium text-gray-900">{{ extension.paymentInfo.amount | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
                             </div>
                             @if (extension.paymentInfo.transactionReference) {
                               <div>
-                                <span class="text-gray-600">Reference:</span>
+                                <span class="text-gray-600"><ng-container i18n>Reference:</ng-container></span>
                                 <span class="ml-2 font-mono text-sm text-gray-900">{{ extension.paymentInfo.transactionReference }}</span>
                               </div>
                             }
                           </div>
                           @if (extension.paymentInfo.notes) {
                             <div class="mt-2 pt-2 border-t border-blue-200">
-                              <span class="text-gray-600 text-sm">Payment Notes:</span>
+                              <span class="text-gray-600 text-sm"><ng-container i18n>Payment Notes:</ng-container></span>
                               <div class="mt-1 text-sm text-gray-700">{{ extension.paymentInfo.notes }}</div>
                             </div>
                           }
@@ -362,11 +362,11 @@
                       <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded">
                         <div class="flex items-center gap-2 text-sm text-red-600 mb-1">
                           <mat-icon class="text-sm">cancel</mat-icon>
-                          Rejection Reason
+                          <ng-container i18n>Rejection Reason</ng-container>
                         </div>
                         <div class="text-sm text-red-700">{{ extension.rejectionReason }}</div>
                         @if (extension.rejectedAt) {
-                          <div class="text-xs text-red-500 mt-1">Rejected on {{ formatExtensionDate(extension.rejectedAt) }}</div>
+                          <div class="text-xs text-red-500 mt-1"><ng-container i18n>Rejected on {{ formatExtensionDate(extension.rejectedAt) }}</ng-container></div>
                         }
                       </div>
                     }
@@ -379,11 +379,11 @@
                 <div class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                   <div class="flex items-center gap-2 mb-2">
                     <mat-icon class="text-green-600">check_circle</mat-icon>
-                    <span class="font-medium text-green-800">Active Extension</span>
+                    <span class="font-medium text-green-800"><ng-container i18n>Active Extension</ng-container></span>
                   </div>
                   <div class="text-sm text-green-700">
-                    <p>Total extension cost: <strong>{{ getTotalExtensionCost() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</strong></p>
-                    <p>Total additional nights: <strong>{{ getTotalExtensionNights() }}</strong></p>
+                    <p i18n>Total extension cost: <strong>{{ getTotalExtensionCost() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</strong></p>
+                    <p i18n>Total additional nights: <strong>{{ getTotalExtensionNights() }}</strong></p>
                   </div>
                 </div>
               }
@@ -397,7 +397,7 @@
             <div class="flex items-center justify-between">
               <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
                 <mat-icon class="text-purple-600">hotel</mat-icon>
-                Room Details
+                <ng-container i18n>Room Details</ng-container>
               </h3>
               
               <!-- Room Change Button -->
@@ -405,7 +405,7 @@
                 <button
                   mat-icon-button
                   (click)="openRoomChangeDialog()"
-                  matTooltip="Change Rooms"
+                  matTooltip="Change Rooms" i18n-matTooltip
                   class="text-blue-600 hover:bg-blue-50 transition-colors duration-200">
                   <mat-icon>swap_horiz</mat-icon>
                 </button>
@@ -417,11 +417,11 @@
               <table class="min-w-full">
                 <thead>
                   <tr class="border-b border-gray-200">
-                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Room Number</th>
-                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Room Type</th>
-                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Adults</th>
-                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Children</th>
-                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Rate per Night</th>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-700"><ng-container i18n>Room Number</ng-container></th>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-700"><ng-container i18n>Room Type</ng-container></th>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-700"><ng-container i18n>Adults</ng-container></th>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-700"><ng-container i18n>Children</ng-container></th>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-700"><ng-container i18n>Rate per Night</ng-container></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -457,9 +457,9 @@
                 <mat-icon [class.text-purple-600]="!isCheckedOut()" [class.text-gray-400]="isCheckedOut()">
                   {{ isCheckedOut() ? 'lock' : 'account_balance_wallet' }}
                 </mat-icon>
-                Pricing Summary
+                <ng-container i18n>Pricing Summary</ng-container>
                 @if (isCheckedOut()) {
-                  <span class="text-xs text-gray-500 font-normal">(Locked)</span>
+                  <span class="text-xs text-gray-500 font-normal"><ng-container i18n>(Locked)</ng-container></span>
                 }
               </h3>
               <button 
@@ -468,7 +468,7 @@
                 class="text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors duration-200"
                 [class.text-gray-400]="!canEditPricing()"
                 [class.cursor-not-allowed]="!canEditPricing()"
-                [matTooltip]="canEditPricing() ? 'Update Pricing (Owner Authorization Required)' : 'Cannot edit pricing for checked-out reservations'"
+                [matTooltip]="canEditPricing() ? ('Update Pricing (Owner Authorization Required)' | tr) : ('Cannot edit pricing for checked-out reservations' | tr)"
                 [disabled]="!canEditPricing()">
                 <mat-icon>{{ canEditPricing() ? 'edit' : 'lock' }}</mat-icon>
               </button>
@@ -477,54 +477,54 @@
           <div class="p-6">
             <div class="space-y-3">
               <div class="flex justify-between">
-                <span class="text-gray-600">Subtotal</span>
+                <span class="text-gray-600"><ng-container i18n>Subtotal</ng-container></span>
                 <span class="font-medium text-gray-900">{{ reservation()!.pricing.subtotal | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Taxes</span>
+                <span class="text-gray-600"><ng-container i18n>Taxes</ng-container></span>
                 <span class="font-medium text-gray-900">{{ reservation()!.pricing.taxes | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
               </div>
               @if (reservation()!.pricing.fees?.serviceFee) {
                 <div class="flex justify-between">
-                  <span class="text-gray-600">Service Fee</span>
+                  <span class="text-gray-600"><ng-container i18n>Service Fee</ng-container></span>
                   <span class="font-medium text-gray-900">{{ $safeNavigationMigration(reservation()!.pricing.fees?.serviceFee)! | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
                 </div>
               }
               @if (reservation()!.pricing.fees?.cleaningFee) {
                 <div class="flex justify-between">
-                  <span class="text-gray-600">Cleaning Fee</span>
+                  <span class="text-gray-600"><ng-container i18n>Cleaning Fee</ng-container></span>
                   <span class="font-medium text-gray-900">{{ $safeNavigationMigration(reservation()!.pricing.fees?.cleaningFee)! | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
                 </div>
               }
               @if (reservation()!.pricing.fees?.resortFee) {
                 <div class="flex justify-between">
-                  <span class="text-gray-600">Resort Fee</span>
+                  <span class="text-gray-600"><ng-container i18n>Resort Fee</ng-container></span>
                   <span class="font-medium text-gray-900">{{ $safeNavigationMigration(reservation()!.pricing.fees?.resortFee)! | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
                 </div>
               }
               @if (reservation()!.pricing.discounts) {
                 <div class="flex justify-between">
-                  <span class="text-gray-600">Discount</span>
+                  <span class="text-gray-600"><ng-container i18n>Discount</ng-container></span>
                   <span class="font-medium text-green-600">-{{ reservation()!.pricing.discounts! | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
                 </div>
               }
               @if (getTotalExtensionCost() > 0) {
                 <div class="flex justify-between">
-                  <span class="text-gray-600">Extensions ({{ getTotalExtensionNights() }} nights)</span>
+                  <span class="text-gray-600"><ng-container i18n>Extensions ({{ getTotalExtensionNights() }} nights)</ng-container></span>
                   <span class="font-medium text-orange-600">+{{ getTotalExtensionCost() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
                 </div>
               }
               <hr class="border-gray-200">
               <div class="flex justify-between text-lg font-semibold">
-                <span class="text-gray-900">Total</span>
+                <span class="text-gray-900"><ng-container i18n>Total</ng-container></span>
                 <span class="text-gray-900">{{ getFinalTotal() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Paid</span>
+                <span class="text-gray-600"><ng-container i18n>Paid</ng-container></span>
                 <span class="font-medium text-green-600">{{ reservation()!.pricing.paid | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Balance</span>
+                <span class="text-gray-600"><ng-container i18n>Balance</ng-container></span>
                 <span class="font-medium" [class]="reservation()!.pricing.balance > 0 ? 'text-red-600' : 'text-green-600'">
                   {{ reservation()!.pricing.balance | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
                 </span>
@@ -542,21 +542,21 @@
                   <mat-icon [class.text-indigo-600]="!isCheckedOut()" [class.text-gray-400]="isCheckedOut()">
                     {{ isCheckedOut() ? 'lock' : 'credit_card' }}
                   </mat-icon>
-                  Payment Information
+                  <ng-container i18n>Payment Information</ng-container>
                   @if (isCheckedOut()) {
-                    <span class="text-xs text-gray-500 font-normal">(Locked)</span>
+                    <span class="text-xs text-gray-500 font-normal"><ng-container i18n>(Locked)</ng-container></span>
                   }
                 </h3>
                 @if (canEditPaymentInfo()) {
                   <button 
                     [matMenuTriggerFor]="paymentMenu"
                     class="p-2 text-gray-600 hover:text-gray-900 hover:bg-white/60 rounded-lg transition-all duration-200"
-                    matTooltip="Payment options">
+                    matTooltip="Payment options" i18n-matTooltip>
                     <mat-icon>more_vert</mat-icon>
                   </button>
                 } @else if (isCheckedOut()) {
                   <div class="p-2 text-gray-400" 
-                       matTooltip="Cannot edit payment info for checked-out reservations">
+                       matTooltip="Cannot edit payment info for checked-out reservations" i18n-matTooltip>
                     <mat-icon>lock</mat-icon>
                   </div>
                 }
@@ -565,11 +565,11 @@
             <div class="p-6">
               <div class="space-y-3">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Payment Method</ng-container></label>
                   <div class="text-sm text-gray-900">{{ $safeNavigationMigration(reservation()!.paymentInfo?.method) | titlecase }}</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Payment Status</ng-container></label>
                   <div class="flex items-center gap-2">
                     @if (statusUpdating()) {
                       <mat-icon class="text-sm animate-spin text-blue-600">refresh</mat-icon>
@@ -584,10 +584,10 @@
                 </div>
                 @if (transactionHistory().length > 0) {
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Transaction</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Last Transaction</ng-container></label>
                     <div class="text-sm text-gray-900">
-                      {{ transactionHistory()[transactionHistory().length - 1].amount | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
-                      on {{ formatDateTime(transactionHistory()[transactionHistory().length - 1].date) }}
+                      <ng-container i18n>{{ transactionHistory()[transactionHistory().length - 1].amount | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
+                      on {{ formatDateTime(transactionHistory()[transactionHistory().length - 1].date) }}</ng-container>
                     </div>
                   </div>
                 }
@@ -607,7 +607,7 @@
           <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <mat-icon class="text-green-600">receipt</mat-icon>
-              Transaction History
+              <ng-container i18n>Transaction History</ng-container>
             </h3>
           </div>
           <div class="p-6">
@@ -615,11 +615,11 @@
               <table class="min-w-full">
                 <thead>
                   <tr class="border-b border-gray-200">
-                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
-                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Amount</th>
-                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Method</th>
-                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Reference</th>
-                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-700"><ng-container i18n>Date</ng-container></th>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-700"><ng-container i18n>Amount</ng-container></th>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-700"><ng-container i18n>Method</ng-container></th>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-700"><ng-container i18n>Reference</ng-container></th>
+                    <th class="text-left py-3 px-4 font-semibold text-gray-700"><ng-container i18n>Status</ng-container></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -652,7 +652,7 @@
               <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
                   <mat-icon class="text-blue-600">message</mat-icon>
-                  Special Requests
+                  <ng-container i18n>Special Requests</ng-container>
                 </h3>
               </div>
               <div class="p-6">
@@ -666,7 +666,7 @@
               <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
                   <mat-icon class="text-orange-600">note</mat-icon>
-                  Internal Notes
+                  <ng-container i18n>Internal Notes</ng-container>
                 </h3>
               </div>
               <div class="p-6">
@@ -683,7 +683,7 @@
           <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <mat-icon class="text-green-600">group</mat-icon>
-              Additional Guests
+              <ng-container i18n>Additional Guests</ng-container>
             </h3>
           </div>
           <div class="p-6">
@@ -693,13 +693,13 @@
                   @if (additionalGuest.guest) {
                     <div class="font-medium text-gray-900">{{ getGuestName(additionalGuest.guest) }}</div>
                     @if (additionalGuest.totalAdults) {
-                      <div class="text-sm text-gray-600">Adults: {{ additionalGuest.totalAdults }}</div>
+                      <div class="text-sm text-gray-600"><ng-container i18n>Adults: {{ additionalGuest.totalAdults }}</ng-container></div>
                     }
                     @if (additionalGuest.totalChildren) {
-                      <div class="text-sm text-gray-600">Children: {{ additionalGuest.totalChildren }}</div>
+                      <div class="text-sm text-gray-600"><ng-container i18n>Children: {{ additionalGuest.totalChildren }}</ng-container></div>
                     }
                   } @else {
-                    <div class="text-sm text-gray-600">Unknown Guest</div>
+                    <div class="text-sm text-gray-600"><ng-container i18n>Unknown Guest</ng-container></div>
                   }
                 </div>
               }
@@ -713,30 +713,30 @@
         <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
             <mat-icon class="text-purple-600">info</mat-icon>
-            Booking Information
+            <ng-container i18n>Booking Information</ng-container>
           </h3>
         </div>
         <div class="p-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Created</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Created</ng-container></label>
               <div class="text-sm text-gray-600">{{ formatDateTime(reservation()!.createdAt) }}</div>
             </div>
             @if (reservation()!.updatedAt !== reservation()!.createdAt) {
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Last Updated</ng-container></label>
                 <div class="text-sm text-gray-600">{{ formatDateTime(reservation()!.updatedAt) }}</div>
               </div>
             }
             @if (reservation()!.actualCheckInDate) {
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Actual Check-in</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Actual Check-in</ng-container></label>
                 <div class="text-sm text-gray-600">{{ formatDateTime(reservation()!.actualCheckInDate) }}</div>
               </div>
             }
             @if (reservation()!.actualCheckOutDate) {
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Actual Check-out</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Actual Check-out</ng-container></label>
                 <div class="text-sm text-gray-600">{{ formatDateTime(reservation()!.actualCheckOutDate) }}</div>
               </div>
             }
@@ -750,28 +750,28 @@
           <div class="bg-red-100 px-6 py-4 border-b border-red-200">
             <h3 class="text-lg font-semibold text-red-900 flex items-center gap-2">
               <mat-icon class="text-red-600">cancel</mat-icon>
-              Cancellation Information
+              <ng-container i18n>Cancellation Information</ng-container>
             </h3>
           </div>
           <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label class="block text-sm font-medium text-red-700 mb-1">Cancelled</label>
+                <label class="block text-sm font-medium text-red-700 mb-1"><ng-container i18n>Cancelled</ng-container></label>
                 <div class="text-sm text-red-600">{{ formatDateTime(reservation()!.cancellation!.cancelledAt!) }}</div>
               </div>
               <div>
-                <label class="block text-sm font-medium text-red-700 mb-1">Reason</label>
+                <label class="block text-sm font-medium text-red-700 mb-1"><ng-container i18n>Reason</ng-container></label>
                 <div class="text-sm text-red-600">{{ reservation()!.cancellation!.reason }}</div>
               </div>
               @if (hasRefundAmount()) {
                 <div>
-                  <label class="block text-sm font-medium text-red-700 mb-1">Refund Amount</label>
+                  <label class="block text-sm font-medium text-red-700 mb-1"><ng-container i18n>Refund Amount</ng-container></label>
                   <div class="text-sm text-red-600">{{ getRefundAmount() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</div>
                 </div>
               }
               @if (hasCancellationFee()) {
                 <div>
-                  <label class="block text-sm font-medium text-red-700 mb-1">Cancellation Fee</label>
+                  <label class="block text-sm font-medium text-red-700 mb-1"><ng-container i18n>Cancellation Fee</ng-container></label>
                   <div class="text-sm text-red-600">{{ getCancellationFee() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</div>
                 </div>
               }
@@ -788,17 +788,17 @@
   @if (canEdit()) {
     <button mat-menu-item (click)="editReservation()" class="!text-gray-700 hover:!bg-blue-50 hover:!text-blue-700 !transition-colors">
       <mat-icon class="mr-3 !text-blue-600">edit</mat-icon>
-      <span>Edit Reservation</span>
+      <span><ng-container i18n>Edit Reservation</ng-container></span>
     </button>
   }
   <button mat-menu-item [matMenuTriggerFor]="printMenu" class="!text-gray-700 hover:!bg-gray-50 !transition-colors">
     <mat-icon class="mr-3 !text-gray-600">print</mat-icon>
-    <span>Print Details</span>
+    <span><ng-container i18n>Print Details</ng-container></span>
     <mat-icon class="ml-auto !text-gray-400">chevron_right</mat-icon>
   </button>
   <button mat-menu-item [matMenuTriggerFor]="emailMenu" class="!text-gray-700 hover:!bg-gray-50 !transition-colors">
     <mat-icon class="mr-3 !text-gray-600">email</mat-icon>
-    <span>Send Email</span>
+    <span><ng-container i18n>Send Email</ng-container></span>
     <mat-icon class="ml-auto !text-gray-400">chevron_right</mat-icon>
   </button>
   @if (canRequestExtension()) {
@@ -808,7 +808,7 @@
       [disabled]="statusUpdating()"
       class="!text-gray-700 hover:!bg-green-50 hover:!text-green-700 !transition-colors">
       <mat-icon class="mr-3 !text-green-600">schedule</mat-icon>
-      <span>Request Stay Extension</span>
+      <span><ng-container i18n>Request Stay Extension</ng-container></span>
     </button>
   }
   <button 
@@ -821,7 +821,7 @@
     } @else {
       <mat-icon class="mr-3 !text-red-600">picture_as_pdf</mat-icon>
     }
-    <span>{{ exportingPDF() ? 'Exporting...' : 'Export to PDF' }}</span>
+    <span>@if (exportingPDF()) {<ng-container i18n>Exporting...</ng-container>} @else {<ng-container i18n>Export to PDF</ng-container>}</span>
   </button>
   @if (canDelete()) {
     <mat-divider class="!border-gray-200 my-1"></mat-divider>
@@ -830,7 +830,7 @@
       (click)="deleteReservation()"
       class="!text-gray-700 hover:!bg-red-50 hover:!text-red-700 !transition-colors">
       <mat-icon class="mr-3 !text-red-600">delete</mat-icon>
-      <span>Delete Reservation</span>
+      <span><ng-container i18n>Delete Reservation</ng-container></span>
     </button>
   }
 </mat-menu>
@@ -838,16 +838,16 @@
 <!-- Payment Status Update Menu -->
 <mat-menu #paymentMenu="matMenu" class="!shadow-xl !border !border-gray-200 !rounded-lg">
   <div class="px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
-    Update Payment Information
+    <ng-container i18n>Update Payment Information</ng-container>
   </div>
   @if (isCheckedOut()) {
     <div class="px-3 py-2 text-xs text-gray-400 italic flex items-center gap-2">
       <mat-icon class="!text-sm">lock</mat-icon>
-      <span>Payment information is locked for checked-out reservations</span>
+      <span><ng-container i18n>Payment information is locked for checked-out reservations</ng-container></span>
     </div>
   } @else if (getAvailablePaymentStatusOptions().length === 0) {
     <div class="px-3 py-2 text-xs text-gray-400 italic">
-      No status changes available
+      <ng-container i18n>No status changes available</ng-container>
     </div>
   } @else {
     @for (status of getAvailablePaymentStatusOptions(); track status.value) {
@@ -866,10 +866,10 @@
       (click)="showPaymentDialog(reservation()!)"
       class="!text-gray-700 hover:!bg-blue-50 hover:!text-blue-700 !transition-colors">
       <mat-icon class="mr-3 !text-base !text-blue-600">edit</mat-icon>
-      <span>Edit Payment Information</span>
+      <span><ng-container i18n>Edit Payment Information</ng-container></span>
     </button>
     <div class="px-3 py-2 text-xs text-blue-600 bg-blue-50 border-t border-blue-100 mt-1">
-      💡 Use "Edit Payment Information" to update method and status details
+      <ng-container i18n>💡 Use "Edit Payment Information" to update method and status details</ng-container>
     </div>
   }
 </mat-menu>
@@ -877,14 +877,14 @@
 <!-- Email Options Menu -->
 <mat-menu #emailMenu="matMenu" class="!shadow-xl !border !border-gray-200 !rounded-lg">
   <div class="px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
-    Email Options
+    <ng-container i18n>Email Options</ng-container>
   </div>
   <button 
     mat-menu-item 
     (click)="sendReservationEmail('details')"
     class="!text-gray-700 hover:!bg-blue-50 hover:!text-blue-700 !transition-colors">
     <mat-icon class="mr-3 !text-blue-600">description</mat-icon>
-    <span>Send Reservation Details</span>
+    <span><ng-container i18n>Send Reservation Details</ng-container></span>
   </button>
   @if (reservation() && (reservation()!.status === 'confirmed' || reservation()!.status === 'checked_in' || reservation()!.status === 'checked_out')) {
     <button 
@@ -892,7 +892,7 @@
       (click)="sendReservationEmail('confirmation')"
       class="!text-gray-700 hover:!bg-green-50 hover:!text-green-700 !transition-colors">
       <mat-icon class="mr-3 !text-green-600">check_circle</mat-icon>
-      <span>Send Confirmation Email</span>
+      <span><ng-container i18n>Send Confirmation Email</ng-container></span>
     </button>
   }
   @if (reservation() && (reservation()!.status === 'checked_in' || reservation()!.status === 'checked_out')) {
@@ -901,18 +901,18 @@
       (click)="sendReservationEmail('checkin')"
       class="!text-gray-700 hover:!bg-purple-50 hover:!text-purple-700 !transition-colors">
       <mat-icon class="mr-3 !text-purple-600">login</mat-icon>
-      <span>Send Check-in Notification</span>
+      <span><ng-container i18n>Send Check-in Notification</ng-container></span>
     </button>
   }
   <div class="px-3 py-2 text-xs text-gray-600 bg-gray-50 border-t border-gray-100 mt-1">
-    📧 Email will be sent to: {{ guestEmail() }}
+    <ng-container i18n>📧 Email will be sent to: {{ guestEmail() }}</ng-container>
   </div>
 </mat-menu>
 
 <!-- Print Options Menu -->
 <mat-menu #printMenu="matMenu" class="!shadow-xl !border !border-gray-200 !rounded-lg">
   <div class="px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
-    Print Options
+    <ng-container i18n>Print Options</ng-container>
   </div>
   
   <!-- Printer Connection Status -->
@@ -920,12 +920,12 @@
     @if (printerConnected()) {
       <div class="flex items-center gap-2 text-green-600">
         <mat-icon class="text-sm">bluetooth_connected</mat-icon>
-        <span>Printer Connected</span>
+        <span><ng-container i18n>Printer Connected</ng-container></span>
       </div>
     } @else {
       <div class="flex items-center gap-2 text-gray-500">
         <mat-icon class="text-sm">bluetooth_disabled</mat-icon>
-        <span>Printer Not Connected</span>
+        <span><ng-container i18n>Printer Not Connected</ng-container></span>
       </div>
     }
   </div>

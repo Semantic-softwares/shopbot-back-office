@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Link to Corrective Action</h2>
+<h2 mat-dialog-title><ng-container i18n>Link to Corrective Action</ng-container></h2>
 <mat-dialog-content>
   @if (correctiveActions.isLoading()) {
     <div class="spinner-container">
@@ -24,13 +24,13 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button mat-dialog-close><ng-container i18n>Cancel</ng-container></button>
   <button
     mat-raised-button
     color="primary"
     [disabled]="!linkedCorrectiveControl.value"
     (click)="linkAction(linkedCorrectiveControl.value)"
   >
-    Link Action
+    <ng-container i18n>Link Action</ng-container>
   </button>
 </mat-dialog-actions>

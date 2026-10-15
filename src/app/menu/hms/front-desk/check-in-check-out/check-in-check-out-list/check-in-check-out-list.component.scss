@@ -1,59 +1,59 @@
 .status-pending {
-  background-color: #fef3c7;
-  color: #92400e;
+  background-color: light-dark(#fef3c7, #423914);
+  color: light-dark(#92400e, #edab83);
 }
 
 .status-confirmed {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background-color: light-dark(#dbeafe, #152842);
+  color: light-dark(#1e40af, #8a9fe5);
 }
 
 .status-checked_in {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: light-dark(#d1fae5, #183f2b);
+  color: light-dark(#065f46, #7ff0d0);
 }
 
 .status-checked_out {
-  background-color: #f3f4f6;
-  color: #374151;
+  background-color: light-dark(#f3f4f6, #1c1b1c);
+  color: light-dark(#374151, #d6d2d2);
 }
 
 .room-available {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: light-dark(#d1fae5, #183f2b);
+  color: light-dark(#065f46, #7ff0d0);
 }
 
 .room-occupied {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: light-dark(#fee2e2, #421515);
+  color: light-dark(#991b1b, #e58b8b);
 }
 
 .room-cleaning {
-  background-color: #fef3c7;
-  color: #92400e;
+  background-color: light-dark(#fef3c7, #423914);
+  color: light-dark(#92400e, #edab83);
 }
 
 .room-maintenance {
-  background-color: #fed7aa;
-  color: #9a3412;
+  background-color: light-dark(#fed7aa, #432d14);
+  color: light-dark(#9a3412, #ea9e85);
 }
 
 .housekeeping-clean {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: light-dark(#d1fae5, #183f2b);
+  color: light-dark(#065f46, #7ff0d0);
 }
 
 .housekeeping-dirty {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: light-dark(#fee2e2, #421515);
+  color: light-dark(#991b1b, #e58b8b);
 }
 
 .housekeeping-inspected {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background-color: light-dark(#dbeafe, #152842);
+  color: light-dark(#1e40af, #8a9fe5);
 }
 
 // Table styles
 .table-row-hover:hover {
-  background-color: #f9fafb;
+  background-color: light-dark(#f9fafb, #1c1b1c);
 }

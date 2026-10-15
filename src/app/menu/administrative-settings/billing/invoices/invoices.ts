@@ -13,6 +13,7 @@ import { MatCardModule } from "@angular/material/card";
 import { NoRecordComponent } from '../../../../shared/components/no-record/no-record.component';
 import { SubscriptionService } from '../../../../shared/services/subscription.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
+import { ChartThemeService } from '../../../../shared/services/chart-theme.service';
 
 @Component({
   selector: 'app-invoices',
@@ -33,6 +34,8 @@ import { StoreStore } from '../../../../shared/stores/store.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InvoicesComponent {
+  // Keeps Chart.js text/grid colours in step with the light/dark theme.
+  private readonly chartTheme = inject(ChartThemeService);
   private subscriptionService = inject(SubscriptionService);
   private storeStore = inject(StoreStore);
 
@@ -83,7 +86,7 @@ export class InvoicesComponent {
         labels: [] as string[],
         datasets: [
           {
-            label: 'Monthly Billing Amount',
+            label: $localize`Monthly Billing Amount`,
             data: [] as number[],
             backgroundColor: '#3b82f6',
             borderColor: '#1e40af',
@@ -106,7 +109,7 @@ export class InvoicesComponent {
       labels: last12.map((inv: any) => this.formatMonth(inv.billingDate)),
       datasets: [
         {
-          label: 'Monthly Billing Amount',
+          label: $localize`Monthly Billing Amount`,
           data: last12.map((inv: any) => inv.amount),
           backgroundColor: '#3b82f6',
           borderColor: '#1e40af',
@@ -133,7 +136,7 @@ export class InvoicesComponent {
         beginAtZero: true,
         title: {
           display: true,
-          text: 'Amount',
+          text: $localize`Amount`,
         },
       },
     },

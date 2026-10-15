@@ -18,12 +18,15 @@
       </div>
 
       <div class="flex items-center gap-1">
+        <app-language-menu />
+        <app-theme-toggle />
+
         <!-- On-duty toggle -->
         <button
           mat-icon-button
           (click)="toggleDuty()"
           [disabled]="togglingDuty()"
-          [matTooltip]="isOnDuty() ? 'On duty — tap to stop receiving table order alerts' : 'Off duty — tap to start receiving table order alerts'"
+          [matTooltip]="isOnDuty() ? ('On duty — tap to stop receiving table order alerts' | tr) : ('Off duty — tap to start receiving table order alerts' | tr)"
           [class.text-green-300]="isOnDuty()"
         >
           <mat-icon>{{ isOnDuty() ? 'work' : 'work_off' }}</mat-icon>
@@ -49,7 +52,7 @@
           mat-icon-button
           [matMenuTriggerFor]="notificationMenu"
           (menuOpened)="onNotificationMenuOpened()"
-          matTooltip="Notifications"
+          matTooltip="Notifications" i18n-matTooltip
           class="relative"
         >
           <mat-icon
@@ -63,14 +66,14 @@
         <!-- Notification Dropdown -->
         <mat-menu #notificationMenu="matMenu" class="notification-menu" xPosition="before">
           <div class="flex items-center justify-between px-4 py-2 border-b border-gray-200" (click)="$event.stopPropagation()">
-            <span class="text-sm font-semibold text-gray-800">Notifications</span>
+            <span class="text-sm font-semibold text-gray-800"><ng-container i18n>Notifications</ng-container></span>
             @if (unreadCount() > 0) {
               <button
                 mat-button
                 class="!text-xs !min-w-0 !px-2 !py-0 text-primary"
                 (click)="markAllAsRead(); $event.stopPropagation()"
               >
-                Mark all read
+                <ng-container i18n>Mark all read</ng-container>
               </button>
             }
           </div>
@@ -82,7 +85,7 @@
           } @else if (notifications().length === 0) {
             <div class="flex flex-col items-center py-6 px-4" (click)="$event.stopPropagation()">
               <mat-icon class="text-gray-300 !text-4xl mb-2">notifications_none</mat-icon>
-              <span class="text-sm text-gray-400">No notifications yet</span>
+              <span class="text-sm text-gray-400"><ng-container i18n>No notifications yet</ng-container></span>
             </div>
           } @else {
             @for (notification of notifications(); track notification._id) {
@@ -121,13 +124,13 @@
         <mat-menu #userMenu="matMenu">
           <button mat-menu-item (click)="goToProfile()">
             <mat-icon>menu</mat-icon>
-            <span>Menu</span>
+            <span><ng-container i18n>Menu</ng-container></span>
           </button>
 
           @if (hasMultipleStores()) {
             <button mat-menu-item [matMenuTriggerFor]="storeMenu" [disabled]="switchingStore()">
               <mat-icon>storefront</mat-icon>
-              <span>{{ selectedStore()?.name || 'Select company' }}</span>
+              <span>@if (selectedStore()?.name) {<ng-container>{{ selectedStore()?.name }}</ng-container>} @else {<ng-container i18n>Select company</ng-container>}</span>
             </button>
           }
 
@@ -138,7 +141,7 @@
           <mat-divider></mat-divider>
           <button mat-menu-item (click)="logout()">
             <mat-icon>logout</mat-icon>
-            <span>Logout</span>
+            <span><ng-container i18n>Logout</ng-container></span>
           </button>
         </mat-menu>
 

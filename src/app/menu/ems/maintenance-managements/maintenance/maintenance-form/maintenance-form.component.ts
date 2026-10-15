@@ -53,11 +53,12 @@ import { EstateUnitService } from '../../../../../shared/services/estate-unit.se
 import { SessionStorageService } from '../../../../../shared/services/session-storage.service';
 import { TenantService } from '../../../../../shared/services/tenant.service';
 import { StoreStore } from '../../../../../shared/stores/store.store';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-maintenance-form',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     PageHeaderComponent,
@@ -294,7 +295,7 @@ export class MaintenanceFormComponent {
       if (!params.propertyId) {
         const emptyResponse: PaginatedResponse<Unit> = {
           success: true,
-          message: 'No property selected',
+          message: $localize`No property selected`,
           data: {
             items: [],
             meta: {
@@ -330,7 +331,7 @@ export class MaintenanceFormComponent {
       if (!params.propertyId) {
         return of({
           success: true,
-          message: 'No property selected',
+          message: $localize`No property selected`,
           data: {
             items: [],
             meta: {
@@ -559,7 +560,7 @@ export class MaintenanceFormComponent {
       },
       error: (error) => {
         const message = error?.error?.message || 'Failed to load request';
-        this.snackBar.open(message, 'Close', { duration: 4000 });
+        this.snackBar.open(message, $localize`Close`, { duration: 4000 });
       },
     });
   }
@@ -641,14 +642,14 @@ export class MaintenanceFormComponent {
       this.submitting.set(false);
       this.selectedPhotoFiles.set([]);
       this.selectedPhotoPreviews.set([]);
-      this.snackBar.open(message, 'Close', { duration: 3000 });
+      this.snackBar.open(message, $localize`Close`, { duration: 3000 });
       this.router.navigate(['/menu/ems/maintenance/maintenances', id]);
     };
 
     const onError = (error: unknown) => {
       this.submitting.set(false);
       const message = (error as { error?: { message?: string } })?.error?.message || 'Failed to save maintenance request';
-      this.snackBar.open(message, 'Close', { duration: 4000 });
+      this.snackBar.open(message, $localize`Close`, { duration: 4000 });
     };
 
     try {

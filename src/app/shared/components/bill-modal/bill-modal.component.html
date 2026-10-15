@@ -1,20 +1,20 @@
-<div mat-dialog-title>Receipt</div>
+<div mat-dialog-title><ng-container i18n>Receipt</ng-container></div>
 
 <mat-dialog-content>
   <div class="receipt-paper  p-8 font-mono text-sm w-full">
     <!-- Store Header -->
     <div class="text-center mb-4 pb-4 border-b border-dashed border-gray-400">
       @if (storeStore.selectedStore()?.logo) {
-        <img [src]="$safeNavigationMigration(storeStore.selectedStore()?.logo)" alt="Store Logo" class="h-12 w-12 object-contain mx-auto mb-2">
+        <img [src]="$safeNavigationMigration(storeStore.selectedStore()?.logo)" alt="Store Logo" i18n-alt class="h-12 w-12 object-contain mx-auto mb-2">
       }
-      <h3 class="text-base font-bold uppercase mb-1">{{ storeStore.selectedStore()?.name || 'Store Name' }}</h3>
+      <h3 class="text-base font-bold uppercase mb-1">@if (storeStore.selectedStore()?.name) {<ng-container>{{ storeStore.selectedStore()?.name }}</ng-container>} @else {<ng-container i18n>Store Name</ng-container>}</h3>
       @if (storeStore.selectedStore()?.contactInfo) {
         <div class="text-xs text-gray-700 space-y-0.5">
           @if (storeStore.selectedStore()?.contactInfo?.address) {
             <p>{{ storeStore.selectedStore()?.contactInfo?.address }}</p>
           }
           @if (storeStore.selectedStore()?.contactInfo?.phone) {
-            <p>Tel: {{ storeStore.selectedStore()?.contactInfo?.phone }}</p>
+            <p><ng-container i18n>Tel: {{ storeStore.selectedStore()?.contactInfo?.phone }}</ng-container></p>
           }
           @if (storeStore.selectedStore()?.contactInfo?.email) {
             <p>{{ storeStore.selectedStore()?.contactInfo?.email }}</p>
@@ -26,28 +26,28 @@
     <!-- Order Information -->
     <div class="text-xs mb-4 pb-3 border-b border-dashed border-gray-400">
       <div class="flex justify-between mb-1">
-        <span>Order #:</span>
+        <span><ng-container i18n>Order #:</ng-container></span>
         <span class="font-semibold">{{ order().reference || order()._id }}</span>
       </div>
       <div class="flex justify-between mb-1">
-        <span>Date:</span>
+        <span><ng-container i18n>Date:</ng-container></span>
         <span>{{ order().createdAt | date:'short' }}</span>
       </div>
       @if (order().table) {
         <div class="flex justify-between mb-1">
-          <span>Table:</span>
+          <span><ng-container i18n>Table:</ng-container></span>
           <span>{{ order().table?.name }}</span>
         </div>
         @if (order().table?.numberOfGuest) {
           <div class="flex justify-between mb-1">
-            <span>Guests:</span>
+            <span><ng-container i18n>Guests:</ng-container></span>
             <span>{{ order().table?.numberOfGuest }}</span>
           </div>
         }
       }
       @if (order().staff) {
         <div class="flex justify-between mb-1">
-          <span>Server:</span>
+          <span><ng-container i18n>Server:</ng-container></span>
           <span>{{ order().staff.name || 'N/A' }}</span>
         </div>
       }
@@ -55,7 +55,7 @@
 
     <!-- Order Items -->
     <div class="mb-4 pb-3 border-b border-dashed border-gray-400">
-      <div class="text-xs font-bold uppercase mb-2">Items</div>
+      <div class="text-xs font-bold uppercase mb-2"><ng-container i18n>Items</ng-container></div>
       
       @for (product of order().cart?.products; track product._id) {
         <div class="mb-3">
@@ -63,7 +63,7 @@
           <div class="flex justify-between items-start mb-1">
             <div class="flex-1 pr-2">
               <div class="font-semibold">{{ product.name }}</div>
-              <div class="text-xs text-gray-600">{{ product.quantity }} x {{ product.price | currency:currency():'symbol':'1.2-2' }}</div>
+              <div class="text-xs text-gray-600"><ng-container i18n>{{ product.quantity }} x {{ product.price | currency:currency():'symbol':'1.2-2' }}</ng-container></div>
             </div>
             <div class="font-semibold whitespace-nowrap">{{ getItemTotal(product) | currency:currency():'symbol':'1.2-2' }}</div>
           </div>
@@ -91,34 +91,34 @@
     <!-- Order Summary -->
     <div class="text-xs mb-4">
       <div class="flex justify-between mb-1.5">
-        <span>Subtotal:</span>
+        <span><ng-container i18n>Subtotal:</ng-container></span>
         <span>{{ (order().subTotal || 0) | currency:currency():'symbol':'1.2-2' }}</span>
       </div>
       
       @if (order().discount && order().discount! > 0) {
         <div class="flex justify-between mb-1.5">
-          <span>Discount:</span>
+          <span><ng-container i18n>Discount:</ng-container></span>
           <span>-{{ order().discount | currency:currency():'symbol':'1.2-2' }}</span>
         </div>
       }
       
       @if (order().tax && order().tax! > 0) {
         <div class="flex justify-between mb-1.5">
-          <span>Tax:</span>
+          <span><ng-container i18n>Tax:</ng-container></span>
           <span>{{ order().tax | currency:currency():'symbol':'1.2-2' }}</span>
         </div>
       }
       
       @if (order().shippingFee && order().shippingFee! > 0) {
         <div class="flex justify-between mb-1.5">
-          <span>Delivery Fee:</span>
+          <span><ng-container i18n>Delivery Fee:</ng-container></span>
           <span>{{ order().shippingFee | currency:currency():'symbol':'1.2-2' }}</span>
         </div>
       }
       
       @if (order().serviceFee && order().serviceFee! > 0) {
         <div class="flex justify-between mb-1.5">
-          <span>Service Fee:</span>
+          <span><ng-container i18n>Service Fee:</ng-container></span>
           <span>{{ order().serviceFee | currency:currency():'symbol':'1.2-2' }}</span>
         </div>
       }
@@ -126,7 +126,7 @@
 
     <div class="border-t-2 border-double border-gray-800 pt-2 mb-4">
       <div class="flex justify-between text-base font-bold">
-        <span>TOTAL:</span>
+        <span><ng-container i18n>TOTAL:</ng-container></span>
         <span>{{ (order().total || 0) | currency:currency():'symbol':'1.2-2' }}</span>
       </div>
     </div>
@@ -137,7 +137,7 @@
            reads as it always has. Orders placed before split payments have no
            `payments` array and fall through to the summary string. -->
       @if ((order().payments || []).length > 1) {
-        <div class="mb-1">Payment:</div>
+        <div class="mb-1"><ng-container i18n>Payment:</ng-container></div>
         @for (payment of order().payments; track $index) {
           <div class="flex justify-between mb-1 pl-3">
             <span>{{ payment.method }}</span>
@@ -148,14 +148,14 @@
         }
       } @else {
         <div class="flex justify-between mb-1">
-          <span>Payment:</span>
+          <span><ng-container i18n>Payment:</ng-container></span>
           <span class="font-semibold">{{ order().payment || 'N/A' }}</span>
         </div>
       }
 
       @if ((order().changeDue || 0) > 0) {
         <div class="flex justify-between mb-1">
-          <span>Change:</span>
+          <span><ng-container i18n>Change:</ng-container></span>
           <span class="font-semibold">
             {{ order().changeDue | currency:currency():'symbol':'1.2-2' }}
           </span>
@@ -163,7 +163,7 @@
       }
 
       <div class="flex justify-between">
-        <span>Status:</span>
+        <span><ng-container i18n>Status:</ng-container></span>
         <span class="font-semibold"
           [class.text-green-600]="order().paymentStatus === 'Paid'"
           [class.text-orange-600]="order().paymentStatus === 'Unpaid'">
@@ -175,7 +175,7 @@
     <!-- Order Notes -->
     @if (order().note) {
       <div class="text-xs mb-4 pb-3 border-b border-dashed border-gray-400">
-        <div class="font-semibold mb-1">Note:</div>
+        <div class="font-semibold mb-1"><ng-container i18n>Note:</ng-container></div>
         <div class="text-gray-600">{{ order().note }}</div>
       </div>
     }
@@ -183,7 +183,7 @@
     <!-- Footer -->
     <div class="text-center mt-6 pt-4 border-t border-dashed border-gray-400">
       <p class="text-xs font-semibold mb-2">
-        {{ storeStore.selectedStore()?.posSettings?.receiptSettings?.footerMessage || 'Thank you for your patronage!' }}
+        @if (storeStore.selectedStore()?.posSettings?.receiptSettings?.footerMessage) {<ng-container>{{ storeStore.selectedStore()?.posSettings?.receiptSettings?.footerMessage }}</ng-container>} @else {<ng-container i18n>Thank you for your patronage!</ng-container>}
       </p>
       @if (storeStore.selectedStore()?.posSettings?.receiptSettings?.disclaimer) {
         <p class="text-xs text-gray-500 mb-2">
@@ -200,9 +200,9 @@
 
 <mat-dialog-actions align="end" class="print:hidden border-t">
   <button matButton (click)="close()" [disabled]="isPrinting()">
-    Close
+    <ng-container i18n>Close</ng-container>
   </button>
   <button matButton="filled" (click)="print()" [disabled]="isPrinting()">
-    <mat-icon>print</mat-icon> Print
+    <mat-icon>print</mat-icon> <ng-container i18n>Print</ng-container>
   </button>
 </mat-dialog-actions>

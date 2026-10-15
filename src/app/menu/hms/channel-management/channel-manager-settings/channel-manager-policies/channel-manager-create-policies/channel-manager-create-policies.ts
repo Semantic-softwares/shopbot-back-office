@@ -16,11 +16,12 @@ import { map } from 'rxjs';
 import { PageHeaderComponent } from '../../../../../../shared/components/page-header/page-header.component';
 import { HotelPolicy, HotelPolicyService } from '../../../../../../shared/services/hotel-policy.service';
 import { StoreStore } from '../../../../../../shared/stores/store.store';
+import { TrPipe } from '../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-channel-manager-create-policies',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -106,14 +107,14 @@ export class ChannelManagerCreatePolicies implements OnInit {
       },
       error: (error) => {
         const errorMessage = error.error?.message || 'Failed to load policy';
-        this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+        this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
       },
     });
   }
 
   savePolicy() {
     if (!this.policyForm.valid) {
-      this.snackBar.open('Please fill in all required fields', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Please fill in all required fields`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -138,13 +139,13 @@ export class ChannelManagerCreatePolicies implements OnInit {
       next: () => {
         this.isSaving = false;
         const message = this.isEditing ? 'Policy updated successfully' : 'Policy created successfully';
-        this.snackBar.open(message, 'Close', { duration: 3000 });
+        this.snackBar.open(message, $localize`Close`, { duration: 3000 });
         this.cancel();
       },
       error: (error) => {
         this.isSaving = false;
         const errorMessage = error.error?.message || 'Failed to save policy';
-        this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+        this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
       },
     });
   }

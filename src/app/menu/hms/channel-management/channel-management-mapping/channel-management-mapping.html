@@ -1,8 +1,8 @@
 <div class="max-w-12xl">
   <!-- Header -->
   <app-page-header
-    title="Channel Management"
-    subtitle="Connect Chicken Republic to distribution channels and start receiving bookings from OTAs"
+    title="Channel Management" i18n-title
+    subtitle="Connect Chicken Republic to distribution channels and start receiving bookings from OTAs" i18n-subtitle
     class="mb-8"
   ></app-page-header>
 
@@ -18,12 +18,12 @@
         <mat-card-content class="flex items-center gap-4 py-4">
           <mat-icon class="text-red-600 text-4xl">warning</mat-icon>
           <div class="flex-1">
-            <h3 class="text-lg font-semibold text-red-900">Property Type Required</h3>
+            <h3 class="text-lg font-semibold text-red-900"><ng-container i18n>Property Type Required</ng-container></h3>
             <p class="text-red-700 mb-2">
-              Channel management requires a valid property type. Your property type is currently set to "{{ propertyType() }}".
+              <ng-container i18n>Channel management requires a valid property type. Your property type is currently set to "{{ propertyType() }}".</ng-container>
             </p>
             <p class="text-sm text-red-600">
-              Please select a valid property type (hotel, resort, guesthouse, etc.) in Step 1 below to enable Channex integration.
+              <ng-container i18n>Please select a valid property type (hotel, resort, guesthouse, etc.) in Step 1 below to enable Channex integration.</ng-container>
             </p>
           </div>
         </mat-card-content>
@@ -35,9 +35,9 @@
       <mat-card appearance="outlined" class="mb-3">
         <mat-card-content class="flex items-center gap-4 py-4">
           <div class="flex-1">
-            <h3 class="text-lg font-semibold text-green-900">Channel Manager Active</h3>
+            <h3 class="text-lg font-semibold text-green-900"><ng-container i18n>Channel Manager Active</ng-container></h3>
             <p class="text-green-700">
-              Your property is synced and ready to receive bookings from distribution channels.
+              <ng-container i18n>Your property is synced and ready to receive bookings from distribution channels.</ng-container>
             </p>
           </div>
         </mat-card-content>
@@ -46,9 +46,9 @@
       <mat-card  appearance="outlined" class="mb-3">
         <mat-card-content class="flex items-center gap-4 py-4">
           <div class="flex-1">
-            <h3 class="text-lg font-semibold ">Setup Required</h3>
+            <h3 class="text-lg font-semibold "><ng-container i18n>Setup Required</ng-container></h3>
             <p>
-              Complete the setup steps below to start receiving bookings from OTAs.
+              <ng-container i18n>Complete the setup steps below to start receiving bookings from OTAs.</ng-container>
             </p>
           </div>
         </mat-card-content>
@@ -57,20 +57,20 @@
     <!-- Setup Steps (Material Stepper) -->
     <mat-horizontal-stepper [linear]="true" [selectedIndex]="currentStep()" (selectionChange)="onStepSelectionChange($event)" class="mb-8">
       <mat-step [completed]="channexStatus()?.channex?.syncStatus === 'synced'">
-        <ng-template matStepLabel>Step 1: Sync Property</ng-template>
+        <ng-template matStepLabel><ng-container i18n>Step 1: Sync Property</ng-container></ng-template>
         <mat-card class="my-4" appearance="outlined">
           <mat-card-content>
             <!-- Step 1 content -->
             @if (channexStatus()?.channex?.syncStatus === 'synced') {
               <div class="space-y-3">
                 <div class="flex justify-between items-center text-sm">
-                  <span class="text-gray-600">Property ID:</span>
+                  <span class="text-gray-600"><ng-container i18n>Property ID:</ng-container></span>
                   <span class="font-mono text-gray-900">
                     {{ channexStatus()?.channex?.propertyId }}
                   </span>
                 </div>
                 <div class="flex justify-between items-center text-sm">
-                  <span class="text-gray-600">Last Synced:</span>
+                  <span class="text-gray-600"><ng-container i18n>Last Synced:</ng-container></span>
                   <span class="text-gray-900">
                     {{ $safeNavigationMigration(channexStatus()?.channex?.lastSyncAt) | date: 'MMM d, y h:mm a' }}
                   </span>
@@ -83,35 +83,35 @@
                   [disabled]="isSyncingStore()"
                 >
                   <mat-icon>refresh</mat-icon>
-                  Re-sync Property
+                  <ng-container i18n>Re-sync Property</ng-container>
                 </button>
               </div>
             } @else {
               <form [formGroup]="syncPropertyForm" class=" my-4 space-y-4">
                 <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Property Type</mat-label>
+                  <mat-label><ng-container i18n>Property Type</ng-container></mat-label>
                   <mat-select formControlName="propertyType">
-                    <mat-option value="hotel">Hotel</mat-option>
-                    <mat-option value="hostel">Hostel</mat-option>
-                    <mat-option value="apartment">Apartment</mat-option>
-                    <mat-option value="guesthouse">Guest House</mat-option>
-                    <mat-option value="resort">Resort</mat-option>
-                    <mat-option value="motel">Motel</mat-option>
-                    <mat-option value="villa">Villa</mat-option>
-                    <mat-option value="boutique_hotel">Boutique Hotel</mat-option>
-                    <mat-option value="bed_and_breakfast">Bed & Breakfast</mat-option>
-                    <mat-option value="lodge">Lodge</mat-option>
+                    <mat-option value="hotel"><ng-container i18n>Hotel</ng-container></mat-option>
+                    <mat-option value="hostel"><ng-container i18n>Hostel</ng-container></mat-option>
+                    <mat-option value="apartment"><ng-container i18n>Apartment</ng-container></mat-option>
+                    <mat-option value="guesthouse"><ng-container i18n>Guest House</ng-container></mat-option>
+                    <mat-option value="resort"><ng-container i18n>Resort</ng-container></mat-option>
+                    <mat-option value="motel"><ng-container i18n>Motel</ng-container></mat-option>
+                    <mat-option value="villa"><ng-container i18n>Villa</ng-container></mat-option>
+                    <mat-option value="boutique_hotel"><ng-container i18n>Boutique Hotel</ng-container></mat-option>
+                    <mat-option value="bed_and_breakfast"><ng-container i18n>Bed & Breakfast</ng-container></mat-option>
+                    <mat-option value="lodge"><ng-container i18n>Lodge</ng-container></mat-option>
                   </mat-select>
                 </mat-form-field>
 
                 <div class="grid grid-cols-2 gap-4">
                   <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Check-in Time</mat-label>
+                    <mat-label><ng-container i18n>Check-in Time</ng-container></mat-label>
                     <input matInput type="time" formControlName="checkInTime">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Check-out Time</mat-label>
+                    <mat-label><ng-container i18n>Check-out Time</ng-container></mat-label>
                     <input matInput type="time" formControlName="checkOutTime">
                   </mat-form-field>
                 </div>
@@ -124,7 +124,7 @@
                   [disabled]="isSyncingStore() || syncPropertyForm.invalid || !isHotelProperty()"
                   [matTooltip]="!isHotelProperty() ? 'Please select a valid property type to sync with Channex' : ''"
                 >
-                 {{isSyncingStore() ? "Please wait..." : "Sync Property to Channex"}}
+                 @if (isSyncingStore()) {<ng-container i18n>Please wait...</ng-container>} @else {<ng-container i18n>Sync Property to Channex</ng-container>}
                   
                 </button>
               </form>
@@ -134,7 +134,7 @@
       </mat-step>
 
       <mat-step [completed]="(channexStatus()?.roomMappings?.length || 0) >= (channexStatus()?.totalRoomTypes || 0) && (channexStatus()?.totalRoomTypes || 0) > 0">
-        <ng-template matStepLabel>Step 2: Sync Room Types</ng-template>
+        <ng-template matStepLabel><ng-container i18n>Step 2: Sync Room Types</ng-container></ng-template>
         <mat-card class="my-4" appearance="outlined">
           <mat-card-content>
             <!-- Step 2 content -->
@@ -142,7 +142,7 @@
               @if (roomTypes().length === 0) {
                 <div class="text-center py-8 text-gray-500">
                   <mat-icon class="text-4xl mb-2">meeting_room</mat-icon>
-                  <p>No room types found. Please create room types first.</p>
+                  <p><ng-container i18n>No room types found. Please create room types first.</ng-container></p>
                 </div>
               } @else {
                 <div class="mb-4">
@@ -152,7 +152,7 @@
                     (click)="syncAllRoomTypes()"
                   >
                     <mat-icon>sync</mat-icon>
-                    Sync All Room Types
+                    <ng-container i18n>Sync All Room Types</ng-container>
                   </button>
                 </div>
 
@@ -163,12 +163,12 @@
                     <mat-list-item>
                       <mat-icon matListItemIcon class="text-gray-600">meeting_room</mat-icon>
                       <div matListItemTitle class="truncate font-medium text-gray-900">{{ roomType.name }}</div>
-                      <div matListItemLine class="text-sm text-gray-500">{{ roomType.description || 'No description' }}</div>
+                      <div matListItemLine class="text-sm text-gray-500">@if (roomType.description) {<ng-container>{{ roomType.description }}</ng-container>} @else {<ng-container i18n>No description</ng-container>}</div>
 
                       <div class="ml-auto flex items-center gap-2" matListItemMeta>
                         @if (isRoomTypeSynced(roomType._id || roomType.id || '')) {
                           <mat-chip color="primary" selected>
-                            Synced
+                            <ng-container i18n>Synced</ng-container>
                           </mat-chip>
                         } @else if (isRoomTypeSyncing(roomType._id || roomType.id || '')) {
                           <mat-spinner diameter="24"></mat-spinner>
@@ -179,7 +179,7 @@
                             (click)="syncRoomType(roomType._id || roomType.id || '', roomType.name)"
                           >
                             <mat-icon>sync</mat-icon>
-                            Sync
+                            <ng-container i18n>Sync</ng-container>
                           </button>
                         }
                       </div>
@@ -195,23 +195,23 @@
       <mat-step
         [completed]="(channexStatus()?.channex?.syncStatus === 'synced') && ((channexStatus()?.roomMappings?.length || 0) >= (channexStatus()?.totalRoomTypes || 0) && (channexStatus()?.totalRoomTypes || 0) > 0)"
       >
-        <ng-template matStepLabel>Step 3: Connect Channels</ng-template>
+        <ng-template matStepLabel><ng-container i18n>Step 3: Connect Channels</ng-container></ng-template>
         <mat-card appearance="outlined" class="my-4">
           <mat-card-content>
             <!-- Step 4 content (connect iframe or button) -->
             <div class="space-y-4">
               @if (!channelIframeUrl()) {
                 <p class="text-sm text-gray-600 mb-4">
-                  Your property is ready! Click below to connect to OTA channels and start receiving bookings.
+                  <ng-container i18n>Your property is ready! Click below to connect to OTA channels and start receiving bookings.</ng-container>
                 </p>
 
                 <div class="bg-blue-50 p-4 rounded-lg mb-4">
                   <div class="flex items-start gap-2">
                     <mat-icon class="text-blue-600 text-base mt-0.5">info</mat-icon>
                     <div class="text-sm text-blue-900">
-                      <p class="font-medium mb-1">Connect OTA Channels</p>
-                      <p>You'll be able to connect to Booking.com, Airbnb, Expedia, and other major booking platforms. 
-                      The connection process is secure and managed by Channex.</p>
+                      <p class="font-medium mb-1"><ng-container i18n>Connect OTA Channels</ng-container></p>
+                      <p><ng-container i18n>You'll be able to connect to Booking.com, Airbnb, Expedia, and other major booking platforms. 
+                      The connection process is secure and managed by Channex.</ng-container></p>
                     </div>
                   </div>
                 </div>
@@ -221,13 +221,13 @@
                   (click)="connectChannels()"
                   [disabled]="isLoadingIframe()"
                 >
-                  {{isLoadingIframe() ? 'Connecting...' : 'Connect to OTA Channels'}}
+                  @if (isLoadingIframe()) {<ng-container i18n>Connecting...</ng-container>} @else {<ng-container i18n>Connect to OTA Channels</ng-container>}
                   
                 </button>
 
                 @if (channexStatus()?.channex?.connectedChannels && channexStatus()?.channex?.connectedChannels!.length > 0) {
                   <mat-divider class="my-4"></mat-divider>
-                  <h4 class="font-semibold text-gray-900 mb-3">Connected Channels</h4>
+                  <h4 class="font-semibold text-gray-900 mb-3"><ng-container i18n>Connected Channels</ng-container></h4>
                   <div class="space-y-2">
                     @for (channel of channexStatus()?.channex?.connectedChannels; track channel.channelId) {
                       <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
@@ -236,7 +236,7 @@
                           <div>
                             <p class="font-medium text-gray-900">{{ channel.channelName }}</p>
                             <p class="text-sm text-gray-500">
-                              Connected {{ channel.connectedAt | date: 'short' }}
+                              <ng-container i18n>Connected {{ channel.connectedAt | date: 'short' }}</ng-container>
                             </p>
                           </div>
                         </div>
@@ -250,11 +250,11 @@
               } @else {
                 <div class="relative">
                   <div class="flex justify-between items-center mb-3">
-                    <h4 class="font-semibold text-gray-900">Connect Your Channels</h4>
+                    <h4 class="font-semibold text-gray-900"><ng-container i18n>Connect Your Channels</ng-container></h4>
                     <button 
                       matButton
                       (click)="closeIframe()"
-                      matTooltip="Close"
+                      matTooltip="Close" i18n-matTooltip
                     >
                       <mat-icon>close</mat-icon>
                     </button>
@@ -271,7 +271,7 @@
 
                   <div class="mt-3 text-sm text-gray-500 text-center">
                     <mat-icon class="text-base align-middle mr-1">info</mat-icon>
-                    Use the interface above to connect and configure your OTA channels
+                    <ng-container i18n>Use the interface above to connect and configure your OTA channels</ng-container>
                   </div>
                 </div>
               }
@@ -288,29 +288,29 @@
     @if (channexStatus()) {
       <mat-card appearance="outlined" class="mt-8">
         <mat-card-header>
-          <mat-card-title class="text-xl font-semibold">Current Status</mat-card-title>
+          <mat-card-title class="text-xl font-semibold"><ng-container i18n>Current Status</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content class="pt-6">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class=" p-4 rounded-lg">
-              <p class="text-sm text-gray-600 mb-1">Sync Status</p>
+              <p class="text-sm text-gray-600 mb-1"><ng-container i18n>Sync Status</ng-container></p>
               <p class="text-lg font-semibold text-gray-900">
-                {{ channexStatus()?.channex?.syncStatus || 'Not Synced' }}
+                @if (channexStatus()?.channex?.syncStatus) {<ng-container>{{ channexStatus()?.channex?.syncStatus }}</ng-container>} @else {<ng-container i18n>Not Synced</ng-container>}
               </p>
             </div>
             <div class=" p-4 rounded-lg">
-              <p class="text-sm text-gray-600 mb-1">Room Types Synced</p>
+              <p class="text-sm text-gray-600 mb-1"><ng-container i18n>Room Types Synced</ng-container></p>
               <p class="text-lg font-semibold text-gray-900">
                 {{ channexStatus()?.roomMappings?.length || 0 }} / {{ channexStatus()?.totalRoomTypes || 0 }}
               </p>
             </div>
             <div class=" p-4 rounded-lg">
-              <p class="text-sm text-gray-600 mb-1">Last Sync</p>
+              <p class="text-sm text-gray-600 mb-1"><ng-container i18n>Last Sync</ng-container></p>
               <p class="text-lg font-semibold text-gray-900">
                 @if (channexStatus()?.channex?.lastSyncAt) {
                   {{ $safeNavigationMigration(channexStatus()?.channex?.lastSyncAt) | date: 'short' }}
                 } @else {
-                  Never
+                  <ng-container i18n>Never</ng-container>
                 }
               </p>
             </div>

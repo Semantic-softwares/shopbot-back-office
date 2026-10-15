@@ -32,31 +32,31 @@ import { MaintenanceCategoryService } from '../../services/maintenance-category.
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>New Maintenance Category</h2>
+    <h2 mat-dialog-title><ng-container i18n>New Maintenance Category</ng-container></h2>
     <mat-dialog-content>
       <form [formGroup]="form" class="space-y-4 pt-2">
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Category Name *</mat-label>
-          <input matInput formControlName="name" placeholder="e.g. Plumbing, Electrical" />
+          <mat-label><ng-container i18n>Category Name *</ng-container></mat-label>
+          <input matInput formControlName="name" placeholder="e.g. Plumbing, Electrical" i18n-placeholder />
           @if (form.controls.name.hasError('required')) {
-            <mat-error>Name is required</mat-error>
+            <mat-error><ng-container i18n>Name is required</ng-container></mat-error>
           }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Description</mat-label>
-          <textarea matInput formControlName="description" rows="2" placeholder="Brief description"></textarea>
+          <mat-label><ng-container i18n>Description</ng-container></mat-label>
+          <textarea matInput formControlName="description" rows="2" placeholder="Brief description" i18n-placeholder></textarea>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Icon (Material Icon Name)</mat-label>
-          <input matInput formControlName="icon" placeholder="e.g. plumbing, electrical_services" />
-          <mat-hint>Use Material Design icon names</mat-hint>
+          <mat-label><ng-container i18n>Icon (Material Icon Name)</ng-container></mat-label>
+          <input matInput formControlName="icon" placeholder="e.g. plumbing, electrical_services" i18n-placeholder />
+          <mat-hint><ng-container i18n>Use Material Design icon names</ng-container></mat-hint>
         </mat-form-field>
       </form>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
+      <button mat-button mat-dialog-close><ng-container i18n>Cancel</ng-container></button>
       <button
         mat-flat-button
         (click)="onSubmit()"
@@ -65,7 +65,7 @@ import { MaintenanceCategoryService } from '../../services/maintenance-category.
         @if (submitting()) {
           <mat-spinner diameter="18"></mat-spinner>
         }
-        Create Category
+        <ng-container i18n>Create Category</ng-container>
       </button>
     </mat-dialog-actions>
   `,
@@ -102,12 +102,12 @@ export class MaintenanceCategoryCreateDialogComponent {
 
     this.categoryService.create(storeId, payload).subscribe({
       next: (res) => {
-        this.snackBar.open('Category created', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Category created`, $localize`Close`, { duration: 3000 });
         this.dialogRef.close(res.data);
       },
       error: (error) => {
         const message = error?.error?.message || 'Failed to create category';
-        this.snackBar.open(message, 'Close', { duration: 4000 });
+        this.snackBar.open(message, $localize`Close`, { duration: 4000 });
         this.submitting.set(false);
       },
     });

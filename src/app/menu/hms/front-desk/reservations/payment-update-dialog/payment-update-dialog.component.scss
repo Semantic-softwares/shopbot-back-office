@@ -7,7 +7,7 @@ mat-dialog-content {
   mat-tab-group {
     ::ng-deep {
       .mat-mdc-tab-list {
-        border-bottom: 1px solid #e5e7eb;
+        border-bottom: 1px solid light-dark(#e5e7eb, #48464b);
       }
 
       .mat-mdc-tab {
@@ -19,14 +19,14 @@ mat-dialog-content {
 
 // Breakdown section
 .bg-gray-50 {
-  background-color: #f9fafb;
+  background-color: light-dark(#f9fafb, #1c1b1c);
 
   .bg-white {
-    background-color: #ffffff;
-    border: 1px solid #e5e7eb;
+    background-color: light-dark(#ffffff, #201f20);
+    border: 1px solid light-dark(#e5e7eb, #48464b);
 
     .text-gray-600 {
-      color: #4b5563;
+      color: light-dark(#4b5563, #cac5cb);
       font-size: 0.75rem;
     }
   }
@@ -37,7 +37,7 @@ mat-dialog-content {
   height: 0.5rem;
 
   &.bg-gray-200 {
-    background-color: #e5e7eb;
+    background-color: light-dark(#e5e7eb, #2b2a2a);
   }
 
   .bg-green-500 {
@@ -58,17 +58,17 @@ table {
   th {
     padding: 0.75rem;
     text-align: left;
-    border-bottom: 1px solid #e5e7eb;
-    background-color: #f9fafb;
+    border-bottom: 1px solid light-dark(#e5e7eb, #48464b);
+    background-color: light-dark(#f9fafb, #1c1b1c);
   }
 
   td {
     padding: 0.75rem;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid light-dark(#e5e7eb, #48464b);
   }
 
   tr:hover {
-    background-color: #f9fafb;
+    background-color: light-dark(#f9fafb, #1c1b1c);
   }
 }
 
@@ -81,18 +81,18 @@ table {
 }
 
 .bg-blue-100 {
-  background-color: #dbeafe;
-  color: #0c4a6e;
+  background-color: light-dark(#dbeafe, #152842);
+  color: light-dark(#0c4a6e, #84c5eb);
 }
 
 .bg-green-100 {
-  background-color: #dcfce7;
-  color: #166534;
+  background-color: light-dark(#dcfce7, #173f25);
+  color: light-dark(#166534, #8ee1ae);
 }
 
 .bg-red-100 {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: light-dark(#fee2e2, #421515);
+  color: light-dark(#991b1b, #e58b8b);
 }
 
 // Empty state
@@ -109,7 +109,7 @@ mat-progress-spinner {
 // Dialog actions
 mat-dialog-actions {
   padding: 16px 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid light-dark(#e5e7eb, #48464b);
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
@@ -145,15 +145,15 @@ mat-dialog-actions {
 }
 
 .text-gray-500 {
-  color: #6b7280;
+  color: light-dark(#6b7280, #cac5cb);
 }
 
 .text-gray-600 {
-  color: #4b5563;
+  color: light-dark(#4b5563, #cac5cb);
 }
 
 .text-green-600 {
-  color: #16a34a;
+  color: light-dark(#16a34a, #87e9ab);
 }
 
 .text-red-600 {
@@ -161,15 +161,15 @@ mat-dialog-actions {
 }
 
 .text-blue-800 {
-  color: #1e40af;
+  color: light-dark(#1e40af, #8a9fe5);
 }
 
 .text-blue-50 {
-  background-color: #eff6ff;
+  background-color: light-dark(#eff6ff, #142843);
 }
 
 .border-blue-200 {
-  border: 1px solid #bfdbfe;
+  border: 1px solid light-dark(#bfdbfe, #2c4463);
 }
 
 .rounded-lg {

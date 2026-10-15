@@ -89,12 +89,12 @@ export class InvoiceCategoryCreateDialogComponent {
       })
       .subscribe({
         next: (res) => {
-          this.snackBar.open('Invoice category created', 'Close', { duration: 2500 });
+          this.snackBar.open($localize`Invoice category created`, $localize`Close`, { duration: 2500 });
           this.dialogRef.close(res.data);
         },
         error: (err) => {
           this.isSaving.set(false);
-          this.snackBar.open(err?.error?.message || 'Failed to create category', 'Close', {
+          this.snackBar.open(err?.error?.message || 'Failed to create category', $localize`Close`, {
             duration: 4500,
           });
         },

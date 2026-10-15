@@ -17,10 +17,10 @@
         <p class="text-xl text-gray-600 leading-relaxed mb-8">{{ feat.heroDescription }}</p>
         <div class="flex flex-wrap gap-4">
           <button mat-flat-button color="primary" class="!rounded-full !px-8 !py-3 !text-base" (click)="navigateToSignup()">
-            Get Started Free
+            <ng-container i18n>Get Started Free</ng-container>
           </button>
           <button mat-stroked-button class="!rounded-full !px-8 !py-3 !text-base" routerLink="/home">
-            ← Back to Home
+            <ng-container i18n>← Back to Home</ng-container>
           </button>
         </div>
       </div>
@@ -40,8 +40,8 @@
 <section class="py-20 bg-white">
   <div class="max-w-6xl mx-auto px-6">
     <div class="text-center mb-16">
-      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Key Highlights</h2>
-      <p class="text-lg text-gray-600">Everything you need, built right in</p>
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4"><ng-container i18n>Key Highlights</ng-container></h2>
+      <p class="text-lg text-gray-600"><ng-container i18n>Everything you need, built right in</ng-container></p>
     </div>
     <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
       @for (item of feat.highlights; track item.title) {
@@ -64,8 +64,8 @@
   <div class="max-w-6xl mx-auto px-6">
     <div class="grid lg:grid-cols-2 gap-12 items-center">
       <div>
-        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Why Choose ShopBot {{ feat.title }}?</h2>
-        <p class="text-lg text-gray-600 mb-8">Built for hospitality professionals who demand the best tools for their business.</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6"><ng-container i18n>Why Choose ShopBot {{ feat.title }}?</ng-container></h2>
+        <p class="text-lg text-gray-600 mb-8"><ng-container i18n>Built for hospitality professionals who demand the best tools for their business.</ng-container></p>
         <ul class="space-y-4">
           @for (benefit of feat.benefits; track benefit) {
           <li class="flex items-start gap-3">
@@ -79,7 +79,7 @@
         <div class="bg-white rounded-2xl border border-gray-200 shadow-lg aspect-square flex items-center justify-center">
           <div class="text-center p-8">
             <mat-icon class="!text-6xl !w-16 !h-16 text-gray-300 mb-4">{{ feat.icon }}</mat-icon>
-            <p class="text-gray-400 font-medium">Feature Screenshot</p>
+            <p class="text-gray-400 font-medium"><ng-container i18n>Feature Screenshot</ng-container></p>
           </div>
         </div>
       </div>
@@ -91,8 +91,8 @@
 <section class="py-20 bg-white">
   <div class="max-w-6xl mx-auto px-6">
     <div class="text-center mb-16">
-      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Deep Dive</h2>
-      <p class="text-lg text-gray-600">Explore the powerful capabilities in detail</p>
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4"><ng-container i18n>Deep Dive</ng-container></h2>
+      <p class="text-lg text-gray-600"><ng-container i18n>Explore the powerful capabilities in detail</ng-container></p>
     </div>
     <div class="space-y-8">
       @for (section of feat.detailSections; track section.title; let i = $index) {
@@ -110,14 +110,14 @@
         <div class="bg-gray-100 rounded-2xl border border-gray-200 aspect-video flex items-center justify-center">
           <div class="text-center p-6">
             <mat-icon class="!text-5xl !w-12 !h-12 text-gray-300 mb-3">{{ section.icon }}</mat-icon>
-            <p class="text-gray-400 text-sm">{{ section.title }} Preview</p>
+            <p class="text-gray-400 text-sm"><ng-container i18n>{{ section.title }} Preview</ng-container></p>
           </div>
         </div>
         } @else {
         <div class="bg-gray-100 rounded-2xl border border-gray-200 aspect-video flex items-center justify-center lg:order-first">
           <div class="text-center p-6">
             <mat-icon class="!text-5xl !w-12 !h-12 text-gray-300 mb-3">{{ section.icon }}</mat-icon>
-            <p class="text-gray-400 text-sm">{{ section.title }} Preview</p>
+            <p class="text-gray-400 text-sm"><ng-container i18n>{{ section.title }} Preview</ng-container></p>
           </div>
         </div>
         <div>
@@ -139,14 +139,14 @@
 <!-- CTA Section -->
 <section class="py-20 bg-gradient-to-r from-indigo-600 to-indigo-800">
   <div class="max-w-4xl mx-auto px-6 text-center">
-    <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Transform Your Operations?</h2>
-    <p class="text-xl text-indigo-100 mb-8">Start using {{ feat.title }} today — free for 14 days, no credit card required.</p>
+    <h2 class="text-3xl md:text-4xl font-bold text-white mb-6"><ng-container i18n>Ready to Transform Your Operations?</ng-container></h2>
+    <p class="text-xl text-indigo-100 mb-8"><ng-container i18n>Start using {{ feat.title }} today — free for 14 days, no credit card required.</ng-container></p>
     <div class="flex flex-wrap justify-center gap-4">
       <button mat-flat-button class="!bg-white !text-indigo-700 !rounded-full !px-8 !py-3 !text-base !font-semibold" (click)="navigateToSignup()">
-        Start Free Trial
+        <ng-container i18n>Start Free Trial</ng-container>
       </button>
       <button mat-stroked-button class="!border-white !text-white !rounded-full !px-8 !py-3 !text-base" routerLink="/home">
-        Learn More
+        <ng-container i18n>Learn More</ng-container>
       </button>
     </div>
   </div>
@@ -156,8 +156,8 @@
 <section class="py-20 bg-gray-50">
   <div class="max-w-6xl mx-auto px-6">
     <div class="text-center mb-12">
-      <h2 class="text-3xl font-bold text-gray-900 mb-4">Explore More Features</h2>
-      <p class="text-lg text-gray-600">ShopBot is a complete hospitality platform</p>
+      <h2 class="text-3xl font-bold text-gray-900 mb-4"><ng-container i18n>Explore More Features</ng-container></h2>
+      <p class="text-lg text-gray-600"><ng-container i18n>ShopBot is a complete hospitality platform</ng-container></p>
     </div>
     <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
       @for (other of otherFeatures(); track other.slug) {

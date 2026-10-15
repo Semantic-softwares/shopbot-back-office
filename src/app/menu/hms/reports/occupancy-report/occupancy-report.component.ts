@@ -29,11 +29,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { TrPipe } from '../../../../shared/i18n/tr.pipe';
+import { ChartThemeService } from '../../../../shared/services/chart-theme.service';
 
 @Component({
   selector: 'app-occupancy-report',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     CurrencyPipe,
     ReactiveFormsModule,
@@ -59,6 +61,8 @@ import { MatNativeDateModule } from '@angular/material/core';
   styleUrls: ['./occupancy-report.component.scss'],
 })
 export class OccupancyReportComponent {
+  // Keeps Chart.js text/grid colours in step with the light/dark theme.
+  private readonly chartTheme = inject(ChartThemeService);
   private fb = inject(FormBuilder);
   private occupancyService = inject(OccupancyService);
   private storeStore = inject(StoreStore);
@@ -145,7 +149,7 @@ export class OccupancyReportComponent {
     datasets: [
       {
         data: [],
-        label: 'Occupancy Rate (%)',
+        label: $localize`Occupancy Rate (%)`,
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         borderColor: 'rgba(59, 130, 246, 1)',
         borderWidth: 2,
@@ -154,7 +158,7 @@ export class OccupancyReportComponent {
       },
       {
         data: [],
-        label: 'Available Rooms',
+        label: $localize`Available Rooms`,
         backgroundColor: 'rgba(34, 197, 94, 0.1)',
         borderColor: 'rgba(34, 197, 94, 1)',
         borderWidth: 2,
@@ -193,14 +197,14 @@ export class OccupancyReportComponent {
         display: true,
         title: {
           display: true,
-          text: 'Date'
+          text: $localize`Date`
         }
       },
       y: {
         display: true,
         title: {
           display: true,
-          text: 'Percentage / Count'
+          text: $localize`Percentage / Count`
         },
         beginAtZero: true
       }
@@ -211,7 +215,7 @@ export class OccupancyReportComponent {
     labels: [],
     datasets: [{
       data: [],
-      label: 'Daily Revenue',
+      label: $localize`Daily Revenue`,
       backgroundColor: 'rgba(168, 85, 247, 0.8)',
       borderColor: 'rgba(168, 85, 247, 1)',
       borderWidth: 1
@@ -243,7 +247,7 @@ export class OccupancyReportComponent {
         display: true,
         title: {
           display: true,
-          text: 'Date'
+          text: $localize`Date`
         }
       },
       y: {
@@ -314,7 +318,7 @@ export class OccupancyReportComponent {
       datasets: [
         {
           data: data.map(d => d.occupancyRate),
-          label: 'Occupancy Rate (%)',
+          label: $localize`Occupancy Rate (%)`,
           backgroundColor: 'rgba(59, 130, 246, 0.1)',
           borderColor: 'rgba(59, 130, 246, 1)',
           borderWidth: 2,
@@ -323,7 +327,7 @@ export class OccupancyReportComponent {
         },
         {
           data: data.map(d => d.availableRooms),
-          label: 'Available Rooms',
+          label: $localize`Available Rooms`,
           backgroundColor: 'rgba(34, 197, 94, 0.1)',
           borderColor: 'rgba(34, 197, 94, 1)',
           borderWidth: 2,
@@ -338,7 +342,7 @@ export class OccupancyReportComponent {
       labels: data.map(d => this.formatDateShort(d.date)),
       datasets: [{
         data: data.map(d => d.revenue),
-        label: 'Daily Revenue',
+        label: $localize`Daily Revenue`,
         backgroundColor: 'rgba(168, 85, 247, 0.8)',
         borderColor: 'rgba(168, 85, 247, 1)',
         borderWidth: 1

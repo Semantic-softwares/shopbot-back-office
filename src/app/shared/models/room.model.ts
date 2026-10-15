@@ -288,14 +288,14 @@ export type Amenity = typeof COMMON_AMENITIES[number];
 
 // View type options
 export const VIEW_TYPE_OPTIONS = [
-  { value: 'ocean', label: 'Ocean View', icon: 'waves' },
-  { value: 'city', label: 'City View', icon: 'location_city' },
-  { value: 'mountain', label: 'Mountain View', icon: 'terrain' },
-  { value: 'garden', label: 'Garden View', icon: 'local_florist' },
-  { value: 'pool', label: 'Pool View', icon: 'pool' },
-  { value: 'courtyard', label: 'Courtyard View', icon: 'account_balance' },
-  { value: 'street', label: 'Street View', icon: 'traffic' },
-  { value: 'interior', label: 'Interior View', icon: 'home' }
+  { value: 'ocean', label: $localize`Ocean View`, icon: 'waves' },
+  { value: 'city', label: $localize`City View`, icon: 'location_city' },
+  { value: 'mountain', label: $localize`Mountain View`, icon: 'terrain' },
+  { value: 'garden', label: $localize`Garden View`, icon: 'local_florist' },
+  { value: 'pool', label: $localize`Pool View`, icon: 'pool' },
+  { value: 'courtyard', label: $localize`Courtyard View`, icon: 'account_balance' },
+  { value: 'street', label: $localize`Street View`, icon: 'traffic' },
+  { value: 'interior', label: $localize`Interior View`, icon: 'home' }
 ] as const;
 
 // Bed configuration options

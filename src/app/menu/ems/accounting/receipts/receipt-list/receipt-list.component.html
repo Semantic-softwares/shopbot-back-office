@@ -1,8 +1,8 @@
-<app-page-header title="Receipts" subtitle="Proof of received payments and allocations">
+<app-page-header title="Receipts" i18n-title subtitle="Proof of received payments and allocations" i18n-subtitle>
   <ng-container actions>
     <button mat-button (click)="clearFilters()">
       <mat-icon>clear</mat-icon>
-      Clear Filters
+      <ng-container i18n>Clear Filters</ng-container>
     </button>
   </ng-container>
 </app-page-header>
@@ -10,7 +10,7 @@
 <div class="px-4 py-6 space-y-4">
   <mat-card appearance="outlined">
     <mat-card-content class="p-4!">
-      <p class="text-sm text-gray-600">Total Received</p>
+      <p class="text-sm text-gray-600"><ng-container i18n>Total Received</ng-container></p>
       <p class="text-2xl font-bold text-gray-900 mt-1">
         {{ formatCurrency(totalAmount()) }}
       </p>
@@ -26,16 +26,16 @@
       } @else {
         <div class="mb-4">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Search</mat-label>
+            <mat-label><ng-container i18n>Search</ng-container></mat-label>
             <mat-icon matPrefix class="mr-1">search</mat-icon>
             <input
               matInput
-              placeholder="Search by receipt number or tenant"
+              placeholder="Search by receipt number or tenant" i18n-placeholder
               [value]="searchQuery()"
               (input)="updateSearch($any($event.target).value)"
             >
             @if (searchQuery()) {
-              <button matSuffix mat-icon-button aria-label="Clear search" (click)="clearSearch()">
+              <button matSuffix mat-icon-button aria-label="Clear search" i18n-aria-label (click)="clearSearch()">
                 <mat-icon>close</mat-icon>
               </button>
             }
@@ -44,9 +44,9 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Tenant</mat-label>
+            <mat-label><ng-container i18n>Tenant</ng-container></mat-label>
             <mat-select [value]="tenantFilter()" (selectionChange)="updateTenantFilter($event.value)">
-              <mat-option value="">All Tenants</mat-option>
+              <mat-option value=""><ng-container i18n>All Tenants</ng-container></mat-option>
               @for (option of tenantFilterOptions(); track option.value) {
                 <mat-option [value]="option.value">{{ option.label }}</mat-option>
               }
@@ -54,7 +54,7 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Payment Method</mat-label>
+            <mat-label><ng-container i18n>Payment Method</ng-container></mat-label>
             <mat-select [value]="methodFilter()" (selectionChange)="updateMethodFilter($event.value)">
               @for (option of methodOptions; track option.value) {
                 <mat-option [value]="option.value">{{ option.label }}</mat-option>
@@ -66,15 +66,15 @@
         @if (filteredReceipts().length === 0) {
           <app-no-record
             icon="receipt_long"
-            title="No Receipts Found"
-            message="No receipts found."
+            title="No Receipts Found" i18n-title
+            message="No receipts found." i18n-message
           ></app-no-record>
         } @else {
           <div class="overflow-x-auto border border-outline-variant rounded-lg">
             <table mat-table [dataSource]="filteredReceipts()" class="w-full">
               <ng-container matColumnDef="receiptNumber">
                 <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                  Receipt
+                  <ng-container i18n>Receipt</ng-container>
                 </th>
                 <td mat-cell *matCellDef="let receipt" class="py-3 text-sm text-gray-900 font-medium">
                   {{ receipt.receiptNumber }}
@@ -83,7 +83,7 @@
 
               <ng-container matColumnDef="receiptDate">
                 <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                  Date
+                  <ng-container i18n>Date</ng-container>
                 </th>
                 <td mat-cell *matCellDef="let receipt" class="py-3 text-sm text-gray-700">
                   {{ receipt.receiptDate | date: 'MMM d, y' }}
@@ -92,7 +92,7 @@
 
               <ng-container matColumnDef="method">
                 <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                  Method
+                  <ng-container i18n>Method</ng-container>
                 </th>
                 <td mat-cell *matCellDef="let receipt" class="py-3 text-sm text-gray-700">
                   {{ methodLabel(receipt.paymentMethod) }}
@@ -101,7 +101,7 @@
 
               <ng-container matColumnDef="tenant">
                 <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                  Tenant
+                  <ng-container i18n>Tenant</ng-container>
                 </th>
                 <td mat-cell *matCellDef="let receipt" class="py-3 text-sm text-gray-700">
                   {{ tenantName(receipt) }}
@@ -110,7 +110,7 @@
 
               <ng-container matColumnDef="amount">
                 <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 text-right!">
-                  Amount
+                  <ng-container i18n>Amount</ng-container>
                 </th>
                 <td mat-cell *matCellDef="let receipt" class="py-3 text-sm text-gray-900 font-medium text-right!">
                   {{ formatCurrency(receipt.amountReceived, receipt.currency) }}
@@ -120,20 +120,20 @@
               @if (isAdmin()) {
                 <ng-container matColumnDef="actions">
                   <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 text-center! w-16">
-                    Actions
+                    <ng-container i18n>Actions</ng-container>
                   </th>
                   <td mat-cell *matCellDef="let receipt" class="py-3 text-center!">
                     <button
                       mat-icon-button
                       [matMenuTriggerFor]="receiptMenu"
-                      aria-label="Receipt actions"
+                      aria-label="Receipt actions" i18n-aria-label
                       (click)="$event.stopPropagation()">
                       <mat-icon>more_vert</mat-icon>
                     </button>
                     <mat-menu #receiptMenu="matMenu">
                       <button mat-menu-item (click)="deleteReceipt($event, receipt)">
                         <mat-icon color="warn">delete</mat-icon>
-                        <span>Delete</span>
+                        <span><ng-container i18n>Delete</ng-container></span>
                       </button>
                     </mat-menu>
                   </td>

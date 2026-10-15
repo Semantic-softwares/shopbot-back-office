@@ -55,7 +55,7 @@ export class ChannelManagerListTaxes {
   private loadTaxes() {
     const propertyId = this.storeStore.selectedStore()?.channex?.propertyId;
     if (!propertyId) {
-      this.snackBar.open('Property ID not found', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Property ID not found`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -71,7 +71,7 @@ export class ChannelManagerListTaxes {
         error: (error) => {
           this.isLoading.set(false);
           const errorMessage = error.error?.message || 'Failed to load taxes';
-          this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+          this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
           console.error('Error loading taxes:', error);
         },
       });
@@ -105,10 +105,10 @@ export class ChannelManagerListTaxes {
     this.dialog
       .open(ConfirmationDialogComponent, {
         data: {
-          title: 'Delete Tax',
-          message: `Are you sure you want to delete the tax "${tax.title}"?`,
-          confirmText: 'Delete',
-          cancelText: 'Cancel',
+          title: $localize`Delete Tax`,
+          message: $localize`Are you sure you want to delete the tax "${tax.title}"?`,
+          confirmText: $localize`Delete`,
+          cancelText: $localize`Cancel`,
         },
       })
       .afterClosed()
@@ -123,12 +123,12 @@ export class ChannelManagerListTaxes {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
               next: () => {
-                this.snackBar.open('Tax deleted successfully', 'Close', { duration: 3000 });
+                this.snackBar.open($localize`Tax deleted successfully`, $localize`Close`, { duration: 3000 });
                 this.loadTaxes();
               },
               error: (error) => {
                 const errorMessage = error.error?.message || 'Failed to delete tax';
-                this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+                this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
                 console.error('Error deleting tax:', error);
               },
             });

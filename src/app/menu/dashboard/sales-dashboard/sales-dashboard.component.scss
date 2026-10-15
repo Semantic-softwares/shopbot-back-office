@@ -312,8 +312,8 @@
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 50%;
-  background: #e6f0fb;
-  color: #005cbb;
+  background: light-dark(#e6f0fb, #1a2b3d);
+  color: light-dark(#005cbb, #77b7f8);
 
   mat-icon { font-size: 1.1rem; width: 1.1rem; height: 1.1rem; }
 

@@ -1,48 +1,48 @@
 <div class="mb-12">
-  <h2 class="text-sm font-semibold text-blue-600 mb-6">Billing Information</h2>
+  <h2 class="text-sm font-semibold text-blue-600 mb-6"><ng-container i18n>Billing Information</ng-container></h2>
 
   <!-- PAID/ACTIVE Subscription -->
   @if (subscription().status === 'ACTIVE' && subscription().hasPaymentMethod) {
     <mat-card appearance="outlined">
       <mat-list>
         <mat-list-item>
-          <span matListItemTitle>Billing Card</span>
+          <span matListItemTitle><ng-container i18n>Billing Card</ng-container></span>
           <span matListItemLine>{{ getCardDisplay() }}</span>
         </mat-list-item>
         <mat-divider></mat-divider>
 
         <mat-list-item>
-          <span matListItemTitle>Subscription Status</span>
+          <span matListItemTitle><ng-container i18n>Subscription Status</ng-container></span>
           <span matListItemLine>{{ getStatusLabel() }}</span>
         </mat-list-item>
         <mat-divider></mat-divider>
 
         <mat-list-item>
-          <span matListItemTitle>Billing Cycle</span>
-          <span matListItemLine>{{ subscription().billingCycle === 'MONTHLY' ? 'Monthly' : 'Yearly' }}</span>
+          <span matListItemTitle><ng-container i18n>Billing Cycle</ng-container></span>
+          <span matListItemLine>@if (subscription().billingCycle === 'MONTHLY') {<ng-container i18n>Monthly</ng-container>} @else {<ng-container i18n>Yearly</ng-container>}</span>
         </mat-list-item>
         <mat-divider></mat-divider>
         
         <mat-list-item>
-          <span matListItemTitle>Billing Email</span>
+          <span matListItemTitle><ng-container i18n>Billing Email</ng-container></span>
           <span matListItemLine>{{ subscription().billingEmail }}</span>
         </mat-list-item>
         <mat-divider></mat-divider>
         
         <mat-list-item>
-          <span matListItemTitle>Billing Country</span>
+          <span matListItemTitle><ng-container i18n>Billing Country</ng-container></span>
           <span matListItemLine>{{ subscription().billingCountry }}</span>
         </mat-list-item>
         <mat-divider></mat-divider>
         
         <mat-list-item>
-          <span matListItemTitle>Plan Renews</span>
+          <span matListItemTitle><ng-container i18n>Plan Renews</ng-container></span>
           <span matListItemLine>{{ subscription().nextBillingDate | date: 'MMMM d, y' }}</span>
         </mat-list-item>
         <mat-divider></mat-divider>
 
         <mat-list-item>
-          <span matListItemTitle>Total Recurring Amount</span>
+          <span matListItemTitle><ng-container i18n>Total Recurring Amount</ng-container></span>
           <span matListItemLine class="font-semibold text-blue-600">
             ${{ data().totalRecurring | number: '1.2-2' }}
             / {{ subscription().billingCycle === 'MONTHLY' ? 'month' : 'year' }}
@@ -57,20 +57,20 @@
     <mat-card appearance="outlined" class="mb-6">
       <mat-list>
         <mat-list-item>
-          <span matListItemTitle>Trial Started</span>
+          <span matListItemTitle><ng-container i18n>Trial Started</ng-container></span>
           <span matListItemLine>{{ subscription().trialStartDate | date: 'MMMM d, y' }}</span>
         </mat-list-item>
         <mat-divider></mat-divider>
         
         <mat-list-item>
-          <span matListItemTitle>Trial Expires</span>
+          <span matListItemTitle><ng-container i18n>Trial Expires</ng-container></span>
           <span matListItemLine>{{ subscription().trialEndDate | date: 'MMMM d, y' }}</span>
         </mat-list-item>
         <mat-divider></mat-divider>
         
         <mat-list-item>
-          <span matListItemTitle>Days Remaining</span>
-          <span matListItemLine class="text-blue-600 font-semibold">{{ getTrialDaysRemaining() }} days</span>
+          <span matListItemTitle><ng-container i18n>Days Remaining</ng-container></span>
+          <span matListItemLine class="text-blue-600 font-semibold"><ng-container i18n>{{ getTrialDaysRemaining() }} days</ng-container></span>
         </mat-list-item>
       </mat-list>
     </mat-card>
@@ -78,25 +78,25 @@
     <mat-card appearance="outlined">
       <mat-list>
         <mat-list-item>
-          <span matListItemTitle>Billing Email</span>
+          <span matListItemTitle><ng-container i18n>Billing Email</ng-container></span>
           <span matListItemLine>{{ subscription().billingEmail }}</span>
         </mat-list-item>
         <mat-divider></mat-divider>
         
         <mat-list-item>
-          <span matListItemTitle>Billing Country</span>
+          <span matListItemTitle><ng-container i18n>Billing Country</ng-container></span>
           <span matListItemLine>{{ subscription().billingCountry }}</span>
         </mat-list-item>
         <mat-divider></mat-divider>
 
         <mat-list-item>
-          <span matListItemTitle>Billing Cycle</span>
-          <span matListItemLine>{{ subscription().billingCycle === 'MONTHLY' ? 'Monthly' : 'Yearly' }}</span>
+          <span matListItemTitle><ng-container i18n>Billing Cycle</ng-container></span>
+          <span matListItemLine>@if (subscription().billingCycle === 'MONTHLY') {<ng-container i18n>Monthly</ng-container>} @else {<ng-container i18n>Yearly</ng-container>}</span>
         </mat-list-item>
         <mat-divider></mat-divider>
 
         <mat-list-item>
-          <span matListItemTitle>After Trial Ends</span>
+          <span matListItemTitle><ng-container i18n>After Trial Ends</ng-container></span>
           <span matListItemLine class="font-semibold text-gray-700">
             ${{ data().totalRecurring | number: '1.2-2' }}
             / {{ subscription().billingCycle === 'MONTHLY' ? 'month' : 'year' }}
@@ -111,13 +111,13 @@
     <mat-card appearance="outlined">
       <mat-list>
         <mat-list-item>
-          <span matListItemTitle>Subscription Status</span>
+          <span matListItemTitle><ng-container i18n>Subscription Status</ng-container></span>
           <span matListItemLine class="font-semibold text-red-600">{{ getStatusLabel() }}</span>
         </mat-list-item>
         <mat-divider></mat-divider>
 
         <mat-list-item>
-          <span matListItemTitle>Billing Email</span>
+          <span matListItemTitle><ng-container i18n>Billing Email</ng-container></span>
           <span matListItemLine>{{ subscription().billingEmail }}</span>
         </mat-list-item>
       </mat-list>

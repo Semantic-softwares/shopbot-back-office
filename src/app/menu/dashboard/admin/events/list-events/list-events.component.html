@@ -1,14 +1,14 @@
 <mat-card class="mat-elevation-z2 !px-2">
   <div class="p-4 flex justify-between items-center gap-4">
     <mat-form-field appearance="outline" class="w-80">
-      <mat-label>Search events</mat-label>
-      <input matInput (input)="onSearch($event)" [value]="searchTerm()" placeholder="Search by title, client or company">
+      <mat-label><ng-container i18n>Search events</ng-container></mat-label>
+      <input matInput (input)="onSearch($event)" [value]="searchTerm()" placeholder="Search by title, client or company" i18n-placeholder>
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
 
     <button mat-flat-button color="primary" (click)="onAdd()">
       <mat-icon>add</mat-icon>
-      Add Event
+      <ng-container i18n>Add Event</ng-container>
     </button>
   </div>
 
@@ -19,32 +19,32 @@
   } @else {
     <table mat-table [dataSource]="filteredEvents()" class="w-full">
       <ng-container matColumnDef="title">
-        <th mat-header-cell *matHeaderCellDef> Title </th>
+        <th mat-header-cell *matHeaderCellDef> <ng-container i18n>Title</ng-container> </th>
         <td mat-cell *matCellDef="let event"> {{event.title}} </td>
       </ng-container>
 
       <ng-container matColumnDef="date">
-        <th mat-header-cell *matHeaderCellDef> Date </th>
+        <th mat-header-cell *matHeaderCellDef> <ng-container i18n>Date</ng-container> </th>
         <td mat-cell *matCellDef="let event"> {{event.date | date}} </td>
       </ng-container>
 
       <ng-container matColumnDef="type">
-        <th mat-header-cell *matHeaderCellDef> Type </th>
+        <th mat-header-cell *matHeaderCellDef> <ng-container i18n>Type</ng-container> </th>
         <td mat-cell *matCellDef="let event"> {{event.type}} </td>
       </ng-container>
 
       <ng-container matColumnDef="client">
-        <th mat-header-cell *matHeaderCellDef> Client </th>
+        <th mat-header-cell *matHeaderCellDef> <ng-container i18n>Client</ng-container> </th>
         <td mat-cell *matCellDef="let event"> {{event.client}} </td>
       </ng-container>
 
       <ng-container matColumnDef="company">
-        <th mat-header-cell *matHeaderCellDef> Company </th>
+        <th mat-header-cell *matHeaderCellDef> <ng-container i18n>Company</ng-container> </th>
         <td mat-cell *matCellDef="let event"> {{event.company}} </td>
       </ng-container>
 
       <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef class="w-20"> Actions </th>
+        <th mat-header-cell *matHeaderCellDef class="w-20"> <ng-container i18n>Actions</ng-container> </th>
         <td mat-cell *matCellDef="let event">
           <button mat-icon-button [matMenuTriggerFor]="menu">
             <mat-icon>more_vert</mat-icon>
@@ -52,11 +52,11 @@
           <mat-menu #menu="matMenu">
             <button mat-menu-item (click)="onEdit(event)">
               <mat-icon>edit</mat-icon>
-              <span>Edit</span>
+              <span><ng-container i18n>Edit</ng-container></span>
             </button>
             <button mat-menu-item (click)="onDelete(event)">
               <mat-icon>delete</mat-icon>
-              <span>Delete</span>
+              <span><ng-container i18n>Delete</ng-container></span>
             </button>
           </mat-menu>
         </td>

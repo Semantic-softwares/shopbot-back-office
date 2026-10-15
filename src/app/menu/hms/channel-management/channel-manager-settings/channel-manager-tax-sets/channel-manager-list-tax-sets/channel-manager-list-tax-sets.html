@@ -1,9 +1,9 @@
 
   <!-- Page Header -->
   <app-page-header
-    title="Tax Sets"
-    subtitle="Manage your tax sets"
-    actionLabel="Create Tax Set"
+    title="Tax Sets" i18n-title
+    subtitle="Manage your tax sets" i18n-subtitle
+    actionLabel="Create Tax Set" i18n-actionLabel
     
   >
 <ng-container actions>
@@ -13,7 +13,7 @@
       (click)="createTaxSet()"
     >
       <mat-icon>add</mat-icon>
-      Create Tax Set
+      <ng-container i18n>Create Tax Set</ng-container>
     </button>
 </ng-container>
 </app-page-header>
@@ -29,8 +29,8 @@
   @if (taxSets.error()) {
     <app-no-record
       icon="error_outline"
-      title="Failed to Load Tax Sets"
-      [message]="taxSets.error()?.message || 'Unable to load tax sets. Please try again.'"
+      title="Failed to Load Tax Sets" i18n-title
+      [message]="taxSets.error()?.message || ('Unable to load tax sets. Please try again.' | tr)"
     ></app-no-record>
   }
 
@@ -41,12 +41,12 @@
         <!-- Search Field -->
         <div class="p-4 border-b border-gray-200">
           <mat-form-field appearance="outline" class="w-full md:w-80">
-            <mat-label>Search tax sets</mat-label>
+            <mat-label><ng-container i18n>Search tax sets</ng-container></mat-label>
             <input
               matInput
               [(ngModel)]="searchText"
               (input)="applyFilter()"
-              placeholder="Search by title..."
+              placeholder="Search by title..." i18n-placeholder
             />
             <mat-icon matSuffix>search</mat-icon>
           </mat-form-field>
@@ -56,7 +56,7 @@
         <table mat-table [dataSource]="dataSource" matSort #table>
           <!-- Title Column -->
           <ng-container matColumnDef="title">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Tax Set Title</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header><ng-container i18n>Tax Set Title</ng-container></th>
             <td mat-cell *matCellDef="let element">
               <span class="font-semibold text-gray-900">{{ element.attributes?.title }}</span>
             </td>
@@ -64,7 +64,7 @@
 
           <!-- Currency Column -->
           <ng-container matColumnDef="currency">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Currency</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header><ng-container i18n>Currency</ng-container></th>
             <td mat-cell *matCellDef="let element">
               {{ element.attributes?.currency }}
             </td>
@@ -72,7 +72,7 @@
 
           <!-- Taxes Count Column -->
           <ng-container matColumnDef="taxes_count">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Tax Count</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header><ng-container i18n>Tax Count</ng-container></th>
             <td mat-cell *matCellDef="let element">
               {{ element.attributes?.taxes?.length || 0 }}
             </td>
@@ -80,23 +80,23 @@
 
           <!-- Actions Column -->
           <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Actions</ng-container></th>
             <td mat-cell *matCellDef="let element" class="text-right">
               <button
                 mat-icon-button
                 [matMenuTriggerFor]="menu"
-                matTooltip="More options"
+                matTooltip="More options" i18n-matTooltip
               >
                 <mat-icon>more_vert</mat-icon>
               </button>
               <mat-menu #menu="matMenu">
                 <button mat-menu-item (click)="editTaxSet(element)">
                   <mat-icon>edit</mat-icon>
-                  <span>Edit</span>
+                  <span><ng-container i18n>Edit</ng-container></span>
                 </button>
                 <button mat-menu-item (click)="deleteTaxSet(element)" class="text-red-600">
                   <mat-icon>delete</mat-icon>
-                  <span>Delete</span>
+                  <span><ng-container i18n>Delete</ng-container></span>
                 </button>
               </mat-menu>
             </td>
@@ -110,7 +110,7 @@
         <mat-paginator
           [pageSizeOptions]="[5, 10, 20, 50]"
           showFirstLastButtons
-          aria-label="Select page"
+          aria-label="Select page" i18n-aria-label
         ></mat-paginator>
       </mat-card-content>
     </mat-card>
@@ -120,8 +120,8 @@
   @if (!taxSets.isLoading() && (!dataSource || dataSource.data.length === 0) && !taxSets.error()) {
     <app-no-record
       icon="assignment"
-      title="No Tax Sets Found"
-      message="No tax sets have been created yet. Create your first tax set to get started."
+      title="No Tax Sets Found" i18n-title
+      message="No tax sets have been created yet. Create your first tax set to get started." i18n-message
     ></app-no-record>
   }
 

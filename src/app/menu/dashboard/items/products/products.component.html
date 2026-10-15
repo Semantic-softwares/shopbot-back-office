@@ -1,12 +1,12 @@
 <div class="p-4 md:p-6">
-<app-page-header title="Products" subtitle="Manage your menu items and pricing">
+<app-page-header title="Products" i18n-title subtitle="Manage your menu items and pricing" i18n-subtitle>
   <button matButton="outlined" (click)="openImportDialog()" actions>
     <mat-icon>upload_file</mat-icon>
-    Import
+    <ng-container i18n>Import</ng-container>
   </button>
   <button matButton="filled" (click)="addItem()" actions>
     <mat-icon>add</mat-icon>
-    Add product
+    <ng-container i18n>Add product</ng-container>
   </button>
 </app-page-header>
 
@@ -16,9 +16,9 @@
     <div class="flex flex-col md:flex-row gap-4 p-4 border-b mb-4">
       <div class="flex flex-col sm:flex-row gap-4 flex-grow">
         <mat-form-field appearance="outline" class="w-full sm:w-48">
-          <mat-label>Category</mat-label>
+          <mat-label><ng-container i18n>Category</ng-container></mat-label>
           <mat-select (selectionChange)="onCategoryChange($event.value)">
-            <mat-option value="all">All Categories</mat-option>
+            <mat-option value="all"><ng-container i18n>All Categories</ng-container></mat-option>
             @for (category of categories.value(); track $index) {
               <mat-option [value]="category._id">
                 {{category.name}}
@@ -27,9 +27,9 @@
           </mat-select>
         </mat-form-field>
         <mat-form-field appearance="outline" class="w-full sm:w-48 md:w-72 lg:w-96">
-          <mat-label>Search</mat-label>
+          <mat-label><ng-container i18n>Search</ng-container></mat-label>
           <mat-icon matPrefix>search</mat-icon>
-          <input matInput (input)="onSearch($event)" placeholder="Search items">
+          <input matInput (input)="onSearch($event)" placeholder="Search items" i18n-placeholder>
         </mat-form-field>
       </div>
     </div>
@@ -38,8 +38,8 @@
         <mat-spinner diameter="40"></mat-spinner>
       </div>
     } @else if (dataSource.hasValue() && filteredProducts().length === 0) {
-      <app-no-record icon="inventory_2" title="No Products"
-        message="No products found matching your criteria.">
+      <app-no-record icon="inventory_2" title="No Products" i18n-title
+        message="No products found matching your criteria." i18n-message>
       </app-no-record>
     } @else if (dataSource.hasValue()) {
 
@@ -48,17 +48,17 @@
         <div class="flex flex-wrap items-center gap-3 px-4 py-3 mx-4 mb-3 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-900/30 dark:border-blue-700">
           <mat-icon class="text-blue-600">checklist</mat-icon>
           <span class="text-sm font-medium text-blue-800 dark:text-blue-200">
-            {{ selectedCount() }} product(s) selected
+            <ng-container i18n>{{ selectedCount() }} product(s) selected</ng-container>
           </span>
 
           <div class="flex flex-wrap items-center gap-2 ml-4">
-            <span class="text-xs text-gray-500 mr-1">Assign Station:</span>
+            <span class="text-xs text-gray-500 mr-1"><ng-container i18n>Assign Station:</ng-container></span>
             @for (station of stations.value(); track station._id) {
               <button mat-stroked-button
                 class="!text-xs !min-w-0 !px-3 !py-1 !h-8"
                 (click)="bulkAssignStation(station._id)"
                 [disabled]="bulkUpdating()"
-                [matTooltip]="'Assign to ' + station.name">
+                [matTooltip]="('Assign to ' | tr) + station.name">
                 <mat-icon class="!text-base !w-4 !h-4 mr-1">{{ station.icon || 'restaurant' }}</mat-icon>
                 {{ station.name }}
               </button>
@@ -67,9 +67,9 @@
               class="!text-xs !min-w-0 !px-3 !py-1 !h-8"
               (click)="bulkRemoveStation()"
               [disabled]="bulkUpdating()"
-              matTooltip="Remove station assignment">
+              matTooltip="Remove station assignment" i18n-matTooltip>
               <mat-icon class="!text-base !w-4 !h-4 mr-1">link_off</mat-icon>
-              Remove Station
+              <ng-container i18n>Remove Station</ng-container>
             </button>
           </div>
           <span class="flex-grow"></span>
@@ -78,9 +78,9 @@
           }
           <button matButton (click)="bulkDelete()" [disabled]="bulkUpdating()" class="!text-red-600">
             <mat-icon>delete</mat-icon>
-            Delete
+            <ng-container i18n>Delete</ng-container>
           </button>
-          <button mat-icon-button (click)="clearSelection()" matTooltip="Clear selection" aria-label="Clear selection">
+          <button mat-icon-button (click)="clearSelection()" matTooltip="Clear selection" i18n-matTooltip aria-label="Clear selection" i18n-aria-label>
             <mat-icon class="!text-base">close</mat-icon>
           </button>
         </div>
@@ -96,7 +96,7 @@
                 [checked]="isAllSelected()"
                 [indeterminate]="isIndeterminate()"
                 (change)="toggleAll()"
-                aria-label="Select all products"
+                aria-label="Select all products" i18n-aria-label
                 color="primary">
               </mat-checkbox>
             </th>
@@ -105,14 +105,14 @@
                 [checked]="isSelected(element._id)"
                 (change)="toggleSelection(element._id)"
                 (click)="$event.stopPropagation()"
-                [aria-label]="'Select ' + element.name"
+                [aria-label]="('Select ' | tr) + element.name"
                 color="primary">
               </mat-checkbox>
             </td>
           </ng-container>
 
           <ng-container matColumnDef="photo">
-            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Photo</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50"><ng-container i18n>Photo</ng-container></th>
             <td mat-cell *matCellDef="let element">
               @if (element.photos?.[0]) {
                 <img [src]="element.photos[0]" alt="" loading="lazy"
@@ -126,7 +126,7 @@
           </ng-container>
 
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Item name</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50"><ng-container i18n>Item name</ng-container></th>
             <td mat-cell *matCellDef="let element">
               <div class="font-semibold">{{element.name}}</div>
               @if (element.description) {
@@ -136,12 +136,12 @@
           </ng-container>
 
           <ng-container matColumnDef="category">
-            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Category</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50"><ng-container i18n>Category</ng-container></th>
             <td mat-cell *matCellDef="let element">{{element?.menu?.name}}</td>
           </ng-container>
 
           <ng-container matColumnDef="station">
-            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Station</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50"><ng-container i18n>Station</ng-container></th>
             <td mat-cell *matCellDef="let element">
               @if (element.station && element.station?.name) {
                 <mat-chip-set>
@@ -151,13 +151,13 @@
                   </mat-chip>
                 </mat-chip-set>
               } @else {
-                <span class="text-gray-400 text-xs italic">No station</span>
+                <span class="text-gray-400 text-xs italic"><ng-container i18n>No station</ng-container></span>
               }
             </td>
           </ng-container>
 
           <ng-container matColumnDef="price">
-            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Price</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50"><ng-container i18n>Price</ng-container></th>
             <td mat-cell *matCellDef="let element">
               <span class="font-semibold text-primary">
                 {{element.price | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
@@ -166,27 +166,27 @@
           </ng-container>
 
           <ng-container matColumnDef="cost">
-            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Cost Price</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50"><ng-container i18n>Cost Price</ng-container></th>
             <td mat-cell *matCellDef="let element">{{element.costPrice}}</td>
           </ng-container>
 
           <ng-container matColumnDef="initialStock">
-            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Initial Stock</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50"><ng-container i18n>Initial Stock</ng-container></th>
             <td mat-cell *matCellDef="let element">{{element.initialStock || 0}}</td>
           </ng-container>
 
           <ng-container matColumnDef="criticalStockLevel">
-            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Critical Level</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50"><ng-container i18n>Critical Level</ng-container></th>
             <td mat-cell *matCellDef="let element">{{element.criticalStockLevel || 0}}</td>
           </ng-container>
 
           <ng-container matColumnDef="qty">
-            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Quantity</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50"><ng-container i18n>Quantity</ng-container></th>
             <td mat-cell *matCellDef="let element">{{element.qty || 0}}</td>
           </ng-container>
 
           <ng-container matColumnDef="active">
-            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Status</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50"><ng-container i18n>Status</ng-container></th>
             <td mat-cell *matCellDef="let element">
               <mat-slide-toggle
                 [checked]="element.active"
@@ -197,19 +197,19 @@
           </ng-container>
 
           <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef class="bg-gray-50">Actions</th>
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50"><ng-container i18n>Actions</ng-container></th>
             <td mat-cell *matCellDef="let product">
-              <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Product actions">
+              <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Product actions" i18n-aria-label>
                 <mat-icon>more_vert</mat-icon>
               </button>
               <mat-menu #menu="matMenu">
                 <button mat-menu-item (click)="onEditProduct(product._id)">
                   <mat-icon>edit</mat-icon>
-                  <span>Edit</span>
+                  <span><ng-container i18n>Edit</ng-container></span>
                 </button>
                 <button mat-menu-item (click)="deleteProduct(product)">
                   <mat-icon>delete</mat-icon>
-                  <span>Delete</span>
+                  <span><ng-container i18n>Delete</ng-container></span>
                 </button>
               </mat-menu>
             </td>
@@ -227,7 +227,7 @@
                 <mat-checkbox
                   [checked]="isSelected(product._id)"
                   (change)="toggleSelection(product._id)"
-                  [aria-label]="'Select ' + product.name"
+                  [aria-label]="('Select ' | tr) + product.name"
                   color="primary">
                 </mat-checkbox>
                 @if (product.photos?.[0]) {
@@ -250,17 +250,17 @@
                     {{ product.price | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
                   </p>
                 </div>
-                <button mat-icon-button [matMenuTriggerFor]="cardMenu" aria-label="Product actions" class="flex-shrink-0">
+                <button mat-icon-button [matMenuTriggerFor]="cardMenu" aria-label="Product actions" i18n-aria-label class="flex-shrink-0">
                   <mat-icon>more_vert</mat-icon>
                 </button>
                 <mat-menu #cardMenu="matMenu">
                   <button mat-menu-item (click)="onEditProduct(product._id)">
                     <mat-icon>edit</mat-icon>
-                    <span>Edit</span>
+                    <span><ng-container i18n>Edit</ng-container></span>
                   </button>
                   <button mat-menu-item (click)="deleteProduct(product)">
                     <mat-icon>delete</mat-icon>
-                    <span>Delete</span>
+                    <span><ng-container i18n>Delete</ng-container></span>
                   </button>
                 </mat-menu>
               </div>
@@ -268,10 +268,10 @@
                 @if (product.station?.name) {
                   <mat-chip class="!text-xs">{{ product.station.name }}</mat-chip>
                 } @else {
-                  <span class="text-gray-400 text-xs italic">No station</span>
+                  <span class="text-gray-400 text-xs italic"><ng-container i18n>No station</ng-container></span>
                 }
                 <mat-slide-toggle [checked]="product.active" (change)="toggleProductStatus(product)" color="primary">
-                  {{ product.active ? 'Active' : 'Hidden' }}
+                  @if (product.active) {<ng-container i18n>Active</ng-container>} @else {<ng-container i18n>Hidden</ng-container>}
                 </mat-slide-toggle>
               </div>
             </div>
@@ -285,12 +285,12 @@
           [pageSizeOptions]="[10, 25, 50, 100]"
           (page)="onPage($event)"
           showFirstLastButtons
-          aria-label="Select page of products">
+          aria-label="Select page of products" i18n-aria-label>
         </mat-paginator>
       </div>
     } @else if (dataSource.error()) {
-      <app-no-record icon="error" title="Error"
-        message="An error occurred while fetching the data. Please try again later.">
+      <app-no-record icon="error" title="Error" i18n-title
+        message="An error occurred while fetching the data. Please try again later." i18n-message>
       </app-no-record>
     }
   </mat-card-content>

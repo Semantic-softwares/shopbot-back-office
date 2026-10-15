@@ -1,8 +1,8 @@
-<app-page-header title="Maintenance Categories" subtitle="Manage categories for maintenance requests">
+<app-page-header title="Maintenance Categories" i18n-title subtitle="Manage categories for maintenance requests" i18n-subtitle>
   <ng-container actions>
     <button mat-flat-button (click)="goToCreate()">
       <mat-icon>add</mat-icon>
-      New Category
+      <ng-container i18n>New Category</ng-container>
     </button>
   </ng-container>
 </app-page-header>
@@ -17,8 +17,8 @@
       } @else {
         <div class="mb-4">
           <mat-form-field appearance="outline" class="w-full md:w-1/2">
-            <mat-label>Search</mat-label>
-            <input matInput [formControl]="filterForm.controls.search" placeholder="Search categories" />
+            <mat-label><ng-container i18n>Search</ng-container></mat-label>
+            <input matInput [formControl]="filterForm.controls.search" placeholder="Search categories" i18n-placeholder />
             <mat-icon matSuffix>search</mat-icon>
           </mat-form-field>
         </div>
@@ -26,28 +26,28 @@
         @if (categories().length === 0) {
           <app-no-record
             icon="category"
-            title="No Categories Found"
-            message="No maintenance categories found. Create a category to get started."
+            title="No Categories Found" i18n-title
+            message="No maintenance categories found. Create a category to get started." i18n-message
           ></app-no-record>
         } @else {
           <div class="overflow-auto">
             <table mat-table [dataSource]="categories()" class="w-full">
               <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Name</ng-container></th>
                 <td mat-cell *matCellDef="let row">
                   <span class="font-medium">{{ row.name }}</span>
                 </td>
               </ng-container>
 
               <ng-container matColumnDef="description">
-                <th mat-header-cell *matHeaderCellDef>Description</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Description</ng-container></th>
                 <td mat-cell *matCellDef="let row">
                   <span class="text-sm text-gray-500">{{ row.description || '-' }}</span>
                 </td>
               </ng-container>
 
               <ng-container matColumnDef="icon">
-                <th mat-header-cell *matHeaderCellDef>Icon</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Icon</ng-container></th>
                 <td mat-cell *matCellDef="let row">
                   @if (row.icon) {
                     <mat-icon class="text-gray-400">{{ row.icon }}</mat-icon>
@@ -58,33 +58,33 @@
               </ng-container>
 
               <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
                 <td mat-cell *matCellDef="let row">
                   <mat-chip [class]="row.isActive ? 'bg-green-600! text-white!' : 'bg-gray-500! text-white!'">
-                    {{ row.isActive ? 'Active' : 'Inactive' }}
+                    @if (row.isActive) {<ng-container i18n>Active</ng-container>} @else {<ng-container i18n>Inactive</ng-container>}
                   </mat-chip>
                 </td>
               </ng-container>
 
               <ng-container matColumnDef="createdAt">
-                <th mat-header-cell *matHeaderCellDef>Created</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Created</ng-container></th>
                 <td mat-cell *matCellDef="let row">{{ row.createdAt | date: 'mediumDate' }}</td>
               </ng-container>
 
               <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <th mat-header-cell *matHeaderCellDef><ng-container i18n>Actions</ng-container></th>
                 <td mat-cell *matCellDef="let row">
-                  <button mat-icon-button [matMenuTriggerFor]="actionMenu" aria-label="Open category actions">
+                  <button mat-icon-button [matMenuTriggerFor]="actionMenu" aria-label="Open category actions" i18n-aria-label>
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #actionMenu="matMenu">
                     <button mat-menu-item (click)="goToEdit(row)">
                       <mat-icon>edit</mat-icon>
-                      <span>Edit Category</span>
+                      <span><ng-container i18n>Edit Category</ng-container></span>
                     </button>
                     <button mat-menu-item (click)="onDelete(row)">
                       <mat-icon>delete</mat-icon>
-                      <span>Delete Category</span>
+                      <span><ng-container i18n>Delete Category</ng-container></span>
                     </button>
                   </mat-menu>
                 </td>

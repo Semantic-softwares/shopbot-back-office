@@ -23,11 +23,12 @@ import { PageHeaderComponent } from '../../../../../../shared/components/page-he
 import { TaxSetService } from '../../../../../../shared/services/tax-set.service';
 import { StoreStore } from '../../../../../../shared/stores/store.store';
 import { Action } from 'rxjs/internal/scheduler/Action';
+import { TrPipe } from '../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-channel-manager-list-tax-sets',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatTableModule,
     MatPaginatorModule,
@@ -113,7 +114,7 @@ export class ChannelManagerListTaxSets {
   deleteTaxSet(taxSet: any) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
-        title: 'Delete Tax Set',
+        title: $localize`Delete Tax Set`,
         message: `Are you sure you want to delete the tax set "${taxSet.attributes?.title}"?`,
       },
     });
@@ -122,12 +123,12 @@ export class ChannelManagerListTaxSets {
       if (result) {
         this.taxSetService.deleteTaxSet(taxSet.id).subscribe({
           next: () => {
-            this.snackBar.open('Tax set deleted successfully', 'Close', { duration: 3000 });
+            this.snackBar.open($localize`Tax set deleted successfully`, $localize`Close`, { duration: 3000 });
             this.taxSets.reload();
           },
           error: (error) => {
             const errorMessage = error.error?.message || 'Failed to delete tax set';
-            this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+            this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
           },
         });
       }

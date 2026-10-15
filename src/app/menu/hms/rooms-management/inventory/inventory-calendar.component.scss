@@ -10,8 +10,8 @@
   font-size: 0.8125rem;
 
   th, td {
-    border-bottom: 1px solid #e5e7eb;
-    border-right: 1px solid #e5e7eb;
+    border-bottom: 1px solid light-dark(#e5e7eb, #48464b);
+    border-right: 1px solid light-dark(#e5e7eb, #48464b);
   }
 }
 
@@ -21,11 +21,11 @@
   position: sticky;
   left: 0;
   z-index: 2;
-  background: #fff;
+  background: light-dark(#fff, #201f20);
   min-width: 200px;
   max-width: 250px;
   padding: 0.5rem 0.75rem;
-  border-right: 2px solid #d1d5db !important;
+  border-right: 2px solid light-dark(#d1d5db, #48464b) !important;
 }
 
 .room-type-header {
@@ -33,20 +33,20 @@
   font-weight: 600;
   font-size: 0.75rem;
   text-transform: uppercase;
-  color: #6b7280;
+  color: light-dark(#6b7280, #cac5cb);
   padding: 0.75rem;
-  background: #f9fafb;
+  background: light-dark(#f9fafb, #1c1b1c);
 }
 
 /* Room type name row — slightly different background */
 .room-type-name-cell {
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0 !important;
+  background: light-dark(#f8fafc, #1c1b1c);
+  border-bottom: 1px solid light-dark(#e2e8f0, #48464b) !important;
 }
 
 /* Rate plan sub-row label */
 .rate-plan-name-cell {
-  background: #fff;
+  background: light-dark(#fff, #201f20);
   padding-top: 0.375rem;
   padding-bottom: 0.375rem;
 }
@@ -56,17 +56,17 @@
   text-align: center;
   padding: 0.5rem 0.25rem;
   min-width: 70px;
-  background: #f9fafb;
+  background: light-dark(#f9fafb, #1c1b1c);
   position: sticky;
   top: 0;
   z-index: 1;
 
   &.weekend {
-    background: #fef3c7;
+    background: light-dark(#fef3c7, #423914);
   }
 
   &.today {
-    background: #e0e7ff;
+    background: light-dark(#e0e7ff, #141e43);
   }
 }
 
@@ -79,25 +79,25 @@
   vertical-align: middle;
   cursor: pointer;
   position: relative;
-  background: #f0f9ff;
+  background: light-dark(#f0f9ff, #143043);
   transition: background-color 0.15s;
 
   &:hover {
-    background: #e0f2fe;
+    background: light-dark(#e0f2fe, #153042);
   }
 
   &.weekend {
-    background: #fef9ee;
+    background: light-dark(#fef9ee, #413316);
     &:hover { background: #fef3c7; }
   }
 
   &.today {
-    background: #eef2ff;
+    background: light-dark(#eef2ff, #141f43);
     &:hover { background: #e0e7ff; }
   }
 
   &.stop-sell {
-    background: #fef2f2 !important;
+    background: light-dark(#fef2f2, #1c1b1c) !important;
     &:hover { background: #fee2e2 !important; }
   }
 }
@@ -112,18 +112,18 @@
 /* Room type group header row */
 .room-type-group-header {
   td {
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid light-dark(#e2e8f0, #48464b);
   }
 }
 
 /* Rate plan row */
 .rate-plan-row {
   td {
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid light-dark(#f1f5f9, #48464b);
   }
 
   &:last-child td {
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid light-dark(#e2e8f0, #48464b);
   }
 }
 
@@ -139,46 +139,46 @@
   transition: background-color 0.15s;
 
   &:hover {
-    background: #f0f4ff;
+    background: light-dark(#f0f4ff, #142043);
   }
 
   &.weekend {
-    background: #fffbeb;
+    background: light-dark(#fffbeb, #433a14);
 
     &:hover {
-      background: #fef3c7;
+      background: light-dark(#fef3c7, #423914);
     }
   }
 
   &.today {
-    background: #eef2ff;
+    background: light-dark(#eef2ff, #141f43);
 
     &:hover {
-      background: #e0e7ff;
+      background: light-dark(#e0e7ff, #141e43);
     }
   }
 
   &.has-rate {
-    background: #f0fdf4;
+    background: light-dark(#f0fdf4, #193e24);
 
     &.weekend {
-      background: #fefce8;
+      background: light-dark(#fefce8, #413d15);
     }
 
     &.today {
-      background: #eef2ff;
+      background: light-dark(#eef2ff, #141f43);
     }
 
     &:hover {
-      background: #dcfce7;
+      background: light-dark(#dcfce7, #173f25);
     }
   }
 
   &.stop-sell {
-    background: #fef2f2 !important;
+    background: light-dark(#fef2f2, #1c1b1c) !important;
 
     &:hover {
-      background: #fee2e2 !important;
+      background: light-dark(#fee2e2, #421515) !important;
     }
   }
 }
@@ -206,7 +206,7 @@
   font-size: 10px !important;
   width: 12px !important;
   height: 12px !important;
-  color: #9ca3af;
+  color: light-dark(#9ca3af, #a9a5ab);
 }
 
 /* ── Restriction Badges ── */
@@ -232,23 +232,23 @@
 }
 
 .stop-sell-badge {
-  background: #fca5a5;
-  color: #991b1b;
+  background: light-dark(#fca5a5, #421515);
+  color: light-dark(#991b1b, #e58b8b);
 }
 
 .cta-badge {
   background: #fde68a;
-  color: #92400e;
+  color: light-dark(#92400e, #edab83);
 }
 
 .ctd-badge {
-  background: #c4b5fd;
-  color: #4c1d95;
+  background: light-dark(#c4b5fd, #1e1542);
+  color: light-dark(#4c1d95, #ae8ce3);
 }
 
 .min-stay-badge {
-  background: #bae6fd;
-  color: #0c4a6e;
+  background: light-dark(#bae6fd, #153242);
+  color: light-dark(#0c4a6e, #84c5eb);
 }
 
 /* Legend badge styles */
@@ -265,18 +265,18 @@
 
   &.cta-badge {
     background: #fde68a;
-    color: #92400e;
+    color: light-dark(#92400e, #edab83);
   }
 
   &.ctd-badge {
-    background: #c4b5fd;
-    color: #4c1d95;
+    background: light-dark(#c4b5fd, #1e1542);
+    color: light-dark(#4c1d95, #ae8ce3);
   }
 }
 
 /* Modified (unsaved) cell indicator */
 .modified {
-  background: #fef9c3 !important;
+  background: light-dark(#fef9c3, #423f14) !important;
   border-bottom: 2px solid #facc15 !important;
 
   &:hover {

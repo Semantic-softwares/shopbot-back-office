@@ -12,7 +12,7 @@ export const authGuard = () => {
   return authService.currentUser.pipe(
     map(currentUser => {
       if (!currentUser) {
-        snackBar.open('Please log in first', 'Close', {
+        snackBar.open($localize`Please log in first`, $localize`Close`, {
           duration: 3000,
         });
         router.navigate(['/auth/login']);

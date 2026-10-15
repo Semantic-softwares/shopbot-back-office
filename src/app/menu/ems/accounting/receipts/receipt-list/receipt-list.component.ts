@@ -123,12 +123,12 @@ export class ReceiptListComponent {
   });
 
   readonly methodOptions = [
-    { value: '', label: 'All Methods' },
-    { value: EstatePaymentMethod.CASH, label: 'Cash' },
-    { value: EstatePaymentMethod.BANK_TRANSFER, label: 'Bank Transfer' },
-    { value: EstatePaymentMethod.CARD, label: 'Card' },
-    { value: EstatePaymentMethod.ONLINE, label: 'Online' },
-    { value: EstatePaymentMethod.OTHER, label: 'Other' },
+    { value: '', label: $localize`All Methods` },
+    { value: EstatePaymentMethod.CASH, label: $localize`Cash` },
+    { value: EstatePaymentMethod.BANK_TRANSFER, label: $localize`Bank Transfer` },
+    { value: EstatePaymentMethod.CARD, label: $localize`Card` },
+    { value: EstatePaymentMethod.ONLINE, label: $localize`Online` },
+    { value: EstatePaymentMethod.OTHER, label: $localize`Other` },
   ];
 
   readonly filteredReceipts = computed(() => {
@@ -223,10 +223,10 @@ export class ReceiptListComponent {
 
     const confirmRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title: 'Delete Receipt',
-        message: `Are you sure you want to delete receipt ${receipt.receiptNumber}? This action cannot be undone.`,
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
+        title: $localize`Delete Receipt`,
+        message: $localize`Are you sure you want to delete receipt ${receipt.receiptNumber}? This action cannot be undone.`,
+        confirmText: $localize`Delete`,
+        cancelText: $localize`Cancel`,
       },
     });
 
@@ -251,13 +251,13 @@ export class ReceiptListComponent {
 
         this.receiptApiService.deleteReceipt(receipt._id).subscribe({
           next: () => {
-            this.snackBar.open('Receipt deleted successfully', 'Close', { duration: 3000 });
+            this.snackBar.open($localize`Receipt deleted successfully`, $localize`Close`, { duration: 3000 });
             this.receiptsResource.reload();
           },
           error: (err) => {
             this.snackBar.open(
               err?.error?.message || 'Failed to delete receipt',
-              'Close',
+              $localize`Close`,
               { duration: 5000 },
             );
           },

@@ -85,7 +85,7 @@ export class ListStationsComponent {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Station',
+        title: $localize`Delete Station`,
         message: `Are you sure you want to delete "${station.name}"? This action cannot be undone.`,
       },
     });
@@ -94,7 +94,7 @@ export class ListStationsComponent {
       if (result) {
         this.stationsService.deleteStation(station._id).subscribe({
           next: () => {
-            this.snackBar.open('Station deleted successfully', 'Close', {
+            this.snackBar.open($localize`Station deleted successfully`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top',
@@ -102,7 +102,7 @@ export class ListStationsComponent {
             this.stations.reload();
           },
           error: (error) => {
-            this.snackBar.open('Error deleting station', 'Close', {
+            this.snackBar.open($localize`Error deleting station`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top',

@@ -502,7 +502,7 @@ export class MessagingComponent implements OnInit, OnDestroy {
 
     if (!storeId || !thread) return;
 
-    if (!confirm('Are you sure you want to close this conversation?')) return;
+    if (!confirm($localize`Are you sure you want to close this conversation?`)) return;
 
     this.messagingService.closeThread(storeId, thread.id).subscribe({
       next: () => {
@@ -633,7 +633,7 @@ export class MessagingComponent implements OnInit, OnDestroy {
    * Show success message
    */
   private showSuccess(message: string): void {
-    this.snackBar.open(message, 'Close', {
+    this.snackBar.open(message, $localize`Close`, {
       duration: 5000,
       horizontalPosition: 'end',
       verticalPosition: 'top',
@@ -645,7 +645,7 @@ export class MessagingComponent implements OnInit, OnDestroy {
    * Show error message
    */
   private showError(message: string): void {
-    this.snackBar.open(message, 'Close', {
+    this.snackBar.open(message, $localize`Close`, {
       duration: 7000,
       horizontalPosition: 'end',
       verticalPosition: 'top',

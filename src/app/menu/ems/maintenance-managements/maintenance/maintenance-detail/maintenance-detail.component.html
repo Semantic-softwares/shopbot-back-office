@@ -1,31 +1,31 @@
 <app-page-header
-  title="Maintenance Request"
-  subtitle="Track assignment, status changes, comments, and cost history"
+  title="Maintenance Request" i18n-title
+  subtitle="Track assignment, status changes, comments, and cost history" i18n-subtitle
 >
   <ng-container actions>
     <button matButton (click)="backToList()">
       <mat-icon>arrow_back</mat-icon>
-      Back to List
+      <ng-container i18n>Back to List</ng-container>
     </button>
     <button matButton="outlined" [matMenuTriggerFor]="actionMenu">
       <mat-icon>more_vert</mat-icon>
-      Actions
+      <ng-container i18n>Actions</ng-container>
     </button>
 
     <mat-menu #actionMenu="matMenu">
       <button mat-menu-item (click)="editRequest()">
         <mat-icon>edit</mat-icon>
-        <span>Edit Request</span>
+        <span><ng-container i18n>Edit Request</ng-container></span>
       </button>
       @if (request()?.expenseInvoiceId) {
         <button mat-menu-item (click)="viewInvoice()">
           <mat-icon>receipt_long</mat-icon>
-          <span>View Invoice</span>
+          <span><ng-container i18n>View Invoice</ng-container></span>
         </button>
       }
       <button mat-menu-item (click)="onDelete()">
         <mat-icon>delete</mat-icon>
-        <span>Delete Request</span>
+        <span><ng-container i18n>Delete Request</ng-container></span>
       </button>
     </mat-menu>
   </ng-container>
@@ -39,8 +39,8 @@
   } @else if (!request()) {
     <app-no-record
       icon="error_outline"
-      title="Request Not Found"
-      message="The maintenance request could not be found or may have been deleted."
+      title="Request Not Found" i18n-title
+      message="The maintenance request could not be found or may have been deleted." i18n-message
     ></app-no-record>
   } @else {
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
@@ -64,23 +64,23 @@
               </div>
             </div>
 
-            <p class="text-sm text-gray-600">{{ request()!.description || 'No description provided.' }}</p>
+            <p class="text-sm text-gray-600">@if (request()!.description) {<ng-container>{{ request()!.description }}</ng-container>} @else {<ng-container i18n>No description provided.</ng-container>}</p>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
               <div>
-                <p class="text-gray-500">Property</p>
+                <p class="text-gray-500"><ng-container i18n>Property</ng-container></p>
                 <p class="font-medium">{{ $any(request()!.propertyId)?.name || request()!.propertyId }}</p>
               </div>
               <div>
-                <p class="text-gray-500">Unit</p>
+                <p class="text-gray-500"><ng-container i18n>Unit</ng-container></p>
                 <p class="font-medium">{{ $any(request()!.unitId)?.name || request()!.unitId || '-' }}</p>
               </div>
               <div>
-                <p class="text-gray-500">Category</p>
+                <p class="text-gray-500"><ng-container i18n>Category</ng-container></p>
                 <p class="font-medium">{{ getCategoryLabel(request()!.category) }}</p>
               </div>
               <div>
-                <p class="text-gray-500">Reporter</p>
+                <p class="text-gray-500"><ng-container i18n>Reporter</ng-container></p>
                 <p class="font-medium">
                   @if (request()!.reportedByType === 'TENANT') {
                     {{ getTenantName(request()!.tenantId) }}
@@ -91,27 +91,27 @@
                 </p>
               </div>
               <div>
-                <p class="text-gray-500">Vendor</p>
+                <p class="text-gray-500"><ng-container i18n>Vendor</ng-container></p>
                 <p class="font-medium">{{ getVendorName(request()!.vendorId) }}</p>
               </div>
               <div>
-                <p class="text-gray-500">Assigned Staff</p>
+                <p class="text-gray-500"><ng-container i18n>Assigned Staff</ng-container></p>
                 <p class="font-medium">{{ getUserName(request()!.assignedTo) }}</p>
               </div>
               <div>
-                <p class="text-gray-500">Due Date</p>
+                <p class="text-gray-500"><ng-container i18n>Due Date</ng-container></p>
                 <p class="font-medium">{{ request()!.dueDate ? (request()!.dueDate | date: 'mediumDate') : '-' }}</p>
               </div>
               <div>
-                <p class="text-gray-500">Lease</p>
+                <p class="text-gray-500"><ng-container i18n>Lease</ng-container></p>
                 <p class="font-medium">{{ $any(request()!.leaseId)?.leaseNumber || request()!.leaseId || '-' }}</p>
               </div>
               <div>
-                <p class="text-gray-500">Created By</p>
+                <p class="text-gray-500"><ng-container i18n>Created By</ng-container></p>
                 <p class="font-medium">{{ getUserName(request()!.createdBy) }}</p>
               </div>
               <div>
-                <p class="text-gray-500">Created</p>
+                <p class="text-gray-500"><ng-container i18n>Created</ng-container></p>
                 <p class="font-medium">{{ request()!.createdAt | date: 'medium' }}</p>
               </div>
             </div>
@@ -121,14 +121,14 @@
         <!-- Costs -->
         <mat-card appearance="outlined">
           <mat-card-content class="p-4! space-y-2">
-            <h3 class="text-base font-semibold text-gray-900">Cost Summary</h3>
+            <h3 class="text-base font-semibold text-gray-900"><ng-container i18n>Cost Summary</ng-container></h3>
             <div class="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p class="text-gray-500">Estimated Cost</p>
+                <p class="text-gray-500"><ng-container i18n>Estimated Cost</ng-container></p>
                 <p class="font-semibold text-lg">{{ (request()!.estimatedCost ?? 0) | currency: currencyCode(): 'symbol':'1.2-2' }}</p>
               </div>
               <div>
-                <p class="text-gray-500">Actual Cost</p>
+                <p class="text-gray-500"><ng-container i18n>Actual Cost</ng-container></p>
                 <p class="font-semibold text-lg">{{ (request()!.actualCost ?? 0) | currency: currencyCode(): 'symbol':'1.2-2' }}</p>
               </div>
             </div>
@@ -139,16 +139,16 @@
         @if (request()!.partsAndLabor && request()!.partsAndLabor!.length > 0) {
           <mat-card appearance="outlined">
             <mat-card-content class="p-4! space-y-2">
-              <h3 class="text-base font-semibold text-gray-900">Parts & Labor</h3>
+              <h3 class="text-base font-semibold text-gray-900"><ng-container i18n>Parts & Labor</ng-container></h3>
               <div class="overflow-x-auto rounded-lg border border-gray-200">
                 <table class="w-full text-sm">
                   <thead class="bg-gray-50">
                     <tr>
-                      <th class="px-3 py-2 text-left font-medium text-gray-600 w-20">QTY</th>
-                      <th class="px-3 py-2 text-left font-medium text-gray-600">Account</th>
-                      <th class="px-3 py-2 text-left font-medium text-gray-600">Description</th>
-                      <th class="px-3 py-2 text-right font-medium text-gray-600 w-28">Price</th>
-                      <th class="px-3 py-2 text-right font-medium text-gray-600 w-28">Total</th>
+                      <th class="px-3 py-2 text-left font-medium text-gray-600 w-20"><ng-container i18n>QTY</ng-container></th>
+                      <th class="px-3 py-2 text-left font-medium text-gray-600"><ng-container i18n>Account</ng-container></th>
+                      <th class="px-3 py-2 text-left font-medium text-gray-600"><ng-container i18n>Description</ng-container></th>
+                      <th class="px-3 py-2 text-right font-medium text-gray-600 w-28"><ng-container i18n>Price</ng-container></th>
+                      <th class="px-3 py-2 text-right font-medium text-gray-600 w-28"><ng-container i18n>Total</ng-container></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -172,11 +172,11 @@
         @if (request()!.photos.length) {
           <mat-card appearance="outlined">
             <mat-card-content class="p-4! space-y-2">
-              <h3 class="text-base font-semibold text-gray-900">Photos</h3>
+              <h3 class="text-base font-semibold text-gray-900"><ng-container i18n>Photos</ng-container></h3>
               <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                 @for (photo of request()!.photos; track photo) {
                   <a [href]="photo" target="_blank" rel="noopener" class="block rounded border border-gray-200 overflow-hidden">
-                    <img [src]="photo" alt="Maintenance photo" class="w-full h-24 object-cover" />
+                    <img [src]="photo" alt="Maintenance photo" i18n-alt class="w-full h-24 object-cover" />
                   </a>
                 }
               </div>
@@ -187,10 +187,10 @@
         <!-- Activity Timeline -->
         <mat-card appearance="outlined">
           <mat-card-content class="p-4! space-y-3">
-            <h3 class="text-base font-semibold text-gray-900">Activity Timeline</h3>
+            <h3 class="text-base font-semibold text-gray-900"><ng-container i18n>Activity Timeline</ng-container></h3>
 
             @if (activities().length === 0) {
-              <p class="text-sm text-gray-500">No activity yet.</p>
+              <p class="text-sm text-gray-500"><ng-container i18n>No activity yet.</ng-container></p>
             } @else {
               <div class="space-y-3">
                 @for (activity of activities(); track activity._id) {
@@ -215,9 +215,9 @@
         <!-- Update Status -->
         <mat-card appearance="outlined">
           <mat-card-content class="p-4! space-y-3">
-            <h3 class="text-base font-semibold text-gray-900">Update Status</h3>
+            <h3 class="text-base font-semibold text-gray-900"><ng-container i18n>Update Status</ng-container></h3>
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Next status</mat-label>
+              <mat-label><ng-container i18n>Next status</ng-container></mat-label>
               <mat-select [value]="selectedStatus()" (valueChange)="selectedStatus.set($event)">
                 @for (item of availableStatusTransitions(); track item) {
                   <mat-option [value]="item">{{ getStatusLabel(item) }}</mat-option>
@@ -225,15 +225,15 @@
               </mat-select>
             </mat-form-field>
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Note (optional)</mat-label>
+              <mat-label><ng-container i18n>Note (optional)</ng-container></mat-label>
               <textarea matInput rows="2" [ngModel]="statusNote()" (ngModelChange)="statusNote.set($event)"></textarea>
             </mat-form-field>
             <button mat-flat-button class="w-full" (click)="changeStatus()" [disabled]="!selectedStatus() || updatingStatus()">
               @if (updatingStatus()) {
                 <mat-spinner diameter="18" class="inline-block mr-2"></mat-spinner>
-                Updating...
+                <ng-container i18n>Updating...</ng-container>
               } @else {
-                Save Status
+                <ng-container i18n>Save Status</ng-container>
               }
             </button>
           </mat-card-content>
@@ -242,13 +242,13 @@
         <!-- Add Comment -->
         <mat-card appearance="outlined">
           <mat-card-content class="p-4! space-y-3">
-            <h3 class="text-base font-semibold text-gray-900">Add Comment</h3>
+            <h3 class="text-base font-semibold text-gray-900"><ng-container i18n>Add Comment</ng-container></h3>
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Comment</mat-label>
+              <mat-label><ng-container i18n>Comment</ng-container></mat-label>
               <textarea matInput rows="3" [ngModel]="newComment()" (ngModelChange)="newComment.set($event)"></textarea>
             </mat-form-field>
             <button mat-flat-button class="w-full" (click)="addComment()" [disabled]="!newComment().trim()">
-              Add Comment
+              <ng-container i18n>Add Comment</ng-container>
             </button>
           </mat-card-content>
         </mat-card>

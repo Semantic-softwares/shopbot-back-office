@@ -20,11 +20,12 @@ import {
 } from '../../../../../shared/models/estate.model';
 import { FinancialSide } from '../../../../../shared/enums/financial.enums';
 import { InvoiceCategorySelectComponent } from '../../../../../shared/components/invoice-category-select/invoice-category-select.component';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-lease-step-transactions',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,

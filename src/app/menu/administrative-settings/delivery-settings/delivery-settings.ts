@@ -131,17 +131,17 @@ export class DeliverySettings implements OnInit {
             this.storeStore.updateStore(updatedStore);
             this.storeService.saveStoreLocally(updatedStore);
             this.saving.set(false);
-            this.snackBar.open('Delivery settings saved.', 'Close', { duration: 3000 });
+            this.snackBar.open($localize`Delivery settings saved.`, $localize`Close`, { duration: 3000 });
           },
           error: () => {
             this.saving.set(false);
-            this.snackBar.open('Saved, but failed to refresh local data.', 'Close', { duration: 4000 });
+            this.snackBar.open($localize`Saved, but failed to refresh local data.`, $localize`Close`, { duration: 4000 });
           },
         });
       },
       error: () => {
         this.saving.set(false);
-        this.snackBar.open('Failed to save delivery settings.', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Failed to save delivery settings.`, $localize`Close`, { duration: 4000 });
       },
     });
   }

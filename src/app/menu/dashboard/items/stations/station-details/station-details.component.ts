@@ -12,6 +12,7 @@ import { StationsService } from '../../../../../shared/services/station.service'
 import { Station } from '../../../../../shared/models';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { ConfirmationDialogComponent } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-station-details',
@@ -19,7 +20,7 @@ import { ConfirmationDialogComponent } from '../../../../../shared/components/co
   styleUrls: ['./station-details.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatCardModule,
     MatButtonModule,
@@ -71,7 +72,7 @@ export class StationDetailsComponent implements OnInit {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Station',
+        title: $localize`Delete Station`,
         message: `Are you sure you want to delete "${this.station()?.name}"? This action cannot be undone.`,
       },
     });
@@ -80,7 +81,7 @@ export class StationDetailsComponent implements OnInit {
       if (result && this.station()) {
         this.stationsService.deleteStation(this.station()!._id).subscribe({
           next: () => {
-            this.snackBar.open('Station deleted successfully', 'Close', {
+            this.snackBar.open($localize`Station deleted successfully`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top',
@@ -88,7 +89,7 @@ export class StationDetailsComponent implements OnInit {
             this.router.navigate(['../list'], { relativeTo: this.route });
           },
           error: (error) => {
-            this.snackBar.open('Error deleting station', 'Close', {
+            this.snackBar.open($localize`Error deleting station`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top',

@@ -27,7 +27,7 @@
               class="text-sm underline block"
             >
               <mat-icon class="text-sm">attachment</mat-icon>
-              Attachment
+              <ng-container i18n>Attachment</ng-container>
             </a>
           }
         </div>
@@ -42,18 +42,18 @@
     @if (message.sender === 'property' && message._status) {
       <div class="flex justify-end items-center gap-1 px-1">
         @if (message._status === 'sending') {
-          <span class="text-[11px] text-gray-400 italic">Sending...</span>
+          <span class="text-[11px] text-gray-400 italic"><ng-container i18n>Sending...</ng-container></span>
         } @else if (message._status === 'sent') {
           <mat-icon class="text-green-500" style="font-size: 14px; width: 14px; height: 14px;">done</mat-icon>
-          <span class="text-[11px] text-green-500">Sent</span>
+          <span class="text-[11px] text-green-500"><ng-container i18n>Sent</ng-container></span>
         } @else if (message._status === 'failed') {
           <mat-icon class="text-red-500" style="font-size: 14px; width: 14px; height: 14px;">error_outline</mat-icon>
-          <span class="text-[11px] text-red-500">Failed to send</span>
+          <span class="text-[11px] text-red-500"><ng-container i18n>Failed to send</ng-container></span>
           <button
             (click)="retry.emit(message)"
             class="text-[11px] text-blue-500 hover:text-blue-700 underline cursor-pointer ml-1"
           >
-            Retry
+            <ng-container i18n>Retry</ng-container>
           </button>
         }
       </div>

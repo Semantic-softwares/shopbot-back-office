@@ -3,12 +3,12 @@
     <mat-expansion-panel-header>
       <mat-panel-title class="flex items-center gap-2 text-sm font-semibold text-gray-800">
         <mat-icon class="text-base! text-gray-600">equalizer</mat-icon>
-        Tenant information
-        <span class="text-sm font-normal text-gray-500">({{ tenants().length }} records)</span>
+        <ng-container i18n>Tenant information</ng-container>
+        <span class="text-sm font-normal text-gray-500"><ng-container i18n>({{ tenants().length }} records)</ng-container></span>
       </mat-panel-title>
       <mat-panel-description class="flex justify-end">
         <a  matButton (click)="$event.stopPropagation()">
-          Edit tenants
+          <ng-container i18n>Edit tenants</ng-container>
         </a>
       </mat-panel-description>
     </mat-expansion-panel-header>
@@ -46,13 +46,13 @@
         }
       </div>
     } @else {
-      <p class="text-sm text-gray-400 px-4 py-3">No tenants attached to this lease.</p>
+      <p class="text-sm text-gray-400 px-4 py-3"><ng-container i18n>No tenants attached to this lease.</ng-container></p>
     }
 
     <!-- Details footer -->
     @if (detailsSummary()) {
       <div class="border-t border-outline-variant px-4 py-3">
-        <div class="text-sm font-semibold text-gray-900 mb-1">Details</div>
+        <div class="text-sm font-semibold text-gray-900 mb-1"><ng-container i18n>Details</ng-container></div>
         <div class="text-sm text-gray-600">{{ detailsSummary() }}</div>
       </div>
     }

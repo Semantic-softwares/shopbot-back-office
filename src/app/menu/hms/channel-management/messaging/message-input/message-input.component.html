@@ -8,7 +8,7 @@
         mat-icon-button
         type="button"
         (click)="onAttachmentClick()"
-        matTooltip="Add attachment"
+        matTooltip="Add attachment" i18n-matTooltip
         [disabled]="isDisabled || isSending"
         class="text-gray-600 hover:text-gray-900"
       >
@@ -21,14 +21,14 @@
         formControlName="messageText"
         [disabled]="isDisabled || isSending"
         (keydown)="onKeyDown($event)"
-        placeholder="Type a message... (Ctrl+Enter to send)"
+        placeholder="Type a message... (Ctrl+Enter to send)" i18n-placeholder
       />
 
       <!-- Send Button (Suffix) -->
       <button
         matSuffix
         mat-icon-button
-        matTooltip="Send message (Ctrl+Enter)"
+        matTooltip="Send message (Ctrl+Enter)" i18n-matTooltip
         color="primary"
         type="submit"
         [disabled]="isSending || messageForm.invalid || isDisabled"

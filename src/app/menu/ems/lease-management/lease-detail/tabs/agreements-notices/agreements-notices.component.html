@@ -1,14 +1,14 @@
 @if (lease(); as lease) {
   <mat-card appearance="outlined">
     <mat-card-content class="p-4!">
-      <div class="text-xs font-semibold text-gray-500 mb-2">AGREEMENTS & NOTICES</div>
+      <div class="text-xs font-semibold text-gray-500 mb-2"><ng-container i18n>AGREEMENTS & NOTICES</ng-container></div>
       @if (lease.notes) {
         <p class="text-sm text-gray-700 leading-relaxed">{{ lease.notes }}</p>
       } @else {
         <app-no-record
           icon="description"
-          title="No Agreements or Notices"
-          message="No agreements or notices have been recorded for this lease yet."
+          title="No Agreements or Notices" i18n-title
+          message="No agreements or notices have been recorded for this lease yet." i18n-message
         ></app-no-record>
       }
     </mat-card-content>

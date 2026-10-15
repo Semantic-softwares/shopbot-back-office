@@ -1,16 +1,16 @@
 <app-page-header
-  [title]="isEditMode() ? 'Edit Tenant' : 'New Tenant'"
-  [subtitle]="isEditMode() ? 'Update tenant information' : 'Add a new tenant'">
+  [title]="isEditMode() ? ('Edit Tenant' | tr) : ('New Tenant' | tr)"
+  [subtitle]="isEditMode() ? ('Update tenant information' | tr) : 'Add a new tenant'">
   <ng-container actions>
     <button mat-button (click)="cancel()">
       <mat-icon class="mr-1">arrow_back</mat-icon>
-      Cancel
+      <ng-container i18n>Cancel</ng-container>
     </button>
     <button mat-flat-button (click)="onSubmit()" [disabled]="isSaving()">
       @if (isSaving()) {
         <mat-spinner diameter="20" class="mr-2"></mat-spinner>
       }
-      {{ isEditMode() ? 'Update Tenant' : 'Create Tenant' }}
+      @if (isEditMode()) {<ng-container i18n>Update Tenant</ng-container>} @else {<ng-container i18n>Create Tenant</ng-container>}
     </button>
   </ng-container>
 </app-page-header>
@@ -20,7 +20,7 @@
 
     <!-- Profile Picture -->
     <mat-card appearance="outlined" class="mb-6">
-      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-3">PROFILE PICTURE</div>
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-3"><ng-container i18n>PROFILE PICTURE</ng-container></div>
       <mat-card-content class="px-4 pb-4">
         <div class="flex items-center gap-6">
           <!-- Avatar preview -->
@@ -28,7 +28,7 @@
             <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
               @if (coverPhotoFile()?.preview || coverPhotoUrl()) {
                 <img [src]="coverPhotoFile()?.preview || coverPhotoUrl()"
-                     alt="Profile photo" class="w-full h-full object-cover">
+                     alt="Profile photo" i18n-alt class="w-full h-full object-cover">
               } @else {
                 <mat-icon class="!text-5xl text-gray-400">person</mat-icon>
               }
@@ -37,7 +37,7 @@
               <button mat-mini-fab color="warn" type="button"
                       class="!absolute -top-1 -right-1 !w-6 !h-6 !min-h-6 !p-0"
                       (click)="removeCoverPhoto()"
-                      aria-label="Remove photo">
+                      aria-label="Remove photo" i18n-aria-label>
                 <mat-icon class="!text-sm">close</mat-icon>
               </button>
             }
@@ -49,9 +49,9 @@
                    (change)="onCoverPhotoSelected($event)">
             <button mat-stroked-button type="button" (click)="photoInput.click()">
               <mat-icon class="mr-1">upload</mat-icon>
-              {{ coverPhotoFile() || coverPhotoUrl() ? 'Change Photo' : 'Upload Photo' }}
+              @if (coverPhotoFile() || coverPhotoUrl()) {<ng-container i18n>Change Photo</ng-container>} @else {<ng-container i18n>Upload Photo</ng-container>}
             </button>
-            <p class="text-xs text-gray-400 mt-2">JPG, PNG or WebP. Recommended 400×400px.</p>
+            <p class="text-xs text-gray-400 mt-2"><ng-container i18n>JPG, PNG or WebP. Recommended 400×400px.</ng-container></p>
           </div>
         </div>
       </mat-card-content>
@@ -59,42 +59,42 @@
 
     <!-- Personal Information -->
     <mat-card appearance="outlined" class="mb-6">
-      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">PERSONAL INFORMATION</div>
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2"><ng-container i18n>PERSONAL INFORMATION</ng-container></div>
       <mat-card-content class="px-4 pb-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>First Name *</mat-label>
-            <input matInput formControlName="firstName" placeholder="First name">
+            <mat-label><ng-container i18n>First Name *</ng-container></mat-label>
+            <input matInput formControlName="firstName" placeholder="First name" i18n-placeholder>
             @if (form.get('firstName')?.hasError('required') && form.get('firstName')?.touched) {
-              <mat-error>First name is required</mat-error>
+              <mat-error><ng-container i18n>First name is required</ng-container></mat-error>
             }
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Last Name *</mat-label>
-            <input matInput formControlName="lastName" placeholder="Last name">
+            <mat-label><ng-container i18n>Last Name *</ng-container></mat-label>
+            <input matInput formControlName="lastName" placeholder="Last name" i18n-placeholder>
             @if (form.get('lastName')?.hasError('required') && form.get('lastName')?.touched) {
-              <mat-error>Last name is required</mat-error>
+              <mat-error><ng-container i18n>Last name is required</ng-container></mat-error>
             }
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Middle Name</mat-label>
-            <input matInput formControlName="middleName" placeholder="Middle name">
+            <mat-label><ng-container i18n>Middle Name</ng-container></mat-label>
+            <input matInput formControlName="middleName" placeholder="Middle name" i18n-placeholder>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Date of Birth</mat-label>
+            <mat-label><ng-container i18n>Date of Birth</ng-container></mat-label>
             <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth"
-                   placeholder="MM/DD/YYYY" readonly
+                   placeholder="MM/DD/YYYY" i18n-placeholder readonly
                    (dateChange)="onDobChange($event)">
             <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
             <mat-datepicker #dobPicker startView="multi-year"></mat-datepicker>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Age</mat-label>
-            <input matInput formControlName="age" placeholder="Auto-calculated">
+            <mat-label><ng-container i18n>Age</ng-container></mat-label>
+            <input matInput formControlName="age" placeholder="Auto-calculated" i18n-placeholder>
           </mat-form-field>
         </div>
       </mat-card-content>
@@ -102,33 +102,33 @@
 
     <!-- Contact Information -->
     <mat-card appearance="outlined" class="mb-6">
-      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">CONTACT INFORMATION</div>
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2"><ng-container i18n>CONTACT INFORMATION</ng-container></div>
       <mat-card-content class="px-4 pb-4">
 
         <!-- Email -->
         <mat-form-field appearance="outline" class="w-full mb-4">
-          <mat-label>Email</mat-label>
-          <input matInput formControlName="email" type="email" placeholder="Email address">
+          <mat-label><ng-container i18n>Email</ng-container></mat-label>
+          <input matInput formControlName="email" type="email" placeholder="Email address" i18n-placeholder>
           @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
-            <mat-error>Enter a valid email</mat-error>
+            <mat-error><ng-container i18n>Enter a valid email</ng-container></mat-error>
           }
         </mat-form-field>
 
         <!-- Multiple Phone Numbers -->
         <div class="mb-2">
-          <div class="text-sm font-medium text-gray-700 mb-3">Phone Numbers</div>
+          <div class="text-sm font-medium text-gray-700 mb-3"><ng-container i18n>Phone Numbers</ng-container></div>
           <div formArrayName="phoneNumbers" class="flex flex-col gap-3">
             @for (ctrl of phoneNumbersArray.controls; track $index) {
               <div class="flex items-center gap-2">
                 <mat-form-field appearance="outline" class="flex-1">
-                  <mat-label>{{ $index === 0 ? 'Primary Phone' : 'Phone ' + ($index + 1) }}</mat-label>
-                  <input matInput [formControlName]="$index" placeholder="Phone number">
+                  <mat-label>@if ($index === 0) {<ng-container i18n>Primary Phone</ng-container>} @else {<ng-container>{{ ('Phone ' | tr) + ($index + 1) }}</ng-container>}</mat-label>
+                  <input matInput [formControlName]="$index" placeholder="Phone number" i18n-placeholder>
                   <mat-icon matPrefix class="text-gray-400 mr-1">phone</mat-icon>
                 </mat-form-field>
                 @if (phoneNumbersArray.length > 1) {
                   <button mat-icon-button type="button" color="warn"
                           (click)="removePhone($index)"
-                          [attr.aria-label]="'Remove phone ' + ($index + 1)">
+                          [attr.aria-label]="('Remove phone ' | tr) + ($index + 1)">
                     <mat-icon>remove_circle_outline</mat-icon>
                   </button>
                 }
@@ -138,7 +138,7 @@
           <button mat-stroked-button type="button" class="mt-2"
                   (click)="addPhone()">
             <mat-icon class="mr-1">add</mat-icon>
-            Add Phone Number
+            <ng-container i18n>Add Phone Number</ng-container>
           </button>
         </div>
       </mat-card-content>
@@ -146,18 +146,18 @@
 
     <!-- Company Information -->
     <mat-card appearance="outlined" class="mb-6">
-      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">COMPANY INFORMATION</div>
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2"><ng-container i18n>COMPANY INFORMATION</ng-container></div>
       <mat-card-content class="px-4 pb-4">
         <div class="mb-4">
           <mat-slide-toggle formControlName="isCompany">
-            Display as a company
+            <ng-container i18n>Display as a company</ng-container>
           </mat-slide-toggle>
         </div>
         @if (isCompany()) {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Company Name</mat-label>
-              <input matInput formControlName="companyName" placeholder="Company name">
+              <mat-label><ng-container i18n>Company Name</ng-container></mat-label>
+              <input matInput formControlName="companyName" placeholder="Company name" i18n-placeholder>
             </mat-form-field>
           </div>
         }
@@ -166,24 +166,24 @@
 
     <!-- Additional Details -->
     <mat-card appearance="outlined" class="mb-6">
-      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">ADDITIONAL DETAILS</div>
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2"><ng-container i18n>ADDITIONAL DETAILS</ng-container></div>
       <mat-card-content class="px-4 pb-4">
         <div class="grid grid-cols-1 gap-4">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Forwarding Address</mat-label>
+            <mat-label><ng-container i18n>Forwarding Address</ng-container></mat-label>
             <textarea matInput formControlName="forwardingAddress" rows="2"
-                      placeholder="Forwarding address"></textarea>
+                      placeholder="Forwarding address" i18n-placeholder></textarea>
           </mat-form-field>
 
           <div>
             <div class="flex items-center justify-between mb-3 gap-3">
               <div>
-                <div class="text-sm font-medium text-gray-700">Emergency Contacts</div>
-                <p class="text-xs text-gray-400 mt-1">Add one or more contacts with name, email, phone number, and relationship.</p>
+                <div class="text-sm font-medium text-gray-700"><ng-container i18n>Emergency Contacts</ng-container></div>
+                <p class="text-xs text-gray-400 mt-1"><ng-container i18n>Add one or more contacts with name, email, phone number, and relationship.</ng-container></p>
               </div>
               <button mat-stroked-button type="button" (click)="addEmergencyContact()">
                 <mat-icon class="mr-1">add</mat-icon>
-                Add Contact
+                <ng-container i18n>Add Contact</ng-container>
               </button>
             </div>
 
@@ -191,11 +191,11 @@
               @for (contact of emergencyContactsArray.controls; track $index) {
                 <div [formGroupName]="$index" class="rounded-xl border border-gray-200 p-4">
                   <div class="flex items-center justify-between mb-4">
-                    <div class="text-sm font-semibold text-gray-700">Emergency Contact {{ $index + 1 }}</div>
+                    <div class="text-sm font-semibold text-gray-700"><ng-container i18n>Emergency Contact {{ $index + 1 }}</ng-container></div>
                     @if (emergencyContactsArray.length > 1) {
                       <button mat-icon-button type="button" color="warn"
                               (click)="removeEmergencyContact($index)"
-                              [attr.aria-label]="'Remove emergency contact ' + ($index + 1)">
+                              [attr.aria-label]="('Remove emergency contact ' | tr) + ($index + 1)">
                         <mat-icon>delete_outline</mat-icon>
                       </button>
                     }
@@ -203,23 +203,23 @@
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Name</mat-label>
-                      <input matInput formControlName="name" placeholder="Full name">
+                      <mat-label><ng-container i18n>Name</ng-container></mat-label>
+                      <input matInput formControlName="name" placeholder="Full name" i18n-placeholder>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Relationship</mat-label>
-                      <input matInput formControlName="relationship" placeholder="e.g. Sister, Friend">
+                      <mat-label><ng-container i18n>Relationship</ng-container></mat-label>
+                      <input matInput formControlName="relationship" placeholder="e.g. Sister, Friend" i18n-placeholder>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Email</mat-label>
-                      <input matInput formControlName="email" type="email" placeholder="Email address">
+                      <mat-label><ng-container i18n>Email</ng-container></mat-label>
+                      <input matInput formControlName="email" type="email" placeholder="Email address" i18n-placeholder>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="w-full">
-                      <mat-label>Phone Number</mat-label>
-                      <input matInput formControlName="phoneNumber" placeholder="Phone number">
+                      <mat-label><ng-container i18n>Phone Number</ng-container></mat-label>
+                      <input matInput formControlName="phoneNumber" placeholder="Phone number" i18n-placeholder>
                     </mat-form-field>
                   </div>
                 </div>
@@ -233,15 +233,15 @@
     <!-- Vehicles -->
     <mat-card appearance="outlined" class="mb-6">
       <div class="flex items-center justify-between px-4 pt-4 pb-2">
-        <span class="text-xs font-bold text-gray-500 tracking-wider">VEHICLES</span>
+        <span class="text-xs font-bold text-gray-500 tracking-wider"><ng-container i18n>VEHICLES</ng-container></span>
         <button mat-stroked-button type="button" (click)="openAddVehicleModal()">
           <mat-icon class="mr-1">directions_car</mat-icon>
-          Add Vehicle
+          <ng-container i18n>Add Vehicle</ng-container>
         </button>
       </div>
       <mat-card-content class="px-4 pb-4">
         @if (pendingVehicles().length === 0) {
-          <p class="text-sm text-gray-400 py-2">No vehicles added yet.</p>
+          <p class="text-sm text-gray-400 py-2"><ng-container i18n>No vehicles added yet.</ng-container></p>
         } @else {
           <div class="flex flex-col gap-3">
             @for (vehicle of pendingVehicles(); track $index) {
@@ -259,11 +259,11 @@
                 </div>
                 <div class="flex items-center gap-1">
                   <button mat-icon-button type="button" (click)="openAddVehicleModal($index)"
-                          aria-label="Edit vehicle" matTooltip="Edit">
+                          aria-label="Edit vehicle" i18n-aria-label matTooltip="Edit" i18n-matTooltip>
                     <mat-icon class="text-gray-600">edit</mat-icon>
                   </button>
                   <button mat-icon-button type="button" color="warn" (click)="removeVehicle($index)"
-                          aria-label="Remove vehicle" matTooltip="Remove">
+                          aria-label="Remove vehicle" i18n-aria-label matTooltip="Remove" i18n-matTooltip>
                     <mat-icon>delete_outline</mat-icon>
                   </button>
                 </div>
@@ -277,15 +277,15 @@
     <!-- Pets -->
     <mat-card appearance="outlined" class="mb-6">
       <div class="flex items-center justify-between px-4 pt-4 pb-2">
-        <span class="text-xs font-bold text-gray-500 tracking-wider">PETS</span>
+        <span class="text-xs font-bold text-gray-500 tracking-wider"><ng-container i18n>PETS</ng-container></span>
         <button mat-stroked-button type="button" (click)="openAddPetModal()">
           <mat-icon class="mr-1">pets</mat-icon>
-          Add Pet
+          <ng-container i18n>Add Pet</ng-container>
         </button>
       </div>
       <mat-card-content class="px-4 pb-4">
         @if (pendingPets().length === 0) {
-          <p class="text-sm text-gray-400 py-2">No pets added yet.</p>
+          <p class="text-sm text-gray-400 py-2"><ng-container i18n>No pets added yet.</ng-container></p>
         } @else {
           <div class="flex flex-col gap-3">
             @for (pet of pendingPets(); track $index) {
@@ -296,21 +296,21 @@
                     <div class="text-sm font-semibold text-gray-800">{{ petLabel(pet) }}</div>
                     <div class="flex flex-wrap gap-2 mt-0.5">
                       @if (pet.vaccinated) {
-                        <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Vaccinated</span>
+                        <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full"><ng-container i18n>Vaccinated</ng-container></span>
                       }
                       @if (pet.licensed) {
-                        <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Licensed</span>
+                        <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full"><ng-container i18n>Licensed</ng-container></span>
                       }
                     </div>
                   </div>
                 </div>
                 <div class="flex items-center gap-1">
                   <button mat-icon-button type="button" (click)="openAddPetModal($index)"
-                          aria-label="Edit pet" matTooltip="Edit">
+                          aria-label="Edit pet" i18n-aria-label matTooltip="Edit" i18n-matTooltip>
                     <mat-icon class="text-gray-600">edit</mat-icon>
                   </button>
                   <button mat-icon-button type="button" color="warn" (click)="removePet($index)"
-                          aria-label="Remove pet" matTooltip="Remove">
+                          aria-label="Remove pet" i18n-aria-label matTooltip="Remove" i18n-matTooltip>
                     <mat-icon>delete_outline</mat-icon>
                   </button>
                 </div>
@@ -323,11 +323,11 @@
 
     <!-- Status & Notes -->
     <mat-card appearance="outlined" class="mb-6">
-      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">STATUS & NOTES</div>
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2"><ng-container i18n>STATUS & NOTES</ng-container></div>
       <mat-card-content class="px-4 pb-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Status</mat-label>
+            <mat-label><ng-container i18n>Status</ng-container></mat-label>
             <mat-select formControlName="status">
               @for (status of statusOptions; track status.value) {
                 <mat-option [value]="status.value">{{ status.label }}</mat-option>
@@ -337,8 +337,8 @@
         </div>
 
         <mat-form-field appearance="outline" class="w-full mt-2">
-          <mat-label>Notes</mat-label>
-          <textarea matInput formControlName="notes" rows="4" placeholder="Additional notes..."></textarea>
+          <mat-label><ng-container i18n>Notes</ng-container></mat-label>
+          <textarea matInput formControlName="notes" rows="4" placeholder="Additional notes..." i18n-placeholder></textarea>
         </mat-form-field>
       </mat-card-content>
     </mat-card>

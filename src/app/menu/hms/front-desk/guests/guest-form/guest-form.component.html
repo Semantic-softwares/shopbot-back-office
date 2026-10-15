@@ -1,8 +1,8 @@
-<app-page-header [title]="pageTitle()" subtitle="Fill in the guest information below">
+<app-page-header [title]="pageTitle()" subtitle="Fill in the guest information below" i18n-subtitle>
   <ng-container actions>
     <button matButton="outlined" (click)="onCancel()">
       <mat-icon>close</mat-icon>
-      Cancel
+      <ng-container i18n>Cancel</ng-container>
     </button>
 
     <button matButton="filled" (click)="onSubmit()" [disabled]="guestForm.invalid || isSaving()">
@@ -32,14 +32,14 @@
       <mat-card appearance="outlined">
         <mat-card-header>
           <mat-icon mat-card-avatar class="text-purple-600">person</mat-icon>
-          <mat-card-title>Personal Information</mat-card-title>
+          <mat-card-title><ng-container i18n>Personal Information</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content class="p-6! space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>First Name *</mat-label>
-                <input matInput formControlName="firstName" placeholder="Enter first name">
+                <mat-label><ng-container i18n>First Name *</ng-container></mat-label>
+                <input matInput formControlName="firstName" placeholder="Enter first name" i18n-placeholder>
                 @if (getFieldError('firstName')) {
                   <mat-error>{{ getFieldError('firstName') }}</mat-error>
                 }
@@ -47,8 +47,8 @@
             </div>
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Last Name *</mat-label>
-                <input matInput formControlName="lastName" placeholder="Enter last name">
+                <mat-label><ng-container i18n>Last Name *</ng-container></mat-label>
+                <input matInput formControlName="lastName" placeholder="Enter last name" i18n-placeholder>
                 @if (getFieldError('lastName')) {
                   <mat-error>{{ getFieldError('lastName') }}</mat-error>
                 }
@@ -59,8 +59,8 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Email Address *</mat-label>
-                <input matInput type="email" formControlName="email" placeholder="Enter email address">
+                <mat-label><ng-container i18n>Email Address *</ng-container></mat-label>
+                <input matInput type="email" formControlName="email" placeholder="Enter email address" i18n-placeholder>
                 <mat-icon matPrefix class="text-gray-400">email</mat-icon>
                 @if (getFieldError('email')) {
                   <mat-error>{{ getFieldError('email') }}</mat-error>
@@ -69,8 +69,8 @@
             </div>
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Phone Number *</mat-label>
-                <input matInput formControlName="phone" placeholder="Enter phone number">
+                <mat-label><ng-container i18n>Phone Number *</ng-container></mat-label>
+                <input matInput formControlName="phone" placeholder="Enter phone number" i18n-placeholder>
                 <mat-icon matPrefix class="text-gray-400">phone</mat-icon>
                 @if (getFieldError('phone')) {
                   <mat-error>{{ getFieldError('phone') }}</mat-error>
@@ -82,7 +82,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Date of Birth</mat-label>
+                <mat-label><ng-container i18n>Date of Birth</ng-container></mat-label>
                 <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth">
                 <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
                 <mat-datepicker #dobPicker></mat-datepicker>
@@ -90,9 +90,9 @@
             </div>
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Nationality</mat-label>
+                <mat-label><ng-container i18n>Nationality</ng-container></mat-label>
                 <mat-select formControlName="nationality">
-                  <mat-option value="">Select Nationality</mat-option>
+                  <mat-option value=""><ng-container i18n>Select Nationality</ng-container></mat-option>
                   @for (country of countryOptions; track country.code) {
                     <mat-option [value]="country.code">{{ country.name }}</mat-option>
                   }
@@ -107,25 +107,25 @@
       <mat-card appearance="outlined" formGroupName="idDocument">
         <mat-card-header>
           <mat-icon mat-card-avatar class="text-purple-600">badge</mat-icon>
-          <mat-card-title>Identification Document</mat-card-title>
+          <mat-card-title><ng-container i18n>Identification Document</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content class="p-6! space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Document Type</mat-label>
+                <mat-label><ng-container i18n>Document Type</ng-container></mat-label>
                 <mat-select formControlName="type">
-                  <mat-option value="passport">Passport</mat-option>
-                  <mat-option value="national_id">National ID</mat-option>
-                  <mat-option value="drivers_license">Driver's License</mat-option>
-                  <mat-option value="other">Other</mat-option>
+                  <mat-option value="passport"><ng-container i18n>Passport</ng-container></mat-option>
+                  <mat-option value="national_id"><ng-container i18n>National ID</ng-container></mat-option>
+                  <mat-option value="drivers_license"><ng-container i18n>Driver's License</ng-container></mat-option>
+                  <mat-option value="other"><ng-container i18n>Other</ng-container></mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Document Number</mat-label>
-                <input matInput formControlName="number" placeholder="Enter document number">
+                <mat-label><ng-container i18n>Document Number</ng-container></mat-label>
+                <input matInput formControlName="number" placeholder="Enter document number" i18n-placeholder>
               </mat-form-field>
             </div>
           </div>
@@ -133,7 +133,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Expiry Date</mat-label>
+                <mat-label><ng-container i18n>Expiry Date</ng-container></mat-label>
                 <input matInput [matDatepicker]="expiryPicker" formControlName="expiryDate">
                 <mat-datepicker-toggle matIconSuffix [for]="expiryPicker"></mat-datepicker-toggle>
                 <mat-datepicker #expiryPicker></mat-datepicker>
@@ -141,9 +141,9 @@
             </div>
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Issuing Country</mat-label>
+                <mat-label><ng-container i18n>Issuing Country</ng-container></mat-label>
                 <mat-select formControlName="issuingCountry">
-                  <mat-option value="">Select Country</mat-option>
+                  <mat-option value=""><ng-container i18n>Select Country</ng-container></mat-option>
                   @for (country of countryOptions; track country.code) {
                     <mat-option [value]="country.code">{{ country.name }}</mat-option>
                   }
@@ -158,42 +158,42 @@
       <mat-card appearance="outlined" formGroupName="address">
         <mat-card-header>
           <mat-icon mat-card-avatar class="text-purple-600">location_on</mat-icon>
-          <mat-card-title>Address Information</mat-card-title>
+          <mat-card-title><ng-container i18n>Address Information</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content class="p-6! space-y-6">
           <div>
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Street Address</mat-label>
-              <input matInput formControlName="street" placeholder="Enter street address">
+              <mat-label><ng-container i18n>Street Address</ng-container></mat-label>
+              <input matInput formControlName="street" placeholder="Enter street address" i18n-placeholder>
             </mat-form-field>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>City</mat-label>
-                <input matInput formControlName="city" placeholder="Enter city">
+                <mat-label><ng-container i18n>City</ng-container></mat-label>
+                <input matInput formControlName="city" placeholder="Enter city" i18n-placeholder>
               </mat-form-field>
             </div>
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>State/Province</mat-label>
-                <input matInput formControlName="state" placeholder="Enter state/province">
+                <mat-label><ng-container i18n>State/Province</ng-container></mat-label>
+                <input matInput formControlName="state" placeholder="Enter state/province" i18n-placeholder>
               </mat-form-field>
             </div>
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Postal Code</mat-label>
-                <input matInput formControlName="postalCode" placeholder="Enter postal code">
+                <mat-label><ng-container i18n>Postal Code</ng-container></mat-label>
+                <input matInput formControlName="postalCode" placeholder="Enter postal code" i18n-placeholder>
               </mat-form-field>
             </div>
           </div>
 
           <div>
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Country</mat-label>
+              <mat-label><ng-container i18n>Country</ng-container></mat-label>
               <mat-select formControlName="country">
-                <mat-option value="">Select Country</mat-option>
+                <mat-option value=""><ng-container i18n>Select Country</ng-container></mat-option>
                 @for (country of countryOptions; track country.code) {
                   <mat-option [value]="country.code">{{ country.name }}</mat-option>
                 }
@@ -207,42 +207,42 @@
       <mat-card appearance="outlined" formGroupName="preferences">
         <mat-card-header>
           <mat-icon mat-card-avatar class="text-purple-600">tune</mat-icon>
-          <mat-card-title>Preferences</mat-card-title>
+          <mat-card-title><ng-container i18n>Preferences</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content class="p-6! space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Room Type</mat-label>
+                <mat-label><ng-container i18n>Room Type</ng-container></mat-label>
                 <mat-select formControlName="roomType">
-                  <mat-option value="">No Preference</mat-option>
-                  <mat-option value="standard">Standard</mat-option>
-                  <mat-option value="deluxe">Deluxe</mat-option>
-                  <mat-option value="suite">Suite</mat-option>
-                  <mat-option value="executive">Executive</mat-option>
+                  <mat-option value=""><ng-container i18n>No Preference</ng-container></mat-option>
+                  <mat-option value="standard"><ng-container i18n>Standard</ng-container></mat-option>
+                  <mat-option value="deluxe"><ng-container i18n>Deluxe</ng-container></mat-option>
+                  <mat-option value="suite"><ng-container i18n>Suite</ng-container></mat-option>
+                  <mat-option value="executive"><ng-container i18n>Executive</ng-container></mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Smoking Preference</mat-label>
+                <mat-label><ng-container i18n>Smoking Preference</ng-container></mat-label>
                 <mat-select formControlName="smokingPreference">
-                  <mat-option value="non_smoking">Non-Smoking</mat-option>
-                  <mat-option value="smoking">Smoking</mat-option>
-                  <mat-option value="no_preference">No Preference</mat-option>
+                  <mat-option value="non_smoking"><ng-container i18n>Non-Smoking</ng-container></mat-option>
+                  <mat-option value="smoking"><ng-container i18n>Smoking</ng-container></mat-option>
+                  <mat-option value="no_preference"><ng-container i18n>No Preference</ng-container></mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Bed Preference</mat-label>
+                <mat-label><ng-container i18n>Bed Preference</ng-container></mat-label>
                 <mat-select formControlName="bedPreference">
-                  <mat-option value="no_preference">No Preference</mat-option>
-                  <mat-option value="single">Single</mat-option>
-                  <mat-option value="double">Double</mat-option>
-                  <mat-option value="queen">Queen</mat-option>
-                  <mat-option value="king">King</mat-option>
-                  <mat-option value="twin">Twin</mat-option>
+                  <mat-option value="no_preference"><ng-container i18n>No Preference</ng-container></mat-option>
+                  <mat-option value="single"><ng-container i18n>Single</ng-container></mat-option>
+                  <mat-option value="double"><ng-container i18n>Double</ng-container></mat-option>
+                  <mat-option value="queen"><ng-container i18n>Queen</ng-container></mat-option>
+                  <mat-option value="king"><ng-container i18n>King</ng-container></mat-option>
+                  <mat-option value="twin"><ng-container i18n>Twin</ng-container></mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
@@ -250,12 +250,12 @@
 
           <div>
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Floor Preference</mat-label>
+              <mat-label><ng-container i18n>Floor Preference</ng-container></mat-label>
               <mat-select formControlName="floorPreference">
-                <mat-option value="no_preference">No Preference</mat-option>
-                <mat-option value="low">Low Floor</mat-option>
-                <mat-option value="middle">Middle Floor</mat-option>
-                <mat-option value="high">High Floor</mat-option>
+                <mat-option value="no_preference"><ng-container i18n>No Preference</ng-container></mat-option>
+                <mat-option value="low"><ng-container i18n>Low Floor</ng-container></mat-option>
+                <mat-option value="middle"><ng-container i18n>Middle Floor</ng-container></mat-option>
+                <mat-option value="high"><ng-container i18n>High Floor</ng-container></mat-option>
               </mat-select>
             </mat-form-field>
           </div>
@@ -266,20 +266,20 @@
       <mat-card appearance="outlined" formGroupName="emergencyContact">
         <mat-card-header>
           <mat-icon mat-card-avatar class="text-purple-600">contact_emergency</mat-icon>
-          <mat-card-title>Emergency Contact</mat-card-title>
+          <mat-card-title><ng-container i18n>Emergency Contact</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content class="p-6! space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Contact Name</mat-label>
-                <input matInput formControlName="name" placeholder="Enter contact name">
+                <mat-label><ng-container i18n>Contact Name</ng-container></mat-label>
+                <input matInput formControlName="name" placeholder="Enter contact name" i18n-placeholder>
               </mat-form-field>
             </div>
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Relationship</mat-label>
-                <input matInput formControlName="relationship" placeholder="e.g., Parent, Spouse, Friend">
+                <mat-label><ng-container i18n>Relationship</ng-container></mat-label>
+                <input matInput formControlName="relationship" placeholder="e.g., Parent, Spouse, Friend" i18n-placeholder>
               </mat-form-field>
             </div>
           </div>
@@ -287,15 +287,15 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Phone Number</mat-label>
-                <input matInput formControlName="phone" placeholder="Enter phone number">
+                <mat-label><ng-container i18n>Phone Number</ng-container></mat-label>
+                <input matInput formControlName="phone" placeholder="Enter phone number" i18n-placeholder>
                 <mat-icon matPrefix class="text-gray-400">phone</mat-icon>
               </mat-form-field>
             </div>
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Email Address</mat-label>
-                <input matInput type="email" formControlName="email" placeholder="Enter email address">
+                <mat-label><ng-container i18n>Email Address</ng-container></mat-label>
+                <input matInput type="email" formControlName="email" placeholder="Enter email address" i18n-placeholder>
                 <mat-icon matPrefix class="text-gray-400">email</mat-icon>
               </mat-form-field>
             </div>
@@ -307,34 +307,34 @@
       <mat-card appearance="outlined">
         <mat-card-header>
           <mat-icon mat-card-avatar class="text-purple-600">notes</mat-icon>
-          <mat-card-title>Status & Additional Information</mat-card-title>
+          <mat-card-title><ng-container i18n>Status & Additional Information</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content class="p-6! space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-4">
               <div>
                 <mat-checkbox formControlName="isVip" class="text-purple-600">
-                  VIP Guest
+                  <ng-container i18n>VIP Guest</ng-container>
                 </mat-checkbox>
-                <p class="text-sm text-gray-500 mt-1">Mark as VIP for special treatment and privileges</p>
+                <p class="text-sm text-gray-500 mt-1"><ng-container i18n>Mark as VIP for special treatment and privileges</ng-container></p>
               </div>
               <div>
                 <mat-checkbox formControlName="blacklisted" class="text-red-600">
-                  Blacklisted
+                  <ng-container i18n>Blacklisted</ng-container>
                 </mat-checkbox>
-                <p class="text-sm text-gray-500 mt-1">Restrict future bookings and services</p>
+                <p class="text-sm text-gray-500 mt-1"><ng-container i18n>Restrict future bookings and services</ng-container></p>
               </div>
             </div>
           </div>
 
           <div>
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Notes</mat-label>
+              <mat-label><ng-container i18n>Notes</ng-container></mat-label>
               <textarea 
                 matInput 
                 formControlName="notes" 
                 rows="4" 
-                placeholder="Add any additional notes about the guest...">
+                placeholder="Add any additional notes about the guest..." i18n-placeholder>
               </textarea>
             </mat-form-field>
           </div>

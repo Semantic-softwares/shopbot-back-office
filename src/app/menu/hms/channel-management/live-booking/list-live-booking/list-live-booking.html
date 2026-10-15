@@ -1,6 +1,6 @@
 <app-page-header 
-  [title]="'Live Bookings'"
-    [subtitle]="'Manage and monitor your live bookings from various OTA providers in one centralized location.'"
+  [title]="('Live Bookings' | tr)"
+    [subtitle]="('Manage and monitor your live bookings from various OTA providers in one centralized location.' | tr)"
 >
 
 </app-page-header>
@@ -9,20 +9,20 @@
   <!-- Filters Card -->
   <mat-card class="filters-card" appearance="outlined">
     <mat-card-header>
-      <mat-card-title>Filters</mat-card-title>
+      <mat-card-title><ng-container i18n>Filters</ng-container></mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <form [formGroup]="filterForm" class="filters-grid">
         <!-- Search Filter -->
         <mat-form-field appearance="outline">
-          <mat-label>Search by Customer or Booking ID</mat-label>
-          <input matInput formControlName="search" placeholder="Search..." />
+          <mat-label><ng-container i18n>Search by Customer or Booking ID</ng-container></mat-label>
+          <input matInput formControlName="search" placeholder="Search..." i18n-placeholder />
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
 
         <!-- OTA Filter -->
         <mat-form-field appearance="outline">
-          <mat-label>OTA Providers</mat-label>
+          <mat-label><ng-container i18n>OTA Providers</ng-container></mat-label>
           <mat-select formControlName="otaCodes" multiple>
             @for (ota of otaOptions; track ota.value) {
               <mat-option [value]="ota.value">
@@ -34,7 +34,7 @@
 
         <!-- Status Filter -->
         <mat-form-field appearance="outline">
-          <mat-label>Status</mat-label>
+          <mat-label><ng-container i18n>Status</ng-container></mat-label>
           <mat-select formControlName="status">
             @for (status of statusOptions; track status.value) {
               <mat-option [value]="status.value">
@@ -46,10 +46,10 @@
 
         <!-- Arrival Date Range -->
         <mat-form-field appearance="outline">
-          <mat-label>Arrival Date Range</mat-label>
+          <mat-label><ng-container i18n>Arrival Date Range</ng-container></mat-label>
           <mat-date-range-input [formGroup]="arrivalDateRange" [rangePicker]="arrivalRangePicker">
-            <input matStartDate formControlName="start" placeholder="From date">
-            <input matEndDate formControlName="end" placeholder="To date">
+            <input matStartDate formControlName="start" placeholder="From date" i18n-placeholder>
+            <input matEndDate formControlName="end" placeholder="To date" i18n-placeholder>
           </mat-date-range-input>
           <mat-datepicker-toggle matIconSuffix [for]="arrivalRangePicker"></mat-datepicker-toggle>
           <mat-date-range-picker #arrivalRangePicker></mat-date-range-picker>
@@ -57,10 +57,10 @@
 
         <!-- Departure Date Range -->
         <mat-form-field appearance="outline">
-          <mat-label>Departure Date Range</mat-label>
+          <mat-label><ng-container i18n>Departure Date Range</ng-container></mat-label>
           <mat-date-range-input [formGroup]="departureDateRange" [rangePicker]="departureRangePicker">
-            <input matStartDate formControlName="start" placeholder="From date">
-            <input matEndDate formControlName="end" placeholder="To date">
+            <input matStartDate formControlName="start" placeholder="From date" i18n-placeholder>
+            <input matEndDate formControlName="end" placeholder="To date" i18n-placeholder>
           </mat-date-range-input>
           <mat-datepicker-toggle matIconSuffix [for]="departureRangePicker"></mat-datepicker-toggle>
           <mat-date-range-picker #departureRangePicker></mat-date-range-picker>
@@ -68,10 +68,10 @@
 
         <!-- Booking Date Range -->
         <mat-form-field appearance="outline">
-          <mat-label>Booking Date Range</mat-label>
+          <mat-label><ng-container i18n>Booking Date Range</ng-container></mat-label>
           <mat-date-range-input [formGroup]="bookingDateRange" [rangePicker]="bookingRangePicker">
-            <input matStartDate formControlName="start" placeholder="From date">
-            <input matEndDate formControlName="end" placeholder="To date">
+            <input matStartDate formControlName="start" placeholder="From date" i18n-placeholder>
+            <input matEndDate formControlName="end" placeholder="To date" i18n-placeholder>
           </mat-date-range-input>
           <mat-datepicker-toggle matIconSuffix [for]="bookingRangePicker"></mat-datepicker-toggle>
           <mat-date-range-picker #bookingRangePicker></mat-date-range-picker>
@@ -81,11 +81,11 @@
         <div class="filter-actions">
           <button matButton="filled" color="primary" (click)="refreshBookings()">
             <mat-icon>refresh</mat-icon>
-            Apply Filters
+            <ng-container i18n>Apply Filters</ng-container>
           </button>
           <button matButton="outlined" (click)="clearFilters()">
             <mat-icon>clear</mat-icon>
-            Clear
+            <ng-container i18n>Clear</ng-container>
           </button>
         </div>
       </form>
@@ -98,14 +98,14 @@
       @if (liveBookings.isLoading()) {
         <div class="loading-container">
           <mat-spinner></mat-spinner>
-          <p>Loading live bookings...</p>
+          <p><ng-container i18n>Loading live bookings...</ng-container></p>
         </div>
       } @else if (liveBookings.error()) {
         <div class="error-container">
           <mat-icon>error</mat-icon>
           <p>{{ liveBookings.error()?.message }}</p>
           <button mat-raised-button color="primary" (click)="refreshBookings()">
-            Retry
+            <ng-container i18n>Retry</ng-container>
           </button>
         </div>
       } @else {
@@ -114,12 +114,12 @@
           <table mat-table [dataSource]="bookingsList">
             <!-- Status Column -->
             <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
               <td mat-cell *matCellDef="let booking">
                 <mat-chip
                   [color]="getStatusChip(booking.status).color"
                   selected
-                  matTooltip="Booking Status"
+                  matTooltip="Booking Status" i18n-matTooltip
                 >
                   {{ booking.status | uppercase }}
                 </mat-chip>
@@ -128,7 +128,7 @@
 
             <!-- Unique ID Column -->
             <ng-container matColumnDef="uniqueId">
-              <th mat-header-cell *matHeaderCellDef>Unique ID</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Unique ID</ng-container></th>
               <td mat-cell *matCellDef="let booking">
                 <span class="font-weight-500">{{ booking.uniqueId }}</span>
               </td>
@@ -136,7 +136,7 @@
 
             <!-- Source Column -->
             <ng-container matColumnDef="source">
-              <th mat-header-cell *matHeaderCellDef>Source</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Source</ng-container></th>
               <td mat-cell *matCellDef="let booking">
                 <span class="font-weight-500">{{ booking.otaName }}</span>
               </td>
@@ -144,7 +144,7 @@
 
             <!-- Customer Column -->
             <ng-container matColumnDef="customerName">
-              <th mat-header-cell *matHeaderCellDef>Customer</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Customer</ng-container></th>
               <td mat-cell *matCellDef="let booking">
                 <div class="customer-info">
                   <strong>{{ booking.customerName?.name }} {{ booking.customerName?.surname }}</strong>
@@ -154,7 +154,7 @@
 
             <!-- Dates Column -->
             <ng-container matColumnDef="dates">
-              <th mat-header-cell *matHeaderCellDef>Dates</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Dates</ng-container></th>
               <td mat-cell *matCellDef="let booking">
                 <div class="date-range" [routerLink]="['../../live-booking', booking.id, 'details']">
                   {{ getDateRange(booking.arrivalDate, booking.departureDate) }}
@@ -164,7 +164,7 @@
 
             <!-- Rooms Count Column -->
             <ng-container matColumnDef="roomsCount">
-              <th mat-header-cell *matHeaderCellDef>Rooms</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Rooms</ng-container></th>
               <td mat-cell *matCellDef="let booking">
                 <mat-chip selected>{{ booking.roomsCount }}</mat-chip>
               </td>
@@ -174,7 +174,7 @@
 
             <!-- Total Column -->
             <ng-container matColumnDef="total">
-              <th mat-header-cell *matHeaderCellDef>Total</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Total</ng-container></th>
               <td mat-cell *matCellDef="let booking">
                 <span class="font-weight-500">
                  {{ booking.amount | currency: booking.currency }} 
@@ -184,12 +184,12 @@
 
             <!-- Actions Column -->
             <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Actions</ng-container></th>
               <td mat-cell *matCellDef="let booking">
                 
                 <button
                   mat-icon-button
-                  matTooltip="More Actions"
+                  matTooltip="More Actions" i18n-matTooltip
                   [matMenuTriggerFor]="menu"
                 >
                   <mat-icon>more_vert</mat-icon>
@@ -197,7 +197,7 @@
                 <mat-menu #menu="matMenu">
                   <button mat-menu-item (click)="viewBookingDetails(booking)">
                     <mat-icon>open_in_new</mat-icon>
-                    <span>View Full Details</span>
+                    <span><ng-container i18n>View Full Details</ng-container></span>
                   </button>
                 </mat-menu>
               </td>

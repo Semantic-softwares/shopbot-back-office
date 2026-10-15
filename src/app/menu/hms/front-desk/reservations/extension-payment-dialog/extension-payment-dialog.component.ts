@@ -43,22 +43,22 @@ export interface ExtensionPaymentResult {
       <div class="flex items-center gap-3 p-6 border-b border-gray-200">
         <mat-icon class="text-green-600">payment</mat-icon>
         <div>
-          <h2 class="text-xl font-semibold text-gray-900">Extension Payment</h2>
-          <p class="text-sm text-gray-600">Update payment information for extension approval</p>
+          <h2 class="text-xl font-semibold text-gray-900"><ng-container i18n>Extension Payment</ng-container></h2>
+          <p class="text-sm text-gray-600"><ng-container i18n>Update payment information for extension approval</ng-container></p>
         </div>
       </div>
 
       <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="p-6 space-y-4">
         <!-- Extension Details -->
         <div class="bg-gray-50 rounded-lg p-4 space-y-2">
-          <h3 class="font-medium text-gray-900">Extension Details</h3>
+          <h3 class="font-medium text-gray-900"><ng-container i18n>Extension Details</ng-container></h3>
           <div class="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span class="text-gray-600">Additional Nights:</span>
+              <span class="text-gray-600"><ng-container i18n>Additional Nights:</ng-container></span>
               <span class="font-medium ml-2">{{ data.additionalNights }}</span>
             </div>
             <div>
-              <span class="text-gray-600">Extension Cost:</span>
+              <span class="text-gray-600"><ng-container i18n>Extension Cost:</ng-container></span>
               <span class="font-medium ml-2">{{ data.extensionCost | currency: data.currency }}</span>
             </div>
           </div>
@@ -66,32 +66,32 @@ export interface ExtensionPaymentResult {
 
         <!-- Payment Status -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Payment Status</mat-label>
+          <mat-label><ng-container i18n>Payment Status</ng-container></mat-label>
           <mat-select formControlName="paymentStatus">
-            <mat-option value="paid">Paid (Full Amount)</mat-option>
-            <mat-option value="partial">Partial Payment</mat-option>
-            <mat-option value="pending">Pending Payment</mat-option>
+            <mat-option value="paid"><ng-container i18n>Paid (Full Amount)</ng-container></mat-option>
+            <mat-option value="partial"><ng-container i18n>Partial Payment</ng-container></mat-option>
+            <mat-option value="pending"><ng-container i18n>Pending Payment</ng-container></mat-option>
           </mat-select>
-          <mat-hint>Select the current payment status for this extension</mat-hint>
+          <mat-hint><ng-container i18n>Select the current payment status for this extension</ng-container></mat-hint>
         </mat-form-field>
 
         <!-- Payment Method -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Payment Method</mat-label>
+          <mat-label><ng-container i18n>Payment Method</ng-container></mat-label>
           <mat-select formControlName="paymentMethod">
-            <mat-option value="cash">Cash</mat-option>
-            <mat-option value="credit_card">Credit Card</mat-option>
-            <mat-option value="debit_card">Debit Card</mat-option>
-            <mat-option value="bank_transfer">Bank Transfer</mat-option>
-            <mat-option value="mobile_payment">Mobile Payment</mat-option>
-            <mat-option value="check">Check</mat-option>
-            <mat-option value="other">Other</mat-option>
+            <mat-option value="cash"><ng-container i18n>Cash</ng-container></mat-option>
+            <mat-option value="credit_card"><ng-container i18n>Credit Card</ng-container></mat-option>
+            <mat-option value="debit_card"><ng-container i18n>Debit Card</ng-container></mat-option>
+            <mat-option value="bank_transfer"><ng-container i18n>Bank Transfer</ng-container></mat-option>
+            <mat-option value="mobile_payment"><ng-container i18n>Mobile Payment</ng-container></mat-option>
+            <mat-option value="check"><ng-container i18n>Check</ng-container></mat-option>
+            <mat-option value="other"><ng-container i18n>Other</ng-container></mat-option>
           </mat-select>
         </mat-form-field>
 
         <!-- Payment Amount -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Payment Amount</mat-label>
+          <mat-label><ng-container i18n>Payment Amount</ng-container></mat-label>
           <input
             matInput
             type="number"
@@ -103,33 +103,33 @@ export interface ExtensionPaymentResult {
           <span matSuffix>{{ data.currency }}</span>
           <mat-hint>
             @if (paymentForm.get('paymentStatus')?.value === 'paid') {
-              Should equal the full extension cost
+              <ng-container i18n>Should equal the full extension cost</ng-container>
             } @else if (paymentForm.get('paymentStatus')?.value === 'partial') {
-              Enter the amount paid so far
+              <ng-container i18n>Enter the amount paid so far</ng-container>
             } @else {
-              Enter 0 for pending payment
+              <ng-container i18n>Enter 0 for pending payment</ng-container>
             }
           </mat-hint>
         </mat-form-field>
 
         <!-- Transaction Reference -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Transaction Reference</mat-label>
+          <mat-label><ng-container i18n>Transaction Reference</ng-container></mat-label>
           <input
             matInput
             formControlName="transactionReference"
-            placeholder="Optional transaction ID or reference">
-          <mat-hint>Payment confirmation number, receipt ID, etc.</mat-hint>
+            placeholder="Optional transaction ID or reference" i18n-placeholder>
+          <mat-hint><ng-container i18n>Payment confirmation number, receipt ID, etc.</ng-container></mat-hint>
         </mat-form-field>
 
         <!-- Notes -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Payment Notes</mat-label>
+          <mat-label><ng-container i18n>Payment Notes</ng-container></mat-label>
           <textarea
             matInput
             rows="3"
             formControlName="notes"
-            placeholder="Optional notes about the payment..."></textarea>
+            placeholder="Optional notes about the payment..." i18n-placeholder></textarea>
         </mat-form-field>
 
         <!-- Actions -->
@@ -139,7 +139,7 @@ export interface ExtensionPaymentResult {
             mat-button
             (click)="onCancel()"
             class="px-6">
-            Cancel
+            <ng-container i18n>Cancel</ng-container>
           </button>
           <button
             type="submit"
@@ -150,7 +150,7 @@ export interface ExtensionPaymentResult {
             @if (submitting()) {
               <mat-icon class="animate-spin mr-2">refresh</mat-icon>
             }
-            Approve Extension
+            <ng-container i18n>Approve Extension</ng-container>
           </button>
         </div>
       </form>

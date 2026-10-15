@@ -8,23 +8,23 @@
 
   <div class="bg-white rounded-lg shadow-sm">
     <div class="p-6 flex justify-between items-center border-b">
-      <h2 class="text-lg font-medium">Sales by Employee</h2>
+      <h2 class="text-lg font-medium"><ng-container i18n>Sales by Employee</ng-container></h2>
       <button mat-flat-button color="primary" [matMenuTriggerFor]="exportMenu">
         <mat-icon class="mr-2">file_download</mat-icon>
-        Export Data
+        <ng-container i18n>Export Data</ng-container>
       </button>
       <mat-menu #exportMenu="matMenu">
         <button mat-menu-item (click)="exportData('pdf')">
           <mat-icon>picture_as_pdf</mat-icon>
-          <span>Export as PDF</span>
+          <span><ng-container i18n>Export as PDF</ng-container></span>
         </button>
         <button mat-menu-item (click)="exportData('csv')">
           <mat-icon>description</mat-icon>
-          <span>Export as CSV</span>
+          <span><ng-container i18n>Export as CSV</ng-container></span>
         </button>
         <button mat-menu-item (click)="exportData('excel')">
           <mat-icon>table_chart</mat-icon>
-          <span>Export as Excel</span>
+          <span><ng-container i18n>Export as Excel</ng-container></span>
         </button>
       </mat-menu>
     </div>
@@ -33,37 +33,37 @@
       <div class="p-6">
         <mat-table [dataSource]="dataSource.value()!" class="w-full !bg-white">
           <ng-container matColumnDef="name">
-            <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element?.name ?? 'Removed user'}}</mat-cell>
+            <mat-header-cell *matHeaderCellDef><ng-container i18n>Name</ng-container></mat-header-cell>
+            <mat-cell *matCellDef="let element">@if (element?.name != null) {<ng-container>{{ element?.name }}</ng-container>} @else {<ng-container i18n>Removed user</ng-container>}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="grossSales">
-            <mat-header-cell *matHeaderCellDef>Gross Sales</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef><ng-container i18n>Gross Sales</ng-container></mat-header-cell>
             <mat-cell *matCellDef="let element">{{element.grossSales | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="refunds">
-            <mat-header-cell *matHeaderCellDef>Refunds</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef><ng-container i18n>Refunds</ng-container></mat-header-cell>
             <mat-cell *matCellDef="let element">{{element.refunds | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="discounts">
-            <mat-header-cell *matHeaderCellDef>Discounts</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef><ng-container i18n>Discounts</ng-container></mat-header-cell>
             <mat-cell *matCellDef="let element">{{element.discounts | percent}}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="netSales">
-            <mat-header-cell *matHeaderCellDef>Net Sales</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef><ng-container i18n>Net Sales</ng-container></mat-header-cell>
             <mat-cell *matCellDef="let element">{{element.netSales |  currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="receipts">
-            <mat-header-cell *matHeaderCellDef>Receipts</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef><ng-container i18n>Receipts</ng-container></mat-header-cell>
             <mat-cell *matCellDef="let element">{{element.receipts}}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="averageSale">
-            <mat-header-cell *matHeaderCellDef>Average Sale</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef><ng-container i18n>Average Sale</ng-container></mat-header-cell>
             <mat-cell *matCellDef="let element">{{element.averageSale | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
           </ng-container>
 
@@ -77,7 +77,7 @@
           [pageSize]="pageSize"
           [pageSizeOptions]="pageSizeOptions"
           showFirstLastButtons
-          aria-label="Select page">
+          aria-label="Select page" i18n-aria-label>
         </mat-paginator>
       </div>
     } @else if (dataSource.isLoading()) {
@@ -85,8 +85,8 @@
           <mat-spinner diameter="40"></mat-spinner>
         </div>
         }  @else {
-        <app-no-record icon="inventory_2" title="No Employee Data Found"
-            message="There are no employee sales data to display for the selected period.">
+        <app-no-record icon="inventory_2" title="No Employee Data Found" i18n-title
+            message="There are no employee sales data to display for the selected period." i18n-message>
         </app-no-record>
         } 
   </div>

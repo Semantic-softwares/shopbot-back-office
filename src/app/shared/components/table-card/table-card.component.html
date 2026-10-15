@@ -20,24 +20,24 @@
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="onViewBill($event)">
           <mat-icon>receipt_long</mat-icon>
-          <span>View Bill</span>
+          <span><ng-container i18n>View Bill</ng-container></span>
         </button>
         <button mat-menu-item (click)="onPrintOrder($event)">
           <mat-icon>print</mat-icon>
-          <span>Print Order</span>
+          <span><ng-container i18n>Print Order</ng-container></span>
         </button>
           <button mat-menu-item (click)="onClearOrder($event)">
             <mat-icon>clear</mat-icon>
-            <span>Clear Order</span>
+            <span><ng-container i18n>Clear Order</ng-container></span>
           </button>
           @if (!isOrderCompleted) {
             <button mat-menu-item (click)="onEditOrder($event)">
               <mat-icon>edit</mat-icon>
-              <span>Edit Order</span>
+              <span><ng-container i18n>Edit Order</ng-container></span>
             </button>
             <button mat-menu-item (click)="onTransferOrder($event)">
               <mat-icon>swap_horiz</mat-icon>
-              <span>Transfer Order</span>
+              <span><ng-container i18n>Transfer Order</ng-container></span>
             </button>
           }
       </mat-menu>
@@ -47,10 +47,10 @@
     <!-- Center: Status Chip, Name and Seats -->
     <div class="flex flex-col items-center justify-center py-4">
       <mat-chip class="!text-sm mb-3">
-        {{table().orderId ? 'Occupied' : 'Free'}}
+        @if (table().orderId) {<ng-container i18n>Occupied</ng-container>} @else {<ng-container i18n>Free</ng-container>}
       </mat-chip>
       <h3 class="text-lg font-bold text-gray-900">{{table().name}}</h3>
-      <span class="text-xs text-gray-600 mt-1">{{table().numberOfGuest}} seats</span>
+      <span class="text-xs text-gray-600 mt-1"><ng-container i18n>{{table().numberOfGuest}} seats</ng-container></span>
       @if (table().orderId) {
         <span class="text-sm font-semibold mt-2" style="color: var(--mat-sys-primary);">
           {{table().orderId.total | currency:currency():'symbol':'1.2-2'}}
@@ -67,19 +67,19 @@
         <div class="flex gap-2 w-full">
           <button matButton="outlined" (click)="onViewOrder($event)" class="flex-1 w-full" color="primary">
             <mat-icon class="mr-2 !text-base">visibility</mat-icon>
-            View Order
+            <ng-container i18n>View Order</ng-container>
           </button>
           @if (!isOrderCompleted) {
             <button matButton="filled" class="flex-1 w-full" color="primary" (click)="onCompleteOrder($event)">
               <mat-icon class="mr-2 !text-base">check_circle</mat-icon>
-              Complete
+              <ng-container i18n>Complete</ng-container>
             </button>
           }
         </div>
       } @else {
         <button matButton="filled" class="w-full" color="primary"  (click)="onAddNewOrder()">
           <mat-icon>add</mat-icon>
-          Add new order
+          <ng-container i18n>Add new order</ng-container>
         </button>
       }
     </mat-card-actions>

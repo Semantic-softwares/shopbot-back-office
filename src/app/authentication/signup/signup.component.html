@@ -3,8 +3,8 @@
   <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 py-8 lg:px-16 xl:px-24">
     <!-- Logo/Brand -->
     <div class="mb-8">
-      <img src="assets/logo/logo_vector.svg" alt="ShopBot Logo" class="h-9 w-9">
-      <p class="text-gray-500 mt-1">Create your account</p>
+      <img src="assets/logo/logo_vector.svg" alt="ShopBot Logo" i18n-alt class="h-9 w-9">
+      <p class="text-gray-500 mt-1"><ng-container i18n>Create your account</ng-container></p>
     </div>
 
     <!-- Stepper Form -->
@@ -13,64 +13,64 @@
 
         <!-- ─── Step 1: Owner ─────────────────────────────────────────── -->
         <mat-step [stepControl]="merchantForm" [editable]="true">
-          <ng-template matStepLabel>Owner</ng-template>
+          <ng-template matStepLabel><ng-container i18n>Owner</ng-container></ng-template>
 
           <form [formGroup]="merchantForm" class="flex flex-col gap-3 mt-6">
-            <h2 class="text-lg font-semibold text-gray-800 mb-2">Personal Information</h2>
+            <h2 class="text-lg font-semibold text-gray-800 mb-2"><ng-container i18n>Personal Information</ng-container></h2>
 
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Full Name</mat-label>
-              <input matInput formControlName="name" placeholder="Enter your full name">
+              <mat-label><ng-container i18n>Full Name</ng-container></mat-label>
+              <input matInput formControlName="name" placeholder="Enter your full name" i18n-placeholder>
               <mat-icon matSuffix fontSet="material-icons-outlined">person</mat-icon>
               @if (merchantForm.get('name')?.hasError('required')) {
-                <mat-error>Name is required</mat-error>
+                <mat-error><ng-container i18n>Name is required</ng-container></mat-error>
               }
               @if (merchantForm.get('name')?.hasError('minlength')) {
-                <mat-error>Name must be at least 2 characters</mat-error>
+                <mat-error><ng-container i18n>Name must be at least 2 characters</ng-container></mat-error>
               }
             </mat-form-field>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Email</mat-label>
-                <input matInput formControlName="email" type="email" placeholder="you@example.com">
+                <mat-label><ng-container i18n>Email</ng-container></mat-label>
+                <input matInput formControlName="email" type="email" placeholder="you@example.com" i18n-placeholder>
                 <mat-icon matSuffix fontSet="material-icons-outlined">email</mat-icon>
                 @if (merchantForm.get('email')?.hasError('required')) {
-                  <mat-error>Email is required</mat-error>
+                  <mat-error><ng-container i18n>Email is required</ng-container></mat-error>
                 }
                 @if (merchantForm.get('email')?.hasError('email')) {
-                  <mat-error>Please enter a valid email</mat-error>
+                  <mat-error><ng-container i18n>Please enter a valid email</ng-container></mat-error>
                 }
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Phone Number</mat-label>
-                <input matInput formControlName="phoneNumber" placeholder="+234XXXXXXXXXX">
+                <mat-label><ng-container i18n>Phone Number</ng-container></mat-label>
+                <input matInput formControlName="phoneNumber" placeholder="+234XXXXXXXXXX" i18n-placeholder>
                 <mat-icon matSuffix fontSet="material-icons-outlined">phone</mat-icon>
                 @if (merchantForm.get('phoneNumber')?.hasError('required')) {
-                  <mat-error>Phone is required</mat-error>
+                  <mat-error><ng-container i18n>Phone is required</ng-container></mat-error>
                 }
                 @if (merchantForm.get('phoneNumber')?.hasError('pattern')) {
-                  <mat-error>Invalid phone number</mat-error>
+                  <mat-error><ng-container i18n>Invalid phone number</ng-container></mat-error>
                 }
               </mat-form-field>
             </div>
 
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Gender</mat-label>
+              <mat-label><ng-container i18n>Gender</ng-container></mat-label>
               <mat-select formControlName="gender">
-                <mat-option value="male">Male</mat-option>
-                <mat-option value="female">Female</mat-option>
-                <mat-option value="other">Other</mat-option>
+                <mat-option value="male"><ng-container i18n>Male</ng-container></mat-option>
+                <mat-option value="female"><ng-container i18n>Female</ng-container></mat-option>
+                <mat-option value="other"><ng-container i18n>Other</ng-container></mat-option>
               </mat-select>
               @if (merchantForm.get('gender')?.hasError('required')) {
-                <mat-error>Gender is required</mat-error>
+                <mat-error><ng-container i18n>Gender is required</ng-container></mat-error>
               }
             </mat-form-field>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Password</mat-label>
+                <mat-label><ng-container i18n>Password</ng-container></mat-label>
                 <input matInput [type]="hidePassword() ? 'password' : 'text'"
                        formControlName="password" placeholder="••••••••">
                 <button mat-icon-button matSuffix type="button"
@@ -80,15 +80,15 @@
                   </mat-icon>
                 </button>
                 @if (merchantForm.get('password')?.hasError('required')) {
-                  <mat-error>Password is required</mat-error>
+                  <mat-error><ng-container i18n>Password is required</ng-container></mat-error>
                 }
                 @if (merchantForm.get('password')?.hasError('minlength')) {
-                  <mat-error>Min 6 characters</mat-error>
+                  <mat-error><ng-container i18n>Min 6 characters</ng-container></mat-error>
                 }
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Confirm Password</mat-label>
+                <mat-label><ng-container i18n>Confirm Password</ng-container></mat-label>
                 <input matInput [type]="hideConfirmPassword() ? 'password' : 'text'"
                        formControlName="confirmPassword" placeholder="••••••••">
                 <button mat-icon-button matSuffix type="button"
@@ -98,23 +98,23 @@
                   </mat-icon>
                 </button>
                 @if (merchantForm.get('confirmPassword')?.hasError('required')) {
-                  <mat-error>Required</mat-error>
+                  <mat-error><ng-container i18n>Required</ng-container></mat-error>
                 }
               </mat-form-field>
             </div>
 
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>PIN (4 digits)</mat-label>
+              <mat-label><ng-container i18n>PIN (4 digits)</ng-container></mat-label>
               <input matInput formControlName="pin" type="password"
                      maxlength="4" minlength="4" placeholder="••••">
               <mat-icon matSuffix fontSet="material-icons-outlined">pin</mat-icon>
-              <mat-hint>Used for sensitive operations</mat-hint>
+              <mat-hint><ng-container i18n>Used for sensitive operations</ng-container></mat-hint>
               @if (merchantForm.get('pin')?.hasError('required')) {
-                <mat-error>PIN is required</mat-error>
+                <mat-error><ng-container i18n>PIN is required</ng-container></mat-error>
               }
               @if (merchantForm.get('pin')?.hasError('pattern') ||
                    merchantForm.get('pin')?.hasError('minlength')) {
-                <mat-error>PIN must be 4 digits</mat-error>
+                <mat-error><ng-container i18n>PIN must be 4 digits</ng-container></mat-error>
               }
             </mat-form-field>
 
@@ -123,14 +123,14 @@
                 <button mat-flat-button color="primary" type="button" disabled
                         class="w-full sm:w-auto">
                   <mat-spinner diameter="20"></mat-spinner>
-                  <span class="ml-2">Validating...</span>
+                  <span class="ml-2"><ng-container i18n>Validating...</ng-container></span>
                 </button>
               } @else {
                 <button mat-flat-button color="primary" type="button"
                         [disabled]="!merchantForm.valid"
                         (click)="validateAndProceed()"
                         class="w-full sm:w-auto">
-                  Continue
+                  <ng-container i18n>Continue</ng-container>
                   <mat-icon iconPositionEnd>arrow_forward</mat-icon>
                 </button>
               }
@@ -140,23 +140,23 @@
 
         <!-- ─── Step 2: Business ──────────────────────────────────────── -->
         <mat-step [stepControl]="storeForm" [editable]="true">
-          <ng-template matStepLabel>Business</ng-template>
+          <ng-template matStepLabel><ng-container i18n>Business</ng-container></ng-template>
 
           <form [formGroup]="storeForm" class="flex flex-col gap-3 mt-6">
-            <h2 class="text-lg font-semibold text-gray-800 mb-2">Business Information</h2>
+            <h2 class="text-lg font-semibold text-gray-800 mb-2"><ng-container i18n>Business Information</ng-container></h2>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Business Name</mat-label>
-                <input matInput formControlName="name" placeholder="Your business name">
+                <mat-label><ng-container i18n>Business Name</ng-container></mat-label>
+                <input matInput formControlName="name" placeholder="Your business name" i18n-placeholder>
                 <mat-icon matSuffix fontSet="material-icons-outlined">store</mat-icon>
                 @if (storeForm.get('name')?.hasError('required')) {
-                  <mat-error>Business name is required</mat-error>
+                  <mat-error><ng-container i18n>Business name is required</ng-container></mat-error>
                 }
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Business Type</mat-label>
+                <mat-label><ng-container i18n>Business Type</ng-container></mat-label>
                 <mat-select formControlName="storeType">
                   @for (type of storeTypes; track type.value) {
                     <mat-option [value]="type.value">{{ type.label }}</mat-option>
@@ -166,27 +166,27 @@
             </div>
 
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Description</mat-label>
+              <mat-label><ng-container i18n>Description</ng-container></mat-label>
               <textarea matInput formControlName="description" rows="2"
-                        placeholder="Brief description of your business"></textarea>
+                        placeholder="Brief description of your business" i18n-placeholder></textarea>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Billing Email</mat-label>
+              <mat-label><ng-container i18n>Billing Email</ng-container></mat-label>
               <input matInput formControlName="billingEmail" type="email"
-                     placeholder="billing@business.com">
+                     placeholder="billing@business.com" i18n-placeholder>
               <mat-icon matSuffix fontSet="material-icons-outlined">receipt_long</mat-icon>
               @if (storeForm.get('billingEmail')?.hasError('required')) {
-                <mat-error>Billing email is required</mat-error>
+                <mat-error><ng-container i18n>Billing email is required</ng-container></mat-error>
               }
               @if (storeForm.get('billingEmail')?.hasError('email')) {
-                <mat-error>Please enter a valid billing email</mat-error>
+                <mat-error><ng-container i18n>Please enter a valid billing email</ng-container></mat-error>
               }
             </mat-form-field>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Country</mat-label>
+                <mat-label><ng-container i18n>Country</ng-container></mat-label>
                 <mat-select formControlName="country"
                             (selectionChange)="selectCountry($event.value)">
                   @for (zone of deliveryZones.value(); track zone.country) {
@@ -196,51 +196,51 @@
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Currency</mat-label>
-                <input matInput formControlName="currency" readonly placeholder="Auto-filled">
+                <mat-label><ng-container i18n>Currency</ng-container></mat-label>
+                <input matInput formControlName="currency" readonly placeholder="Auto-filled" i18n-placeholder>
               </mat-form-field>
             </div>
 
             <!-- Contact Info -->
             <div class="border-t border-gray-200 pt-4 mt-2">
               <h3 class="text-sm font-medium text-gray-600 mb-3">
-                Contact Information (Optional)
+                <ng-container i18n>Contact Information (Optional)</ng-container>
               </h3>
 
               <div formGroupName="contactInfo" class="flex flex-col gap-3">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Business Email</mat-label>
+                    <mat-label><ng-container i18n>Business Email</ng-container></mat-label>
                     <input matInput formControlName="email" type="email"
-                           placeholder="contact@business.com">
+                           placeholder="contact@business.com" i18n-placeholder>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Business Phone</mat-label>
-                    <input matInput formControlName="phone" placeholder="Business phone">
+                    <mat-label><ng-container i18n>Business Phone</ng-container></mat-label>
+                    <input matInput formControlName="phone" placeholder="Business phone" i18n-placeholder>
                   </mat-form-field>
                 </div>
 
                 <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Address</mat-label>
-                  <input matInput formControlName="address" placeholder="Street address">
+                  <mat-label><ng-container i18n>Address</ng-container></mat-label>
+                  <input matInput formControlName="address" placeholder="Street address" i18n-placeholder>
                 </mat-form-field>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>City</mat-label>
-                    <input matInput formControlName="city" placeholder="City">
+                    <mat-label><ng-container i18n>City</ng-container></mat-label>
+                    <input matInput formControlName="city" placeholder="City" i18n-placeholder>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>State</mat-label>
+                    <mat-label><ng-container i18n>State</ng-container></mat-label>
                     <mat-select formControlName="state">
                       @for (state of states(); track state.name) {
                         <mat-option [value]="state.name">{{ state.name }}</mat-option>
                       }
                     </mat-select>
                     @if (!states()?.length) {
-                      <mat-hint>Select a country first</mat-hint>
+                      <mat-hint><ng-container i18n>Select a country first</ng-container></mat-hint>
                     }
                   </mat-form-field>
                 </div>
@@ -250,13 +250,13 @@
             <div class="flex flex-col sm:flex-row gap-3 mt-4">
               <button mat-stroked-button type="button" matStepperPrevious class="sm:order-1">
                 <mat-icon>arrow_back</mat-icon>
-                Back
+                <ng-container i18n>Back</ng-container>
               </button>
               <button mat-flat-button color="primary" type="button"
                       [disabled]="!storeForm.valid"
                       (click)="proceedToModules()"
                       class="flex-1 sm:order-2">
-                Continue
+                <ng-container i18n>Continue</ng-container>
                 <mat-icon iconPositionEnd>arrow_forward</mat-icon>
               </button>
             </div>
@@ -265,14 +265,14 @@
 
         <!-- ─── Step 3: Modules ───────────────────────────────────────── -->
         <mat-step [editable]="true">
-          <ng-template matStepLabel>Modules</ng-template>
+          <ng-template matStepLabel><ng-container i18n>Modules</ng-container></ng-template>
 
           <div class="flex flex-col gap-6 mt-6">
             <div>
-              <h2 class="text-lg font-semibold text-gray-800">Choose Your Modules</h2>
+              <h2 class="text-lg font-semibold text-gray-800"><ng-container i18n>Choose Your Modules</ng-container></h2>
               <p class="text-sm text-gray-500 mt-1">
-                Select the modules your business needs.
-                All modules share one 30-day free trial.
+                <ng-container i18n>Select the modules your business needs.
+                All modules share one 30-day free trial.</ng-container>
               </p>
             </div>
 
@@ -283,17 +283,17 @@
                         ? 'px-4 py-2 rounded-md text-sm font-medium bg-white shadow text-blue-600 transition-all'
                         : 'px-4 py-2 rounded-md text-sm font-medium text-gray-500 transition-all'"
                       (click)="setBillingCycle('MONTHLY')">
-                Monthly
+                <ng-container i18n>Monthly</ng-container>
               </button>
               <button type="button"
                       [class]="billingCycle() === 'YEARLY'
                         ? 'px-4 py-2 rounded-md text-sm font-medium bg-white shadow text-blue-600 transition-all'
                         : 'px-4 py-2 rounded-md text-sm font-medium text-gray-500 transition-all'"
                       (click)="setBillingCycle('YEARLY')">
-                Yearly
+                <ng-container i18n>Yearly</ng-container>
                 @if (yearlySaving() > 0 && selectedModules().length > 0) {
                   <span class="ml-1 text-xs font-semibold text-green-600 bg-green-100 px-1.5 py-0.5 rounded">
-                    Save ${{ yearlySaving() }}
+                    <ng-container i18n>Save ${{ yearlySaving() }}</ng-container>
                   </span>
                 }
               </button>
@@ -335,7 +335,7 @@
                             </span>
                             @if (isRecommendedCard(mod)) {
                               <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
-                                Recommended with PMS
+                                <ng-container i18n>Recommended with PMS</ng-container>
                               </span>
                             }
                           </div>
@@ -357,7 +357,7 @@
                     <div class="mt-auto flex items-end justify-between gap-3 border-t border-gray-200 pt-3">
                       <div>
                         <p class="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-                          {{ billingCycle() === 'MONTHLY' ? 'Monthly plan' : 'Yearly plan' }}
+                          @if (billingCycle() === 'MONTHLY') {<ng-container i18n>Monthly plan</ng-container>} @else {<ng-container i18n>Yearly plan</ng-container>}
                         </p>
                         <p [class]="isModuleCardSelected(mod)
                                     ? 'text-lg font-bold text-blue-700'
@@ -371,7 +371,7 @@
                       </div>
 
                       <p class="text-xs font-medium text-gray-500">
-                        {{ billingCycle() === 'MONTHLY' ? 'per month' : 'per year' }}
+                        @if (billingCycle() === 'MONTHLY') {<ng-container i18n>per month</ng-container>} @else {<ng-container i18n>per year</ng-container>}
                       </p>
                     </div>
                   </div>
@@ -384,9 +384,9 @@
                 <div class="flex items-start gap-3">
                   <mat-icon class="text-amber-600" fontSet="material-icons-outlined">lightbulb</mat-icon>
                   <div>
-                    <p class="text-sm font-semibold text-amber-900">POS / ERP is available after PMS</p>
+                    <p class="text-sm font-semibold text-amber-900"><ng-container i18n>POS / ERP is available after PMS</ng-container></p>
                     <p class="mt-1 text-xs leading-relaxed text-amber-700">
-                      Select PMS first to unlock the recommended POS / ERP bundle during account creation.
+                      <ng-container i18n>Select PMS first to unlock the recommended POS / ERP bundle during account creation.</ng-container>
                     </p>
                   </div>
                 </div>
@@ -402,7 +402,7 @@
                       {{ selectedModuleCountLabel() }}
                     </p>
                     <p class="text-xs text-blue-600 mt-0.5">
-                      30-day free trial, then billed {{ billingCycle() === 'MONTHLY' ? 'monthly' : 'yearly' }}
+                      <ng-container i18n>30-day free trial, then billed {{ billingCycle() === 'MONTHLY' ? 'monthly' : 'yearly' }}</ng-container>
                     </p>
                   </div>
                   <div class="text-right">
@@ -410,7 +410,7 @@
                       ${{ displayTotal() }}
                     </p>
                     <p class="text-xs text-blue-500">
-                      {{ billingCycle() === 'MONTHLY' ? 'per month' : 'per year' }}
+                      @if (billingCycle() === 'MONTHLY') {<ng-container i18n>per month</ng-container>} @else {<ng-container i18n>per year</ng-container>}
                     </p>
                   </div>
                 </div>
@@ -421,7 +421,7 @@
                       savings
                     </mat-icon>
                     <p class="text-xs font-medium text-green-700">
-                      You save ${{ yearlySaving() }} compared to monthly billing
+                      <ng-container i18n>You save ${{ yearlySaving() }} compared to monthly billing</ng-container>
                     </p>
                   </div>
                 }
@@ -430,7 +430,7 @@
               <div class="rounded-xl border border-dashed border-gray-300 p-4 text-center">
                 <mat-icon class="text-gray-300 text-3xl mb-1"
                           fontSet="material-icons-outlined">widgets</mat-icon>
-                <p class="text-sm text-gray-400">Select at least one module above</p>
+                <p class="text-sm text-gray-400"><ng-container i18n>Select at least one module above</ng-container></p>
               </div>
             }
 
@@ -438,14 +438,14 @@
             <div class="flex flex-col sm:flex-row gap-3">
               <button mat-stroked-button type="button" matStepperPrevious class="sm:order-1">
                 <mat-icon>arrow_back</mat-icon>
-                Back
+                <ng-container i18n>Back</ng-container>
               </button>
               <button matButton="filled" color="primary" type="button"
                       [disabled]="selectedModules().length === 0 || loading()"
                       (click)="onSubmit()"
                       class="flex-1 sm:order-2">
                       <mat-icon>rocket_launch</mat-icon>
-                {{loading() ? 'Creating Account...' : 'Start Free Trial'}}
+                @if (loading()) {<ng-container i18n>Creating Account...</ng-container>} @else {<ng-container i18n>Start Free Trial</ng-container>}
                   
               </button>
             </div>
@@ -456,8 +456,8 @@
 
       <!-- Sign in link -->
       <div class="text-center mt-8 pt-6 border-t border-gray-200">
-        <span class="text-sm text-gray-600">Already have an account?</span>
-        <a matButton routerLink="/auth/login" class="text-sm font-medium ml-1">Sign in</a>
+        <span class="text-sm text-gray-600"><ng-container i18n>Already have an account?</ng-container></span>
+        <a matButton routerLink="/auth/login" class="text-sm font-medium ml-1"><ng-container i18n>Sign in</ng-container></a>
       </div>
     </div>
   </div>
@@ -474,10 +474,10 @@
       <!-- Main Headline -->
       <div class="mb-10">
         <h2 class="text-3xl xl:text-4xl font-bold leading-tight mb-4">
-          Manage your business with ease.
+          <ng-container i18n>Manage your business with ease.</ng-container>
         </h2>
         <p class="text-blue-200 text-lg">
-          Access your dashboard to monitor sales, manage inventory, and grow your business.
+          <ng-container i18n>Access your dashboard to monitor sales, manage inventory, and grow your business.</ng-container>
         </p>
       </div>
 
@@ -485,33 +485,33 @@
       <div class="grid grid-cols-2 gap-6">
         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
           <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">trending_up</mat-icon>
-          <h4 class="font-semibold text-white mb-1">Real-time Analytics</h4>
-          <p class="text-blue-200 text-sm">Track your sales and performance in real-time</p>
+          <h4 class="font-semibold text-white mb-1"><ng-container i18n>Real-time Analytics</ng-container></h4>
+          <p class="text-blue-200 text-sm"><ng-container i18n>Track your sales and performance in real-time</ng-container></p>
         </div>
         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
           <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">inventory_2</mat-icon>
-          <h4 class="font-semibold text-white mb-1">Inventory Control</h4>
-          <p class="text-blue-200 text-sm">Manage stock levels effortlessly</p>
+          <h4 class="font-semibold text-white mb-1"><ng-container i18n>Inventory Control</ng-container></h4>
+          <p class="text-blue-200 text-sm"><ng-container i18n>Manage stock levels effortlessly</ng-container></p>
         </div>
         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
           <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">hotel</mat-icon>
-          <h4 class="font-semibold text-white mb-1">Hotel Management</h4>
-          <p class="text-blue-200 text-sm">Complete property management system</p>
+          <h4 class="font-semibold text-white mb-1"><ng-container i18n>Hotel Management</ng-container></h4>
+          <p class="text-blue-200 text-sm"><ng-container i18n>Complete property management system</ng-container></p>
         </div>
         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
           <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">apartment</mat-icon>
-          <h4 class="font-semibold text-white mb-1">Estate Management</h4>
-          <p class="text-blue-200 text-sm">Manage properties, tenants, and leases</p>
+          <h4 class="font-semibold text-white mb-1"><ng-container i18n>Estate Management</ng-container></h4>
+          <p class="text-blue-200 text-sm"><ng-container i18n>Manage properties, tenants, and leases</ng-container></p>
         </div>
         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
           <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">people</mat-icon>
-          <h4 class="font-semibold text-white mb-1">Staff Management</h4>
-          <p class="text-blue-200 text-sm">Organize your team with ease</p>
+          <h4 class="font-semibold text-white mb-1"><ng-container i18n>Staff Management</ng-container></h4>
+          <p class="text-blue-200 text-sm"><ng-container i18n>Organize your team with ease</ng-container></p>
         </div>
         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
           <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">point_of_sale</mat-icon>
-          <h4 class="font-semibold text-white mb-1">POS + ERP</h4>
-          <p class="text-blue-200 text-sm">Complete point of sale and resource planning</p>
+          <h4 class="font-semibold text-white mb-1"><ng-container i18n>POS + ERP</ng-container></h4>
+          <p class="text-blue-200 text-sm"><ng-container i18n>Complete point of sale and resource planning</ng-container></p>
         </div>
       </div>
 
@@ -519,13 +519,13 @@
       <div class="pt-8 border-t border-white/20">
         <div class="flex items-center gap-4">
           <div class="flex -space-x-2">
-            <div class="w-10 h-10 rounded-full bg-blue-400 border-2 border-white flex items-center justify-center text-sm font-medium">JD</div>
-            <div class="w-10 h-10 rounded-full bg-indigo-400 border-2 border-white flex items-center justify-center text-sm font-medium">KL</div>
-            <div class="w-10 h-10 rounded-full bg-purple-400 border-2 border-white flex items-center justify-center text-sm font-medium">MN</div>
+            <div class="w-10 h-10 rounded-full bg-blue-400 border-2 border-white flex items-center justify-center text-sm font-medium"><ng-container i18n>JD</ng-container></div>
+            <div class="w-10 h-10 rounded-full bg-indigo-400 border-2 border-white flex items-center justify-center text-sm font-medium"><ng-container i18n>KL</ng-container></div>
+            <div class="w-10 h-10 rounded-full bg-purple-400 border-2 border-white flex items-center justify-center text-sm font-medium"><ng-container i18n>MN</ng-container></div>
           </div>
           <div>
-            <p class="text-white font-medium">Trusted by 1,000+ businesses</p>
-            <p class="text-blue-200 text-sm">Join our growing community</p>
+            <p class="text-white font-medium"><ng-container i18n>Trusted by 1,000+ businesses</ng-container></p>
+            <p class="text-blue-200 text-sm"><ng-container i18n>Join our growing community</ng-container></p>
           </div>
         </div>
       </div>

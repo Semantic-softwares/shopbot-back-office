@@ -88,23 +88,23 @@ export class EmployeeDialogComponent {
             }
             this.snackBar.open(
               message,
-              'Close',
+              $localize`Close`,
               { duration: 3000 }
             );
             this.isSubmitting.set(false);
             return;
           }
           this.snackBar.open(
-            `Employee ${this.isEdit ? 'updated' : 'created'} successfully`,
-            'Close',
+            $localize`Employee ${this.isEdit ? 'updated' : 'created'} successfully`,
+            $localize`Close`,
             { duration: 3000 }
           );
           this.dialogRef.close(true);
         },
         error: (err) => {
           this.snackBar.open(
-            `Error ${this.isEdit ? 'updating' : 'creating'} employee`,
-            'Close',
+            $localize`Error ${this.isEdit ? 'updating' : 'creating'} employee`,
+            $localize`Close`,
             { duration: 3000 }
           );
           this.isSubmitting.set(false);

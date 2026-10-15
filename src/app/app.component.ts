@@ -11,6 +11,7 @@ import { IncomingTableOrderAlertComponent } from './shared/components/incoming-t
 import { SocketService } from './shared/services/socket.service';
 import { SessionStorageService } from './shared/services/session-storage.service';
 import { StoreStore } from './shared/stores/store.store';
+import { ThemeService } from './shared/services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -27,6 +28,8 @@ export class AppComponent implements OnInit {
   private socketService = inject(SocketService);
   private sessionStorage = inject(SessionStorageService);
   private storeStore = inject(StoreStore);
+  // Injected for its side effect: applies the saved light/dark choice app-wide.
+  private readonly theme = inject(ThemeService);
 
   constructor() {
     // Connect from here — the only component mounted on EVERY route — rather

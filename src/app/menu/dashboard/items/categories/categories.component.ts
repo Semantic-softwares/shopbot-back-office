@@ -163,10 +163,10 @@ export class CategoriesComponent {
     if (updateRequests.length > 0) {
       forkJoin(updateRequests).subscribe({
         next: () => {
-          this.snackBar.open('Categories sorted successfully', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Categories sorted successfully`, $localize`Close`, { duration: 3000 });
         },
         error: () => {
-          this.snackBar.open('Failed to sort categories', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Failed to sort categories`, $localize`Close`, { duration: 3000 });
           // Reload to reset
           this.categories.reload();
         }

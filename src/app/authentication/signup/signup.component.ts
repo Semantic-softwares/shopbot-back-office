@@ -79,9 +79,9 @@ export class SignupComponent {
   private readonly moduleCards: ModuleCardDef[] = [
     {
       id: 'PMS',
-      label: 'Property Management',
+      label: $localize`Property Management`,
       shortLabel: 'PMS',
-      description: 'Hotel reservations, room management, housekeeping, guest tracking',
+      description: $localize`Hotel reservations, room management, housekeeping, guest tracking`,
       icon: 'hotel',
       includedModules: ['PMS'],
       monthly: 100,
@@ -89,9 +89,9 @@ export class SignupComponent {
     },
     {
       id: 'EMS',
-      label: 'Estate Management',
+      label: $localize`Estate Management`,
       shortLabel: 'EMS',
-      description: 'Lease management, tenants, property invoicing, unit tracking',
+      description: $localize`Lease management, tenants, property invoicing, unit tracking`,
       icon: 'apartment',
       includedModules: ['EMS'],
       monthly: 100,
@@ -99,9 +99,9 @@ export class SignupComponent {
     },
     {
       id: 'POS_ERP',
-      label: 'POS + ERP Bundle',
+      label: $localize`POS + ERP Bundle`,
       shortLabel: 'POS / ERP',
-      description: 'Add point of sale, stock management, suppliers, receipts, and inventory workflows to your PMS setup.',
+      description: $localize`Add point of sale, stock management, suppliers, receipts, and inventory workflows to your PMS setup.`,
       icon: 'inventory_2',
       includedModules: ['POS', 'ERP'],
       monthly: 0,
@@ -191,9 +191,9 @@ export class SignupComponent {
   // ── Static data ───────────────────────────────────────────────────────────
 
   readonly storeTypes = [
-    { value: 'restaurant', label: 'Restaurant' },
-    { value: 'hotel', label: 'Hotel' },
-    { value: 'real_estate', label: 'Real Estate' },
+    { value: 'restaurant', label: $localize`Restaurant` },
+    { value: 'hotel', label: $localize`Hotel` },
+    { value: 'real_estate', label: $localize`Real Estate` },
   ];
 
   readonly deliveryZones = rxResource({
@@ -276,7 +276,7 @@ export class SignupComponent {
       return false;
     }
     if (this.merchantForm.value.password !== this.merchantForm.value.confirmPassword) {
-      this.snackBar.open('Passwords do not match', 'Close', {
+      this.snackBar.open($localize`Passwords do not match`, $localize`Close`, {
         duration: 3000,
         horizontalPosition: 'end',
         verticalPosition: 'top',
@@ -297,7 +297,7 @@ export class SignupComponent {
       .validateEmailAndPhoneNumber({ email, phoneNumber })
       .pipe(
         catchError(() => {
-          this.snackBar.open('Error validating information. Please try again.', 'Close', {
+          this.snackBar.open($localize`Error validating information. Please try again.`, $localize`Close`, {
             duration: 3000,
             horizontalPosition: 'end',
             verticalPosition: 'top',
@@ -315,7 +315,7 @@ export class SignupComponent {
         if (!result.phoneNumber) errors.push('Phone number is already registered');
 
         if (errors.length > 0) {
-          this.snackBar.open(errors.join('. '), 'Close', {
+          this.snackBar.open(errors.join('. '), $localize`Close`, {
             duration: 5000,
             horizontalPosition: 'end',
             verticalPosition: 'top',
@@ -340,7 +340,7 @@ export class SignupComponent {
     if (!this.merchantForm.valid || !this.storeForm.valid) return;
 
     if (this.selectedModules().length === 0) {
-      this.snackBar.open('Please select at least one module to continue', 'Close', {
+      this.snackBar.open($localize`Please select at least one module to continue`, $localize`Close`, {
         duration: 4000,
         horizontalPosition: 'end',
         verticalPosition: 'top',
@@ -389,7 +389,7 @@ export class SignupComponent {
         catchError((error) => {
           this.snackBar.open(
             error.error?.message || error.message || 'Signup failed. Please try again.',
-            'Close',
+            $localize`Close`,
             {
               duration: 5000,
               horizontalPosition: 'end',
@@ -405,7 +405,7 @@ export class SignupComponent {
         if (store) {
           this.snackBar.open(
             'Account created successfully! Your store number is: ' + store.storeNumber,
-            'Close',
+            $localize`Close`,
             { duration: 10000, horizontalPosition: 'center', verticalPosition: 'top' },
           );
           setTimeout(() => this.router.navigate(['/auth/login']), 2000);

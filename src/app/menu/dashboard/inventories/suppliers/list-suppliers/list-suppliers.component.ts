@@ -116,7 +116,7 @@ export class ListSuppliersComponent implements OnInit {
           this.dataSource.data = [...data];
         }
         
-        this.snackBar.open('Supplier status updated successfully', 'Close', {
+        this.snackBar.open($localize`Supplier status updated successfully`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -124,7 +124,7 @@ export class ListSuppliersComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error toggling supplier status:', error);
-        this.snackBar.open('Failed to update supplier status', 'Close', {
+        this.snackBar.open($localize`Failed to update supplier status`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -149,7 +149,7 @@ export class ListSuppliersComponent implements OnInit {
         this.suppliersService.deleteSupplier(supplier._id, storeId).subscribe({
           next: () => {
             this.suppliers.reload();
-            this.snackBar.open('Supplier deleted successfully', 'Close', {
+            this.snackBar.open($localize`Supplier deleted successfully`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -157,7 +157,7 @@ export class ListSuppliersComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error deleting supplier:', error);
-            this.snackBar.open('Failed to delete supplier', 'Close', {
+            this.snackBar.open($localize`Failed to delete supplier`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'

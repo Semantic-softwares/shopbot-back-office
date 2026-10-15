@@ -91,8 +91,8 @@ export class CreatePermissionComponent  {
           next: () => this.dialogRef.close(true),
           error: (error) => {
             this.snackBar.open(
-              `Failed to ${this.data.mode} permission`, 
-              'Close', 
+              $localize`Failed to ${this.data.mode} permission`, 
+              $localize`Close`, 
               { duration: 3000, panelClass: ['error-snackbar'] }
             );
           }

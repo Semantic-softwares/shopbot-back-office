@@ -29,6 +29,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin } from 'rxjs';
 import { ImportProductsDialogComponent } from './import-products-dialog/import-products-dialog.component';
+import { TrPipe } from '../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-products',
@@ -36,7 +37,7 @@ import { ImportProductsDialogComponent } from './import-products-dialog/import-p
   styleUrls: ['./products.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatTableModule,
     MatPaginatorModule,
@@ -204,7 +205,7 @@ export class ProductsComponent {
     const updatedProduct = { active: !product.active };
     this.productService.saveProduct(updatedProduct, product._id).subscribe({
       next: () => {
-        this.snackBar.open('Product status updated successfully', 'Close', {
+        this.snackBar.open($localize`Product status updated successfully`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -212,7 +213,7 @@ export class ProductsComponent {
         // this.dataSource.reload();
       },
       error: () => {
-        this.snackBar.open('Error updating product status', 'Close', {
+        this.snackBar.open($localize`Error updating product status`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'
@@ -280,7 +281,7 @@ export class ProductsComponent {
         this.bulkUpdating.set(true);
         forkJoin(ids.map((id) => this.productService.deleteProduct(id))).subscribe({
           next: () => {
-            this.snackBar.open(`${ids.length} product(s) deleted`, 'Close', {
+            this.snackBar.open($localize`${ids.length} product(s) deleted`, $localize`Close`, {
               duration: 3000, horizontalPosition: 'end', verticalPosition: 'top',
             });
             this.clearSelection();
@@ -288,7 +289,7 @@ export class ProductsComponent {
             this.bulkUpdating.set(false);
           },
           error: () => {
-            this.snackBar.open('Some products could not be deleted. Please try again.', 'Close', {
+            this.snackBar.open($localize`Some products could not be deleted. Please try again.`, $localize`Close`, {
               duration: 3000, horizontalPosition: 'end', verticalPosition: 'top',
             });
             this.dataSource.reload();
@@ -310,8 +311,8 @@ export class ProductsComponent {
     forkJoin(updates).subscribe({
       next: () => {
         this.snackBar.open(
-          `Station updated for ${ids.length} product(s)`,
-          'Close',
+          $localize`Station updated for ${ids.length} product(s)`,
+          $localize`Close`,
           { duration: 3000, horizontalPosition: 'end', verticalPosition: 'top' }
         );
         this.clearSelection();
@@ -320,8 +321,8 @@ export class ProductsComponent {
       },
       error: () => {
         this.snackBar.open(
-          'Error updating stations. Please try again.',
-          'Close',
+          $localize`Error updating stations. Please try again.`,
+          $localize`Close`,
           { duration: 3000, horizontalPosition: 'end', verticalPosition: 'top' }
         );
         this.bulkUpdating.set(false);
@@ -341,8 +342,8 @@ export class ProductsComponent {
     forkJoin(updates).subscribe({
       next: () => {
         this.snackBar.open(
-          `Station removed from ${ids.length} product(s)`,
-          'Close',
+          $localize`Station removed from ${ids.length} product(s)`,
+          $localize`Close`,
           { duration: 3000, horizontalPosition: 'end', verticalPosition: 'top' }
         );
         this.clearSelection();
@@ -351,8 +352,8 @@ export class ProductsComponent {
       },
       error: () => {
         this.snackBar.open(
-          'Error removing stations. Please try again.',
-          'Close',
+          $localize`Error removing stations. Please try again.`,
+          $localize`Close`,
           { duration: 3000, horizontalPosition: 'end', verticalPosition: 'top' }
         );
         this.bulkUpdating.set(false);

@@ -18,6 +18,7 @@ import { GuestSearchComponent } from '../guest-search/guest-search.component';
 import { GuestService } from '../../services/guest.service';
 import { RoomsService } from '../../services/rooms.service';
 import { StoreStore } from '../../stores/store.store';
+import { TrPipe } from '../../i18n/tr.pipe';
 
 export interface GuestSelectionDialogData {
   selectedGuest: Guest | null;
@@ -36,7 +37,7 @@ export interface OccupiedRoom extends Omit<Room, 'currentGuest' | 'currentReserv
 @Component({
   selector: 'app-guest-selection-dialog',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatDialogModule,
     MatButtonModule,

@@ -9,23 +9,23 @@
 
     <div class="bg-white rounded-lg shadow-sm">
         <div class="p-6 flex justify-between items-center border-b">
-            <h2 class="text-lg font-medium">Sales by Category</h2>
+            <h2 class="text-lg font-medium"><ng-container i18n>Sales by Category</ng-container></h2>
             <button mat-flat-button color="primary" [matMenuTriggerFor]="exportMenu">
                 <mat-icon class="mr-2">file_download</mat-icon>
-                Export Data
+                <ng-container i18n>Export Data</ng-container>
             </button>
             <mat-menu #exportMenu="matMenu">
                 <button mat-menu-item (click)="exportData('pdf')">
                     <mat-icon>picture_as_pdf</mat-icon>
-                    <span>Export as PDF</span>
+                    <span><ng-container i18n>Export as PDF</ng-container></span>
                 </button>
                 <button mat-menu-item (click)="exportData('csv')">
                     <mat-icon>description</mat-icon>
-                    <span>Export as CSV</span>
+                    <span><ng-container i18n>Export as CSV</ng-container></span>
                 </button>
                 <button mat-menu-item (click)="exportData('excel')">
                     <mat-icon>table_chart</mat-icon>
-                    <span>Export as Excel</span>
+                    <span><ng-container i18n>Export as Excel</ng-container></span>
                 </button>
             </mat-menu>
         </div>
@@ -33,27 +33,27 @@
         <div class="p-6">
             <mat-table [dataSource]="dataSource.value()!" class="w-full !bg-white">
                 <ng-container matColumnDef="category">
-                    <mat-header-cell *matHeaderCellDef>Category</mat-header-cell>
+                    <mat-header-cell *matHeaderCellDef><ng-container i18n>Category</ng-container></mat-header-cell>
                     <mat-cell *matCellDef="let element">{{element.category}}</mat-cell>
                 </ng-container>
 
                 <ng-container matColumnDef="itemsSold">
-                    <mat-header-cell *matHeaderCellDef>Items Sold</mat-header-cell>
+                    <mat-header-cell *matHeaderCellDef><ng-container i18n>Items Sold</ng-container></mat-header-cell>
                     <mat-cell *matCellDef="let element">{{element.itemsSold  }}</mat-cell>
                 </ng-container>
 
                 <ng-container matColumnDef="netSales">
-                    <mat-header-cell *matHeaderCellDef>Net Sales</mat-header-cell>
+                    <mat-header-cell *matHeaderCellDef><ng-container i18n>Net Sales</ng-container></mat-header-cell>
                     <mat-cell *matCellDef="let element">{{element.netSales | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
                 </ng-container>
 
                 <ng-container matColumnDef="costOfGoods">
-                    <mat-header-cell *matHeaderCellDef>Cost of Goods</mat-header-cell>
+                    <mat-header-cell *matHeaderCellDef><ng-container i18n>Cost of Goods</ng-container></mat-header-cell>
                     <mat-cell *matCellDef="let element">{{element.costOfGoods | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
                 </ng-container>
 
                 <ng-container matColumnDef="grossProfit">
-                    <mat-header-cell *matHeaderCellDef>Gross Profit</mat-header-cell>
+                    <mat-header-cell *matHeaderCellDef><ng-container i18n>Gross Profit</ng-container></mat-header-cell>
                     <mat-cell *matCellDef="let element">{{element.grossProfit | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
                 </ng-container>
 
@@ -62,7 +62,7 @@
             </mat-table>
 
             <mat-paginator class="!bg-white" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
-                showFirstLastButtons aria-label="Select page">
+                showFirstLastButtons aria-label="Select page" i18n-aria-label>
             </mat-paginator>
         </div>
         } @else if (dataSource.isLoading()) {
@@ -70,8 +70,8 @@
           <mat-spinner diameter="40"></mat-spinner>
         </div>
         }  @else {
-        <app-no-record icon="inventory_2" title="No Category Found"
-            message="There are no category to display for the selected period.">
+        <app-no-record icon="inventory_2" title="No Category Found" i18n-title
+            message="There are no category to display for the selected period." i18n-message>
         </app-no-record>
         } 
     </div>

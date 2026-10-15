@@ -13,6 +13,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { RateInventoryService, RatePlan } from '../../../../../shared/services/rate-inventory.service';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 export interface RatePlanDialogData {
   storeId: string;
@@ -25,7 +26,7 @@ export interface RatePlanDialogData {
 @Component({
   selector: 'app-rate-plan-dialog',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
@@ -135,8 +136,8 @@ export class RatePlanDialogComponent implements OnInit {
       next: (result) => {
         this.saving.set(false);
         this.snackBar.open(
-          `Rate plan ${this.isEdit() ? 'updated' : 'created'} successfully`,
-          'Close',
+          $localize`Rate plan ${this.isEdit() ? 'updated' : 'created'} successfully`,
+          $localize`Close`,
           { duration: 3000 },
         );
         this.dialogRef.close(result);
@@ -144,8 +145,8 @@ export class RatePlanDialogComponent implements OnInit {
       error: (err) => {
         this.saving.set(false);
         this.snackBar.open(
-          `Failed to ${this.isEdit() ? 'update' : 'create'} rate plan: ${err?.error?.message || err.message}`,
-          'Close',
+          $localize`Failed to ${this.isEdit() ? 'update' : 'create'} rate plan: ${err?.error?.message || err.message}`,
+          $localize`Close`,
           { duration: 5000 },
         );
       },

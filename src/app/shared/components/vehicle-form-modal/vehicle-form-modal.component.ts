@@ -37,13 +37,13 @@ export class VehicleFormModalComponent {
   private data: VehicleFormDialogData = inject(MAT_DIALOG_DATA, { optional: true }) ?? {};
 
   readonly vehicleTypes: { value: VehicleType; label: string }[] = [
-    { value: VehicleType.CAR, label: 'Car' },
-    { value: VehicleType.SUV, label: 'SUV' },
-    { value: VehicleType.TRUCK, label: 'Truck' },
-    { value: VehicleType.VAN, label: 'Van' },
-    { value: VehicleType.MOTORCYCLE, label: 'Motorcycle' },
-    { value: VehicleType.BUS, label: 'Bus' },
-    { value: VehicleType.OTHER, label: 'Other' },
+    { value: VehicleType.CAR, label: $localize`Car` },
+    { value: VehicleType.SUV, label: $localize`SUV` },
+    { value: VehicleType.TRUCK, label: $localize`Truck` },
+    { value: VehicleType.VAN, label: $localize`Van` },
+    { value: VehicleType.MOTORCYCLE, label: $localize`Motorcycle` },
+    { value: VehicleType.BUS, label: $localize`Bus` },
+    { value: VehicleType.OTHER, label: $localize`Other` },
   ];
 
   readonly currentYear = new Date().getFullYear();

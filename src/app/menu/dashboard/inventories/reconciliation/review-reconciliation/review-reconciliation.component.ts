@@ -51,7 +51,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Review Reconciliation</h1>
+          <h1 class="text-3xl font-bold text-gray-900"><ng-container i18n>Review Reconciliation</ng-container></h1>
           @if (reconciliation()) {
             <p class="text-gray-600 mt-1">{{ reconciliation()!.name }}</p>
           }
@@ -59,11 +59,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
         <div class="flex space-x-4">
           <button mat-button [routerLink]="['../count']" class="text-gray-600">
             <mat-icon>arrow_back</mat-icon>
-            Back to Count
+            <ng-container i18n>Back to Count</ng-container>
           </button>
           <button mat-button [routerLink]="['../..']" class="text-gray-600">
             <mat-icon>list</mat-icon>
-            Back to List
+            <ng-container i18n>Back to List</ng-container>
           </button>
         </div>
       </div>
@@ -74,7 +74,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
           <mat-card class="p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600">Total Items</p>
+                <p class="text-sm text-gray-600"><ng-container i18n>Total Items</ng-container></p>
                 <p class="text-2xl font-bold text-blue-600">{{ reconciliation()!.totalProducts }}</p>
               </div>
               <mat-icon class="text-blue-500">inventory</mat-icon>
@@ -84,7 +84,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
           <mat-card class="p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600">Items Counted</p>
+                <p class="text-sm text-gray-600"><ng-container i18n>Items Counted</ng-container></p>
                 <p class="text-2xl font-bold text-green-600">{{ reconciliation()!.countedProducts }}</p>
               </div>
               <mat-icon class="text-green-500">check_circle</mat-icon>
@@ -94,7 +94,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
           <mat-card class="p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600">Discrepancies</p>
+                <p class="text-sm text-gray-600"><ng-container i18n>Discrepancies</ng-container></p>
                 <p class="text-2xl font-bold text-orange-600">{{ reconciliation()!.discrepancyCount }}</p>
               </div>
               <mat-icon class="text-orange-500">warning</mat-icon>
@@ -104,7 +104,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
           <mat-card class="p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600">Value Impact</p>
+                <p class="text-sm text-gray-600"><ng-container i18n>Value Impact</ng-container></p>
                 <p class="text-2xl font-bold" 
                    [class.text-red-600]="reconciliation()!.totalVarianceValue < 0"
                    [class.text-green-600]="reconciliation()!.totalVarianceValue > 0"
@@ -125,21 +125,21 @@ import { toSignal } from '@angular/core/rxjs-interop';
                 <mat-card>
                   <div class="p-4">
                     <div class="flex justify-between items-center mb-4">
-                      <h3 class="text-lg font-semibold">Items with Discrepancies</h3>
+                      <h3 class="text-lg font-semibold"><ng-container i18n>Items with Discrepancies</ng-container></h3>
                       <div class="space-x-2">
                         <button 
                           mat-button
                           (click)="selectAllDiscrepancies()"
                           [disabled]="allDiscrepanciesSelected()"
                         >
-                          Select All
+                          <ng-container i18n>Select All</ng-container>
                         </button>
                         <button 
                           mat-button
                           (click)="deselectAllDiscrepancies()"
                           [disabled]="!anyDiscrepanciesSelected()"
                         >
-                          Deselect All
+                          <ng-container i18n>Deselect All</ng-container>
                         </button>
                         <button 
                           mat-raised-button
@@ -150,7 +150,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
                           @if (isProcessing()) {
                             <mat-icon>refresh</mat-icon>
                           }
-                          Approve Selected ({{ selectedDiscrepancyItems().length }})
+                          <ng-container i18n>Approve Selected ({{ selectedDiscrepancyItems().length }})</ng-container>
                         </button>
                       </div>
                     </div>
@@ -177,12 +177,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
                         <!-- Product Name Column -->
                         <ng-container matColumnDef="product">
-                          <th mat-header-cell *matHeaderCellDef class="font-semibold">Product</th>
+                          <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Product</ng-container></th>
                           <td mat-cell *matCellDef="let item" class="py-4">
                             <div>
                               <div class="font-medium">{{ item.productName }}</div>
                               @if (item.productSku) {
-                                <div class="text-sm text-gray-500">SKU: {{ item.productSku }}</div>
+                                <div class="text-sm text-gray-500"><ng-container i18n>SKU: {{ item.productSku }}</ng-container></div>
                               }
                             </div>
                           </td>
@@ -190,15 +190,15 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
                         <!-- Quantities Column -->
                         <ng-container matColumnDef="quantities">
-                          <th mat-header-cell *matHeaderCellDef class="font-semibold">System / Physical</th>
+                          <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>System / Physical</ng-container></th>
                           <td mat-cell *matCellDef="let item" class="py-4">
                             <div class="flex items-center space-x-2">
                               <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
-                                System: {{ item.systemQuantity }}
+                                <ng-container i18n>System: {{ item.systemQuantity }}</ng-container>
                               </span>
                               <mat-icon class="text-gray-400">arrow_forward</mat-icon>
                               <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
-                                Physical: {{ item.physicalQuantity }}
+                                <ng-container i18n>Physical: {{ item.physicalQuantity }}</ng-container>
                               </span>
                             </div>
                           </td>
@@ -206,7 +206,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
                         <!-- Variance Column -->
                         <ng-container matColumnDef="variance">
-                          <th mat-header-cell *matHeaderCellDef class="font-semibold">Variance</th>
+                          <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Variance</ng-container></th>
                           <td mat-cell *matCellDef="let item" class="py-4">
                             <div class="text-center">
                               <div 
@@ -229,14 +229,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
                         <!-- Reason Column -->
                         <ng-container matColumnDef="reason">
-                          <th mat-header-cell *matHeaderCellDef class="font-semibold">Reason</th>
+                          <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Reason</ng-container></th>
                           <td mat-cell *matCellDef="let item" class="py-4">
                             @if (item.reason) {
                               <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm">
                                 {{ getReasonDisplay(item.reason) }}
                               </span>
                             } @else {
-                              <span class="text-gray-400 text-sm">No reason specified</span>
+                              <span class="text-gray-400 text-sm"><ng-container i18n>No reason specified</ng-container></span>
                             }
                             @if (item.reasonNote) {
                               <div class="text-xs text-gray-500 mt-1">{{ item.reasonNote }}</div>
@@ -246,7 +246,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
                         <!-- Status Column -->
                         <ng-container matColumnDef="status">
-                          <th mat-header-cell *matHeaderCellDef class="font-semibold">Status</th>
+                          <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Status</ng-container></th>
                           <td mat-cell *matCellDef="let item" class="py-4">
                             <span [class]="getStatusClass(item.status)" class="px-2 py-1 rounded-full text-xs font-medium">
                               {{ item.status | titlecase }}
@@ -263,8 +263,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
               } @else {
                 <div class="text-center py-12">
                   <mat-icon class="text-green-500 text-6xl mb-4">check_circle</mat-icon>
-                  <h3 class="text-lg font-medium text-gray-900 mb-2">No Discrepancies Found</h3>
-                  <p class="text-gray-500">All counted items match the system quantities</p>
+                  <h3 class="text-lg font-medium text-gray-900 mb-2"><ng-container i18n>No Discrepancies Found</ng-container></h3>
+                  <p class="text-gray-500"><ng-container i18n>All counted items match the system quantities</ng-container></p>
                 </div>
               }
             </div>
@@ -275,14 +275,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
               <mat-card>
                 <div class="p-4">
                   <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold">All Items</h3>
+                    <h3 class="text-lg font-semibold"><ng-container i18n>All Items</ng-container></h3>
                     <mat-form-field appearance="outline" class="w-64">
-                      <mat-label>Filter by status</mat-label>
+                      <mat-label><ng-container i18n>Filter by status</ng-container></mat-label>
                       <mat-select [(ngModel)]="statusFilter">
-                        <mat-option value="">All</mat-option>
-                        <mat-option value="pending">Pending</mat-option>
-                        <mat-option value="counted">Counted</mat-option>
-                        <mat-option value="approved">Approved</mat-option>
+                        <mat-option value=""><ng-container i18n>All</ng-container></mat-option>
+                        <mat-option value="pending"><ng-container i18n>Pending</ng-container></mat-option>
+                        <mat-option value="counted"><ng-container i18n>Counted</ng-container></mat-option>
+                        <mat-option value="approved"><ng-container i18n>Approved</ng-container></mat-option>
                       </mat-select>
                     </mat-form-field>
                   </div>
@@ -292,12 +292,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
                       
                       <!-- Product Name Column -->
                       <ng-container matColumnDef="product">
-                        <th mat-header-cell *matHeaderCellDef class="font-semibold">Product</th>
+                        <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Product</ng-container></th>
                         <td mat-cell *matCellDef="let item" class="py-4">
                           <div>
                             <div class="font-medium">{{ item.productName }}</div>
                             @if (item.productSku) {
-                              <div class="text-sm text-gray-500">SKU: {{ item.productSku }}</div>
+                              <div class="text-sm text-gray-500"><ng-container i18n>SKU: {{ item.productSku }}</ng-container></div>
                             }
                           </div>
                         </td>
@@ -305,7 +305,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
                       <!-- System Quantity Column -->
                       <ng-container matColumnDef="systemQuantity">
-                        <th mat-header-cell *matHeaderCellDef class="font-semibold">System Qty</th>
+                        <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>System Qty</ng-container></th>
                         <td mat-cell *matCellDef="let item" class="py-4">
                           <span class="font-medium">{{ item.systemQuantity }}</span>
                         </td>
@@ -313,19 +313,19 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
                       <!-- Physical Quantity Column -->
                       <ng-container matColumnDef="physicalQuantity">
-                        <th mat-header-cell *matHeaderCellDef class="font-semibold">Physical Qty</th>
+                        <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Physical Qty</ng-container></th>
                         <td mat-cell *matCellDef="let item" class="py-4">
                           @if (item.physicalQuantity !== undefined) {
                             <span class="font-medium">{{ item.physicalQuantity }}</span>
                           } @else {
-                            <span class="text-gray-400">Not counted</span>
+                            <span class="text-gray-400"><ng-container i18n>Not counted</ng-container></span>
                           }
                         </td>
                       </ng-container>
 
                       <!-- Variance Column -->
                       <ng-container matColumnDef="variance">
-                        <th mat-header-cell *matHeaderCellDef class="font-semibold">Variance</th>
+                        <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Variance</ng-container></th>
                         <td mat-cell *matCellDef="let item" class="py-4">
                           <span 
                             [class.text-red-600]="item.variance < 0"
@@ -340,7 +340,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
                       <!-- Status Column -->
                       <ng-container matColumnDef="status">
-                        <th mat-header-cell *matHeaderCellDef class="font-semibold">Status</th>
+                        <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Status</ng-container></th>
                         <td mat-cell *matCellDef="let item" class="py-4">
                           <span [class]="getStatusClass(item.status)" class="px-2 py-1 rounded-full text-xs font-medium">
                             {{ item.status | titlecase }}
@@ -362,9 +362,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
         <div class="flex justify-between items-center">
           <div class="text-sm text-gray-600">
             @if (reconciliation()!.discrepancyCount > 0) {
-              {{ selectedDiscrepancyItems().length }} of {{ discrepancyItems().length }} discrepancies selected for approval
+              <ng-container i18n>{{ selectedDiscrepancyItems().length }} of {{ discrepancyItems().length }} discrepancies selected for approval</ng-container>
             } @else {
-              No discrepancies to approve
+              <ng-container i18n>No discrepancies to approve</ng-container>
             }
           </div>
           
@@ -375,7 +375,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
               [routerLink]="['../count']"
             >
               <mat-icon>edit</mat-icon>
-              Continue Counting
+              <ng-container i18n>Continue Counting</ng-container>
             </button>
             
             @if (reconciliation()!.discrepancyCount === 0 || allDiscrepanciesApproved()) {
@@ -388,7 +388,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
                 @if (isProcessing()) {
                   <mat-icon>refresh</mat-icon>
                 }
-                Complete Reconciliation
+                <ng-container i18n>Complete Reconciliation</ng-container>
               </button>
             } @else {
               <button 
@@ -400,7 +400,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
                 @if (isProcessing()) {
                   <mat-icon>refresh</mat-icon>
                 }
-                Approve Selected ({{ selectedDiscrepancyItems().length }})
+                <ng-container i18n>Approve Selected ({{ selectedDiscrepancyItems().length }})</ng-container>
               </button>
             }
           </div>
@@ -506,7 +506,7 @@ export class ReviewReconciliationComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading reconciliation:', error);
-        this.snackBar.open('Error loading reconciliation', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Error loading reconciliation`, $localize`Close`, { duration: 3000 });
       }
     });
   }
@@ -562,12 +562,12 @@ export class ReviewReconciliationComponent implements OnInit {
         this.reconciliation.set(updatedRec);
         this.selectedDiscrepancyItemIds.set([]);
         this.isProcessing.set(false);
-        this.snackBar.open(`${selectedItems.length} discrepancies approved successfully`, 'Close', { duration: 3000 });
+        this.snackBar.open($localize`${selectedItems.length} discrepancies approved successfully`, $localize`Close`, { duration: 3000 });
       },
       error: (error) => {
         console.error('Error approving discrepancies:', error);
         this.isProcessing.set(false);
-        this.snackBar.open('Error approving discrepancies', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Error approving discrepancies`, $localize`Close`, { duration: 3000 });
       }
     });
   }
@@ -584,7 +584,7 @@ export class ReviewReconciliationComponent implements OnInit {
       next: (updatedRec) => {
         this.reconciliation.set(updatedRec);
         this.isProcessing.set(false);
-        this.snackBar.open('Reconciliation completed successfully', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Reconciliation completed successfully`, $localize`Close`, { duration: 3000 });
         // Navigate to reconciliation list or details
         setTimeout(() => {
           this.router.navigate(['../../'], { relativeTo: this.route });
@@ -593,7 +593,7 @@ export class ReviewReconciliationComponent implements OnInit {
       error: (error) => {
         console.error('Error completing reconciliation:', error);
         this.isProcessing.set(false);
-        this.snackBar.open('Error completing reconciliation', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Error completing reconciliation`, $localize`Close`, { duration: 3000 });
       }
     });
   }

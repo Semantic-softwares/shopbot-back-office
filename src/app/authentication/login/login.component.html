@@ -3,48 +3,48 @@
     <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 py-12 lg:px-16 xl:px-24 ">
         <!-- Logo/Brand -->
         <div class="mb-8">
-            <img src="assets/logo/logo_vector.svg" alt="ShopBot Logo" class="h-9 w-9">
-            <p class="text-gray-500 mt-1">Welcome back</p>
+            <img src="assets/logo/logo_vector.svg" alt="ShopBot Logo" i18n-alt class="h-9 w-9">
+            <p class="text-gray-500 mt-1"><ng-container i18n>Welcome back</ng-container></p>
         </div>
 
         <!-- Login Form -->
         <div class="max-w-md">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-2">Sign in to your account</h2>
-            <p class="text-gray-500 mb-8">Enter your credentials to access your dashboard</p>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-2"><ng-container i18n>Sign in to your account</ng-container></h2>
+            <p class="text-gray-500 mb-8"><ng-container i18n>Enter your credentials to access your dashboard</ng-container></p>
 
             <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
                 <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Email</mat-label>
-                    <input matInput formControlName="email" type="email" placeholder="you@example.com">
+                    <mat-label><ng-container i18n>Email</ng-container></mat-label>
+                    <input matInput formControlName="email" type="email" placeholder="you@example.com" i18n-placeholder>
                     <mat-icon matSuffix fontSet="material-icons-outlined">email</mat-icon>
                     @if (loginForm.get('email')?.hasError('required')) {
-                    <mat-error>Email is required</mat-error>
+                    <mat-error><ng-container i18n>Email is required</ng-container></mat-error>
                     }
                     @if (loginForm.get('email')?.hasError('email')) {
-                    <mat-error>Please enter a valid email</mat-error>
+                    <mat-error><ng-container i18n>Please enter a valid email</ng-container></mat-error>
                     }
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Password</mat-label>
+                    <mat-label><ng-container i18n>Password</ng-container></mat-label>
                     <input matInput [type]="hide() ? 'password' : 'text'" formControlName="password"
                         placeholder="••••••••">
                     <button mat-icon-button matSuffix type="button" (click)="clickEvent($event)" 
-                            [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide()">
+                            [attr.aria-label]="('Hide password' | tr)" [attr.aria-pressed]="hide()">
                         <mat-icon fontSet="material-icons-outlined">{{hide() ? 'visibility_off' : 'visibility'}}</mat-icon>
                     </button>
                     @if (loginForm.get('password')?.hasError('required')) {
-                    <mat-error>Password is required</mat-error>
+                    <mat-error><ng-container i18n>Password is required</ng-container></mat-error>
                     }
                 </mat-form-field>
 
                 <div class="flex items-center justify-between">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        <span class="text-sm text-gray-600">Remember me</span>
+                        <span class="text-sm text-gray-600"><ng-container i18n>Remember me</ng-container></span>
                     </label>
                     <a matButton routerLink="/auth/forgot-password" class="text-sm font-medium">
-                        Forgot password?
+                        <ng-container i18n>Forgot password?</ng-container>
                     </a>
                 </div>
 
@@ -54,17 +54,17 @@
                     @if (loading()) {
                         <span class="flex items-center justify-center gap-2">
                             <mat-spinner diameter="20"></mat-spinner>
-                            Signing in...
+                            <ng-container i18n>Signing in...</ng-container>
                         </span>
                     } @else {
-                        Sign in
+                        <ng-container i18n>Sign in</ng-container>
                     }
                 </button>
 
                 <div class="text-center mt-6">
-                    <span class="text-sm text-gray-600">Don't have an account?</span>
+                    <span class="text-sm text-gray-600"><ng-container i18n>Don't have an account?</ng-container></span>
                     <a matButton routerLink="/auth/signup" class=" font-medium  ml-1">
-                        Create account
+                        <ng-container i18n>Create account</ng-container>
                     </a>
                 </div>
             </form>
@@ -85,10 +85,10 @@
             <!-- Main Headline -->
             <div class="mb-10">
                 <h2 class="text-3xl xl:text-4xl font-bold leading-tight mb-4">
-                    Manage your business with ease.
+                    <ng-container i18n>Manage your business with ease.</ng-container>
                 </h2>
                 <p class="text-blue-200 text-lg">
-                    Access your dashboard to monitor sales, manage inventory, and grow your business.
+                    <ng-container i18n>Access your dashboard to monitor sales, manage inventory, and grow your business.</ng-container>
                 </p>
             </div>
 
@@ -96,33 +96,33 @@
             <div class="grid grid-cols-2 gap-6">
                 <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
                     <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">trending_up</mat-icon>
-                    <h4 class="font-semibold text-white mb-1">Real-time Analytics</h4>
-                    <p class="text-blue-200 text-sm">Track your sales and performance in real-time</p>
+                    <h4 class="font-semibold text-white mb-1"><ng-container i18n>Real-time Analytics</ng-container></h4>
+                    <p class="text-blue-200 text-sm"><ng-container i18n>Track your sales and performance in real-time</ng-container></p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
                     <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">inventory_2</mat-icon>
-                    <h4 class="font-semibold text-white mb-1">Inventory Control</h4>
-                    <p class="text-blue-200 text-sm">Manage stock levels effortlessly</p>
+                    <h4 class="font-semibold text-white mb-1"><ng-container i18n>Inventory Control</ng-container></h4>
+                    <p class="text-blue-200 text-sm"><ng-container i18n>Manage stock levels effortlessly</ng-container></p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
                     <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">hotel</mat-icon>
-                    <h4 class="font-semibold text-white mb-1">Hotel Management</h4>
-                    <p class="text-blue-200 text-sm">Complete property management system</p>
+                    <h4 class="font-semibold text-white mb-1"><ng-container i18n>Hotel Management</ng-container></h4>
+                    <p class="text-blue-200 text-sm"><ng-container i18n>Complete property management system</ng-container></p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
                     <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">apartment</mat-icon>
-                    <h4 class="font-semibold text-white mb-1">Estate Management</h4>
-                    <p class="text-blue-200 text-sm">Manage properties, tenants, and leases</p>
+                    <h4 class="font-semibold text-white mb-1"><ng-container i18n>Estate Management</ng-container></h4>
+                    <p class="text-blue-200 text-sm"><ng-container i18n>Manage properties, tenants, and leases</ng-container></p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
                     <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">people</mat-icon>
-                    <h4 class="font-semibold text-white mb-1">Staff Management</h4>
-                    <p class="text-blue-200 text-sm">Organize your team with ease</p>
+                    <h4 class="font-semibold text-white mb-1"><ng-container i18n>Staff Management</ng-container></h4>
+                    <p class="text-blue-200 text-sm"><ng-container i18n>Organize your team with ease</ng-container></p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
                     <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">point_of_sale</mat-icon>
-                    <h4 class="font-semibold text-white mb-1">POS + ERP</h4>
-                    <p class="text-blue-200 text-sm">Complete point of sale and resource planning</p>
+                    <h4 class="font-semibold text-white mb-1"><ng-container i18n>POS + ERP</ng-container></h4>
+                    <p class="text-blue-200 text-sm"><ng-container i18n>Complete point of sale and resource planning</ng-container></p>
                 </div>
             </div>
 
@@ -130,13 +130,13 @@
             <div class="mt-12 pt-8 border-t border-white/20">
                 <div class="flex items-center gap-4">
                     <div class="flex -space-x-2">
-                        <div class="w-10 h-10 rounded-full bg-blue-400 border-2 border-white flex items-center justify-center text-sm font-medium">JD</div>
-                        <div class="w-10 h-10 rounded-full bg-indigo-400 border-2 border-white flex items-center justify-center text-sm font-medium">KL</div>
-                        <div class="w-10 h-10 rounded-full bg-purple-400 border-2 border-white flex items-center justify-center text-sm font-medium">MN</div>
+                        <div class="w-10 h-10 rounded-full bg-blue-400 border-2 border-white flex items-center justify-center text-sm font-medium"><ng-container i18n>JD</ng-container></div>
+                        <div class="w-10 h-10 rounded-full bg-indigo-400 border-2 border-white flex items-center justify-center text-sm font-medium"><ng-container i18n>KL</ng-container></div>
+                        <div class="w-10 h-10 rounded-full bg-purple-400 border-2 border-white flex items-center justify-center text-sm font-medium"><ng-container i18n>MN</ng-container></div>
                     </div>
                     <div>
-                        <p class="text-white font-medium">Trusted by 1,000+ businesses</p>
-                        <p class="text-blue-200 text-sm">Join our growing community</p>
+                        <p class="text-white font-medium"><ng-container i18n>Trusted by 1,000+ businesses</ng-container></p>
+                        <p class="text-blue-200 text-sm"><ng-container i18n>Join our growing community</ng-container></p>
                     </div>
                 </div>
             </div>

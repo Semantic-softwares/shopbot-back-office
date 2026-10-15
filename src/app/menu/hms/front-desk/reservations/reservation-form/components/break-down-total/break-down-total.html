@@ -1,21 +1,21 @@
 <div class="mt-6" [formGroup]="reservationForm()!">
     <h3 class="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
-        Price Breakdown
+        <ng-container i18n>Price Breakdown</ng-container>
     </h3>
 
     <!-- Summary List -->
     <mat-list formGroupName="pricing">
         <!-- Total Nights -->
         <mat-list-item>
-            <span matListItemTitle>Total Nights</span>
+            <span matListItemTitle><ng-container i18n>Total Nights</ng-container></span>
             <span matListItemMeta class="font-semibold">
-                {{ totalNumberOfNights() }} night(s)
+                <ng-container i18n>{{ totalNumberOfNights() }} night(s)</ng-container>
             </span>
         </mat-list-item>
 
         <!-- Base Total -->
         <mat-list-item>
-            <span matListItemTitle>Base Total (all rooms)</span>
+            <span matListItemTitle><ng-container i18n>Base Total (all rooms)</ng-container></span>
             <span matListItemMeta>
                 {{ breakdownSubtotal() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
@@ -23,7 +23,7 @@
 
         <!-- Service Fee -->
         <mat-list-item>
-            <span matListItemTitle>Service Fee</span>
+            <span matListItemTitle><ng-container i18n>Service Fee</ng-container></span>
             <span matListItemMeta>
                 {{ breakdownServiceFee() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
@@ -31,7 +31,7 @@
 
         <!-- Cleaning Fee -->
         <mat-list-item>
-            <span matListItemTitle>Cleaning Fee</span>
+            <span matListItemTitle><ng-container i18n>Cleaning Fee</ng-container></span>
             <span matListItemMeta>
                 {{ breakdownCleaningFee() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
@@ -39,7 +39,7 @@
 
         <!-- Resort Fee -->
         <mat-list-item>
-            <span matListItemTitle>Resort Fee</span>
+            <span matListItemTitle><ng-container i18n>Resort Fee</ng-container></span>
             <span matListItemMeta>
                 {{ breakdownResortFee() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
@@ -47,7 +47,7 @@
 
         <!-- Other Fees -->
         <mat-list-item>
-            <span matListItemTitle>Other Fees</span>
+            <span matListItemTitle><ng-container i18n>Other Fees</ng-container></span>
             <span matListItemMeta>
                 {{ breakdownOtherFees() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
@@ -58,7 +58,7 @@
 
         <!-- Total Fees -->
         <mat-list-item>
-            <span matListItemTitle class="font-semibold">Total Fees</span>
+            <span matListItemTitle class="font-semibold"><ng-container i18n>Total Fees</ng-container></span>
             <span matListItemMeta class="font-semibold">
                 {{ breakdownTotalFees() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
@@ -69,7 +69,7 @@
 
         <!-- Taxes -->
         <mat-list-item>
-            <span matListItemTitle>Taxes</span>
+            <span matListItemTitle><ng-container i18n>Taxes</ng-container></span>
             <span matListItemMeta>
                 {{ breakdownTaxes() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
@@ -77,7 +77,7 @@
 
         <!-- Discount -->
         <mat-list-item>
-            <span matListItemTitle>Discount</span>
+            <span matListItemTitle><ng-container i18n>Discount</ng-container></span>
             <span matListItemMeta>
                 {{ breakdownDiscount() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
@@ -88,7 +88,7 @@
 
         <!-- Grand Total -->
         <mat-list-item class="py-4">
-            <span matListItemTitle class="font-bold text-lg">Grand Total</span>
+            <span matListItemTitle class="font-bold text-lg"><ng-container i18n>Grand Total</ng-container></span>
             <span matListItemMeta class="font-bold text-lg">
                 {{ breakdownGrandTotal() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
@@ -99,7 +99,7 @@
 
         <!-- Reservation Total (same as Grand Total, for clarity) -->
         <mat-list-item class="py-4 bg-indigo-50">
-            <span matListItemTitle class="font-bold text-indigo-900">Reservation Total</span>
+            <span matListItemTitle class="font-bold text-indigo-900"><ng-container i18n>Reservation Total</ng-container></span>
             <span matListItemMeta class="font-bold text-indigo-900">
                 {{ breakdownGrandTotal() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
@@ -108,7 +108,7 @@
         <!-- Orders Grand Total -->
         @if (ordersGrandTotal() > 0) {
           <mat-list-item class="py-4 bg-green-50">
-              <span matListItemTitle class="font-bold text-green-900 flex items-center gap-2">
+              <span i18n matListItemTitle class="font-bold text-green-900 flex items-center gap-2">
                 <span class="text-sm">📦</span> Orders Total
               </span>
               <span matListItemMeta class="font-bold text-green-900">
@@ -118,7 +118,7 @@
 
           <!-- Orders Paid -->
           <mat-list-item class="py-2 pl-8">
-              <span matListItemTitle class="text-sm text-gray-700">Orders Paid</span>
+              <span matListItemTitle class="text-sm text-gray-700"><ng-container i18n>Orders Paid</ng-container></span>
               <span matListItemMeta class="text-sm text-green-700">
                   {{ ordersPaidAmount() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
               </span>
@@ -126,7 +126,7 @@
 
           <!-- Orders Balance -->
           <mat-list-item class="py-2 pl-8 mb-2">
-              <span matListItemTitle class="text-sm text-gray-700">Orders Balance</span>
+              <span matListItemTitle class="text-sm text-gray-700"><ng-container i18n>Orders Balance</ng-container></span>
               <span matListItemMeta class="text-sm" [class.text-red-700]="ordersBalanceAmount() > 0" [class.text-green-700]="ordersBalanceAmount() <= 0">
                   {{ ordersBalanceAmount() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
               </span>
@@ -137,7 +137,7 @@
 
         <!-- Paid Amount -->
         <mat-list-item class="py-4">
-            <span matListItemTitle >Paid</span>
+            <span matListItemTitle ><ng-container i18n>Paid</ng-container></span>
             <span matListItemMeta >
                 {{ paidAmount() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>
@@ -145,7 +145,7 @@
 
         <!-- Balance -->
         <mat-list-item class="py-4">
-            <span matListItemTitle >Balance</span>
+            <span matListItemTitle ><ng-container i18n>Balance</ng-container></span>
             <span matListItemMeta >
                 {{ breakdownBalance() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}
             </span>

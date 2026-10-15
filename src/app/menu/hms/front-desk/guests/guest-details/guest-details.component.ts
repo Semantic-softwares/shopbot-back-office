@@ -15,11 +15,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-guest-details',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatIconModule,
     MatButtonModule,
@@ -175,7 +176,7 @@ export class GuestDetailsComponent implements OnInit, OnDestroy {
 
     if (guest.isVip) {
       // Removing VIP status - simple confirmation
-      if (!confirm(`Are you sure you want to remove VIP status from ${guestName}?\n\nThis will remove all VIP benefits and privileges.`)) {
+      if (!confirm($localize`Are you sure you want to remove VIP status from ${guestName}?\n\nThis will remove all VIP benefits and privileges.`)) {
         return;
       }
       await this.updateVipStatus(guestId, false);
@@ -232,7 +233,7 @@ export class GuestDetailsComponent implements OnInit, OnDestroy {
 
     if (guest.blacklisted) {
       // Removing from blacklist - simple confirmation
-      if (!confirm(`Are you sure you want to remove ${guestName} from the blacklist?`)) {
+      if (!confirm($localize`Are you sure you want to remove ${guestName} from the blacklist?`)) {
         return;
       }
       await this.updateBlacklistStatus(guestId, false, '');
@@ -260,7 +261,7 @@ export class GuestDetailsComponent implements OnInit, OnDestroy {
     }
 
     if (!reason.trim()) {
-      alert('A reason is required to blacklist a guest.');
+      alert($localize`A reason is required to blacklist a guest.`);
       return;
     }
 
@@ -348,7 +349,7 @@ export class GuestDetailsComponent implements OnInit, OnDestroy {
 
   // Notification methods
   private showSuccess(message: string) {
-    this.snackBar.open(message, 'Close', {
+    this.snackBar.open(message, $localize`Close`, {
       duration: 3000,
       panelClass: ['success-snackbar'],
       horizontalPosition: 'right',
@@ -357,7 +358,7 @@ export class GuestDetailsComponent implements OnInit, OnDestroy {
   }
 
   private showError(message: string) {
-    this.snackBar.open(message, 'Close', {
+    this.snackBar.open(message, $localize`Close`, {
       duration: 5000,
       panelClass: ['error-snackbar'],
       horizontalPosition: 'right',

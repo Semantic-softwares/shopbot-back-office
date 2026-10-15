@@ -22,6 +22,7 @@ import { MaintenanceCategoryService } from '../../services/maintenance-category.
 import { MaintenanceService } from '../../services/maintenance.service';
 import { MaintenanceVendor } from '../../models/maintenance-vendor.model';
 import { MaintenanceAssigneeType } from '../../models/maintenance.model';
+import { TrPipe } from '../../i18n/tr.pipe';
 
 export interface AssignVendorDialogData {
   storeId: string;
@@ -34,7 +35,7 @@ export interface AssignVendorDialogData {
   selector: 'app-assign-vendor-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
@@ -70,7 +71,7 @@ export class AssignVendorDialogComponent {
   readonly categoryOptions = computed(() => {
     const data = this.categoriesResource.value()?.data;
     return [
-      { value: '', label: 'All Categories' },
+      { value: '', label: $localize`All Categories` },
       ...(data?.map((c: { name: string }) => ({ value: c.name, label: c.name })) ?? []),
     ];
   });
@@ -115,12 +116,12 @@ export class AssignVendorDialogComponent {
       })
       .subscribe({
         next: () => {
-          this.snackBar.open('Vendor assigned successfully', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Vendor assigned successfully`, $localize`Close`, { duration: 3000 });
           this.dialogRef.close(true);
         },
         error: (error) => {
           const message = error?.error?.message || 'Failed to assign vendor';
-          this.snackBar.open(message, 'Close', { duration: 4000 });
+          this.snackBar.open(message, $localize`Close`, { duration: 4000 });
           this.submitting.set(false);
         },
       });

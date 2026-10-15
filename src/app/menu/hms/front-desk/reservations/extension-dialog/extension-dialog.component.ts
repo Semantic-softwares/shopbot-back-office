@@ -267,7 +267,7 @@ export class ExtensionDialogComponent {
       {
         id: 'same_rate',
         name: 'Same Rate',
-        description: 'Continue with the original room rate',
+        description: $localize`Continue with the original room rate`,
         rate: breakdown.originalRate,
         isRecommended: true,
         badge: 'ORIGINAL',
@@ -276,7 +276,7 @@ export class ExtensionDialogComponent {
       {
         id: 'discounted_rate',
         name: 'Discounted Rate',
-        description: 'Apply a custom discount to the original rate',
+        description: $localize`Apply a custom discount to the original rate`,
         rate: this.getDiscountedRateValue() || breakdown.originalRate,
         isRecommended: false,
         badge: null,

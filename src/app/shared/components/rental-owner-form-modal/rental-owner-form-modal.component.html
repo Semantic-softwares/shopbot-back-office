@@ -1,17 +1,17 @@
 @if (isEditing()) {
-  <h2 mat-dialog-title class="text-xl font-bold mb-4">Edit Rental Owner</h2>
+  <h2 mat-dialog-title class="text-xl font-bold mb-4"><ng-container i18n>Edit Rental Owner</ng-container></h2>
 } @else {
-  <h2 mat-dialog-title class="text-xl font-bold mb-4">Add Property Owner</h2>
+  <h2 mat-dialog-title class="text-xl font-bold mb-4"><ng-container i18n>Add Property Owner</ng-container></h2>
 }
 
 <mat-dialog-content class="max-h-[70vh] overflow-y-auto">
   <!-- Owner Search Section -->
   @if (!isEditing()) {
     <div class="mb-6 pb-6 border-b border-gray-200">
-      <p class="text-sm text-gray-500 mb-3">Search for an existing rental owner or create a new one below.</p>
+      <p class="text-sm text-gray-500 mb-3"><ng-container i18n>Search for an existing rental owner or create a new one below.</ng-container></p>
       <app-rental-owner-search
-        label="Search Existing Owner"
-        placeholder="Search by name, email or company..."
+        label="Search Existing Owner" i18n-label
+        placeholder="Search by name, email or company..." i18n-placeholder
         (ownerSelected)="onSelectExistingOwner($event)">
       </app-rental-owner-search>
     </div>
@@ -19,24 +19,24 @@
 
   <form [formGroup]="ownerForm" class="space-y-4">
     @if (!isEditing()) {
-      <p class="text-sm font-medium text-gray-600 mb-2">Or create a new owner:</p>
+      <p class="text-sm font-medium text-gray-600 mb-2"><ng-container i18n>Or create a new owner:</ng-container></p>
     }
 
     <!-- Personal Information -->
     <div class="grid grid-cols-2 gap-4">
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>First Name</mat-label>
-        <input matInput formControlName="firstName" placeholder="First name">
+        <mat-label><ng-container i18n>First Name</ng-container></mat-label>
+        <input matInput formControlName="firstName" placeholder="First name" i18n-placeholder>
         @if (ownerForm.get('firstName')?.hasError('required') && ownerForm.get('firstName')?.touched) {
-          <mat-error>First name is required</mat-error>
+          <mat-error><ng-container i18n>First name is required</ng-container></mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Last Name</mat-label>
-        <input matInput formControlName="lastName" placeholder="Last name">
+        <mat-label><ng-container i18n>Last Name</ng-container></mat-label>
+        <input matInput formControlName="lastName" placeholder="Last name" i18n-placeholder>
         @if (ownerForm.get('lastName')?.hasError('required') && ownerForm.get('lastName')?.touched) {
-          <mat-error>Last name is required</mat-error>
+          <mat-error><ng-container i18n>Last name is required</ng-container></mat-error>
         }
       </mat-form-field>
     </div>
@@ -44,50 +44,50 @@
     <!-- Contact Information -->
     <div class="grid grid-cols-2 gap-4">
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Email</mat-label>
-        <input matInput formControlName="email" type="email" placeholder="Email address">
+        <mat-label><ng-container i18n>Email</ng-container></mat-label>
+        <input matInput formControlName="email" type="email" placeholder="Email address" i18n-placeholder>
         @if (ownerForm.get('email')?.hasError('email') && ownerForm.get('email')?.touched) {
-          <mat-error>Enter a valid email</mat-error>
+          <mat-error><ng-container i18n>Enter a valid email</ng-container></mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Phone</mat-label>
-        <input matInput formControlName="phone" placeholder="Phone number">
+        <mat-label><ng-container i18n>Phone</ng-container></mat-label>
+        <input matInput formControlName="phone" placeholder="Phone number" i18n-placeholder>
       </mat-form-field>
     </div>
 
     <!-- Company Toggle -->
     <div class="mb-2">
       <mat-slide-toggle formControlName="isCompany">
-        This owner is a company
+        <ng-container i18n>This owner is a company</ng-container>
       </mat-slide-toggle>
     </div>
 
     @if (isCompany()) {
       <div class="grid grid-cols-2 gap-4">
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Company Name</mat-label>
-          <input matInput formControlName="companyName" placeholder="Company name">
+          <mat-label><ng-container i18n>Company Name</ng-container></mat-label>
+          <input matInput formControlName="companyName" placeholder="Company name" i18n-placeholder>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Tax ID</mat-label>
-          <input matInput formControlName="taxId" placeholder="Tax ID / Registration number">
+          <mat-label><ng-container i18n>Tax ID</ng-container></mat-label>
+          <input matInput formControlName="taxId" placeholder="Tax ID / Registration number" i18n-placeholder>
         </mat-form-field>
       </div>
     }
 
     <!-- Notes -->
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Notes</mat-label>
-      <textarea matInput formControlName="notes" rows="3" placeholder="Additional notes..."></textarea>
+      <mat-label><ng-container i18n>Notes</ng-container></mat-label>
+      <textarea matInput formControlName="notes" rows="3" placeholder="Additional notes..." i18n-placeholder></textarea>
     </mat-form-field>
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="pt-4">
-  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button (click)="onCancel()"><ng-container i18n>Cancel</ng-container></button>
   <button
     mat-flat-button
     (click)="onSubmit()"
@@ -95,6 +95,6 @@
     @if (isSaving()) {
       <mat-spinner diameter="20" class="mr-2"></mat-spinner>
     }
-    {{ isEditing() ? 'Update Owner' : 'Create & Add Owner' }}
+    @if (isEditing()) {<ng-container i18n>Update Owner</ng-container>} @else {<ng-container i18n>Create & Add Owner</ng-container>}
   </button>
 </mat-dialog-actions>

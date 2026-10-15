@@ -1,6 +1,6 @@
 <div class="flex items-center justify-between gap-2 pl-6 pr-2 pt-4">
-  <h2 mat-dialog-title class="!mb-0 !p-0 !text-lg">Payment</h2>
-  <button mat-icon-button (click)="onCancel()" aria-label="Cancel" matTooltip="Cancel">
+  <h2 mat-dialog-title class="!mb-0 !p-0 !text-lg"><ng-container i18n>Payment</ng-container></h2>
+  <button mat-icon-button (click)="onCancel()" aria-label="Cancel" i18n-aria-label matTooltip="Cancel" i18n-matTooltip>
     <mat-icon>close</mat-icon>
   </button>
 </div>
@@ -9,7 +9,7 @@
   <!-- Total, then the running balance. The balance is the number the cashier
        works down to, so it sits with the total rather than under the controls. -->
   <div class="rounded-lg border border-gray-200 p-4 mb-4 text-center">
-    <p class="text-xs uppercase tracking-wide text-gray-500 mb-1">Total Amount</p>
+    <p class="text-xs uppercase tracking-wide text-gray-500 mb-1"><ng-container i18n>Total Amount</ng-container></p>
     <p class="text-2xl sm:text-3xl font-bold text-gray-900 tabular-nums">
       {{ total() | currency: data.currency : 'symbol' : '1.2-2' }}
     </p>
@@ -17,13 +17,13 @@
     @if (payments().length) {
       <div class="mt-3 pt-3 border-t border-dashed border-gray-300 grid grid-cols-2 gap-2 text-sm">
         <div>
-          <p class="text-xs text-gray-500">Paid</p>
+          <p class="text-xs text-gray-500"><ng-container i18n>Paid</ng-container></p>
           <p class="font-semibold text-gray-900 tabular-nums">
             {{ amountPaid() | currency: data.currency : 'symbol' : '1.2-2' }}
           </p>
         </div>
         <div>
-          <p class="text-xs text-gray-500">{{ settled() ? 'Balance' : 'Balance due' }}</p>
+          <p class="text-xs text-gray-500">@if (settled()) {<ng-container i18n>Balance</ng-container>} @else {<ng-container i18n>Balance due</ng-container>}</p>
           <p
             class="font-semibold tabular-nums"
             [class]="settled() ? 'text-emerald-700' : 'text-amber-700'"
@@ -47,8 +47,8 @@
               <!-- Both halves of an over-tender, so the change figure is
                    traceable back to what the customer actually handed over. -->
               <p class="text-xs text-gray-500 tabular-nums">
-                Tendered {{ payment.tendered | currency: data.currency : 'symbol' : '1.2-2' }}
-                · change {{ payment.change | currency: data.currency : 'symbol' : '1.2-2' }}
+                <ng-container i18n>Tendered {{ payment.tendered | currency: data.currency : 'symbol' : '1.2-2' }}
+                · change {{ payment.change | currency: data.currency : 'symbol' : '1.2-2' }}</ng-container>
               </p>
             }
           </div>
@@ -58,8 +58,8 @@
           <button
             mat-icon-button
             type="button"
-            aria-label="Remove this payment"
-            matTooltip="Remove"
+            aria-label="Remove this payment" i18n-aria-label
+            matTooltip="Remove" i18n-matTooltip
             (click)="removePaymentAt($index)"
           >
             <mat-icon class="text-gray-400" style="font-size: 18px; width: 18px; height: 18px">
@@ -75,7 +75,7 @@
        argue with when the cashier is done. -->
   @if (!settled()) {
     <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-      {{ payments().length ? 'Add another payment' : 'Payment method' }}
+      @if (payments().length) {<ng-container i18n>Add another payment</ng-container>} @else {<ng-container i18n>Payment method</ng-container>}
     </p>
 
     <!-- A plain responsive grid rather than mat-button-toggle-group: the
@@ -103,7 +103,7 @@
     @if (selectedPaymentMethod()) {
       <div class="mt-3 flex flex-col sm:flex-row sm:items-start gap-2">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="flex-1">
-          <mat-label>{{ selectedIsCash() ? 'Amount tendered' : 'Amount' }}</mat-label>
+          <mat-label>@if (selectedIsCash()) {<ng-container i18n>Amount tendered</ng-container>} @else {<ng-container i18n>Amount</ng-container>}</mat-label>
           <!-- type="text" with inputmode="decimal": a number input hands
                ngModel a number, which broke the string handling behind the
                Add button, and it cannot show a thousands separator. -->
@@ -128,7 +128,7 @@
           [disabled]="!canAddPayment()"
           (click)="addSelectedPayment()"
         >
-          Add payment
+          <ng-container i18n>Add payment</ng-container>
         </button>
       </div>
 
@@ -136,13 +136,13 @@
         <!-- Previewed before the payment is added, so the cashier knows what
              to hand back while the customer is still holding the notes. -->
         <p class="mt-2 text-sm font-semibold text-emerald-700 tabular-nums">
-          Change to give: {{ pendingChange() | currency: data.currency : 'symbol' : '1.2-2' }}
+          <ng-container i18n>Change to give: {{ pendingChange() | currency: data.currency : 'symbol' : '1.2-2' }}</ng-container>
         </p>
       } @else if (!selectedIsCash()) {
         <p class="mt-2 text-xs text-gray-500">
-          Applied up to the
+          <ng-container i18n>Applied up to the
           {{ remaining() | currency: data.currency : 'symbol' : '1.2-2' }} still owed — only
-          cash gives change.
+          cash gives change.</ng-container>
         </p>
       }
     }
@@ -157,7 +157,7 @@
         : 'border-gray-200 bg-gray-50'"
     >
       @if (changeDue() > 0) {
-        <p class="text-xs uppercase tracking-wide text-emerald-800 mb-1">Change due to customer</p>
+        <p class="text-xs uppercase tracking-wide text-emerald-800 mb-1"><ng-container i18n>Change due to customer</ng-container></p>
         <p class="text-2xl sm:text-3xl font-bold text-emerald-900 tabular-nums">
           {{ changeDue() | currency: data.currency : 'symbol' : '1.2-2' }}
         </p>
@@ -166,7 +166,7 @@
           <mat-icon class="text-emerald-600" style="font-size: 18px; width: 18px; height: 18px">
             check_circle
           </mat-icon>
-          Paid in full{{ isSplit() ? ' across ' + payments().length + ' payments' : '' }}
+          <ng-container i18n>Paid in full{{ isSplit() ? (' across ' | tr) + payments().length + (' payments' | tr) : '' }}</ng-container>
         </p>
       }
     </div>
@@ -174,11 +174,11 @@
 
   <!-- Order Note -->
   <mat-form-field appearance="outline" class="w-full mt-4">
-    <mat-label>Order Note (optional)</mat-label>
+    <mat-label><ng-container i18n>Order Note (optional)</ng-container></mat-label>
     <textarea
       matInput
       rows="2"
-      placeholder="Add a note for this order..."
+      placeholder="Add a note for this order..." i18n-placeholder
       [ngModel]="note()"
       (ngModelChange)="note.set($event)">
     </textarea>
@@ -191,7 +191,7 @@
   <div class="flex w-full flex-col-reverse sm:flex-row sm:justify-end gap-2">
     @if (!data.requirePayment) {
       <button matButton="outlined" color="primary" class="w-full sm:w-auto" (click)="onSkipPayment()">
-        Skip Payment
+        <ng-container i18n>Skip Payment</ng-container>
       </button>
     }
     <button
@@ -201,7 +201,7 @@
       [disabled]="!settled()"
       [matTooltip]="settled() ? '' : 'Add payments covering the full total first'"
       (click)="onConfirmPayment()">
-      Confirm Payment
+      <ng-container i18n>Confirm Payment</ng-container>
     </button>
   </div>
 </mat-dialog-actions>

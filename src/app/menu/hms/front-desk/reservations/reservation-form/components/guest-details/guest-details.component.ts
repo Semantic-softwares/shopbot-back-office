@@ -100,7 +100,7 @@ export class GuestDetailsComponent {
   }
 
   onDeleteGuest() {
-    if (confirm('Are you sure you want to remove this guest?')) {
+    if (confirm($localize`Are you sure you want to remove this guest?`)) {
       this.guestDeleted.emit();
     }
   }

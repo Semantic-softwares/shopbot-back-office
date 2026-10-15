@@ -5,10 +5,10 @@
       <div class="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-lg">
         <mat-icon class="text-white text-lg">security</mat-icon>
       </div>
-      Store Owner Authorization Required
+      <ng-container i18n>Store Owner Authorization Required</ng-container>
     </h2>
     <p class="text-gray-600 text-sm">
-      Enter the store owner PIN to authorize and {{ actionDescription }}.
+      <ng-container i18n>Enter the store owner PIN to authorize and {{ actionDescription }}.</ng-container>
     </p>
   </div>
 
@@ -18,12 +18,12 @@
       <div class="space-y-4">
         <!-- PIN Input Field -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Store Owner PIN</mat-label>
+          <mat-label><ng-container i18n>Store Owner PIN</ng-container></mat-label>
           <input 
             matInput 
             formControlName="pin"
             [type]="showPin() ? 'text' : 'password'"
-            placeholder="Enter 4-6 digit PIN"
+            placeholder="Enter 4-6 digit PIN" i18n-placeholder
             maxlength="6"
             autocomplete="off"
             (keypress)="onPinKeyPress($event)"
@@ -34,23 +34,23 @@
             matSuffix 
             mat-icon-button 
             (click)="togglePinVisibility()"
-            [attr.aria-label]="'Toggle PIN visibility'"
+            [attr.aria-label]="('Toggle PIN visibility' | tr)"
             class="text-gray-500 hover:text-gray-700">
             <mat-icon>{{ showPin() ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
           
           <!-- Error Messages -->
           @if (pinForm.get('pin')?.hasError('required') && pinForm.get('pin')?.touched) {
-            <mat-error>PIN is required</mat-error>
+            <mat-error><ng-container i18n>PIN is required</ng-container></mat-error>
           }
           @if (pinForm.get('pin')?.hasError('minlength') && pinForm.get('pin')?.touched) {
-            <mat-error>PIN must be at least 4 digits</mat-error>
+            <mat-error><ng-container i18n>PIN must be at least 4 digits</ng-container></mat-error>
           }
           @if (pinForm.get('pin')?.hasError('maxlength') && pinForm.get('pin')?.touched) {
-            <mat-error>PIN cannot exceed 6 digits</mat-error>
+            <mat-error><ng-container i18n>PIN cannot exceed 6 digits</ng-container></mat-error>
           }
           @if (pinForm.get('pin')?.hasError('invalid') && pinForm.get('pin')?.touched) {
-            <mat-error>Invalid PIN entered</mat-error>
+            <mat-error><ng-container i18n>Invalid PIN entered</ng-container></mat-error>
           }
         </mat-form-field>
 
@@ -59,7 +59,7 @@
           <div class="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
             <mat-icon class="text-red-500 mt-0.5 flex-shrink-0">error</mat-icon>
             <div>
-              <h4 class="text-red-800 font-medium text-sm">Authorization Failed</h4>
+              <h4 class="text-red-800 font-medium text-sm"><ng-container i18n>Authorization Failed</ng-container></h4>
               <p class="text-red-700 text-sm mt-1">{{ error() }}</p>
             </div>
           </div>
@@ -69,9 +69,9 @@
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
           <mat-icon class="text-blue-500 mt-0.5 flex-shrink-0">info</mat-icon>
           <div>
-            <h4 class="text-blue-800 font-medium text-sm">Security Notice</h4>
+            <h4 class="text-blue-800 font-medium text-sm"><ng-container i18n>Security Notice</ng-container></h4>
             <p class="text-blue-700 text-sm mt-1">
-              Only the store owner should have access to this PIN. This authorization ensures that important actions are performed with proper approval.
+              <ng-container i18n>Only the store owner should have access to this PIN. This authorization ensures that important actions are performed with proper approval.</ng-container>
             </p>
           </div>
         </div>
@@ -87,7 +87,7 @@
       (click)="cancel()"
       [disabled]="verifying()"
       class="!text-gray-600 hover:!text-gray-800 hover:!bg-gray-50 !transition-colors !px-6 !py-2">
-      Cancel
+      <ng-container i18n>Cancel</ng-container>
     </button>
     
     <button 
@@ -98,7 +98,7 @@
       [disabled]="pinForm.invalid || verifying()"
       class="!bg-gradient-to-r !from-blue-600 !to-blue-700 hover:!from-blue-700 hover:!to-blue-800 !text-white !px-8 !py-2 !rounded-lg !font-medium !transition-all !duration-200 !shadow-lg hover:!shadow-xl disabled:!opacity-50 disabled:!cursor-not-allowed">
       
-      {{ verifying() ? 'Verifying...' : 'Authorize Action' }}
+      @if (verifying()) {<ng-container i18n>Verifying...</ng-container>} @else {<ng-container i18n>Authorize Action</ng-container>}
     </button>
   </div>
 </div>

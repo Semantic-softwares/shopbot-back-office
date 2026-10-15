@@ -38,11 +38,12 @@ import {
   PaymentDialogData,
   PaymentDialogResult
 } from '../../../../shared/components/payment-dialog/payment-dialog.component';
+import { TrPipe } from '../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-list-orders',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     RouterModule,
     FormsModule,
@@ -185,19 +186,19 @@ export class ListOrders {
 
   // Order status options
   statusOptions = [
-    { value: '', label: 'All Statuses' },
-    { value: OrderCategoryType.PROCESSING, label: 'Processing' },
-    { value: OrderCategoryType.READY, label: 'Ready' },
-    { value: OrderCategoryType.COMPLETE, label: 'Complete' },
-    { value: OrderCategoryType.CANCEL, label: 'Cancelled' }
+    { value: '', label: $localize`All Statuses` },
+    { value: OrderCategoryType.PROCESSING, label: $localize`Processing` },
+    { value: OrderCategoryType.READY, label: $localize`Ready` },
+    { value: OrderCategoryType.COMPLETE, label: $localize`Complete` },
+    { value: OrderCategoryType.CANCEL, label: $localize`Cancelled` }
   ];
 
   // Payment options
   paymentOptions = [
-    { value: '', label: 'All Payments' },
-    { value: 'Cash', label: 'Cash' },
-    { value: 'POS Terminal', label: 'POS Terminal' },
-    { value: 'Pay Online', label: 'Pay Online' }
+    { value: '', label: $localize`All Payments` },
+    { value: 'Cash', label: $localize`Cash` },
+    { value: 'POS Terminal', label: $localize`POS Terminal` },
+    { value: 'Pay Online', label: $localize`Pay Online` }
   ];
 
   reloadData(): void {
@@ -272,11 +273,11 @@ export class ListOrders {
 
   async printOrder(order: Order): Promise<void> {
     if (!order._id) {
-      this.snackBar.open('Invalid order data', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Invalid order data`, $localize`Close`, { duration: 3000 });
       return;
     }
 
-    const loadingSnackBar = this.snackBar.open('Sending to printer...', '', {
+    const loadingSnackBar = this.snackBar.open($localize`Sending to printer...`, '', {
       duration: 0,
       horizontalPosition: 'center',
       verticalPosition: 'bottom',
@@ -286,14 +287,14 @@ export class ListOrders {
       next: (response) => {
         loadingSnackBar.dismiss();
         if (response.success) {
-          this.snackBar.open(response.message || 'Print job created', 'OK', { duration: 3000 });
+          this.snackBar.open(response.message || 'Print job created', $localize`OK`, { duration: 3000 });
         } else {
-          this.snackBar.open('Failed to create print job', 'Close', { duration: 5000 });
+          this.snackBar.open($localize`Failed to create print job`, $localize`Close`, { duration: 5000 });
         }
       },
       error: (error) => {
         loadingSnackBar.dismiss();
-        this.snackBar.open(`Print failed: ${error.error?.error || error.message}`, 'Close', { duration: 5000 });
+        this.snackBar.open($localize`Print failed: ${error.error?.error || error.message}`, $localize`Close`, { duration: 5000 });
         console.error('Print order error:', error);
       },
     });
@@ -313,7 +314,7 @@ export class ListOrders {
    */
   public completeOrder(order: Order): void {
     if (!order._id) {
-      this.snackBar.open('Invalid order data', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Invalid order data`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -362,11 +363,11 @@ export class ListOrders {
             this.tableStore.updateTable(order.table._id, { orderId: null, order: null });
             this.tableStore.updateTableOrderSync(order.table._id, { orderId: null });
           }
-          this.snackBar.open('Order completed', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Order completed`, $localize`Close`, { duration: 3000 });
           this.reloadData();
         },
         error: (error) => {
-          this.snackBar.open('Failed to complete order', 'Close', { duration: 5000 });
+          this.snackBar.open($localize`Failed to complete order`, $localize`Close`, { duration: 5000 });
           console.error('Complete order error:', error);
         },
       });
@@ -380,18 +381,18 @@ export class ListOrders {
 
   public editOrder(order: Order): void {
     if (!this.canEditOrder(order)) {
-      this.snackBar.open('This order is complete and paid — it can no longer be edited.', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`This order is complete and paid — it can no longer be edited.`, $localize`Close`, { duration: 3000 });
       return;
     }
 
     if (!order.cart?._id) {
-      this.snackBar.open('Invalid cart data', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Invalid cart data`, $localize`Close`, { duration: 3000 });
       console.error('Invalid cart data');
       return;
     }
 
     // Show loading snackbar
-    const loadingSnackBar = this.snackBar.open('Loading order for editing...', '', {
+    const loadingSnackBar = this.snackBar.open($localize`Loading order for editing...`, '', {
       duration: 0,
       horizontalPosition: 'center',
       verticalPosition: 'bottom',
@@ -411,7 +412,7 @@ export class ListOrders {
       error: (error) => {
         // Dismiss loading and show error
         loadingSnackBar.dismiss();
-        this.snackBar.open('Failed to load order for editing', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Failed to load order for editing`, $localize`Close`, { duration: 3000 });
         console.error('Error loading cart:', error);
         
         // Cart loading failed

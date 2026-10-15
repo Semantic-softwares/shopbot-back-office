@@ -21,7 +21,7 @@ export const adminGuard: CanActivateFn = () => {
   const role = rolesService.role();
 
   if (!role) {
-    snackBar.open('Please login to access this page', 'Close', {
+    snackBar.open($localize`Please login to access this page`, $localize`Close`, {
       duration: 3000,
       horizontalPosition: 'end',
       verticalPosition: 'top',
@@ -34,7 +34,7 @@ export const adminGuard: CanActivateFn = () => {
     return true;
   }
 
-  snackBar.open('Access denied: Only administrators can access this section', 'Close', {
+  snackBar.open($localize`Access denied: Only administrators can access this section`, $localize`Close`, {
     duration: 3000,
     horizontalPosition: 'end',
     verticalPosition: 'top',

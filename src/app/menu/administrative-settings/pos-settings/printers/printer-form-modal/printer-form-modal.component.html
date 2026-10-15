@@ -1,6 +1,6 @@
 <h2 mat-dialog-title class="flex items-center gap-2">
   <mat-icon>{{ data.printer ? 'edit' : 'add' }}</mat-icon>
-  {{ data.printer ? 'Edit Printer' : 'Create New Printer' }}
+  @if (data.printer) {<ng-container i18n>Edit Printer</ng-container>} @else {<ng-container i18n>Create New Printer</ng-container>}
 </h2>
 
 <mat-dialog-content class="max-w-2xl">
@@ -8,20 +8,20 @@
     
     <!-- Basic Information Section -->
     <div class="space-y-4">
-      <h3 class="text-sm font-semibold text-gray-900">Basic Information</h3>
+      <h3 class="text-sm font-semibold text-gray-900"><ng-container i18n>Basic Information</ng-container></h3>
       
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Printer Name</mat-label>
-        <input matInput formControlName="name" placeholder="e.g., Kitchen Printer 1" required />
+        <mat-label><ng-container i18n>Printer Name</ng-container></mat-label>
+        <input matInput formControlName="name" placeholder="e.g., Kitchen Printer 1" i18n-placeholder required />
         <mat-icon matPrefix class="text-gray-400">print</mat-icon>
         @if (printerForm.get('name')?.hasError('required') && printerForm.get('name')?.touched) {
-          <mat-error>Printer name is required</mat-error>
+          <mat-error><ng-container i18n>Printer name is required</ng-container></mat-error>
         }
       </mat-form-field>
 
       <div class="grid grid-cols-2 gap-4">
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Connection Type</mat-label>
+          <mat-label><ng-container i18n>Connection Type</ng-container></mat-label>
           <mat-select formControlName="connectionType" required>
             @for (type of connectionTypes; track type.value) {
               <mat-option [value]="type.value">{{ type.label }}</mat-option>
@@ -30,7 +30,7 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Printer Role</mat-label>
+          <mat-label><ng-container i18n>Printer Role</ng-container></mat-label>
           <mat-select formControlName="role" required>
             @for (role of roles; track role.value) {
               <mat-option [value]="role.value">{{ role.label }}</mat-option>
@@ -42,7 +42,7 @@
 
     <!-- Connection Settings Section -->
     <div class="space-y-4">
-      <h3 class="text-sm font-semibold text-gray-900">Connection Settings</h3>
+      <h3 class="text-sm font-semibold text-gray-900"><ng-container i18n>Connection Settings</ng-container></h3>
       
       <div formGroupName="connection" class="space-y-4">
         @switch (selectedConnectionType()) {
@@ -50,15 +50,15 @@
           @case ('network') {
             <div class="grid grid-cols-2 gap-4">
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>IP Address</mat-label>
+                <mat-label><ng-container i18n>IP Address</ng-container></mat-label>
                 <input matInput formControlName="ip" placeholder="192.168.1.100" />
-                <mat-hint>Enter the printer's IP address</mat-hint>
+                <mat-hint><ng-container i18n>Enter the printer's IP address</ng-container></mat-hint>
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Port</mat-label>
+                <mat-label><ng-container i18n>Port</ng-container></mat-label>
                 <input matInput type="number" formControlName="port" placeholder="9100" />
-                <mat-hint>Default: 9100</mat-hint>
+                <mat-hint><ng-container i18n>Default: 9100</ng-container></mat-hint>
               </mat-form-field>
             </div>
           }
@@ -66,9 +66,9 @@
           <!-- USB OS Connection -->
           @case ('usb-os') {
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Device Name</mat-label>
-              <input matInput formControlName="deviceName" placeholder="e.g., /dev/usb0 or PRN" />
-              <mat-hint>OS device identifier</mat-hint>
+              <mat-label><ng-container i18n>Device Name</ng-container></mat-label>
+              <input matInput formControlName="deviceName" placeholder="e.g., /dev/usb0 or PRN" i18n-placeholder />
+              <mat-hint><ng-container i18n>OS device identifier</ng-container></mat-hint>
             </mat-form-field>
           }
 
@@ -76,20 +76,20 @@
           @case ('usb-raw') {
             <div class="grid grid-cols-2 gap-4">
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Vendor ID</mat-label>
-                <input matInput formControlName="vendorId" placeholder="e.g., 1048 or 0x0418" />
-                <mat-hint>Decimal or 0x-prefixed hex, from the printer agent's "Add Printer" USB scan</mat-hint>
+                <mat-label><ng-container i18n>Vendor ID</ng-container></mat-label>
+                <input matInput formControlName="vendorId" placeholder="e.g., 1048 or 0x0418" i18n-placeholder />
+                <mat-hint><ng-container i18n>Decimal or 0x-prefixed hex, from the printer agent's "Add Printer" USB scan</ng-container></mat-hint>
                 @if (printerForm.get('connection.vendorId')?.hasError('pattern')) {
-                  <mat-error>Enter a decimal number (1048) or 0x-prefixed hex (0x0418)</mat-error>
+                  <mat-error><ng-container i18n>Enter a decimal number (1048) or 0x-prefixed hex (0x0418)</ng-container></mat-error>
                 }
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Product ID</mat-label>
-                <input matInput formControlName="productId" placeholder="e.g., 20497 or 0x5011" />
-                <mat-hint>Decimal or 0x-prefixed hex, from the printer agent's "Add Printer" USB scan</mat-hint>
+                <mat-label><ng-container i18n>Product ID</ng-container></mat-label>
+                <input matInput formControlName="productId" placeholder="e.g., 20497 or 0x5011" i18n-placeholder />
+                <mat-hint><ng-container i18n>Decimal or 0x-prefixed hex, from the printer agent's "Add Printer" USB scan</ng-container></mat-hint>
                 @if (printerForm.get('connection.productId')?.hasError('pattern')) {
-                  <mat-error>Enter a decimal number (20497) or 0x-prefixed hex (0x5011)</mat-error>
+                  <mat-error><ng-container i18n>Enter a decimal number (20497) or 0x-prefixed hex (0x5011)</ng-container></mat-error>
                 }
               </mat-form-field>
             </div>
@@ -99,15 +99,15 @@
           @case ('bluetooth') {
             <div class="grid grid-cols-2 gap-4">
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>MAC Address</mat-label>
+                <mat-label><ng-container i18n>MAC Address</ng-container></mat-label>
                 <input matInput formControlName="macAddress" placeholder="00:00:00:00:00:00" />
-                <mat-hint>Device MAC address</mat-hint>
+                <mat-hint><ng-container i18n>Device MAC address</ng-container></mat-hint>
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Channel</mat-label>
+                <mat-label><ng-container i18n>Channel</ng-container></mat-label>
                 <input matInput type="number" formControlName="channel" placeholder="0" />
-                <mat-hint>RFCOMM channel</mat-hint>
+                <mat-hint><ng-container i18n>RFCOMM channel</ng-container></mat-hint>
               </mat-form-field>
             </div>
           }
@@ -117,11 +117,11 @@
 
     <!-- Capabilities Section -->
     <div class="space-y-4">
-      <h3 class="text-sm font-semibold text-gray-900">Printer Capabilities</h3>
+      <h3 class="text-sm font-semibold text-gray-900"><ng-container i18n>Printer Capabilities</ng-container></h3>
       
       <div formGroupName="capabilities" class="space-y-4">
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Paper Width</mat-label>
+          <mat-label><ng-container i18n>Paper Width</ng-container></mat-label>
           <mat-select formControlName="paperWidth" required>
             @for (size of paperSizes; track size.value) {
               <mat-option [value]="size.value">{{ size.label }}</mat-option>
@@ -133,21 +133,21 @@
           <mat-checkbox formControlName="supportsQr" color="primary">
             <span class="flex items-center gap-2">
               <mat-icon class="text-sm text-gray-600">qr_code_2</mat-icon>
-              Supports QR Code
+              <ng-container i18n>Supports QR Code</ng-container>
             </span>
           </mat-checkbox>
 
           <mat-checkbox formControlName="supportsLogo" color="primary">
             <span class="flex items-center gap-2">
               <mat-icon class="text-sm text-gray-600">image</mat-icon>
-              Supports Logo
+              <ng-container i18n>Supports Logo</ng-container>
             </span>
           </mat-checkbox>
 
           <mat-checkbox formControlName="supportsCut" color="primary">
             <span class="flex items-center gap-2">
               <mat-icon class="text-sm text-gray-600">content_cut</mat-icon>
-              Supports Paper Cut
+              <ng-container i18n>Supports Paper Cut</ng-container>
             </span>
           </mat-checkbox>
         </div>
@@ -158,8 +158,8 @@
     <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
       <mat-icon class="text-gray-600">power_settings_new</mat-icon>
       <label class="flex-grow">
-        <span class="font-medium text-gray-900">Active</span>
-        <p class="text-xs text-gray-600">Enable this printer to receive print jobs</p>
+        <span class="font-medium text-gray-900"><ng-container i18n>Active</ng-container></span>
+        <p class="text-xs text-gray-600"><ng-container i18n>Enable this printer to receive print jobs</ng-container></p>
       </label>
       <mat-slide-toggle formControlName="isActive" color="primary"></mat-slide-toggle>
     </div>
@@ -167,7 +167,7 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="pt-4 border-t border-gray-200">
-  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button (click)="onCancel()"><ng-container i18n>Cancel</ng-container></button>
   <button 
     mat-raised-button 
     color="primary" 
@@ -178,6 +178,6 @@
     } @else {
       <mat-icon>{{ data.printer ? 'save' : 'add' }}</mat-icon>
     }
-    {{ data.printer ? 'Update' : 'Create' }} Printer
+    <ng-container i18n>{{ data.printer ? ('Update' | tr) : ('Create' | tr) }} Printer</ng-container>
   </button>
 </mat-dialog-actions>

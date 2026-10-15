@@ -38,11 +38,12 @@ import { StoreStore } from '../../../../../../shared/stores/store.store';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { tap, startWith } from 'rxjs/operators';
+import { TrPipe } from '../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-webhook-form-dialog',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
@@ -179,8 +180,8 @@ webhook = rxResource({
   onSubmit(): void {
     if (this.webhookForm.invalid || this.selectedEvents().length === 0) {
       this.snackBar.open(
-        'Please fill in all required fields and select at least one event',
-        'Close',
+        $localize`Please fill in all required fields and select at least one event`,
+        $localize`Close`,
         { duration: 3000 },
       );
       return;
@@ -192,7 +193,7 @@ webhook = rxResource({
     const propertyId = store?.channex?.propertyId;
 
     if (!propertyId) {
-      this.snackBar.open('Property ID not found', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Property ID not found`, $localize`Close`, { duration: 3000 });
       this.saving.set(false);
       return;
     }
@@ -207,7 +208,7 @@ webhook = rxResource({
           ? JSON.parse(formValue.headers) 
           : formValue.headers || {};
       } catch (e) {
-        this.snackBar.open('Invalid JSON in headers field', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Invalid JSON in headers field`, $localize`Close`, { duration: 3000 });
         this.saving.set(false);
         return;
       }
@@ -219,7 +220,7 @@ webhook = rxResource({
           ? JSON.parse(formValue.request_params)
           : formValue.request_params || {};
       } catch (e) {
-        this.snackBar.open('Invalid JSON in request_params field', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Invalid JSON in request_params field`, $localize`Close`, { duration: 3000 });
         this.saving.set(false);
         return;
       }
@@ -241,7 +242,7 @@ webhook = rxResource({
       // Update existing webhook
       this.webhookService.updateWebhook(webhookId, webhook).subscribe({
         next: (response) => {
-          this.snackBar.open('Webhook updated successfully', 'Close', {
+          this.snackBar.open($localize`Webhook updated successfully`, $localize`Close`, {
             duration: 3000,
           });
           this.saving.set(false);
@@ -249,7 +250,7 @@ webhook = rxResource({
         },
         error: (error) => {
           console.error('Failed to update webhook:', error);
-          this.snackBar.open('Failed to update webhook', 'Close', {
+          this.snackBar.open($localize`Failed to update webhook`, $localize`Close`, {
             duration: 3000,
           });
           this.saving.set(false);
@@ -259,7 +260,7 @@ webhook = rxResource({
       // Create new webhook
       this.webhookService.createWebhook(webhook).subscribe({
         next: (response) => {
-          this.snackBar.open('Webhook created successfully', 'Close', {
+          this.snackBar.open($localize`Webhook created successfully`, $localize`Close`, {
             duration: 3000,
           });
           this.saving.set(false);
@@ -267,7 +268,7 @@ webhook = rxResource({
         },
         error: (error) => {
           console.error('Failed to create webhook:', error);
-          this.snackBar.open('Failed to create webhook', 'Close', {
+          this.snackBar.open($localize`Failed to create webhook`, $localize`Close`, {
             duration: 3000,
           });
           this.saving.set(false);

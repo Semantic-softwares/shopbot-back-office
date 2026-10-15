@@ -5,8 +5,8 @@
 } @else if (leases().length === 0) {
   <app-no-record
     icon="description"
-    title="No Leases Found"
-    message="This tenant is not assigned to any lease yet."
+    title="No Leases Found" i18n-title
+    message="This tenant is not assigned to any lease yet." i18n-message
   ></app-no-record>
 } @else {
   <mat-card appearance="outlined">
@@ -15,7 +15,7 @@
         <table mat-table [dataSource]="leases()" class="w-full">
           <ng-container matColumnDef="lease">
             <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-              Lease
+              <ng-container i18n>Lease</ng-container>
             </th>
             <td mat-cell *matCellDef="let lease" class="py-3">
               <div class="flex flex-col gap-1">
@@ -27,7 +27,7 @@
 
           <ng-container matColumnDef="term">
             <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-              Property / Unit
+              <ng-container i18n>Property / Unit</ng-container>
             </th>
             <td mat-cell *matCellDef="let lease" class="py-3 text-sm text-slate-700">
               {{ propertyName(lease) }} @if (unitName(lease) !== '--') { · {{ unitName(lease) }} }
@@ -36,7 +36,7 @@
 
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-              Status
+              <ng-container i18n>Status</ng-container>
             </th>
             <td mat-cell *matCellDef="let lease" class="py-3">
               <mat-chip [ngClass]="statusClass(lease.status)">{{ lease.status }}</mat-chip>
@@ -45,7 +45,7 @@
 
           <ng-container matColumnDef="tenant">
             <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-              Tenant
+              <ng-container i18n>Tenant</ng-container>
             </th>
             <td mat-cell *matCellDef="let lease" class="py-3">
               <div class="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-2.5 py-1.5">
@@ -59,10 +59,10 @@
 
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 text-right!">
-              Action
+              <ng-container i18n>Action</ng-container>
             </th>
             <td mat-cell *matCellDef="let lease" class="py-3 text-right!">
-              <button mat-button color="primary" (click)="viewLease(lease._id)">View</button>
+              <button mat-button color="primary" (click)="viewLease(lease._id)"><ng-container i18n>View</ng-container></button>
             </td>
           </ng-container>
 

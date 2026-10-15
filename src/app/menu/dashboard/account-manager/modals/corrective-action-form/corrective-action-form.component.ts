@@ -18,11 +18,12 @@ import { UserService } from '../../../../../shared/services/user.service';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { tap } from 'rxjs';
 import { FeedbackService } from '../../../../shared/services/feedback.service';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-corrective-action-form',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
@@ -86,8 +87,8 @@ export class CorrectiveActionFormComponent {
           }
           
           this.snackBar.open(
-            `Corrective action ${this.data?._id ? 'updated' : 'created'} successfully`,
-            'Close',
+            $localize`Corrective action ${this.data?._id ? 'updated' : 'created'} successfully`,
+            $localize`Close`,
             {
               duration: 3000,
               horizontalPosition: 'end',
@@ -97,7 +98,7 @@ export class CorrectiveActionFormComponent {
           this.dialogRef.close(data);
         },
         error: (error) => {
-          this.snackBar.open(`Error ${this.data?._id ? 'updating' : 'creating'} corrective action`, 'Close', {
+          this.snackBar.open($localize`Error ${this.data?._id ? 'updating' : 'creating'} corrective action`, $localize`Close`, {
             duration: 3000,
             horizontalPosition: 'end',
             verticalPosition: 'top',

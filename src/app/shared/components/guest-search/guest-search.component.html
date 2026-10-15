@@ -9,7 +9,7 @@
       [matAutocomplete]="guestAutoComplete"
     />
     @if (isLoading()) {
-      <span>Searching...</span>
+      <span><ng-container i18n>Searching...</ng-container></span>
     }
     <mat-autocomplete #guestAutoComplete="matAutocomplete" (optionSelected)="onGuestSelected($event.option.value)">
       @for (guest of filteredGuests(); track guest._id) {
@@ -19,7 +19,7 @@
         </mat-option>
       }
       @if (filteredGuests().length === 0 && !isLoading()) {
-        <mat-option disabled>No guests found</mat-option>
+        <mat-option disabled><ng-container i18n>No guests found</ng-container></mat-option>
       }
     </mat-autocomplete>
   </mat-form-field>

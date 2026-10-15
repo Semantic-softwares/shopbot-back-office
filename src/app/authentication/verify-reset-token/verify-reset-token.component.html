@@ -3,33 +3,33 @@
     <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 py-12 lg:px-16 xl:px-24 bg-white">
         <!-- Logo/Brand -->
         <div class="mb-8">
-            <h1 class="text-2xl font-bold text-gray-900">ShopBot</h1>
-            <p class="text-gray-500 mt-1">Verify Reset Token</p>
+            <h1 class="text-2xl font-bold text-gray-900"><ng-container i18n>ShopBot</ng-container></h1>
+            <p class="text-gray-500 mt-1"><ng-container i18n>Verify Reset Token</ng-container></p>
         </div>
 
         <!-- Form Content -->
         <div class="max-w-md">
             @if (!verified()) {
-                <h2 class="text-2xl font-semibold text-gray-800 mb-2">Enter verification code</h2>
-                <p class="text-gray-500 mb-8">Enter the 6-digit token sent to your email.</p>
+                <h2 class="text-2xl font-semibold text-gray-800 mb-2"><ng-container i18n>Enter verification code</ng-container></h2>
+                <p class="text-gray-500 mb-8"><ng-container i18n>Enter the 6-digit token sent to your email.</ng-container></p>
 
                 <div class="bg-blue-50 text-blue-700 text-sm p-4 rounded-lg mb-6 flex items-center gap-3">
                     <mat-icon class="text-blue-600" fontSet="material-icons-outlined">mail</mat-icon>
-                    <span>Token sent to: <strong>{{ email() }}</strong></span>
+                    <span i18n>Token sent to: <strong>{{ email() }}</strong></span>
                 </div>
 
                 <form [formGroup]="verifyTokenForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Reset Token</mat-label>
-                        <input matInput formControlName="token" placeholder="Enter 6-digit token" type="text" maxlength="6"
+                        <mat-label><ng-container i18n>Reset Token</ng-container></mat-label>
+                        <input matInput formControlName="token" placeholder="Enter 6-digit token" i18n-placeholder type="text" maxlength="6"
                                class="text-center text-2xl tracking-widest">
                         <mat-icon matSuffix fontSet="material-icons-outlined">vpn_key</mat-icon>
                         
                         @if (verifyTokenForm.get('token')?.hasError('required')) {
-                            <mat-error>Token is required</mat-error>
+                            <mat-error><ng-container i18n>Token is required</ng-container></mat-error>
                         }
                         @if (verifyTokenForm.get('token')?.hasError('minlength')) {
-                            <mat-error>Token must be 6 digits</mat-error>
+                            <mat-error><ng-container i18n>Token must be 6 digits</ng-container></mat-error>
                         }
                     </mat-form-field>
 
@@ -39,17 +39,17 @@
                         @if (loading()) {
                             <span class="flex items-center justify-center gap-2">
                                 <mat-spinner diameter="20"></mat-spinner>
-                                Verifying...
+                                <ng-container i18n>Verifying...</ng-container>
                             </span>
                         } @else {
-                            Verify Token
+                            <ng-container i18n>Verify Token</ng-container>
                         }
                     </button>
 
                     <div class="text-center mt-6">
-                        <p class="text-sm text-gray-500 mb-2">Didn't receive the token?</p>
+                        <p class="text-sm text-gray-500 mb-2"><ng-container i18n>Didn't receive the token?</ng-container></p>
                         <a href="/auth/forgot-password" class="text-sm font-medium text-blue-600 hover:text-blue-800">
-                            Request a new one
+                            <ng-container i18n>Request a new one</ng-container>
                         </a>
                     </div>
                 </form>
@@ -58,9 +58,9 @@
                     <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                         <mat-icon class="text-green-600 text-3xl">verified_user</mat-icon>
                     </div>
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-2">Token Verified!</h2>
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-2"><ng-container i18n>Token Verified!</ng-container></h2>
                     <p class="text-gray-500 mb-4">
-                        Redirecting to reset your password...
+                        <ng-container i18n>Redirecting to reset your password...</ng-container>
                     </p>
                     <mat-spinner diameter="32" class="mx-auto"></mat-spinner>
                 </div>
@@ -82,10 +82,10 @@
             <!-- Main Headline -->
             <div class="mb-10">
                 <h2 class="text-3xl xl:text-4xl font-bold leading-tight mb-4">
-                    Almost there!
+                    <ng-container i18n>Almost there!</ng-container>
                 </h2>
                 <p class="text-blue-200 text-lg">
-                    Verify your identity to continue with the password reset process.
+                    <ng-container i18n>Verify your identity to continue with the password reset process.</ng-container>
                 </p>
             </div>
 
@@ -93,23 +93,23 @@
             <div class="grid grid-cols-2 gap-6">
                 <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
                     <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">verified_user</mat-icon>
-                    <h4 class="font-semibold text-white mb-1">Secure Verification</h4>
-                    <p class="text-blue-200 text-sm">One-time token for your security</p>
+                    <h4 class="font-semibold text-white mb-1"><ng-container i18n>Secure Verification</ng-container></h4>
+                    <p class="text-blue-200 text-sm"><ng-container i18n>One-time token for your security</ng-container></p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
                     <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">schedule</mat-icon>
-                    <h4 class="font-semibold text-white mb-1">Time Limited</h4>
-                    <p class="text-blue-200 text-sm">Token expires for added security</p>
+                    <h4 class="font-semibold text-white mb-1"><ng-container i18n>Time Limited</ng-container></h4>
+                    <p class="text-blue-200 text-sm"><ng-container i18n>Token expires for added security</ng-container></p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
                     <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">lock</mat-icon>
-                    <h4 class="font-semibold text-white mb-1">Encrypted</h4>
-                    <p class="text-blue-200 text-sm">Your data is always protected</p>
+                    <h4 class="font-semibold text-white mb-1"><ng-container i18n>Encrypted</ng-container></h4>
+                    <p class="text-blue-200 text-sm"><ng-container i18n>Your data is always protected</ng-container></p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
                     <mat-icon class="text-blue-300 text-3xl mb-3" fontSet="material-icons-outlined">refresh</mat-icon>
-                    <h4 class="font-semibold text-white mb-1">Resend Token</h4>
-                    <p class="text-blue-200 text-sm">Request a new code if needed</p>
+                    <h4 class="font-semibold text-white mb-1"><ng-container i18n>Resend Token</ng-container></h4>
+                    <p class="text-blue-200 text-sm"><ng-container i18n>Request a new code if needed</ng-container></p>
                 </div>
             </div>
         </div>

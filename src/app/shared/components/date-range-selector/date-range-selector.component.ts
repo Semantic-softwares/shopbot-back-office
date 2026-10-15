@@ -35,7 +35,7 @@ import { QueryParamService } from '../../services/query-param.service';
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Date Range</mat-label>
+      <mat-label><ng-container i18n>Date Range</ng-container></mat-label>
       <mat-date-range-input
         [formGroup]="dateRange"
         [max]="maxDate()"
@@ -44,13 +44,13 @@ import { QueryParamService } from '../../services/query-param.service';
         <input
           matStartDate
           formControlName="start"
-          placeholder="Start date"
+          placeholder="Start date" i18n-placeholder
           required
           />
         <input
           matEndDate
           formControlName="end"
-          placeholder="End date"
+          placeholder="End date" i18n-placeholder
           required
           />
       </mat-date-range-input>
@@ -65,7 +65,7 @@ import { QueryParamService } from '../../services/query-param.service';
         ) {
         <mat-error
           >
-          Both dates are required
+          <ng-container i18n>Both dates are required</ng-container>
         </mat-error>
       }
     </mat-form-field>

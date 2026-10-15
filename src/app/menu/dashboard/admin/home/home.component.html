@@ -1,6 +1,6 @@
 <div class="dashboard">
   <div class="welcome-section">
-    <h1>Dashboard Overview</h1>
+    <h1><ng-container i18n>Dashboard Overview</ng-container></h1>
     <p class="date">{{currentDate | date:'EEEE, MMMM d, y'}}</p>
   </div>
 
@@ -8,13 +8,13 @@
     <div class="stat-card" [class.active]="selectedStat === 'users'" (click)="selectStat('users')">
       <div class="stat-header">
         <span class="material-icons" [style.color]="'#4f46e5'">person</span>
-        <span class="label">Users</span>
+        <span class="label"><ng-container i18n>Users</ng-container></span>
       </div>
       <div class="stat-body">
         <h3>{{stats.users.count | number}}</h3>
         <div class="stat-details">
           <span class="trend-up">{{stats.users.trend}}</span>
-          <span class="period">vs last month</span>
+          <span class="period"><ng-container i18n>vs last month</ng-container></span>
         </div>
       </div>
     </div>
@@ -22,13 +22,13 @@
     <div class="stat-card" [class.active]="selectedStat === 'companies'" (click)="selectStat('companies')">
       <div class="stat-header">
         <span class="material-icons" [style.color]="'#10b981'">business</span>
-        <span class="label">Companies</span>
+        <span class="label"><ng-container i18n>Companies</ng-container></span>
       </div>
       <div class="stat-body">
         <h3>{{stats.companies.count | number}}</h3>
         <div class="stat-details">
           <span class="trend-up">{{stats.companies.trend}}</span>
-          <span class="period">vs last month</span>
+          <span class="period"><ng-container i18n>vs last month</ng-container></span>
         </div>
       </div>
     </div>
@@ -36,13 +36,13 @@
     <div class="stat-card" [class.active]="selectedStat === 'services'" (click)="selectStat('services')">
       <div class="stat-header">
         <span class="material-icons" [style.color]="'#f59e0b'">handyman</span>
-        <span class="label">Feedback</span>
+        <span class="label"><ng-container i18n>Feedback</ng-container></span>
       </div>
       <div class="stat-body">
         <h3>{{stats.feedback.count | number}}</h3>
         <div class="stat-details">
           <span class="trend-up">{{stats.feedback.trend}}</span>
-          <span class="period">vs last month</span>
+          <span class="period"><ng-container i18n>vs last month</ng-container></span>
         </div>
       </div>
     </div>
@@ -50,13 +50,13 @@
     <div class="stat-card" [class.active]="selectedStat === 'events'" (click)="selectStat('events')">
       <div class="stat-header">
         <span class="material-icons" [style.color]="'#ef4444'">psychology_alt</span>
-        <span class="label">Surveys</span>
+        <span class="label"><ng-container i18n>Surveys</ng-container></span>
       </div>
       <div class="stat-body">
         <h3>{{stats.surveys.count | number}}</h3>
         <div class="stat-details">
           <span class="trend-up">{{stats.surveys.trend}}</span>
-          <span class="period">vs last month</span>
+          <span class="period"><ng-container i18n>vs last month</ng-container></span>
         </div>
       </div>
     </div>
@@ -66,11 +66,11 @@
     <div class="chart-section">
       <div class="chart-card">
         <div class="card-header">
-          <h2>{{selectedStat | titlecase}} Growth</h2>
+          <h2><ng-container i18n>{{selectedStat | titlecase}} Growth</ng-container></h2>
           <div class="period-selector">
-            <button [class.active]="selectedPeriod === 'week'" (click)="changePeriod('week')">Week</button>
-            <button [class.active]="selectedPeriod === 'month'" (click)="changePeriod('month')">Month</button>
-            <button [class.active]="selectedPeriod === 'year'" (click)="changePeriod('year')">Year</button>
+            <button [class.active]="selectedPeriod === 'week'" (click)="changePeriod('week')"><ng-container i18n>Week</ng-container></button>
+            <button [class.active]="selectedPeriod === 'month'" (click)="changePeriod('month')"><ng-container i18n>Month</ng-container></button>
+            <button [class.active]="selectedPeriod === 'year'" (click)="changePeriod('year')"><ng-container i18n>Year</ng-container></button>
           </div>
         </div>
         <canvas baseChart [data]="chartData" [type]="'line'" [options]="chartOptions"></canvas>
@@ -79,7 +79,7 @@
 
     <div class="side-section">
       <div class="recent-activity-card">
-        <h2>Recent Activities</h2>
+        <h2><ng-container i18n>Recent Activities</ng-container></h2>
         <div class="activity-list">
           <div class="activity-item" *ngFor="let activity of recentActivities">
             <div class="activity-icon" [style.background]="activity.color + '20'" [style.color]="activity.color">

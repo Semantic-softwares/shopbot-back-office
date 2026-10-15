@@ -109,7 +109,7 @@ export class PaymentListComponent {
   );
 
   readonly methodOptions = computed(() => [
-    { value: '', label: 'All Methods' },
+    { value: '', label: $localize`All Methods` },
     { value: EstatePaymentMethod.CASH, label: this.methodLabel(EstatePaymentMethod.CASH) },
     { value: EstatePaymentMethod.BANK_TRANSFER, label: this.methodLabel(EstatePaymentMethod.BANK_TRANSFER) },
     { value: EstatePaymentMethod.CARD, label: this.methodLabel(EstatePaymentMethod.CARD) },
@@ -118,7 +118,7 @@ export class PaymentListComponent {
   ]);
 
   readonly statusOptions = computed(() => [
-    { value: '', label: 'All Statuses' },
+    { value: '', label: $localize`All Statuses` },
     { value: PaymentStatus.UNALLOCATED, label: this.statusLabel(PaymentStatus.UNALLOCATED) },
     {
       value: PaymentStatus.PARTIALLY_ALLOCATED,
@@ -129,11 +129,11 @@ export class PaymentListComponent {
   ]);
 
   readonly flowOptions = [
-    { value: '', label: 'All Flows' },
-    { value: 'INCOME', label: 'Inflow' },
-    { value: 'EXPENSE', label: 'Outflow' },
-    { value: 'MIXED', label: 'Mixed' },
-    { value: 'UNSET', label: 'Not identified' },
+    { value: '', label: $localize`All Flows` },
+    { value: 'INCOME', label: $localize`Inflow` },
+    { value: 'EXPENSE', label: $localize`Outflow` },
+    { value: 'MIXED', label: $localize`Mixed` },
+    { value: 'UNSET', label: $localize`Not identified` },
   ];
 
   readonly filteredPayments = computed(() => {
@@ -321,10 +321,10 @@ export class PaymentListComponent {
 
     const confirmRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title: 'Delete Payment',
-        message: `Are you sure you want to delete payment ${payment.paymentNumber}? This action cannot be undone.`,
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
+        title: $localize`Delete Payment`,
+        message: $localize`Are you sure you want to delete payment ${payment.paymentNumber}? This action cannot be undone.`,
+        confirmText: $localize`Delete`,
+        cancelText: $localize`Cancel`,
       },
     });
 
@@ -349,13 +349,13 @@ export class PaymentListComponent {
 
         this.paymentService.deletePayment(payment._id).subscribe({
           next: () => {
-            this.snackBar.open('Payment deleted successfully', 'Close', { duration: 3000 });
+            this.snackBar.open($localize`Payment deleted successfully`, $localize`Close`, { duration: 3000 });
             this.paymentsResource.reload();
           },
           error: (err) => {
             this.snackBar.open(
               err?.error?.message || 'Failed to delete payment',
-              'Close',
+              $localize`Close`,
               { duration: 5000 },
             );
           },

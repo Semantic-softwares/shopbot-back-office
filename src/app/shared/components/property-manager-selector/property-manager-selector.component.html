@@ -5,10 +5,10 @@
     [formControl]="control"
     [matAutocomplete]="managerAuto"
     (input)="onManagerInput($event)"
-    placeholder="Search staff by name or email"
-    aria-label="Search for a staff member">
+    placeholder="Search staff by name or email" i18n-placeholder
+    aria-label="Search for a staff member" i18n-aria-label>
   @if (control.value) {
-    <button matSuffix mat-icon-button type="button" (click)="clearManager()" aria-label="Clear selected manager">
+    <button matSuffix mat-icon-button type="button" (click)="clearManager()" aria-label="Clear selected manager" i18n-aria-label>
       <mat-icon>close</mat-icon>
     </button>
   }
@@ -29,6 +29,6 @@
     }
   </mat-autocomplete>
   @if (control.invalid && control.touched) {
-    <mat-error>Please select a staff member</mat-error>
+    <mat-error><ng-container i18n>Please select a staff member</ng-container></mat-error>
   }
 </mat-form-field>

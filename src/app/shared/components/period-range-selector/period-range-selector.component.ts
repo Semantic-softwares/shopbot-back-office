@@ -25,7 +25,7 @@ import { QueryParamService } from '../../services/query-param.service';
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Period</mat-label>
+      <mat-label><ng-container i18n>Period</ng-container></mat-label>
       <mat-select [(value)]="selectedPeriod" (selectionChange)="onSelectionChange($event.value)">
         @for (period of periods; track period) {
           <mat-option [value]="period">

@@ -35,11 +35,12 @@ import { LeaseStepTenantsComponent } from './steps/lease-step-tenants.component'
 import { LeaseStepTransactionsComponent } from './steps/lease-step-transactions.component';
 import { LeaseStepUtilitiesComponent } from './steps/lease-step-utilities.component';
 import { LeaseStepSummaryComponent } from './steps/lease-step-summary.component';
+import { TrPipe } from '../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-lease-create-wizard',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
@@ -389,7 +390,7 @@ export class LeaseCreateWizardComponent {
         this.termsGroup.get('unitId')?.updateValueAndValidity({ emitEvent: false });
       },
       error: () => {
-        this.snackBar.open('Failed to load property details', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Failed to load property details`, $localize`Close`, { duration: 4000 });
       },
     });
   }
@@ -653,7 +654,7 @@ export class LeaseCreateWizardComponent {
         this.onPropertyChange(this.termsGroup.get('propertyId')?.value);
         this.syncTenantShares();
       },
-      error: () => this.snackBar.open('Failed to load lease', 'Close', { duration: 5000 }),
+      error: () => this.snackBar.open($localize`Failed to load lease`, $localize`Close`, { duration: 5000 }),
     });
   }
 
@@ -662,7 +663,7 @@ export class LeaseCreateWizardComponent {
   submit(status: LeaseStatus): void {
     if (this.leaseForm.invalid) {
       this.leaseForm.markAllAsTouched();
-      this.snackBar.open('Please complete required fields before submitting', 'Close', {
+      this.snackBar.open($localize`Please complete required fields before submitting`, $localize`Close`, {
         duration: 4000,
       });
       return;
@@ -674,7 +675,7 @@ export class LeaseCreateWizardComponent {
     const endDate = terms.endDate ? new Date(terms.endDate) : null;
 
     if (terms.leaseType === LeaseType.FIXED_TERM && startDate && endDate && endDate <= startDate) {
-      this.snackBar.open('End date must be after start date', 'Close', { duration: 4000 });
+      this.snackBar.open($localize`End date must be after start date`, $localize`Close`, { duration: 4000 });
       return;
     }
 
@@ -703,14 +704,14 @@ export class LeaseCreateWizardComponent {
     request$.subscribe({
       next: () => {
         this.snackBar.open(
-          this.isEditMode() ? 'Lease updated successfully' : 'Lease created successfully',
-          'Close',
+          this.isEditMode() ? $localize`Lease updated successfully` : $localize`Lease created successfully`,
+          $localize`Close`,
           { duration: 3500 },
         );
         this.router.navigate(['../'], { relativeTo: this.route });
       },
       error: (err) => {
-        this.snackBar.open(err?.error?.message || 'Failed to save lease', 'Close', {
+        this.snackBar.open(err?.error?.message || 'Failed to save lease', $localize`Close`, {
           duration: 5000,
         });
         this.isSubmitting.set(false);
@@ -734,7 +735,7 @@ export class LeaseCreateWizardComponent {
   private submitThenActivate(): void {
     if (this.leaseForm.invalid) {
       this.leaseForm.markAllAsTouched();
-      this.snackBar.open('Please complete required fields before submitting', 'Close', {
+      this.snackBar.open($localize`Please complete required fields before submitting`, $localize`Close`, {
         duration: 4000,
       });
       return;
@@ -746,7 +747,7 @@ export class LeaseCreateWizardComponent {
     const endDate = terms.endDate ? new Date(terms.endDate) : null;
 
     if (terms.leaseType === LeaseType.FIXED_TERM && startDate && endDate && endDate <= startDate) {
-      this.snackBar.open('End date must be after start date', 'Close', { duration: 4000 });
+      this.snackBar.open($localize`End date must be after start date`, $localize`Close`, { duration: 4000 });
       return;
     }
 
@@ -775,13 +776,13 @@ export class LeaseCreateWizardComponent {
         // Step 2: Activate via dedicated endpoint (triggers billing)
         this.leaseService.activateLease(this.leaseId!).subscribe({
           next: () => {
-            this.snackBar.open('Lease activated successfully', 'Close', { duration: 3500 });
+            this.snackBar.open($localize`Lease activated successfully`, $localize`Close`, { duration: 3500 });
             this.router.navigate(['../'], { relativeTo: this.route });
           },
           error: (err) => {
             this.snackBar.open(
               err?.error?.message || 'Lease saved but activation failed',
-              'Close',
+              $localize`Close`,
               { duration: 5000 },
             );
             this.isSubmitting.set(false);
@@ -789,7 +790,7 @@ export class LeaseCreateWizardComponent {
         });
       },
       error: (err) => {
-        this.snackBar.open(err?.error?.message || 'Failed to save lease', 'Close', {
+        this.snackBar.open(err?.error?.message || 'Failed to save lease', $localize`Close`, {
           duration: 5000,
         });
         this.isSubmitting.set(false);

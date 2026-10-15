@@ -39,13 +39,13 @@ export class PetFormModalComponent {
   private data: PetFormDialogData = inject(MAT_DIALOG_DATA, { optional: true }) ?? {};
 
   readonly petTypes: { value: PetType; label: string }[] = [
-    { value: PetType.DOG, label: 'Dog' },
-    { value: PetType.CAT, label: 'Cat' },
-    { value: PetType.BIRD, label: 'Bird' },
-    { value: PetType.FISH, label: 'Fish' },
-    { value: PetType.RABBIT, label: 'Rabbit' },
-    { value: PetType.REPTILE, label: 'Reptile' },
-    { value: PetType.OTHER, label: 'Other' },
+    { value: PetType.DOG, label: $localize`Dog` },
+    { value: PetType.CAT, label: $localize`Cat` },
+    { value: PetType.BIRD, label: $localize`Bird` },
+    { value: PetType.FISH, label: $localize`Fish` },
+    { value: PetType.RABBIT, label: $localize`Rabbit` },
+    { value: PetType.REPTILE, label: $localize`Reptile` },
+    { value: PetType.OTHER, label: $localize`Other` },
   ];
 
   form = this.fb.group({

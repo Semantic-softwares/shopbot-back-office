@@ -1,13 +1,13 @@
 <div class="px-4">
   <div class="grid grid-cols-1 gap-6">
-    <app-page-header title="MRA e-Invoicing" subtitle="Fiscalise your invoices and receipts with the Mauritius Revenue Authority"></app-page-header>
+    <app-page-header title="MRA e-Invoicing" i18n-title subtitle="Fiscalise your invoices and receipts with the Mauritius Revenue Authority" i18n-subtitle></app-page-header>
 
     @if (loading()) {
       <div class="flex items-center justify-center py-8"><mat-spinner diameter="40"></mat-spinner></div>
     } @else if (loadFailed() || !view()) {
       <mat-card appearance="outlined">
         <mat-card-content class="pt-4 text-center text-sm text-gray-500 py-8">
-          Couldn't load MRA e-invoicing. Refresh the page to try again.
+          <ng-container i18n>Couldn't load MRA e-invoicing. Refresh the page to try again.</ng-container>
         </mat-card-content>
       </mat-card>
     } @else if (member(); as m) {
@@ -15,8 +15,8 @@
         <mat-card-content class="pt-4 flex items-center gap-3">
           <mat-icon [class]="m.fiscalisation.active ? 'text-green-600' : 'text-gray-400'">{{ m.fiscalisation.active ? 'check_circle' : 'remove_circle_outline' }}</mat-icon>
           <div>
-            <div class="text-sm font-medium text-gray-900">MRA fiscalisation: {{ m.fiscalisation.active ? 'Active' : 'Not active' }}</div>
-            <div class="text-xs text-gray-500">Only the store owner can change MRA settings.</div>
+            <div class="text-sm font-medium text-gray-900"><ng-container i18n>MRA fiscalisation: {{ m.fiscalisation.active ? ('Active' | tr) : ('Not active' | tr) }}</ng-container></div>
+            <div class="text-xs text-gray-500"><ng-container i18n>Only the store owner can change MRA settings.</ng-container></div>
           </div>
         </mat-card-content>
       </mat-card>
@@ -35,118 +35,118 @@
                   </button>
                 }
               </div>
-              <button type="button" mat-button (click)="leaveWizard()" [disabled]="saving()">Save for later</button>
+              <button type="button" mat-button (click)="leaveWizard()" [disabled]="saving()"><ng-container i18n>Save for later</ng-container></button>
             </div>
 
             @switch (wizardStep()) {
               @case (1) {
-                <h4 class="text-sm font-medium text-gray-900">Your business</h4>
-                <p class="text-xs text-gray-500 mt-1 mb-4">We've filled in what Shopbot already knows. Check it, and add your tax numbers.</p>
+                <h4 class="text-sm font-medium text-gray-900"><ng-container i18n>Your business</ng-container></h4>
+                <p class="text-xs text-gray-500 mt-1 mb-4"><ng-container i18n>We've filled in what Shopbot already knows. Check it, and add your tax numbers.</ng-container></p>
                 <form [formGroup]="businessForm" (ngSubmit)="saveBusiness()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <mat-form-field appearance="outline"><mat-label>Legal business name</mat-label>
+                  <mat-form-field appearance="outline"><mat-label><ng-container i18n>Legal business name</ng-container></mat-label>
                     <input matInput formControlName="legalName" autocomplete="off" />
-                    @if (businessForm.controls.legalName.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Required</mat-error> }
+                    @if (businessForm.controls.legalName.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error><ng-container i18n>Required</ng-container></mat-error> }
                   </mat-form-field>
-                  <mat-form-field appearance="outline"><mat-label>Trading name</mat-label>
+                  <mat-form-field appearance="outline"><mat-label><ng-container i18n>Trading name</ng-container></mat-label>
                     <input matInput formControlName="tradingName" autocomplete="off" />
                   </mat-form-field>
-                  <mat-form-field appearance="outline"><mat-label>Tax Account Number (TAN)</mat-label>
+                  <mat-form-field appearance="outline"><mat-label><ng-container i18n>Tax Account Number (TAN)</ng-container></mat-label>
                     <input matInput formControlName="tan" placeholder="12345678" autocomplete="off" inputmode="numeric" />
-                    <mat-hint>Used by MRA to identify the seller issuing the invoice.</mat-hint>
-                    @if (businessForm.controls.tan.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Enter your 8-digit TAN.</mat-error> }
+                    <mat-hint><ng-container i18n>Used by MRA to identify the seller issuing the invoice.</ng-container></mat-hint>
+                    @if (businessForm.controls.tan.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error><ng-container i18n>Enter your 8-digit TAN.</ng-container></mat-error> }
                   </mat-form-field>
-                  <mat-form-field appearance="outline"><mat-label>Business Registration Number (BRN)</mat-label>
+                  <mat-form-field appearance="outline"><mat-label><ng-container i18n>Business Registration Number (BRN)</ng-container></mat-label>
                     <input matInput formControlName="brn" placeholder="C12345678" autocomplete="off" />
-                    <mat-hint>A letter followed by digits.</mat-hint>
-                    @if (businessForm.controls.brn.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Required</mat-error> }
+                    <mat-hint><ng-container i18n>A letter followed by digits.</ng-container></mat-hint>
+                    @if (businessForm.controls.brn.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error><ng-container i18n>Required</ng-container></mat-error> }
                   </mat-form-field>
-                  <mat-form-field appearance="outline" class="sm:col-span-2"><mat-label>Business address</mat-label>
+                  <mat-form-field appearance="outline" class="sm:col-span-2"><mat-label><ng-container i18n>Business address</ng-container></mat-label>
                     <input matInput formControlName="businessAddr" autocomplete="off" />
-                    @if (businessForm.controls.businessAddr.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Required</mat-error> }
+                    @if (businessForm.controls.businessAddr.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error><ng-container i18n>Required</ng-container></mat-error> }
                   </mat-form-field>
-                  <mat-form-field appearance="outline"><mat-label>Business phone</mat-label><input matInput formControlName="businessPhone" autocomplete="off" /></mat-form-field>
-                  <mat-form-field appearance="outline"><mat-label>Business email</mat-label><input matInput formControlName="businessEmail" autocomplete="off" /></mat-form-field>
-                  <div class="sm:col-span-2 text-xs text-gray-500">TAN and BRN belong to your business, not to any cashier. Currency: {{ o.business.currency }} · Country: {{ o.business.country }}</div>
-                  <div class="sm:col-span-2"><button type="submit" mat-flat-button color="primary" [disabled]="saving()">{{ saving() ? 'Saving...' : 'Save and continue' }}</button></div>
+                  <mat-form-field appearance="outline"><mat-label><ng-container i18n>Business phone</ng-container></mat-label><input matInput formControlName="businessPhone" autocomplete="off" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label><ng-container i18n>Business email</ng-container></mat-label><input matInput formControlName="businessEmail" autocomplete="off" /></mat-form-field>
+                  <div class="sm:col-span-2 text-xs text-gray-500"><ng-container i18n>TAN and BRN belong to your business, not to any cashier. Currency: {{ o.business.currency }} · Country: {{ o.business.country }}</ng-container></div>
+                  <div class="sm:col-span-2"><button type="submit" mat-flat-button color="primary" [disabled]="saving()">@if (saving()) {<ng-container i18n>Saving...</ng-container>} @else {<ng-container i18n>Save and continue</ng-container>}</button></div>
                 </form>
               }
               @case (2) {
-                <h4 class="text-sm font-medium text-gray-900">Register with MRA</h4>
+                <h4 class="text-sm font-medium text-gray-900"><ng-container i18n>Register with MRA</ng-container></h4>
                 <div class="mt-2 rounded-lg border border-blue-100 bg-blue-50 p-3 text-xs text-blue-900">
-                  Shopbot is already an MRA-compliant Electronic Billing System. Before your business can issue live fiscalised invoices,
+                  <ng-container i18n>Shopbot is already an MRA-compliant Electronic Billing System. Before your business can issue live fiscalised invoices,
                   MRA requires your business to register as an Economic Operator, register its places of business, and create a
-                  Transmission User. Shopbot can't do the MRA registration for you: you do it with MRA, then come back here.
+                  Transmission User. Shopbot can't do the MRA registration for you: you do it with MRA, then come back here.</ng-container>
                 </div>
                 <div class="mt-3">
-                  <a mat-stroked-button [href]="portalUrl" target="_blank" rel="noopener"><mat-icon>open_in_new</mat-icon> Open the MRA website</a>
+                  <a mat-stroked-button [href]="portalUrl" target="_blank" rel="noopener"><mat-icon>open_in_new</mat-icon> <ng-container i18n>Open the MRA website</ng-container></a>
                 </div>
                 <form [formGroup]="registrationForm" (ngSubmit)="saveRegistration()" class="mt-4 grid gap-1">
-                  <mat-checkbox formControlName="registeredAsOperator">I have registered my business with MRA as an Economic Operator</mat-checkbox>
-                  <mat-checkbox formControlName="placesOfBusinessRegistered">My places of business are registered with MRA</mat-checkbox>
-                  <mat-checkbox formControlName="transmissionUserCreated">MRA has created my Transmission User and I have set its password</mat-checkbox>
-                  <p class="text-xs text-gray-500 mt-1">These are your own confirmations. Shopbot can't check them with MRA.</p>
+                  <mat-checkbox formControlName="registeredAsOperator"><ng-container i18n>I have registered my business with MRA as an Economic Operator</ng-container></mat-checkbox>
+                  <mat-checkbox formControlName="placesOfBusinessRegistered"><ng-container i18n>My places of business are registered with MRA</ng-container></mat-checkbox>
+                  <mat-checkbox formControlName="transmissionUserCreated"><ng-container i18n>MRA has created my Transmission User and I have set its password</ng-container></mat-checkbox>
+                  <p class="text-xs text-gray-500 mt-1"><ng-container i18n>These are your own confirmations. Shopbot can't check them with MRA.</ng-container></p>
                   <div class="mt-3 flex gap-2">
-                    <button type="submit" mat-flat-button color="primary" [disabled]="saving()">{{ registrationComplete() ? 'Save and continue' : 'Save for later' }}</button>
-                    <button type="button" mat-button (click)="goToStep(1)" [disabled]="saving()">Back</button>
+                    <button type="submit" mat-flat-button color="primary" [disabled]="saving()">@if (registrationComplete()) {<ng-container i18n>Save and continue</ng-container>} @else {<ng-container i18n>Save for later</ng-container>}</button>
+                    <button type="button" mat-button (click)="goToStep(1)" [disabled]="saving()"><ng-container i18n>Back</ng-container></button>
                   </div>
                 </form>
               }
               @case (3) {
-                <h4 class="text-sm font-medium text-gray-900">MRA Transmission User</h4>
+                <h4 class="text-sm font-medium text-gray-900"><ng-container i18n>MRA Transmission User</ng-container></h4>
                 <p class="text-xs text-gray-500 mt-1 mb-4">
-                  The username is generated by MRA. The password is set by your business on the MRA e-Invoicing Portal. These details let Shopbot
-                  authenticate your EBS when sending invoices to MRA, for all your places of business. They stay on Shopbot's secure servers and are never shown again.
+                  <ng-container i18n>The username is generated by MRA. The password is set by your business on the MRA e-Invoicing Portal. These details let Shopbot
+                  authenticate your EBS when sending invoices to MRA, for all your places of business. They stay on Shopbot's secure servers and are never shown again.</ng-container>
                 </p>
                 <form [formGroup]="transmissionForm" (ngSubmit)="saveTransmissionUser()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <mat-form-field appearance="outline"><mat-label>Transmission User username</mat-label>
+                  <mat-form-field appearance="outline"><mat-label><ng-container i18n>Transmission User username</ng-container></mat-label>
                     <input matInput formControlName="username" autocomplete="off" />
-                    <mat-hint>Generated by MRA.</mat-hint>
-                    @if (transmissionForm.controls.username.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Required</mat-error> }
+                    <mat-hint><ng-container i18n>Generated by MRA.</ng-container></mat-hint>
+                    @if (transmissionForm.controls.username.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error><ng-container i18n>Required</ng-container></mat-error> }
                   </mat-form-field>
-                  <mat-form-field appearance="outline"><mat-label>Transmission User password</mat-label>
-                    <input matInput type="password" formControlName="password" autocomplete="new-password" [placeholder]="o.transmissionUser.passwordSet ? 'Saved — leave blank to keep it' : ''" />
-                    <mat-hint>The password you set on the MRA portal.</mat-hint>
+                  <mat-form-field appearance="outline"><mat-label><ng-container i18n>Transmission User password</ng-container></mat-label>
+                    <input matInput type="password" formControlName="password" autocomplete="new-password" [placeholder]="o.transmissionUser.passwordSet ? ('Saved — leave blank to keep it' | tr) : ''" />
+                    <mat-hint><ng-container i18n>The password you set on the MRA portal.</ng-container></mat-hint>
                     @if (transmissionForm.controls.password.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> }
                   </mat-form-field>
-                  <p class="sm:col-span-2 text-xs text-gray-500">This is not your MRA e-filing password. Don't enter that here.</p>
+                  <p class="sm:col-span-2 text-xs text-gray-500"><ng-container i18n>This is not your MRA e-filing password. Don't enter that here.</ng-container></p>
                   <div class="sm:col-span-2 flex gap-2">
-                    <button type="submit" mat-flat-button color="primary" [disabled]="saving()">{{ saving() ? 'Saving...' : 'Save and continue' }}</button>
-                    <button type="button" mat-button (click)="goToStep(2)" [disabled]="saving()">Back</button>
+                    <button type="submit" mat-flat-button color="primary" [disabled]="saving()">@if (saving()) {<ng-container i18n>Saving...</ng-container>} @else {<ng-container i18n>Save and continue</ng-container>}</button>
+                    <button type="button" mat-button (click)="goToStep(2)" [disabled]="saving()"><ng-container i18n>Back</ng-container></button>
                   </div>
                 </form>
               }
               @case (4) {
-                <h4 class="text-sm font-medium text-gray-900">Shopbot EBS for this place of business</h4>
-                <p class="text-xs text-gray-500 mt-1 mb-4">Each place of business has its own EBS registration with MRA. Enter the details MRA gave you for <strong>{{ o.placeOfBusiness.reference }}</strong>.</p>
+                <h4 class="text-sm font-medium text-gray-900"><ng-container i18n>Shopbot EBS for this place of business</ng-container></h4>
+                <p i18n class="text-xs text-gray-500 mt-1 mb-4">Each place of business has its own EBS registration with MRA. Enter the details MRA gave you for <strong>{{ o.placeOfBusiness.reference }}</strong>.</p>
                 <form [formGroup]="ebsForm" (ngSubmit)="saveEbs()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <mat-form-field appearance="outline"><mat-label>EBS MRA ID</mat-label>
+                  <mat-form-field appearance="outline"><mat-label><ng-container i18n>EBS MRA ID</ng-container></mat-label>
                     <input matInput formControlName="ebsMraId" autocomplete="off" />
-                    <mat-hint>Identifies Shopbot's registration as the EBS for this place of business.</mat-hint>
-                    @if (ebsForm.controls.ebsMraId.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Required</mat-error> }
+                    <mat-hint><ng-container i18n>Identifies Shopbot's registration as the EBS for this place of business.</ng-container></mat-hint>
+                    @if (ebsForm.controls.ebsMraId.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error><ng-container i18n>Required</ng-container></mat-error> }
                   </mat-form-field>
-                  <mat-form-field appearance="outline"><mat-label>Area code</mat-label>
+                  <mat-form-field appearance="outline"><mat-label><ng-container i18n>Area code</ng-container></mat-label>
                     <input matInput formControlName="areaCode" autocomplete="off" />
-                    <mat-hint>Provided by MRA as part of your EBS configuration.</mat-hint>
-                    @if (ebsForm.controls.areaCode.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Required</mat-error> }
+                    <mat-hint><ng-container i18n>Provided by MRA as part of your EBS configuration.</ng-container></mat-hint>
+                    @if (ebsForm.controls.areaCode.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error><ng-container i18n>Required</ng-container></mat-error> }
                   </mat-form-field>
-                  <mat-form-field appearance="outline" class="sm:col-span-2"><mat-label>Place of business name on MRA</mat-label>
+                  <mat-form-field appearance="outline" class="sm:col-span-2"><mat-label><ng-container i18n>Place of business name on MRA</ng-container></mat-label>
                     <input matInput formControlName="placeOfBusinessReference" autocomplete="off" />
                   </mat-form-field>
-                  <mat-form-field appearance="outline" class="sm:col-span-2"><mat-label>Who runs the MRA tests?</mat-label>
+                  <mat-form-field appearance="outline" class="sm:col-span-2"><mat-label><ng-container i18n>Who runs the MRA tests?</ng-container></mat-label>
                     <mat-select formControlName="testUserKind">
-                      <mat-option value="MERCHANT_STAFF">One of our own staff (our MRA Test User)</mat-option>
-                      <mat-option value="PROVIDER">Someone from Shopbot (the EBS Solution Provider)</mat-option>
+                      <mat-option value="MERCHANT_STAFF"><ng-container i18n>One of our own staff (our MRA Test User)</ng-container></mat-option>
+                      <mat-option value="PROVIDER"><ng-container i18n>Someone from Shopbot (the EBS Solution Provider)</ng-container></mat-option>
                     </mat-select>
-                    <mat-hint>MRA's Test User registers and tests the EBS, then sends it for onboarding. Only one Test User is allowed per place of business.</mat-hint>
-                    @if (ebsForm.controls.testUserKind.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error>Required</mat-error> }
+                    <mat-hint><ng-container i18n>MRA's Test User registers and tests the EBS, then sends it for onboarding. Only one Test User is allowed per place of business.</ng-container></mat-hint>
+                    @if (ebsForm.controls.testUserKind.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error><ng-container i18n>Required</ng-container></mat-error> }
                   </mat-form-field>
                   <div class="sm:col-span-2">
-                    <mat-checkbox formControlName="ebsRegistered">Shopbot is registered as the EBS for this place of business</mat-checkbox>
+                    <mat-checkbox formControlName="ebsRegistered"><ng-container i18n>Shopbot is registered as the EBS for this place of business</ng-container></mat-checkbox>
                     @if (ebsForm.controls.ebsRegistered.errors?.['server']; as e) { <div class="text-xs text-red-600 mt-1">{{ e }}</div> }
                   </div>
                   <div class="sm:col-span-2 flex gap-2">
-                    <button type="submit" mat-flat-button color="primary" [disabled]="saving()">{{ saving() ? 'Saving...' : 'Register this place of business' }}</button>
-                    <button type="button" mat-button (click)="goToStep(3)" [disabled]="saving()">Back</button>
+                    <button type="submit" mat-flat-button color="primary" [disabled]="saving()">@if (saving()) {<ng-container i18n>Saving...</ng-container>} @else {<ng-container i18n>Register this place of business</ng-container>}</button>
+                    <button type="button" mat-button (click)="goToStep(3)" [disabled]="saving()"><ng-container i18n>Back</ng-container></button>
                   </div>
                 </form>
               }
@@ -159,17 +159,17 @@
           <mat-card-content class="pt-4">
             <div class="flex flex-wrap items-start justify-between gap-3">
               <div class="max-w-xl">
-                <h4 class="text-base font-medium text-gray-900">Fiscalise your invoices with MRA</h4>
-                <p class="text-xs text-gray-500 mt-1">Shopbot is an MRA-compliant EBS solution. To start fiscalising your own sales:</p>
+                <h4 class="text-base font-medium text-gray-900"><ng-container i18n>Fiscalise your invoices with MRA</ng-container></h4>
+                <p class="text-xs text-gray-500 mt-1"><ng-container i18n>Shopbot is an MRA-compliant EBS solution. To start fiscalising your own sales:</ng-container></p>
               </div>
-              <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">Not connected</span>
+              <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600"><ng-container i18n>Not connected</ng-container></span>
             </div>
             <ol class="mt-4 grid gap-2 text-sm text-gray-700">
               @for (step of firstTimeSteps; track step; let i = $index) {
                 <li class="flex items-start gap-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-medium text-gray-600">{{ i + 1 }}</span><span class="pt-0.5">{{ step }}</span></li>
               }
             </ol>
-            <div class="mt-5"><button type="button" mat-flat-button color="primary" (click)="startSetup()">Start setup</button></div>
+            <div class="mt-5"><button type="button" mat-flat-button color="primary" (click)="startSetup()"><ng-container i18n>Start setup</ng-container></button></div>
           </mat-card-content>
         </mat-card>
       } @else {
@@ -198,55 +198,55 @@
                   @else if (step.state === 'CURRENT') { <mat-icon class="text-primary">radio_button_checked</mat-icon> }
                   @else { <mat-icon class="text-gray-300">radio_button_unchecked</mat-icon> }
                   <span [class]="step.state === 'TODO' ? 'text-gray-400' : 'text-gray-900'">{{ step.label }}</span>
-                  @if (step.key === 6 && o.tests.required) { <span class="text-xs text-gray-500">{{ o.tests.passed }} of {{ o.tests.required }} passed</span> }
+                  @if (step.key === 6 && o.tests.required) { <span class="text-xs text-gray-500"><ng-container i18n>{{ o.tests.passed }} of {{ o.tests.required }} passed</ng-container></span> }
                 </li>
               }
             </ol>
 
             <dl class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-              <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">TAN</dt><dd class="font-medium text-gray-900">{{ o.business.tan }}</dd></div>
-              <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">BRN</dt><dd class="font-medium text-gray-900">{{ o.business.brn }}</dd></div>
-              <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">Environment</dt><dd class="font-medium text-gray-900">{{ o.environment }}</dd></div>
-              <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">MRA mode</dt><dd class="font-medium text-gray-900">{{ modeLabel(o.ebsMode) }}</dd></div>
+              <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500"><ng-container i18n>TAN</ng-container></dt><dd class="font-medium text-gray-900">{{ o.business.tan }}</dd></div>
+              <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500"><ng-container i18n>BRN</ng-container></dt><dd class="font-medium text-gray-900">{{ o.business.brn }}</dd></div>
+              <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500"><ng-container i18n>Environment</ng-container></dt><dd class="font-medium text-gray-900">{{ o.environment }}</dd></div>
+              <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500"><ng-container i18n>MRA mode</ng-container></dt><dd class="font-medium text-gray-900">{{ modeLabel(o.ebsMode) }}</dd></div>
               @if (o.placeOfBusiness.ebsMraId) {
-                <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">EBS</dt><dd class="font-medium text-gray-900">Shopbot POS</dd></div>
-                <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">MRA EBS ID</dt><dd class="font-medium text-gray-900 break-all">{{ o.placeOfBusiness.ebsMraId }}</dd></div>
+                <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500"><ng-container i18n>EBS</ng-container></dt><dd class="font-medium text-gray-900"><ng-container i18n>Shopbot POS</ng-container></dd></div>
+                <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500"><ng-container i18n>MRA EBS ID</ng-container></dt><dd class="font-medium text-gray-900 break-all">{{ o.placeOfBusiness.ebsMraId }}</dd></div>
               }
               @if (o.transmissionUser.configured) {
-                <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">Transmission User</dt><dd class="font-medium text-gray-900 break-all">{{ o.transmissionUser.username }}</dd></div>
+                <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500"><ng-container i18n>Transmission User</ng-container></dt><dd class="font-medium text-gray-900 break-all">{{ o.transmissionUser.username }}</dd></div>
               }
               @if (o.live.activatedAt) {
-                <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500">LIVE since</dt><dd class="font-medium text-gray-900">{{ o.live.activatedAt | date: 'medium' }}</dd></div>
+                <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500"><ng-container i18n>LIVE since</ng-container></dt><dd class="font-medium text-gray-900">{{ o.live.activatedAt | date: 'medium' }}</dd></div>
               }
             </dl>
-            <p class="mt-3 text-xs text-gray-500">{{ o.shopbotEbs.label }}. Your business’s own MRA onboarding and testing is tracked above.</p>
+            <p class="mt-3 text-xs text-gray-500"><ng-container i18n>{{ o.shopbotEbs.label }}. Your business’s own MRA onboarding and testing is tracked above.</ng-container></p>
 
             @if (o.status === 'TEST_CONFIGURATION' || o.status === 'TESTING' || o.status === 'TEST_FAILED' || o.status === 'TEST_PASSED') {
               <div class="mt-4 rounded-lg border border-gray-200 p-4">
-                <h5 class="text-sm font-medium text-gray-900">MRA Test Drive</h5>
+                <h5 class="text-sm font-medium text-gray-900"><ng-container i18n>MRA Test Drive</ng-container></h5>
 
                 @if (o.status === 'TEST_CONFIGURATION') {
                   <ol class="mt-2 grid gap-2 text-xs text-gray-700">
-                    <li>
+                    <li i18n>
                       <strong>1. Switch the EBS to Test Drive on the MRA portal.</strong>
-                      Your MRA Test User {{ o.placeOfBusiness.testUserKind === 'PROVIDER' ? '(from Shopbot)' : '(your own staff)' }} does this on MRA's e-Invoicing portal.
+                      Your MRA Test User {{ o.placeOfBusiness.testUserKind === 'PROVIDER' ? ('(from Shopbot)' | tr) : ('(your own staff)' | tr) }} does this on MRA's e-Invoicing portal.
                       Shopbot can't change or check it for you.
                     </li>
-                    <li>
+                    <li i18n>
                       <strong>2. Confirm it here.</strong> Otherwise MRA would count the Test Drive as Sandbox.
                     </li>
                   </ol>
                   @if (o.testDrive.portalModeConfirmedAt) {
-                    <p class="mt-3 text-xs text-green-700">You confirmed the portal shows Test Drive mode on {{ o.testDrive.portalModeConfirmedAt | date: 'medium' }}.</p>
-                    <button type="button" mat-flat-button color="primary" class="mt-2" (click)="startTestDrive()" [disabled]="saving() || !o.testDrive.canStart">Start Test Drive</button>
+                    <p class="mt-3 text-xs text-green-700"><ng-container i18n>You confirmed the portal shows Test Drive mode on {{ o.testDrive.portalModeConfirmedAt | date: 'medium' }}.</ng-container></p>
+                    <button type="button" mat-flat-button color="primary" class="mt-2" (click)="startTestDrive()" [disabled]="saving() || !o.testDrive.canStart"><ng-container i18n>Start Test Drive</ng-container></button>
                   } @else {
-                    <button type="button" mat-stroked-button class="mt-3" (click)="confirmPortalMode()" [disabled]="saving()">The MRA portal shows this EBS in Test Drive mode</button>
+                    <button type="button" mat-stroked-button class="mt-3" (click)="confirmPortalMode()" [disabled]="saving()"><ng-container i18n>The MRA portal shows this EBS in Test Drive mode</ng-container></button>
                   }
                 }
 
                 @if (testing(); as t) {
                   @if (o.status === 'TESTING') {
-                    <p class="mt-2 text-xs text-gray-600">Running {{ t.passed }} of {{ t.required }}. This takes a minute; you can leave this page.</p>
+                    <p class="mt-2 text-xs text-gray-600"><ng-container i18n>Running {{ t.passed }} of {{ t.required }}. This takes a minute; you can leave this page.</ng-container></p>
                   }
                   <ul class="mt-3 grid gap-1">
                     @for (scenario of t.scenarios; track scenario.id) {
@@ -262,13 +262,13 @@
                 }
 
                 @if (o.status === 'TEST_FAILED') {
-                  <p class="mt-3 text-xs text-gray-600">MRA restarts a failed Test Drive from scratch. Restart it here, then ask your Test User to switch the EBS back to Test Drive on the MRA portal.</p>
+                  <p class="mt-3 text-xs text-gray-600"><ng-container i18n>MRA restarts a failed Test Drive from scratch. Restart it here, then ask your Test User to switch the EBS back to Test Drive on the MRA portal.</ng-container></p>
                 }
 
                 @if (o.status === 'TEST_PASSED') {
                   <div class="mt-3 rounded-lg bg-gray-50 border border-gray-200 p-3">
-                    <mat-checkbox [checked]="portalPassConfirmed()" (change)="portalPassConfirmed.set($event.checked)">The MRA portal shows every Test Drive scenario as passed</mat-checkbox>
-                    <p class="text-xs text-gray-500 mt-1">MRA's portal, not Shopbot, decides whether the Test Drive passed. Check it before sending the EBS for onboarding.</p>
+                    <mat-checkbox [checked]="portalPassConfirmed()" (change)="portalPassConfirmed.set($event.checked)"><ng-container i18n>The MRA portal shows every Test Drive scenario as passed</ng-container></mat-checkbox>
+                    <p class="text-xs text-gray-500 mt-1"><ng-container i18n>MRA's portal, not Shopbot, decides whether the Test Drive passed. Check it before sending the EBS for onboarding.</ng-container></p>
                   </div>
                 }
               </div>
@@ -276,41 +276,41 @@
 
             @if (activity(); as a) {
               <div class="mt-4 rounded-lg border border-gray-200 p-4">
-                <h5 class="text-sm font-medium text-gray-900">Fiscalisation activity</h5>
+                <h5 class="text-sm font-medium text-gray-900"><ng-container i18n>Fiscalisation activity</ng-container></h5>
                 <div class="mt-2 flex flex-wrap gap-2 text-xs">
-                  <span class="rounded-full bg-green-50 px-2 py-0.5 font-medium text-green-700">{{ a.counts.FISCALISED }} fiscalised</span>
-                  <span class="rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-600">{{ a.counts.WAITING }} waiting to be sent</span>
-                  <span class="rounded-full px-2 py-0.5 font-medium" [class]="a.counts.NEEDS_CHECKING ? 'bg-amber-50 text-amber-800' : 'bg-gray-100 text-gray-600'">{{ a.counts.NEEDS_CHECKING }} need checking</span>
-                  <span class="rounded-full px-2 py-0.5 font-medium" [class]="a.counts.NEEDS_ATTENTION ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600'">{{ a.counts.NEEDS_ATTENTION }} need attention</span>
+                  <span class="rounded-full bg-green-50 px-2 py-0.5 font-medium text-green-700"><ng-container i18n>{{ a.counts.FISCALISED }} fiscalised</ng-container></span>
+                  <span class="rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-600"><ng-container i18n>{{ a.counts.WAITING }} waiting to be sent</ng-container></span>
+                  <span class="rounded-full px-2 py-0.5 font-medium" [class]="a.counts.NEEDS_CHECKING ? 'bg-amber-50 text-amber-800' : 'bg-gray-100 text-gray-600'"><ng-container i18n>{{ a.counts.NEEDS_CHECKING }} need checking</ng-container></span>
+                  <span class="rounded-full px-2 py-0.5 font-medium" [class]="a.counts.NEEDS_ATTENTION ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600'"><ng-container i18n>{{ a.counts.NEEDS_ATTENTION }} need attention</ng-container></span>
                 </div>
                 @if (a.lastFiscalised; as last) {
-                  <p class="mt-2 text-xs text-gray-600">Last fiscalised invoice: <strong class="text-gray-900">{{ last.invoice }}</strong>@if (last.irn) { · IRN {{ last.irn }}}@if (last.at) { · {{ last.at | date: 'medium' }}}</p>
+                  <p class="mt-2 text-xs text-gray-600"><ng-container i18n>Last fiscalised invoice:</ng-container> <strong class="text-gray-900">{{ last.invoice }}</strong>@if (last.irn) { <ng-container i18n>· IRN {{ last.irn }}</ng-container>}@if (last.at) { · {{ last.at | date: 'medium' }}}</p>
                 }
                 @if (a.needsAction === 0) {
-                  <p class="mt-2 text-xs text-gray-500">Nothing needs your attention.</p>
+                  <p class="mt-2 text-xs text-gray-500"><ng-container i18n>Nothing needs your attention.</ng-container></p>
                 }
                 @for (item of a.invoices; track item.invoice) {
                   <div class="mt-3 rounded-lg border p-3" [class]="item.status === 'NEEDS_ATTENTION' ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'">
                     <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
-                      <span class="font-medium text-gray-900">{{ item.invoice }}@if (item.total) { · Rs {{ item.total }}}</span>
+                      <span class="font-medium text-gray-900">{{ item.invoice }}@if (item.total) { <ng-container i18n>· Rs {{ item.total }}</ng-container>}</span>
                       <span class="text-xs font-medium text-gray-700">{{ item.label }}</span>
                     </div>
                     @if (item.message) { <p class="mt-1 text-xs text-gray-700">{{ item.message }}</p> }
                     @if (item.canRelease && releasing() !== item.invoice) {
-                      <button type="button" mat-stroked-button class="mt-2" (click)="openRelease(item.invoice)">I checked the MRA portal: release it</button>
+                      <button type="button" mat-stroked-button class="mt-2" (click)="openRelease(item.invoice)"><ng-container i18n>I checked the MRA portal: release it</ng-container></button>
                     }
                     @if (releasing() === item.invoice) {
                       <div class="mt-3 grid gap-2">
-                        <p class="text-xs text-gray-700">Only release this invoice if you searched MRA's portal and it is <strong>not</strong> there. If MRA already has it, sending it again would create a duplicate.</p>
-                        <mat-form-field appearance="outline" class="w-full"><mat-label>What did you check?</mat-label><input matInput [formControl]="releaseNote" autocomplete="off" />
+                        <p i18n class="text-xs text-gray-700">Only release this invoice if you searched MRA's portal and it is <strong>not</strong> there. If MRA already has it, sending it again would create a duplicate.</p>
+                        <mat-form-field appearance="outline" class="w-full"><mat-label><ng-container i18n>What did you check?</ng-container></mat-label><input matInput [formControl]="releaseNote" autocomplete="off" />
                           @if (releaseErrors()['note']) { <mat-error>{{ releaseErrors()['note'] }}</mat-error> }
                         </mat-form-field>
-                        <mat-form-field appearance="outline" class="w-full"><mat-label>Type NOT ON MRA to confirm</mat-label><input matInput [formControl]="releaseConfirmation" autocomplete="off" />
+                        <mat-form-field appearance="outline" class="w-full"><mat-label><ng-container i18n>Type NOT ON MRA to confirm</ng-container></mat-label><input matInput [formControl]="releaseConfirmation" autocomplete="off" />
                           @if (releaseErrors()['confirmation']) { <mat-error>{{ releaseErrors()['confirmation'] }}</mat-error> }
                         </mat-form-field>
                         <div class="flex gap-2">
-                          <button type="button" mat-flat-button color="warn" (click)="release()" [disabled]="saving() || releaseConfirmation.value.trim().toUpperCase() !== 'NOT ON MRA' || releaseNote.value.trim().length < 5">{{ saving() ? 'Releasing...' : 'Release for resending' }}</button>
-                          <button type="button" mat-button (click)="releasing.set(null)" [disabled]="saving()">Cancel</button>
+                          <button type="button" mat-flat-button color="warn" (click)="release()" [disabled]="saving() || releaseConfirmation.value.trim().toUpperCase() !== 'NOT ON MRA' || releaseNote.value.trim().length < 5">@if (saving()) {<ng-container i18n>Releasing...</ng-container>} @else {<ng-container i18n>Release for resending</ng-container>}</button>
+                          <button type="button" mat-button (click)="releasing.set(null)" [disabled]="saving()"><ng-container i18n>Cancel</ng-container></button>
                         </div>
                       </div>
                     }
@@ -321,70 +321,70 @@
 
             <div class="mt-4 flex flex-wrap gap-2">
               @if (o.status !== 'LIVE' && o.status !== 'SUSPENDED') {
-                <button type="button" mat-stroked-button (click)="startSetup()">{{ o.progress[3].state === 'DONE' ? 'Review MRA settings' : 'Continue setup' }}</button>
+                <button type="button" mat-stroked-button (click)="startSetup()">@if (o.progress[3].state === 'DONE') {<ng-container i18n>Review MRA settings</ng-container>} @else {<ng-container i18n>Continue setup</ng-container>}</button>
               }
               @if (o.onboarding.canSubmit) {
-                <button type="button" mat-flat-button color="primary" (click)="submitOnboarding()" [disabled]="saving() || !portalPassConfirmed()">I've sent the EBS for onboarding on MRA</button>
+                <button type="button" mat-flat-button color="primary" (click)="submitOnboarding()" [disabled]="saving() || !portalPassConfirmed()"><ng-container i18n>I've sent the EBS for onboarding on MRA</ng-container></button>
               }
               @if (o.onboarding.canApprove) {
-                <button type="button" mat-flat-button color="primary" (click)="approveOnboarding()" [disabled]="saving()">Our business has approved the onboarding</button>
+                <button type="button" mat-flat-button color="primary" (click)="approveOnboarding()" [disabled]="saving()"><ng-container i18n>Our business has approved the onboarding</ng-container></button>
               }
               @if (o.status === 'TESTING' || o.status === 'TEST_FAILED' || o.status === 'TEST_PASSED' || o.status === 'PENDING_ONBOARDING' || o.status === 'READY_FOR_LIVE') {
-                <button type="button" mat-button (click)="resetTesting()" [disabled]="saving()">Restart Test Drive</button>
+                <button type="button" mat-button (click)="resetTesting()" [disabled]="saving()"><ng-container i18n>Restart Test Drive</ng-container></button>
               }
               @if (o.live.canActivate) {
-                <button type="button" mat-flat-button color="primary" (click)="liveConfirmOpen.set(true)">Activate LIVE fiscalisation</button>
+                <button type="button" mat-flat-button color="primary" (click)="liveConfirmOpen.set(true)"><ng-container i18n>Activate LIVE fiscalisation</ng-container></button>
               }
               @if (o.status === 'SUSPENDED') {
-                <button type="button" mat-flat-button color="primary" (click)="liveConfirmOpen.set(true)">Resume LIVE fiscalisation</button>
+                <button type="button" mat-flat-button color="primary" (click)="liveConfirmOpen.set(true)"><ng-container i18n>Resume LIVE fiscalisation</ng-container></button>
               }
               @if (o.status === 'LIVE') {
-                <button type="button" mat-button color="warn" (click)="suspendOpen.set(true)">Suspend fiscalisation</button>
+                <button type="button" mat-button color="warn" (click)="suspendOpen.set(true)"><ng-container i18n>Suspend fiscalisation</ng-container></button>
               }
-              <button type="button" mat-button (click)="toggleActivity()">{{ audit() ? 'Hide activity' : 'View activity' }}</button>
+              <button type="button" mat-button (click)="toggleActivity()">@if (audit()) {<ng-container i18n>Hide activity</ng-container>} @else {<ng-container i18n>View activity</ng-container>}</button>
             </div>
 
             @if (o.progress[3].state === 'DONE' && o.status !== 'LIVE' && o.status !== 'SUSPENDED' && !o.live.canActivate) {
               <div class="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs text-gray-600">
-                LIVE activation becomes available after your connection is verified, the MRA Test Drive passes, and your business approves the EBS onboarding.
+                <ng-container i18n>LIVE activation becomes available after your connection is verified, the MRA Test Drive passes, and your business approves the EBS onboarding.</ng-container>
               </div>
             }
 
             @if (liveConfirmOpen()) {
               <div class="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
-                <h5 class="text-sm font-medium text-red-900">{{ o.status === 'SUSPENDED' ? 'Resume' : 'Activate' }} LIVE fiscalisation?</h5>
-                <p class="mt-1 text-xs text-red-800">
+                <h5 class="text-sm font-medium text-red-900"><ng-container i18n>{{ o.status === 'SUSPENDED' ? ('Resume' | tr) : ('Activate' | tr) }} LIVE fiscalisation?</ng-container></h5>
+                <p i18n class="mt-1 text-xs text-red-800">
                   Invoices and receipts from <strong>{{ o.business.legalName }}</strong> (TAN {{ o.business.tan }}, place of business {{ o.placeOfBusiness.reference }}, EBS {{ o.placeOfBusiness.ebsMraId }}) will be sent to MRA in LIVE mode.
                   This affects real customer transactions.
                 </p>
                 <mat-form-field appearance="outline" class="w-full mt-3">
-                  <mat-label>Type {{ o.live.activationPhrase }} to confirm</mat-label>
+                  <mat-label><ng-container i18n>Type {{ o.live.activationPhrase }} to confirm</ng-container></mat-label>
                   <input matInput [formControl]="liveConfirmation" autocomplete="off" />
                 </mat-form-field>
                 <div class="flex gap-2">
-                  <button type="button" mat-flat-button color="warn" [disabled]="saving() || liveConfirmation.value.trim() !== o.live.activationPhrase" (click)="activateLive()">{{ saving() ? 'Activating...' : 'Activate LIVE' }}</button>
-                  <button type="button" mat-button (click)="liveConfirmOpen.set(false)" [disabled]="saving()">Cancel</button>
+                  <button type="button" mat-flat-button color="warn" [disabled]="saving() || liveConfirmation.value.trim() !== o.live.activationPhrase" (click)="activateLive()">@if (saving()) {<ng-container i18n>Activating...</ng-container>} @else {<ng-container i18n>Activate LIVE</ng-container>}</button>
+                  <button type="button" mat-button (click)="liveConfirmOpen.set(false)" [disabled]="saving()"><ng-container i18n>Cancel</ng-container></button>
                 </div>
               </div>
             }
 
             @if (suspendOpen()) {
               <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
-                <h5 class="text-sm font-medium text-amber-900">Suspend fiscalisation?</h5>
-                <p class="mt-1 text-xs text-amber-800">New receipts will say “Not Yet Fiscalised” until you resume.</p>
-                <mat-form-field appearance="outline" class="w-full mt-3"><mat-label>Reason</mat-label><input matInput [formControl]="suspendReason" autocomplete="off" /></mat-form-field>
-                <mat-form-field appearance="outline" class="w-full"><mat-label>Type SUSPEND to confirm</mat-label><input matInput [formControl]="suspendConfirmation" autocomplete="off" /></mat-form-field>
+                <h5 class="text-sm font-medium text-amber-900"><ng-container i18n>Suspend fiscalisation?</ng-container></h5>
+                <p class="mt-1 text-xs text-amber-800"><ng-container i18n>New receipts will say “Not Yet Fiscalised” until you resume.</ng-container></p>
+                <mat-form-field appearance="outline" class="w-full mt-3"><mat-label><ng-container i18n>Reason</ng-container></mat-label><input matInput [formControl]="suspendReason" autocomplete="off" /></mat-form-field>
+                <mat-form-field appearance="outline" class="w-full"><mat-label><ng-container i18n>Type SUSPEND to confirm</ng-container></mat-label><input matInput [formControl]="suspendConfirmation" autocomplete="off" /></mat-form-field>
                 <div class="flex gap-2">
-                  <button type="button" mat-flat-button color="warn" [disabled]="saving() || suspendConfirmation.value.trim().toUpperCase() !== 'SUSPEND' || !suspendReason.value.trim()" (click)="suspend()">Suspend</button>
-                  <button type="button" mat-button (click)="suspendOpen.set(false)" [disabled]="saving()">Cancel</button>
+                  <button type="button" mat-flat-button color="warn" [disabled]="saving() || suspendConfirmation.value.trim().toUpperCase() !== 'SUSPEND' || !suspendReason.value.trim()" (click)="suspend()"><ng-container i18n>Suspend</ng-container></button>
+                  <button type="button" mat-button (click)="suspendOpen.set(false)" [disabled]="saving()"><ng-container i18n>Cancel</ng-container></button>
                 </div>
               </div>
             }
 
             @if (audit(); as entries) {
               <div class="mt-4 border-t border-gray-200 pt-3">
-                <h5 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Activity</h5>
-                @if (!entries.length) { <p class="text-xs text-gray-500">Nothing yet.</p> }
+                <h5 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2"><ng-container i18n>Activity</ng-container></h5>
+                @if (!entries.length) { <p class="text-xs text-gray-500"><ng-container i18n>Nothing yet.</ng-container></p> }
                 <ul class="grid gap-1">
                   @for (entry of entries; track entry._id) {
                     <li class="flex justify-between gap-3 text-xs"><span class="text-gray-800">{{ activityLabel(entry.action) }}</span><span class="text-gray-500 shrink-0">{{ entry.createdAt | date: 'medium' }}</span></li>

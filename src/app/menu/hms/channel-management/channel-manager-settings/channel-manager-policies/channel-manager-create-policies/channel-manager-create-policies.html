@@ -1,7 +1,7 @@
   <!-- Page Header -->
   <app-page-header
-    [title]="isEditing ? 'Edit Hotel Policy' : 'Create Hotel Policy'"
-    [subtitle]="isEditing ? 'Update the policy details' : 'Create a new hotel policy'">
+    [title]="isEditing ? ('Edit Hotel Policy' | tr) : ('Create Hotel Policy' | tr)"
+    [subtitle]="isEditing ? ('Update the policy details' | tr) : 'Create a new hotel policy'">
     <ng-container actions>
         <a
             matButton="outlined"
@@ -10,7 +10,7 @@
             [disabled]="isSaving"
             class="px-8"
           >
-            Cancel
+            <ng-container i18n>Cancel</ng-container>
     </a>
         <button
             matButton="filled"
@@ -20,9 +20,9 @@
             class="px-4"
         >
             @if (isSaving) {
-            Saving...
+            <ng-container i18n>Saving...</ng-container>
             } @else {
-            {{ isEditing ? 'Update Policy' : 'Create Policy' }}
+            @if (isEditing) {<ng-container i18n>Update Policy</ng-container>} @else {<ng-container i18n>Create Policy</ng-container>}
             }
         </button>   
     </ng-container>
@@ -31,7 +31,7 @@
   <!-- Form Card -->
   <mat-card appearance="outlined" class="mt-6">
     <mat-card-header class="mb-3">
-      <mat-card-title class="text-xl font-bold text-gray-900">Policy Details</mat-card-title>
+      <mat-card-title class="text-xl font-bold text-gray-900"><ng-container i18n>Policy Details</ng-container></mat-card-title>
     </mat-card-header>
    
     <mat-card-content class="pt-6">
@@ -40,24 +40,24 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Title -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Policy Title</mat-label>
-            <input matInput formControlName="title" placeholder="e.g., Standard Policy" />
-            <mat-hint>Give your policy a clear title</mat-hint>
+            <mat-label><ng-container i18n>Policy Title</ng-container></mat-label>
+            <input matInput formControlName="title" placeholder="e.g., Standard Policy" i18n-placeholder />
+            <mat-hint><ng-container i18n>Give your policy a clear title</ng-container></mat-hint>
             @if (policyForm.get('title')?.hasError('required')) {
-              <mat-error>Policy title is required</mat-error>
+              <mat-error><ng-container i18n>Policy title is required</ng-container></mat-error>
             }
             @if (policyForm.get('title')?.hasError('minlength')) {
-              <mat-error>Title must be at least 3 characters</mat-error>
+              <mat-error><ng-container i18n>Title must be at least 3 characters</ng-container></mat-error>
             }
           </mat-form-field>
 
           <!-- Currency -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Currency</mat-label>
-            <input matInput formControlName="currency" placeholder="e.g., USD" maxlength="3" />
-            <mat-hint>ISO 4217 currency code</mat-hint>
+            <mat-label><ng-container i18n>Currency</ng-container></mat-label>
+            <input matInput formControlName="currency" placeholder="e.g., USD" i18n-placeholder maxlength="3" />
+            <mat-hint><ng-container i18n>ISO 4217 currency code</ng-container></mat-hint>
             @if (policyForm.get('currency')?.hasError('required')) {
-              <mat-error>Currency is required</mat-error>
+              <mat-error><ng-container i18n>Currency is required</ng-container></mat-error>
             }
           </mat-form-field>
         </div>
@@ -66,18 +66,18 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Max Guests -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Max Guests</mat-label>
+            <mat-label><ng-container i18n>Max Guests</ng-container></mat-label>
             <input matInput type="number" formControlName="max_count_of_guests" min="1" />
-            <mat-hint>Maximum number of guests allowed</mat-hint>
+            <mat-hint><ng-container i18n>Maximum number of guests allowed</ng-container></mat-hint>
             @if (policyForm.get('max_count_of_guests')?.hasError('required')) {
-              <mat-error>Max guests is required</mat-error>
+              <mat-error><ng-container i18n>Max guests is required</ng-container></mat-error>
             }
           </mat-form-field>
 
           <!-- Adults Only -->
           <div class="flex items-center">
             <mat-checkbox formControlName="is_adults_only" class="py-2">
-              <span class="ml-2">Adults Only</span>
+              <span class="ml-2"><ng-container i18n>Adults Only</ng-container></span>
             </mat-checkbox>
           </div>
         </div>
@@ -86,44 +86,44 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <!-- Check-in From Time -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Check-in From</mat-label>
+            <mat-label><ng-container i18n>Check-in From</ng-container></mat-label>
             <input matInput type="time" formControlName="checkin_from_time" />
-            <mat-hint>Check-in start time</mat-hint>
+            <mat-hint><ng-container i18n>Check-in start time</ng-container></mat-hint>
           </mat-form-field>
 
           <!-- Check-in To Time -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Check-in To</mat-label>
+            <mat-label><ng-container i18n>Check-in To</ng-container></mat-label>
             <input matInput type="time" formControlName="checkin_to_time" />
-            <mat-hint>Check-in end time</mat-hint>
+            <mat-hint><ng-container i18n>Check-in end time</ng-container></mat-hint>
           </mat-form-field>
 
           <!-- Check-out From Time -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Check-out From</mat-label>
+            <mat-label><ng-container i18n>Check-out From</ng-container></mat-label>
             <input matInput type="time" formControlName="checkout_from_time" />
-            <mat-hint>Check-out start time</mat-hint>
+            <mat-hint><ng-container i18n>Check-out start time</ng-container></mat-hint>
           </mat-form-field>
 
           <!-- Check-out To Time -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Check-out To</mat-label>
+            <mat-label><ng-container i18n>Check-out To</ng-container></mat-label>
             <input matInput type="time" formControlName="checkout_to_time" />
-            <mat-hint>Check-out end time</mat-hint>
+            <mat-hint><ng-container i18n>Check-out end time</ng-container></mat-hint>
           </mat-form-field>
         </div>
 
         <!-- Internet Settings -->
         <mat-card appearance="outlined" class="bg-gray-50">
           <mat-card-header class="mb-3">
-            <mat-card-title class="text-lg font-semibold text-gray-900">Internet Settings</mat-card-title>
+            <mat-card-title class="text-lg font-semibold text-gray-900"><ng-container i18n>Internet Settings</ng-container></mat-card-title>
           </mat-card-header>
          
           <mat-card-content class="pt-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Internet Access Type -->
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Internet Access Type</mat-label>
+                <mat-label><ng-container i18n>Internet Access Type</ng-container></mat-label>
                 <mat-select formControlName="internet_access_type">
                   @for (type of internetAccessTypes; track type) {
                     <mat-option [value]="type">{{ type | titlecase }}</mat-option>
@@ -133,7 +133,7 @@
 
               <!-- Internet Access Coverage -->
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Coverage</mat-label>
+                <mat-label><ng-container i18n>Coverage</ng-container></mat-label>
                 <mat-select formControlName="internet_access_coverage">
                   @for (coverage of internetAccessCoverages; track coverage) {
                     <mat-option [value]="coverage">{{ coverage | titlecase }}</mat-option>
@@ -143,9 +143,9 @@
 
               <!-- Internet Cost -->
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Cost (Optional)</mat-label>
+                <mat-label><ng-container i18n>Cost (Optional)</ng-container></mat-label>
                 <input matInput type="number" formControlName="internet_access_cost" step="0.01" placeholder="0.00" />
-                <mat-hint>Leave blank if free</mat-hint>
+                <mat-hint><ng-container i18n>Leave blank if free</ng-container></mat-hint>
               </mat-form-field>
             </div>
           </mat-card-content>
@@ -154,14 +154,14 @@
         <!-- Parking Settings -->
         <mat-card appearance="outlined" class="bg-gray-50">
           <mat-card-header  class="mb-3">
-            <mat-card-title class="text-lg font-semibold text-gray-900">Parking Settings</mat-card-title>
+            <mat-card-title class="text-lg font-semibold text-gray-900"><ng-container i18n>Parking Settings</ng-container></mat-card-title>
           </mat-card-header>
          
           <mat-card-content class="pt-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Parking Type -->
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Parking Type</mat-label>
+                <mat-label><ng-container i18n>Parking Type</ng-container></mat-label>
                 <mat-select formControlName="parking_type">
                   @for (type of parkingTypes; track type) {
                     <mat-option [value]="type">{{ type | titlecase }}</mat-option>
@@ -171,7 +171,7 @@
 
               <!-- Parking Reservation -->
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Reservation Required</mat-label>
+                <mat-label><ng-container i18n>Reservation Required</ng-container></mat-label>
                 <mat-select formControlName="parking_reservation">
                   @for (res of parkingReservations; track res) {
                     <mat-option [value]="res">{{ res | titlecase }}</mat-option>
@@ -182,15 +182,15 @@
               <!-- Parking Private -->
               <div class="flex items-center">
                 <mat-checkbox formControlName="parking_is_private" class="py-2">
-                  <span class="ml-2">Private Parking</span>
+                  <span class="ml-2"><ng-container i18n>Private Parking</ng-container></span>
                 </mat-checkbox>
               </div>
 
               <!-- Parking Cost -->
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Cost (Optional)</mat-label>
+                <mat-label><ng-container i18n>Cost (Optional)</ng-container></mat-label>
                 <input matInput type="number" formControlName="parking_cost" step="0.01" placeholder="0.00" />
-                <mat-hint>Leave blank if free</mat-hint>
+                <mat-hint><ng-container i18n>Leave blank if free</ng-container></mat-hint>
               </mat-form-field>
             </div>
           </mat-card-content>
@@ -199,14 +199,14 @@
         <!-- Pets Settings -->
         <mat-card appearance="outlined" class="bg-gray-50">
           <mat-card-header class="mb-3" class="mb-3">
-            <mat-card-title class="text-lg font-semibold text-gray-900">Pets Policy</mat-card-title>
+            <mat-card-title class="text-lg font-semibold text-gray-900"><ng-container i18n>Pets Policy</ng-container></mat-card-title>
           </mat-card-header>
          
           <mat-card-content class="pt-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Pets Policy -->
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Pets Policy</mat-label>
+                <mat-label><ng-container i18n>Pets Policy</ng-container></mat-label>
                 <mat-select formControlName="pets_policy">
                   @for (policy of petsPolicies; track policy) {
                     <mat-option [value]="policy">{{ policy | titlecase }}</mat-option>
@@ -216,13 +216,13 @@
 
               <!-- Non-refundable Fee -->
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Non-refundable Fee</mat-label>
+                <mat-label><ng-container i18n>Non-refundable Fee</ng-container></mat-label>
                 <input matInput type="number" formControlName="pets_non_refundable_fee" step="0.01" placeholder="0.00" />
               </mat-form-field>
 
               <!-- Refundable Deposit -->
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Refundable Deposit</mat-label>
+                <mat-label><ng-container i18n>Refundable Deposit</ng-container></mat-label>
                 <input matInput type="number" formControlName="pets_refundable_deposit" step="0.01" placeholder="0.00" />
               </mat-form-field>
             </div>
@@ -232,12 +232,12 @@
         <!-- Smoking Policy -->
         <mat-card appearance="outlined" class="bg-gray-50">
           <mat-card-header class="mb-3">
-            <mat-card-title class="text-lg font-semibold text-gray-900">Smoking Policy</mat-card-title>
+            <mat-card-title class="text-lg font-semibold text-gray-900"><ng-container i18n>Smoking Policy</ng-container></mat-card-title>
           </mat-card-header>
          
           <mat-card-content class="pt-6">
             <mat-form-field appearance="outline" class="w-full md:w-1/2">
-              <mat-label>Smoking Policy</mat-label>
+              <mat-label><ng-container i18n>Smoking Policy</ng-container></mat-label>
               <mat-select formControlName="smoking_policy">
                 @for (policy of smokingPolicies; track policy) {
                   <mat-option [value]="policy">{{ policy | titlecase }}</mat-option>
@@ -250,7 +250,7 @@
         <!-- Cleaning & Hygiene Settings -->
         <mat-card appearance="outlined" class="bg-gray-50">
           <mat-card-header class="mb-3">
-            <mat-card-title class="text-lg font-semibold text-gray-900">Cleaning & Hygiene</mat-card-title>
+            <mat-card-title class="text-lg font-semibold text-gray-900"><ng-container i18n>Cleaning & Hygiene</ng-container></mat-card-title>
           </mat-card-header>
          
           <mat-card-content class="pt-6">
@@ -258,22 +258,22 @@
               <!-- Enhanced Cleaning Practices -->
               <div class="flex items-center">
                 <mat-checkbox formControlName="enhanced_cleaning_practices" class="py-2">
-                  <span class="ml-2">Enhanced Cleaning Practices</span>
+                  <span class="ml-2"><ng-container i18n>Enhanced Cleaning Practices</ng-container></span>
                 </mat-checkbox>
               </div>
 
               <!-- Cleaning Practices Description -->
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Cleaning Practices Description</mat-label>
-                <textarea matInput formControlName="cleaning_practices_description" rows="4" placeholder="Describe your cleaning practices..."></textarea>
-                <mat-hint>Optional: Details about your cleaning procedures</mat-hint>
+                <mat-label><ng-container i18n>Cleaning Practices Description</ng-container></mat-label>
+                <textarea matInput formControlName="cleaning_practices_description" rows="4" placeholder="Describe your cleaning practices..." i18n-placeholder></textarea>
+                <mat-hint><ng-container i18n>Optional: Details about your cleaning procedures</ng-container></mat-hint>
               </mat-form-field>
 
               <!-- Partner Hygiene Link -->
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Partner Hygiene Link</mat-label>
-                <input matInput formControlName="partner_hygiene_link" type="url" placeholder="https://example.com/hygiene" />
-                <mat-hint>Optional: Link to partner hygiene certification or information</mat-hint>
+                <mat-label><ng-container i18n>Partner Hygiene Link</ng-container></mat-label>
+                <input matInput formControlName="partner_hygiene_link" type="url" placeholder="https://example.com/hygiene" i18n-placeholder />
+                <mat-hint><ng-container i18n>Optional: Link to partner hygiene certification or information</ng-container></mat-hint>
               </mat-form-field>
             </div>
           </mat-card-content>

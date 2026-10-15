@@ -3,65 +3,65 @@
     <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 py-12 lg:px-16 xl:px-24 bg-white">
         <!-- Logo/Brand -->
         <div class="mb-8">
-            <img src="assets/logo/logo_vector.svg" alt="ShopBot Logo" class="h-9 w-9">
-            <p class="text-gray-500 mt-1">Welcome to the team</p>
+            <img src="assets/logo/logo_vector.svg" alt="ShopBot Logo" i18n-alt class="h-9 w-9">
+            <p class="text-gray-500 mt-1"><ng-container i18n>Welcome to the team</ng-container></p>
         </div>
 
         <div class="max-w-md">
             @if (loadingPreview()) {
                 <div class="flex flex-col items-center py-16 gap-4">
                     <mat-spinner diameter="40"></mat-spinner>
-                    <p class="text-gray-500 text-sm">Checking your invite…</p>
+                    <p class="text-gray-500 text-sm"><ng-container i18n>Checking your invite…</ng-container></p>
                 </div>
             } @else if (invalidReason()) {
                 <div class="text-center py-8">
                     <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
                         <mat-icon class="text-red-600 text-3xl">error_outline</mat-icon>
                     </div>
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-2">Invite link not valid</h2>
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-2"><ng-container i18n>Invite link not valid</ng-container></h2>
                     <p class="text-gray-500 mb-8">{{ invalidReason() }}</p>
                     <a routerLink="/auth/login" mat-flat-button color="primary" class="w-full h-12">
-                        Go to Login
+                        <ng-container i18n>Go to Login</ng-container>
                     </a>
                 </div>
             } @else if (!done()) {
-                <h2 class="text-2xl font-semibold text-gray-800 mb-2">Hi {{ name() }}!</h2>
-                <p class="text-gray-500 mb-8">Set a password for <strong>{{ email() }}</strong> to finish setting up your account.</p>
+                <h2 class="text-2xl font-semibold text-gray-800 mb-2"><ng-container i18n>Hi {{ name() }}!</ng-container></h2>
+                <p i18n class="text-gray-500 mb-8">Set a password for <strong>{{ email() }}</strong> to finish setting up your account.</p>
 
                 <form [formGroup]="acceptForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Password</mat-label>
+                        <mat-label><ng-container i18n>Password</ng-container></mat-label>
                         <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password"
                             placeholder="••••••••">
                         <button type="button" mat-icon-button matSuffix (click)="clickEvent('password')"
-                            [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword()">
+                            [attr.aria-label]="('Hide password' | tr)" [attr.aria-pressed]="hidePassword()">
                             <mat-icon fontSet="material-icons-outlined">{{hidePassword() ? 'visibility_off' : 'visibility'}}</mat-icon>
                         </button>
                         @if (acceptForm.get('password')?.hasError('required')) {
-                        <mat-error>Password is required</mat-error>
+                        <mat-error><ng-container i18n>Password is required</ng-container></mat-error>
                         }
                         @if (acceptForm.get('password')?.hasError('minlength')) {
-                        <mat-error>Password must be at least 6 characters</mat-error>
+                        <mat-error><ng-container i18n>Password must be at least 6 characters</ng-container></mat-error>
                         }
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Confirm Password</mat-label>
+                        <mat-label><ng-container i18n>Confirm Password</ng-container></mat-label>
                         <input matInput [type]="hideConfirmPassword() ? 'password' : 'text'"
                             formControlName="confirmPassword" placeholder="••••••••">
                         <button type="button" mat-icon-button matSuffix (click)="clickEvent('confirmPassword')"
-                            [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hideConfirmPassword()">
+                            [attr.aria-label]="('Hide password' | tr)" [attr.aria-pressed]="hideConfirmPassword()">
                             <mat-icon fontSet="material-icons-outlined">{{hideConfirmPassword() ? 'visibility_off' : 'visibility'}}</mat-icon>
                         </button>
                         @if (acceptForm.get('confirmPassword')?.hasError('required')) {
-                        <mat-error>Please confirm your password</mat-error>
+                        <mat-error><ng-container i18n>Please confirm your password</ng-container></mat-error>
                         }
                     </mat-form-field>
 
                     @if (acceptForm.hasError('passwordMismatch') && acceptForm.get('password')?.value &&
                     acceptForm.get('confirmPassword')?.value) {
                     <div class="bg-red-50 text-red-600 text-sm p-3 rounded-lg text-center">
-                        Passwords do not match
+                        <ng-container i18n>Passwords do not match</ng-container>
                     </div>
                     }
 
@@ -71,10 +71,10 @@
                         @if (submitting()) {
                             <span class="flex items-center justify-center gap-2">
                                 <mat-spinner diameter="20"></mat-spinner>
-                                Setting password...
+                                <ng-container i18n>Setting password...</ng-container>
                             </span>
                         } @else {
-                            Set Password &amp; Continue
+                            <ng-container i18n>Set Password &amp; Continue</ng-container>
                         }
                     </button>
                 </form>
@@ -83,12 +83,12 @@
                     <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                         <mat-icon class="text-green-600 text-3xl">check_circle</mat-icon>
                     </div>
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-2">You're all set!</h2>
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-2"><ng-container i18n>You're all set!</ng-container></h2>
                     <p class="text-gray-500 mb-8">
-                        Your password has been created. Taking you to login…
+                        <ng-container i18n>Your password has been created. Taking you to login…</ng-container>
                     </p>
                     <a routerLink="/auth/login" mat-flat-button color="primary" class="w-full h-12">
-                        Go to Login
+                        <ng-container i18n>Go to Login</ng-container>
                     </a>
                 </div>
             }
@@ -106,10 +106,10 @@
         <div class="relative z-10 flex flex-col justify-center px-12 xl:px-16 text-white">
             <div class="mb-10">
                 <h2 class="text-3xl xl:text-4xl font-bold leading-tight mb-4">
-                    You've been invited to join the team.
+                    <ng-container i18n>You've been invited to join the team.</ng-container>
                 </h2>
                 <p class="text-blue-200 text-lg">
-                    Set a password to finish setting up your account and get to work.
+                    <ng-container i18n>Set a password to finish setting up your account and get to work.</ng-container>
                 </p>
             </div>
         </div>

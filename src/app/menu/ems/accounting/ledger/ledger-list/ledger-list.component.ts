@@ -84,12 +84,12 @@ export class LedgerListComponent {
   ];
 
   readonly typeOptions = [
-    { value: '', label: 'All Types' },
-    { value: LedgerEntryType.INVOICE, label: 'Invoice' },
-    { value: LedgerEntryType.PAYMENT, label: 'Payment' },
-    { value: LedgerEntryType.LATE_FEE, label: 'Late Fee' },
-    { value: LedgerEntryType.VOID, label: 'Void' },
-    { value: LedgerEntryType.REVERSAL, label: 'Reversal' },
+    { value: '', label: $localize`All Types` },
+    { value: LedgerEntryType.INVOICE, label: $localize`Invoice` },
+    { value: LedgerEntryType.PAYMENT, label: $localize`Payment` },
+    { value: LedgerEntryType.LATE_FEE, label: $localize`Late Fee` },
+    { value: LedgerEntryType.VOID, label: $localize`Void` },
+    { value: LedgerEntryType.REVERSAL, label: $localize`Reversal` },
   ];
 
   readonly tenantsResource = rxResource({

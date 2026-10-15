@@ -60,7 +60,7 @@ export class TaxSelectionModalComponent {
 
   private loadTaxes() {
     if (!this.data.propertyId) {
-      this.snackBar.open('Property ID not found', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Property ID not found`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -75,7 +75,7 @@ export class TaxSelectionModalComponent {
         this.isLoading.set(false);
 
         if (filteredTaxes.length === 0) {
-          this.snackBar.open('All taxes have been selected', 'Close', {
+          this.snackBar.open($localize`All taxes have been selected`, $localize`Close`, {
             duration: 3000,
           });
         }
@@ -83,7 +83,7 @@ export class TaxSelectionModalComponent {
       error: (error: any) => {
         this.isLoading.set(false);
         const errorMessage = error.error?.message || 'Failed to load taxes';
-        this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+        this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
         console.error('Error loading taxes:', error);
       },
     });
@@ -91,7 +91,7 @@ export class TaxSelectionModalComponent {
 
   selectTax() {
     if (!this.form.valid) {
-      this.snackBar.open('Please select a tax', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Please select a tax`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -120,7 +120,7 @@ export class TaxSelectionModalComponent {
         if (result) {
           // Reload taxes after creating a new one
           this.loadTaxes();
-          this.snackBar.open('Tax created successfully', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Tax created successfully`, $localize`Close`, { duration: 3000 });
         }
       });
   }

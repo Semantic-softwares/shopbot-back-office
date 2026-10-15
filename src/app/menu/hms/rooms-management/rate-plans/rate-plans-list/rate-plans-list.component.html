@@ -1,12 +1,12 @@
-<app-page-header title="Rate Plans" subtitle="Manage pricing strategies for your room types">
+<app-page-header title="Rate Plans" i18n-title subtitle="Manage pricing strategies for your room types" i18n-subtitle>
   <ng-container actions>
     <button mat-stroked-button (click)="ratePlansResource.reload()">
       <mat-icon>refresh</mat-icon>
-      Reload
+      <ng-container i18n>Reload</ng-container>
     </button>
     <button mat-flat-button color="primary" (click)="openCreateDialog()">
       <mat-icon>add</mat-icon>
-      Create Rate Plan
+      <ng-container i18n>Create Rate Plan</ng-container>
     </button>
   </ng-container>
 </app-page-header>
@@ -22,7 +22,7 @@
           </div>
           <div>
             <div class="text-2xl font-bold">{{ stats().total }}</div>
-            <div class="text-sm text-gray-600">Total Plans</div>
+            <div class="text-sm text-gray-600"><ng-container i18n>Total Plans</ng-container></div>
           </div>
         </div>
       </mat-card-content>
@@ -36,7 +36,7 @@
           </div>
           <div>
             <div class="text-2xl font-bold text-green-600">{{ stats().active }}</div>
-            <div class="text-sm text-gray-600">Active</div>
+            <div class="text-sm text-gray-600"><ng-container i18n>Active</ng-container></div>
           </div>
         </div>
       </mat-card-content>
@@ -50,7 +50,7 @@
           </div>
           <div>
             <div class="text-2xl font-bold text-amber-600">{{ stats().defaults }}</div>
-            <div class="text-sm text-gray-600">Defaults</div>
+            <div class="text-sm text-gray-600"><ng-container i18n>Defaults</ng-container></div>
           </div>
         </div>
       </mat-card-content>
@@ -64,7 +64,7 @@
           </div>
           <div>
             <div class="text-2xl font-bold text-purple-600">{{ stats().roomTypesCovered }}</div>
-            <div class="text-sm text-gray-600">Room Types Covered</div>
+            <div class="text-sm text-gray-600"><ng-container i18n>Room Types Covered</ng-container></div>
           </div>
         </div>
       </mat-card-content>
@@ -86,7 +86,7 @@
 
       <!-- Name -->
       <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <th mat-header-cell *matHeaderCellDef><ng-container i18n>Name</ng-container></th>
         <td mat-cell *matCellDef="let plan">
           <div class="flex items-center gap-2">
             <mat-icon class="text-indigo-500 text-base">price_change</mat-icon>
@@ -102,7 +102,7 @@
 
       <!-- Room Type -->
       <ng-container matColumnDef="roomType">
-        <th mat-header-cell *matHeaderCellDef>Room Type</th>
+        <th mat-header-cell *matHeaderCellDef><ng-container i18n>Room Type</ng-container></th>
         <td mat-cell *matCellDef="let plan">
           <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium">
             {{ getRoomTypeName(plan) }}
@@ -112,23 +112,23 @@
 
       <!-- Base Rate -->
       <ng-container matColumnDef="baseRate">
-        <th mat-header-cell *matHeaderCellDef>Rates</th>
+        <th mat-header-cell *matHeaderCellDef><ng-container i18n>Rates</ng-container></th>
         <td mat-cell *matCellDef="let plan">
           <div class="flex flex-col">
             <div>
-              <span class="text-xs text-gray-500">PMS:</span>
+              <span class="text-xs text-gray-500"><ng-container i18n>PMS:</ng-container></span>
               <span class="font-semibold text-green-700 ml-1">
                 {{ plan.baseRate | currency: storeCurrency() }}
               </span>
-              <span class="text-xs text-gray-500">/night</span>
+              <span class="text-xs text-gray-500"><ng-container i18n>/night</ng-container></span>
             </div>
             @if (plan.otaBaseRate != null) {
               <div>
-                <span class="text-xs text-gray-500">OTA:</span>
+                <span class="text-xs text-gray-500"><ng-container i18n>OTA:</ng-container></span>
                 <span class="font-semibold text-indigo-600 ml-1">
                   {{ plan.otaBaseRate | currency: storeCurrency() }}
                 </span>
-                <span class="text-xs text-gray-500">/night</span>
+                <span class="text-xs text-gray-500"><ng-container i18n>/night</ng-container></span>
               </div>
             }
           </div>
@@ -137,7 +137,7 @@
 
       <!-- Day of Week Overrides -->
       <ng-container matColumnDef="dayOfWeek">
-        <th mat-header-cell *matHeaderCellDef>Day Overrides</th>
+        <th mat-header-cell *matHeaderCellDef><ng-container i18n>Day Overrides</ng-container></th>
         <td mat-cell *matCellDef="let plan">
           @if (getDayOverrides(plan).length > 0) {
             <div class="flex flex-wrap gap-1">
@@ -148,30 +148,30 @@
               }
             </div>
           } @else {
-            <span class="text-xs text-gray-400">None</span>
+            <span class="text-xs text-gray-400"><ng-container i18n>None</ng-container></span>
           }
         </td>
       </ng-container>
 
       <!-- Restrictions -->
       <ng-container matColumnDef="restrictions">
-        <th mat-header-cell *matHeaderCellDef>Stay</th>
+        <th mat-header-cell *matHeaderCellDef><ng-container i18n>Stay</ng-container></th>
         <td mat-cell *matCellDef="let plan">
           <span class="text-xs text-gray-600">
-            {{ plan.restrictions?.minStay || 1 }}–{{ plan.restrictions?.maxStay || 365 }} nights
+            <ng-container i18n>{{ plan.restrictions?.minStay || 1 }}–{{ plan.restrictions?.maxStay || 365 }} nights</ng-container>
           </span>
         </td>
       </ng-container>
 
       <!-- Channex Sync -->
       <ng-container matColumnDef="channexSync">
-        <th mat-header-cell *matHeaderCellDef>Channex</th>
+        <th mat-header-cell *matHeaderCellDef><ng-container i18n>Channex</ng-container></th>
         <td mat-cell *matCellDef="let plan">
           @if (plan.channex?.ratePlanId) {
             <div class="flex items-center gap-1.5">
               <mat-icon class="text-green-600 text-base!">cloud_done</mat-icon>
               <div class="flex flex-col">
-                <span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs font-medium">Synced</span>
+                <span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs font-medium"><ng-container i18n>Synced</ng-container></span>
                 <span class="text-[10px] text-gray-400 mt-0.5 font-mono truncate max-w-[120px]" [matTooltip]="plan.channex.ratePlanId">
                   {{ plan.channex.ratePlanId }}
                 </span>
@@ -181,12 +181,12 @@
             <div class="flex items-center gap-1.5">
               <mat-icon class="text-red-500 text-base!">cloud_off</mat-icon>
               <div class="flex flex-col">
-                <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-medium">Error</span>
+                <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-medium"><ng-container i18n>Error</ng-container></span>
                 <button mat-button class="text-xs! h-6! min-h-0! px-1!" (click)="syncRatePlanToChannex(plan)" [disabled]="syncingPlanId() === plan._id">
                   @if (syncingPlanId() === plan._id) {
                     <mat-spinner diameter="14" class="mr-1"></mat-spinner>
                   }
-                  Retry
+                  <ng-container i18n>Retry</ng-container>
                 </button>
               </div>
             </div>
@@ -194,12 +194,12 @@
             <div class="flex items-center gap-1.5">
               <mat-icon class="text-gray-400 text-base!">cloud_off</mat-icon>
               <div class="flex flex-col">
-                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">Not synced</span>
+                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-medium"><ng-container i18n>Not synced</ng-container></span>
                 <button mat-button class="text-xs! h-6! min-h-0! px-1! text-indigo-600" (click)="syncRatePlanToChannex(plan)" [disabled]="syncingPlanId() === plan._id">
                   @if (syncingPlanId() === plan._id) {
                     <mat-spinner diameter="14" class="mr-1"></mat-spinner>
                   }
-                  Sync now
+                  <ng-container i18n>Sync now</ng-container>
                 </button>
               </div>
             </div>
@@ -209,16 +209,16 @@
 
       <!-- Status -->
       <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <th mat-header-cell *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
         <td mat-cell *matCellDef="let plan">
           <div class="flex items-center gap-1">
             @if (plan.isDefault) {
-              <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full text-xs font-medium">Default</span>
+              <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full text-xs font-medium"><ng-container i18n>Default</ng-container></span>
             }
             @if (plan.active) {
-              <span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs font-medium">Active</span>
+              <span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs font-medium"><ng-container i18n>Active</ng-container></span>
             } @else {
-              <span class="px-2 py-0.5 bg-red-100 text-red-800 rounded-full text-xs font-medium">Inactive</span>
+              <span class="px-2 py-0.5 bg-red-100 text-red-800 rounded-full text-xs font-medium"><ng-container i18n>Inactive</ng-container></span>
             }
           </div>
         </td>
@@ -233,19 +233,19 @@
           </button>
           <mat-menu #menu="matMenu">
             <button mat-menu-item (click)="openEditDialog(plan)">
-              <mat-icon>edit</mat-icon> Edit
+              <mat-icon>edit</mat-icon> <ng-container i18n>Edit</ng-container>
             </button>
             <button mat-menu-item (click)="generateInventory(plan)">
-              <mat-icon>auto_fix_high</mat-icon> Generate Inventory (90 days)
+              <mat-icon>auto_fix_high</mat-icon> <ng-container i18n>Generate Inventory (90 days)</ng-container>
             </button>
             @if (!plan.channex?.ratePlanId) {
               <button mat-menu-item (click)="syncRatePlanToChannex(plan)">
-                <mat-icon>cloud_upload</mat-icon> Sync to Channex
+                <mat-icon>cloud_upload</mat-icon> <ng-container i18n>Sync to Channex</ng-container>
               </button>
             }
             <mat-divider></mat-divider>
             <button mat-menu-item (click)="deleteRatePlan(plan)" class="text-red-600">
-              <mat-icon class="text-red-600">delete</mat-icon> Delete
+              <mat-icon class="text-red-600">delete</mat-icon> <ng-container i18n>Delete</ng-container>
             </button>
           </mat-menu>
         </td>
@@ -265,15 +265,15 @@
         <mat-icon class="text-indigo-400 text-3xl!">price_change</mat-icon>
       </div>
       <div>
-        <h3 class="text-lg font-semibold text-gray-800">No Rate Plans Yet</h3>
+        <h3 class="text-lg font-semibold text-gray-800"><ng-container i18n>No Rate Plans Yet</ng-container></h3>
         <p class="text-sm text-gray-500 mt-1 max-w-md">
-          Rate plans define how much each room type costs per night. Create one to set base rates, 
-          weekend pricing, and seasonal overrides.
+          <ng-container i18n>Rate plans define how much each room type costs per night. Create one to set base rates, 
+          weekend pricing, and seasonal overrides.</ng-container>
         </p>
       </div>
       <button mat-flat-button color="primary" (click)="openCreateDialog()">
         <mat-icon>add</mat-icon>
-        Create Your First Rate Plan
+        <ng-container i18n>Create Your First Rate Plan</ng-container>
       </button>
     </div>
   </mat-card>

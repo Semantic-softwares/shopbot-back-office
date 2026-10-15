@@ -1,18 +1,18 @@
-<app-page-header title="Rental Owners" subtitle="Manage property rental owners">
+<app-page-header title="Rental Owners" i18n-title subtitle="Manage property rental owners" i18n-subtitle>
   <ng-container actions>
     <button mat-button (click)="clearFilters()">
       <mat-icon>clear</mat-icon>
-      Clear Filters
+      <ng-container i18n>Clear Filters</ng-container>
     </button>
 
     <button mat-button (click)="reloadData()">
       <mat-icon class="mr-1">refresh</mat-icon>
-      Reload
+      <ng-container i18n>Reload</ng-container>
     </button>
 
     <button mat-flat-button (click)="createOwner()">
       <mat-icon class="mr-1">add</mat-icon>
-      New Owner
+      <ng-container i18n>New Owner</ng-container>
     </button>
   </ng-container>
 </app-page-header>
@@ -22,21 +22,21 @@
   <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
-        <div class="text-sm text-gray-600">Total</div>
+        <div class="text-sm text-gray-600"><ng-container i18n>Total</ng-container></div>
         <div class="text-2xl font-bold">{{ totalOwners() }}</div>
       </mat-card-content>
     </mat-card>
 
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
-        <div class="text-sm text-gray-600">Active</div>
+        <div class="text-sm text-gray-600"><ng-container i18n>Active</ng-container></div>
         <div class="text-2xl font-bold text-green-600">{{ activeCount() }}</div>
       </mat-card-content>
     </mat-card>
 
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
-        <div class="text-sm text-gray-600">Inactive</div>
+        <div class="text-sm text-gray-600"><ng-container i18n>Inactive</ng-container></div>
         <div class="text-2xl font-bold text-gray-500">{{ inactiveCount() }}</div>
       </mat-card-content>
     </mat-card>
@@ -48,13 +48,13 @@
       <form [formGroup]="filterForm">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Search owners...</mat-label>
+            <mat-label><ng-container i18n>Search owners...</ng-container></mat-label>
             <mat-icon matPrefix class="text-gray-400">search</mat-icon>
-            <input matInput placeholder="Name, email or phone" formControlName="search">
+            <input matInput placeholder="Name, email or phone" i18n-placeholder formControlName="search">
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Status</mat-label>
+            <mat-label><ng-container i18n>Status</ng-container></mat-label>
             <mat-select formControlName="status">
               @for (status of statusOptions; track status.value) {
                 <mat-option [value]="status.value">{{ status.label }}</mat-option>
@@ -70,7 +70,7 @@
         <table mat-table [dataSource]="rentalOwners.value()!.data.items" class="w-full">
           <!-- Name Column -->
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Name</ng-container></th>
             <td mat-cell *matCellDef="let owner">
               <div class="font-medium">{{ owner.firstName }} {{ owner.lastName }}</div>
             </td>
@@ -78,7 +78,7 @@
 
           <!-- Contact Column -->
           <ng-container matColumnDef="contact">
-            <th mat-header-cell *matHeaderCellDef>Contact</th>
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Contact</ng-container></th>
             <td mat-cell *matCellDef="let owner">
               @if (owner.email) {
                 <div class="text-sm">{{ owner.email }}</div>
@@ -91,7 +91,7 @@
 
           <!-- Company Column -->
           <ng-container matColumnDef="company">
-            <th mat-header-cell *matHeaderCellDef>Company</th>
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Company</ng-container></th>
             <td mat-cell *matCellDef="let owner">
               @if (owner.isCompany && owner.companyName) {
                 <span class="text-sm">{{ owner.companyName }}</span>
@@ -103,7 +103,7 @@
 
           <!-- Status Column -->
           <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
             <td mat-cell *matCellDef="let owner">
               <mat-chip [ngClass]="getStatusClass(owner.status)">
                 {{ owner.status | titlecase }}
@@ -113,7 +113,7 @@
 
           <!-- Actions Column -->
           <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Actions</ng-container></th>
             <td mat-cell *matCellDef="let owner">
               <button mat-icon-button [matMenuTriggerFor]="actionMenu" (click)="$event.stopPropagation()">
                 <mat-icon>more_vert</mat-icon>
@@ -122,16 +122,16 @@
               <mat-menu #actionMenu="matMenu">
                 <button mat-menu-item (click)="viewOwner(owner)">
                   <mat-icon>visibility</mat-icon>
-                  <span>View Details</span>
+                  <span><ng-container i18n>View Details</ng-container></span>
                 </button>
                 <button mat-menu-item (click)="editOwner(owner)" [disabled]="isUpdating()">
                   <mat-icon>edit</mat-icon>
-                  <span>Edit</span>
+                  <span><ng-container i18n>Edit</ng-container></span>
                 </button>
                 <mat-divider></mat-divider>
                 <button mat-menu-item (click)="deleteOwner(owner)" [disabled]="isUpdating()">
                   <mat-icon color="warn">delete</mat-icon>
-                  <span>Delete</span>
+                  <span><ng-container i18n>Delete</ng-container></span>
                 </button>
               </mat-menu>
             </td>
@@ -158,13 +158,13 @@
         <div class="p-4">
           <app-no-record
             icon="person"
-            title="No Rental Owners Found"
+            title="No Rental Owners Found" i18n-title
             [message]="filterForm.get('search')?.value
-              ? 'Try adjusting your search to find matching owners.'
-              : 'Get started by creating your first rental owner.'">
+              ? ('Try adjusting your search to find matching owners.' | tr)
+              : ('Get started by creating your first rental owner.' | tr)">
             <button mat-flat-button (click)="createOwner()">
               <mat-icon>add</mat-icon>
-              Create Owner
+              <ng-container i18n>Create Owner</ng-container>
             </button>
           </app-no-record>
         </div>
@@ -176,11 +176,11 @@
         <div class="flex">
           <mat-icon class="text-red-500 mr-2">error</mat-icon>
           <div>
-            <h3 class="text-red-800 font-medium">Error loading rental owners</h3>
+            <h3 class="text-red-800 font-medium"><ng-container i18n>Error loading rental owners</ng-container></h3>
             <p class="text-red-700 text-sm mt-1">{{ rentalOwners.error() }}</p>
             <button mat-button color="warn" (click)="reloadData()" class="mt-2 !text-red-600">
               <mat-icon class="mr-1">refresh</mat-icon>
-              Retry
+              <ng-container i18n>Retry</ng-container>
             </button>
           </div>
         </div>

@@ -2,15 +2,15 @@
       <div class="flex items-center justify-between mb-6">
         <div>
           <h1 class="text-2xl font-bold text-gray-900">
-            {{ isEditMode() ? 'Edit Stock Entry' : 'Add Stock' }}
+            @if (isEditMode()) {<ng-container i18n>Edit Stock Entry</ng-container>} @else {<ng-container i18n>Add Stock</ng-container>}
           </h1>
           <p class="text-gray-600 mt-1">
-            {{ isEditMode() ? 'Update existing inventory record' : 'Record new inventory received from suppliers' }}
+            @if (isEditMode()) {<ng-container i18n>Update existing inventory record</ng-container>} @else {<ng-container i18n>Record new inventory received from suppliers</ng-container>}
           </p>
         </div>
         <button mat-button (click)="goToRestock()" class="text-gray-600">
           <mat-icon>arrow_back</mat-icon>
-          Back to List
+          <ng-container i18n>Back to List</ng-container>
         </button>
       </div>
 
@@ -18,37 +18,37 @@
         <!-- Header Information -->
         <mat-card class="mb-6">
           <mat-card-header>
-            <mat-card-title>Restock Information</mat-card-title>
+            <mat-card-title><ng-container i18n>Restock Information</ng-container></mat-card-title>
           </mat-card-header>
           <mat-card-content class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <mat-form-field appearance="outline">
-                <mat-label>Supplier *</mat-label>
+                <mat-label><ng-container i18n>Supplier *</ng-container></mat-label>
                 <mat-select formControlName="supplier" required>
                   @for (supplier of suppliers.value(); track supplier._id) {
                     <mat-option [value]="supplier._id">{{ supplier.name }}</mat-option>
                   }
                 </mat-select>
                 @if (restockForm.get('supplier')?.invalid && restockForm.get('supplier')?.touched) {
-                  <mat-error>Supplier is required</mat-error>
+                  <mat-error><ng-container i18n>Supplier is required</ng-container></mat-error>
                 }
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>Invoice Number *</mat-label>
+                <mat-label><ng-container i18n>Invoice Number *</ng-container></mat-label>
                 <input matInput formControlName="invoiceNumber" required>
                 @if (restockForm.get('invoiceNumber')?.invalid && restockForm.get('invoiceNumber')?.touched) {
-                  <mat-error>Invoice number is required</mat-error>
+                  <mat-error><ng-container i18n>Invoice number is required</ng-container></mat-error>
                 }
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>Order Number</mat-label>
+                <mat-label><ng-container i18n>Order Number</ng-container></mat-label>
                 <input matInput formControlName="orderNumber">
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>Invoice Date *</mat-label>
+                <mat-label><ng-container i18n>Invoice Date *</ng-container></mat-label>
                 <input matInput [matDatepicker]="datePicker" formControlName="invoiceDate" required>
                 <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
                 <mat-datepicker #datePicker></mat-datepicker>
@@ -60,18 +60,18 @@
         <!-- Products Section -->
         <mat-card class="mb-6">
           <mat-card-header>
-            <mat-card-title>Products</mat-card-title>
+            <mat-card-title><ng-container i18n>Products</ng-container></mat-card-title>
           </mat-card-header>
           <mat-card-content class="p-6">
             <!-- Add Product Search -->
             <div class="mb-4">
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Search and add product</mat-label>
+                <mat-label><ng-container i18n>Search and add product</ng-container></mat-label>
                 <input
                   matInput
                   #searchInput
                   [matAutocomplete]="auto"
-                  placeholder="Search by product name or barcode"
+                  placeholder="Search by product name or barcode" i18n-placeholder
                   (input)="onSearchInputChange($event)"
                 >
                 <mat-autocomplete 
@@ -92,7 +92,7 @@
                         <div>
                           <div class="font-medium">{{ product.name }}</div>
                           <div class="text-sm text-gray-500">
-                            Current Qty: {{ product.qty || 0 }} | Cost: {{ product.costPrice | currency:currency():'symbol':'1.2-2' }}
+                            <ng-container i18n>Current Qty: {{ product.qty || 0 }} | Cost: {{ product.costPrice | currency:currency():'symbol':'1.2-2' }}</ng-container>
                           </div>
                         </div>
                       </div>
@@ -107,20 +107,20 @@
               @if (itemsArray.length === 0) {
                 <div class="text-center py-8 text-gray-500">
                   <mat-icon class="text-4xl mb-2">search</mat-icon>
-                  <p>Search and add products to restock</p>
+                  <p><ng-container i18n>Search and add products to restock</ng-container></p>
                 </div>
               } @else {
                 <div class="overflow-x-auto">
                   <table class="w-full">
                     <thead>
                       <tr class="border-b border-gray-200">
-                        <th class="text-left py-2">Product</th>
-                        <th class="text-left py-2">Quantity</th>
-                        <th class="text-left py-2">Cost Price</th>
-                        <th class="text-left py-2">Selling Price</th>
-                        <th class="text-left py-2">Expiry Date</th>
-                        <th class="text-left py-2">Total</th>
-                        <th class="text-left py-2">Actions</th>
+                        <th class="text-left py-2"><ng-container i18n>Product</ng-container></th>
+                        <th class="text-left py-2"><ng-container i18n>Quantity</ng-container></th>
+                        <th class="text-left py-2"><ng-container i18n>Cost Price</ng-container></th>
+                        <th class="text-left py-2"><ng-container i18n>Selling Price</ng-container></th>
+                        <th class="text-left py-2"><ng-container i18n>Expiry Date</ng-container></th>
+                        <th class="text-left py-2"><ng-container i18n>Total</ng-container></th>
+                        <th class="text-left py-2"><ng-container i18n>Actions</ng-container></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -188,35 +188,35 @@
         @if (itemsArray.length > 0) {
           <mat-card class="mb-6">
             <mat-card-header>
-              <mat-card-title>Summary</mat-card-title>
+              <mat-card-title><ng-container i18n>Summary</ng-container></mat-card-title>
             </mat-card-header>
             <mat-card-content class="p-6">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <mat-form-field appearance="outline">
-                  <mat-label>Discount (%)</mat-label>
+                  <mat-label><ng-container i18n>Discount (%)</ng-container></mat-label>
                   <input matInput type="number" formControlName="discount" min="0" max="100" step="0.01">
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
-                  <mat-label>VAT (%)</mat-label>
+                  <mat-label><ng-container i18n>VAT (%)</ng-container></mat-label>
                   <input matInput type="number" formControlName="vat" min="0" max="100" step="0.01">
                 </mat-form-field>
 
                 <div class="flex flex-col space-y-2 justify-end">
                   <div class="flex justify-between">
-                    <span>Subtotal:</span>
+                    <span><ng-container i18n>Subtotal:</ng-container></span>
                     <span class="font-medium">{{ subtotal() | currency:currency():'symbol':'1.2-2' }}</span>
                   </div>
                   <div class="flex justify-between">
-                    <span>Discount:</span>
+                    <span><ng-container i18n>Discount:</ng-container></span>
                     <span class="font-medium">{{ discountAmount() | currency:currency():'symbol':'1.2-2' }}</span>
                   </div>
                   <div class="flex justify-between">
-                    <span>VAT:</span>
+                    <span><ng-container i18n>VAT:</ng-container></span>
                     <span class="font-medium">{{ vatAmount() | currency:currency():'symbol':'1.2-2' }}</span>
                   </div>
                   <div class="flex justify-between text-lg font-bold border-t pt-2">
-                    <span>Total:</span>
+                    <span><ng-container i18n>Total:</ng-container></span>
                     <span>{{ total() | currency:currency():'symbol':'1.2-2' }}</span>
                   </div>
                 </div>
@@ -224,23 +224,23 @@
 
               <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <mat-form-field appearance="outline">
-                  <mat-label>Amount Paid</mat-label>
+                  <mat-label><ng-container i18n>Amount Paid</ng-container></mat-label>
                   <input matInput type="number" formControlName="amountPaid" min="0" step="0.01">
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
-                  <mat-label>Payment Method</mat-label>
+                  <mat-label><ng-container i18n>Payment Method</ng-container></mat-label>
                   <mat-select formControlName="paymentMethod">
-                    <mat-option value="cash">Cash</mat-option>
-                    <mat-option value="bank_transfer">Bank Transfer</mat-option>
-                    <mat-option value="check">Check</mat-option>
-                    <mat-option value="credit">Credit</mat-option>
+                    <mat-option value="cash"><ng-container i18n>Cash</ng-container></mat-option>
+                    <mat-option value="bank_transfer"><ng-container i18n>Bank Transfer</ng-container></mat-option>
+                    <mat-option value="check"><ng-container i18n>Check</ng-container></mat-option>
+                    <mat-option value="credit"><ng-container i18n>Credit</ng-container></mat-option>
                   </mat-select>
                 </mat-form-field>
               </div>
 
               <mat-form-field appearance="outline" class="w-full mt-4">
-                <mat-label>Notes</mat-label>
+                <mat-label><ng-container i18n>Notes</ng-container></mat-label>
                 <textarea matInput formControlName="notes" rows="3"></textarea>
               </mat-form-field>
             </mat-card-content>
@@ -249,7 +249,7 @@
 
         <!-- Action Buttons -->
         <div class="flex justify-end space-x-4">
-          <button type="button" mat-button [routerLink]="['..']">Cancel</button>
+          <button type="button" mat-button [routerLink]="['..']"><ng-container i18n>Cancel</ng-container></button>
           <button
             type="submit"
             mat-raised-button
@@ -259,7 +259,7 @@
             @if (isSubmitting()) {
               <mat-spinner diameter="20" class="mr-2"></mat-spinner>
             }
-            {{ isEditMode() ? 'Update Restock' : 'Save Restock' }}
+            @if (isEditMode()) {<ng-container i18n>Update Restock</ng-container>} @else {<ng-container i18n>Save Restock</ng-container>}
           </button>
         </div>
       </form>

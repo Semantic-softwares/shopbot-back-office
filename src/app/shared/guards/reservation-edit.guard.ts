@@ -13,7 +13,7 @@ export const reservationEditGuard = (route: ActivatedRouteSnapshot) => {
   const reservationId = route.paramMap.get('id');
   
   if (!reservationId) {
-    snackBar.open('Invalid reservation ID', 'Close', {
+    snackBar.open($localize`Invalid reservation ID`, $localize`Close`, {
       duration: 3000,
     });
     router.navigate(['/dashboard/reservations']);
@@ -23,7 +23,7 @@ export const reservationEditGuard = (route: ActivatedRouteSnapshot) => {
   return reservationService.getReservationById(reservationId).pipe(
     map(reservation => {
       if (!reservation) {
-        snackBar.open('Reservation not found', 'Close', {
+        snackBar.open($localize`Reservation not found`, $localize`Close`, {
           duration: 3000,
         });
         router.navigate(['/dashboard/reservations']);
@@ -32,7 +32,7 @@ export const reservationEditGuard = (route: ActivatedRouteSnapshot) => {
 
       // Check if reservation is checked in
       if (reservation.status === 'checked_in' || reservation.actualCheckInDate) {
-        snackBar.open('Cannot edit reservation that has been checked in', 'Close', {
+        snackBar.open($localize`Cannot edit reservation that has been checked in`, $localize`Close`, {
           duration: 4000,
         });
         router.navigate(['/dashboard/reservations', reservationId]);
@@ -43,7 +43,7 @@ export const reservationEditGuard = (route: ActivatedRouteSnapshot) => {
     }),
     catchError(error => {
       console.error('Error checking reservation status:', error);
-      snackBar.open('Error checking reservation status', 'Close', {
+      snackBar.open($localize`Error checking reservation status`, $localize`Close`, {
         duration: 3000,
       });
       router.navigate(['/dashboard/reservations']);

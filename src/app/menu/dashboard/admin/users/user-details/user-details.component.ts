@@ -58,7 +58,7 @@ export class UserDetailsComponent {
   updatePassword() {
     if (this.passwordForm.valid) {
       // Implement password update logic here
-      this.snackBar.open('Password updated successfully', 'Close', {
+      this.snackBar.open($localize`Password updated successfully`, $localize`Close`, {
         duration: 3000
       });
       this.passwordForm.reset();

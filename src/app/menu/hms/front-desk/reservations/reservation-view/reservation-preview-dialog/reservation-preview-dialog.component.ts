@@ -305,7 +305,7 @@ export class ReservationPreviewDialogComponent {
     const reservation = this.reservation();
     
     if (!reservation || !this.canChangeRooms()) {
-      this.snackBar.open('Cannot change rooms for this reservation', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Cannot change rooms for this reservation`, $localize`Close`, { duration: 3000 });
       return;
     }
 
@@ -333,13 +333,13 @@ export class ReservationPreviewDialogComponent {
         try {
           const response = await this.reservationService.changeRooms(reservation._id, result).toPromise();
           if (response?.success) {
-            this.snackBar.open('Room changed successfully', 'Close', { duration: 3000 });
+            this.snackBar.open($localize`Room changed successfully`, $localize`Close`, { duration: 3000 });
             this.reservation.set(response.data);
           }
         } catch (error: any) {
           console.error('Error changing rooms:', error);
           const errorMessage = error?.error?.error || error?.error?.message || error?.message || 'Failed to change rooms';
-          this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+          this.snackBar.open(errorMessage, $localize`Close`, { duration: 5000 });
         }
       }
     });

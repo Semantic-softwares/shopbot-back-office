@@ -33,31 +33,31 @@ export class ChannelManagerSettings {
   navLinks = [
     {
       path: 'settings-general',
-      label: 'Settings',
+      label: $localize`Settings`,
       icon: 'settings',
       iconColor: 'text-blue-600',
     },
     {
       path: 'policies',
-      label: 'Policies',
+      label: $localize`Policies`,
       icon: 'policy',
       iconColor: 'text-green-600',
     },
     {
       path: 'tax-sets',
-      label: 'Tax Sets',
+      label: $localize`Tax Sets`,
       icon: 'account_balance_wallet',
       iconColor: 'text-orange-600',
     },
     {
       path: 'taxes',
-      label: 'Taxes',
+      label: $localize`Taxes`,
       icon: 'gavel',
       iconColor: 'text-red-600',
     },
     {
       path: 'webhooks',
-      label: 'Webhooks',
+      label: $localize`Webhooks`,
       icon: 'webhook',
       iconColor: 'text-purple-600',
     },

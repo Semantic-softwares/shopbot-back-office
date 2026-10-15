@@ -976,7 +976,7 @@ export class RoomDetailsComponent {
     dialogRef.afterClosed().subscribe((result) => {
       if (result && result.success) {
         // The form has already been updated directly
-        this.snackBar.open('Price updated successfully', 'Close', {
+        this.snackBar.open($localize`Price updated successfully`, $localize`Close`, {
           duration: 2000,
           horizontalPosition: 'end',
           verticalPosition: 'top',
@@ -1033,8 +1033,8 @@ export class RoomDetailsComponent {
 
       // Show error message using snackbar
       this.snackBar.open(
-        'This room is already selected in another row',
-        'Close',
+        $localize`This room is already selected in another row`,
+        $localize`Close`,
         {
           duration: 3000,
           horizontalPosition: 'end',
@@ -1237,8 +1237,8 @@ export class RoomDetailsComponent {
     // Validate room stay period is within reservation period
     if (roomFrom < resFrom || roomTo > resTo) {
       this.snackBar.open(
-        'Room stay period must be within the reservation dates',
-        'Close',
+        $localize`Room stay period must be within the reservation dates`,
+        $localize`Close`,
         {
           duration: 4000,
           horizontalPosition: 'end',
@@ -1259,8 +1259,8 @@ export class RoomDetailsComponent {
       (isAvailable) => {
         if (!isAvailable) {
           this.snackBar.open(
-            'Room is not available for the selected dates',
-            'Close',
+            $localize`Room is not available for the selected dates`,
+            $localize`Close`,
             {
               duration: 4000,
               horizontalPosition: 'end',
@@ -1573,8 +1573,8 @@ export class RoomDetailsComponent {
     const toStr = this.formatLocalDate(latestCheckOut);
 
     this.snackBar.open(
-      `Reservation dates auto-adjusted to ${fromStr} → ${toStr} (${nights} night${nights !== 1 ? 's' : ''})`,
-      'Close',
+      $localize`Reservation dates auto-adjusted to ${fromStr} → ${toStr} (${nights} night${nights !== 1 ? 's' : ''})`,
+      $localize`Close`,
       {
         duration: 5000,
         horizontalPosition: 'end',

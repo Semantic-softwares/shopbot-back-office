@@ -7,26 +7,26 @@
   >
     <mat-expansion-panel-header class="px-6 py-4">
       <mat-panel-title>
-        <span class="text-lg font-semibold text-slate-800">Filters</span>
+        <span class="text-lg font-semibold text-slate-800"><ng-container i18n>Filters</ng-container></span>
       </mat-panel-title>
       <mat-panel-description>
-        <span class="text-sm text-slate-500">Narrow down arrears by tenant, property, aging bucket, amount, and time period.</span>
+        <span class="text-sm text-slate-500"><ng-container i18n>Narrow down arrears by tenant, property, aging bucket, amount, and time period.</ng-container></span>
       </mat-panel-description>
     </mat-expansion-panel-header>
 
     <form [formGroup]="filterForm" class="space-y-4 px-6 pb-6 pt-2">
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Search</mat-label>
-          <input matInput formControlName="search" placeholder="Lease, tenant, property..." />
+          <mat-label><ng-container i18n>Search</ng-container></mat-label>
+          <input matInput formControlName="search" placeholder="Lease, tenant, property..." i18n-placeholder />
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Property</mat-label>
+          <mat-label><ng-container i18n>Property</ng-container></mat-label>
           <mat-select formControlName="propertyId">
             <mat-select-trigger>{{ selectedPropertyName() }}</mat-select-trigger>
-            <mat-option value="">All Properties</mat-option>
+            <mat-option value=""><ng-container i18n>All Properties</ng-container></mat-option>
             @for (property of properties(); track property._id) {
               <mat-option [value]="property._id">{{ property.name }}</mat-option>
             }
@@ -34,10 +34,10 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Unit</mat-label>
+          <mat-label><ng-container i18n>Unit</ng-container></mat-label>
           <mat-select formControlName="unitId">
             <mat-select-trigger>{{ selectedUnitName() }}</mat-select-trigger>
-            <mat-option value="">All Units</mat-option>
+            <mat-option value=""><ng-container i18n>All Units</ng-container></mat-option>
             @for (unit of units(); track unit._id) {
               <mat-option [value]="unit._id">{{ unit.name }}</mat-option>
             }
@@ -45,62 +45,62 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Aging Bucket</mat-label>
+          <mat-label><ng-container i18n>Aging Bucket</ng-container></mat-label>
           <mat-select formControlName="agingBucket">
-            <mat-option value="">All Buckets</mat-option>
-            <mat-option [value]="agingBucket.BUCKET_0_30">0-30 Days</mat-option>
-            <mat-option [value]="agingBucket.BUCKET_31_60">31-60 Days</mat-option>
-            <mat-option [value]="agingBucket.BUCKET_61_90">61-90 Days</mat-option>
-            <mat-option [value]="agingBucket.BUCKET_90_PLUS">90+ Days</mat-option>
+            <mat-option value=""><ng-container i18n>All Buckets</ng-container></mat-option>
+            <mat-option [value]="agingBucket.BUCKET_0_30"><ng-container i18n>0-30 Days</ng-container></mat-option>
+            <mat-option [value]="agingBucket.BUCKET_31_60"><ng-container i18n>31-60 Days</ng-container></mat-option>
+            <mat-option [value]="agingBucket.BUCKET_61_90"><ng-container i18n>61-90 Days</ng-container></mat-option>
+            <mat-option [value]="agingBucket.BUCKET_90_PLUS"><ng-container i18n>90+ Days</ng-container></mat-option>
           </mat-select>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Min Amount</mat-label>
+          <mat-label><ng-container i18n>Min Amount</ng-container></mat-label>
           <input matInput type="number" formControlName="minAmount" min="0" />
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Max Amount</mat-label>
+          <mat-label><ng-container i18n>Max Amount</ng-container></mat-label>
           <input matInput type="number" formControlName="maxAmount" min="0" />
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Date From</mat-label>
+          <mat-label><ng-container i18n>Date From</ng-container></mat-label>
           <input matInput [matDatepicker]="dateFromPicker" formControlName="dateFrom" />
           <mat-datepicker-toggle matIconSuffix [for]="dateFromPicker"></mat-datepicker-toggle>
           <mat-datepicker #dateFromPicker></mat-datepicker>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Date To</mat-label>
+          <mat-label><ng-container i18n>Date To</ng-container></mat-label>
           <input matInput [matDatepicker]="dateToPicker" formControlName="dateTo" />
           <mat-datepicker-toggle matIconSuffix [for]="dateToPicker"></mat-datepicker-toggle>
           <mat-datepicker #dateToPicker></mat-datepicker>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Sort By</mat-label>
+          <mat-label><ng-container i18n>Sort By</ng-container></mat-label>
           <mat-select formControlName="sortBy">
-            <mat-option [value]="sortByField.OLDEST_INVOICE_DAYS">Oldest Invoice</mat-option>
-            <mat-option [value]="sortByField.TOTAL_OVERDUE_AMOUNT">Total Overdue</mat-option>
-            <mat-option [value]="sortByField.OVERDUE_INVOICE_COUNT">Invoice Count</mat-option>
-            <mat-option [value]="sortByField.PROPERTY_NAME">Property Name</mat-option>
-            <mat-option [value]="sortByField.TENANT_NAME">Tenant Name</mat-option>
-            <mat-option [value]="sortByField.LEASE_NUMBER">Lease Number</mat-option>
+            <mat-option [value]="sortByField.OLDEST_INVOICE_DAYS"><ng-container i18n>Oldest Invoice</ng-container></mat-option>
+            <mat-option [value]="sortByField.TOTAL_OVERDUE_AMOUNT"><ng-container i18n>Total Overdue</ng-container></mat-option>
+            <mat-option [value]="sortByField.OVERDUE_INVOICE_COUNT"><ng-container i18n>Invoice Count</ng-container></mat-option>
+            <mat-option [value]="sortByField.PROPERTY_NAME"><ng-container i18n>Property Name</ng-container></mat-option>
+            <mat-option [value]="sortByField.TENANT_NAME"><ng-container i18n>Tenant Name</ng-container></mat-option>
+            <mat-option [value]="sortByField.LEASE_NUMBER"><ng-container i18n>Lease Number</ng-container></mat-option>
           </mat-select>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Order</mat-label>
+          <mat-label><ng-container i18n>Order</ng-container></mat-label>
           <mat-select formControlName="sortOrder">
-            <mat-option [value]="sortOrder.DESC">Descending</mat-option>
-            <mat-option [value]="sortOrder.ASC">Ascending</mat-option>
+            <mat-option [value]="sortOrder.DESC"><ng-container i18n>Descending</ng-container></mat-option>
+            <mat-option [value]="sortOrder.ASC"><ng-container i18n>Ascending</ng-container></mat-option>
           </mat-select>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Results Per Page</mat-label>
+          <mat-label><ng-container i18n>Results Per Page</ng-container></mat-label>
           <mat-select formControlName="limit">
             <mat-option [value]="10">10</mat-option>
             <mat-option [value]="20">20</mat-option>
@@ -113,11 +113,11 @@
       <div class="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:justify-end">
         <button mat-stroked-button type="button" (click)="resetFilters()" class="sm:!min-w-32">
           <mat-icon class="mr-1">refresh</mat-icon>
-          Reset
+          <ng-container i18n>Reset</ng-container>
         </button>
         <button mat-flat-button color="primary" type="button" (click)="applyFilters()" class="sm:!min-w-40">
           <mat-icon class="mr-1">filter_list</mat-icon>
-          Apply Filters
+          <ng-container i18n>Apply Filters</ng-container>
         </button>
       </div>
     </form>

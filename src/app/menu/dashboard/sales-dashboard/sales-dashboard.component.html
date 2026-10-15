@@ -1,12 +1,12 @@
 <div class="sales-dashboard">
 
-  <app-page-header title="Dashboard" [subtitle]="subtitle()">
+  <app-page-header title="Dashboard" i18n-title [subtitle]="subtitle()">
     <ng-container actions>
       <date-range-selector />
       <app-employee-selector />
       <button matButton (click)="retry()" [disabled]="refreshing()">
         <mat-icon>refresh</mat-icon>
-        Refresh
+        <ng-container i18n>Refresh</ng-container>
       </button>
     </ng-container>
   </app-page-header>
@@ -14,14 +14,14 @@
   @if (loading()) {
     <div class="state-panel">
       <mat-spinner diameter="36"></mat-spinner>
-      <p>Crunching your sales numbers…</p>
+      <p><ng-container i18n>Crunching your sales numbers…</ng-container></p>
     </div>
   } @else if (error()) {
     <mat-card appearance="outlined" class="state-panel">
       <mat-icon class="state-panel__icon">cloud_off</mat-icon>
-      <p class="state-panel__title">We couldn't load your dashboard</p>
-      <p>Check your connection, then try again.</p>
-      <button matButton="filled" (click)="retry()">Try again</button>
+      <p class="state-panel__title"><ng-container i18n>We couldn't load your dashboard</ng-container></p>
+      <p><ng-container i18n>Check your connection, then try again.</ng-container></p>
+      <button matButton="filled" (click)="retry()"><ng-container i18n>Try again</ng-container></button>
     </mat-card>
   } @else {
 
@@ -62,8 +62,8 @@
     @if (!hasSales()) {
       <mat-card appearance="outlined" class="state-panel">
         <mat-icon class="state-panel__icon">insights</mat-icon>
-        <p class="state-panel__title">No sales in this period</p>
-        <p>Pick a different date range or employee to see your charts.</p>
+        <p class="state-panel__title"><ng-container i18n>No sales in this period</ng-container></p>
+        <p><ng-container i18n>Pick a different date range or employee to see your charts.</ng-container></p>
       </mat-card>
     } @else {
 
@@ -73,10 +73,10 @@
         <mat-card appearance="outlined" class="chart-card span-8">
           <div class="chart-card__header">
             <div>
-              <h3 class="chart-card__title">Sales trend</h3>
-              <p class="chart-card__meta">Gross vs. net sales over time</p>
+              <h3 class="chart-card__title"><ng-container i18n>Sales trend</ng-container></h3>
+              <p class="chart-card__meta"><ng-container i18n>Gross vs. net sales over time</ng-container></p>
             </div>
-            <mat-button-toggle-group hideSingleSelectionIndicator class="period-toggle" [value]="period()" (change)="setPeriod($event.value)" aria-label="Group sales by">
+            <mat-button-toggle-group hideSingleSelectionIndicator class="period-toggle" [value]="period()" (change)="setPeriod($event.value)" aria-label="Group sales by" i18n-aria-label>
               @for (option of periodOptions; track option.value) {
                 <mat-button-toggle [value]="option.value">{{ option.label }}</mat-button-toggle>
               }
@@ -89,14 +89,14 @@
         <mat-card appearance="outlined" class="chart-card span-4">
           <div class="chart-card__header">
             <div>
-              <h3 class="chart-card__title">Payment methods</h3>
-              <p class="chart-card__meta">How customers paid</p>
+              <h3 class="chart-card__title"><ng-container i18n>Payment methods</ng-container></h3>
+              <p class="chart-card__meta"><ng-container i18n>How customers paid</ng-container></p>
             </div>
           </div>
           <div class="donut-wrap">
             <div echarts [options]="paymentsChart()" class="chart chart--lg"></div>
             <div class="donut-center">
-              <span class="donut-center__label">Collected</span>
+              <span class="donut-center__label"><ng-container i18n>Collected</ng-container></span>
               <span class="donut-center__value">{{ money(paymentsTotal()) }}</span>
             </div>
           </div>
@@ -106,10 +106,10 @@
         <mat-card appearance="outlined" class="chart-card span-6">
           <div class="chart-card__header">
             <div>
-              <h3 class="chart-card__title">Top products</h3>
-              <p class="chart-card__meta">Best sellers by revenue</p>
+              <h3 class="chart-card__title"><ng-container i18n>Top products</ng-container></h3>
+              <p class="chart-card__meta"><ng-container i18n>Best sellers by revenue</ng-container></p>
             </div>
-            <a matButton routerLink="../reports/sales-by-item" [queryParams]="receiptsQueryParams()">View all</a>
+            <a matButton routerLink="../reports/sales-by-item" [queryParams]="receiptsQueryParams()"><ng-container i18n>View all</ng-container></a>
           </div>
           <div echarts [options]="topProductsChart()" class="chart chart--lg"></div>
         </mat-card>
@@ -118,10 +118,10 @@
         <mat-card appearance="outlined" class="chart-card span-6">
           <div class="chart-card__header">
             <div>
-              <h3 class="chart-card__title">Sales by category</h3>
-              <p class="chart-card__meta">Net sales share per category</p>
+              <h3 class="chart-card__title"><ng-container i18n>Sales by category</ng-container></h3>
+              <p class="chart-card__meta"><ng-container i18n>Net sales share per category</ng-container></p>
             </div>
-            <a matButton routerLink="../reports/sales-by-category" [queryParams]="receiptsQueryParams()">View all</a>
+            <a matButton routerLink="../reports/sales-by-category" [queryParams]="receiptsQueryParams()"><ng-container i18n>View all</ng-container></a>
           </div>
           <div echarts [options]="categoryChart()" class="chart chart--lg"></div>
         </mat-card>
@@ -130,8 +130,8 @@
         <mat-card appearance="outlined" class="chart-card span-8">
           <div class="chart-card__header">
             <div>
-              <h3 class="chart-card__title">Busiest hours</h3>
-              <p class="chart-card__meta">{{ peakHour() || 'Orders by day of week and hour' }}</p>
+              <h3 class="chart-card__title"><ng-container i18n>Busiest hours</ng-container></h3>
+              <p class="chart-card__meta">@if (peakHour()) {<ng-container>{{ peakHour() }}</ng-container>} @else {<ng-container i18n>Orders by day of week and hour</ng-container>}</p>
             </div>
           </div>
           <div class="chart-scroll">
@@ -143,8 +143,8 @@
         <mat-card appearance="outlined" class="chart-card span-4">
           <div class="chart-card__header">
             <div>
-              <h3 class="chart-card__title">Sales channels</h3>
-              <p class="chart-card__meta">Point of sale vs. self-order</p>
+              <h3 class="chart-card__title"><ng-container i18n>Sales channels</ng-container></h3>
+              <p class="chart-card__meta"><ng-container i18n>Point of sale vs. self-order</ng-container></p>
             </div>
           </div>
           <div echarts [options]="channelChart()" class="chart chart--lg"></div>
@@ -154,10 +154,10 @@
         <mat-card appearance="outlined" class="chart-card span-5">
           <div class="chart-card__header">
             <div>
-              <h3 class="chart-card__title">Staff performance</h3>
-              <p class="chart-card__meta">Net sales by employee</p>
+              <h3 class="chart-card__title"><ng-container i18n>Staff performance</ng-container></h3>
+              <p class="chart-card__meta"><ng-container i18n>Net sales by employee</ng-container></p>
             </div>
-            <a matButton routerLink="../reports/sales-by-employee" [queryParams]="receiptsQueryParams()">View all</a>
+            <a matButton routerLink="../reports/sales-by-employee" [queryParams]="receiptsQueryParams()"><ng-container i18n>View all</ng-container></a>
           </div>
           <div echarts [options]="employeesChart()" class="chart"></div>
         </mat-card>
@@ -166,8 +166,8 @@
         <mat-card appearance="outlined" class="chart-card span-3">
           <div class="chart-card__header">
             <div>
-              <h3 class="chart-card__title">Order types</h3>
-              <p class="chart-card__meta">Table, quick sale, online</p>
+              <h3 class="chart-card__title"><ng-container i18n>Order types</ng-container></h3>
+              <p class="chart-card__meta"><ng-container i18n>Table, quick sale, online</ng-container></p>
             </div>
           </div>
           <div echarts [options]="orderTypeChart()" class="chart"></div>
@@ -177,10 +177,10 @@
         <mat-card appearance="outlined" class="chart-card span-4">
           <div class="chart-card__header">
             <div>
-              <h3 class="chart-card__title">Recent receipts</h3>
-              <p class="chart-card__meta">Latest orders in this range</p>
+              <h3 class="chart-card__title"><ng-container i18n>Recent receipts</ng-container></h3>
+              <p class="chart-card__meta"><ng-container i18n>Latest orders in this range</ng-container></p>
             </div>
-            <a matButton routerLink="../reports/receipts" [queryParams]="receiptsQueryParams()">View all</a>
+            <a matButton routerLink="../reports/receipts" [queryParams]="receiptsQueryParams()"><ng-container i18n>View all</ng-container></a>
           </div>
           <ul class="receipt-list">
             @for (receipt of recentReceipts(); track receipt._id) {
@@ -191,7 +191,7 @@
                   </span>
                   <span class="receipt-row__main">
                     <span class="receipt-row__title">#{{ receipt.receiptNo }}</span>
-                    <span class="receipt-row__sub">{{ receipt.date | date: 'MMM d, h:mm a' }} · {{ receipt.type || 'Unpaid' }}</span>
+                    <span class="receipt-row__sub">{{ receipt.date | date: 'MMM d, h:mm a' }} · {{ receipt.type || ('Unpaid' | tr) }}</span>
                   </span>
                   <span class="receipt-row__amount" [class.receipt-row__amount--refund]="receipt.category === 'Cancel'">
                     {{ money(receipt.total) }}
@@ -199,7 +199,7 @@
                 </button>
               </li>
             } @empty {
-              <li class="receipt-list__empty">No receipts yet</li>
+              <li class="receipt-list__empty"><ng-container i18n>No receipts yet</ng-container></li>
             }
           </ul>
         </mat-card>

@@ -20,7 +20,7 @@
           <div>
             <h3 class="text-base font-medium">{{ variant.name | titlecase }}</h3>
             <p class="text-xs text-gray-500">
-              Choose {{ variant.atLeast === variant.atMost ? variant.atLeast : 'between ' + variant.atLeast + ' and ' + variant.atMost }}
+              <ng-container i18n>Choose {{ variant.atLeast === variant.atMost ? variant.atLeast : ('between ' | tr) + variant.atLeast + (' and ' | tr) + variant.atMost }}</ng-container>
             </p>
           </div>
           <span 
@@ -32,7 +32,7 @@
             [class.bg-gray-100]="variant.atLeast === 0 && variant.invalid"
             [class.text-gray-600]="variant.atLeast === 0 && variant.invalid"
           >
-            {{ variant.atLeast > 0 ? 'Required' : 'Optional' }}
+            @if (variant.atLeast > 0) {<ng-container i18n>Required</ng-container>} @else {<ng-container i18n>Optional</ng-container>}
           </span>
         </div>
 
@@ -49,7 +49,7 @@
                 <div>
                   <span class="text-sm">{{ option.name | titlecase }}</span>
                   @if (!option.inStock) {
-                    <span class="block text-xs text-red-500">Out of stock</span>
+                    <span class="block text-xs text-red-500"><ng-container i18n>Out of stock</ng-container></span>
                   }
                 </div>
                 
@@ -99,7 +99,7 @@
   } @else {
     <div class="flex flex-col items-center justify-center py-8 gap-4">
       <mat-spinner diameter="40"></mat-spinner>
-      <p class="text-gray-500">Loading options...</p>
+      <p class="text-gray-500"><ng-container i18n>Loading options...</ng-container></p>
     </div>
   }
 </mat-dialog-content>
@@ -108,13 +108,13 @@
 <mat-dialog-actions align="end" class=" border-t border-outline-variant">
   
   
-  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button mat-dialog-close><ng-container i18n>Cancel</ng-container></button>
   <button 
     mat-flat-button 
     color="primary"
     [disabled]="!updateAreAllVariantsValid()"
     (click)="submit()"
   >
-    {{ isEditing() ? 'Update' : 'Add to Order' }}
+    @if (isEditing()) {<ng-container i18n>Update</ng-container>} @else {<ng-container i18n>Add to Order</ng-container>}
   </button>
 </mat-dialog-actions>

@@ -1,63 +1,63 @@
 <div class="p-6">
   <h2 mat-dialog-title class="text-xl font-bold mb-4">
-    {{ isEdit ? 'Edit Customer' : 'Create New Customer' }}
+    @if (isEdit) {<ng-container i18n>Edit Customer</ng-container>} @else {<ng-container i18n>Create New Customer</ng-container>}
   </h2>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="space-y-4">
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Name</mat-label>
-        <input matInput formControlName="name" placeholder="Enter customer name">
+        <mat-label><ng-container i18n>Name</ng-container></mat-label>
+        <input matInput formControlName="name" placeholder="Enter customer name" i18n-placeholder>
         @if (form.get('name')?.hasError('required')) {
           <mat-error>
-            Name is required
+            <ng-container i18n>Name is required</ng-container>
           </mat-error>
         }
         @if (form.get('name')?.hasError('minlength')) {
           <mat-error>
-            Name must be at least 2 characters
+            <ng-container i18n>Name must be at least 2 characters</ng-container>
           </mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Email</mat-label>
-        <input matInput formControlName="email" type="email" placeholder="Enter email address">
+        <mat-label><ng-container i18n>Email</ng-container></mat-label>
+        <input matInput formControlName="email" type="email" placeholder="Enter email address" i18n-placeholder>
         @if (form.get('email')?.hasError('required')) {
           <mat-error>
-            Email is required
+            <ng-container i18n>Email is required</ng-container>
           </mat-error>
         }
         @if (form.get('email')?.hasError('email')) {
           <mat-error>
-            Please enter a valid email address
+            <ng-container i18n>Please enter a valid email address</ng-container>
           </mat-error>
         }
         @if (form.get('email')?.hasError('lowercase')) {
           <mat-error>
-            Email must be lowercase
+            <ng-container i18n>Email must be lowercase</ng-container>
           </mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Phone Number</mat-label>
-        <input matInput formControlName="phoneNumber" placeholder="Enter phone number">
+        <mat-label><ng-container i18n>Phone Number</ng-container></mat-label>
+        <input matInput formControlName="phoneNumber" placeholder="Enter phone number" i18n-placeholder>
         @if (form.get('phoneNumber')?.hasError('required')) {
           <mat-error>
-            Phone number is required
+            <ng-container i18n>Phone number is required</ng-container>
           </mat-error>
         }
         @if (form.get('phoneNumber')?.hasError('minlength')) {
           <mat-error>
-            Phone number must be at least 6 digits
+            <ng-container i18n>Phone number must be at least 6 digits</ng-container>
           </mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Country</mat-label>
-        <mat-select formControlName="country" placeholder="Select country" (selectionChange)="selectCountry($event.value)">
+        <mat-label><ng-container i18n>Country</ng-container></mat-label>
+        <mat-select formControlName="country" placeholder="Select country" i18n-placeholder (selectionChange)="selectCountry($event.value)">
           @for (zone of deliveryZones.value() || []; track $index) {
             <mat-option [value]="zone.country">
               {{ zone.country }}
@@ -66,14 +66,14 @@
         </mat-select>
         @if (form.get('country')?.hasError('required')) {
           <mat-error>
-            Country is required
+            <ng-container i18n>Country is required</ng-container>
           </mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Notes</mat-label>
-        <textarea matInput formControlName="notes" placeholder="Enter any additional notes"></textarea>
+        <mat-label><ng-container i18n>Notes</ng-container></mat-label>
+        <textarea matInput formControlName="notes" placeholder="Enter any additional notes" i18n-placeholder></textarea>
 
 
       </mat-form-field>
@@ -82,12 +82,12 @@
     </div>
 
     <div class="flex justify-end space-x-2 mt-6 pt-4 border-t border-gray-200">
-      <button mat-button type="button" [disabled]="isSubmitting()" (click)="onCancel()">Cancel</button>
+      <button mat-button type="button" [disabled]="isSubmitting()" (click)="onCancel()"><ng-container i18n>Cancel</ng-container></button>
       <button mat-raised-button color="primary" type="submit" [disabled]="!form.valid || isSubmitting()">
         @if (isSubmitting()) {
           <mat-spinner diameter="20" class="mr-2"></mat-spinner>
         }
-        {{isEdit ? 'Update' : 'Create'}}
+        @if (isEdit) {<ng-container i18n>Update</ng-container>} @else {<ng-container i18n>Create</ng-container>}
       </button>
     </div>
   </form>

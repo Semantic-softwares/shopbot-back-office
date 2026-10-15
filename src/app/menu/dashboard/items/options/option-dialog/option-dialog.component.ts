@@ -13,13 +13,14 @@ import { StoreStore } from '../../../../../shared/stores/store.store';
 import { ProductService } from '../../../../../shared/services/product.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-option-dialog',
   templateUrl: './option-dialog.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
+  imports: [TrPipe, 
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
@@ -67,8 +68,8 @@ export class OptionDialogComponent {
       request.subscribe({
         next: () => {
           this.snackBar.open(
-            `Option ${this.data.isEdit ? 'updated' : 'created'} successfully`,
-            'Close',
+            $localize`Option ${this.data.isEdit ? 'updated' : 'created'} successfully`,
+            $localize`Close`,
             {
               duration: 3000,
               horizontalPosition: 'end',
@@ -79,8 +80,8 @@ export class OptionDialogComponent {
         },
         error: () => {
           this.snackBar.open(
-            `Error ${this.data.isEdit ? 'updating' : 'creating'} option`,
-            'Close',
+            $localize`Error ${this.data.isEdit ? 'updating' : 'creating'} option`,
+            $localize`Close`,
             {
               duration: 3000,
               horizontalPosition: 'end',

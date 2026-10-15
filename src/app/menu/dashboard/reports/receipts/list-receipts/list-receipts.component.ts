@@ -29,12 +29,13 @@ import { ExportService } from '../../../../../shared/services/export.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PageHeaderComponent } from "../../../../../shared/components/page-header/page-header.component";
 import { MatCard } from "@angular/material/card";
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-list-receipts',
   templateUrl: './list-receipts.component.html',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatTableModule,
     MatPaginatorModule,
@@ -109,9 +110,9 @@ export class ListReceiptsComponent {
           this.selection.clear();
 
           this.tabStats = [
-            { label: 'All Receipts', value: 'all', count: data.allReceipts },
-            { label: 'Sales', value: 'sales', count: data.sales },
-            { label: 'Refunds', value: 'refund', count: data.refund },
+            { label: $localize`All Receipts`, value: 'all', count: data.allReceipts },
+            { label: $localize`Sales`, value: 'sales', count: data.sales },
+            { label: $localize`Refunds`, value: 'refund', count: data.refund },
           ];
         })
       ),
@@ -122,18 +123,18 @@ export class ListReceiptsComponent {
   // Shows every channel/order type by default (empty = no filter sent) —
   // narrow down explicitly via these two dropdowns.
   salesChannelOptions = [
-    { value: '', label: 'All Channels' },
-    { value: 'Point of Sale', label: 'Point of Sale' },
-    { value: 'Qrcode', label: 'Self-Order (QR)' },
-    { value: 'Storefront', label: 'Storefront' },
-    { value: 'Shopbot', label: 'Shopbot' },
+    { value: '', label: $localize`All Channels` },
+    { value: 'Point of Sale', label: $localize`Point of Sale` },
+    { value: 'Qrcode', label: $localize`Self-Order (QR)` },
+    { value: 'Storefront', label: $localize`Storefront` },
+    { value: 'Shopbot', label: $localize`Shopbot` },
   ];
 
   orderTypeOptions = [
-    { value: '', label: 'All Order Types' },
-    { value: 'table', label: 'Table' },
-    { value: 'quick', label: 'Quick Sale' },
-    { value: 'online', label: 'Online' },
+    { value: '', label: $localize`All Order Types` },
+    { value: 'table', label: $localize`Table` },
+    { value: 'quick', label: $localize`Quick Sale` },
+    { value: 'online', label: $localize`Online` },
   ];
 
   statusClass(category: string): string {
@@ -229,10 +230,10 @@ export class ListReceiptsComponent {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Receipt',
-        message: 'Are you sure you want to delete this receipt? This action cannot be undone.',
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
+        title: $localize`Delete Receipt`,
+        message: $localize`Are you sure you want to delete this receipt? This action cannot be undone.`,
+        confirmText: $localize`Delete`,
+        cancelText: $localize`Cancel`,
       },
     });
 
@@ -274,10 +275,10 @@ export class ListReceiptsComponent {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Multiple Receipts',
-        message: `Are you sure you want to delete ${selectedReceipts.length} receipt(s)? This action cannot be undone.`,
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
+        title: $localize`Delete Multiple Receipts`,
+        message: $localize`Are you sure you want to delete ${selectedReceipts.length} receipt(s)? This action cannot be undone.`,
+        confirmText: $localize`Delete`,
+        cancelText: $localize`Cancel`,
       },
     });
 

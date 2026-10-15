@@ -21,7 +21,7 @@
 
       <!-- Top 5 Items -->
       <div class="w-full">
-        <h2 class="text-lg font-medium mb-4">Top 5 Items (Net Sales)</h2>
+        <h2 class="text-lg font-medium mb-4"><ng-container i18n>Top 5 Items (Net Sales)</ng-container></h2>
         @if (products.hasValue()) {
           <mat-list>
             @for (item of products.value(); track $index) {
@@ -31,14 +31,14 @@
                     [alt]="item.name">
                 </div>
                 <div matListItemTitle>{{item.name}}</div>
-                <div matListItemLine class="text-gray-600 text-sm">{{item.totalQuantitySold}} item(s)</div>
+                <div matListItemLine class="text-gray-600 text-sm"><ng-container i18n>{{item.totalQuantitySold}} item(s)</ng-container></div>
                 <div matListItemMeta class="text-primary font-medium text-lg">{{item.netSales | currency:
                 $safeNavigationMigration(storeStore.selectedStore()?.currency) }}</div>
               </mat-list-item>
               } @empty {
               <div class="flex items-center justify-center min-h-[300px]">
-                <app-no-record icon="inventory_2" title="No Products Found"
-                  message="There are no products to display for the selected period.">
+                <app-no-record icon="inventory_2" title="No Products Found" i18n-title
+                  message="There are no products to display for the selected period." i18n-message>
                 </app-no-record>
               </div>
 
@@ -60,10 +60,10 @@
     <!-- Chart -->
     <div class="relative flex flex-col">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-medium">Sales by Item Chart</h2>
+        <h2 class="text-lg font-medium"><ng-container i18n>Sales by Item Chart</ng-container></h2>
         <div class="flex gap-4">
           <mat-form-field appearance="outline" class="w-32">
-            <mat-label>Chart Type</mat-label>
+            <mat-label><ng-container i18n>Chart Type</ng-container></mat-label>
             <mat-select [(value)]="selectedChartType" (selectionChange)="onChartTypeChange($event.value)">
               @for (type of chartTypes; track type) {
                 <mat-option [value]="type">
@@ -79,8 +79,8 @@
         @if (products.hasValue()) {
 
           @if ( products.value().length < 1) { <div class="flex items-center justify-center min-h-[300px]">
-            <app-no-record icon="inventory_2" title="No Products Found"
-              message="There are no products to display for the selected period.">
+            <app-no-record icon="inventory_2" title="No Products Found" i18n-title
+              message="There are no products to display for the selected period." i18n-message>
             </app-no-record>
           </div>
 
@@ -100,33 +100,33 @@
 <!-- Table Card -->
 <div class="bg-white rounded-lg shadow-sm">
   <div class="p-4 sm:p-6 flex flex-wrap gap-4 justify-between items-center border-b">
-    <h2 class="text-lg font-medium">All Products</h2>
+    <h2 class="text-lg font-medium"><ng-container i18n>All Products</ng-container></h2>
     <div class="flex items-center gap-2 sm:gap-4">
       <mat-button-toggle-group class="hidden md:block" [value]="isGridView" (change)="toggleView($event)">
-        <mat-button-toggle [value]="true" aria-label="Grid view">
+        <mat-button-toggle [value]="true" aria-label="Grid view" i18n-aria-label>
           <mat-icon class="!h-5 !w-5 text-sm">grid_view</mat-icon>
         </mat-button-toggle>
-        <mat-button-toggle [value]="false" aria-label="List view">
+        <mat-button-toggle [value]="false" aria-label="List view" i18n-aria-label>
           <mat-icon class="!h-5 !w-5 text-sm">list</mat-icon>
         </mat-button-toggle>
       </mat-button-toggle-group>
       <button mat-flat-button color="primary" [matMenuTriggerFor]="exportMenu">
         <mat-icon class="mr-2">file_download</mat-icon>
-        <span class="hidden sm:inline">Export Data</span>
-        <span class="sm:hidden">Export</span>
+        <span class="hidden sm:inline"><ng-container i18n>Export Data</ng-container></span>
+        <span class="sm:hidden"><ng-container i18n>Export</ng-container></span>
       </button>
       <mat-menu #exportMenu="matMenu">
         <button mat-menu-item (click)="exportData('pdf')">
           <mat-icon>picture_as_pdf</mat-icon>
-          <span>Export as PDF</span>
+          <span><ng-container i18n>Export as PDF</ng-container></span>
         </button>
         <button mat-menu-item (click)="exportData('csv')">
           <mat-icon>description</mat-icon>
-          <span>Export as CSV</span>
+          <span><ng-container i18n>Export as CSV</ng-container></span>
         </button>
         <button mat-menu-item (click)="exportData('excel')">
           <mat-icon>table_chart</mat-icon>
-          <span>Export as Excel</span>
+          <span><ng-container i18n>Export as Excel</ng-container></span>
         </button>
       </mat-menu>
     </div>
@@ -174,8 +174,8 @@
     <!-- No Products Found -->
     @else if (!products.hasValue() || products.value().length === 0) {
     <div class="flex items-center justify-center min-h-[300px]">
-      <app-no-record icon="inventory_2" title="No Products Found"
-        message="There are no products to display for the selected period.">
+      <app-no-record icon="inventory_2" title="No Products Found" i18n-title
+        message="There are no products to display for the selected period." i18n-message>
       </app-no-record>
     </div>
   }
@@ -185,27 +185,27 @@
   <div class="overflow-x-auto">
     <mat-table [dataSource]="products.value()" class="w-full !bg-white">
       <ng-container matColumnDef="name">
-        <mat-header-cell *matHeaderCellDef>Product</mat-header-cell>
+        <mat-header-cell *matHeaderCellDef><ng-container i18n>Product</ng-container></mat-header-cell>
         <mat-cell *matCellDef="let element">{{element.name}}</mat-cell>
       </ng-container>
       <ng-container matColumnDef="totalQuantitySold">
-        <mat-header-cell *matHeaderCellDef>Quantity Sold</mat-header-cell>
+        <mat-header-cell *matHeaderCellDef><ng-container i18n>Quantity Sold</ng-container></mat-header-cell>
         <mat-cell *matCellDef="let element">{{element.totalQuantitySold}}</mat-cell>
       </ng-container>
       <ng-container matColumnDef="grossSales">
-        <mat-header-cell *matHeaderCellDef>Gross Sales</mat-header-cell>
+        <mat-header-cell *matHeaderCellDef><ng-container i18n>Gross Sales</ng-container></mat-header-cell>
         <mat-cell *matCellDef="let element">{{element.grossSales | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
       </ng-container>
       <ng-container matColumnDef="netSales">
-        <mat-header-cell *matHeaderCellDef>Net Sales</mat-header-cell>
+        <mat-header-cell *matHeaderCellDef><ng-container i18n>Net Sales</ng-container></mat-header-cell>
         <mat-cell *matCellDef="let element">{{element.netSales | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
       </ng-container>
       <ng-container matColumnDef="totalTax">
-        <mat-header-cell *matHeaderCellDef>Total Tax</mat-header-cell>
+        <mat-header-cell *matHeaderCellDef><ng-container i18n>Total Tax</ng-container></mat-header-cell>
         <mat-cell *matCellDef="let element">{{element.totalTax | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
       </ng-container>
       <ng-container matColumnDef="totalRevenue">
-        <mat-header-cell *matHeaderCellDef>Total Revenue</mat-header-cell>
+        <mat-header-cell *matHeaderCellDef><ng-container i18n>Total Revenue</ng-container></mat-header-cell>
         <mat-cell *matCellDef="let element">{{element.totalRevenue | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
       </ng-container>
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
@@ -224,24 +224,24 @@
           [alt]="item.name">
         <div class="flex-1">
           <h3 class="font-medium text-gray-900 mb-1">{{item.name}}</h3>
-          <p class="text-sm text-gray-500">{{item.totalQuantitySold}} items sold</p>
+          <p class="text-sm text-gray-500"><ng-container i18n>{{item.totalQuantitySold}} items sold</ng-container></p>
         </div>
       </div>
       <div class="space-y-3">
         <div class="flex justify-between items-center pb-2 border-b">
-          <span class="text-gray-600">Gross Sales</span>
+          <span class="text-gray-600"><ng-container i18n>Gross Sales</ng-container></span>
           <span class="font-medium">{{item.grossSales | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
         </div>
         <div class="flex justify-between items-center">
-          <span class="text-gray-600">Net Sales</span>
+          <span class="text-gray-600"><ng-container i18n>Net Sales</ng-container></span>
           <span class="font-medium">{{item.netSales | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
         </div>
         <div class="flex justify-between items-center">
-          <span class="text-gray-600">Total Tax</span>
+          <span class="text-gray-600"><ng-container i18n>Total Tax</ng-container></span>
           <span class="font-medium">{{item.totalTax | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
         </div>
         <div class="flex justify-between items-center pt-2 border-t">
-          <span class="text-gray-600">Total Revenue</span>
+          <span class="text-gray-600"><ng-container i18n>Total Revenue</ng-container></span>
           <span class="font-medium text-primary">{{item.totalRevenue | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
         </div>
       </div>

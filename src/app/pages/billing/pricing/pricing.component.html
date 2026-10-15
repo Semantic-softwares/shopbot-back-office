@@ -1,8 +1,8 @@
 <div class="max-w-5xl mx-auto px-4 py-8 min-h-screen">
   <!-- Header -->
   <div class="text-center mb-12">
-    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">Choose Your Plan</h1>
-    <p class="text-lg text-gray-600">Simple pricing. Start free, upgrade when you're ready.</p>
+    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2"><ng-container i18n>Choose Your Plan</ng-container></h1>
+    <p class="text-lg text-gray-600"><ng-container i18n>Simple pricing. Start free, upgrade when you're ready.</ng-container></p>
   </div>
 
   <!-- Pricing Cards -->
@@ -11,31 +11,31 @@
     <mat-card class="flex flex-col hover:shadow-lg transition-all duration-300">
       <mat-card-content class="flex-1 p-8">
         <div class="mb-6">
-          <h3 class="text-2xl font-bold text-gray-900 mb-1">Free Trial</h3>
-          <p class="text-gray-500">Try everything for 30 days</p>
+          <h3 class="text-2xl font-bold text-gray-900 mb-1"><ng-container i18n>Free Trial</ng-container></h3>
+          <p class="text-gray-500"><ng-container i18n>Try everything for 30 days</ng-container></p>
         </div>
 
         <div class="flex items-baseline gap-2 mb-8">
           <span class="text-5xl font-bold text-gray-900">$0</span>
-          <span class="text-gray-500">/30 days</span>
+          <span class="text-gray-500"><ng-container i18n>/30 days</ng-container></span>
         </div>
 
         <div class="space-y-4 mb-8">
           <div class="flex items-center gap-3 text-gray-700">
             <mat-icon class="text-green-500">check_circle</mat-icon>
-            <span>30-day free trial</span>
+            <span><ng-container i18n>30-day free trial</ng-container></span>
           </div>
           <div class="flex items-center gap-3 text-gray-700">
             <mat-icon class="text-green-500">check_circle</mat-icon>
-            <span>No credit card required</span>
+            <span><ng-container i18n>No credit card required</ng-container></span>
           </div>
           <div class="flex items-center gap-3 text-gray-700">
             <mat-icon class="text-green-500">check_circle</mat-icon>
-            <span>Full access to all features</span>
+            <span><ng-container i18n>Full access to all features</ng-container></span>
           </div>
           <div class="flex items-center gap-3 text-gray-700">
             <mat-icon class="text-green-500">check_circle</mat-icon>
-            <span>Cancel anytime</span>
+            <span><ng-container i18n>Cancel anytime</ng-container></span>
           </div>
         </div>
 
@@ -49,7 +49,7 @@
           @if (isProcessing()) {
             <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
           } @else {
-            Start Free Trial
+            <ng-container i18n>Start Free Trial</ng-container>
           }
         </button>
       </mat-card-content>
@@ -58,49 +58,49 @@
     <!-- Paid Plan Card -->
     <mat-card class="flex flex-col border-2 border-blue-600 hover:shadow-lg transition-all duration-300 relative">
       <div class="absolute -top-3 left-6 bg-blue-600 text-white px-4 py-1 rounded-full text-xs font-bold">
-        RECOMMENDED
+        <ng-container i18n>RECOMMENDED</ng-container>
       </div>
 
       <mat-card-content class="flex-1 p-8">
         <div class="mb-6">
-          <h3 class="text-2xl font-bold text-gray-900 mb-1">Paid Plan</h3>
-          <p class="text-gray-500">Everything you need to run your business</p>
+          <h3 class="text-2xl font-bold text-gray-900 mb-1"><ng-container i18n>Paid Plan</ng-container></h3>
+          <p class="text-gray-500"><ng-container i18n>Everything you need to run your business</ng-container></p>
         </div>
 
         <div class="flex items-baseline gap-2 mb-8">
           <span class="text-sm text-gray-500">$</span>
           <span class="text-5xl font-bold text-blue-600">{{ paidPrice }}</span>
-          <span class="text-gray-500">/month</span>
+          <span class="text-gray-500"><ng-container i18n>/month</ng-container></span>
         </div>
 
         <div class="space-y-4 mb-8">
           <div class="flex items-center gap-3 text-gray-700">
             <mat-icon class="text-green-500">check_circle</mat-icon>
-            <span>Unlimited rooms</span>
+            <span><ng-container i18n>Unlimited rooms</ng-container></span>
           </div>
           <div class="flex items-center gap-3 text-gray-700">
             <mat-icon class="text-green-500">check_circle</mat-icon>
-            <span>Unlimited users & staff</span>
+            <span><ng-container i18n>Unlimited users & staff</ng-container></span>
           </div>
           <div class="flex items-center gap-3 text-gray-700">
             <mat-icon class="text-green-500">check_circle</mat-icon>
-            <span>POS, HMS & ERP modules</span>
+            <span><ng-container i18n>POS, HMS & ERP modules</ng-container></span>
           </div>
           <div class="flex items-center gap-3 text-gray-700">
             <mat-icon class="text-green-500">check_circle</mat-icon>
-            <span>Channel manager integration</span>
+            <span><ng-container i18n>Channel manager integration</ng-container></span>
           </div>
           <div class="flex items-center gap-3 text-gray-700">
             <mat-icon class="text-green-500">check_circle</mat-icon>
-            <span>Receipt & kitchen printing</span>
+            <span><ng-container i18n>Receipt & kitchen printing</ng-container></span>
           </div>
           <div class="flex items-center gap-3 text-gray-700">
             <mat-icon class="text-green-500">check_circle</mat-icon>
-            <span>24/7 priority support</span>
+            <span><ng-container i18n>24/7 priority support</ng-container></span>
           </div>
           <div class="flex items-center gap-3 text-gray-700">
             <mat-icon class="text-green-500">check_circle</mat-icon>
-            <span>All current & future features</span>
+            <span><ng-container i18n>All current & future features</ng-container></span>
           </div>
         </div>
 
@@ -114,7 +114,7 @@
           @if (isProcessing()) {
             <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
           } @else {
-            Upgrade Now — ${{ paidPrice }}/month
+            <ng-container i18n>Upgrade Now — ${{ paidPrice }}/month</ng-container>
           }
         </button>
       </mat-card-content>
@@ -124,27 +124,27 @@
   <!-- How Billing Works -->
   <mat-card class="mb-8">
     <mat-card-content class="p-8">
-      <h2 class="text-2xl font-bold text-gray-900 mb-6">How Billing Works</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-6"><ng-container i18n>How Billing Works</ng-container></h2>
 
       <div class="grid md:grid-cols-2 gap-8">
         <div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-3">Trial Period</h3>
-          <p class="text-gray-600 leading-relaxed">Get 30 days of free access without providing a payment method. After the trial ends, upgrade to continue using all features.</p>
+          <h3 class="text-lg font-semibold text-gray-900 mb-3"><ng-container i18n>Trial Period</ng-container></h3>
+          <p class="text-gray-600 leading-relaxed"><ng-container i18n>Get 30 days of free access without providing a payment method. After the trial ends, upgrade to continue using all features.</ng-container></p>
         </div>
 
         <div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-3">Monthly Billing</h3>
-          <p class="text-gray-600 leading-relaxed">Once you upgrade, you'll be charged ${{ paidPrice }} USD monthly. Charges are processed automatically on your billing date.</p>
+          <h3 class="text-lg font-semibold text-gray-900 mb-3"><ng-container i18n>Monthly Billing</ng-container></h3>
+          <p class="text-gray-600 leading-relaxed"><ng-container i18n>Once you upgrade, you'll be charged ${{ paidPrice }} USD monthly. Charges are processed automatically on your billing date.</ng-container></p>
         </div>
 
         <div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-3">One Simple Price</h3>
-          <p class="text-gray-600 leading-relaxed">No hidden fees, no per-room charges. One flat price for all features — POS, hotel management, ERP, printing, and more.</p>
+          <h3 class="text-lg font-semibold text-gray-900 mb-3"><ng-container i18n>One Simple Price</ng-container></h3>
+          <p class="text-gray-600 leading-relaxed"><ng-container i18n>No hidden fees, no per-room charges. One flat price for all features — POS, hotel management, ERP, printing, and more.</ng-container></p>
         </div>
 
         <div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-3">Secure Payment</h3>
-          <p class="text-gray-600 leading-relaxed">We use Paystack for secure payment processing. Your card details are never stored on our servers.</p>
+          <h3 class="text-lg font-semibold text-gray-900 mb-3"><ng-container i18n>Secure Payment</ng-container></h3>
+          <p class="text-gray-600 leading-relaxed"><ng-container i18n>We use Paystack for secure payment processing. Your card details are never stored on our servers.</ng-container></p>
         </div>
       </div>
     </mat-card-content>

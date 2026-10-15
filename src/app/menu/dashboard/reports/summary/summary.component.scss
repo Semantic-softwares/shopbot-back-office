@@ -5,21 +5,21 @@
 ::ng-deep {
   .mat-mdc-tab-nav-bar {
     height: auto !important;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid light-dark(#e5e7eb, #48464b);
   }
 
   .mat-mdc-tab-link {
     height: auto !important;
     min-height: 140px;
     opacity: 1 !important;
-    border-right: 1px solid #e5e7eb;
+    border-right: 1px solid light-dark(#e5e7eb, #48464b);
 
     &:last-child {
       border-right: none;
     }
 
     &.mdc-tab--active {
-      background-color: #f8f9fa;
+      background-color: light-dark(#f8f9fa, #1c1b1c);
     }
   }
 
@@ -28,7 +28,7 @@
   }
 
   .mat-mdc-table {
-    border: 1px solid #e5e7eb;
+    border: 1px solid light-dark(#e5e7eb, #48464b);
     border-radius: 8px;
     overflow: hidden;
   }
@@ -38,11 +38,11 @@
   }
 
   .mat-mdc-header-row {
-    background-color: #f8f9fa;
+    background-color: light-dark(#f8f9fa, #1c1b1c);
   }
 
   .mat-mdc-paginator {
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid light-dark(#e5e7eb, #48464b);
     margin-top: 1rem;
   }
 }

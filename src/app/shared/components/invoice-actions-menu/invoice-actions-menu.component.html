@@ -3,7 +3,7 @@
     mat-icon-button
     [matMenuTriggerFor]="actionsMenu"
     (click)="$event.stopPropagation()"
-    aria-label="Invoice actions"
+    aria-label="Invoice actions" i18n-aria-label
   >
     <mat-icon>more_horiz</mat-icon>
   </button>
@@ -12,10 +12,10 @@
     mat-stroked-button
     [matMenuTriggerFor]="actionsMenu"
     (click)="$event.stopPropagation()"
-    aria-label="Invoice actions"
+    aria-label="Invoice actions" i18n-aria-label
   >
     <mat-icon>more_vert</mat-icon>
-    Actions
+    <ng-container i18n>Actions</ng-container>
   </button>
 }
 
@@ -23,25 +23,25 @@
   @if (canMarkAsPaid()) {
     <button mat-menu-item (click)="openMarkAsPaid()">
       <mat-icon>payments</mat-icon>
-      <span>Mark as paid</span>
+      <span><ng-container i18n>Mark as paid</ng-container></span>
     </button>
   }
   @if (canVoid()) {
     <button mat-menu-item (click)="voidInvoice()">
       <mat-icon>block</mat-icon>
-      <span>Void</span>
+      <span><ng-container i18n>Void</ng-container></span>
     </button>
   }
   @if (canUnvoid()) {
     <button mat-menu-item (click)="unvoidInvoice()">
       <mat-icon>undo</mat-icon>
-      <span>Unvoid</span>
+      <span><ng-container i18n>Unvoid</ng-container></span>
     </button>
   }
   @if (canDelete()) {
     <button mat-menu-item (click)="deleteInvoice()">
       <mat-icon class="text-red-600">delete</mat-icon>
-      <span class="text-red-600">Delete</span>
+      <span class="text-red-600"><ng-container i18n>Delete</ng-container></span>
     </button>
   }
 </mat-menu>

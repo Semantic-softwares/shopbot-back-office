@@ -242,12 +242,12 @@ export class CreateRoleDialogComponent implements OnInit {
       this.rolesService.updateRole(this.data.role!._id!, roleData).subscribe({
         next: (role) => {
           this.saving.set(false);
-          this.snackBar.open('Role updated successfully!', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Role updated successfully!`, $localize`Close`, { duration: 3000 });
           this.dialogRef.close(role);
         },
         error: (err) => {
           this.saving.set(false);
-          this.snackBar.open(err.error?.message || 'Failed to update role', 'Close', { duration: 5000 });
+          this.snackBar.open(err.error?.message || 'Failed to update role', $localize`Close`, { duration: 5000 });
         }
       });
     } else {
@@ -255,12 +255,12 @@ export class CreateRoleDialogComponent implements OnInit {
       this.rolesService.createRole(roleData).subscribe({
         next: (role) => {
           this.saving.set(false);
-          this.snackBar.open('Role created successfully!', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Role created successfully!`, $localize`Close`, { duration: 3000 });
           this.dialogRef.close(role);
         },
         error: (err) => {
           this.saving.set(false);
-          this.snackBar.open(err.error?.message || 'Failed to create role', 'Close', { duration: 5000 });
+          this.snackBar.open(err.error?.message || 'Failed to create role', $localize`Close`, { duration: 5000 });
         }
       });
     }

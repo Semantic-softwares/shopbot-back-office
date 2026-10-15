@@ -11,16 +11,16 @@
         <mat-button-toggle-group [value]="tableStore.statusFilter()" (change)="onStatusFilterChange($any($event.value))"
           class="w-full sm:w-auto">
           <mat-button-toggle value="all" class="flex-1 sm:flex-initial">
-            <span class="hidden sm:inline">All ({{tableStore.tablesCount()}})</span>
-            <span class="sm:hidden">All</span>
+            <span class="hidden sm:inline"><ng-container i18n>All ({{tableStore.tablesCount()}})</ng-container></span>
+            <span class="sm:hidden"><ng-container i18n>All</ng-container></span>
           </mat-button-toggle>
           <mat-button-toggle value="free" class="flex-1 sm:flex-initial">
-            <span class="hidden sm:inline">Free ({{tableStore.freeTableCount()}})</span>
-            <span class="sm:hidden">Free</span>
+            <span class="hidden sm:inline"><ng-container i18n>Free ({{tableStore.freeTableCount()}})</ng-container></span>
+            <span class="sm:hidden"><ng-container i18n>Free</ng-container></span>
           </mat-button-toggle>
           <mat-button-toggle value="occupied" class="flex-1 sm:flex-initial">
-            <span class="hidden sm:inline">Occupied ({{tableStore.occupiedTableCount()}})</span>
-            <span class="sm:hidden">Occ.</span>
+            <span class="hidden sm:inline"><ng-container i18n>Occupied ({{tableStore.occupiedTableCount()}})</ng-container></span>
+            <span class="sm:hidden"><ng-container i18n>Occ.</ng-container></span>
           </mat-button-toggle>
         </mat-button-toggle-group>
       </div>
@@ -30,10 +30,10 @@
   <!-- Category Chips -->
   <div class="px-4 py-3 border-b border-outline-variant mb-4">
     <div class="flex items-center gap-3 overflow-x-auto scrollbar-hide">
-      <mat-chip-listbox aria-label="Select a table category" class="flex-nowrap">
+      <mat-chip-listbox aria-label="Select a table category" i18n-aria-label class="flex-nowrap">
         <mat-chip-option [selected]="!tableCategoryStore.selectedTableCategory()" (click)="clearCategoryFilter()"
           class="cursor-pointer">
-          All Categories
+          <ng-container i18n>All Categories</ng-container>
         </mat-chip-option>
         @for (category of tableCategoryStore.tableCategories(); track category._id) {
         <mat-chip-option [selected]="tableCategoryStore.selectedTableCategory()?._id === category._id"
@@ -65,7 +65,7 @@
 
     @if (tableStore.filteredTables().length === 0) {
       <div class="px-4 py-8">
-        <app-no-record icon="table_restaurant" title="No Tables Found" message="There are no tables to display at this time."></app-no-record>
+        <app-no-record icon="table_restaurant" title="No Tables Found" i18n-title message="There are no tables to display at this time." i18n-message></app-no-record>
       </div>
     }
   }

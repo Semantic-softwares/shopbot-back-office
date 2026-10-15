@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../shared/services/user.service';
+import { TrPipe } from '../../shared/i18n/tr.pipe';
 
 /**
  * Where a staff-invite email link lands: /auth/accept-invite/:token. This is
@@ -22,7 +23,7 @@ import { UserService } from '../../shared/services/user.service';
 @Component({
   selector: 'app-accept-invite',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatCardModule,
     MatButtonModule,
@@ -114,7 +115,7 @@ export class AcceptInviteComponent implements OnInit {
         this.submitting.set(false);
         this.snackBar.open(
           error.error?.message || 'Could not set your password. Please try again.',
-          'Close',
+          $localize`Close`,
           { duration: 5000, horizontalPosition: 'end', verticalPosition: 'top', panelClass: ['error-snackbar'] },
         );
       },

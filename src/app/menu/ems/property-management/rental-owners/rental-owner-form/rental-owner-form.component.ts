@@ -14,12 +14,13 @@ import { RentalOwnerService } from '../../../../../shared/services/rental-owner.
 import { RentalOwnerStatus } from '../../../../../shared/models/estate.model';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-rental-owner-form',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatInputModule,
@@ -47,8 +48,8 @@ export class RentalOwnerFormComponent {
   isCompany = signal<boolean>(false);
 
   statusOptions = [
-    { value: RentalOwnerStatus.ACTIVE, label: 'Active' },
-    { value: RentalOwnerStatus.INACTIVE, label: 'Inactive' },
+    { value: RentalOwnerStatus.ACTIVE, label: $localize`Active` },
+    { value: RentalOwnerStatus.INACTIVE, label: $localize`Inactive` },
   ];
 
   form = this.fb.group({
@@ -94,7 +95,7 @@ export class RentalOwnerFormComponent {
         this.isCompany.set(owner.isCompany);
       },
       error: () => {
-        this.snackBar.open('Failed to load rental owner', 'Close', { duration: 5000 });
+        this.snackBar.open($localize`Failed to load rental owner`, $localize`Close`, { duration: 5000 });
       },
     });
   }
@@ -120,8 +121,8 @@ export class RentalOwnerFormComponent {
     request$.subscribe({
       next: (res) => {
         this.snackBar.open(
-          this.isEditMode() ? 'Rental owner updated' : 'Rental owner created',
-          'Close',
+          this.isEditMode() ? $localize`Rental owner updated` : $localize`Rental owner created`,
+          $localize`Close`,
           { duration: 3000 },
         );
         if (this.isEditMode()) {
@@ -133,7 +134,7 @@ export class RentalOwnerFormComponent {
       error: (err) => {
         this.snackBar.open(
           err?.error?.message || 'Failed to save rental owner',
-          'Close',
+          $localize`Close`,
           { duration: 5000 },
         );
         this.isSaving.set(false);

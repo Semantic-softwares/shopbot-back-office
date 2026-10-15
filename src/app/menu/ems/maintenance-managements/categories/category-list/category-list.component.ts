@@ -139,10 +139,10 @@ export class CategoryListComponent {
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title: 'Delete Category',
-        message: `Are you sure you want to delete category "${category.name}"? This action cannot be undone.`,
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
+        title: $localize`Delete Category`,
+        message: $localize`Are you sure you want to delete category "${category.name}"? This action cannot be undone.`,
+        confirmText: $localize`Delete`,
+        cancelText: $localize`Cancel`,
       },
     });
 
@@ -151,12 +151,12 @@ export class CategoryListComponent {
 
       this.categoryService.delete(storeId, category._id).subscribe({
         next: () => {
-          this.snackBar.open('Category deleted', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Category deleted`, $localize`Close`, { duration: 3000 });
           this.categoriesResource.reload();
         },
         error: (error) => {
           const message = error?.error?.message || 'Failed to delete category';
-          this.snackBar.open(message, 'Close', { duration: 4000 });
+          this.snackBar.open(message, $localize`Close`, { duration: 4000 });
         },
       });
     });

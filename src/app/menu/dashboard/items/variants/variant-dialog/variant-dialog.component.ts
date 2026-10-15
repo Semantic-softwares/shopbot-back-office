@@ -118,12 +118,12 @@ export class VariantDialogComponent {
             store: this.storeStore.selectedStore()?._id,
             inStock: true,
           });
-          this.snackBar.open('Option added successfully', 'Close', {
+          this.snackBar.open($localize`Option added successfully`, $localize`Close`, {
             duration: 3000,
           });
         },
         error: () => {
-          this.snackBar.open('Error adding option', 'Close', {
+          this.snackBar.open($localize`Error adding option`, $localize`Close`, {
             duration: 3000,
           });
         },
@@ -137,12 +137,12 @@ export class VariantDialogComponent {
       this.selectedOptions.splice(index, 1);
       this.productService.deleteOptionItem(option._id).subscribe({
         next: () => {
-          this.snackBar.open('Option removed successfully', 'Close', {
+          this.snackBar.open($localize`Option removed successfully`, $localize`Close`, {
             duration: 3000,
           });
         },
         error: () => {
-          this.snackBar.open('Error removing option', 'Close', {
+          this.snackBar.open($localize`Error removing option`, $localize`Close`, {
             duration: 3000,
           });
         },
@@ -165,8 +165,8 @@ export class VariantDialogComponent {
       request.subscribe({
         next: () => {
           this.snackBar.open(
-            `Variant ${this.data.isEdit ? 'updated' : 'created'} successfully`,
-            'Close',
+            $localize`Variant ${this.data.isEdit ? 'updated' : 'created'} successfully`,
+            $localize`Close`,
             {
               duration: 3000,
               horizontalPosition: 'end',
@@ -177,8 +177,8 @@ export class VariantDialogComponent {
         },
         error: () => {
           this.snackBar.open(
-            `Error ${this.data.isEdit ? 'updating' : 'creating'} variant`,
-            'Close',
+            $localize`Error ${this.data.isEdit ? 'updating' : 'creating'} variant`,
+            $localize`Close`,
             {
               duration: 3000,
               horizontalPosition: 'end',

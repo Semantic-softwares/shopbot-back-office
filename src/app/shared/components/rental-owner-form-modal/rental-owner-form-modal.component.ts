@@ -56,8 +56,8 @@ export class RentalOwnerFormModalComponent implements OnDestroy {
   ownerForm: FormGroup;
 
   statusOptions = [
-    { value: RentalOwnerStatus.ACTIVE, label: 'Active' },
-    { value: RentalOwnerStatus.INACTIVE, label: 'Inactive' },
+    { value: RentalOwnerStatus.ACTIVE, label: $localize`Active` },
+    { value: RentalOwnerStatus.INACTIVE, label: $localize`Inactive` },
   ];
 
   constructor() {
@@ -116,7 +116,7 @@ export class RentalOwnerFormModalComponent implements OnDestroy {
   onSubmit(): void {
     if (this.ownerForm.invalid) {
       this.markFormGroupTouched(this.ownerForm);
-      this.snackBar.open('Please fill in all required fields', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`Please fill in all required fields`, $localize`Close`, { duration: 5000 });
       return;
     }
 
@@ -136,8 +136,8 @@ export class RentalOwnerFormModalComponent implements OnDestroy {
     request$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (res) => {
         this.snackBar.open(
-          this.isEditing() ? 'Owner updated' : 'Owner created',
-          'Close',
+          this.isEditing() ? $localize`Owner updated` : $localize`Owner created`,
+          $localize`Close`,
           { duration: 3000 },
         );
         this.dialogRef.close(res.data);
@@ -145,7 +145,7 @@ export class RentalOwnerFormModalComponent implements OnDestroy {
       error: (err) => {
         this.snackBar.open(
           err?.error?.message || 'Failed to save owner',
-          'Close',
+          $localize`Close`,
           { duration: 5000 },
         );
         this.isSaving.set(false);

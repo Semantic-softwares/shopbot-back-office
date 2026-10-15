@@ -201,8 +201,8 @@ export class SocketService {
       console.log('📡 [GLOBAL SOCKET] printJob:created', jobId);
 
       this.snackBar.open(
-        `📋 Print job created for Order #${data.orderNumber || data.order?._id || 'N/A'}`,
-        'View',
+        $localize`📋 Print job created for Order #${data.orderNumber || data.order?._id || 'N/A'}`,
+        $localize`View`,
         {
           duration: 5000,
           horizontalPosition: 'end',
@@ -214,7 +214,7 @@ export class SocketService {
     // Listen for completed jobs
     socket.on('printJob:completed', (data: any) => {
       console.log('✅ [GLOBAL SOCKET] printJob:completed EVENT RECEIVED');
-      this.snackBar.open('✅ Print job completed successfully', 'Close', {
+      this.snackBar.open($localize`✅ Print job completed successfully`, $localize`Close`, {
         duration: 3000,
         horizontalPosition: 'end',
         verticalPosition: 'top',
@@ -225,8 +225,8 @@ export class SocketService {
     socket.on('printJob:failed', (data: any) => {
       console.log('❌ [GLOBAL SOCKET] printJob:failed EVENT RECEIVED');
       this.snackBar.open(
-        `❌ Print job failed: ${data.error || 'Unknown error'}`,
-        'Close',
+        $localize`❌ Print job failed: ${data.error || 'Unknown error'}`,
+        $localize`Close`,
         {
           duration: 5000,
           horizontalPosition: 'end',

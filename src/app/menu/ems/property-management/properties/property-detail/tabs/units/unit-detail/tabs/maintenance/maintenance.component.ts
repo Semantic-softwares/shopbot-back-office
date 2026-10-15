@@ -71,7 +71,7 @@ export class UnitMaintenanceComponent {
   ];
 
   readonly statusOptions = [
-    { value: '', label: 'All statuses' },
+    { value: '', label: $localize`All statuses` },
     ...Object.values(MaintenanceStatus).map((value) => ({
       value,
       label: STATUS_LABEL[value],
@@ -79,7 +79,7 @@ export class UnitMaintenanceComponent {
   ];
 
   readonly priorityOptions = [
-    { value: '', label: 'All priorities' },
+    { value: '', label: $localize`All priorities` },
     ...Object.values(MaintenancePriority).map((value) => ({
       value,
       label: PRIORITY_LABEL[value],

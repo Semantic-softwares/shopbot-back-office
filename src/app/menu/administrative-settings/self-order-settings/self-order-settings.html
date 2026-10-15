@@ -1,19 +1,19 @@
 <div class="px-4">
   <div class="grid grid-cols-1 gap-6">
-    <app-page-header title="Self-Order Menu" subtitle="Let customers scan a table QR code to browse the menu and order">
+    <app-page-header title="Self-Order Menu" i18n-title subtitle="Let customers scan a table QR code to browse the menu and order" i18n-subtitle>
       <div actions class="flex items-center gap-2">
         <button type="button" mat-stroked-button [disabled]="!previewUrl()" (click)="openPreview()">
           <mat-icon class="mr-1">visibility</mat-icon>
-          Preview
+          <ng-container i18n>Preview</ng-container>
         </button>
         <button type="button" mat-stroked-button [disabled]="!previewUrl()" (click)="copyStoreLink()"
-          [attr.aria-label]="'Copy store link ' + (previewUrl() ?? '')">
+          [attr.aria-label]="('Copy store link ' | tr) + (previewUrl() ?? '')">
           <mat-icon class="mr-1">content_copy</mat-icon>
-          Copy link
+          <ng-container i18n>Copy link</ng-container>
         </button>
         <button type="button" mat-flat-button color="primary" [disabled]="saving()" (click)="save()">
           <mat-icon class="mr-1">save</mat-icon>
-          {{ saving() ? 'Saving...' : 'Save' }}
+          @if (saving()) {<ng-container i18n>Saving...</ng-container>} @else {<ng-container i18n>Save</ng-container>}
         </button>
       </div>
     </app-page-header>
@@ -27,24 +27,24 @@
         <mat-card-content class="pt-4">
           <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
             <div>
-              <h4 class="text-sm font-medium text-gray-900">Enable self-ordering</h4>
-              <p class="text-xs text-gray-500">Turn this on once you've generated table QR codes and are ready for customers to order.</p>
+              <h4 class="text-sm font-medium text-gray-900"><ng-container i18n>Enable self-ordering</ng-container></h4>
+              <p class="text-xs text-gray-500"><ng-container i18n>Turn this on once you've generated table QR codes and are ready for customers to order.</ng-container></p>
             </div>
             <mat-slide-toggle [ngModel]="enabled()" (ngModelChange)="enabled.set($event)" color="primary"></mat-slide-toggle>
           </div>
           <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 mt-3">
             <div>
-              <h4 class="text-sm font-medium text-gray-900">Auto-print a receipt</h4>
-              <p class="text-xs text-gray-500">Automatically send a kitchen ticket to the printer when a customer places a self-order.</p>
+              <h4 class="text-sm font-medium text-gray-900"><ng-container i18n>Auto-print a receipt</ng-container></h4>
+              <p class="text-xs text-gray-500"><ng-container i18n>Automatically send a kitchen ticket to the printer when a customer places a self-order.</ng-container></p>
             </div>
             <mat-slide-toggle [ngModel]="autoPrintReceipt()" (ngModelChange)="autoPrintReceipt.set($event)" color="primary"></mat-slide-toggle>
           </div>
           <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 mt-3">
             <div class="flex items-center justify-between">
               <div>
-                <h4 class="text-sm font-medium text-gray-900">Show guest Wi-Fi</h4>
+                <h4 class="text-sm font-medium text-gray-900"><ng-container i18n>Show guest Wi-Fi</ng-container></h4>
                 <p class="text-xs text-gray-500">
-                  Show the Wi-Fi name and password on the menu. Leave the network name blank to show nothing.
+                  <ng-container i18n>Show the Wi-Fi name and password on the menu. Leave the network name blank to show nothing.</ng-container>
                 </p>
               </div>
               <mat-slide-toggle [ngModel]="showWifi()" (ngModelChange)="showWifi.set($event)" color="primary"></mat-slide-toggle>
@@ -52,25 +52,25 @@
             @if (showWifi()) {
               <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 mt-3">
                 <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                  <mat-label>Wi-Fi Network Name</mat-label>
-                  <input matInput [ngModel]="wifiSsid()" (ngModelChange)="wifiSsid.set($event)" placeholder="e.g. LE POLE" />
+                  <mat-label><ng-container i18n>Wi-Fi Network Name</ng-container></mat-label>
+                  <input matInput [ngModel]="wifiSsid()" (ngModelChange)="wifiSsid.set($event)" placeholder="e.g. LE POLE" i18n-placeholder />
                 </mat-form-field>
                 <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                  <mat-label>Wi-Fi Password</mat-label>
-                  <input matInput [ngModel]="wifiPassword()" (ngModelChange)="wifiPassword.set($event)" placeholder="Leave blank for an open network" />
+                  <mat-label><ng-container i18n>Wi-Fi Password</ng-container></mat-label>
+                  <input matInput [ngModel]="wifiPassword()" (ngModelChange)="wifiPassword.set($event)" placeholder="Leave blank for an open network" i18n-placeholder />
                 </mat-form-field>
               </div>
               <p class="mt-2 text-xs text-gray-500">
-                This covers the whole venue. If one area has its own network, set it on that table instead —
-                a table's own Wi-Fi overrides this.
+                <ng-container i18n>This covers the whole venue. If one area has its own network, set it on that table instead —
+                a table's own Wi-Fi overrides this.</ng-container>
               </p>
             }
           </div>
           <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 mt-3">
             <div>
-              <h4 class="text-sm font-medium text-gray-900">Show address &amp; contact in the footer</h4>
+              <h4 class="text-sm font-medium text-gray-900"><ng-container i18n>Show address &amp; contact in the footer</ng-container></h4>
               <p class="text-xs text-gray-500">
-                Add your address, phone and email to the bottom of the menu, taken from your store's contact details.
+                <ng-container i18n>Add your address, phone and email to the bottom of the menu, taken from your store's contact details.</ng-container>
               </p>
             </div>
             <mat-slide-toggle [ngModel]="showContactInfo()" (ngModelChange)="showContactInfo.set($event)" color="primary"></mat-slide-toggle>
@@ -83,15 +83,15 @@
           <mat-card-content class="pt-4">
             <div class="mb-4 flex flex-wrap items-start justify-between gap-2">
               <div>
-                <h4 class="text-sm font-medium text-gray-900">Home page</h4>
+                <h4 class="text-sm font-medium text-gray-900"><ng-container i18n>Home page</ng-container></h4>
                 <p class="text-xs text-gray-500">
-                  The first page customers see at your store link — background, headline, buttons and feature strip.
+                  <ng-container i18n>The first page customers see at your store link — background, headline, buttons and feature strip.</ng-container>
                 </p>
               </div>
               @if (previewUrl(); as url) {
                 <a mat-button [href]="url" target="_blank" rel="noopener">
                   <mat-icon>open_in_new</mat-icon>
-                  Open home page
+                  <ng-container i18n>Open home page</ng-container>
                 </a>
               }
             </div>
@@ -109,7 +109,7 @@
 
       <mat-card appearance="outlined">
         <mat-card-content class="pt-4">
-          <h4 class="text-sm font-medium text-gray-900 mb-3">Menu theme</h4>
+          <h4 class="text-sm font-medium text-gray-900 mb-3"><ng-container i18n>Menu theme</ng-container></h4>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             @for (template of availableTemplates(); track template.slug) {
               <button
@@ -139,7 +139,7 @@
       @if (selectedTemplate(); as template) {
         <mat-card appearance="outlined">
           <mat-card-content class="pt-4">
-            <h4 class="text-sm font-medium text-gray-900 mb-3">{{ template.name }} — appearance</h4>
+            <h4 class="text-sm font-medium text-gray-900 mb-3"><ng-container i18n>{{ template.name }} — appearance</ng-container></h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               @for (field of template.settingsSchema; track field.key) {
                 <div>
@@ -186,12 +186,12 @@
                           } @else {
                             <mat-icon class="mr-1">upload</mat-icon>
                           }
-                          {{ themeImageUploading() === field.key ? 'Uploading…' : settingsValues()[field.key] ? 'Change image' : 'Upload image' }}
+                          {{ themeImageUploading() === field.key ? ('Uploading…' | tr) : settingsValues()[field.key] ? ('Change image' | tr) : ('Upload image' | tr) }}
                         </button>
                         @if (settingsValues()[field.key]) {
                           <button type="button" mat-button (click)="updateSetting(field.key, '')">
                             <mat-icon class="mr-1">delete</mat-icon>
-                            Remove
+                            <ng-container i18n>Remove</ng-container>
                           </button>
                         }
                       </div>
@@ -221,10 +221,10 @@
            ============================================================ -->
       <mat-card appearance="outlined">
         <mat-card-content class="pt-4">
-          <h4 class="text-sm font-medium text-gray-900">QR card design</h4>
+          <h4 class="text-sm font-medium text-gray-900"><ng-container i18n>QR card design</ng-container></h4>
           <p class="mb-3 text-xs text-gray-500">
-            The printed card guests scan at the table. Staff can still pick a size and
-            language when printing an individual table.
+            <ng-container i18n>The printed card guests scan at the table. Staff can still pick a size and
+            language when printing an individual table.</ng-container>
           </p>
 
           <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -260,22 +260,22 @@
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <!-- Controls -->
               <div>
-                <h4 class="mb-3 text-sm font-medium text-gray-900">{{ qrTemplate.name }} — appearance</h4>
+                <h4 class="mb-3 text-sm font-medium text-gray-900"><ng-container i18n>{{ qrTemplate.name }} — appearance</ng-container></h4>
 
                 <div class="mb-4 grid grid-cols-2 gap-3">
                   <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                    <mat-label>Default size</mat-label>
+                    <mat-label><ng-container i18n>Default size</ng-container></mat-label>
                     <mat-select [value]="qrSize()" (valueChange)="setQrSize($event)">
                       @for (size of qrAvailableSizes(); track size.key) {
                         <mat-option [value]="size.key">
-                          {{ size.label }} ({{ size.widthMm }}×{{ size.heightMm }}mm)
+                          <ng-container i18n>{{ size.label }} ({{ size.widthMm }}×{{ size.heightMm }}mm)</ng-container>
                         </mat-option>
                       }
                     </mat-select>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                    <mat-label>Default language</mat-label>
+                    <mat-label><ng-container i18n>Default language</ng-container></mat-label>
                     <mat-select [value]="qrLanguage()" (valueChange)="setQrLanguage($event)">
                       @for (language of qrOptions()?.languages || []; track language.code) {
                         <mat-option [value]="language.code">{{ language.label }}</mat-option>
@@ -362,7 +362,7 @@
                               @if (qrUploading()) {
                                 <mat-spinner diameter="18"></mat-spinner>
                               } @else {
-                                {{ qrSettings()[field.key] ? 'Replace' : 'Upload' }}
+                                @if (qrSettings()[field.key]) {<ng-container i18n>Replace</ng-container>} @else {<ng-container i18n>Upload</ng-container>}
                               }
                             </button>
                             @if (qrSettings()[field.key]) {
@@ -374,13 +374,13 @@
                                 [disabled]="qrUploading()"
                                 (click)="recropQrBackground(field)"
                               >
-                                <mat-icon class="mr-1">crop</mat-icon>Crop
+                                <mat-icon class="mr-1">crop</mat-icon><ng-container i18n>Crop</ng-container>
                               </button>
-                              <button mat-button type="button" (click)="updateQrSetting(field.key, '')">Remove</button>
+                              <button mat-button type="button" (click)="updateQrSetting(field.key, '')"><ng-container i18n>Remove</ng-container></button>
                             }
                           </div>
                           <p class="mt-1 text-xs text-gray-500">
-                            You'll be asked to crop it to the shape this design prints.
+                            <ng-container i18n>You'll be asked to crop it to the shape this design prints.</ng-container>
                           </p>
                         }
                         @case ('select') {
@@ -403,7 +403,7 @@
                               matInput
                               [ngModel]="qrSettings()[field.key] || ''"
                               (ngModelChange)="updateQrSetting(field.key, $event)"
-                              [placeholder]="'Leave blank to use the ' + qrLanguage() + ' default'"
+                              [placeholder]="('Leave blank to use the ' | tr) + qrLanguage() + (' default' | tr)"
                             />
                           </mat-form-field>
                         }
@@ -426,10 +426,10 @@
                    leaves a sticky item nothing to travel within. -->
               <div class="lg:sticky lg:top-4 lg:self-start">
                 <div class="mb-2 flex items-center justify-between">
-                  <h4 class="text-sm font-medium text-gray-900">Preview</h4>
+                  <h4 class="text-sm font-medium text-gray-900"><ng-container i18n>Preview</ng-container></h4>
                   @if (qrPreviewLoading()) {
                     <span class="flex items-center gap-2 text-xs text-gray-500">
-                      <mat-spinner diameter="14"></mat-spinner> Rendering…
+                      <mat-spinner diameter="14"></mat-spinner> <ng-container i18n>Rendering…</ng-container>
                     </span>
                   }
                 </div>
@@ -437,17 +437,17 @@
                   @if (qrPreviewUrl(); as previewUrl) {
                     <iframe
                       [src]="previewUrl"
-                      title="QR card preview"
+                      title="QR card preview" i18n-title
                       class="h-[26rem] w-full rounded"
                       style="border: 0"
                     ></iframe>
                   } @else {
-                    <p class="text-xs text-gray-400">Preview will appear here.</p>
+                    <p class="text-xs text-gray-400"><ng-container i18n>Preview will appear here.</ng-container></p>
                   }
                 </div>
                 <p class="mt-2 text-xs text-gray-500">
-                  Shown with a sample table. The QR here is a placeholder — real cards
-                  encode each table's own code.
+                  <ng-container i18n>Shown with a sample table. The QR here is a placeholder — real cards
+                  encode each table's own code.</ng-container>
                 </p>
               </div>
             </div>

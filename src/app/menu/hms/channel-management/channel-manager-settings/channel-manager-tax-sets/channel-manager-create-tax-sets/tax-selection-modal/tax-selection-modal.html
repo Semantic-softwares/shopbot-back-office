@@ -1,4 +1,4 @@
-  <h2 mat-dialog-title>Add Tax</h2>
+  <h2 mat-dialog-title><ng-container i18n>Add Tax</ng-container></h2>
 
   @if (isLoading()) {
     <div class="flex items-center justify-center py-8">
@@ -7,18 +7,18 @@
   } @else {
     <mat-dialog-content class="mt-6">
       @if (availableTaxes().length === 0) {
-        <p class="text-gray-500 text-center py-4">All taxes have been added to this tax set.</p>
+        <p class="text-gray-500 text-center py-4"><ng-container i18n>All taxes have been added to this tax set.</ng-container></p>
       } @else {
         <form [formGroup]="form">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Select Tax</mat-label>
+            <mat-label><ng-container i18n>Select Tax</ng-container></mat-label>
             <mat-select formControlName="taxId">
               @for (tax of availableTaxes(); track tax.id) {
                 <mat-option [value]="tax.id">{{ tax.title }}</mat-option>
               }
             </mat-select>
             @if (form.get('taxId')?.hasError('required')) {
-              <mat-error>Please select a tax</mat-error>
+              <mat-error><ng-container i18n>Please select a tax</ng-container></mat-error>
             }
           </mat-form-field>
         </form>
@@ -31,7 +31,7 @@
         (click)="cancel()"
         [disabled]="isLoading()"
       >
-        Cancel
+        <ng-container i18n>Cancel</ng-container>
       </button>
       <button
         matButton
@@ -40,7 +40,7 @@
         [disabled]="isLoading()"
       >
         <mat-icon class="mr-1">add</mat-icon>
-        Create Tax
+        <ng-container i18n>Create Tax</ng-container>
       </button>
       <button
         matButton="filled"
@@ -48,7 +48,7 @@
         (click)="selectTax()"
         [disabled]="!form.valid || isLoading() || availableTaxes().length === 0"
       >
-        Select
+        <ng-container i18n>Select</ng-container>
       </button>
     </mat-dialog-actions>
   }

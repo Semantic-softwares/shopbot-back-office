@@ -1,21 +1,21 @@
 <app-page-header
-  title="Printers"
-  subtitle="Manage all printers for your store">
+  title="Printers" i18n-title
+  subtitle="Manage all printers for your store" i18n-subtitle>
   <ng-container actions>
     <button 
       matButton="outlined"
       (click)="reload()"
       [disabled]="isLoading()"
-      matTooltip="Refresh printer list">
+      matTooltip="Refresh printer list" i18n-matTooltip>
       <mat-icon>refresh</mat-icon>
-      Reload
+      <ng-container i18n>Reload</ng-container>
     </button>
     <button 
       matButton="filled" 
       color="primary" 
       (click)="openCreatePrinterDialog()">
       <mat-icon>add</mat-icon>
-      Add New Printer
+      <ng-container i18n>Add New Printer</ng-container>
     </button>
   </ng-container>
 </app-page-header>
@@ -26,7 +26,7 @@
   @if (error()) {
     <app-no-record
       icon="error"
-      title="Failed to load printers"
+      title="Failed to load printers" i18n-title
       message="{{ error()?.message || 'An error occurred while loading printers' }}">
     </app-no-record>
   }
@@ -42,8 +42,8 @@
   @if (!isLoading() && !error() && printers().length === 0) {
     <app-no-record
       icon="print_disabled"
-      title="No Printers Configured"
-      message="Get started by adding your first printer">
+      title="No Printers Configured" i18n-title
+      message="Get started by adding your first printer" i18n-message>
     </app-no-record>
   }
 
@@ -55,7 +55,7 @@
         <!-- Name Column -->
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>
-            Printer Name
+            <ng-container i18n>Printer Name</ng-container>
           </th>
           <td mat-cell *matCellDef="let printer">
             <div class="flex items-center gap-2">
@@ -68,7 +68,7 @@
         <!-- Connection Type Column -->
         <ng-container matColumnDef="connectionType">
           <th mat-header-cell *matHeaderCellDef >
-            Connection Type
+            <ng-container i18n>Connection Type</ng-container>
           </th>
           <td mat-cell *matCellDef="let printer" class="px-6 py-4">
             <mat-chip [highlighted]="printer.connectionType === 'network'">
@@ -80,7 +80,7 @@
         <!-- Role Column -->
         <ng-container matColumnDef="role">
           <th mat-header-cell *matHeaderCellDef >
-            Role
+            <ng-container i18n>Role</ng-container>
           </th>
           <td mat-cell *matCellDef="let printer" class="px-6 py-4">
             <mat-chip 
@@ -94,7 +94,7 @@
         <!-- Status Column -->
         <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef >
-            Status
+            <ng-container i18n>Status</ng-container>
           </th>
           <td mat-cell *matCellDef="let printer" class="px-6 py-4">
             <div class="flex items-center gap-2">
@@ -111,7 +111,7 @@
         <!-- Capabilities Column -->
         <ng-container matColumnDef="capabilities">
           <th mat-header-cell *matHeaderCellDef >
-            Capabilities
+            <ng-container i18n>Capabilities</ng-container>
           </th>
           <td mat-cell *matCellDef="let printer" class="px-6 py-4">
             <div class="flex items-center gap-2">
@@ -119,13 +119,13 @@
                 description
               </mat-icon>
               @if (printer.capabilities.supportsQr) {
-                <mat-icon class="text-blue-500 text-lg" matTooltip="QR Code Support">qr_code_2</mat-icon>
+                <mat-icon class="text-blue-500 text-lg" matTooltip="QR Code Support" i18n-matTooltip>qr_code_2</mat-icon>
               }
               @if (printer.capabilities.supportsLogo) {
-                <mat-icon class="text-blue-500 text-lg" matTooltip="Logo Support">image</mat-icon>
+                <mat-icon class="text-blue-500 text-lg" matTooltip="Logo Support" i18n-matTooltip>image</mat-icon>
               }
               @if (printer.capabilities.supportsCut) {
-                <mat-icon class="text-blue-500 text-lg" matTooltip="Paper Cut Support">content_cut</mat-icon>
+                <mat-icon class="text-blue-500 text-lg" matTooltip="Paper Cut Support" i18n-matTooltip>content_cut</mat-icon>
               }
             </div>
           </td>
@@ -134,19 +134,19 @@
         <!-- Actions Column -->
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>
-            Actions
+            <ng-container i18n>Actions</ng-container>
           </th>
           <td mat-cell *matCellDef="let printer" class="px-6 py-4 text-right">
             <button 
               mat-icon-button 
-              matTooltip="Edit"
+              matTooltip="Edit" i18n-matTooltip
               (click)="openEditPrinterDialog(printer)"
               color="primary">
               <mat-icon>edit</mat-icon>
             </button>
             <button 
               mat-icon-button 
-              matTooltip="Delete"
+              matTooltip="Delete" i18n-matTooltip
               (click)="deletePrinter(printer._id!)"
               color="warn">
               <mat-icon>delete</mat-icon>

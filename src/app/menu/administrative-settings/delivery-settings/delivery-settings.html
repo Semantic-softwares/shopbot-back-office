@@ -1,10 +1,10 @@
 <div class="px-4">
   <div class="grid grid-cols-1 gap-6">
-    <app-page-header title="Delivery" subtitle="Set how delivery fees are calculated for storefront orders">
+    <app-page-header title="Delivery" i18n-title subtitle="Set how delivery fees are calculated for storefront orders" i18n-subtitle>
       <div actions class="flex items-center gap-2">
         <button type="button" mat-flat-button color="primary" [disabled]="saving()" (click)="save()">
           <mat-icon class="mr-1">save</mat-icon>
-          {{ saving() ? 'Saving...' : 'Save' }}
+          @if (saving()) {<ng-container i18n>Saving...</ng-container>} @else {<ng-container i18n>Save</ng-container>}
         </button>
       </div>
     </app-page-header>
@@ -16,23 +16,23 @@
     } @else {
       <mat-card appearance="outlined">
         <mat-card-content class="pt-4">
-          <h4 class="text-sm font-medium text-gray-900 mb-1">How is the delivery fee calculated?</h4>
-          <p class="text-xs text-gray-500 mb-3">Applies to storefront delivery orders — pickup and table orders never carry a delivery fee.</p>
+          <h4 class="text-sm font-medium text-gray-900 mb-1"><ng-container i18n>How is the delivery fee calculated?</ng-container></h4>
+          <p class="text-xs text-gray-500 mb-3"><ng-container i18n>Applies to storefront delivery orders — pickup and table orders never carry a delivery fee.</ng-container></p>
 
           <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full sm:w-80">
-            <mat-label>Pricing mode</mat-label>
+            <mat-label><ng-container i18n>Pricing mode</ng-container></mat-label>
             <mat-select [ngModel]="feeMode()" (ngModelChange)="feeMode.set($event)">
-              <mat-option [value]="1">Flat rate</mat-option>
-              <mat-option [value]="2">Free delivery</mat-option>
-              <mat-option [value]="3">Free above a minimum order</mat-option>
-              <mat-option [value]="4">By distance</mat-option>
+              <mat-option [value]="1"><ng-container i18n>Flat rate</ng-container></mat-option>
+              <mat-option [value]="2"><ng-container i18n>Free delivery</ng-container></mat-option>
+              <mat-option [value]="3"><ng-container i18n>Free above a minimum order</ng-container></mat-option>
+              <mat-option [value]="4"><ng-container i18n>By distance</ng-container></mat-option>
             </mat-select>
           </mat-form-field>
 
           @if (feeMode() === 1) {
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 mt-3">
               <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Delivery fee</mat-label>
+                <mat-label><ng-container i18n>Delivery fee</ng-container></mat-label>
                 <input matInput type="number" min="0" [ngModel]="deliveryFeeForAllOrder()" (ngModelChange)="deliveryFeeForAllOrder.set($event)" />
               </mat-form-field>
             </div>
@@ -41,11 +41,11 @@
           @if (feeMode() === 3) {
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 mt-3">
               <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Free delivery above</mat-label>
+                <mat-label><ng-container i18n>Free delivery above</ng-container></mat-label>
                 <input matInput type="number" min="0" [ngModel]="minimumOrderAmountForFreeDelivery()" (ngModelChange)="minimumOrderAmountForFreeDelivery.set($event)" />
               </mat-form-field>
               <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Delivery fee below that</mat-label>
+                <mat-label><ng-container i18n>Delivery fee below that</ng-container></mat-label>
                 <input matInput type="number" min="0" [ngModel]="deliveryFeeForAllOrder()" (ngModelChange)="deliveryFeeForAllOrder.set($event)" />
               </mat-form-field>
             </div>
@@ -54,11 +54,11 @@
           @if (feeMode() === 4) {
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 mt-3">
               <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Minimum delivery fee</mat-label>
+                <mat-label><ng-container i18n>Minimum delivery fee</ng-container></mat-label>
                 <input matInput type="number" min="0" [ngModel]="minimumDeliveryFee()" (ngModelChange)="minimumDeliveryFee.set($event)" />
               </mat-form-field>
               <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Fee per kilometer</mat-label>
+                <mat-label><ng-container i18n>Fee per kilometer</ng-container></mat-label>
                 <input matInput type="number" min="0" [ngModel]="deliveryFeeByKilometers()" (ngModelChange)="deliveryFeeByKilometers.set($event)" />
               </mat-form-field>
             </div>
@@ -68,21 +68,21 @@
 
       <mat-card appearance="outlined">
         <mat-card-content class="pt-4">
-          <h4 class="text-sm font-medium text-gray-900 mb-3">Delivery area &amp; estimates</h4>
+          <h4 class="text-sm font-medium text-gray-900 mb-3"><ng-container i18n>Delivery area &amp; estimates</ng-container></h4>
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Delivery radius (km)</mat-label>
-              <input matInput type="number" min="0" placeholder="No limit" [ngModel]="deliveryRadius()" (ngModelChange)="deliveryRadius.set($event)" />
-              <mat-hint>Orders from further away than this are declined.</mat-hint>
+              <mat-label><ng-container i18n>Delivery radius (km)</ng-container></mat-label>
+              <input matInput type="number" min="0" placeholder="No limit" i18n-placeholder [ngModel]="deliveryRadius()" (ngModelChange)="deliveryRadius.set($event)" />
+              <mat-hint><ng-container i18n>Orders from further away than this are declined.</ng-container></mat-hint>
             </mat-form-field>
           </div>
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 mt-3">
             <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Estimated time — minimum (min)</mat-label>
+              <mat-label><ng-container i18n>Estimated time — minimum (min)</ng-container></mat-label>
               <input matInput type="number" min="0" [ngModel]="estimatedMinMinutes()" (ngModelChange)="estimatedMinMinutes.set($event)" />
             </mat-form-field>
             <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Estimated time — maximum (min)</mat-label>
+              <mat-label><ng-container i18n>Estimated time — maximum (min)</ng-container></mat-label>
               <input matInput type="number" min="0" [ngModel]="estimatedMaxMinutes()" (ngModelChange)="estimatedMaxMinutes.set($event)" />
             </mat-form-field>
           </div>
@@ -93,29 +93,29 @@
         <mat-card-content class="pt-4">
           <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
             <div>
-              <h4 class="text-sm font-medium text-gray-900">Require a minimum order for delivery</h4>
-              <p class="text-xs text-gray-500">Delivery orders below this amount are declined. Pickup and table orders are unaffected.</p>
+              <h4 class="text-sm font-medium text-gray-900"><ng-container i18n>Require a minimum order for delivery</ng-container></h4>
+              <p class="text-xs text-gray-500"><ng-container i18n>Delivery orders below this amount are declined. Pickup and table orders are unaffected.</ng-container></p>
             </div>
             <mat-slide-toggle [ngModel]="allowMinimumOrderAmount()" (ngModelChange)="allowMinimumOrderAmount.set($event)" color="primary"></mat-slide-toggle>
           </div>
           @if (allowMinimumOrderAmount()) {
             <mat-form-field appearance="outline" subscriptSizing="dynamic" class="mt-3 w-full sm:w-80">
-              <mat-label>Minimum order amount</mat-label>
+              <mat-label><ng-container i18n>Minimum order amount</ng-container></mat-label>
               <input matInput type="number" min="0" [ngModel]="minimumOrderAmount()" (ngModelChange)="minimumOrderAmount.set($event)" />
             </mat-form-field>
           }
 
           <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 mt-3">
             <div>
-              <h4 class="text-sm font-medium text-gray-900">Delivery instructions</h4>
-              <p class="text-xs text-gray-500">Shown to the customer when they choose delivery at checkout.</p>
+              <h4 class="text-sm font-medium text-gray-900"><ng-container i18n>Delivery instructions</ng-container></h4>
+              <p class="text-xs text-gray-500"><ng-container i18n>Shown to the customer when they choose delivery at checkout.</ng-container></p>
             </div>
             <mat-slide-toggle [ngModel]="enableDeliveryInstructions()" (ngModelChange)="enableDeliveryInstructions.set($event)" color="primary"></mat-slide-toggle>
           </div>
           @if (enableDeliveryInstructions()) {
             <mat-form-field appearance="outline" subscriptSizing="dynamic" class="mt-3 w-full">
-              <mat-label>Instructions</mat-label>
-              <textarea matInput rows="3" [ngModel]="deliveryInstructions()" (ngModelChange)="deliveryInstructions.set($event)" placeholder="e.g. Call on arrival, parking is around the back"></textarea>
+              <mat-label><ng-container i18n>Instructions</ng-container></mat-label>
+              <textarea matInput rows="3" [ngModel]="deliveryInstructions()" (ngModelChange)="deliveryInstructions.set($event)" placeholder="e.g. Call on arrival, parking is around the back" i18n-placeholder></textarea>
             </mat-form-field>
           }
         </mat-card-content>

@@ -1,6 +1,6 @@
 <!-- Dialog Header -->
 <h2 mat-dialog-title class="m-0">
-  {{ data?.webhook?.id ? 'Edit Webhook' : 'Create Webhook' }}
+  @if (data?.webhook?.id) {<ng-container i18n>Edit Webhook</ng-container>} @else {<ng-container i18n>Create Webhook</ng-container>}
 </h2>
 
 <!-- Dialog Content -->
@@ -14,14 +14,14 @@
       <!-- Trigger/Events Chips Autocomplete -->
     
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Trigger</mat-label>
-          <mat-chip-set aria-label="Event selection">
+          <mat-label><ng-container i18n>Trigger</ng-container></mat-label>
+          <mat-chip-set aria-label="Event selection" i18n-aria-label>
             @for (event of selectedEvents(); track event.id) {
               <mat-chip
                 (removed)="removeEvent(event)"
                 [removable]="true">
                 {{ getEventLabel(event) }}
-                <button matChipRemove aria-label="Remove event">
+                <button matChipRemove aria-label="Remove event" i18n-aria-label>
                   <mat-icon>cancel</mat-icon>
                 </button>
               </mat-chip>
@@ -31,7 +31,7 @@
             matInput
             [formControl]="eventAutocompleteControl"
             [matAutocomplete]="eventAutocomplete"
-            placeholder="e.g., booking_new, booking_modification">
+            placeholder="e.g., booking_new, booking_modification" i18n-placeholder>
           <mat-icon matSuffix>event</mat-icon>
           <mat-autocomplete #eventAutocomplete="matAutocomplete">
             @for (event of filteredEvents(); track event.id) {
@@ -42,15 +42,15 @@
             @if (filteredEvents()?.length === 0) {
               <mat-option disabled>
                 @if (availableEvents.value()?.data?.length === 0) {
-                  Loading events...
+                  <ng-container i18n>Loading events...</ng-container>
                 } @else {
-                  No events available
+                  <ng-container i18n>No events available</ng-container>
                 }
               </mat-option>
             }
           </mat-autocomplete>
           @if (selectedEvents().length === 0) {
-           <mat-hint>At least one event is required</mat-hint>
+           <mat-hint><ng-container i18n>At least one event is required</ng-container></mat-hint>
           }
         </mat-form-field>
 
@@ -59,18 +59,18 @@
 
       <!-- URL Field -->
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Callback URL</mat-label>
+        <mat-label><ng-container i18n>Callback URL</ng-container></mat-label>
         <input 
           matInput 
           formControlName="url" 
-          placeholder="https://example.com/webhook"
+          placeholder="https://example.com/webhook" i18n-placeholder
           type="url">
         <mat-icon matSuffix>link</mat-icon>
         @if (webhookForm.get('url')?.hasError('required')) {
-          <mat-error>URL is required</mat-error>
+          <mat-error><ng-container i18n>URL is required</ng-container></mat-error>
         }
         @if (webhookForm.get('url')?.hasError('pattern')) {
-          <mat-error>URL must start with http:// or https://</mat-error>
+          <mat-error><ng-container i18n>URL must start with http:// or https://</ng-container></mat-error>
         }
       </mat-form-field>
 
@@ -82,7 +82,7 @@
           class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           formControlName="is_active">
         <label for="is_active" class="text-sm font-medium text-gray-900 cursor-pointer">
-          Is Active
+          <ng-container i18n>Is Active</ng-container>
         </label>
       </div>
 
@@ -94,33 +94,33 @@
           class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           formControlName="send_data">
         <label for="send_data" class="text-sm font-medium text-gray-900 cursor-pointer">
-          Send Data
+          <ng-container i18n>Send Data</ng-container>
         </label>
-        <span class="text-xs text-gray-600">Select this option if you would like to receive webhook payload.</span>
+        <span class="text-xs text-gray-600"><ng-container i18n>Select this option if you would like to receive webhook payload.</ng-container></span>
       </div>
 
       <!-- Headers Field -->
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Headers (JSON)</mat-label>
+        <mat-label><ng-container i18n>Headers (JSON)</ng-container></mat-label>
         <textarea
           matInput
           formControlName="headers"
-          placeholder='{ "api-key": "some_api_key" }'
+          placeholder='{ "api-key": "some_api_key" }' i18n-placeholder
           rows="4"
           class="font-mono text-sm"></textarea>
-        <mat-hint>Manage HTTP Headers which should be sent to your side. Here you can define API-KEY protection.</mat-hint>
+        <mat-hint><ng-container i18n>Manage HTTP Headers which should be sent to your side. Here you can define API-KEY protection.</ng-container></mat-hint>
       </mat-form-field>
 
       <!-- Request Params Field -->
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Request Params (JSON)</mat-label>
+        <mat-label><ng-container i18n>Request Params (JSON)</ng-container></mat-label>
         <textarea
           matInput
           formControlName="request_params"
-          placeholder='{ "get-arg": "value" }'
+          placeholder='{ "get-arg": "value" }' i18n-placeholder
           rows="4"
           class="font-mono text-sm"></textarea>
-        <mat-hint>If your endpoint need some GET arguments, specify it here instead Callback URL section.</mat-hint>
+        <mat-hint><ng-container i18n>If your endpoint need some GET arguments, specify it here instead Callback URL section.</ng-container></mat-hint>
       </mat-form-field>
 
     </form>
@@ -133,13 +133,13 @@
     matButton
     (click)="dialogRef.close()"
     [disabled]="saving()">
-    Cancel
+    <ng-container i18n>Cancel</ng-container>
   </button>
   <button
     matButton="filled"
     color="primary"
     (click)="onSubmit()"
     [disabled]="webhookForm.invalid ">
-    {{saving() ? 'Saving...' : (data?.webhook?.id ? 'Update Webhook' : 'Create Webhook')}}
+    {{saving() ? ('Saving...' | tr) : (data?.webhook?.id ? 'Update Webhook' : 'Create Webhook')}}
   </button>
 </mat-dialog-actions>

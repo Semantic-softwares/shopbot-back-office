@@ -1,23 +1,23 @@
-<h2 mat-dialog-title>Add Delivery Fee</h2>
+<h2 mat-dialog-title><ng-container i18n>Add Delivery Fee</ng-container></h2>
 
 <mat-dialog-content>
   <form [formGroup]="deliveryForm">
     <!-- Delivery Fee Field -->
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Delivery Fee</mat-label>
+      <mat-label><ng-container i18n>Delivery Fee</ng-container></mat-label>
       <mat-icon matPrefix>local_shipping</mat-icon>
       <input 
         matInput 
         currencyMask
         [options]="{ prefix: $safeNavigationMigration(storeStore.selectedStore()?.currency) + ' ' }"
         formControlName="deliveryFee" 
-        placeholder="Enter delivery fee"
+        placeholder="Enter delivery fee" i18n-placeholder
       />
       @if (f['deliveryFee'].hasError('required') && f['deliveryFee'].touched) {
-        <mat-error>Delivery fee is required</mat-error>
+        <mat-error><ng-container i18n>Delivery fee is required</ng-container></mat-error>
       }
       @if (f['deliveryFee'].hasError('min')) {
-        <mat-error>Delivery fee must be a positive number</mat-error>
+        <mat-error><ng-container i18n>Delivery fee must be a positive number</ng-container></mat-error>
       }
     </mat-form-field>
   </form>
@@ -26,16 +26,16 @@
 <mat-dialog-actions align="end">
   @if (data.deliveryFee) {
     <button mat-button color="warn" (click)="onRemoveDelivery()">
-      Remove Delivery
+      <ng-container i18n>Remove Delivery</ng-container>
     </button>
   }
-  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button (click)="onCancel()"><ng-container i18n>Cancel</ng-container></button>
   <button 
     mat-flat-button 
     color="primary" 
     (click)="onApply()" 
     [disabled]="deliveryForm.invalid"
   >
-    Apply
+    <ng-container i18n>Apply</ng-container>
   </button>
 </mat-dialog-actions>

@@ -43,10 +43,10 @@ export class HotelPrinterService {
 
       const printerConfig = this.getHotelPrinterConfiguration();
       await this.bluetoothPrinterService.printReservation(reservation, store, printerConfig);
-      this.snackBar.open('Reservation printed successfully!', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Reservation printed successfully!`, $localize`Close`, { duration: 3000 });
     } catch (error) {
       console.error('Error printing reservation:', error);
-      this.snackBar.open('Failed to print reservation. Please check printer connection.', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`Failed to print reservation. Please check printer connection.`, $localize`Close`, { duration: 5000 });
       throw error;
     }
   }
@@ -58,10 +58,10 @@ export class HotelPrinterService {
     try {
       const printerConfig = this.getHotelPrinterConfiguration();
       await this.bluetoothPrinterService.testPrint(printerConfig);
-      this.snackBar.open('Test print sent successfully with hotel settings!', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Test print sent successfully with hotel settings!`, $localize`Close`, { duration: 3000 });
     } catch (error) {
       console.error('Error during test print:', error);
-      this.snackBar.open('Test print failed. Please check printer connection.', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`Test print failed. Please check printer connection.`, $localize`Close`, { duration: 5000 });
       throw error;
     }
   }
@@ -73,10 +73,10 @@ export class HotelPrinterService {
     try {
       const printerConfig = this.getHotelPrinterConfiguration();
       await this.bluetoothPrinterService.testPaperUtilization(printerConfig);
-      this.snackBar.open('Paper utilization test sent successfully!', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Paper utilization test sent successfully!`, $localize`Close`, { duration: 3000 });
     } catch (error) {
       console.error('Error during paper utilization test:', error);
-      this.snackBar.open('Paper utilization test failed. Please check printer connection.', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`Paper utilization test failed. Please check printer connection.`, $localize`Close`, { duration: 5000 });
       throw error;
     }
   }
@@ -122,10 +122,10 @@ export class HotelPrinterService {
   async uploadLogo(logoData: string | ArrayBuffer): Promise<void> {
     try {
       await this.bluetoothPrinterService.uploadLogo(logoData);
-      this.snackBar.open('Logo uploaded to printer successfully!', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Logo uploaded to printer successfully!`, $localize`Close`, { duration: 3000 });
     } catch (error) {
       console.error('Error uploading logo:', error);
-      this.snackBar.open('Failed to upload logo. Please check printer connection.', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`Failed to upload logo. Please check printer connection.`, $localize`Close`, { duration: 5000 });
       throw error;
     }
   }

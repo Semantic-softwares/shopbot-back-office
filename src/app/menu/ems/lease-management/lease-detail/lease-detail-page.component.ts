@@ -39,11 +39,11 @@ export class LeaseDetailPageComponent {
   readonly leaseId = signal<string>(this.route.snapshot.paramMap.get('id') || '');
 
   readonly tabs = [
-    { label: 'Tenants', link: 'tenants', icon: 'people' },
-    { label: 'Lease Transactions', link: 'lease-transactions', icon: 'receipt_long' },
-    { label: 'Activities', link: 'activities', icon: 'timeline' },
-    { label: 'Utilities', link: 'utilities', icon: 'bolt' },
-    { label: 'Billing', link: 'billing', icon: 'payments' },
+    { label: $localize`Tenants`, link: 'tenants', icon: 'people' },
+    { label: $localize`Lease Transactions`, link: 'lease-transactions', icon: 'receipt_long' },
+    { label: $localize`Activities`, link: 'activities', icon: 'timeline' },
+    { label: $localize`Utilities`, link: 'utilities', icon: 'bolt' },
+    { label: $localize`Billing`, link: 'billing', icon: 'payments' },
   ];
 
   leaseResource = rxResource({
@@ -79,16 +79,16 @@ export class LeaseDetailPageComponent {
   }
 
   deleteLease(): void {
-    const confirmed = window.confirm('Delete this lease? This action cannot be undone.');
+    const confirmed = window.confirm($localize`Delete this lease? This action cannot be undone.`);
     if (!confirmed) return;
 
     this.leaseService.deleteLease(this.leaseId()).subscribe({
       next: () => {
-        this.snackBar.open('Lease deleted successfully', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Lease deleted successfully`, $localize`Close`, { duration: 3000 });
         this.router.navigate(['../'], { relativeTo: this.route });
       },
       error: (err) => {
-        this.snackBar.open(err?.error?.message || 'Failed to delete lease', 'Close', {
+        this.snackBar.open(err?.error?.message || 'Failed to delete lease', $localize`Close`, {
           duration: 5000,
         });
       },

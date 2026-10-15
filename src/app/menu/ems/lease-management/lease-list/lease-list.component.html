@@ -1,13 +1,13 @@
-<app-page-header title="Leases" subtitle="Create and manage lease agreements">
+<app-page-header title="Leases" i18n-title subtitle="Create and manage lease agreements" i18n-subtitle>
   <ng-container actions>
     <button mat-button (click)="clearFilters()">
       <mat-icon>clear</mat-icon>
-      Clear Filters
+      <ng-container i18n>Clear Filters</ng-container>
     </button>
 
     <button mat-flat-button (click)="createLease()">
       <mat-icon class="mr-1">add</mat-icon>
-      Add Lease
+      <ng-container i18n>Add Lease</ng-container>
     </button>
   </ng-container>
 </app-page-header>
@@ -18,25 +18,25 @@
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
-        <p class="text-sm text-gray-600">Active leases</p>
+        <p class="text-sm text-gray-600"><ng-container i18n>Active leases</ng-container></p>
         <p class="text-2xl font-bold text-gray-900 mt-1">{{ activeLeaseCount() }}</p>
       </mat-card-content>
     </mat-card>
     <mat-card appearance="outlined">
       <mat-card-content class="p-4!">
-        <p class="text-sm text-gray-600">Lease expiration</p>
+        <p class="text-sm text-gray-600"><ng-container i18n>Lease expiration</ng-container></p>
         <div class="flex items-baseline gap-2 mt-1">
           <span class="text-2xl font-bold text-gray-900">{{ expiringLeaseCount() }}</span>
-          <span class="text-xs text-gray-400">In the upcoming 30 days</span>
+          <span class="text-xs text-gray-400"><ng-container i18n>In the upcoming 30 days</ng-container></span>
         </div>
       </mat-card-content>
     </mat-card>
     <mat-card appearance="outlined" class="border-red-200!">
       <mat-card-content class="p-4!">
-        <p class="text-sm text-gray-600">Scheduled</p>
+        <p class="text-sm text-gray-600"><ng-container i18n>Scheduled</ng-container></p>
         <div class="flex items-baseline gap-2 mt-1">
           <span class="text-2xl font-bold text-gray-900">{{ scheduledLeaseCount() }}</span>
-          <span class="text-xs text-gray-400">Future leases</span>
+          <span class="text-xs text-gray-400"><ng-container i18n>Future leases</ng-container></span>
         </div>
       </mat-card-content>
     </mat-card>
@@ -52,15 +52,15 @@
       } @else if (leases().length === 0) {
         <div class="text-center py-8 text-gray-500">
           <mat-icon class="!text-5xl !h-14 !w-14 mb-2 text-gray-300">description</mat-icon>
-          <p class="text-sm">No leases yet. Create your first lease to get started.</p>
+          <p class="text-sm"><ng-container i18n>No leases yet. Create your first lease to get started.</ng-container></p>
         </div>
       } @else {
         <!-- Filters -->
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Property</mat-label>
+            <mat-label><ng-container i18n>Property</ng-container></mat-label>
             <mat-select [value]="selectedPropertyFilter()" (selectionChange)="updatePropertyFilter($event.value)">
-              <mat-option value="">All Properties</mat-option>
+              <mat-option value=""><ng-container i18n>All Properties</ng-container></mat-option>
               @for (name of propertyFilterOptions(); track name) {
                 <mat-option [value]="name.toLowerCase()">{{ name }}</mat-option>
               }
@@ -68,7 +68,7 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Status</mat-label>
+            <mat-label><ng-container i18n>Status</ng-container></mat-label>
             <mat-select [value]="selectedStatusFilter()" (selectionChange)="updateStatusFilter($event.value)">
               @for (opt of statusOptions; track opt.value) {
                 <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
@@ -77,9 +77,9 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Tenant</mat-label>
+            <mat-label><ng-container i18n>Tenant</ng-container></mat-label>
             <mat-select [value]="selectedTenantFilter()" (selectionChange)="updateTenantFilter($event.value)">
-              <mat-option value="">All Tenants</mat-option>
+              <mat-option value=""><ng-container i18n>All Tenants</ng-container></mat-option>
               @for (opt of tenantFilterOptions(); track opt.value) {
                 <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
               }
@@ -87,7 +87,7 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Lease timeline</mat-label>
+            <mat-label><ng-container i18n>Lease timeline</ng-container></mat-label>
             <mat-select [value]="selectedExpiryFilter()" (selectionChange)="updateExpiryFilter($event.value)">
               @for (opt of expiryOptions; track opt.value) {
                 <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
@@ -103,7 +103,7 @@
             <!-- Status Column -->
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                Status
+                <ng-container i18n>Status</ng-container>
               </th>
               <td mat-cell *matCellDef="let lease" class="py-3">
                 <mat-chip>
@@ -115,7 +115,7 @@
             <!-- Lease Number Column -->
             <ng-container matColumnDef="lease">
               <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                Lease
+                <ng-container i18n>Lease</ng-container>
               </th>
               <td mat-cell *matCellDef="let lease" class="text-sm text-gray-800 font-medium py-3">
                 {{ lease.leaseNumber || '--' }}
@@ -125,7 +125,7 @@
             <!-- Created Date Column -->
             <ng-container matColumnDef="createdAt">
               <th mat-header-cell *matHeaderCellDef mat-sort-header="createdAt" class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                Created
+                <ng-container i18n>Created</ng-container>
               </th>
               <td mat-cell *matCellDef="let lease" class="text-sm text-gray-700 py-3">
                 {{ lease.createdAt | date: 'MMM d, y' }}
@@ -135,7 +135,7 @@
             <!-- Property & Unit Column -->
             <ng-container matColumnDef="property">
               <th mat-header-cell *matHeaderCellDef mat-sort-header="property" class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                Property & unit
+                <ng-container i18n>Property & unit</ng-container>
               </th>
               <td mat-cell *matCellDef="let lease" class="text-sm text-gray-700 py-3">
                 {{ propertyAndUnitName(lease) }}
@@ -145,7 +145,7 @@
             <!-- Tenants Column -->
             <ng-container matColumnDef="tenant">
               <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                Tenants
+                <ng-container i18n>Tenants</ng-container>
               </th>
               <td mat-cell *matCellDef="let lease" class="text-sm text-gray-700 py-3">
                 <span>{{ tenantDisplay(lease).primary }}</span>
@@ -160,7 +160,7 @@
             <!-- Duration Column -->
             <ng-container matColumnDef="duration">
               <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                Duration
+                <ng-container i18n>Duration</ng-container>
               </th>
               <td mat-cell *matCellDef="let lease" class="text-sm text-gray-700 py-3">
                 {{ leaseDuration(lease) }}
@@ -170,7 +170,7 @@
             <!-- Rent & Schedule Column -->
             <ng-container matColumnDef="rent">
               <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase tracking-wide text-gray-600 text-right!">
-                Rent & schedule
+                <ng-container i18n>Rent & schedule</ng-container>
               </th>
               <td mat-cell *matCellDef="let lease" class="text-sm text-gray-800 font-medium py-3 text-right!">
                 {{ rentDisplay(lease) }}
@@ -210,12 +210,12 @@
           </table>
 
           <div class="px-4 py-3 text-xs text-gray-500 border-t border-gray-100">
-            {{ filteredLeases().length }} Total
+            <ng-container i18n>{{ filteredLeases().length }} Total</ng-container>
           </div>
 
           @if (filteredLeases().length === 0) {
             <div class="text-center py-6 text-sm text-gray-500">
-              No leases match the selected filters.
+              <ng-container i18n>No leases match the selected filters.</ng-container>
             </div>
           }
         </div>

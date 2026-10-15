@@ -9,6 +9,8 @@ import { AuthService } from '../../shared/services/auth.service';
 import { RolesService } from '../../shared/services/roles.service';
 import { StoreStore } from '../../shared/stores/store.store';
 import { Store } from '../../shared/models/store.model';
+import { ThemeToggleComponent } from '../../shared/components/theme-toggle/theme-toggle.component';
+import { LanguageMenuComponent } from '../../shared/components/language-menu/language-menu.component';
 
 /**
  * Shown right after login when a merchant belongs to more than one store —
@@ -19,7 +21,7 @@ import { Store } from '../../shared/models/store.model';
 @Component({
   selector: 'app-select-store',
   standalone: true,
-  imports: [MatCardModule, MatIconModule, MatButtonModule, MatProgressSpinnerModule],
+  imports: [ThemeToggleComponent, LanguageMenuComponent, MatCardModule, MatIconModule, MatButtonModule, MatProgressSpinnerModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './select-store.component.html',
   styleUrl: './select-store.component.scss',
@@ -51,7 +53,7 @@ export class SelectStoreComponent {
       },
       error: () => {
         this.selecting.set(null);
-        this.snackBar.open('Could not load your access for this store — please try again.', 'Close', {
+        this.snackBar.open($localize`Could not load your access for this store — please try again.`, $localize`Close`, {
           duration: 5000,
           horizontalPosition: 'end',
           verticalPosition: 'top',

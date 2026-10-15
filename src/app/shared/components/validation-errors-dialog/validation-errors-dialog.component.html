@@ -1,12 +1,12 @@
 <div>
   <h2 mat-dialog-title>
     <mat-icon inline class="align-middle">error_outline</mat-icon>
-    {{ data.title || 'Validation Errors' }}
+    @if (data.title) {<ng-container>{{ data.title }}</ng-container>} @else {<ng-container i18n>Validation Errors</ng-container>}
   </h2>
 
   <mat-dialog-content>
     <p>
-      {{ data.message || 'Please fix the following errors before submitting:' }}
+      @if (data.message) {<ng-container>{{ data.message }}</ng-container>} @else {<ng-container i18n>Please fix the following errors before submitting:</ng-container>}
     </p>
 
     <mat-list>
@@ -21,7 +21,7 @@
       @if (data.invalidControls.length === 0) {
         <mat-list-item>
           <mat-icon matListItemIcon color="accent">check_circle</mat-icon>
-          <div matListItemTitle>All fields are valid</div>
+          <div matListItemTitle><ng-container i18n>All fields are valid</ng-container></div>
         </mat-list-item>
       }
     </mat-list>
@@ -29,7 +29,7 @@
 
   <mat-dialog-actions align="end">
     <button matButton="filled" color="primary" mat-dialog-close>
-      Close
+      <ng-container i18n>Close</ng-container>
     </button>
   </mat-dialog-actions>
 </div>

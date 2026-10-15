@@ -21,12 +21,13 @@ import { RentalOwner, RentalOwnerStatus } from '../../../../../shared/models/est
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { NoRecordComponent } from '../../../../../shared/components/no-record/no-record.component';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-rental-owner-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatTableModule,
@@ -67,9 +68,9 @@ export class RentalOwnerListComponent {
   displayedColumns = ['name', 'contact', 'company', 'status', 'actions'];
 
   statusOptions = [
-    { value: '', label: 'All Status' },
-    { value: RentalOwnerStatus.ACTIVE, label: 'Active' },
-    { value: RentalOwnerStatus.INACTIVE, label: 'Inactive' },
+    { value: '', label: $localize`All Status` },
+    { value: RentalOwnerStatus.ACTIVE, label: $localize`Active` },
+    { value: RentalOwnerStatus.INACTIVE, label: $localize`Inactive` },
   ];
 
   private filterParams = computed(() => ({
@@ -145,17 +146,17 @@ export class RentalOwnerListComponent {
 
   async deleteOwner(owner: RentalOwner): Promise<void> {
     const confirmDelete = confirm(
-      `Delete rental owner "${owner.firstName} ${owner.lastName}"? This action cannot be undone.`,
+      $localize`Delete rental owner "${owner.firstName} ${owner.lastName}"? This action cannot be undone.`,
     );
     if (!confirmDelete) return;
 
     this.isUpdating.set(true);
     try {
       await this.rentalOwnerService.deleteRentalOwner(owner._id).toPromise();
-      this.snackBar.open(`Rental owner deleted`, 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Rental owner deleted`, $localize`Close`, { duration: 3000 });
       this.reloadData();
     } catch {
-      this.snackBar.open('Failed to delete rental owner', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`Failed to delete rental owner`, $localize`Close`, { duration: 5000 });
     } finally {
       this.isUpdating.set(false);
     }

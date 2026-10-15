@@ -1,50 +1,50 @@
-<h2 mat-dialog-title>{{data.service ? 'Edit' : 'Add'}} Service</h2>
+<h2 mat-dialog-title><ng-container i18n>{{data.service ? ('Edit' | tr) : 'Add'}} Service</ng-container></h2>
 <mat-dialog-content>
   <form [formGroup]="serviceForm" class="flex flex-col gap-4">
     <mat-form-field appearance="outline">
-      <mat-label>Name</mat-label>
-      <input matInput formControlName="name" placeholder="Enter service name">
+      <mat-label><ng-container i18n>Name</ng-container></mat-label>
+      <input matInput formControlName="name" placeholder="Enter service name" i18n-placeholder>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Category</mat-label>
+      <mat-label><ng-container i18n>Category</ng-container></mat-label>
       <mat-select formControlName="category">
-        <mat-option value="Cloud Services">Cloud Services</mat-option>
-        <mat-option value="Security">Security</mat-option>
-        <mat-option value="Infrastructure">Infrastructure</mat-option>
-        <mat-option value="Consulting">Consulting</mat-option>
+        <mat-option value="Cloud Services"><ng-container i18n>Cloud Services</ng-container></mat-option>
+        <mat-option value="Security"><ng-container i18n>Security</ng-container></mat-option>
+        <mat-option value="Infrastructure"><ng-container i18n>Infrastructure</ng-container></mat-option>
+        <mat-option value="Consulting"><ng-container i18n>Consulting</ng-container></mat-option>
       </mat-select>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Price</mat-label>
-      <input matInput formControlName="price" placeholder="Enter price">
+      <mat-label><ng-container i18n>Price</ng-container></mat-label>
+      <input matInput formControlName="price" placeholder="Enter price" i18n-placeholder>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Status</mat-label>
+      <mat-label><ng-container i18n>Status</ng-container></mat-label>
       <mat-select formControlName="status">
-        <mat-option value="Active">Active</mat-option>
-        <mat-option value="Inactive">Inactive</mat-option>
-        <mat-option value="Pending">Pending</mat-option>
+        <mat-option value="Active"><ng-container i18n>Active</ng-container></mat-option>
+        <mat-option value="Inactive"><ng-container i18n>Inactive</ng-container></mat-option>
+        <mat-option value="Pending"><ng-container i18n>Pending</ng-container></mat-option>
       </mat-select>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Provider</mat-label>
-      <input matInput formControlName="provider" placeholder="Enter provider">
+      <mat-label><ng-container i18n>Provider</ng-container></mat-label>
+      <input matInput formControlName="provider" placeholder="Enter provider" i18n-placeholder>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Description</mat-label>
-      <textarea matInput formControlName="description" rows="3" placeholder="Enter description"></textarea>
+      <mat-label><ng-container i18n>Description</ng-container></mat-label>
+      <textarea matInput formControlName="description" rows="3" placeholder="Enter description" i18n-placeholder></textarea>
     </mat-form-field>
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button (click)="onCancel()"><ng-container i18n>Cancel</ng-container></button>
   <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="!serviceForm.valid">
-    {{data.service ? 'Update' : 'Create'}}
+    @if (data.service) {<ng-container i18n>Update</ng-container>} @else {<ng-container i18n>Create</ng-container>}
   </button>
 </mat-dialog-actions>

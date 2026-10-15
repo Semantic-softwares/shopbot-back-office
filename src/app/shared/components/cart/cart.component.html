@@ -11,19 +11,19 @@
             <mat-menu #buyerMenu="matMenu">
                 <button mat-menu-item (click)="openCustomerSelectionDialog()">
                     <mat-icon>person</mat-icon>
-                    <span>Customer</span>
+                    <span><ng-container i18n>Customer</ng-container></span>
                 </button>
                 @if (hasPmsModule()) {
                 <button mat-menu-item (click)="openGuestSelectionDialog()">
                     <mat-icon>hotel</mat-icon>
-                    <span>Guest</span>
+                    <span><ng-container i18n>Guest</ng-container></span>
                 </button>
                 }
                 @if (selectedCustomer() || selectedGuest()) {
                 <mat-divider></mat-divider>
                 <button mat-menu-item (click)="clearBuyerSelection()">
                     <mat-icon>close</mat-icon>
-                    <span>Clear Selection</span>
+                    <span><ng-container i18n>Clear Selection</ng-container></span>
                 </button>
                 }
             </mat-menu>
@@ -37,13 +37,13 @@
             } @else {
             <button matButton="outlined"  (click)="onSelectTable()">
                 <mat-icon>table_restaurant</mat-icon>
-                <span class="text-xs">Table</span>
+                <span class="text-xs"><ng-container i18n>Table</ng-container></span>
             </button>
             }
 
             <!-- Close Button (Mobile only) -->
             @if (isMobile()) {
-            <button matIconButton (click)="closeCart()" title="Close cart">
+            <button matIconButton (click)="closeCart()" title="Close cart" i18n-title>
                 <mat-icon>close</mat-icon>
             </button>
             }
@@ -58,7 +58,7 @@
         <div class="mb-3 flex justify-end">
             <button mat-button color="warn" (click)="cancelSales()">
                 <mat-icon>delete_outline</mat-icon>
-                <span>Clear Cart</span>
+                <span><ng-container i18n>Clear Cart</ng-container></span>
             </button>
         </div>
         }
@@ -119,8 +119,8 @@
             } @empty {
             <div class="flex flex-col items-center justify-center h-full min-h-[300px] text-gray-400">
                 <mat-icon class="!text-6xl !w-16 !h-16 mb-4">shopping_cart</mat-icon>
-                <p class="text-lg font-medium">Cart is empty</p>
-                <p class="text-sm">Add products to start an order</p>
+                <p class="text-lg font-medium"><ng-container i18n>Cart is empty</ng-container></p>
+                <p class="text-sm"><ng-container i18n>Add products to start an order</ng-container></p>
             </div>
             }
         </div>
@@ -139,19 +139,19 @@
         <div class="flex items-center gap-2 p-2 border-b border-gray-100">
             <button matButton="outlined" class="!flex-1" (click)="onApplyDiscount()">
                 <mat-icon>local_offer</mat-icon>
-                <span class="ml-1">Discount</span>
+                <span class="ml-1"><ng-container i18n>Discount</ng-container></span>
             </button>
             <button matButton="outlined" class="!flex-1" (click)="onApplyDelivery()">
                 <mat-icon>local_shipping</mat-icon>
-                <span class="ml-1">Delivery</span>
+                <span class="ml-1"><ng-container i18n>Delivery</ng-container></span>
             </button>
         </div>
 
         <!-- Main Checkout Button -->
         <div class="p-3">
             <button matButton="filled" color="primary" class="w-full !h-12 !text-base" (click)="onCheckout()">
-                Checkout {{ itemsCount() }} items ({{ (this.cartSummary()?.totalCost || 0 )| currency:
-                currency() : 'symbol' : '1.0-0' }})
+                <ng-container i18n>Checkout {{ itemsCount() }} items ({{ (this.cartSummary()?.totalCost || 0 )| currency:
+                currency() : 'symbol' : '1.0-0' }})</ng-container>
             </button>
         </div>
 

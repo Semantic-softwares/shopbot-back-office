@@ -3,8 +3,8 @@
   <div class="mb-6">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Check-In / Check-Out Operations</h1>
-        <p class="text-gray-600 mt-1">Manage arrivals, departures, and in-house guests</p>
+        <h1 class="text-2xl font-bold text-gray-900"><ng-container i18n>Check-In / Check-Out Operations</ng-container></h1>
+        <p class="text-gray-600 mt-1"><ng-container i18n>Manage arrivals, departures, and in-house guests</ng-container></p>
       </div>
       <div class="flex items-center space-x-3">
         <button
@@ -14,7 +14,7 @@
           [disabled]="loading()"
           class="flex items-center">
           <mat-icon class="mr-2">refresh</mat-icon>
-          Refresh
+          <ng-container i18n>Refresh</ng-container>
         </button>
       </div>
     </div>
@@ -29,7 +29,7 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">Today's Arrivals</p>
+            <p class="text-sm font-medium text-gray-600"><ng-container i18n>Today's Arrivals</ng-container></p>
             <p class="text-2xl font-bold text-gray-900">{{ checkInToday().length }}</p>
           </div>
         </div>
@@ -43,7 +43,7 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">Today's Departures</p>
+            <p class="text-sm font-medium text-gray-600"><ng-container i18n>Today's Departures</ng-container></p>
             <p class="text-2xl font-bold text-gray-900">{{ checkOutToday().length }}</p>
           </div>
         </div>
@@ -57,7 +57,7 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">In-House Guests</p>
+            <p class="text-sm font-medium text-gray-600"><ng-container i18n>In-House Guests</ng-container></p>
             <p class="text-2xl font-bold text-gray-900">{{ inHouseGuests().length }}</p>
           </div>
         </div>
@@ -71,7 +71,7 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">Pending Actions</p>
+            <p class="text-sm font-medium text-gray-600"><ng-container i18n>Pending Actions</ng-container></p>
             <p class="text-2xl font-bold text-gray-900">{{ pendingCheckIns().length }}</p>
           </div>
         </div>
@@ -84,7 +84,7 @@
     <div class="flex justify-center items-center h-64 bg-white rounded-lg border border-gray-200">
       <div class="text-center">
         <mat-spinner class="mx-auto mb-4"></mat-spinner>
-        <p class="text-gray-600">Loading check-in/check-out data...</p>
+        <p class="text-gray-600"><ng-container i18n>Loading check-in/check-out data...</ng-container></p>
       </div>
     </div>
   }
@@ -93,11 +93,11 @@
   @if (!loading() && reservations().length === 0) {
     <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
       <mat-icon class="text-gray-400 text-6xl mb-4">hotel</mat-icon>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">No Reservations Found</h3>
-      <p class="text-gray-500 mb-4">There are no check-in or check-out operations for today.</p>
+      <h3 class="text-lg font-medium text-gray-900 mb-2"><ng-container i18n>No Reservations Found</ng-container></h3>
+      <p class="text-gray-500 mb-4"><ng-container i18n>There are no check-in or check-out operations for today.</ng-container></p>
       <button mat-raised-button color="primary" (click)="refreshData()">
         <mat-icon class="mr-2">refresh</mat-icon>
-        Refresh Data
+        <ng-container i18n>Refresh Data</ng-container>
       </button>
     </div>
   }
@@ -106,33 +106,33 @@
   @if (!loading() && reservations().length > 0) {
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200">
-        <h2 class="text-lg font-medium text-gray-900">All Reservations</h2>
-        <p class="text-sm text-gray-600 mt-1">Today's arrivals, departures, and in-house guests</p>
+        <h2 class="text-lg font-medium text-gray-900"><ng-container i18n>All Reservations</ng-container></h2>
+        <p class="text-sm text-gray-600 mt-1"><ng-container i18n>Today's arrivals, departures, and in-house guests</ng-container></p>
       </div>
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Guest
+                <ng-container i18n>Guest</ng-container>
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Confirmation
+                <ng-container i18n>Confirmation</ng-container>
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Room(s)
+                <ng-container i18n>Room(s)</ng-container>
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Check-In / Check-Out
+                <ng-container i18n>Check-In / Check-Out</ng-container>
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
+                <ng-container i18n>Status</ng-container>
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Balance
+                <ng-container i18n>Balance</ng-container>
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                <ng-container i18n>Actions</ng-container>
               </th>
             </tr>
           </thead>
@@ -155,7 +155,7 @@
                           <span
                             class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                             <mat-icon class="text-yellow-600 text-xs mr-1">star</mat-icon>
-                            VIP
+                            <ng-container i18n>VIP</ng-container>
                           </span>
                         }
                       </div>
@@ -168,10 +168,10 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-900">{{ reservation.confirmationNumber }}</div>
                   <div class="text-sm text-gray-500">
-                    {{ reservation.guestDetails.totalAdults }} Adults
+                    <ng-container i18n>{{ reservation.guestDetails.totalAdults }} Adults</ng-container>
                     @if (reservation.guestDetails.totalChildren > 0) {
                       <span>
-                        , {{ reservation.guestDetails.totalChildren }} Children
+                        <ng-container i18n>, {{ reservation.guestDetails.totalChildren }} Children</ng-container>
                       </span>
                     }
                   </div>
@@ -182,7 +182,7 @@
                     @for (roomRes of reservation.rooms; track roomRes) {
                       <div
                         class="flex items-center justify-between text-sm">
-                        <span class="font-medium text-gray-900">Room {{ roomRes.room.number }}</span>
+                        <span class="font-medium text-gray-900"><ng-container i18n>Room {{ roomRes.room.number }}</ng-container></span>
                         <div class="flex space-x-1">
                           <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                             [ngClass]="getRoomStatusClass(roomRes.room.status)">
@@ -197,7 +197,7 @@
                     }
                     @for (roomRes of reservation.rooms; track roomRes) {
                       <div class="text-xs text-gray-500">
-                        {{ roomRes.room.roomType.name }} • Floor {{ roomRes.room.floor }}
+                        <ng-container i18n>{{ roomRes.room.roomType.name }} • Floor {{ roomRes.room.floor }}</ng-container>
                       </div>
                     }
                   </div>
@@ -218,12 +218,12 @@
                   </div>
                   @if (reservation.actualCheckInDate) {
                     <div class="text-xs text-gray-500 mt-1">
-                      Checked in: {{ reservation.actualCheckInDate | date:'short' }}
+                      <ng-container i18n>Checked in: {{ reservation.actualCheckInDate | date:'short' }}</ng-container>
                     </div>
                   }
                   @if (reservation.actualCheckOutDate) {
                     <div class="text-xs text-gray-500 mt-1">
-                      Checked out: {{ reservation.actualCheckOutDate | date:'short' }}
+                      <ng-container i18n>Checked out: {{ reservation.actualCheckOutDate | date:'short' }}</ng-container>
                     </div>
                   }
                 </td>
@@ -235,7 +235,7 @@
                   </span>
                   @if (reservation.bookingSource) {
                     <div class="text-xs text-gray-500 mt-1">
-                      via {{ reservation.bookingSource | titlecase }}
+                      <ng-container i18n>via {{ reservation.bookingSource | titlecase }}</ng-container>
                     </div>
                   }
                 </td>
@@ -246,7 +246,7 @@
                     {{ reservation.pricing.balance | currency:(selectedStore()?.currency || 'USD'):'symbol':'1.2-2' }}
                   </div>
                   <div class="text-xs text-gray-500">
-                    Total: {{ reservation.pricing.total | currency:(selectedStore()?.currency || 'USD'):'symbol':'1.2-2' }}
+                    <ng-container i18n>Total: {{ reservation.pricing.total | currency:(selectedStore()?.currency || 'USD'):'symbol':'1.2-2' }}</ng-container>
                   </div>
                 </td>
                 <!-- Actions Column -->
@@ -254,7 +254,7 @@
                   <div class="flex items-center justify-end space-x-2">
                     <!-- View Details Button -->
                     <button mat-icon-button
-                      matTooltip="View Details"
+                      matTooltip="View Details" i18n-matTooltip
                       (click)="viewReservation(reservation._id)"
                       class="text-gray-400 hover:text-gray-600">
                       <mat-icon>visibility</mat-icon>
@@ -268,7 +268,7 @@
                         (click)="performCheckIn(reservation)"
                         class="text-xs">
                         <mat-icon class="mr-1 text-sm">login</mat-icon>
-                        Check In
+                        <ng-container i18n>Check In</ng-container>
                       </button>
                     }
                     <!-- Check-Out Button -->
@@ -280,7 +280,7 @@
                         (click)="performCheckOut(reservation)"
                         class="text-xs">
                         <mat-icon class="mr-1 text-sm">logout</mat-icon>
-                        Check Out
+                        <ng-container i18n>Check Out</ng-container>
                       </button>
                     }
                     <!-- More Actions Menu -->
@@ -294,7 +294,7 @@
                           mat-menu-item
                           (click)="requestEarlyCheckIn(reservation)">
                           <mat-icon>schedule</mat-icon>
-                          Request Early Check-in
+                          <ng-container i18n>Request Early Check-in</ng-container>
                         </button>
                       }
                       @if (reservation.status === 'checked_in') {
@@ -302,20 +302,20 @@
                           mat-menu-item
                           (click)="requestLateCheckOut(reservation)">
                           <mat-icon>schedule</mat-icon>
-                          Request Late Check-out
+                          <ng-container i18n>Request Late Check-out</ng-container>
                         </button>
                       }
                       <!-- Room Management -->
                       <button mat-menu-item (click)="changeRoom(reservation)">
                         <mat-icon>swap_horiz</mat-icon>
-                        Change Room
+                        <ng-container i18n>Change Room</ng-container>
                       </button>
                       @if (reservation.status === 'checked_in') {
                         <button
                           mat-menu-item
                           (click)="housekeepingRequest(reservation)">
                           <mat-icon>cleaning_services</mat-icon>
-                          Housekeeping Request
+                          <ng-container i18n>Housekeeping Request</ng-container>
                         </button>
                       }
                       <!-- Financial -->
@@ -324,12 +324,12 @@
                           mat-menu-item
                           (click)="processPayment(reservation)">
                           <mat-icon>payment</mat-icon>
-                          Process Payment
+                          <ng-container i18n>Process Payment</ng-container>
                         </button>
                       }
                       <button mat-menu-item (click)="printFolio(reservation)">
                         <mat-icon>print</mat-icon>
-                        Print Folio
+                        <ng-container i18n>Print Folio</ng-container>
                       </button>
                       <!-- Guest Services -->
                       @if (reservation.status === 'checked_in') {
@@ -337,7 +337,7 @@
                           mat-menu-item
                           (click)="extendStay(reservation)">
                           <mat-icon>event</mat-icon>
-                          Extend Stay
+                          <ng-container i18n>Extend Stay</ng-container>
                         </button>
                       }
                       @if (reservation.status === 'checked_in') {
@@ -345,12 +345,12 @@
                           mat-menu-item
                           (click)="addCharges(reservation)">
                           <mat-icon>add_shopping_cart</mat-icon>
-                          Add Charges
+                          <ng-container i18n>Add Charges</ng-container>
                         </button>
                       }
                       <button mat-menu-item (click)="addNotes(reservation)">
                         <mat-icon>note</mat-icon>
-                        Add Notes
+                        <ng-container i18n>Add Notes</ng-container>
                       </button>
                     </mat-menu>
                   </div>

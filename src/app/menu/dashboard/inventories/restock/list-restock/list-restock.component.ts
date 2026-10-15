@@ -111,7 +111,7 @@ export class ListRestockComponent implements OnInit {
   }
 
   deleteRestock(id: string): void {
-    if (confirm('Are you sure you want to delete this restock record?')) {
+    if (confirm($localize`Are you sure you want to delete this restock record?`)) {
       this.restockService.delete(id).subscribe(() => {
         this.loadRestocks();
       });

@@ -5,9 +5,9 @@
     <div class="w-1/3 border-r border-gray-200 flex flex-col">
       <!-- List Tabs -->
       <mat-tab-group (selectedIndexChange)="onTabChange($event)" [selectedIndex]="isActiveTab() ? 0 : 1" class="flex-1 flex flex-col">
-        <mat-tab label="Active" class="flex-1">
+        <mat-tab label="Active" i18n-label class="flex-1">
           <ng-template mat-tab-label>
-            <span class="text-sm font-medium">Active</span>
+            <span class="text-sm font-medium"><ng-container i18n>Active</ng-container></span>
           </ng-template>
 
           <!-- Loading State -->
@@ -19,8 +19,8 @@
             <!-- Empty State -->
             <div class="flex flex-col items-center justify-center py-12 px-4 text-center">
               <mat-icon class="text-6xl text-gray-300 mb-4">mail_outline</mat-icon>
-              <p class="text-gray-500">No active messages</p>
-              <p class="text-sm text-gray-400 mt-2">Active conversations will appear here</p>
+              <p class="text-gray-500"><ng-container i18n>No active messages</ng-container></p>
+              <p class="text-sm text-gray-400 mt-2"><ng-container i18n>Active conversations will appear here</ng-container></p>
             </div>
           } @else {
             <!-- Thread List -->
@@ -40,7 +40,7 @@
                         [alt]="thread.provider" />
                     }
                     <span matListItemTitle>{{ thread.title }}</span>
-                    <span matListItemLine>{{ thread.last_message.message || '(Attachment)' }}</span>
+                    <span matListItemLine>@if (thread.last_message.message) {<ng-container>{{ thread.last_message.message }}</ng-container>} @else {<ng-container i18n>(Attachment)</ng-container>}</span>
                 </a>
                 }
               </mat-nav-list>
@@ -48,9 +48,9 @@
           }
         </mat-tab>
 
-        <mat-tab label="Closed" class="flex-1">
+        <mat-tab label="Closed" i18n-label class="flex-1">
           <ng-template mat-tab-label>
-            <span class="text-sm font-medium">Closed</span>
+            <span class="text-sm font-medium"><ng-container i18n>Closed</ng-container></span>
           </ng-template>
 
           <!-- Loading State -->
@@ -62,8 +62,8 @@
             <!-- Empty State -->
             <div class="flex flex-col items-center justify-center py-12 px-4 text-center">
               <mat-icon class="text-6xl text-gray-300 mb-4">lock_outline</mat-icon>
-              <p class="text-gray-500">No closed conversations</p>
-              <p class="text-sm text-gray-400 mt-2">Closed conversations will appear here</p>
+              <p class="text-gray-500"><ng-container i18n>No closed conversations</ng-container></p>
+              <p class="text-sm text-gray-400 mt-2"><ng-container i18n>Closed conversations will appear here</ng-container></p>
             </div>
           } @else {
             <!-- Thread List -->
@@ -76,7 +76,7 @@
                     class="cursor-pointer"
                   >
                     <span matListItemTitle>{{ thread.title }}</span>
-                    <span matListItemLine>{{ thread.last_message.message || '(Attachment)' }}</span>
+                    <span matListItemLine>@if (thread.last_message.message) {<ng-container>{{ thread.last_message.message }}</ng-container>} @else {<ng-container i18n>(Attachment)</ng-container>}</span>
                     
                     @if (getProviderLogo(thread.provider); as logo) {
                       <img matListItemMeta 
@@ -105,8 +105,8 @@
         <div class="flex-1 flex items-center justify-center text-center">
           <div>
             <mat-icon class="text-6xl text-gray-300 mb-4">chat_bubble_outline</mat-icon>
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">No conversation selected</h3>
-            <p class="text-gray-500">Select a conversation to start chatting</p>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2"><ng-container i18n>No conversation selected</ng-container></h3>
+            <p class="text-gray-500"><ng-container i18n>Select a conversation to start chatting</ng-container></p>
           </div>
         </div>
       } @else {
@@ -117,7 +117,7 @@
               {{ selectedThread()?.title }}
             </h2>
             <p class="text-sm text-gray-500">
-              {{ selectedThread()?.message_count }} messages · {{ selectedThread()?.provider }}
+              <ng-container i18n>{{ selectedThread()?.message_count }} messages · {{ selectedThread()?.provider }}</ng-container>
             </p>
           </div>
           <div class="flex gap-2">
@@ -126,7 +126,7 @@
                 <button
                   matButton
                   (click)="markNoReplyNeeded()"
-                  matTooltip="Mark as no reply needed"
+                  matTooltip="Mark as no reply needed" i18n-matTooltip
                   class="text-gray-600 hover:text-gray-900"
                 >
                   <mat-icon>done_all</mat-icon>
@@ -135,7 +135,7 @@
               <button
                 matButton
                 (click)="closeThread()"
-                matTooltip="Close conversation"
+                matTooltip="Close conversation" i18n-matTooltip
                 class="text-gray-600 hover:text-red-600"
               >
                 <mat-icon>close</mat-icon>
@@ -156,7 +156,7 @@
               <mat-spinner diameter="40"></mat-spinner>
             </div>
           } @else if (threadMessages().length === 0) {
-            <div class="text-center text-gray-500">No messages</div>
+            <div class="text-center text-gray-500"><ng-container i18n>No messages</ng-container></div>
           } @else {
             <!-- Load More Button -->
             @if (isLoadingMoreMessages() || hasMoreMessages()) {
@@ -168,7 +168,7 @@
                     (click)="loadPreviousMessages()"
                     class="px-4 py-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
                   >
-                    Load more messages
+                    <ng-container i18n>Load more messages</ng-container>
                   </button>
                 }
               </div>

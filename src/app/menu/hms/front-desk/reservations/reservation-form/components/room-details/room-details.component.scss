@@ -6,6 +6,6 @@ mat-card {
   &-header {
     padding-bottom: 1rem;
     margin-bottom: 1rem;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid light-dark(#e5e7eb, #48464b);
   }
 }

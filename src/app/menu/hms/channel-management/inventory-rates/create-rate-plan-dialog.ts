@@ -39,124 +39,124 @@ export interface CreateRatePlanDialogData {
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
-    <h2 mat-dialog-title>Create Rate Plan</h2>
+    <h2 mat-dialog-title><ng-container i18n>Create Rate Plan</ng-container></h2>
     <mat-dialog-content class="space-y-4">
       <form [formGroup]="ratePlanForm" class="space-y-4">
         <!-- Title -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Rate Plan Title</mat-label>
+          <mat-label><ng-container i18n>Rate Plan Title</ng-container></mat-label>
           <input 
             matInput 
             formControlName="title"
-            placeholder="e.g., Standard Rate, Promotional Rate"
+            placeholder="e.g., Standard Rate, Promotional Rate" i18n-placeholder
             required>
           <mat-error *ngIf="ratePlanForm.get('title')?.hasError('required')">
-            Title is required
+            <ng-container i18n>Title is required</ng-container>
           </mat-error>
           <mat-error *ngIf="ratePlanForm.get('title')?.hasError('maxlength')">
-            Title must not exceed 255 characters
+            <ng-container i18n>Title must not exceed 255 characters</ng-container>
           </mat-error>
         </mat-form-field>
 
         <!-- Sell Mode -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Sell Mode</mat-label>
+          <mat-label><ng-container i18n>Sell Mode</ng-container></mat-label>
           <mat-select formControlName="sellMode">
-            <mat-option value="per_room">Per Room (same price for all guests)</mat-option>
-            <mat-option value="per_person">Per Person (price per guest)</mat-option>
+            <mat-option value="per_room"><ng-container i18n>Per Room (same price for all guests)</ng-container></mat-option>
+            <mat-option value="per_person"><ng-container i18n>Per Person (price per guest)</ng-container></mat-option>
           </mat-select>
         </mat-form-field>
 
         <!-- Rate Mode -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Rate Mode</mat-label>
+          <mat-label><ng-container i18n>Rate Mode</ng-container></mat-label>
           <mat-select formControlName="rateMode">
-            <mat-option value="manual">Manual (set rates manually)</mat-option>
-            <mat-option value="derived">Derived (from parent rate plan)</mat-option>
-            <mat-option value="cascade">Cascade (for each occupancy option)</mat-option>
-            <mat-option value="auto">Auto (calculated automatically)</mat-option>
+            <mat-option value="manual"><ng-container i18n>Manual (set rates manually)</ng-container></mat-option>
+            <mat-option value="derived"><ng-container i18n>Derived (from parent rate plan)</ng-container></mat-option>
+            <mat-option value="cascade"><ng-container i18n>Cascade (for each occupancy option)</ng-container></mat-option>
+            <mat-option value="auto"><ng-container i18n>Auto (calculated automatically)</ng-container></mat-option>
           </mat-select>
         </mat-form-field>
 
         <!-- Currency -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Currency</mat-label>
+          <mat-label><ng-container i18n>Currency</ng-container></mat-label>
           <mat-select formControlName="currency">
-            <mat-option value="NGN">NGN (₦)</mat-option>
-            <mat-option value="USD">USD ($)</mat-option>
-            <mat-option value="EUR">EUR (€)</mat-option>
-            <mat-option value="GBP">GBP (£)</mat-option>
-            <mat-option value="ZAR">ZAR (R)</mat-option>
-            <mat-option value="KES">KES (Ks)</mat-option>
+            <mat-option value="NGN"><ng-container i18n>NGN (₦)</ng-container></mat-option>
+            <mat-option value="USD"><ng-container i18n>USD ($)</ng-container></mat-option>
+            <mat-option value="EUR"><ng-container i18n>EUR (€)</ng-container></mat-option>
+            <mat-option value="GBP"><ng-container i18n>GBP (£)</ng-container></mat-option>
+            <mat-option value="ZAR"><ng-container i18n>ZAR (R)</ng-container></mat-option>
+            <mat-option value="KES"><ng-container i18n>KES (Ks)</ng-container></mat-option>
           </mat-select>
         </mat-form-field>
 
         <!-- Occupancy -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Occupancy</mat-label>
+          <mat-label><ng-container i18n>Occupancy</ng-container></mat-label>
           <input 
             matInput 
             type="number" 
             formControlName="occupancy"
             min="1"
             required>
-          <mat-hint>Maximum number of guests for this rate plan</mat-hint>
+          <mat-hint><ng-container i18n>Maximum number of guests for this rate plan</ng-container></mat-hint>
           <mat-error *ngIf="ratePlanForm.get('occupancy')?.hasError('required')">
-            Occupancy is required
+            <ng-container i18n>Occupancy is required</ng-container>
           </mat-error>
           <mat-error *ngIf="ratePlanForm.get('occupancy')?.hasError('min')">
-            Occupancy must be at least 1
+            <ng-container i18n>Occupancy must be at least 1</ng-container>
           </mat-error>
         </mat-form-field>
 
         <!-- Base Rate -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Base Rate</mat-label>
+          <mat-label><ng-container i18n>Base Rate</ng-container></mat-label>
           <input 
             matInput 
             type="number" 
             formControlName="baseRate"
             min="0"
             step="0.01">
-          <mat-hint>Default rate for this rate plan</mat-hint>
+          <mat-hint><ng-container i18n>Default rate for this rate plan</ng-container></mat-hint>
         </mat-form-field>
 
         <!-- Min Stay Arrival -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Min Stay (Arrival)</mat-label>
+          <mat-label><ng-container i18n>Min Stay (Arrival)</ng-container></mat-label>
           <input 
             matInput 
             type="number" 
             formControlName="minStayArrival"
             min="0">
-          <mat-hint>Minimum stay nights for arrival</mat-hint>
+          <mat-hint><ng-container i18n>Minimum stay nights for arrival</ng-container></mat-hint>
         </mat-form-field>
 
         <!-- Meal Type -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Meal Type</mat-label>
+          <mat-label><ng-container i18n>Meal Type</ng-container></mat-label>
           <mat-select formControlName="mealType">
-            <mat-option value="room_only">Room Only</mat-option>
-            <mat-option value="breakfast">Breakfast</mat-option>
-            <mat-option value="half_board">Half Board</mat-option>
-            <mat-option value="full_board">Full Board</mat-option>
-            <mat-option value="all_inclusive">All Inclusive</mat-option>
+            <mat-option value="room_only"><ng-container i18n>Room Only</ng-container></mat-option>
+            <mat-option value="breakfast"><ng-container i18n>Breakfast</ng-container></mat-option>
+            <mat-option value="half_board"><ng-container i18n>Half Board</ng-container></mat-option>
+            <mat-option value="full_board"><ng-container i18n>Full Board</ng-container></mat-option>
+            <mat-option value="all_inclusive"><ng-container i18n>All Inclusive</ng-container></mat-option>
           </mat-select>
         </mat-form-field>
 
         <!-- Closed to Arrival -->
         <mat-checkbox formControlName="closedToArrival">
-          Closed to Arrival (guests cannot check-in on this rate plan)
+          <ng-container i18n>Closed to Arrival (guests cannot check-in on this rate plan)</ng-container>
         </mat-checkbox>
 
         <!-- Closed to Departure -->
         <mat-checkbox formControlName="closedToDeparture">
-          Closed to Departure (guests cannot check-out on this rate plan)
+          <ng-container i18n>Closed to Departure (guests cannot check-out on this rate plan)</ng-container>
         </mat-checkbox>
 
         <!-- Stop Sell -->
         <mat-checkbox formControlName="stopSell">
-          Stop Sell (rate plan is not available for booking)
+          <ng-container i18n>Stop Sell (rate plan is not available for booking)</ng-container>
         </mat-checkbox>
       </form>
     </mat-dialog-content>
@@ -166,17 +166,14 @@ export interface CreateRatePlanDialogData {
         matButton 
         (click)="dialogRef.close()"
         [disabled]="isCreating()">
-        Cancel
+        <ng-container i18n>Cancel</ng-container>
       </button>
       <button 
         matButton="filled" 
         color="primary"
         (click)="createRatePlan()"
         [disabled]="isCreating() || ratePlanForm.invalid">
-        {{isCreating() 
-          ? 'Creating...'
-          : 'Create Rate Plan'
-        }}
+        @if (isCreating()) {<ng-container i18n>Creating...</ng-container>} @else {<ng-container i18n>Create Rate Plan</ng-container>}
       </button>
     </mat-dialog-actions>
   `,
@@ -260,8 +257,8 @@ export class CreateRatePlanDialogComponent {
         next: (response: any) => {
           this.isCreating.set(false);
           this.snackBar.open(
-            `Rate plan "${formValue.title}" created successfully`,
-            'Close',
+            $localize`Rate plan "${formValue.title}" created successfully`,
+            $localize`Close`,
             { duration: 5000, horizontalPosition: 'end', verticalPosition: 'bottom' }
           );
           this.dialogRef.close({
@@ -278,8 +275,8 @@ export class CreateRatePlanDialogComponent {
             'Failed to create rate plan';
           this.errorMessage.set(errorMsg);
           this.snackBar.open(
-            `Error: ${errorMsg}`,
-            'Close',
+            $localize`Error: ${errorMsg}`,
+            $localize`Close`,
             { duration: 7000, horizontalPosition: 'end', verticalPosition: 'bottom', panelClass: ['error-snackbar'] }
           );
           console.error('Error creating rate plan:', error);

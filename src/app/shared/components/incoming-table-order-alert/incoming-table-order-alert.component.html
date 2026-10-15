@@ -8,10 +8,10 @@
     >
       <mat-icon class="!text-lg animate-pulse">notifications_active</mat-icon>
       <span class="text-sm font-semibold">
-        {{ order.isAddition ? 'Items added to your table' : 'New table order' }}
+        @if (order.isAddition) {<ng-container i18n>Items added to your table</ng-container>} @else {<ng-container i18n>New table order</ng-container>}
       </span>
       @if (queue().length > 1) {
-        <span class="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-xs font-medium">+{{ queue().length - 1 }} more</span>
+        <span class="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-xs font-medium"><ng-container i18n>+{{ queue().length - 1 }} more</ng-container></span>
       }
     </div>
 
@@ -19,20 +19,20 @@
     <button type="button" class="block w-full px-4 py-3 text-left hover:bg-gray-50" (click)="view(order)">
       <p class="text-lg font-bold text-gray-900">{{ order.tableName }}</p>
       <p class="text-sm text-gray-500">
-        {{ order.itemCount }} item{{ order.itemCount === 1 ? '' : 's' }}
+        <ng-container i18n>{{ order.itemCount }} item{{ order.itemCount === 1 ? '' : 's' }}</ng-container>
         @if (order.itemPreview?.length) {
           — {{ order.itemPreview.join(', ') }}@if (order.itemCount > order.itemPreview.length) {, …}
         }
       </p>
-      <p class="mt-1 text-xs text-gray-400">Tap to review the order</p>
+      <p class="mt-1 text-xs text-gray-400"><ng-container i18n>Tap to review the order</ng-container></p>
     </button>
 
     <div class="flex gap-2 border-t border-gray-100 px-4 py-3">
       @if (order.isAddition) {
         <!-- Already this employee's table — nothing to claim, just go to it. -->
-        <button mat-stroked-button class="!flex-1" (click)="decline(order)">Dismiss</button>
+        <button mat-stroked-button class="!flex-1" (click)="decline(order)"><ng-container i18n>Dismiss</ng-container></button>
         <button mat-flat-button color="primary" class="!flex-1" (click)="view(order)">
-          View order
+          <ng-container i18n>View order</ng-container>
         </button>
       } @else {
         <!-- "Open" rather than "Decline": reviewing the order first is the
@@ -43,7 +43,7 @@
           [disabled]="claiming()"
           (click)="view(order)"
         >
-          Open
+          <ng-container i18n>Open</ng-container>
         </button>
         <button
           mat-flat-button
@@ -55,7 +55,7 @@
           @if (claiming()) {
             <mat-icon class="animate-spin !text-base">refresh</mat-icon>
           } @else {
-            Accept
+            <ng-container i18n>Accept</ng-container>
           }
         </button>
       }

@@ -168,7 +168,7 @@ export class BulkSetDialogComponent {
     const hasRestrictions = val.stopSell || val.minStay || val.maxStay;
 
     if (!hasRate && !hasOtaRate && !hasAvailability && !hasRestrictions) {
-      this.snackBar.open('Please provide at least one value to update (rate, OTA rate, availability, or restrictions)', 'OK', { duration: 4000 });
+      this.snackBar.open($localize`Please provide at least one value to update (rate, OTA rate, availability, or restrictions)`, $localize`OK`, { duration: 4000 });
       return;
     }
 
@@ -224,15 +224,15 @@ export class BulkSetDialogComponent {
       next: (result) => {
         this.saving.set(false);
         this.snackBar.open(
-          `Successfully updated ${(result.modifiedCount || 0) + (result.upsertedCount || 0)} dates`,
-          'OK',
+          $localize`Successfully updated ${(result.modifiedCount || 0) + (result.upsertedCount || 0)} dates`,
+          $localize`OK`,
           { duration: 3000 }
         );
         this.dialogRef.close(result);
       },
       error: (err) => {
         this.saving.set(false);
-        this.snackBar.open('Failed to update rates: ' + (err?.error?.message || err.message), 'OK', {
+        this.snackBar.open('Failed to update rates: ' + (err?.error?.message || err.message), $localize`OK`, {
           duration: 5000,
         });
       },

@@ -1,8 +1,8 @@
-<app-page-header [title]="formTitle()" [subtitle]="isEditMode() ? 'Update room type information and settings' : 'Configure a new room type for your hotel'">
+<app-page-header [title]="formTitle()" [subtitle]="isEditMode() ? ('Update room type information and settings' | tr) : 'Configure a new room type for your hotel'">
   <ng-container actions>
     <button mat-stroked-button (click)="onCancel()" [disabled]="saving()">
       <mat-icon>close</mat-icon>
-      Cancel
+      <ng-container i18n>Cancel</ng-container>
     </button>
 
     <button mat-flat-button color="primary" type="submit" form="roomTypeForm" [disabled]="saving() || loading()">
@@ -30,11 +30,11 @@
       <div class="w-16 h-16 bg-red-200 rounded-full flex items-center justify-center mx-auto mb-4">
         <mat-icon class="text-4xl text-red-500">error</mat-icon>
       </div>
-      <h3 class="text-lg font-semibold text-red-900 mb-2">Error Loading Room Type</h3>
+      <h3 class="text-lg font-semibold text-red-900 mb-2"><ng-container i18n>Error Loading Room Type</ng-container></h3>
       <p class="text-red-700 mb-4">{{ error() }}</p>
       <button mat-flat-button color="warn" (click)="onCancel()">
         <mat-icon>arrow_back</mat-icon>
-        Go Back
+        <ng-container i18n>Go Back</ng-container>
       </button>
     </mat-card-content>
   </mat-card>
@@ -49,24 +49,24 @@
       <mat-card appearance="outlined">
         <mat-card-header>
           <mat-icon mat-card-avatar class="text-blue-600">info</mat-icon>
-          <mat-card-title>Basic Information</mat-card-title>
+          <mat-card-title><ng-container i18n>Basic Information</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content class="p-6! space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Room Type Name -->
             <div class="md:col-span-2">
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Room Type Name *</mat-label>
-                <input matInput formControlName="name" placeholder="e.g., Deluxe Ocean View">
+                <mat-label><ng-container i18n>Room Type Name *</ng-container></mat-label>
+                <input matInput formControlName="name" placeholder="e.g., Deluxe Ocean View" i18n-placeholder>
                 <mat-icon matSuffix class="text-gray-400">hotel_class</mat-icon>
                 @if (hasError('name', 'required')) {
-                  <mat-error>Room type name is required</mat-error>
+                  <mat-error><ng-container i18n>Room type name is required</ng-container></mat-error>
                 }
                 @if (hasError('name', 'minlength')) {
-                  <mat-error>Name must be at least 2 characters</mat-error>
+                  <mat-error><ng-container i18n>Name must be at least 2 characters</ng-container></mat-error>
                 }
                 @if (hasError('name', 'maxlength')) {
-                  <mat-error>Name must not exceed 100 characters</mat-error>
+                  <mat-error><ng-container i18n>Name must not exceed 100 characters</ng-container></mat-error>
                 }
               </mat-form-field>
             </div>
@@ -74,10 +74,10 @@
             <!-- Description -->
             <div class="md:col-span-2">
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Description</mat-label>
-                <textarea matInput formControlName="description" rows="3" placeholder="Describe the room type features and highlights..."></textarea>
+                <mat-label><ng-container i18n>Description</ng-container></mat-label>
+                <textarea matInput formControlName="description" rows="3" placeholder="Describe the room type features and highlights..." i18n-placeholder></textarea>
                 @if (hasError('description', 'maxlength')) {
-                  <mat-error>Description must not exceed 500 characters</mat-error>
+                  <mat-error><ng-container i18n>Description must not exceed 500 characters</ng-container></mat-error>
                 }
               </mat-form-field>
             </div>
@@ -85,14 +85,14 @@
             <!-- Base Price -->
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Base Price per Night *</mat-label>
+                <mat-label><ng-container i18n>Base Price per Night *</ng-container></mat-label>
                 <span matPrefix>$&nbsp;</span>
                 <input matInput type="number" formControlName="basePrice" min="0" step="0.01">
                 @if (hasError('basePrice', 'required')) {
-                  <mat-error>Base price is required</mat-error>
+                  <mat-error><ng-container i18n>Base price is required</ng-container></mat-error>
                 }
                 @if (hasError('basePrice', 'min')) {
-                  <mat-error>Price must be greater than 0</mat-error>
+                  <mat-error><ng-container i18n>Price must be greater than 0</ng-container></mat-error>
                 }
               </mat-form-field>
             </div>
@@ -100,7 +100,7 @@
             <!-- Room Size -->
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Room Size (sq ft)</mat-label>
+                <mat-label><ng-container i18n>Room Size (sq ft)</ng-container></mat-label>
                 <input matInput type="number" formControlName="size" min="0">
                 <mat-icon matSuffix class="text-gray-400">fullscreen</mat-icon>
               </mat-form-field>
@@ -109,9 +109,9 @@
             <!-- Bed Configuration -->
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Bed Configuration</mat-label>
+                <mat-label><ng-container i18n>Bed Configuration</ng-container></mat-label>
                 <mat-select formControlName="bedConfiguration">
-                  <mat-option value="">Select bed configuration</mat-option>
+                  <mat-option value=""><ng-container i18n>Select bed configuration</ng-container></mat-option>
                   @for (config of bedConfigurations; track config) {
                     <mat-option [value]="config">{{ config }}</mat-option>
                   }
@@ -122,10 +122,10 @@
             <!-- Sort Order -->
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Sort Order</mat-label>
+                <mat-label><ng-container i18n>Sort Order</ng-container></mat-label>
                 <input matInput type="number" formControlName="sortOrder" min="0">
                 <mat-icon matSuffix class="text-gray-400">sort</mat-icon>
-                <mat-hint>Lower numbers appear first</mat-hint>
+                <mat-hint><ng-container i18n>Lower numbers appear first</ng-container></mat-hint>
               </mat-form-field>
             </div>
           </div>
@@ -136,24 +136,24 @@
       <mat-card appearance="outlined">
         <mat-card-header>
           <mat-icon mat-card-avatar class="text-green-600">people</mat-icon>
-          <mat-card-title>Capacity & Occupancy</mat-card-title>
+          <mat-card-title><ng-container i18n>Capacity & Occupancy</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content class="p-6! space-y-6">
           <div formGroupName="capacity" class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Adults -->
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Adults *</mat-label>
+                <mat-label><ng-container i18n>Adults *</ng-container></mat-label>
                 <input matInput type="number" formControlName="adults" min="1" max="10" (change)="onCapacityChange()">
                 <mat-icon matSuffix class="text-gray-400">person</mat-icon>
                 @if (hasError('capacity.adults', 'required')) {
-                  <mat-error>Number of adults is required</mat-error>
+                  <mat-error><ng-container i18n>Number of adults is required</ng-container></mat-error>
                 }
                 @if (hasError('capacity.adults', 'min')) {
-                  <mat-error>At least 1 adult required</mat-error>
+                  <mat-error><ng-container i18n>At least 1 adult required</ng-container></mat-error>
                 }
                 @if (hasError('capacity.adults', 'max')) {
-                  <mat-error>Maximum 10 adults allowed</mat-error>
+                  <mat-error><ng-container i18n>Maximum 10 adults allowed</ng-container></mat-error>
                 }
               </mat-form-field>
             </div>
@@ -161,14 +161,14 @@
             <!-- Children -->
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Children</mat-label>
+                <mat-label><ng-container i18n>Children</ng-container></mat-label>
                 <input matInput type="number" formControlName="children" min="0" max="10" (change)="onCapacityChange()">
                 <mat-icon matSuffix class="text-gray-400">child_care</mat-icon>
                 @if (hasError('capacity.children', 'min')) {
-                  <mat-error>Cannot be negative</mat-error>
+                  <mat-error><ng-container i18n>Cannot be negative</ng-container></mat-error>
                 }
                 @if (hasError('capacity.children', 'max')) {
-                  <mat-error>Maximum 10 children allowed</mat-error>
+                  <mat-error><ng-container i18n>Maximum 10 children allowed</ng-container></mat-error>
                 }
               </mat-form-field>
             </div>
@@ -176,14 +176,14 @@
             <!-- Infants -->
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Infants</mat-label>
+                <mat-label><ng-container i18n>Infants</ng-container></mat-label>
                 <input matInput type="number" formControlName="infants" min="0" max="5" (change)="onCapacityChange()">
                 <mat-icon matSuffix class="text-gray-400">baby_changing_station</mat-icon>
                 @if (hasError('capacity.infants', 'min')) {
-                  <mat-error>Cannot be negative</mat-error>
+                  <mat-error><ng-container i18n>Cannot be negative</ng-container></mat-error>
                 }
                 @if (hasError('capacity.infants', 'max')) {
-                  <mat-error>Maximum 5 infants allowed</mat-error>
+                  <mat-error><ng-container i18n>Maximum 5 infants allowed</ng-container></mat-error>
                 }
               </mat-form-field>
             </div>
@@ -193,7 +193,7 @@
           <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div class="flex items-center gap-2 text-blue-800">
               <mat-icon>info</mat-icon>
-              <span class="font-medium">Total Base Capacity: {{ totalCapacity() }} guests</span>
+              <span class="font-medium"><ng-container i18n>Total Base Capacity: {{ totalCapacity() }} guests</ng-container></span>
             </div>
           </div>
 
@@ -201,18 +201,18 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Maximum Occupancy *</mat-label>
+                <mat-label><ng-container i18n>Maximum Occupancy *</ng-container></mat-label>
                 <input matInput type="number" formControlName="maxOccupancy" min="1" max="20">
                 <mat-icon matSuffix class="text-gray-400">groups</mat-icon>
-                <mat-hint>Total guests including extra beds</mat-hint>
+                <mat-hint><ng-container i18n>Total guests including extra beds</ng-container></mat-hint>
                 @if (hasError('maxOccupancy', 'required')) {
-                  <mat-error>Maximum occupancy is required</mat-error>
+                  <mat-error><ng-container i18n>Maximum occupancy is required</ng-container></mat-error>
                 }
                 @if (hasError('maxOccupancy', 'min')) {
-                  <mat-error>At least 1 guest required</mat-error>
+                  <mat-error><ng-container i18n>At least 1 guest required</ng-container></mat-error>
                 }
                 @if (hasError('maxOccupancy', 'max')) {
-                  <mat-error>Maximum 20 guests allowed</mat-error>
+                  <mat-error><ng-container i18n>Maximum 20 guests allowed</ng-container></mat-error>
                 }
               </mat-form-field>
             </div>
@@ -224,7 +224,7 @@
       <mat-card appearance="outlined">
         <mat-card-header>
           <mat-icon mat-card-avatar class="text-purple-600">toggle_on</mat-icon>
-          <mat-card-title>Room Type Status</mat-card-title>
+          <mat-card-title><ng-container i18n>Room Type Status</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content class="p-6! space-y-6">
           <div class="flex items-center">
@@ -232,8 +232,8 @@
               <span class="flex items-center gap-2">
                 <mat-icon class="text-lg text-gray-600">check_circle</mat-icon>
                 <span>
-                  <span class="font-medium">Active Room Type</span>
-                  <span class="text-sm text-gray-500 ml-2">Available for booking</span>
+                  <span class="font-medium"><ng-container i18n>Active Room Type</ng-container></span>
+                  <span class="text-sm text-gray-500 ml-2"><ng-container i18n>Available for booking</ng-container></span>
                 </span>
               </span>
             </mat-checkbox>
@@ -245,8 +245,8 @@
       <mat-card appearance="outlined">
         <mat-card-header>
           <mat-icon mat-card-avatar class="text-amber-600">star</mat-icon>
-          <mat-card-title>Room Features</mat-card-title>
-          <mat-card-subtitle>Select the features available in this room type</mat-card-subtitle>
+          <mat-card-title><ng-container i18n>Room Features</ng-container></mat-card-title>
+          <mat-card-subtitle><ng-container i18n>Select the features available in this room type</ng-container></mat-card-subtitle>
         </mat-card-header>
         <mat-card-content class="p-6! space-y-6">
           <div formGroupName="features" class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -254,7 +254,7 @@
               <mat-checkbox formControlName="hasPrivateBathroom" class="text-blue-600">
                 <span class="flex items-center gap-2">
                   <mat-icon class="text-lg text-gray-600">bathroom</mat-icon>
-                  Private Bathroom
+                  <ng-container i18n>Private Bathroom</ng-container>
                 </span>
               </mat-checkbox>
             </div>
@@ -263,7 +263,7 @@
               <mat-checkbox formControlName="hasAirConditioning" class="text-blue-600">
                 <span class="flex items-center gap-2">
                   <mat-icon class="text-lg text-gray-600">ac_unit</mat-icon>
-                  Air Conditioning
+                  <ng-container i18n>Air Conditioning</ng-container>
                 </span>
               </mat-checkbox>
             </div>
@@ -272,7 +272,7 @@
               <mat-checkbox formControlName="hasWifi" class="text-blue-600">
                 <span class="flex items-center gap-2">
                   <mat-icon class="text-lg text-gray-600">wifi</mat-icon>
-                  WiFi
+                  <ng-container i18n>WiFi</ng-container>
                 </span>
               </mat-checkbox>
             </div>
@@ -281,7 +281,7 @@
               <mat-checkbox formControlName="hasTv" class="text-blue-600">
                 <span class="flex items-center gap-2">
                   <mat-icon class="text-lg text-gray-600">tv</mat-icon>
-                  Television
+                  <ng-container i18n>Television</ng-container>
                 </span>
               </mat-checkbox>
             </div>
@@ -290,7 +290,7 @@
               <mat-checkbox formControlName="hasRefrigerator" class="text-blue-600">
                 <span class="flex items-center gap-2">
                   <mat-icon class="text-lg text-gray-600">kitchen</mat-icon>
-                  Refrigerator
+                  <ng-container i18n>Refrigerator</ng-container>
                 </span>
               </mat-checkbox>
             </div>
@@ -299,7 +299,7 @@
               <mat-checkbox formControlName="hasBalcony" class="text-blue-600">
                 <span class="flex items-center gap-2">
                   <mat-icon class="text-lg text-gray-600">balcony</mat-icon>
-                  Balcony
+                  <ng-container i18n>Balcony</ng-container>
                 </span>
               </mat-checkbox>
             </div>
@@ -308,7 +308,7 @@
               <mat-checkbox formControlName="hasKitchenette" class="text-blue-600">
                 <span class="flex items-center gap-2">
                   <mat-icon class="text-lg text-gray-600">countertops</mat-icon>
-                  Kitchenette
+                  <ng-container i18n>Kitchenette</ng-container>
                 </span>
               </mat-checkbox>
             </div>
@@ -317,7 +317,7 @@
               <mat-checkbox formControlName="hasWorkDesk" class="text-blue-600">
                 <span class="flex items-center gap-2">
                   <mat-icon class="text-lg text-gray-600">desk</mat-icon>
-                  Work Desk
+                  <ng-container i18n>Work Desk</ng-container>
                 </span>
               </mat-checkbox>
             </div>
@@ -326,7 +326,7 @@
               <mat-checkbox formControlName="hasSafe" class="text-blue-600">
                 <span class="flex items-center gap-2">
                   <mat-icon class="text-lg text-gray-600">lock</mat-icon>
-                  Safe
+                  <ng-container i18n>Safe</ng-container>
                 </span>
               </mat-checkbox>
             </div>
@@ -335,7 +335,7 @@
               <mat-checkbox formControlName="hasHairdryer" class="text-blue-600">
                 <span class="flex items-center gap-2">
                   <mat-icon class="text-lg text-gray-600">dry</mat-icon>
-                  Hair Dryer
+                  <ng-container i18n>Hair Dryer</ng-container>
                 </span>
               </mat-checkbox>
             </div>
@@ -344,7 +344,7 @@
               <mat-checkbox formControlName="hasIroning" class="text-blue-600">
                 <span class="flex items-center gap-2">
                   <mat-icon class="text-lg text-gray-600">iron</mat-icon>
-                  Iron & Board
+                  <ng-container i18n>Iron & Board</ng-container>
                 </span>
               </mat-checkbox>
             </div>
@@ -353,7 +353,7 @@
               <mat-checkbox formControlName="hasSeatingArea" class="text-blue-600">
                 <span class="flex items-center gap-2">
                   <mat-icon class="text-lg text-gray-600">weekend</mat-icon>
-                  Seating Area
+                  <ng-container i18n>Seating Area</ng-container>
                 </span>
               </mat-checkbox>
             </div>
@@ -365,14 +365,14 @@
       <mat-card appearance="outlined">
         <mat-card-header>
           <mat-icon mat-card-avatar class="text-indigo-600">room_service</mat-icon>
-          <mat-card-title>Amenities</mat-card-title>
-          <mat-card-subtitle>Select the amenities included with this room type</mat-card-subtitle>
+          <mat-card-title><ng-container i18n>Amenities</ng-container></mat-card-title>
+          <mat-card-subtitle><ng-container i18n>Select the amenities included with this room type</ng-container></mat-card-subtitle>
         </mat-card-header>
         <mat-card-content class="p-6! space-y-6">
           <!-- Selected Amenities Display -->
           @if (amenitiesFormArray.controls.length > 0 || customAmenitiesFormArray.controls.length > 0) {
             <div>
-              <h4 class="text-sm font-medium text-gray-700 mb-3">Selected Amenities ({{ amenitiesFormArray.controls.length + customAmenitiesFormArray.controls.length }})</h4>
+              <h4 class="text-sm font-medium text-gray-700 mb-3"><ng-container i18n>Selected Amenities ({{ amenitiesFormArray.controls.length + customAmenitiesFormArray.controls.length }})</ng-container></h4>
               <div class="flex flex-wrap gap-2">
                 @for (control of amenitiesFormArray.controls; track $index) {
                   <div class="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
@@ -396,7 +396,7 @@
 
           <!-- Common Amenities -->
           <div>
-            <h4 class="text-sm font-medium text-gray-700 mb-3">Common Amenities</h4>
+            <h4 class="text-sm font-medium text-gray-700 mb-3"><ng-container i18n>Common Amenities</ng-container></h4>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               @for (amenity of commonAmenities; track amenity) {
                 <button 
@@ -416,11 +416,11 @@
 
           <!-- Custom Amenities -->
           <div>
-            <h4 class="text-sm font-medium text-gray-700 mb-3">Add Custom Amenity</h4>
+            <h4 class="text-sm font-medium text-gray-700 mb-3"><ng-container i18n>Add Custom Amenity</ng-container></h4>
             <div class="flex gap-2">
               <mat-form-field appearance="outline" class="flex-1">
-                <mat-label>Custom Amenity Name</mat-label>
-                <input matInput #customAmenityInput placeholder="Enter custom amenity">
+                <mat-label><ng-container i18n>Custom Amenity Name</ng-container></mat-label>
+                <input matInput #customAmenityInput placeholder="Enter custom amenity" i18n-placeholder>
               </mat-form-field>
               <button 
                 type="button" 
@@ -429,7 +429,7 @@
                 (click)="addCustomAmenity(customAmenityInput.value); customAmenityInput.value = ''"
                 class="h-14">
                 <mat-icon>add</mat-icon>
-                Add
+                <ng-container i18n>Add</ng-container>
               </button>
             </div>
           </div>

@@ -17,7 +17,7 @@ export const RESERVATION_VIEW_ROUTES: Routes = [
           import('./reservations-list/reservations-list.component').then(
             (c) => c.ReservationsListComponent
           ),
-        title: 'Reservations List- Hotel Management',
+        title: $localize`Reservations List- Hotel Management`,
       },
         {
           path: 'calendar',
@@ -25,7 +25,7 @@ export const RESERVATION_VIEW_ROUTES: Routes = [
             import('./reservations-calendar/reservations-calendar').then(
               (c) => c.ReservationsCalendar
             ),
-          title: 'Reservation Calendar - Hotel Management',
+          title: $localize`Reservation Calendar - Hotel Management`,
         },
       
 

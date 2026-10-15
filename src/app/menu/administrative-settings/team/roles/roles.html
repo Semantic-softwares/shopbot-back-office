@@ -3,14 +3,14 @@
   <div class="mb-4 flex items-center justify-between">
     <button mat-button (click)="location.back()">
       <mat-icon>arrow_back</mat-icon>
-      Back
+      <ng-container i18n>Back</ng-container>
     </button>
     <button matButton="outlined"
       (click)="syncPermissions()"
       [disabled]="syncing()"
-      matTooltip="Sync latest permissions and update admin roles (e.g., add new POS permissions)">
+      matTooltip="Sync latest permissions and update admin roles (e.g., add new POS permissions)" i18n-matTooltip>
       <mat-icon>sync</mat-icon>
-      {{  syncing() ? 'Syncing...' : 'Sync Permissions' }}
+      @if (syncing()) {<ng-container i18n>Syncing...</ng-container>} @else {<ng-container i18n>Sync Permissions</ng-container>}
     </button>
   </div>
 
@@ -19,8 +19,8 @@
   <div class="w-96 shrink-0 flex flex-col">
     <mat-card appearance="outlined" class="h-full flex flex-col overflow-hidden">
       <mat-card-header class="shrink-0 !flex !justify-between !items-center">
-        <mat-card-title>Roles</mat-card-title>
-        <button mat-mini-fab color="primary" (click)="openCreateRoleDialog()" matTooltip="Create Custom Role">
+        <mat-card-title><ng-container i18n>Roles</ng-container></mat-card-title>
+        <button mat-mini-fab color="primary" (click)="openCreateRoleDialog()" matTooltip="Create Custom Role" i18n-matTooltip>
           <mat-icon>add</mat-icon>
         </button>
       </mat-card-header>
@@ -30,35 +30,35 @@
           <mat-spinner diameter="32"></mat-spinner>
         </div>
         } @else if (roles.value()?.length === 0) {
-        <app-no-record icon="badge" title="No Roles Found" message="Create your first role to manage staff permissions">
+        <app-no-record icon="badge" title="No Roles Found" i18n-title message="Create your first role to manage staff permissions" i18n-message>
         </app-no-record>
         } @else {
         <mat-selection-list [multiple]="false">
           <!-- Administrative Roles -->
           @if (administrativeRoles().length > 0) {
-            <div mat-subheader>Administrative Roles</div>
+            <div mat-subheader><ng-container i18n>Administrative Roles</ng-container></div>
             @for (role of administrativeRoles(); track role._id) {
               <mat-list-option [selected]="selectedRole()?._id === role._id" (click)="selectRole(role)">
                 <mat-icon matListItemIcon>{{ getRoleIcon(role) }}</mat-icon>
                 <div matListItemTitle>{{ role.name }}</div>
-                <div matListItemLine>{{ role.permissions.length || 0 }} permissions</div>
+                <div matListItemLine><ng-container i18n>{{ role.permissions.length || 0 }} permissions</ng-container></div>
               </mat-list-option>
             }
           }
 
           <!-- Custom Store Roles -->
-          <div mat-subheader>Custom Roles</div>
+          <div mat-subheader><ng-container i18n>Custom Roles</ng-container></div>
           @if (customRoles().length > 0) {
             @for (role of customRoles(); track role._id) {
               <mat-list-option [selected]="selectedRole()?._id === role._id" (click)="selectRole(role)">
                 <mat-icon matListItemIcon>{{ getRoleIcon(role) }}</mat-icon>
                 <div matListItemTitle>{{ role.name }}</div>
-                <div matListItemLine>{{ role.permissions.length || 0 }} permissions</div>
+                <div matListItemLine><ng-container i18n>{{ role.permissions.length || 0 }} permissions</ng-container></div>
               </mat-list-option>
             }
           } @else {
             <div class="px-4 py-3 text-sm text-gray-500 italic">
-              No custom roles created yet
+              <ng-container i18n>No custom roles created yet</ng-container>
             </div>
           }
         </mat-selection-list>
@@ -79,16 +79,16 @@
           </div>
           <div class="flex-1">
             <mat-card-title>{{ selectedRole()?.name }}</mat-card-title>
-            <mat-card-subtitle>{{ selectedRole()?.description || 'No description' }}</mat-card-subtitle>
+            <mat-card-subtitle>@if (selectedRole()?.description) {<ng-container>{{ selectedRole()?.description }}</ng-container>} @else {<ng-container i18n>No description</ng-container>}</mat-card-subtitle>
           </div>
           <div class="flex gap-2">
             <button mat-stroked-button [disabled]="$safeNavigationMigration(selectedRole()?.isAdministrative)" (click)="openEditRoleDialog()">
               <mat-icon>edit</mat-icon>
-              Edit Role
+              <ng-container i18n>Edit Role</ng-container>
             </button>
             <button mat-stroked-button color="warn" [disabled]="$safeNavigationMigration(selectedRole()?.isAdministrative)" (click)="deleteRole()">
               <mat-icon>delete</mat-icon>
-              Delete
+              <ng-container i18n>Delete</ng-container>
             </button>
           </div>
         </div>
@@ -102,7 +102,7 @@
             <mat-card-header >
               <mat-card-title>
                 <!-- <mat-icon class="text-green-600 mr-2">check_circle</mat-icon> -->
-                Granted Permissions ({{ allowedPermissions().length }})
+                <ng-container i18n>Granted Permissions ({{ allowedPermissions().length }})</ng-container>
               </mat-card-title>
             </mat-card-header>
             <mat-card-content class="!p-0 max-h-[400px] overflow-y-auto">
@@ -121,7 +121,7 @@
                 }
                 @if (allowedPermissions().length === 0) {
                   <div class="p-4 text-center text-gray-500 italic">
-                    No permissions granted
+                    <ng-container i18n>No permissions granted</ng-container>
                   </div>
                 }
               </mat-list>
@@ -133,7 +133,7 @@
             <mat-card-header>
               <mat-card-title >
                 <!-- <mat-icon class="text-red-400 mr-2">cancel</mat-icon> -->
-                Denied Permissions ({{ deniedPermissions().length }})
+                <ng-container i18n>Denied Permissions ({{ deniedPermissions().length }})</ng-container>
               </mat-card-title>
             </mat-card-header>
             <mat-card-content class="!p-0 max-h-[400px] overflow-y-auto">
@@ -152,7 +152,7 @@
                 }
                 @if (deniedPermissions().length === 0) {
                   <div class="p-4 text-center text-gray-500 italic">
-                    All permissions granted
+                    <ng-container i18n>All permissions granted</ng-container>
                   </div>
                 }
               </mat-list>
@@ -167,8 +167,8 @@
       <mat-card-content class="flex-1 flex items-center justify-center">
         <div class="text-center py-16">
           <mat-icon class="text-6xl text-gray-300 mb-4">touch_app</mat-icon>
-          <h3 class="text-lg font-medium text-gray-600 mb-2">Select a Role</h3>
-          <p class="text-gray-500">Click on a role from the list to view its permissions</p>
+          <h3 class="text-lg font-medium text-gray-600 mb-2"><ng-container i18n>Select a Role</ng-container></h3>
+          <p class="text-gray-500"><ng-container i18n>Click on a role from the list to view its permissions</ng-container></p>
         </div>
       </mat-card-content>
     </mat-card>

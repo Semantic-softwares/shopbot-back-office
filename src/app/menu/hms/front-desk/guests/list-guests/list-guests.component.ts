@@ -78,16 +78,16 @@ export class ListGuestsComponent {
 
   // Status options
   statusOptions = [
-    { value: '', label: 'All Status' },
-    { value: 'active', label: 'Active' },
-    { value: 'blacklisted', label: 'Blacklisted' }
+    { value: '', label: $localize`All Status` },
+    { value: 'active', label: $localize`Active` },
+    { value: 'blacklisted', label: $localize`Blacklisted` }
   ];
 
   // Guest type options
   guestTypeOptions = [
-    { value: '', label: 'All Guests' },
-    { value: 'vip', label: 'VIP Guests' },
-    { value: 'regular', label: 'Regular Guests' }
+    { value: '', label: $localize`All Guests` },
+    { value: 'vip', label: $localize`VIP Guests` },
+    { value: 'regular', label: $localize`Regular Guests` }
   ];
 
   // Computed filter params for rxResource
@@ -170,7 +170,7 @@ export class ListGuestsComponent {
 
   async deleteGuest(guest: Guest) {
     const guestName = `${guest.firstName} ${guest.lastName}`;
-    const confirmDelete = confirm(`Delete guest ${guestName}? This action cannot be undone.`);
+    const confirmDelete = confirm($localize`Delete guest ${guestName}? This action cannot be undone.`);
     if (confirmDelete) {
       this.isUpdating.set(true);
       try {
@@ -212,12 +212,12 @@ export class ListGuestsComponent {
   async toggleBlacklistStatus(guest: Guest) {
     const guestName = `${guest.firstName} ${guest.lastName}`;
     if (guest.blacklisted) {
-      if (!confirm(`Remove ${guestName} from the blacklist?`)) return;
+      if (!confirm($localize`Remove ${guestName} from the blacklist?`)) return;
       await this.updateBlacklistStatus(guest._id, false, '');
     } else {
       const reason = prompt(`Please provide a reason for blacklisting ${guestName}:`);
       if (reason === null) return;
-      if (!reason.trim()) { alert('A reason is required.'); return; }
+      if (!reason.trim()) { alert($localize`A reason is required.`); return; }
       await this.updateBlacklistStatus(guest._id, true, reason.trim());
     }
   }
@@ -286,10 +286,10 @@ export class ListGuestsComponent {
   }
 
   private showSuccess(message: string) {
-    this.snackBar.open(message, 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
+    this.snackBar.open(message, $localize`Close`, { duration: 3000, panelClass: ['success-snackbar'] });
   }
 
   private showError(message: string) {
-    this.snackBar.open(message, 'Close', { duration: 5000, panelClass: ['error-snackbar'] });
+    this.snackBar.open(message, $localize`Close`, { duration: 5000, panelClass: ['error-snackbar'] });
   }
 }

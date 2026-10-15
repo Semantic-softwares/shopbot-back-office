@@ -19,11 +19,12 @@ import { StoreStore } from '../../stores/store.store';
 import { AuthService } from '../../services/auth.service';
 import { MaintenanceVendorService } from '../../services/maintenance-vendor.service';
 import { MaintenanceCategorySelectComponent } from '../maintenance-category-select/maintenance-category-select.component';
+import { TrPipe } from '../../i18n/tr.pipe';
 
 @Component({
   selector: 'app-maintenance-vendor-create-dialog',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
@@ -37,19 +38,19 @@ import { MaintenanceCategorySelectComponent } from '../maintenance-category-sele
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>New Vendor</h2>
+    <h2 mat-dialog-title><ng-container i18n>New Vendor</ng-container></h2>
     <mat-dialog-content class="!max-h-[70vh]">
       <form [formGroup]="form" class="space-y-4 pt-2">
         <!-- Profile Image Upload -->
         <div class="flex items-center gap-4">
           <div class="relative w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-100 flex items-center justify-center">
             @if (profileImagePreview()) {
-              <img [src]="profileImagePreview()" alt="Vendor profile" class="w-full h-full object-cover" />
+              <img [src]="profileImagePreview()" alt="Vendor profile" i18n-alt class="w-full h-full object-cover" />
               <button
                 type="button"
                 class="absolute top-0 right-0 bg-white/90 rounded-full p-0.5"
                 (click)="removeProfileImage()"
-                aria-label="Remove profile image"
+                aria-label="Remove profile image" i18n-aria-label
               >
                 <mat-icon class="!text-sm">close</mat-icon>
               </button>
@@ -61,60 +62,60 @@ import { MaintenanceCategorySelectComponent } from '../maintenance-category-sele
             <input type="file" accept="image/*" class="hidden" (change)="onProfileImageSelected($event)" />
             <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">
               <mat-icon>upload</mat-icon>
-              {{ profileImagePreview() ? 'Change' : 'Upload Photo' }}
+              @if (profileImagePreview()) {<ng-container i18n>Change</ng-container>} @else {<ng-container i18n>Upload Photo</ng-container>}
             </span>
           </label>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>{{ form.controls.company.value ? 'Company Name *' : 'Vendor Name *' }}</mat-label>
-            <input matInput formControlName="name" [placeholder]="form.controls.company.value ? 'Enter company name' : 'Enter vendor name'" />
+            <mat-label>@if (form.controls.company.value) {<ng-container i18n>Company Name *</ng-container>} @else {<ng-container i18n>Vendor Name *</ng-container>}</mat-label>
+            <input matInput formControlName="name" [placeholder]="form.controls.company.value ? ('Enter company name' | tr) : ('Enter vendor name' | tr)" />
             @if (form.controls.name.hasError('required')) {
-              <mat-error>Name is required</mat-error>
+              <mat-error><ng-container i18n>Name is required</ng-container></mat-error>
             }
           </mat-form-field>
 
           <div class="flex items-center">
             <mat-slide-toggle formControlName="company" color="primary">
-              Is a Company
+              <ng-container i18n>Is a Company</ng-container>
             </mat-slide-toggle>
           </div>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Email</mat-label>
-            <input matInput formControlName="email" type="email" placeholder="vendor@example.com" />
+            <mat-label><ng-container i18n>Email</ng-container></mat-label>
+            <input matInput formControlName="email" type="email" placeholder="vendor@example.com" i18n-placeholder />
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Phone</mat-label>
-            <input matInput formControlName="phone" placeholder="Phone number" />
+            <mat-label><ng-container i18n>Phone</ng-container></mat-label>
+            <input matInput formControlName="phone" placeholder="Phone number" i18n-placeholder />
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Specialty</mat-label>
-            <input matInput formControlName="specialty" placeholder="e.g. Plumbing, Electrical" />
+            <mat-label><ng-container i18n>Specialty</ng-container></mat-label>
+            <input matInput formControlName="specialty" placeholder="e.g. Plumbing, Electrical" i18n-placeholder />
           </mat-form-field>
 
           <app-maintenance-category-select
             [control]="$any(form.controls.category)"
-            label="Category"
+            label="Category" i18n-label
           />
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Address</mat-label>
-            <input matInput formControlName="address" placeholder="Vendor address" />
+            <mat-label><ng-container i18n>Address</ng-container></mat-label>
+            <input matInput formControlName="address" placeholder="Vendor address" i18n-placeholder />
           </mat-form-field>
         </div>
 
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Notes</mat-label>
-          <textarea matInput formControlName="notes" rows="2" placeholder="Additional notes"></textarea>
+          <mat-label><ng-container i18n>Notes</ng-container></mat-label>
+          <textarea matInput formControlName="notes" rows="2" placeholder="Additional notes" i18n-placeholder></textarea>
         </mat-form-field>
       </form>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancel</button>
+      <button mat-button mat-dialog-close><ng-container i18n>Cancel</ng-container></button>
       <button
         mat-flat-button
         (click)="onSubmit()"
@@ -123,7 +124,7 @@ import { MaintenanceCategorySelectComponent } from '../maintenance-category-sele
         @if (submitting()) {
           <mat-spinner diameter="18"></mat-spinner>
         }
-        Create Vendor
+        <ng-container i18n>Create Vendor</ng-container>
       </button>
     </mat-dialog-actions>
   `,
@@ -179,7 +180,7 @@ export class MaintenanceVendorCreateDialogComponent {
         const uploadRes = await firstValueFrom(this.vendorService.uploadProfileImage(storeId, imageFile));
         profileImage = uploadRes.data.photos?.[0];
       } catch {
-        this.snackBar.open('Failed to upload profile image', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Failed to upload profile image`, $localize`Close`, { duration: 4000 });
         this.submitting.set(false);
         return;
       }
@@ -200,12 +201,12 @@ export class MaintenanceVendorCreateDialogComponent {
 
     this.vendorService.create(storeId, payload).subscribe({
       next: (res) => {
-        this.snackBar.open('Vendor created', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Vendor created`, $localize`Close`, { duration: 3000 });
         this.dialogRef.close(res.data);
       },
       error: (error) => {
         const message = error?.error?.message || 'Failed to create vendor';
-        this.snackBar.open(message, 'Close', { duration: 4000 });
+        this.snackBar.open(message, $localize`Close`, { duration: 4000 });
         this.submitting.set(false);
       },
     });

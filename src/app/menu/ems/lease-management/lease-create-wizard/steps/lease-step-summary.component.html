@@ -6,8 +6,8 @@
       <mat-icon class="text-primary-600 !text-lg">description</mat-icon>
     </div>
     <div>
-      <h2 class="text-base font-semibold text-gray-800">Lease Summary</h2>
-      <p class="text-xs text-gray-500">Review all details before submitting</p>
+      <h2 class="text-base font-semibold text-gray-800"><ng-container i18n>Lease Summary</ng-container></h2>
+      <p class="text-xs text-gray-500"><ng-container i18n>Review all details before submitting</ng-container></p>
     </div>
   </div>
 
@@ -16,45 +16,45 @@
     <mat-card-content class="p-4!">
       <div class="flex items-center gap-2 mb-4">
         <mat-icon class="text-gray-500 !text-base">home_work</mat-icon>
-        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Property & Terms</span>
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide"><ng-container i18n>Property & Terms</ng-container></span>
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 text-sm">
         <div>
-          <p class="text-xs text-gray-400 mb-0.5">Property</p>
+          <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>Property</ng-container></p>
           <p class="font-medium text-gray-800">{{ propertyName(terms['propertyId']) }}</p>
         </div>
         <div>
-          <p class="text-xs text-gray-400 mb-0.5">Unit</p>
+          <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>Unit</ng-container></p>
           <p class="font-medium text-gray-800">{{ unitName(terms['unitId']) }}</p>
         </div>
         <div>
-          <p class="text-xs text-gray-400 mb-0.5">Currency</p>
+          <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>Currency</ng-container></p>
           <p class="font-medium text-gray-800">{{ terms['currency'] || '-' }}</p>
         </div>
         <div>
-          <p class="text-xs text-gray-400 mb-0.5">Lease Type</p>
+          <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>Lease Type</ng-container></p>
           <p class="font-medium text-gray-800">{{ leaseTypeLabel(terms['leaseType']) }}</p>
         </div>
         <div>
-          <p class="text-xs text-gray-400 mb-0.5">Invoicing Type</p>
+          <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>Invoicing Type</ng-container></p>
           <p class="font-medium text-gray-800">{{ invoicingTypeLabel(transactions['invoicingType']) }}</p>
         </div>
         <div>
-          <p class="text-xs text-gray-400 mb-0.5">Status</p>
-          <p class="font-medium text-gray-800">{{ terms['status'] || 'DRAFT' }}</p>
+          <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>Status</ng-container></p>
+          <p class="font-medium text-gray-800">@if (terms['status']) {<ng-container>{{ terms['status'] }}</ng-container>} @else {<ng-container i18n>DRAFT</ng-container>}</p>
         </div>
         <div>
-          <p class="text-xs text-gray-400 mb-0.5">Start Date</p>
+          <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>Start Date</ng-container></p>
           <p class="font-medium text-gray-800">{{ formatDate(terms['startDate']) }}</p>
         </div>
         <div>
-          <p class="text-xs text-gray-400 mb-0.5">End Date</p>
+          <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>End Date</ng-container></p>
           <p class="font-medium text-gray-800">{{ formatDate(terms['endDate']) }}</p>
         </div>
         @if (terms['notes']) {
           <div class="col-span-2 md:col-span-3">
-            <p class="text-xs text-gray-400 mb-0.5">Notes</p>
+            <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>Notes</ng-container></p>
             <p class="font-medium text-gray-800">{{ terms['notes'] }}</p>
           </div>
         }
@@ -67,7 +67,7 @@
     <mat-card-content class="p-4!">
       <div class="flex items-center gap-2 mb-4">
         <mat-icon class="text-gray-500 !text-base">people</mat-icon>
-        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tenants</span>
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide"><ng-container i18n>Tenants</ng-container></span>
       </div>
 
       @if (tenantList().length > 0) {
@@ -83,7 +83,7 @@
           }
         </div>
       } @else {
-        <p class="text-sm text-gray-400 italic">No tenants selected</p>
+        <p class="text-sm text-gray-400 italic"><ng-container i18n>No tenants selected</ng-container></p>
       }
     </mat-card-content>
   </mat-card>
@@ -93,38 +93,38 @@
     <mat-card-content class="p-4!">
       <div class="flex items-center gap-2 mb-4">
         <mat-icon class="text-gray-500 !text-base">payments</mat-icon>
-        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Recurring Rent</span>
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide"><ng-container i18n>Recurring Rent</ng-container></span>
       </div>
 
       @if (recurringRent['enabled']) {
         <div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 text-sm mb-4">
           <div>
-            <p class="text-xs text-gray-400 mb-0.5">Total Amount</p>
+            <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>Total Amount</ng-container></p>
             <p class="font-semibold text-gray-900">{{ terms['currency'] || '' }} {{ recurringRent['totalAmount'] | number:'1.2-2' }}</p>
           </div>
           <div>
-            <p class="text-xs text-gray-400 mb-0.5">Frequency</p>
+            <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>Frequency</ng-container></p>
             <p class="font-medium text-gray-800">{{ frequencyLabel(recurringRent['frequency']) }}</p>
           </div>
           <div>
-            <p class="text-xs text-gray-400 mb-0.5">Due Date Rule</p>
+            <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>Due Date Rule</ng-container></p>
             <p class="font-medium text-gray-800">{{ dueDateRuleLabel(recurringRent['dueDateRule']) }}</p>
           </div>
           <div>
-            <p class="text-xs text-gray-400 mb-0.5">First Rent Date</p>
+            <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>First Rent Date</ng-container></p>
             <p class="font-medium text-gray-800">{{ formatDate(recurringRent['firstRentDate']) }}</p>
           </div>
           @if (recurringRent['markPastInvoicesAsPaid']) {
             <div>
-              <p class="text-xs text-gray-400 mb-0.5">Past Invoices</p>
-              <p class="font-medium text-green-700">Mark as Paid</p>
+              <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>Past Invoices</ng-container></p>
+              <p class="font-medium text-green-700"><ng-container i18n>Mark as Paid</ng-container></p>
             </div>
           }
         </div>
 
         @if (transactions['invoicingType'] === 'INDIVIDUAL' && (recurringRent['tenantShares'] || []).length > 0) {
           <div class="mt-3 border-t border-gray-100 pt-3">
-            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Tenant Shares</p>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2"><ng-container i18n>Tenant Shares</ng-container></p>
             <div class="flex flex-col gap-2">
               @for (share of recurringRent['tenantShares']; track $index) {
                 <div class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-4 py-2 text-sm">
@@ -136,7 +136,7 @@
           </div>
         }
       } @else {
-        <p class="text-sm text-gray-400 italic">Recurring rent is not enabled</p>
+        <p class="text-sm text-gray-400 italic"><ng-container i18n>Recurring rent is not enabled</ng-container></p>
       }
     </mat-card-content>
   </mat-card>
@@ -146,7 +146,7 @@
     <mat-card-content class="p-4!">
       <div class="flex items-center gap-2 mb-4">
         <mat-icon class="text-gray-500 !text-base">account_balance_wallet</mat-icon>
-        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Deposits</span>
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide"><ng-container i18n>Deposits</ng-container></span>
       </div>
 
       @if (deposits.length > 0) {
@@ -158,7 +158,7 @@
                   <mat-icon class="text-gray-400 !text-base">savings</mat-icon>
                   <div>
                     <p class="font-medium text-gray-800">{{ depositCategoryLabel(deposit.category) }}</p>
-                    <p class="text-xs text-gray-500">Invoice: {{ formatDate(deposit.invoiceDate) }}</p>
+                    <p class="text-xs text-gray-500"><ng-container i18n>Invoice: {{ formatDate(deposit.invoiceDate) }}</ng-container></p>
                   </div>
                 </div>
                 <p class="font-semibold text-gray-900">{{ terms['currency'] || '' }} {{ deposit.amount | number:'1.2-2' }}</p>
@@ -166,7 +166,7 @@
 
               @if (transactions['invoicingType'] === 'INDIVIDUAL' && (deposit.tenantShares || []).length > 0) {
                 <div class="mt-2 border-t border-gray-200 pt-2">
-                  <p class="text-xs text-gray-400 mb-1">Tenant Shares</p>
+                  <p class="text-xs text-gray-400 mb-1"><ng-container i18n>Tenant Shares</ng-container></p>
                   @for (share of deposit.tenantShares; track $index) {
                     <div class="flex items-center justify-between text-xs text-gray-600 py-0.5">
                       <span>{{ tenantName(share.tenantId) }}</span>
@@ -179,7 +179,7 @@
           }
         </div>
       } @else {
-        <p class="text-sm text-gray-400 italic">No deposits added</p>
+        <p class="text-sm text-gray-400 italic"><ng-container i18n>No deposits added</ng-container></p>
       }
     </mat-card-content>
   </mat-card>
@@ -189,7 +189,7 @@
     <mat-card-content class="p-4!">
       <div class="flex items-center gap-2 mb-4">
         <mat-icon class="text-gray-500 !text-base">receipt</mat-icon>
-        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Other Transactions</span>
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide"><ng-container i18n>Other Transactions</ng-container></span>
       </div>
 
       @if (otherTransactions.length > 0) {
@@ -199,12 +199,12 @@
               <div class="flex items-center gap-3">
                 <mat-icon class="text-amber-400 !text-base">monetization_on</mat-icon>
                 <div>
-                  <p class="font-medium text-gray-800">{{ txn.title || 'Untitled' }}</p>
+                  <p class="font-medium text-gray-800">@if (txn.title) {<ng-container>{{ txn.title }}</ng-container>} @else {<ng-container i18n>Untitled</ng-container>}</p>
                   <p class="text-xs text-gray-500">
-                    {{ frequencyLabel(txn.frequency) }} · Due: {{ formatDate(txn.dueDate) }}
+                    <ng-container i18n>{{ frequencyLabel(txn.frequency) }} · Due: {{ formatDate(txn.dueDate) }}</ng-container>
                   </p>
                   @if (txn.account) {
-                    <p class="text-xs text-gray-400">Account: {{ txn.account }}</p>
+                    <p class="text-xs text-gray-400"><ng-container i18n>Account: {{ txn.account }}</ng-container></p>
                   }
                 </div>
               </div>
@@ -218,7 +218,7 @@
           }
         </div>
       } @else {
-        <p class="text-sm text-gray-400 italic">No other transactions added</p>
+        <p class="text-sm text-gray-400 italic"><ng-container i18n>No other transactions added</ng-container></p>
       }
     </mat-card-content>
   </mat-card>
@@ -228,24 +228,24 @@
     <mat-card-content class="p-4!">
       <div class="flex items-center gap-2 mb-4">
         <mat-icon class="text-gray-500 !text-base">gavel</mat-icon>
-        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Late Fee Settings</span>
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide"><ng-container i18n>Late Fee Settings</ng-container></span>
       </div>
 
       @if (lateFeeSettings['enabled']) {
         <div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 text-sm">
           <div>
-            <p class="text-xs text-gray-400 mb-0.5">Grace Period</p>
-            <p class="font-medium text-gray-800">{{ lateFeeSettings['gracePeriodDays'] || 0 }} days</p>
+            <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>Grace Period</ng-container></p>
+            <p class="font-medium text-gray-800"><ng-container i18n>{{ lateFeeSettings['gracePeriodDays'] || 0 }} days</ng-container></p>
           </div>
 
           @if (lateFeeSettings['oneTimeFee']?.type) {
             <div>
-              <p class="text-xs text-gray-400 mb-0.5">One-Time Late Fee</p>
+              <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>One-Time Late Fee</ng-container></p>
               <p class="font-medium text-gray-800">
                 @if (lateFeeSettings['oneTimeFee'].type === 'FIXED') {
                   {{ terms['currency'] || '' }} {{ lateFeeSettings['oneTimeFee'].value | number:'1.2-2' }}
                 } @else {
-                  {{ lateFeeSettings['oneTimeFee'].value }}% of rent
+                  <ng-container i18n>{{ lateFeeSettings['oneTimeFee'].value }}% of rent</ng-container>
                 }
               </p>
             </div>
@@ -253,19 +253,19 @@
 
           @if (lateFeeSettings['dailyFee']?.type) {
             <div>
-              <p class="text-xs text-gray-400 mb-0.5">Daily Late Fee</p>
+              <p class="text-xs text-gray-400 mb-0.5"><ng-container i18n>Daily Late Fee</ng-container></p>
               <p class="font-medium text-gray-800">
                 @if (lateFeeSettings['dailyFee'].type === 'FIXED') {
-                  {{ terms['currency'] || '' }} {{ lateFeeSettings['dailyFee'].value | number:'1.2-2' }} / day
+                  <ng-container i18n>{{ terms['currency'] || '' }} {{ lateFeeSettings['dailyFee'].value | number:'1.2-2' }} / day</ng-container>
                 } @else {
-                  {{ lateFeeSettings['dailyFee'].value }}% of rent / day
+                  <ng-container i18n>{{ lateFeeSettings['dailyFee'].value }}% of rent / day</ng-container>
                 }
               </p>
             </div>
           }
         </div>
       } @else {
-        <p class="text-sm text-gray-400 italic">Late fees are not enabled</p>
+        <p class="text-sm text-gray-400 italic"><ng-container i18n>Late fees are not enabled</ng-container></p>
       }
     </mat-card-content>
   </mat-card>
@@ -275,7 +275,7 @@
     <mat-card-content class="p-4!">
       <div class="flex items-center gap-2 mb-4">
         <mat-icon class="text-gray-500 !text-base">bolt</mat-icon>
-        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Utility Responsibilities</span>
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide"><ng-container i18n>Utility Responsibilities</ng-container></span>
       </div>
 
       @if (utilities.length > 0) {
@@ -296,7 +296,7 @@
           }
         </div>
       } @else {
-        <p class="text-sm text-gray-400 italic">No utility responsibilities defined</p>
+        <p class="text-sm text-gray-400 italic"><ng-container i18n>No utility responsibilities defined</ng-container></p>
       }
     </mat-card-content>
   </mat-card>

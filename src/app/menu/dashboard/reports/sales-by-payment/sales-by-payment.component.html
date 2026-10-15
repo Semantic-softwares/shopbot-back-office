@@ -11,23 +11,23 @@
 
   <div class="bg-white rounded-lg shadow-sm">
     <div class="p-6 flex justify-between items-center border-b">
-      <h2 class="text-lg font-medium">Sales by Payment Type</h2>
+      <h2 class="text-lg font-medium"><ng-container i18n>Sales by Payment Type</ng-container></h2>
       <button mat-flat-button color="primary" [matMenuTriggerFor]="exportMenu">
         <mat-icon class="mr-2">file_download</mat-icon>
-        Export Data
+        <ng-container i18n>Export Data</ng-container>
       </button>
       <mat-menu #exportMenu="matMenu">
         <button mat-menu-item (click)="exportData('pdf')">
           <mat-icon>picture_as_pdf</mat-icon>
-          <span>Export as PDF</span>
+          <span><ng-container i18n>Export as PDF</ng-container></span>
         </button>
         <button mat-menu-item (click)="exportData('csv')">
           <mat-icon>description</mat-icon>
-          <span>Export as CSV</span>
+          <span><ng-container i18n>Export as CSV</ng-container></span>
         </button>
         <button mat-menu-item (click)="exportData('excel')">
           <mat-icon>table_chart</mat-icon>
-          <span>Export as Excel</span>
+          <span><ng-container i18n>Export as Excel</ng-container></span>
         </button>
       </mat-menu>
     </div>
@@ -40,32 +40,32 @@
       <div class="p-6">
         <mat-table [dataSource]="dataSource.value()" class="w-full !bg-white">
           <ng-container matColumnDef="paymentType">
-            <mat-header-cell *matHeaderCellDef>Payment Type</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef><ng-container i18n>Payment Type</ng-container></mat-header-cell>
             <mat-cell *matCellDef="let element">{{element.paymentType}}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="paymentTransactions">
-            <mat-header-cell *matHeaderCellDef>Payment Transactions</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef><ng-container i18n>Payment Transactions</ng-container></mat-header-cell>
             <mat-cell *matCellDef="let element">{{element.paymentTransactions}}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="paymentAmount">
-            <mat-header-cell *matHeaderCellDef>Payment Amount</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef><ng-container i18n>Payment Amount</ng-container></mat-header-cell>
             <mat-cell *matCellDef="let element">{{element.paymentAmount | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="refundTransactions">
-            <mat-header-cell *matHeaderCellDef>Refund Transactions</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef><ng-container i18n>Refund Transactions</ng-container></mat-header-cell>
             <mat-cell *matCellDef="let element">{{element.refundTransactions}}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="refundAmount">
-            <mat-header-cell *matHeaderCellDef>Refund Amount</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef><ng-container i18n>Refund Amount</ng-container></mat-header-cell>
             <mat-cell *matCellDef="let element">{{element.refundAmount | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="netAmount">
-            <mat-header-cell *matHeaderCellDef>Net Amount</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef><ng-container i18n>Net Amount</ng-container></mat-header-cell>
             <mat-cell *matCellDef="let element">{{element.netAmount | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
           </ng-container>
 
@@ -74,8 +74,8 @@
         </mat-table>
       </div>
     } @else {
-        <app-no-record icon="inventory_2" title="No Employee Data Found"
-            message="There are no employee sales data to display for the selected period.">
+        <app-no-record icon="inventory_2" title="No Employee Data Found" i18n-title
+            message="There are no employee sales data to display for the selected period." i18n-message>
         </app-no-record>
         } 
   </div>

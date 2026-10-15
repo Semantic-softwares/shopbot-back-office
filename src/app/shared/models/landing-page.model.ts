@@ -35,20 +35,20 @@ export interface LandingPageSettings {
 }
 
 export const LANDING_HIGHLIGHT_ICONS: { value: string; label: string }[] = [
-  { value: 'delivery_dining', label: 'Delivery' },
-  { value: 'eco', label: 'Fresh' },
-  { value: 'star', label: 'Rating' },
-  { value: 'touch_app', label: 'Easy ordering' },
-  { value: 'schedule', label: 'Fast' },
-  { value: 'local_fire_department', label: 'Grill / hot' },
-  { value: 'restaurant', label: 'Dining' },
-  { value: 'local_cafe', label: 'Coffee' },
-  { value: 'local_bar', label: 'Drinks' },
-  { value: 'cake', label: 'Desserts' },
-  { value: 'verified', label: 'Quality' },
-  { value: 'favorite', label: 'Loved' },
-  { value: 'payments', label: 'Payment' },
-  { value: 'storefront', label: 'Pickup' },
+  { value: 'delivery_dining', label: $localize`Delivery` },
+  { value: 'eco', label: $localize`Fresh` },
+  { value: 'star', label: $localize`Rating` },
+  { value: 'touch_app', label: $localize`Easy ordering` },
+  { value: 'schedule', label: $localize`Fast` },
+  { value: 'local_fire_department', label: $localize`Grill / hot` },
+  { value: 'restaurant', label: $localize`Dining` },
+  { value: 'local_cafe', label: $localize`Coffee` },
+  { value: 'local_bar', label: $localize`Drinks` },
+  { value: 'cake', label: $localize`Desserts` },
+  { value: 'verified', label: $localize`Quality` },
+  { value: 'favorite', label: $localize`Loved` },
+  { value: 'payments', label: $localize`Payment` },
+  { value: 'storefront', label: $localize`Pickup` },
 ];
 
 export const DEFAULT_LANDING_PAGE: LandingPageSettings = {

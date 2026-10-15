@@ -1,4 +1,4 @@
-<app-page-header title="Orders" subtitle="Manage and track all your orders">
+<app-page-header title="Orders" i18n-title subtitle="Manage and track all your orders" i18n-subtitle>
     <ng-container actions>
         @if (!isMobile()) {
         <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)">
@@ -13,7 +13,7 @@
 
         <button mat-stroked-button (click)="clearFilters()">
             <mat-icon>clear</mat-icon>
-            Clear Filters
+            <ng-container i18n>Clear Filters</ng-container>
         </button>
 
         @if (isMobile()) {
@@ -23,14 +23,14 @@
         } @else {
         <button matButton="outlined" (click)="reloadData()" [disabled]="ordersResource.isLoading()">
             <mat-icon [class.animate-spin]="ordersResource.isLoading()">refresh</mat-icon>
-            Reload
+            <ng-container i18n>Reload</ng-container>
         </button>
         }
 
         @if (!isMobile()) {
         <button matButton="filled" color="primary" (click)="startNewSale()">
             <mat-icon>add_shopping_cart</mat-icon>
-            Start New Sale
+            <ng-container i18n>Start New Sale</ng-container>
         </button>
         }
     </ng-container>
@@ -41,7 +41,7 @@
     class="!fixed !bottom-[88px] !right-4 !z-[60] md:!hidden"
     (click)="startNewSale()">
     <mat-icon>add_shopping_cart</mat-icon>
-    Start Sale
+    <ng-container i18n>Start Sale</ng-container>
 </button>
 
 <div class="max-w-12xl py-6 px-4">
@@ -51,15 +51,15 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 px-4 mb-4">
             <!-- Search -->
             <mat-form-field appearance="outline">
-                <mat-label>Search</mat-label>
+                <mat-label><ng-container i18n>Search</ng-container></mat-label>
                 <input matInput [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)"
-                    placeholder="Order ID, customer name...">
+                    placeholder="Order ID, customer name..." i18n-placeholder>
                 <mat-icon matPrefix>search</mat-icon>
             </mat-form-field>
 
             <!-- Status Filter -->
             <mat-form-field appearance="outline">
-                <mat-label>Status</mat-label>
+                <mat-label><ng-container i18n>Status</ng-container></mat-label>
                 <mat-select [value]="statusFilter()" (selectionChange)="statusFilter.set($event.value)">
                     @for (option of statusOptions; track option.value) {
                     <mat-option [value]="option.value">{{ option.label }}</mat-option>
@@ -69,7 +69,7 @@
 
             <!-- Payment Filter -->
             <mat-form-field appearance="outline">
-                <mat-label>Payment</mat-label>
+                <mat-label><ng-container i18n>Payment</ng-container></mat-label>
                 <mat-select [value]="paymentFilter()" (selectionChange)="paymentFilter.set($event.value)">
                     @for (option of paymentOptions; track option.value) {
                     <mat-option [value]="option.value">{{ option.label }}</mat-option>
@@ -79,14 +79,14 @@
 
             <!-- Date Range Filter -->
             <mat-form-field appearance="outline">
-                <mat-label>Date Range</mat-label>
+                <mat-label><ng-container i18n>Date Range</ng-container></mat-label>
                 <mat-date-range-input [rangePicker]="dateRangePicker">
                     <input matStartDate 
-                           placeholder="Start date" 
+                           placeholder="Start date" i18n-placeholder 
                            [value]="startDate()"
                            (dateChange)="onStartDateChange($event.value)">
                     <input matEndDate 
-                           placeholder="End date"
+                           placeholder="End date" i18n-placeholder
                            [value]="endDate()"
                            (dateChange)="onEndDateChange($event.value)">
                 </mat-date-range-input>
@@ -104,17 +104,17 @@
 
         <!-- Error State -->
         @if (ordersResource.error() && !ordersResource.isLoading()) {
-        <app-no-record icon="error_outline" title="Failed to Load Orders" [message]="ordersResource.error()">
+        <app-no-record icon="error_outline" title="Failed to Load Orders" i18n-title [message]="ordersResource.error()">
             <button mat-flat-button color="primary" (click)="reloadData()">
-                Retry
+                <ng-container i18n>Retry</ng-container>
             </button>
         </app-no-record>
         }
 
         <!-- Empty State -->
         @if (!ordersResource.isLoading() && !ordersResource.error() && filteredOrders().length === 0) {
-        <app-no-record icon="receipt_long" title="No Orders Found"
-            message="No orders match your current filters. Try adjusting your search criteria.">
+        <app-no-record icon="receipt_long" title="No Orders Found" i18n-title
+            message="No orders match your current filters. Try adjusting your search criteria." i18n-message>
         </app-no-record>
         }
 
@@ -124,7 +124,7 @@
             <table mat-table [dataSource]="filteredOrders()" class="w-full">
                 <!-- Reference Column -->
                 <ng-container matColumnDef="reference">
-                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Order ID & Name</th>
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Order ID & Name</ng-container></th>
                     <td mat-cell *matCellDef="let order">
                         <div class="flex flex-col">
                             <div class="flex items-center gap-1">
@@ -137,7 +137,7 @@
                                 </mat-icon>
                                 }
                             </div>
-                            <span class="text-sm text-gray-600">{{ order.user?.name || order.guestName || order.user?.email || 'Guest'
+                            <span class="text-sm text-gray-600">{{ order.user?.name || order.guestName || order.user?.email || ('Guest' | tr)
                                 }}</span>
                         </div>
                     </td>
@@ -145,7 +145,7 @@
 
                 <!-- Total Column -->
                 <ng-container matColumnDef="total">
-                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Total</th>
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Total</ng-container></th>
                     <td mat-cell *matCellDef="let order">
                         <span class="font-semibold">{{ order.total | currency:currency():'symbol':'1.2-2' }}</span>
                     </td>
@@ -153,7 +153,7 @@
 
                 <!-- Status Column -->
                 <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Status</th>
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Status</ng-container></th>
                     <td mat-cell *matCellDef="let order">
                         <mat-chip [class]="getStatusColor(order.category)">
                             {{ order.category }}
@@ -163,7 +163,7 @@
 
                 <!-- Payment Method Column -->
                 <ng-container matColumnDef="payment">
-                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Payment Method</th>
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Payment Method</ng-container></th>
                     <td mat-cell *matCellDef="let order">
                         <span class="text-sm">{{ order.payment || 'N/A' }}</span>
                     </td>
@@ -171,7 +171,7 @@
 
                 <!-- Payment Status Column -->
                 <ng-container matColumnDef="paymentStatus">
-                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Payment Status</th>
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Payment Status</ng-container></th>
                     <td mat-cell *matCellDef="let order">
                         <mat-chip [class]="getPaymentStatusColor(order.paymentStatus)" class="text-xs">
                             {{ order.paymentStatus }}
@@ -181,7 +181,7 @@
 
                 <!-- Location Column -->
                 <ng-container matColumnDef="location">
-                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Location</th>
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Location</ng-container></th>
                     <td mat-cell *matCellDef="let order">
                         <span class="text-sm">{{ getLocationInfo(order) }}</span>
                     </td>
@@ -189,7 +189,7 @@
 
                 <!-- Date Column -->
                 <ng-container matColumnDef="date">
-                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Date</th>
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Date</ng-container></th>
                     <td mat-cell *matCellDef="let order">
                         <span class="text-sm">{{ order.createdAt | date:'short' }}</span>
                     </td>
@@ -197,7 +197,7 @@
 
                 <!-- Actions Column -->
                 <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef class="font-semibold">Actions</th>
+                    <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Actions</ng-container></th>
                     <td mat-cell *matCellDef="let order">
                         <button mat-icon-button [matMenuTriggerFor]="menu">
                             <mat-icon>more_vert</mat-icon>
@@ -205,22 +205,22 @@
                         <mat-menu #menu="matMenu">
                             <button mat-menu-item (click)="viewOrder(order)">
                                 <mat-icon>visibility</mat-icon>
-                                <span>View</span>
+                                <span><ng-container i18n>View</ng-container></span>
                             </button>
                             <button mat-menu-item (click)="printOrder(order)">
                                 <mat-icon>print</mat-icon>
-                                <span>Print</span>
+                                <span><ng-container i18n>Print</ng-container></span>
                             </button>
                             @if (canCompleteOrder(order)) {
                                 <button mat-menu-item (click)="completeOrder(order)">
                                     <mat-icon>task_alt</mat-icon>
-                                    <span>Complete Order</span>
+                                    <span><ng-container i18n>Complete Order</ng-container></span>
                                 </button>
                             }
                             @if (canEditOrder(order)) {
                                 <button mat-menu-item (click)="editOrder(order)">
                                     <mat-icon>edit</mat-icon>
-                                    <span>Edit</span>
+                                    <span><ng-container i18n>Edit</ng-container></span>
                                 </button>
                             }
                         </mat-menu>
@@ -262,7 +262,7 @@
                             </mat-icon>
                             }
                         </div>
-                        <p class="text-sm text-gray-600">{{ order.user?.name || order.guestName || order.user?.email || 'Guest' }}</p>
+                        <p class="text-sm text-gray-600">{{ order.user?.name || order.guestName || order.user?.email || ('Guest' | tr) }}</p>
                     </div>
                     <button mat-icon-button [matMenuTriggerFor]="cardMenu">
                         <mat-icon>more_vert</mat-icon>
@@ -270,22 +270,22 @@
                     <mat-menu #cardMenu="matMenu">
                         <button mat-menu-item (click)="viewOrder(order)">
                             <mat-icon>visibility</mat-icon>
-                            <span>View</span>
+                            <span><ng-container i18n>View</ng-container></span>
                         </button>
                         <button mat-menu-item (click)="printOrder(order)">
                             <mat-icon>print</mat-icon>
-                            <span>Print</span>
+                            <span><ng-container i18n>Print</ng-container></span>
                         </button>
                         @if (canCompleteOrder(order)) {
                             <button mat-menu-item (click)="completeOrder(order)">
                                 <mat-icon>task_alt</mat-icon>
-                                <span>Complete Order</span>
+                                <span><ng-container i18n>Complete Order</ng-container></span>
                             </button>
                         }
                         @if (canEditOrder(order)) {
                             <button mat-menu-item (click)="editOrder(order)">
                                 <mat-icon>edit</mat-icon>
-                                <span>Edit</span>
+                                <span><ng-container i18n>Edit</ng-container></span>
                             </button>
                         }
                     </mat-menu>

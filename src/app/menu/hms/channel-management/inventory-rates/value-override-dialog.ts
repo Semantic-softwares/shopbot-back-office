@@ -47,28 +47,28 @@ interface ValueOverrideData {
   ],
   template: `
     <div class="p-6 min-w-96">
-      <h2 class="text-xl font-bold mb-6">Value Override</h2>
+      <h2 class="text-xl font-bold mb-6"><ng-container i18n>Value Override</ng-container></h2>
 
       <form [formGroup]="form" class="space-y-6">
         <!-- Room Type Display -->
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Room Type:</label>
+          <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Room Type:</ng-container></label>
           <div class="text-base font-semibold text-gray-900">{{ data.roomTypeName }}</div>
         </div>
 
         <!-- Rate Plan Display (if applicable) -->
         @if (data.ratePlanName) {
           <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700">Rate Plan:</label>
+            <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Rate Plan:</ng-container></label>
             <div class="text-base font-semibold text-gray-900">{{ data.ratePlanName }}</div>
           </div>
         }
 
         <!-- Date Range (Material Range Picker) -->
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Date Range:</label>
+          <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Date Range:</ng-container></label>
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Select date range</mat-label>
+            <mat-label><ng-container i18n>Select date range</ng-container></mat-label>
             <mat-date-range-input [formGroup]="form" [rangePicker]="picker">
               <input matStartDate formControlName="startDate" readonly>
               <input matEndDate formControlName="endDate" readonly>
@@ -81,14 +81,14 @@ interface ValueOverrideData {
         <!-- Restriction Type Selection (only for rate plans) -->
         @if (!data.isAvailabilityOnly) {
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Restriction</mat-label>
+            <mat-label><ng-container i18n>Restriction</ng-container></mat-label>
             <mat-select formControlName="restrictionType" (selectionChange)="onRestrictionTypeChange()">
-              <mat-option value="rate">Rate</mat-option>
-              <mat-option value="min-stay">Min Stay</mat-option>
-              <mat-option value="max-stay">Max Stay</mat-option>
-              <mat-option value="cta">Closed to Arrival</mat-option>
-              <mat-option value="ctd">Closed to Departure</mat-option>
-              <mat-option value="stop-sell">Stop Sell</mat-option>
+              <mat-option value="rate"><ng-container i18n>Rate</ng-container></mat-option>
+              <mat-option value="min-stay"><ng-container i18n>Min Stay</ng-container></mat-option>
+              <mat-option value="max-stay"><ng-container i18n>Max Stay</ng-container></mat-option>
+              <mat-option value="cta"><ng-container i18n>Closed to Arrival</ng-container></mat-option>
+              <mat-option value="ctd"><ng-container i18n>Closed to Departure</ng-container></mat-option>
+              <mat-option value="stop-sell"><ng-container i18n>Stop Sell</ng-container></mat-option>
             </mat-select>
           </mat-form-field>
         }
@@ -97,21 +97,21 @@ interface ValueOverrideData {
         @if (isRateRestriction()) {
           <div class="grid grid-cols-2 gap-4">
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>PMS Rate</mat-label>
+              <mat-label><ng-container i18n>PMS Rate</ng-container></mat-label>
               <input 
                 matInput 
                 type="number" 
                 formControlName="value"
-                placeholder="PMS Rate"
+                placeholder="PMS Rate" i18n-placeholder
                 min="0">
             </mat-form-field>
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>OTA Rate</mat-label>
+              <mat-label><ng-container i18n>OTA Rate</ng-container></mat-label>
               <input 
                 matInput 
                 type="number" 
                 formControlName="otaRateValue"
-                placeholder="OTA Rate"
+                placeholder="OTA Rate" i18n-placeholder
                 min="0">
             </mat-form-field>
           </div>
@@ -125,7 +125,7 @@ interface ValueOverrideData {
               matInput 
               type="number" 
               formControlName="value"
-              placeholder="Enter value"
+              placeholder="Enter value" i18n-placeholder
               min="0">
           </mat-form-field>
         }
@@ -144,14 +144,14 @@ interface ValueOverrideData {
         <button 
           matButton 
           (click)="dialogRef.close()">
-          Cancel
+          <ng-container i18n>Cancel</ng-container>
         </button>
         <button 
           matButton="filled"
           color="primary"
           (click)="save()"
           [disabled]="form.invalid">
-          OK
+          <ng-container i18n>OK</ng-container>
         </button>
       </div>
     </div>

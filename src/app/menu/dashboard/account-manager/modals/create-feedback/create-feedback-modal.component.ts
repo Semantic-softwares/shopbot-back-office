@@ -70,7 +70,7 @@ export class CreateFeedbackModalComponent {
       this.isSubmitting.set(true);
       this.feedbackService.createFeedback(this.feedbackForm.getRawValue()).subscribe({
         next: (data) => {
-          this.snackBar.open(data.reason, 'Close', {
+          this.snackBar.open(data.reason, $localize`Close`, {
             duration: 3000,
             horizontalPosition: 'end',
             verticalPosition: 'top'
@@ -78,7 +78,7 @@ export class CreateFeedbackModalComponent {
           this.dialogRef.close(this.feedbackForm.value);
         },
         error: (error) => {
-          this.snackBar.open('Error creating feedback', 'Close', {
+          this.snackBar.open($localize`Error creating feedback`, $localize`Close`, {
             duration: 3000,
             horizontalPosition: 'end',
             verticalPosition: 'top'

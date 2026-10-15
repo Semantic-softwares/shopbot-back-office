@@ -313,15 +313,15 @@ export class CartComponent implements OnDestroy {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Cancel Sale',
+        title: $localize`Cancel Sale`,
         message:
-          'Are you sure you want to cancel this sale? This action cannot be undone.',
+          $localize`Are you sure you want to cancel this sale? This action cannot be undone.`,
       },
     });
 
     dialogRef.afterClosed().subscribe((confirmed: boolean) => {
       if (confirmed) {
-        this.snackBar.open('Sale cancelled', 'Close', {
+        this.snackBar.open($localize`Sale cancelled`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'center',
           verticalPosition: 'bottom',
@@ -369,8 +369,8 @@ export class CartComponent implements OnDestroy {
           if (result.action === 'select' && result.table) {
             this.tableStore.selectTable(result.table._id);
             this.snackBar.open(
-              `Table "${result.table.name}" selected`,
-              'Close',
+              $localize`Table "${result.table.name}" selected`,
+              $localize`Close`,
               {
                 duration: 3000,
                 horizontalPosition: 'center',
@@ -379,7 +379,7 @@ export class CartComponent implements OnDestroy {
             );
           } else if (result.action === 'remove') {
             this.tableStore.clearSelectedTable();
-            this.snackBar.open('Table selection removed', 'Close', {
+            this.snackBar.open($localize`Table selection removed`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'center',
               verticalPosition: 'bottom',
@@ -428,10 +428,10 @@ export class CartComponent implements OnDestroy {
             }
 
             this.snackBar.open(
-              `Customer "${
+              $localize`Customer "${
                 result.customer.name || result.customer.email
               }" selected`,
-              'Close',
+              $localize`Close`,
               {
                 duration: 3000,
                 horizontalPosition: 'center',
@@ -447,7 +447,7 @@ export class CartComponent implements OnDestroy {
               this.cartStore.updateCartUser(selectedCart._id, '');
             }
 
-            this.snackBar.open('Customer removed', 'Close', {
+            this.snackBar.open($localize`Customer removed`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'center',
               verticalPosition: 'bottom',
@@ -477,10 +477,10 @@ export class CartComponent implements OnDestroy {
             this.selectedCustomer.set(null);
             this.selectedGuest.set(result.guest);
             this.snackBar.open(
-              `Guest "${this.guestService.getGuestName(
+              $localize`Guest "${this.guestService.getGuestName(
                 result.guest
               )}" selected`,
-              'Close',
+              $localize`Close`,
               {
                 duration: 3000,
                 horizontalPosition: 'center',
@@ -489,7 +489,7 @@ export class CartComponent implements OnDestroy {
             );
           } else if (result.action === 'remove') {
             this.selectedGuest.set(null);
-            this.snackBar.open('Guest removed', 'Close', {
+            this.snackBar.open($localize`Guest removed`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'center',
               verticalPosition: 'bottom',
@@ -535,8 +535,8 @@ export class CartComponent implements OnDestroy {
 
             if (result.value > 0) {
               this.snackBar.open(
-                `Discount applied: ${result.discountType} - ${result.value}`,
-                'Close',
+                $localize`Discount applied: ${result.discountType} - ${result.value}`,
+                $localize`Close`,
                 {
                   duration: 3000,
                   horizontalPosition: 'center',
@@ -544,7 +544,7 @@ export class CartComponent implements OnDestroy {
                 }
               );
             } else {
-              this.snackBar.open('Discount removed', 'Close', {
+              this.snackBar.open($localize`Discount removed`, $localize`Close`, {
                 duration: 3000,
                 horizontalPosition: 'center',
                 verticalPosition: 'bottom',
@@ -578,8 +578,8 @@ export class CartComponent implements OnDestroy {
 
             if (result.deliveryFee > 0) {
               this.snackBar.open(
-                `Delivery fee applied: ${result.deliveryFee}`,
-                'Close',
+                $localize`Delivery fee applied: ${result.deliveryFee}`,
+                $localize`Close`,
                 {
                   duration: 3000,
                   horizontalPosition: 'center',
@@ -587,7 +587,7 @@ export class CartComponent implements OnDestroy {
                 }
               );
             } else {
-              this.snackBar.open('Delivery fee removed', 'Close', {
+              this.snackBar.open($localize`Delivery fee removed`, $localize`Close`, {
                 duration: 3000,
                 horizontalPosition: 'center',
                 verticalPosition: 'bottom',
@@ -611,7 +611,7 @@ export class CartComponent implements OnDestroy {
       this.cartStore.addSelectedCartToPending();
       this.cartStore.removeSelectedCart();
 
-      this.snackBar.open('Order pending', 'Close', {
+      this.snackBar.open($localize`Order pending`, $localize`Close`, {
         duration: 3000,
         horizontalPosition: 'center',
         verticalPosition: 'bottom',
@@ -684,7 +684,7 @@ export class CartComponent implements OnDestroy {
 
   // Validate required data
   if (!selectedCart) {
-    this.snackBar.open('No cart selected', 'Close', {
+    this.snackBar.open($localize`No cart selected`, $localize`Close`, {
       duration: 3000,
       horizontalPosition: 'center',
       verticalPosition: 'bottom',
@@ -693,7 +693,7 @@ export class CartComponent implements OnDestroy {
   }
 
   if (!selectedStore) {
-    this.snackBar.open('No store selected', 'Close', {
+    this.snackBar.open($localize`No store selected`, $localize`Close`, {
       duration: 3000,
       horizontalPosition: 'center',
       verticalPosition: 'bottom',
@@ -702,7 +702,7 @@ export class CartComponent implements OnDestroy {
   }
 
   if (!selectedSaleType) {
-    this.snackBar.open('Please select a sale type', 'Close', {
+    this.snackBar.open($localize`Please select a sale type`, $localize`Close`, {
       duration: 3000,
       horizontalPosition: 'center',
       verticalPosition: 'bottom',
@@ -732,7 +732,7 @@ export class CartComponent implements OnDestroy {
   if (isEditingOrder) {
     const selectedOrder = this.orderStore.selectedOrder();
     if (!selectedOrder) {
-      this.snackBar.open('No order selected for editing', 'Close', {
+      this.snackBar.open($localize`No order selected for editing`, $localize`Close`, {
         duration: 3000,
         horizontalPosition: 'center',
         verticalPosition: 'bottom',
@@ -781,7 +781,7 @@ export class CartComponent implements OnDestroy {
     });
     
     this.saleTypeStore.stopEditing();
-    this.snackBar.open('Order updated successfully', 'Close', { duration: 2000 });
+    this.snackBar.open($localize`Order updated successfully`, $localize`Close`, { duration: 2000 });
   } else {
     // Create new order
     this.orderStore.syncOrder$({
@@ -816,7 +816,7 @@ export class CartComponent implements OnDestroy {
       staff: this.selectedUser?._id,
       storeId: selectedStore._id,
     });
-    this.snackBar.open('Order Created', 'Print', { duration: 2000 });
+    this.snackBar.open($localize`Order Created`, $localize`Print`, { duration: 2000 });
   }
 
   // Handle table sync after order creation/update

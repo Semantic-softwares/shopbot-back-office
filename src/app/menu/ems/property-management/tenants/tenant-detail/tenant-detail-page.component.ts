@@ -38,10 +38,10 @@ export class TenantDetailPageComponent {
   );
 
   readonly tabs = [
-    { label: 'Profile', link: 'profile', icon: 'badge' },
-    { label: 'Leases', link: 'leases', icon: 'description' },
-    { label: 'Invoices', link: 'invoices', icon: 'receipt_long' },
-    { label: 'Activities', link: 'activities', icon: 'timeline' },
+    { label: $localize`Profile`, link: 'profile', icon: 'badge' },
+    { label: $localize`Leases`, link: 'leases', icon: 'description' },
+    { label: $localize`Invoices`, link: 'invoices', icon: 'receipt_long' },
+    { label: $localize`Activities`, link: 'activities', icon: 'timeline' },
   ];
 
   tenantResource = rxResource({

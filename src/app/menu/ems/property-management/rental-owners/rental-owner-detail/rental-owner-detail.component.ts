@@ -39,10 +39,10 @@ export class RentalOwnerDetailComponent {
   );
 
   readonly tabs = [
-    { label: 'Summary', link: 'summary', icon: 'dashboard' },
-    { label: 'Properties', link: 'properties', icon: 'domain' },
-    { label: 'Notes', link: 'notes', icon: 'sticky_note_2' },
-    { label: 'Files', link: 'files', icon: 'folder' },
+    { label: $localize`Summary`, link: 'summary', icon: 'dashboard' },
+    { label: $localize`Properties`, link: 'properties', icon: 'domain' },
+    { label: $localize`Notes`, link: 'notes', icon: 'sticky_note_2' },
+    { label: $localize`Files`, link: 'files', icon: 'folder' },
   ];
 
   ownerResource = rxResource({

@@ -10,6 +10,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TableCategoryService } from '../../../../../../shared/services/table-category.service';
 import { StoreStore } from '../../../../../../shared/stores/store.store';
 import { TableCategory } from '../../../../../../shared/models';
+import { TrPipe } from '../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-create-table-category',
@@ -17,7 +18,7 @@ import { TableCategory } from '../../../../../../shared/models';
   styleUrls: ['./create-table-category.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
+  imports: [TrPipe, 
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -71,7 +72,7 @@ export class CreateTableCategoryComponent implements OnInit {
       if (this.isEdit) {
         this.tableCategoryService.updateTableCategory(this.data.category._id, formValue).subscribe({
           next: () => {
-            this.snackBar.open('Table category updated successfully', 'Close', {
+            this.snackBar.open($localize`Table category updated successfully`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -80,7 +81,7 @@ export class CreateTableCategoryComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error updating table category:', error);
-            this.snackBar.open('Error updating table category', 'Close', {
+            this.snackBar.open($localize`Error updating table category`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -91,7 +92,7 @@ export class CreateTableCategoryComponent implements OnInit {
       } else {
         this.tableCategoryService.createTableCategory(formValue).subscribe({
           next: () => {
-            this.snackBar.open('Table category created successfully', 'Close', {
+            this.snackBar.open($localize`Table category created successfully`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -100,7 +101,7 @@ export class CreateTableCategoryComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error creating table category:', error);
-            this.snackBar.open('Error creating table category', 'Close', {
+            this.snackBar.open($localize`Error creating table category`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'

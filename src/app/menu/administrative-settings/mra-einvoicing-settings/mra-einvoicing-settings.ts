@@ -18,6 +18,7 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { MraActivity, MraAuditEntry, MraOwnerView, MraStatus, MraTestDriveStatus, MraTestUserKind, MraView } from '../../../shared/models';
 import { MraEinvoicingService } from '../../../shared/services/mra-einvoicing.service';
 import { StoreStore } from '../../../shared/stores/store.store';
+import { TrPipe } from '../../../shared/i18n/tr.pipe';
 
 const MRA_PORTAL_URL = 'https://www.mra.mu';
 
@@ -62,7 +63,7 @@ type Mode = 'status' | 'wizard';
 @Component({
   selector: 'app-mra-einvoicing-settings',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     DatePipe,
     ReactiveFormsModule,
     MatButtonModule,
@@ -245,7 +246,7 @@ export class MraEinvoicingSettings implements OnInit, OnDestroy {
     if (!storeId || this.ebsForm.invalid) return this.ebsForm.markAllAsTouched();
     this.run(this.service.saveEbs(storeId, this.ebsForm.getRawValue()), this.ebsForm, () => {
       this.mode.set('status');
-      this.snackBar.open('Shopbot is registered for this place of business', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`Shopbot is registered for this place of business`, $localize`Close`, { duration: 5000 });
     });
   }
 
@@ -282,13 +283,13 @@ export class MraEinvoicingSettings implements OnInit, OnDestroy {
       next: () => {
         this.saving.set(false);
         this.releasing.set(null);
-        this.snackBar.open('Released. Shopbot will send it to MRA again.', 'Close', { duration: 5000 });
+        this.snackBar.open($localize`Released. Shopbot will send it to MRA again.`, $localize`Close`, { duration: 5000 });
         this.loadActivity();
       },
       error: (err: HttpErrorResponse) => {
         this.saving.set(false);
         this.releaseErrors.set(err.error?.errors ?? {});
-        this.snackBar.open(err.error?.errors ? 'Check the highlighted fields.' : (err.error?.message ?? 'Could not release this invoice.'), 'Close', { duration: 6000 });
+        this.snackBar.open(err.error?.errors ? $localize`Check the highlighted fields.` : (err.error?.message ?? 'Could not release this invoice.'), $localize`Close`, { duration: 6000 });
       },
     });
   }
@@ -357,7 +358,7 @@ export class MraEinvoicingSettings implements OnInit, OnDestroy {
 
   resetTesting(): void {
     const storeId = this.storeId;
-    if (storeId) this.run(this.service.resetTesting(storeId), undefined, () => this.snackBar.open('MRA Test Drive restarted from scratch', 'Close', { duration: 5000 }));
+    if (storeId) this.run(this.service.resetTesting(storeId), undefined, () => this.snackBar.open($localize`MRA Test Drive restarted from scratch`, $localize`Close`, { duration: 5000 }));
   }
 
   // ---- LIVE ---------------------------------------------------------------
@@ -368,7 +369,7 @@ export class MraEinvoicingSettings implements OnInit, OnDestroy {
     this.run(this.service.activateLive(storeId, this.liveConfirmation.value), undefined, () => {
       this.liveConfirmOpen.set(false);
       this.liveConfirmation.reset('');
-      this.snackBar.open('LIVE fiscalisation is on', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`LIVE fiscalisation is on`, $localize`Close`, { duration: 5000 });
     });
   }
 
@@ -475,6 +476,6 @@ export class MraEinvoicingSettings implements OnInit, OnDestroy {
       }
     }
     const raw = err.status === 403 ? 'Only the store owner can change this.' : fieldErrors ? 'Check the highlighted fields.' : (err.error?.message ?? 'Something went wrong. Please try again.');
-    this.snackBar.open(Array.isArray(raw) ? raw.join(', ') : raw, 'Close', { duration: 6000 });
+    this.snackBar.open(Array.isArray(raw) ? raw.join(', ') : raw, $localize`Close`, { duration: 6000 });
   }
 }

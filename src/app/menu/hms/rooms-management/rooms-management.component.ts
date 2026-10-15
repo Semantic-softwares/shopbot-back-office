@@ -25,9 +25,9 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 export class RoomsManagementComponent {
 
   readonly tabs = [
-    { label: 'Rooms', link: 'rooms', icon: 'meeting_room' },
-    { label: 'Room Types', link: 'room-types', icon: 'category' },
-    { label: 'Rate Plans', link: 'rate-plans', icon: 'price_change' },
-    { label: 'Inventory', link: 'inventory', icon: 'calendar_month' },
+    { label: $localize`Rooms`, link: 'rooms', icon: 'meeting_room' },
+    { label: $localize`Room Types`, link: 'room-types', icon: 'category' },
+    { label: $localize`Rate Plans`, link: 'rate-plans', icon: 'price_change' },
+    { label: $localize`Inventory`, link: 'inventory', icon: 'calendar_month' },
   ];
 }

@@ -190,17 +190,17 @@ export class OperationalOrdersSettings implements OnInit {
             this.storeStore.updateStore(updatedStore);
             this.storeService.saveStoreLocally(updatedStore);
             this.saving.set(false);
-            this.snackBar.open('Operational hours saved.', 'Close', { duration: 3000 });
+            this.snackBar.open($localize`Operational hours saved.`, $localize`Close`, { duration: 3000 });
           },
           error: () => {
             this.saving.set(false);
-            this.snackBar.open('Saved, but failed to refresh local data.', 'Close', { duration: 4000 });
+            this.snackBar.open($localize`Saved, but failed to refresh local data.`, $localize`Close`, { duration: 4000 });
           },
         });
       },
       error: () => {
         this.saving.set(false);
-        this.snackBar.open('Failed to save operational hours.', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Failed to save operational hours.`, $localize`Close`, { duration: 4000 });
       },
     });
   }

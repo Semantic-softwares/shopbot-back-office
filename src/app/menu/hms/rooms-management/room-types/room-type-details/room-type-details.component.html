@@ -1,31 +1,31 @@
 <app-page-header 
-  [title]="roomType() ? roomType()!.name : 'Room Type Details'" 
-  [subtitle]="roomType() ? 'Room type configuration and pricing' : 'Loading room type information...'">
+  [title]="roomType() ? roomType()!.name : ('Room Type Details' | tr)" 
+  [subtitle]="roomType() ? ('Room type configuration and pricing' | tr) : ('Loading room type information...' | tr)">
   <ng-container actions>
     @if (!loading() && roomType()) {
       <button mat-stroked-button (click)="onEdit()">
         <mat-icon>edit</mat-icon>
-        Edit Room Type
+        <ng-container i18n>Edit Room Type</ng-container>
       </button>
 
       <button mat-stroked-button [matMenuTriggerFor]="actionsMenu">
         <mat-icon>more_vert</mat-icon>
-        Actions
+        <ng-container i18n>Actions</ng-container>
       </button>
 
       <mat-menu #actionsMenu="matMenu">
         <button mat-menu-item (click)="onEdit()">
           <mat-icon>edit</mat-icon>
-          <span>Edit Room Type</span>
+          <span><ng-container i18n>Edit Room Type</ng-container></span>
         </button>
         <button mat-menu-item (click)="onToggleActive()">
           <mat-icon>{{ roomType()!.active ? 'toggle_off' : 'toggle_on' }}</mat-icon>
-          <span>{{ roomType()!.active ? 'Deactivate' : 'Activate' }}</span>
+          <span>@if (roomType()!.active) {<ng-container i18n>Deactivate</ng-container>} @else {<ng-container i18n>Activate</ng-container>}</span>
         </button>
         <mat-divider></mat-divider>
         <button mat-menu-item (click)="onDelete()" class="text-red-600!">
           <mat-icon class="text-red-600!">delete</mat-icon>
-          <span>Delete Room Type</span>
+          <span><ng-container i18n>Delete Room Type</ng-container></span>
         </button>
       </mat-menu>
     }
@@ -46,11 +46,11 @@
       <div class="w-16 h-16 bg-red-200 rounded-full flex items-center justify-center mx-auto mb-4">
         <mat-icon class="text-4xl text-red-500">error</mat-icon>
       </div>
-      <h3 class="text-lg font-semibold text-red-900 mb-2">Failed to Load Room Type</h3>
+      <h3 class="text-lg font-semibold text-red-900 mb-2"><ng-container i18n>Failed to Load Room Type</ng-container></h3>
       <p class="text-red-700 mb-4">{{ error() }}</p>
       <button mat-flat-button color="warn" (click)="loadRoomTypeDetails()">
         <mat-icon>refresh</mat-icon>
-        Try Again
+        <ng-container i18n>Try Again</ng-container>
       </button>
     </mat-card-content>
   </mat-card>
@@ -84,7 +84,7 @@
                 @if (rt.size) {
                   <div class="flex items-center gap-1">
                     <mat-icon class="text-lg">fullscreen</mat-icon>
-                    <span>{{ rt.size }} sq ft</span>
+                    <span><ng-container i18n>{{ rt.size }} sq ft</ng-container></span>
                   </div>
                 }
                 @if (rt.bedConfiguration) {
@@ -100,7 +100,7 @@
                 'bg-green-100! text-green-800!': rt.active,
                 'bg-red-100! text-red-800!': !rt.active
               }">
-                {{ rt.active ? 'Active' : 'Inactive' }}
+                @if (rt.active) {<ng-container i18n>Active</ng-container>} @else {<ng-container i18n>Inactive</ng-container>}
               </mat-chip>
             </div>
           </div>
@@ -110,13 +110,13 @@
             <mat-card appearance="outlined" class="bg-green-50!">
               <mat-card-content class="p-4! text-center">
                 <div class="text-2xl font-bold text-green-600">{{ formatPrice(rt.basePrice) }}</div>
-                <div class="text-sm text-green-700">Price/Night</div>
+                <div class="text-sm text-green-700"><ng-container i18n>Price/Night</ng-container></div>
               </mat-card-content>
             </mat-card>
             <mat-card appearance="outlined" class="bg-blue-50!">
               <mat-card-content class="p-4! text-center">
                 <div class="text-2xl font-bold text-blue-600">{{ totalCapacity() }}</div>
-                <div class="text-sm text-blue-700">Max Guests</div>
+                <div class="text-sm text-blue-700"><ng-container i18n>Max Guests</ng-container></div>
               </mat-card-content>
             </mat-card>
           </div>
@@ -129,7 +129,7 @@
       <mat-tab-group animationDuration="200ms">
         
         <!-- Room Type Information Tab -->
-        <mat-tab label="Room Type Information">
+        <mat-tab label="Room Type Information" i18n-label>
           <div class="p-6 space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
@@ -137,40 +137,40 @@
               <mat-card appearance="outlined">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-blue-600">info</mat-icon>
-                  <mat-card-title>Basic Details</mat-card-title>
+                  <mat-card-title><ng-container i18n>Basic Details</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6! space-y-4">
                   <div>
-                    <label class="text-sm font-medium text-gray-500">Room Type Name</label>
+                    <label class="text-sm font-medium text-gray-500"><ng-container i18n>Room Type Name</ng-container></label>
                     <p class="text-lg font-semibold text-gray-900 mt-1">{{ rt.name }}</p>
                   </div>
                   @if (rt.description) {
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Description</label>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Description</ng-container></label>
                       <p class="text-gray-700 mt-1">{{ rt.description }}</p>
                     </div>
                   }
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Base Price</label>
-                      <p class="text-lg font-semibold text-green-600 mt-1">{{ formatPrice(rt.basePrice) }}/night</p>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Base Price</ng-container></label>
+                      <p class="text-lg font-semibold text-green-600 mt-1"><ng-container i18n>{{ formatPrice(rt.basePrice) }}/night</ng-container></p>
                     </div>
                     @if (rt.size) {
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Room Size</label>
-                        <p class="text-gray-900 mt-1">{{ rt.size }} sq ft</p>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Room Size</ng-container></label>
+                        <p class="text-gray-900 mt-1"><ng-container i18n>{{ rt.size }} sq ft</ng-container></p>
                       </div>
                     }
                   </div>
                   @if (rt.bedConfiguration) {
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Bed Configuration</label>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Bed Configuration</ng-container></label>
                       <p class="text-gray-900 mt-1">{{ rt.bedConfiguration }}</p>
                     </div>
                   }
                   @if (rt.sortOrder !== undefined) {
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Sort Order</label>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Sort Order</ng-container></label>
                       <p class="text-gray-900 mt-1">{{ rt.sortOrder }}</p>
                     </div>
                   }
@@ -181,20 +181,20 @@
               <mat-card appearance="outlined">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-green-600">people</mat-icon>
-                  <mat-card-title>Capacity & Occupancy</mat-card-title>
+                  <mat-card-title><ng-container i18n>Capacity & Occupancy</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6! space-y-4">
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Base Capacity</label>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Base Capacity</ng-container></label>
                       <p class="text-lg font-semibold text-gray-900 mt-1">{{ getCapacityText() }}</p>
-                      <p class="text-sm text-gray-500">Total: {{ totalCapacity() }} guests</p>
+                      <p class="text-sm text-gray-500"><ng-container i18n>Total: {{ totalCapacity() }} guests</ng-container></p>
                     </div>
                     @if (rt.maxOccupancy) {
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Maximum Occupancy</label>
-                        <p class="text-lg font-semibold text-gray-900 mt-1">{{ rt.maxOccupancy }} guests</p>
-                        <p class="text-sm text-gray-500">Including extra beds</p>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Maximum Occupancy</ng-container></label>
+                        <p class="text-lg font-semibold text-gray-900 mt-1"><ng-container i18n>{{ rt.maxOccupancy }} guests</ng-container></p>
+                        <p class="text-sm text-gray-500"><ng-container i18n>Including extra beds</ng-container></p>
                       </div>
                     }
                   </div>
@@ -204,16 +204,16 @@
                     <div class="grid grid-cols-3 gap-3 pt-4 border-t border-gray-100">
                       <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
                         <div class="text-xl font-bold text-blue-600">{{ rt.capacity.adults || 0 }}</div>
-                        <div class="text-xs font-medium text-gray-600">Adults</div>
+                        <div class="text-xs font-medium text-gray-600"><ng-container i18n>Adults</ng-container></div>
                       </div>
                       <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
                         <div class="text-xl font-bold text-green-600">{{ rt.capacity.children || 0 }}</div>
-                        <div class="text-xs font-medium text-gray-600">Children</div>
+                        <div class="text-xs font-medium text-gray-600"><ng-container i18n>Children</ng-container></div>
                       </div>
                       @if (rt.capacity.infants !== undefined) {
                         <div class="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
                           <div class="text-xl font-bold text-purple-600">{{ rt.capacity.infants || 0 }}</div>
-                          <div class="text-xs font-medium text-gray-600">Infants</div>
+                          <div class="text-xs font-medium text-gray-600"><ng-container i18n>Infants</ng-container></div>
                         </div>
                       }
                     </div>
@@ -226,32 +226,32 @@
             <mat-card appearance="outlined">
               <mat-card-header>
                 <mat-icon mat-card-avatar class="text-amber-600">assignment_turned_in</mat-icon>
-                <mat-card-title>Status & Metadata</mat-card-title>
+                <mat-card-title><ng-container i18n>Status & Metadata</ng-container></mat-card-title>
               </mat-card-header>
               <mat-card-content class="p-6!">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                   <div>
-                    <label class="text-sm font-medium text-gray-500 mb-2 block">Status</label>
+                    <label class="text-sm font-medium text-gray-500 mb-2 block"><ng-container i18n>Status</ng-container></label>
                     <mat-chip [ngClass]="{
                       'bg-green-100! text-green-800!': rt.active,
                       'bg-red-100! text-red-800!': !rt.active
                     }">
-                      {{ rt.active ? 'Active' : 'Inactive' }}
+                      @if (rt.active) {<ng-container i18n>Active</ng-container>} @else {<ng-container i18n>Inactive</ng-container>}
                     </mat-chip>
                   </div>
                   <div>
-                    <label class="text-sm font-medium text-gray-500">Room Type ID</label>
+                    <label class="text-sm font-medium text-gray-500"><ng-container i18n>Room Type ID</ng-container></label>
                     <p class="text-sm font-mono text-gray-900 mt-1 bg-gray-50 px-2 py-1 rounded border truncate">{{ rt._id || rt.id }}</p>
                   </div>
                   @if (rt.createdAt) {
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Created</label>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Created</ng-container></label>
                       <p class="text-sm text-gray-900 mt-1">{{ rt.createdAt | date:'medium' }}</p>
                     </div>
                   }
                   @if (rt.updatedAt) {
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Last Updated</label>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Last Updated</ng-container></label>
                       <p class="text-sm text-gray-900 mt-1">{{ rt.updatedAt | date:'medium' }}</p>
                     </div>
                   }
@@ -262,14 +262,14 @@
         </mat-tab>
 
         <!-- Features & Amenities Tab -->
-        <mat-tab label="Features & Amenities">
+        <mat-tab label="Features & Amenities" i18n-label>
           <div class="p-6 space-y-6">
             
             <!-- Room Features -->
             <mat-card appearance="outlined">
               <mat-card-header>
                 <mat-icon mat-card-avatar class="text-purple-600">star</mat-icon>
-                <mat-card-title>Room Features</mat-card-title>
+                <mat-card-title><ng-container i18n>Room Features</ng-container></mat-card-title>
               </mat-card-header>
               <mat-card-content class="p-6!">
                 @if (roomFeatures().length > 0) {
@@ -284,7 +284,7 @@
                 } @else {
                   <div class="text-center py-8 text-gray-500">
                     <mat-icon class="text-4xl text-gray-300 mb-2">star_outline</mat-icon>
-                    <p>No specific features configured</p>
+                    <p><ng-container i18n>No specific features configured</ng-container></p>
                   </div>
                 }
               </mat-card-content>
@@ -294,7 +294,7 @@
             <mat-card appearance="outlined">
               <mat-card-header>
                 <mat-icon mat-card-avatar class="text-indigo-600">room_service</mat-icon>
-                <mat-card-title>Amenities</mat-card-title>
+                <mat-card-title><ng-container i18n>Amenities</ng-container></mat-card-title>
               </mat-card-header>
               <mat-card-content class="p-6!">
                 @if (rt.amenities && rt.amenities.length > 0) {
@@ -308,7 +308,7 @@
                 } @else {
                   <div class="text-center py-8 text-gray-500">
                     <mat-icon class="text-4xl text-gray-300 mb-2">local_offer</mat-icon>
-                    <p>No amenities configured</p>
+                    <p><ng-container i18n>No amenities configured</ng-container></p>
                   </div>
                 }
               </mat-card-content>
@@ -317,30 +317,30 @@
         </mat-tab>
 
         <!-- Actions Tab -->
-        <mat-tab label="Actions">
+        <mat-tab label="Actions" i18n-label>
           <div class="p-6 space-y-6">
             <mat-card appearance="outlined">
               <mat-card-header>
                 <mat-icon mat-card-avatar class="text-blue-600">settings</mat-icon>
-                <mat-card-title>Room Type Actions</mat-card-title>
+                <mat-card-title><ng-container i18n>Room Type Actions</ng-container></mat-card-title>
               </mat-card-header>
               <mat-card-content class="p-6!">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <button mat-flat-button color="primary" (click)="onEdit()">
                     <mat-icon>edit</mat-icon>
-                    Edit Room Type
+                    <ng-container i18n>Edit Room Type</ng-container>
                   </button>
                   
                   <button mat-stroked-button (click)="onToggleActive()"
                     [class.text-green-600!]="!rt.active"
                     [class.text-red-600!]="rt.active">
                     <mat-icon>{{ rt.active ? 'toggle_off' : 'toggle_on' }}</mat-icon>
-                    {{ rt.active ? 'Deactivate' : 'Activate' }}
+                    @if (rt.active) {<ng-container i18n>Deactivate</ng-container>} @else {<ng-container i18n>Activate</ng-container>}
                   </button>
 
                   <button mat-flat-button color="warn" (click)="onDelete()">
                     <mat-icon>delete</mat-icon>
-                    Delete Room Type
+                    <ng-container i18n>Delete Room Type</ng-container>
                   </button>
                 </div>
               </mat-card-content>
@@ -349,12 +349,12 @@
             <mat-card appearance="outlined">
               <mat-card-header>
                 <mat-icon mat-card-avatar class="text-gray-600">arrow_back</mat-icon>
-                <mat-card-title>Navigation</mat-card-title>
+                <mat-card-title><ng-container i18n>Navigation</ng-container></mat-card-title>
               </mat-card-header>
               <mat-card-content class="p-6!">
                 <button mat-stroked-button (click)="onBack()">
                   <mat-icon>arrow_back</mat-icon>
-                  Back to Room Types
+                  <ng-container i18n>Back to Room Types</ng-container>
                 </button>
               </mat-card-content>
             </mat-card>

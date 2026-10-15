@@ -36,43 +36,43 @@ import { AuthService } from '../../../../../shared/services/auth.service';
     <div class="p-6 max-w-2xl mx-auto">
       <div class="flex items-center justify-between mb-6">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Start New Reconciliation</h1>
-          <p class="text-gray-600 mt-1">Initialize a new inventory reconciliation session</p>
+          <h1 class="text-2xl font-bold text-gray-900"><ng-container i18n>Start New Reconciliation</ng-container></h1>
+          <p class="text-gray-600 mt-1"><ng-container i18n>Initialize a new inventory reconciliation session</ng-container></p>
         </div>
         <button mat-button [routerLink]="['..']" class="text-gray-600">
           <mat-icon>arrow_back</mat-icon>
-          Back to List
+          <ng-container i18n>Back to List</ng-container>
         </button>
       </div>
 
       <form [formGroup]="reconciliationForm" (ngSubmit)="onSubmit()">
         <mat-card class="mb-6">
           <mat-card-header>
-            <mat-card-title>Reconciliation Details</mat-card-title>
+            <mat-card-title><ng-container i18n>Reconciliation Details</ng-container></mat-card-title>
           </mat-card-header>
           <mat-card-content class="p-6">
             <div class="space-y-6">
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Reconciliation Name *</mat-label>
-                <input matInput formControlName="name" placeholder="e.g., Monthly Inventory Count - December 2024">
+                <mat-label><ng-container i18n>Reconciliation Name *</ng-container></mat-label>
+                <input matInput formControlName="name" placeholder="e.g., Monthly Inventory Count - December 2024" i18n-placeholder>
                 @if (reconciliationForm.get('name')?.invalid && reconciliationForm.get('name')?.touched) {
-                  <mat-error>Reconciliation name is required</mat-error>
+                  <mat-error><ng-container i18n>Reconciliation name is required</ng-container></mat-error>
                 }
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Type</mat-label>
+                <mat-label><ng-container i18n>Type</ng-container></mat-label>
                 <mat-select formControlName="type">
-                  <mat-option value="full_inventory">Full Inventory Count</mat-option>
-                  <mat-option value="partial">Partial Count</mat-option>
-                  <mat-option value="cycle_count">Cycle Count</mat-option>
+                  <mat-option value="full_inventory"><ng-container i18n>Full Inventory Count</ng-container></mat-option>
+                  <mat-option value="partial"><ng-container i18n>Partial Count</ng-container></mat-option>
+                  <mat-option value="cycle_count"><ng-container i18n>Cycle Count</ng-container></mat-option>
                 </mat-select>
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Description</mat-label>
+                <mat-label><ng-container i18n>Description</ng-container></mat-label>
                 <textarea matInput formControlName="description" rows="3" 
-                          placeholder="Optional description or notes about this reconciliation"></textarea>
+                          placeholder="Optional description or notes about this reconciliation" i18n-placeholder></textarea>
               </mat-form-field>
             </div>
           </mat-card-content>
@@ -84,12 +84,12 @@ import { AuthService } from '../../../../../shared/services/auth.service';
             <div class="flex items-start space-x-4">
               <mat-icon class="text-blue-500 mt-1">info</mat-icon>
               <div>
-                <h3 class="font-semibold text-gray-900 mb-2">What happens next?</h3>
+                <h3 class="font-semibold text-gray-900 mb-2"><ng-container i18n>What happens next?</ng-container></h3>
                 <ul class="text-sm text-gray-600 space-y-1">
-                  <li>• System will load all current products and their quantities</li>
-                  <li>• You'll be able to enter physical counts for each product</li>
-                  <li>• Discrepancies will be automatically calculated</li>
-                  <li>• Review and approve adjustments before updating inventory</li>
+                  <li><ng-container i18n>• System will load all current products and their quantities</ng-container></li>
+                  <li><ng-container i18n>• You'll be able to enter physical counts for each product</ng-container></li>
+                  <li><ng-container i18n>• Discrepancies will be automatically calculated</ng-container></li>
+                  <li><ng-container i18n>• Review and approve adjustments before updating inventory</ng-container></li>
                 </ul>
               </div>
             </div>
@@ -98,7 +98,7 @@ import { AuthService } from '../../../../../shared/services/auth.service';
 
         <!-- Action Buttons -->
         <div class="flex justify-end space-x-4">
-          <button type="button" mat-button [routerLink]="['..']">Cancel</button>
+          <button type="button" mat-button [routerLink]="['..']"><ng-container i18n>Cancel</ng-container></button>
           <button
             type="submit"
             mat-raised-button
@@ -108,7 +108,7 @@ import { AuthService } from '../../../../../shared/services/auth.service';
             @if (isSubmitting()) {
               <mat-spinner diameter="20" class="mr-2"></mat-spinner>
             }
-            Initialize Reconciliation
+            <ng-container i18n>Initialize Reconciliation</ng-container>
           </button>
         </div>
       </form>

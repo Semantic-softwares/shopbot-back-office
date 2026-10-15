@@ -6,31 +6,31 @@
           <mat-icon class="text-indigo-600">install_mobile</mat-icon>
         </div>
         <div class="flex-1 min-w-0">
-          <h3 class="text-sm font-semibold text-gray-900 m-0">Install Shopbot</h3>
+          <h3 class="text-sm font-semibold text-gray-900 m-0"><ng-container i18n>Install Shopbot</ng-container></h3>
 
           @if (installService.canInstall()) {
             <p class="text-xs text-gray-600 mt-1 mb-3">
-              Install the app on your device for quick access and a better experience.
+              <ng-container i18n>Install the app on your device for quick access and a better experience.</ng-container>
             </p>
             <div class="flex items-center gap-2">
               <button mat-flat-button color="primary" (click)="onInstall()" class="text-xs">
                 <mat-icon class="mr-1">download</mat-icon>
-                Install
+                <ng-container i18n>Install</ng-container>
               </button>
               <button mat-stroked-button (click)="onDismiss()" class="text-xs">
-                Not now
+                <ng-container i18n>Not now</ng-container>
               </button>
             </div>
           }
 
           @if (installService.showIosInstall() && !installService.canInstall()) {
             <p class="text-xs text-gray-600 mt-1 mb-2">
-              To install, tap
+              <ng-container i18n>To install, tap</ng-container>
               <mat-icon class="align-middle text-base">ios_share</mat-icon>
-              then <strong>"Add to Home Screen"</strong>.
+              <ng-container i18n>then</ng-container> <strong><ng-container i18n>"Add to Home Screen"</ng-container></strong>.
             </p>
             <button mat-stroked-button (click)="onDismiss()" class="text-xs">
-              Got it
+              <ng-container i18n>Got it</ng-container>
             </button>
           }
         </div>

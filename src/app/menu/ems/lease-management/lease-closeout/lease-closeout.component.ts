@@ -33,11 +33,12 @@ import {
   ReturnDepositDialogComponent,
   ReturnDepositDialogResult,
 } from './return-deposit-dialog/return-deposit-dialog.component';
+import { TrPipe } from '../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-lease-closeout',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
@@ -143,7 +144,7 @@ export class LeaseCloseoutComponent {
       .open(ConfirmationDialogComponent, {
         data: {
           message:
-            'End this lease now? Future recurring billing will stop, but outstanding invoices and deposits will remain for manual closeout.',
+            $localize`End this lease now? Future recurring billing will stop, but outstanding invoices and deposits will remain for manual closeout.`,
         },
       })
       .afterClosed()
@@ -164,12 +165,12 @@ export class LeaseCloseoutComponent {
           .subscribe({
             next: () => {
               this.isSubmitting.set(false);
-              this.snackBar.open('Lease ended successfully', 'Close', { duration: 4000 });
+              this.snackBar.open($localize`Lease ended successfully`, $localize`Close`, { duration: 4000 });
               this.router.navigate(['../'], { relativeTo: this.route });
             },
             error: (error) => {
               this.isSubmitting.set(false);
-              this.snackBar.open(error?.error?.message || 'Failed to end lease', 'Close', {
+              this.snackBar.open(error?.error?.message || 'Failed to end lease', $localize`Close`, {
                 duration: 6000,
               });
             },
@@ -220,7 +221,7 @@ export class LeaseCloseoutComponent {
       error: (err: { error?: { message?: string } }) => {
         this.snackBar.open(
           err?.error?.message || 'Failed to load invoice details',
-          'Close',
+          $localize`Close`,
           { duration: 5000 },
         );
       },
@@ -258,7 +259,7 @@ export class LeaseCloseoutComponent {
       const today = this.formatDateForApi(new Date());
       if (!today) {
         this.isRefundingDeposit.set(false);
-        this.snackBar.open('Unable to determine refund date', 'Close', {
+        this.snackBar.open($localize`Unable to determine refund date`, $localize`Close`, {
           duration: 4000,
         });
         return;
@@ -268,8 +269,8 @@ export class LeaseCloseoutComponent {
         .createManualInvoice({
           leaseId: this.leaseId(),
           tenantId: result.tenantId,
-          title: 'Refund Deposit',
-          description: 'Lease closeout deposit refund',
+          title: $localize`Refund Deposit`,
+          description: $localize`Lease closeout deposit refund`,
           type: InvoiceType.ONE_TIME_CHARGE,
           dueDate: today,
           amount: result.amount,
@@ -285,7 +286,7 @@ export class LeaseCloseoutComponent {
 
             if (!result.markAsPaid) {
               this.isRefundingDeposit.set(false);
-              this.snackBar.open('Refund invoice created', 'Close', {
+              this.snackBar.open($localize`Refund invoice created`, $localize`Close`, {
                 duration: 3500,
               });
               this.closeoutResource.reload();
@@ -301,7 +302,7 @@ export class LeaseCloseoutComponent {
                 this.isRefundingDeposit.set(false);
                 this.snackBar.open(
                   err?.error?.message || 'Refund invoice created but failed to load payment dialog',
-                  'Close',
+                  $localize`Close`,
                   { duration: 5000 },
                 );
                 this.closeoutResource.reload();
@@ -312,7 +313,7 @@ export class LeaseCloseoutComponent {
             this.isRefundingDeposit.set(false);
             this.snackBar.open(
               err?.error?.message || 'Failed to create refund invoice',
-              'Close',
+              $localize`Close`,
               { duration: 5000 },
             );
           },
@@ -353,7 +354,7 @@ export class LeaseCloseoutComponent {
         })
         .subscribe({
           next: () => {
-            this.snackBar.open('Payment recorded and applied to invoice', 'Close', {
+            this.snackBar.open($localize`Payment recorded and applied to invoice`, $localize`Close`, {
               duration: 3500,
             });
             this.closeoutResource.reload();
@@ -361,7 +362,7 @@ export class LeaseCloseoutComponent {
           error: (err: { error?: { message?: string } }) => {
             this.snackBar.open(
               err?.error?.message || 'Failed to record payment',
-              'Close',
+              $localize`Close`,
               { duration: 5000 },
             );
           },

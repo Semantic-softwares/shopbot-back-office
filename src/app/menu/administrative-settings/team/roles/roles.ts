@@ -179,7 +179,7 @@ export class Roles {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Role',
+        title: $localize`Delete Role`,
         message: `Are you sure you want to delete the role "${role.name}"? This action cannot be undone.`
       }
     });
@@ -209,8 +209,8 @@ export class Roles {
         const rolesCreated = data?.roles?.created?.length ?? 0;
         const rolesUpdated = data?.roles?.updated?.length ?? 0;
         this.snackBar.open(
-          `Sync complete: ${created} new permissions, ${rolesCreated} roles created, ${rolesUpdated} roles updated`,
-          'OK',
+          $localize`Sync complete: ${created} new permissions, ${rolesCreated} roles created, ${rolesUpdated} roles updated`,
+          $localize`OK`,
           { duration: 5000 }
         );
         // Refresh both roles and permissions
@@ -221,7 +221,7 @@ export class Roles {
       },
       error: (err) => {
         console.error('Failed to sync permissions:', err);
-        this.snackBar.open('Failed to sync permissions. Please try again.', 'OK', { duration: 4000 });
+        this.snackBar.open($localize`Failed to sync permissions. Please try again.`, $localize`OK`, { duration: 4000 });
         this.syncing.set(false);
       },
     });

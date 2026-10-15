@@ -99,13 +99,13 @@ export class TableCardComponent {
     const order = this.table().orderId;
     
     if (!order?.cart) {
-      this.snackBar.open('No cart data available', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`No cart data available`, $localize`Close`, { duration: 3000 });
       return;
     }
 
     // Set loading state and show loading indicator
     this.isLoadingBill.set(true);
-    const loadingSnackBar = this.snackBar.open('Loading bill...', '', {
+    const loadingSnackBar = this.snackBar.open($localize`Loading bill...`, '', {
       duration: 0,
       horizontalPosition: 'center',
       verticalPosition: 'bottom',
@@ -135,14 +135,14 @@ export class TableCardComponent {
           console.error('Failed to load bill:', error);
           loadingSnackBar.dismiss();
           this.isLoadingBill.set(false);
-          this.snackBar.open('Failed to load bill', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Failed to load bill`, $localize`Close`, { duration: 3000 });
         }
       },
       error: (error) => {
         console.error('Error loading cart:', error);
         loadingSnackBar.dismiss();
         this.isLoadingBill.set(false);
-        this.snackBar.open('Failed to load cart data', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Failed to load cart data`, $localize`Close`, { duration: 3000 });
       },
     });
   }

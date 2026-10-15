@@ -1,23 +1,23 @@
 <div class="p-6">
   <h2 mat-dialog-title class="text-xl font-bold mb-4">
-    {{ data.isEdit ? 'Edit Category' : 'Create New Category' }}
+    @if (data.isEdit) {<ng-container i18n>Edit Category</ng-container>} @else {<ng-container i18n>Create New Category</ng-container>}
   </h2>
 
   <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
     <div class="space-y-4">
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Category Name</mat-label>
-        <input matInput formControlName="name" placeholder="Enter category name">
+        <mat-label><ng-container i18n>Category Name</ng-container></mat-label>
+        <input matInput formControlName="name" placeholder="Enter category name" i18n-placeholder>
       </mat-form-field>
 
 
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Color picker</mat-label>
+        <mat-label><ng-container i18n>Color picker</ng-container></mat-label>
         <input matInput  [mtxColorpicker]="picker" [format]="format" formControlName="color" />
         <mtx-colorpicker-toggle matSuffix [for]="picker"></mtx-colorpicker-toggle>
         <mtx-colorpicker #picker></mtx-colorpicker>
-        <mat-hint>Choose your favorite color</mat-hint>
-        <mat-error>Please enter the color</mat-error>
+        <mat-hint><ng-container i18n>Choose your favorite color</ng-container></mat-hint>
+        <mat-error><ng-container i18n>Please enter the color</ng-container></mat-error>
       </mat-form-field>
 
 
@@ -36,18 +36,18 @@
 
       <div class="flex items-center">
         <mat-slide-toggle formControlName="published" color="primary">
-          Published
+          <ng-container i18n>Published</ng-container>
         </mat-slide-toggle>
       </div>
     </div>
 
     <div class="flex justify-end space-x-2 mt-6">
-      <button mat-button type="button" (click)="onCancel()">Cancel</button>
+      <button mat-button type="button" (click)="onCancel()"><ng-container i18n>Cancel</ng-container></button>
       <button matButton="filled" color="primary" type="submit" [disabled]="!categoryForm.valid || isSubmitting()">
         @if (isSubmitting()) {
           <mat-spinner diameter="20" class="mr-2"></mat-spinner>
         }
-        {{data.isEdit ? 'Update' : 'Create'}}
+        @if (data.isEdit) {<ng-container i18n>Update</ng-container>} @else {<ng-container i18n>Create</ng-container>}
       </button>
     </div>
   </form>

@@ -60,7 +60,7 @@ export class SyncWarningsDialogComponent {
 
   copyToClipboard(text: string): void {
     navigator.clipboard.writeText(text).then(() => {
-      this.snackBar.open('Copied to clipboard!', 'Close', { duration: 2000 });
+      this.snackBar.open($localize`Copied to clipboard!`, $localize`Close`, { duration: 2000 });
     });
   }
 
@@ -121,7 +121,7 @@ export class SyncWarningsDialogComponent {
         groups.set(fallbackKey, {
           type: 'unknown',
           icon: 'warning',
-          label: 'Warning',
+          label: $localize`Warning`,
           message: typeof w === 'string' ? w : JSON.stringify(w),
           count: 1,
           dates: [],

@@ -24,11 +24,12 @@ import {
   Tenant,
   Unit,
 } from '../../../../../shared/models/estate.model';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-payment-detail',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatButtonModule,
     MatCardModule,

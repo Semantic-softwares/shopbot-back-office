@@ -1,7 +1,7 @@
 <!-- Page Header -->
 <app-page-header
-  [title]="isEditing ? 'Edit Tax Set' : 'Create Tax Set'"
-  [subtitle]="isEditing ? 'Update the tax set details' : 'Create a new tax set'">
+  [title]="isEditing ? ('Edit Tax Set' | tr) : ('Create Tax Set' | tr)"
+  [subtitle]="isEditing ? ('Update the tax set details' | tr) : 'Create a new tax set'">
   <ng-container actions>
     <a
       matButton="outlined"
@@ -10,7 +10,7 @@
       [disabled]="isSaving"
       class="px-8"
     >
-      Cancel
+      <ng-container i18n>Cancel</ng-container>
     </a>
     <button
       matButton="filled"
@@ -20,9 +20,9 @@
       class="px-4"
     >
       @if (isSaving) {
-        Saving...
+        <ng-container i18n>Saving...</ng-container>
       } @else {
-        {{ isEditing ? 'Update Tax Set' : 'Create Tax Set' }}
+        @if (isEditing) {<ng-container i18n>Update Tax Set</ng-container>} @else {<ng-container i18n>Create Tax Set</ng-container>}
       }
     </button>
   </ng-container>
@@ -31,7 +31,7 @@
 <!-- Form Card -->
 <mat-card appearance="outlined" class="mt-6">
   <mat-card-header class="mb-3">
-    <mat-card-title class="text-xl font-bold text-gray-900">Tax Set Details</mat-card-title>
+    <mat-card-title class="text-xl font-bold text-gray-900"><ng-container i18n>Tax Set Details</ng-container></mat-card-title>
   </mat-card-header>
 
   <mat-card-content class="pt-6">
@@ -40,24 +40,24 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Title -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Tax Set Title</mat-label>
-          <input matInput formControlName="title" placeholder="e.g., Standard Tax Set" />
-          <mat-hint>Give your tax set a clear title</mat-hint>
+          <mat-label><ng-container i18n>Tax Set Title</ng-container></mat-label>
+          <input matInput formControlName="title" placeholder="e.g., Standard Tax Set" i18n-placeholder />
+          <mat-hint><ng-container i18n>Give your tax set a clear title</ng-container></mat-hint>
           @if (taxSetForm.get('title')?.hasError('required')) {
-            <mat-error>Tax set title is required</mat-error>
+            <mat-error><ng-container i18n>Tax set title is required</ng-container></mat-error>
           }
           @if (taxSetForm.get('title')?.hasError('minlength')) {
-            <mat-error>Title must be at least 3 characters</mat-error>
+            <mat-error><ng-container i18n>Title must be at least 3 characters</ng-container></mat-error>
           }
         </mat-form-field>
 
         <!-- Currency -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Currency</mat-label>
-          <input matInput formControlName="currency" placeholder="e.g., USD" maxlength="3" />
-          <mat-hint>ISO 4217 currency code</mat-hint>
+          <mat-label><ng-container i18n>Currency</ng-container></mat-label>
+          <input matInput formControlName="currency" placeholder="e.g., USD" i18n-placeholder maxlength="3" />
+          <mat-hint><ng-container i18n>ISO 4217 currency code</ng-container></mat-hint>
           @if (taxSetForm.get('currency')?.hasError('required')) {
-            <mat-error>Currency is required</mat-error>
+            <mat-error><ng-container i18n>Currency is required</ng-container></mat-error>
           }
         </mat-form-field>
       </div>
@@ -65,12 +65,12 @@
       <!-- Taxes Section -->
       <mat-card appearance="outlined">
         <mat-card-header class="mb-3 flex items-center justify-between">
-          <mat-card-title class="text-lg font-semibold text-gray-900">Taxes</mat-card-title>
+          <mat-card-title class="text-lg font-semibold text-gray-900"><ng-container i18n>Taxes</ng-container></mat-card-title>
           <button
             type="button"
             mat-icon-button
             (click)="addTax()"
-            matTooltip="Add tax"
+            matTooltip="Add tax" i18n-matTooltip
             class="text-blue-600"
           >
             <mat-icon>add</mat-icon>
@@ -79,7 +79,7 @@
 
         <mat-card-content class="pt-6">
           @if (taxesLength === 0) {
-            <p class="text-gray-500 text-center py-4">No taxes added yet. Click the + button to add a tax.</p>
+            <p class="text-gray-500 text-center py-4"><ng-container i18n>No taxes added yet. Click the + button to add a tax.</ng-container></p>
           }
           
           @if (taxesLength > 0) {
@@ -91,7 +91,7 @@
                       <div class="flex items-center gap-3 flex-1">
                         <mat-icon cdkDragHandle class="cursor-move text-gray-400">drag_indicator</mat-icon>
                         <div>
-                          <h4 class="font-semibold text-gray-900">Group #{{ $index + 1 }}</h4>
+                          <h4 class="font-semibold text-gray-900"><ng-container i18n>Group #{{ $index + 1 }}</ng-container></h4>
                           <p class="text-sm text-gray-600">{{ getTaxTitle($index) }}</p>
                         </div>
                       </div>
@@ -101,7 +101,7 @@
                           mat-icon-button
                           (click)="removeTax($index)"
                           class="text-gray-400 hover:text-red-600"
-                          matTooltip="Remove"
+                          matTooltip="Remove" i18n-matTooltip
                         >
                           <mat-icon>delete</mat-icon>
                         </button>
@@ -111,21 +111,21 @@
                     <div class="flex items-center justify-between text-sm">
                       <div class="flex items-center gap-4">
                         <div>
-                          <span class="text-gray-500">Title:</span>
+                          <span class="text-gray-500"><ng-container i18n>Title:</ng-container></span>
                           <span class="font-medium text-gray-900 ml-1">{{ getTaxTitle($index) }}</span>
                         </div>
                         <div>
-                          <span class="text-gray-500">Inclusive:</span>
+                          <span class="text-gray-500"><ng-container i18n>Inclusive:</ng-container></span>
                           <span class="font-medium text-gray-900 ml-1">-</span>
                         </div>
                       </div>
                       <div>
-                        <span class="text-gray-500">Rate:</span>
+                        <span class="text-gray-500"><ng-container i18n>Rate:</ng-container></span>
                         <span class="font-semibold text-gray-900 ml-1">{{ getTaxRate($index) }}%</span>
                       </div>
                     </div>
                     <p class="text-xs text-gray-500 mt-2 italic">
-                      Tax Group {{ $index + 1 }} is calculated first and the sum is used for next group
+                      <ng-container i18n>Tax Group {{ $index + 1 }} is calculated first and the sum is used for next group</ng-container>
                     </p>
                   </div>
                 }
@@ -134,10 +134,10 @@
 
             <!-- Tax Calculator -->
             
-            <h3 class="font-semibold text-gray-900 mb-4">Tax calculator</h3>
+            <h3 class="font-semibold text-gray-900 mb-4"><ng-container i18n>Tax calculator</ng-container></h3>
             <div class="space-y-4  p-4 rounded-lg border border-outline-variant">
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Sell date :</mat-label>
+                <mat-label><ng-container i18n>Sell date :</ng-container></mat-label>
                 <input matInput [matDatepicker]="picker" formControlName="sell_date" />
                 <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-datepicker #picker></mat-datepicker>
@@ -148,7 +148,7 @@
                 @for (priceControl of netPricesArray.controls; track $index) {
                   <div class="flex items-center gap-2">
                     <mat-form-field appearance="outline" class="flex-1">
-                      <mat-label>Net price :</mat-label>
+                      <mat-label><ng-container i18n>Net price :</ng-container></mat-label>
                       <input matInput type="number" [formControlName]="$index" placeholder="0" min="0" step="0.01" />
                     </mat-form-field>
                     <div class="flex gap-1">
@@ -157,7 +157,7 @@
                           type="button"
                           mat-icon-button
                           (click)="addNetPrice()"
-                          matTooltip="Add Date"
+                          matTooltip="Add Date" i18n-matTooltip
                           class="text-blue-600"
                         >
                           <mat-icon>add_circle</mat-icon>
@@ -168,7 +168,7 @@
                           type="button"
                           mat-icon-button
                           (click)="removeNetPrice($index)"
-                          matTooltip="Remove Date"
+                          matTooltip="Remove Date" i18n-matTooltip
                           class="text-red-600"
                         >
                           <mat-icon>remove_circle</mat-icon>
@@ -188,7 +188,7 @@
       <!-- Associated Rate Plans Section -->
       <mat-card appearance="outlined" class="bg-gray-50">
         <mat-card-header class="mb-3">
-          <mat-card-title class="text-lg font-semibold text-gray-900">Associated Rate Plans</mat-card-title>
+          <mat-card-title class="text-lg font-semibold text-gray-900"><ng-container i18n>Associated Rate Plans</ng-container></mat-card-title>
         </mat-card-header>
 
         <mat-card-content class="pt-6">
@@ -197,7 +197,7 @@
               <mat-spinner diameter="40"></mat-spinner>
             </div>
           } @else if (roomTypesWithPlans().length === 0) {
-            <p class="text-gray-500 text-center py-4">No room types found for this property.</p>
+            <p class="text-gray-500 text-center py-4"><ng-container i18n>No room types found for this property.</ng-container></p>
           } @else {
             <div class="space-y-4">
               <!-- Select All -->
@@ -208,7 +208,7 @@
                   (change)="toggleAllRoomTypes($event.checked)"
                   class="font-semibold text-gray-900"
                 >
-                  Select All Rates
+                  <ng-container i18n>Select All Rates</ng-container>
                 </mat-checkbox>
               </div>
 

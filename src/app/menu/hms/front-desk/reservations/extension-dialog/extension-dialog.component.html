@@ -1,9 +1,9 @@
 <div mat-dialog-title class="flex items-center gap-3 border-b border-gray-200">
   <!-- <mat-icon class="text-blue-600">schedule</mat-icon> -->
   <div>
-    <span class="text-xl font-semibold text-gray-800 m-0">Extend Reservation</span>
+    <span class="text-xl font-semibold text-gray-800 m-0"><ng-container i18n>Extend Reservation</ng-container></span>
     <p class="text-sm text-gray-600 m-0 mt-1">
-      Request extension for {{ reservation?.guestDetails?.primaryGuest?.firstName }} {{ reservation?.guestDetails?.primaryGuest?.lastName }}
+      <ng-container i18n>Request extension for {{ reservation?.guestDetails?.primaryGuest?.firstName }} {{ reservation?.guestDetails?.primaryGuest?.lastName }}</ng-container>
     </p>
   </div>
 </div>
@@ -13,19 +13,19 @@
   <div class="bg-gray-50 rounded-lg p-4 mb-6">
     <h3 class="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
       <mat-icon class="text-gray-600 !text-base">info</mat-icon>
-      Current Reservation Details
+      <ng-container i18n>Current Reservation Details</ng-container>
     </h3>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="space-y-1">
-        <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Check-out Date</div>
+        <div class="text-xs font-medium text-gray-500 uppercase tracking-wider"><ng-container i18n>Check-out Date</ng-container></div>
         <div class="text-sm text-gray-900">{{ currentCheckOutDate | date:'mediumDate' }}</div>
       </div>
       <div class="space-y-1">
-        <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Room(s)</div>
-        <div class="text-sm text-gray-900">{{ reservation?.rooms?.length }} room(s)</div>
+        <div class="text-xs font-medium text-gray-500 uppercase tracking-wider"><ng-container i18n>Room(s)</ng-container></div>
+        <div class="text-sm text-gray-900"><ng-container i18n>{{ reservation?.rooms?.length }} room(s)</ng-container></div>
       </div>
       <div class="space-y-1">
-        <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Confirmation</div>
+        <div class="text-xs font-medium text-gray-500 uppercase tracking-wider"><ng-container i18n>Confirmation</ng-container></div>
         <div class="text-sm text-gray-900">{{ reservation?.confirmationNumber }}</div>
       </div>
     </div>
@@ -35,21 +35,21 @@
   <form [formGroup]="extensionForm" class="space-y-6">
     <!-- Date Selection -->
     <div class="space-y-2">
-      <label class="text-sm font-medium text-gray-700">New Check-out Date</label>
+      <label class="text-sm font-medium text-gray-700"><ng-container i18n>New Check-out Date</ng-container></label>
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Select new check-out date</mat-label>
+        <mat-label><ng-container i18n>Select new check-out date</ng-container></mat-label>
         <input
           matInput
           [matDatepicker]="picker"
           formControlName="newCheckOutDate"
 
           (dateChange)="onDateChange()"
-          placeholder="Choose date">
+          placeholder="Choose date" i18n-placeholder>
         <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
         @if (extensionForm.get('newCheckOutDate')?.hasError('required')) {
           <mat-error>
-            New check-out date is required
+            <ng-container i18n>New check-out date is required</ng-container>
           </mat-error>
         }
       </mat-form-field>
@@ -62,7 +62,7 @@
         @if (availabilityChecking()) {
           <div class="flex items-center justify-center gap-3 py-8">
             <mat-spinner diameter="24"></mat-spinner>
-            <span class="text-sm text-gray-600">Checking availability...</span>
+            <span class="text-sm text-gray-600"><ng-container i18n>Checking availability...</ng-container></span>
           </div>
         }
         <!-- Availability Results -->
@@ -76,7 +76,7 @@
               </mat-icon>
               <h4 class="text-base font-medium"
                 [class]="availability()?.isAvailable ? 'text-green-800' : 'text-red-800'">
-                {{ availability()?.isAvailable ? 'Extension Available' : 'Extension Unavailable' }}
+                @if (availability()?.isAvailable) {<ng-container i18n>Extension Available</ng-container>} @else {<ng-container i18n>Extension Unavailable</ng-container>}
               </h4>
             </div>
             <!-- Available Extension Details -->
@@ -85,11 +85,11 @@
                 <!-- Basic Info -->
                 <div class="grid grid-cols-2 gap-4 text-sm">
                   <div class="space-y-1">
-                    <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Additional Nights</div>
+                    <div class="text-xs font-medium text-gray-500 uppercase tracking-wider"><ng-container i18n>Additional Nights</ng-container></div>
                     <div class="text-gray-900 font-semibold">{{ availability()?.maxExtensionNights }}</div>
                   </div>
                   <div class="space-y-1">
-                    <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Extension Days</div>
+                    <div class="text-xs font-medium text-gray-500 uppercase tracking-wider"><ng-container i18n>Extension Days</ng-container></div>
                     <div class="text-gray-900 font-semibold">{{ availability()?.extensionDays }}</div>
                   </div>
                 </div>
@@ -97,8 +97,8 @@
                 @if (availability()?.pricingBreakdown?.originalRate) {
                   <div class="space-y-4 border-t pt-4">
                     <div class="flex items-center justify-between">
-                      <label class="text-sm font-medium text-gray-700">Choose Rate Option:</label>
-                      <div class="text-xs text-gray-500">2 options available</div>
+                      <label class="text-sm font-medium text-gray-700"><ng-container i18n>Choose Rate Option:</ng-container></label>
+                      <div class="text-xs text-gray-500"><ng-container i18n>2 options available</ng-container></div>
                     </div>
                     <!-- Pricing Strategy Options -->
                     <mat-radio-group class="space-y-3" formControlName="selectedPricingStrategy">
@@ -108,18 +108,18 @@
                           value="same_rate"
                           class="w-full block p-4 border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                           <div class="absolute top-2 right-2 px-2 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800">
-                            ORIGINAL
+                            <ng-container i18n>ORIGINAL</ng-container>
                           </div>
                           <div class="flex items-start justify-between mt-1">
                             <div class="flex-1 min-w-0 pr-4">
-                              <div class="text-sm font-semibold text-blue-900">Same Rate</div>
-                              <div class="text-xs mt-1 text-blue-700">Continue with the original room rate</div>
+                              <div class="text-sm font-semibold text-blue-900"><ng-container i18n>Same Rate</ng-container></div>
+                              <div class="text-xs mt-1 text-blue-700"><ng-container i18n>Continue with the original room rate</ng-container></div>
                             </div>
                             <div class="text-right">
                               <div class="text-lg font-bold text-blue-600">
                                 {{ formatCurrency(availability()?.pricingBreakdown?.originalRate || 0) }}
                               </div>
-                              <div class="text-xs text-gray-500">per night</div>
+                              <div class="text-xs text-gray-500"><ng-container i18n>per night</ng-container></div>
                             </div>
                           </div>
                         </mat-radio-button>
@@ -131,14 +131,14 @@
                           class="w-full block p-4 border border-green-200 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
                           <div class="flex items-start justify-between mt-1">
                             <div class="flex-1 min-w-0 pr-4">
-                              <div class="text-sm font-semibold text-green-900">Discounted Rate</div>
-                              <div class="text-xs mt-1 text-green-700">Apply a custom discount to the original rate</div>
+                              <div class="text-sm font-semibold text-green-900"><ng-container i18n>Discounted Rate</ng-container></div>
+                              <div class="text-xs mt-1 text-green-700"><ng-container i18n>Apply a custom discount to the original rate</ng-container></div>
                               <!-- Savings indicator -->
                               @if (getDiscountAmount() > 0) {
                                 <div
                                   class="inline-flex items-center mt-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
                                   <mat-icon class="!text-xs mr-1">savings</mat-icon>
-                                  Save {{ formatCurrency(getDiscountAmount()) }} per night
+                                  <ng-container i18n>Save {{ formatCurrency(getDiscountAmount()) }} per night</ng-container>
                                 </div>
                               }
                             </div>
@@ -146,7 +146,7 @@
                               <div class="text-lg font-bold text-green-600">
                                 {{ formatCurrency(getSelectedRate()) }}
                               </div>
-                              <div class="text-xs text-gray-500">per night</div>
+                              <div class="text-xs text-gray-500"><ng-container i18n>per night</ng-container></div>
                             </div>
                           </div>
                         </mat-radio-button>
@@ -156,7 +156,7 @@
                     @if (extensionForm.get('selectedPricingStrategy')?.value === 'discounted_rate') {
                       <div class="mt-4">
                         <mat-form-field appearance="outline" class="w-full">
-                          <mat-label>Discounted Rate per Night</mat-label>
+                          <mat-label><ng-container i18n>Discounted Rate per Night</ng-container></mat-label>
                           <input
                             matInput
                             type="number"
@@ -164,22 +164,22 @@
                             [max]="$safeNavigationMigration(availability()?.pricingBreakdown?.originalRate)"
                             step="0.01"
                             formControlName="discountedRate"
-                            placeholder="Enter discounted rate">
+                            placeholder="Enter discounted rate" i18n-placeholder>
                           <span matTextPrefix>{{ storeStore.selectedStore()?.currency || '$' }}&nbsp;</span>
-                          <mat-hint>Rate must be less than or equal to {{ formatCurrency(availability()?.pricingBreakdown?.originalRate || 0) }}</mat-hint>
+                          <mat-hint><ng-container i18n>Rate must be less than or equal to {{ formatCurrency(availability()?.pricingBreakdown?.originalRate || 0) }}</ng-container></mat-hint>
                           @if (extensionForm.get('discountedRate')?.hasError('required')) {
                             <mat-error>
-                              Discounted rate is required
+                              <ng-container i18n>Discounted rate is required</ng-container>
                             </mat-error>
                           }
                           @if (extensionForm.get('discountedRate')?.hasError('min')) {
                             <mat-error>
-                              Rate must be greater than 0
+                              <ng-container i18n>Rate must be greater than 0</ng-container>
                             </mat-error>
                           }
                           @if (!validateDiscountedRate()) {
                             <mat-error>
-                              Rate cannot be higher than the original rate
+                              <ng-container i18n>Rate cannot be higher than the original rate</ng-container>
                             </mat-error>
                           }
                         </mat-form-field>
@@ -189,13 +189,13 @@
                     <div class="bg-gray-100 rounded-lg p-4 mt-4">
                       <div class="flex justify-between items-center">
                         <div>
-                          <div class="text-sm font-medium text-gray-700">Total Extension Cost</div>
+                          <div class="text-sm font-medium text-gray-700"><ng-container i18n>Total Extension Cost</ng-container></div>
                           <div class="text-xs text-gray-500">
-                            {{ availability()?.extensionDays }} nights × {{ formatCurrency(getSelectedRate()) }}
+                            <ng-container i18n>{{ availability()?.extensionDays }} nights × {{ formatCurrency(getSelectedRate()) }}</ng-container>
                           </div>
                           @if (getDiscountAmount() > 0) {
                             <div class="text-xs text-green-600 font-medium mt-1">
-                              Total Savings: {{ formatCurrency(getDiscountAmount() * (availability()?.extensionDays || 0)) }}
+                              <ng-container i18n>Total Savings: {{ formatCurrency(getDiscountAmount() * (availability()?.extensionDays || 0)) }}</ng-container>
                             </div>
                           }
                         </div>
@@ -211,17 +211,17 @@
                   <div class="bg-white rounded-md p-4 border border-gray-200">
                     <h5 class="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
                       <mat-icon class="!text-base text-blue-600">receipt</mat-icon>
-                      Pricing Breakdown
+                      <ng-container i18n>Pricing Breakdown</ng-container>
                     </h5>
                     <div class="space-y-2 text-sm">
                       <div class="flex justify-between">
-                        <span class="text-gray-600">Base Rate per Night:</span>
+                        <span class="text-gray-600"><ng-container i18n>Base Rate per Night:</ng-container></span>
                         <span class="font-medium">{{ formatCurrency(availability()?.pricingBreakdown?.baseRatePerNight || 0) }}</span>
                       </div>
                       <!-- Applied Modifiers -->
                       @if (availability()?.pricingBreakdown?.appliedModifiers?.length) {
                         <div class="space-y-1">
-                          <div class="text-xs font-medium text-gray-500 mt-2 mb-1">ADJUSTMENTS:</div>
+                          <div class="text-xs font-medium text-gray-500 mt-2 mb-1"><ng-container i18n>ADJUSTMENTS:</ng-container></div>
                           @for (modifier of availability()?.pricingBreakdown?.appliedModifiers; track modifier) {
                             <div class="flex justify-between text-xs"
                               >
@@ -236,13 +236,13 @@
                       }
                       <div class="border-t pt-2 mt-3">
                         <div class="flex justify-between font-semibold">
-                          <span>Final Rate per Night:</span>
+                          <span><ng-container i18n>Final Rate per Night:</ng-container></span>
                           <span class="text-blue-600">{{ formatCurrency(availability()?.pricingBreakdown?.finalRatePerNight || 0) }}</span>
                         </div>
                       </div>
                       <div class="bg-blue-50 rounded p-2 mt-3">
                         <div class="flex justify-between items-center">
-                          <span class="font-semibold text-blue-900">Total Extension Cost:</span>
+                          <span class="font-semibold text-blue-900"><ng-container i18n>Total Extension Cost:</ng-container></span>
                           <span class="text-lg font-bold text-blue-700">{{ formatCurrency(availability()?.estimatedCost || 0) }}</span>
                         </div>
                       </div>
@@ -257,8 +257,8 @@
                 >
                 <mat-icon class="text-amber-600 !text-base mt-0.5">warning</mat-icon>
                 <div class="text-sm text-amber-800">
-                  <div class="font-medium">Room conflicts prevent extension beyond this date</div>
-                  <div class="text-xs mt-1">Please choose an earlier date or check with front desk for alternative options.</div>
+                  <div class="font-medium"><ng-container i18n>Room conflicts prevent extension beyond this date</ng-container></div>
+                  <div class="text-xs mt-1"><ng-container i18n>Please choose an earlier date or check with front desk for alternative options.</ng-container></div>
                 </div>
               </div>
             }
@@ -269,14 +269,14 @@
 
     <!-- Notes -->
     <div class="space-y-2">
-      <label class="text-sm font-medium text-gray-700">Notes (Optional)</label>
+      <label class="text-sm font-medium text-gray-700"><ng-container i18n>Notes (Optional)</ng-container></label>
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Special requests or notes</mat-label>
+        <mat-label><ng-container i18n>Special requests or notes</ng-container></mat-label>
         <textarea
           matInput
           formControlName="notes"
           rows="3"
-          placeholder="Add any special requests or notes for the extension">
+          placeholder="Add any special requests or notes for the extension" i18n-placeholder>
         </textarea>
       </mat-form-field>
     </div>
@@ -286,7 +286,7 @@
       <div class="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-md">
         <mat-icon class="text-red-600 !text-base mt-0.5">error</mat-icon>
         <div class="text-sm text-red-800">
-          <div class="font-medium">Extension Request Failed</div>
+          <div class="font-medium"><ng-container i18n>Extension Request Failed</ng-container></div>
           <div>{{ errorMessage() }}</div>
         </div>
       </div>
@@ -301,7 +301,7 @@
     (click)="onCancel()"
     [disabled]="isLoading()"
     class="px-4 py-2">
-    Cancel
+    <ng-container i18n>Cancel</ng-container>
   </button>
 
   <button
@@ -316,10 +316,10 @@
         <mat-spinner diameter="16"></mat-spinner>
       }
       @if (!isLoading()) {
-        <span>Request Extension</span>
+        <span><ng-container i18n>Request Extension</ng-container></span>
       }
       @if (isLoading()) {
-        <span>Processing...</span>
+        <span><ng-container i18n>Processing...</ng-container></span>
       }
     </div>
   </button>

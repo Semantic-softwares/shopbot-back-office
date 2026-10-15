@@ -1,16 +1,16 @@
 <app-page-header
-  [title]="isEditMode() ? 'Edit Rental Owner' : 'New Rental Owner'"
-  [subtitle]="isEditMode() ? 'Update rental owner information' : 'Add a new rental owner'">
+  [title]="isEditMode() ? ('Edit Rental Owner' | tr) : ('New Rental Owner' | tr)"
+  [subtitle]="isEditMode() ? ('Update rental owner information' | tr) : 'Add a new rental owner'">
   <ng-container actions>
     <button mat-button (click)="cancel()">
       <mat-icon class="mr-1">arrow_back</mat-icon>
-      Cancel
+      <ng-container i18n>Cancel</ng-container>
     </button>
     <button mat-flat-button (click)="onSubmit()" [disabled]="isSaving()">
       @if (isSaving()) {
         <mat-spinner diameter="20" class="mr-2"></mat-spinner>
       }
-      {{ isEditMode() ? 'Update Owner' : 'Create Owner' }}
+      @if (isEditMode()) {<ng-container i18n>Update Owner</ng-container>} @else {<ng-container i18n>Create Owner</ng-container>}
     </button>
   </ng-container>
 </app-page-header>
@@ -20,22 +20,22 @@
 
     <!-- PERSONAL INFORMATION -->
     <mat-card appearance="outlined" class="mb-6">
-      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">PERSONAL INFORMATION</div>
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2"><ng-container i18n>PERSONAL INFORMATION</ng-container></div>
       <mat-card-content class="px-4 pb-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>First Name</mat-label>
-            <input matInput formControlName="firstName" placeholder="First name">
+            <mat-label><ng-container i18n>First Name</ng-container></mat-label>
+            <input matInput formControlName="firstName" placeholder="First name" i18n-placeholder>
             @if (form.get('firstName')?.hasError('required') && form.get('firstName')?.touched) {
-              <mat-error>First name is required</mat-error>
+              <mat-error><ng-container i18n>First name is required</ng-container></mat-error>
             }
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Last Name</mat-label>
-            <input matInput formControlName="lastName" placeholder="Last name">
+            <mat-label><ng-container i18n>Last Name</ng-container></mat-label>
+            <input matInput formControlName="lastName" placeholder="Last name" i18n-placeholder>
             @if (form.get('lastName')?.hasError('required') && form.get('lastName')?.touched) {
-              <mat-error>Last name is required</mat-error>
+              <mat-error><ng-container i18n>Last name is required</ng-container></mat-error>
             }
           </mat-form-field>
         </div>
@@ -44,25 +44,25 @@
 
     <!-- CONTACT INFORMATION -->
     <mat-card appearance="outlined" class="mb-6">
-      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">CONTACT INFORMATION</div>
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2"><ng-container i18n>CONTACT INFORMATION</ng-container></div>
       <mat-card-content class="px-4 pb-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Email</mat-label>
-            <input matInput formControlName="email" type="email" placeholder="Email address">
+            <mat-label><ng-container i18n>Email</ng-container></mat-label>
+            <input matInput formControlName="email" type="email" placeholder="Email address" i18n-placeholder>
             @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
-              <mat-error>Enter a valid email</mat-error>
+              <mat-error><ng-container i18n>Enter a valid email</ng-container></mat-error>
             }
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Phone</mat-label>
-            <input matInput formControlName="phone" placeholder="Phone number">
+            <mat-label><ng-container i18n>Phone</ng-container></mat-label>
+            <input matInput formControlName="phone" placeholder="Phone number" i18n-placeholder>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Alternate Phone</mat-label>
-            <input matInput formControlName="alternatePhone" placeholder="Alternate phone">
+            <mat-label><ng-container i18n>Alternate Phone</ng-container></mat-label>
+            <input matInput formControlName="alternatePhone" placeholder="Alternate phone" i18n-placeholder>
           </mat-form-field>
         </div>
       </mat-card-content>
@@ -70,24 +70,24 @@
 
     <!-- COMPANY INFORMATION -->
     <mat-card appearance="outlined" class="mb-6">
-      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">COMPANY INFORMATION</div>
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2"><ng-container i18n>COMPANY INFORMATION</ng-container></div>
       <mat-card-content class="px-4 pb-4">
         <div class="mb-4">
           <mat-slide-toggle formControlName="isCompany">
-            This owner is a company
+            <ng-container i18n>This owner is a company</ng-container>
           </mat-slide-toggle>
         </div>
 
         @if (isCompany()) {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Company Name</mat-label>
-              <input matInput formControlName="companyName" placeholder="Company name">
+              <mat-label><ng-container i18n>Company Name</ng-container></mat-label>
+              <input matInput formControlName="companyName" placeholder="Company name" i18n-placeholder>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Tax ID</mat-label>
-              <input matInput formControlName="taxId" placeholder="Tax ID / Registration number">
+              <mat-label><ng-container i18n>Tax ID</ng-container></mat-label>
+              <input matInput formControlName="taxId" placeholder="Tax ID / Registration number" i18n-placeholder>
             </mat-form-field>
           </div>
         }
@@ -96,11 +96,11 @@
 
     <!-- STATUS & NOTES -->
     <mat-card appearance="outlined" class="mb-6">
-      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2">STATUS & NOTES</div>
+      <div class="text-xs font-bold text-gray-500 tracking-wider px-4 pt-4 pb-2"><ng-container i18n>STATUS & NOTES</ng-container></div>
       <mat-card-content class="px-4 pb-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Status</mat-label>
+            <mat-label><ng-container i18n>Status</ng-container></mat-label>
             <mat-select formControlName="status">
               @for (s of statusOptions; track s.value) {
                 <mat-option [value]="s.value">{{ s.label }}</mat-option>
@@ -110,8 +110,8 @@
         </div>
 
         <mat-form-field appearance="outline" class="w-full mt-2">
-          <mat-label>Notes</mat-label>
-          <textarea matInput formControlName="notes" rows="4" placeholder="Additional notes..."></textarea>
+          <mat-label><ng-container i18n>Notes</ng-container></mat-label>
+          <textarea matInput formControlName="notes" rows="4" placeholder="Additional notes..." i18n-placeholder></textarea>
         </mat-form-field>
       </mat-card-content>
     </mat-card>

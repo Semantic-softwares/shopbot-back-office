@@ -1,13 +1,13 @@
 <div class="px-4">
   <app-page-header
-    title="General Information"
-    subtitle="Manage your store details and address">
+    title="General Information" i18n-title
+    subtitle="Manage your store details and address" i18n-subtitle>
     <div actions>
       <button type="button" mat-flat-button color="primary"
         [disabled]="hotelInfoForm.invalid || saving()"
         (click)="saveHotelInfo()">
         <mat-icon class="mr-1">save</mat-icon>
-        {{ saving() ? 'Saving...' : 'Save Information' }}
+        @if (saving()) {<ng-container i18n>Saving...</ng-container>} @else {<ng-container i18n>Save Information</ng-container>}
       </button>
     </div>
   </app-page-header>
@@ -19,31 +19,31 @@
       <mat-card appearance="outlined">
         <mat-card-header>
           <mat-icon mat-card-avatar class="text-blue-600 !flex !items-center !justify-center">info</mat-icon>
-          <mat-card-title>Basic Information</mat-card-title>
+          <mat-card-title><ng-container i18n>Basic Information</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content class="pt-4 space-y-6">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Hotel Name</mat-label>
-            <input matInput formControlName="hotelName" placeholder="Enter hotel name">
+            <mat-label><ng-container i18n>Hotel Name</ng-container></mat-label>
+            <input matInput formControlName="hotelName" placeholder="Enter hotel name" i18n-placeholder>
             <mat-icon matSuffix>business</mat-icon>
           </mat-form-field>
 
           <div formGroupName="contactInfo" class="space-y-4">
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Phone Number</mat-label>
+              <mat-label><ng-container i18n>Phone Number</ng-container></mat-label>
               <input matInput formControlName="phone" placeholder="+1 (555) 123-4567">
               <mat-icon matSuffix>phone</mat-icon>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Email Address</mat-label>
-              <input matInput type="email" formControlName="email" placeholder="contact@hotel.com">
+              <mat-label><ng-container i18n>Email Address</ng-container></mat-label>
+              <input matInput type="email" formControlName="email" placeholder="contact@hotel.com" i18n-placeholder>
               <mat-icon matSuffix>email</mat-icon>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Website (Optional)</mat-label>
-              <input matInput formControlName="website" placeholder="https://www.hotel.com">
+              <mat-label><ng-container i18n>Website (Optional)</ng-container></mat-label>
+              <input matInput formControlName="website" placeholder="https://www.hotel.com" i18n-placeholder>
               <mat-icon matSuffix>language</mat-icon>
             </mat-form-field>
           </div>
@@ -54,35 +54,35 @@
       <mat-card appearance="outlined">
         <mat-card-header>
           <mat-icon mat-card-avatar class="text-green-600 !flex !items-center !justify-center">location_on</mat-icon>
-          <mat-card-title>Address Information</mat-card-title>
+          <mat-card-title><ng-container i18n>Address Information</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content class="pt-4 space-y-6" formGroupName="address">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Street Address</mat-label>
-            <textarea matInput formControlName="street" placeholder="123 Hotel Street" rows="2"></textarea>
+            <mat-label><ng-container i18n>Street Address</ng-container></mat-label>
+            <textarea matInput formControlName="street" placeholder="123 Hotel Street" i18n-placeholder rows="2"></textarea>
             <mat-icon matSuffix>place</mat-icon>
           </mat-form-field>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <mat-form-field appearance="outline">
-              <mat-label>City</mat-label>
-              <input matInput formControlName="city" placeholder="New York">
+              <mat-label><ng-container i18n>City</ng-container></mat-label>
+              <input matInput formControlName="city" placeholder="New York" i18n-placeholder>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>State/Province</mat-label>
-              <input matInput formControlName="state" placeholder="NY">
+              <mat-label><ng-container i18n>State/Province</ng-container></mat-label>
+              <input matInput formControlName="state" placeholder="NY" i18n-placeholder>
             </mat-form-field>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <mat-form-field appearance="outline">
-              <mat-label>Country</mat-label>
-              <input matInput formControlName="country" placeholder="United States">
+              <mat-label><ng-container i18n>Country</ng-container></mat-label>
+              <input matInput formControlName="country" placeholder="United States" i18n-placeholder>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Postal Code</mat-label>
+              <mat-label><ng-container i18n>Postal Code</ng-container></mat-label>
               <input matInput formControlName="postalCode" placeholder="10001">
             </mat-form-field>
           </div>
@@ -93,18 +93,18 @@
       <mat-card appearance="outlined" class="lg:col-span-2">
         <mat-card-header>
           <mat-icon mat-card-avatar class="text-purple-600 !flex !items-center !justify-center">palette</mat-icon>
-          <mat-card-title>Branding</mat-card-title>
+          <mat-card-title><ng-container i18n>Branding</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content class="pt-4">
           <p class="text-xs text-gray-500 mb-4">
-            Shown on your online store, receipts and QR menu. Each image is saved as soon as it's uploaded.
+            <ng-container i18n>Shown on your online store, receipts and QR menu. Each image is saved as soon as it's uploaded.</ng-container>
           </p>
           <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
             <div class="flex flex-col items-start gap-2">
-              <span class="text-sm font-medium text-gray-900">Logo</span>
+              <span class="text-sm font-medium text-gray-900"><ng-container i18n>Logo</ng-container></span>
               <div class="h-28 w-28 rounded-full border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center">
                 @if (storeStore.selectedStore()?.logo; as logo) {
-                  <img [src]="logo" alt="Store logo" class="h-full w-full object-cover" />
+                  <img [src]="logo" alt="Store logo" i18n-alt class="h-full w-full object-cover" />
                 } @else {
                   <mat-icon class="!text-4xl !w-10 !h-10 text-gray-300">storefront</mat-icon>
                 }
@@ -116,16 +116,16 @@
                 } @else {
                   <mat-icon class="mr-1">upload</mat-icon>
                 }
-                {{ uploadingLogo() ? 'Uploading…' : storeStore.selectedStore()?.logo ? 'Change logo' : 'Upload logo' }}
+                {{ uploadingLogo() ? ('Uploading…' | tr) : storeStore.selectedStore()?.logo ? ('Change logo' | tr) : ('Upload logo' | tr) }}
               </button>
-              <span class="text-xs text-gray-500">Square, at least 400×400px.</span>
+              <span class="text-xs text-gray-500"><ng-container i18n>Square, at least 400×400px.</ng-container></span>
             </div>
 
             <div class="flex flex-col items-start gap-2 min-w-0">
-              <span class="text-sm font-medium text-gray-900">Banner</span>
+              <span class="text-sm font-medium text-gray-900"><ng-container i18n>Banner</ng-container></span>
               <div class="w-full aspect-[3/1] max-h-48 rounded-lg border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center">
                 @if (storeStore.selectedStore()?.bannerImage; as banner) {
-                  <img [src]="banner" alt="Store banner" class="h-full w-full object-cover" />
+                  <img [src]="banner" alt="Store banner" i18n-alt class="h-full w-full object-cover" />
                 } @else {
                   <mat-icon class="!text-4xl !w-10 !h-10 text-gray-300">image</mat-icon>
                 }
@@ -137,9 +137,9 @@
                 } @else {
                   <mat-icon class="mr-1">upload</mat-icon>
                 }
-                {{ uploadingBanner() ? 'Uploading…' : storeStore.selectedStore()?.bannerImage ? 'Change banner' : 'Upload banner' }}
+                {{ uploadingBanner() ? ('Uploading…' | tr) : storeStore.selectedStore()?.bannerImage ? ('Change banner' | tr) : ('Upload banner' | tr) }}
               </button>
-              <span class="text-xs text-gray-500">Wide image, at least 1500×500px.</span>
+              <span class="text-xs text-gray-500"><ng-container i18n>Wide image, at least 1500×500px.</ng-container></span>
             </div>
           </div>
         </mat-card-content>
@@ -149,17 +149,17 @@
       <mat-card appearance="outlined" class="lg:col-span-2">
         <mat-card-header>
           <mat-icon mat-card-avatar class="text-teal-600 !flex !items-center !justify-center">my_location</mat-icon>
-          <mat-card-title>Store Location</mat-card-title>
+          <mat-card-title><ng-container i18n>Store Location</ng-container></mat-card-title>
         </mat-card-header>
         <mat-card-content class="pt-4 space-y-3">
           <p class="text-xs text-gray-500">
-            Used to calculate delivery distance and fees for storefront orders. Search for your address or use your
-            current location — until this is set, it defaults to a placeholder point and delivery distances will be wrong.
+            <ng-container i18n>Used to calculate delivery distance and fees for storefront orders. Search for your address or use your
+            current location — until this is set, it defaults to a placeholder point and delivery distances will be wrong.</ng-container>
           </p>
           <div class="flex flex-col gap-3 sm:flex-row">
             <mat-form-field appearance="outline" subscriptSizing="dynamic" class="flex-1">
-              <mat-label>Search for your store's address</mat-label>
-              <input matInput #locationSearchInput placeholder="Start typing an address..." />
+              <mat-label><ng-container i18n>Search for your store's address</ng-container></mat-label>
+              <input matInput #locationSearchInput placeholder="Start typing an address..." i18n-placeholder />
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
             <button type="button" mat-stroked-button [disabled]="isLocating()" (click)="useCurrentLocationForStore()">
@@ -168,7 +168,7 @@
               } @else {
                 <mat-icon class="mr-1">my_location</mat-icon>
               }
-              Use current location
+              <ng-container i18n>Use current location</ng-container>
             </button>
           </div>
 
@@ -182,11 +182,11 @@
         <mat-card appearance="outlined">
           <mat-card-header>
             <mat-icon mat-card-avatar class="text-red-600 !flex !items-center !justify-center">warning</mat-icon>
-            <mat-card-title>Reset Account Data (EMS)</mat-card-title>
+            <mat-card-title><ng-container i18n>Reset Account Data (EMS)</ng-container></mat-card-title>
           </mat-card-header>
           <mat-card-content class="pt-4">
             <p class="text-sm text-gray-600 mb-3">
-              Select the EMS data categories you want to reset for this store. This action permanently deletes selected records.
+              <ng-container i18n>Select the EMS data categories you want to reset for this store. This action permanently deletes selected records.</ng-container>
             </p>
 
             <mat-selection-list
@@ -216,7 +216,7 @@
                 } @else {
                   <mat-icon class="mr-1">restart_alt</mat-icon>
                 }
-                Reset
+                <ng-container i18n>Reset</ng-container>
               </button>
             </div>
           </mat-card-content>
@@ -227,11 +227,11 @@
         <mat-card appearance="outlined">
           <mat-card-header>
             <mat-icon mat-card-avatar class="text-amber-600 !flex !items-center !justify-center">hotel</mat-icon>
-            <mat-card-title>Reset Account Data (PMS)</mat-card-title>
+            <mat-card-title><ng-container i18n>Reset Account Data (PMS)</ng-container></mat-card-title>
           </mat-card-header>
           <mat-card-content class="pt-4">
             <p class="text-sm text-gray-600 mb-3">
-              Select the PMS data categories you want to reset for this store. This action permanently deletes selected records.
+              <ng-container i18n>Select the PMS data categories you want to reset for this store. This action permanently deletes selected records.</ng-container>
             </p>
 
             <mat-selection-list
@@ -261,7 +261,7 @@
                 } @else {
                   <mat-icon class="mr-1">restart_alt</mat-icon>
                 }
-                Reset PMS
+                <ng-container i18n>Reset PMS</ng-container>
               </button>
             </div>
           </mat-card-content>
@@ -272,11 +272,11 @@
         <mat-card appearance="outlined">
           <mat-card-header>
             <mat-icon mat-card-avatar class="text-indigo-600 !flex !items-center !justify-center">inventory_2</mat-icon>
-            <mat-card-title>Reset Account Data (ERP)</mat-card-title>
+            <mat-card-title><ng-container i18n>Reset Account Data (ERP)</ng-container></mat-card-title>
           </mat-card-header>
           <mat-card-content class="pt-4">
             <p class="text-sm text-gray-600 mb-3">
-              Select the ERP data categories you want to reset for this store. This action permanently deletes selected records.
+              <ng-container i18n>Select the ERP data categories you want to reset for this store. This action permanently deletes selected records.</ng-container>
             </p>
 
             <mat-selection-list
@@ -306,7 +306,7 @@
                 } @else {
                   <mat-icon class="mr-1">restart_alt</mat-icon>
                 }
-                Reset ERP
+                <ng-container i18n>Reset ERP</ng-container>
               </button>
             </div>
           </mat-card-content>

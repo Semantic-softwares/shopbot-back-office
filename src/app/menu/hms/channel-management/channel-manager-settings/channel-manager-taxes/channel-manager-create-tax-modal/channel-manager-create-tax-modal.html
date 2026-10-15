@@ -1,6 +1,6 @@
 <!-- Dialog Header -->
   <h2 mat-dialog-title class="m-0">
-    {{ isEditing() ? 'Edit Tax' : 'Create Tax' }}
+    @if (isEditing()) {<ng-container i18n>Edit Tax</ng-container>} @else {<ng-container i18n>Create Tax</ng-container>}
   </h2>
  
 
@@ -9,89 +9,89 @@
   <form [formGroup]="taxForm" class="space-y-4">
     <!-- Title -->
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Title</mat-label>
-      <input matInput formControlName="title" placeholder="e.g., City Tax" />
+      <mat-label><ng-container i18n>Title</ng-container></mat-label>
+      <input matInput formControlName="title" placeholder="e.g., City Tax" i18n-placeholder />
       @if (taxForm.get('title')?.hasError('required')) {
-        <mat-error>Title is required</mat-error>
+        <mat-error><ng-container i18n>Title is required</ng-container></mat-error>
       }
       @if (taxForm.get('title')?.hasError('minlength')) {
-        <mat-error>Title must be at least 3 characters</mat-error>
+        <mat-error><ng-container i18n>Title must be at least 3 characters</ng-container></mat-error>
       }
     </mat-form-field>
 
     <!-- Is Inclusive -->
     <div class="flex items-center gap-4">
-      <span class="text-sm font-medium text-gray-700">Is inclusive:</span>
+      <span class="text-sm font-medium text-gray-700"><ng-container i18n>Is inclusive:</ng-container></span>
       <mat-button-toggle-group
         [value]="taxForm.get('is_inclusive')?.value ? 'exclusive' : 'inclusive'"
         (change)="taxForm.get('is_inclusive')?.setValue($event.value === 'exclusive')"
-        aria-label="Is inclusive option"
+        aria-label="Is inclusive option" i18n-aria-label
       >
-        <mat-button-toggle value="inclusive">Inclusive</mat-button-toggle>
-        <mat-button-toggle value="exclusive">Exclusive</mat-button-toggle>
+        <mat-button-toggle value="inclusive"><ng-container i18n>Inclusive</ng-container></mat-button-toggle>
+        <mat-button-toggle value="exclusive"><ng-container i18n>Exclusive</ng-container></mat-button-toggle>
       </mat-button-toggle-group>
     </div>
 
     <!-- Logic -->
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Logic</mat-label>
+      <mat-label><ng-container i18n>Logic</ng-container></mat-label>
       <mat-select formControlName="logic">
-        <mat-option value="percent">Percent</mat-option>
-        <mat-option value="absolute">Absolute</mat-option>
-        <mat-option value="per_booking">Per Booking</mat-option>
+        <mat-option value="percent"><ng-container i18n>Percent</ng-container></mat-option>
+        <mat-option value="absolute"><ng-container i18n>Absolute</ng-container></mat-option>
+        <mat-option value="per_booking"><ng-container i18n>Per Booking</ng-container></mat-option>
       </mat-select>
     </mat-form-field>
 
     <!-- Type -->
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Type</mat-label>
+      <mat-label><ng-container i18n>Type</ng-container></mat-label>
       <mat-select formControlName="type">
-        <mat-option value="fee">Fee</mat-option>
-        <mat-option value="tax">Tax</mat-option>
-        <mat-option value="city_tax">City Tax</mat-option>
+        <mat-option value="fee"><ng-container i18n>Fee</ng-container></mat-option>
+        <mat-option value="tax"><ng-container i18n>Tax</ng-container></mat-option>
+        <mat-option value="city_tax"><ng-container i18n>City Tax</ng-container></mat-option>
       </mat-select>
       @if (taxForm.get('type')?.hasError('required')) {
-        <mat-error>Type is required</mat-error>
+        <mat-error><ng-container i18n>Type is required</ng-container></mat-error>
       }
     </mat-form-field>
 
     <!-- Currency -->
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Currency</mat-label>
-      <input matInput formControlName="currency" placeholder="e.g., NGN" maxlength="3" />
+      <mat-label><ng-container i18n>Currency</ng-container></mat-label>
+      <input matInput formControlName="currency" placeholder="e.g., NGN" i18n-placeholder maxlength="3" />
       @if (taxForm.get('currency')?.hasError('required')) {
-        <mat-error>Currency is required</mat-error>
+        <mat-error><ng-container i18n>Currency is required</ng-container></mat-error>
       }
       @if (taxForm.get('currency')?.hasError('minlength') || taxForm.get('currency')?.hasError('maxlength')) {
-        <mat-error>Currency must be 3 characters</mat-error>
+        <mat-error><ng-container i18n>Currency must be 3 characters</ng-container></mat-error>
       }
     </mat-form-field>
 
     <!-- Rate -->
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Rate</mat-label>
+      <mat-label><ng-container i18n>Rate</ng-container></mat-label>
       <input matInput type="number" formControlName="rate" placeholder="e.g., 10" />
       @if (taxForm.get('rate')?.hasError('required')) {
-        <mat-error>Rate is required</mat-error>
+        <mat-error><ng-container i18n>Rate is required</ng-container></mat-error>
       }
     </mat-form-field>
 
     <!-- Additional Information Section -->
     <mat-expansion-panel [expanded]="additionalInfoExpanded()">
       <mat-expansion-panel-header>
-        <mat-panel-title>Additional Information</mat-panel-title>
+        <mat-panel-title><ng-container i18n>Additional Information</ng-container></mat-panel-title>
       </mat-expansion-panel-header>
 
       <div class="space-y-4 pt-4">
         <!-- Max Nights -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Max nights</mat-label>
+          <mat-label><ng-container i18n>Max nights</ng-container></mat-label>
           <input matInput type="number" formControlName="max_nights" placeholder="e.g., 30" />
         </mat-form-field>
 
         <!-- Skip Nights -->
         <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Skip nights</mat-label>
+          <mat-label><ng-container i18n>Skip nights</ng-container></mat-label>
           <input matInput type="number" formControlName="skip_nights" placeholder="e.g., 0" />
         </mat-form-field>
       </div>
@@ -101,7 +101,7 @@
     <mat-expansion-panel [expanded]="applicableDatesExpanded()">
       <mat-expansion-panel-header>
         <mat-panel-title>
-          Applicable Dates
+          <ng-container i18n>Applicable Dates</ng-container>
         </mat-panel-title>
         <mat-panel-description>
           <button
@@ -119,7 +119,7 @@
         @for (range of dateRangesArray.controls; track $index) {
           <div [formGroupName]="$index" class="p-4 border border-gray-200 rounded-lg">
             <div class="flex items-center justify-between mb-3">
-              <span class="font-medium text-gray-900">Date range {{ $index + 1 }}</span>
+              <span class="font-medium text-gray-900"><ng-container i18n>Date range {{ $index + 1 }}</ng-container></span>
               <button
                 type="button"
                 mat-icon-button
@@ -133,7 +133,7 @@
             <div class="space-y-3">
               <!-- Applicable After -->
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Applicable after :</mat-label>
+                <mat-label><ng-container i18n>Applicable after :</ng-container></mat-label>
                 <input matInput [matDatepicker]="pickerAfter" formControlName="after" />
                 <mat-datepicker-toggle matIconSuffix [for]="pickerAfter"></mat-datepicker-toggle>
                 <mat-datepicker #pickerAfter></mat-datepicker>
@@ -141,7 +141,7 @@
 
               <!-- Applicable Before -->
               <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Applicable before :</mat-label>
+                <mat-label><ng-container i18n>Applicable before :</ng-container></mat-label>
                 <input matInput [matDatepicker]="pickerBefore" formControlName="before" />
                 <mat-datepicker-toggle matIconSuffix [for]="pickerBefore"></mat-datepicker-toggle>
                 <mat-datepicker #pickerBefore></mat-datepicker>
@@ -161,7 +161,7 @@
     (click)="cancel()"
     [disabled]="isSaving()"
   >
-    Cancel
+    <ng-container i18n>Cancel</ng-container>
   </button>
   <button
     matButton="filled"
@@ -170,9 +170,9 @@
     [disabled]="isSaving() || !taxForm.valid"
   >
     @if (isSaving()) {
-      Saving...
+      <ng-container i18n>Saving...</ng-container>
     } @else {
-      {{ isEditing() ? 'Update Tax' : 'Create Tax' }}
+      @if (isEditing()) {<ng-container i18n>Update Tax</ng-container>} @else {<ng-container i18n>Create Tax</ng-container>}
     }
   </button>
 </mat-dialog-actions>

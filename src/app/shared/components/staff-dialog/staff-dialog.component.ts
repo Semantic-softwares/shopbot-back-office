@@ -109,12 +109,12 @@ export class StaffDialogComponent implements OnInit {
       this.userService.updateMerchant(this.data.staff!._id!, staffData).subscribe({
         next: (result) => {
           this.saving.set(false);
-          this.snackBar.open('Staff member updated successfully!', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Staff member updated successfully!`, $localize`Close`, { duration: 3000 });
           this.dialogRef.close(result);
         },
         error: (err) => {
           this.saving.set(false);
-          this.snackBar.open(err.error?.message || 'Failed to update staff member', 'Close', { duration: 5000 });
+          this.snackBar.open(err.error?.message || 'Failed to update staff member', $localize`Close`, { duration: 5000 });
         }
       });
     } else {
@@ -130,12 +130,12 @@ export class StaffDialogComponent implements OnInit {
           const message = result?.membershipStatus === 'INVITED'
             ? 'Added — they already have an account, so they were emailed instead of asked to set a password.'
             : 'Staff member added! They\'ll receive an email to set their password.';
-          this.snackBar.open(message, 'Close', { duration: 5000 });
+          this.snackBar.open(message, $localize`Close`, { duration: 5000 });
           this.dialogRef.close(result);
         },
         error: (err) => {
           this.saving.set(false);
-          this.snackBar.open(err.error?.message || 'Failed to create staff member', 'Close', { duration: 5000 });
+          this.snackBar.open(err.error?.message || 'Failed to create staff member', $localize`Close`, { duration: 5000 });
         }
       });
     }

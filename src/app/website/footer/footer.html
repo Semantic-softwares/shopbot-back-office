@@ -4,61 +4,61 @@
     <div class="grid md:grid-cols-4 gap-10">
       <div>
         <div class="flex items-center gap-2 mb-4">
-          <img src="assets/logo/logo_512.png" alt="Shopbot Logo" class="h-9 w-9">
-          <span class="font-bold text-xl" style="color: #6750a4;">Shopbot</span>
+          <img src="assets/logo/logo_512.png" alt="Shopbot Logo" i18n-alt class="h-9 w-9">
+          <span class="font-bold text-xl" style="color: #6750a4;"><ng-container i18n>Shopbot</ng-container></span>
         </div>
         <p class="text-gray-600 leading-relaxed">
-          Powerful hotel management platform for modern teams. Manage reservations, staff, billing and insights in one place.
+          <ng-container i18n>Powerful hotel management platform for modern teams. Manage reservations, staff, billing and insights in one place.</ng-container>
         </p>
         <div class="flex items-center gap-4 mt-6 text-gray-500">
-          <a href="#" aria-label="Twitter" class="hover:text-gray-800"><mat-icon>share</mat-icon></a>
-          <a href="#" aria-label="LinkedIn" class="hover:text-gray-800"><mat-icon>work</mat-icon></a>
-          <a href="#" aria-label="YouTube" class="hover:text-gray-800"><mat-icon>ondemand_video</mat-icon></a>
+          <a href="#" aria-label="Twitter" i18n-aria-label class="hover:text-gray-800"><mat-icon>share</mat-icon></a>
+          <a href="#" aria-label="LinkedIn" i18n-aria-label class="hover:text-gray-800"><mat-icon>work</mat-icon></a>
+          <a href="#" aria-label="YouTube" i18n-aria-label class="hover:text-gray-800"><mat-icon>ondemand_video</mat-icon></a>
         </div>
       </div>
 
       <div>
-        <h4 class="font-semibold text-gray-900 mb-4">Product</h4>
+        <h4 class="font-semibold text-gray-900 mb-4"><ng-container i18n>Product</ng-container></h4>
         <ul class="space-y-3 text-gray-600">
-          <li><a href="#features" class="hover:text-gray-900">Features</a></li>
-          <li><a routerLink="/features/pms" class="hover:text-gray-900 cursor-pointer">Property Management</a></li>
-          <li><a routerLink="/features/pos" class="hover:text-gray-900 cursor-pointer">POS - Food & Beverage</a></li>
-          <li><a routerLink="/features/accounting" class="hover:text-gray-900 cursor-pointer">Accounting & Expenses</a></li>
-          <li><a routerLink="/features/inventory" class="hover:text-gray-900 cursor-pointer">Purchasing & Inventory</a></li>
-          <li><a routerLink="/features/housekeeping" class="hover:text-gray-900 cursor-pointer">Housekeeping</a></li>
-          <li><a routerLink="/features/reporting" class="hover:text-gray-900 cursor-pointer">Reporting & Analytics</a></li>
-          <li><a routerLink="/features/booking-engine" class="hover:text-gray-900 cursor-pointer">Booking Engine</a></li>
-          <li><a routerLink="/features/channel-manager" class="hover:text-gray-900 cursor-pointer">Channel Manager</a></li>
-          <li><a routerLink="/downloads" class="hover:text-gray-900">Printer Agent</a></li>
+          <li><a href="#features" class="hover:text-gray-900"><ng-container i18n>Features</ng-container></a></li>
+          <li><a routerLink="/features/pms" class="hover:text-gray-900 cursor-pointer"><ng-container i18n>Property Management</ng-container></a></li>
+          <li><a routerLink="/features/pos" class="hover:text-gray-900 cursor-pointer"><ng-container i18n>POS - Food & Beverage</ng-container></a></li>
+          <li><a routerLink="/features/accounting" class="hover:text-gray-900 cursor-pointer"><ng-container i18n>Accounting & Expenses</ng-container></a></li>
+          <li><a routerLink="/features/inventory" class="hover:text-gray-900 cursor-pointer"><ng-container i18n>Purchasing & Inventory</ng-container></a></li>
+          <li><a routerLink="/features/housekeeping" class="hover:text-gray-900 cursor-pointer"><ng-container i18n>Housekeeping</ng-container></a></li>
+          <li><a routerLink="/features/reporting" class="hover:text-gray-900 cursor-pointer"><ng-container i18n>Reporting & Analytics</ng-container></a></li>
+          <li><a routerLink="/features/booking-engine" class="hover:text-gray-900 cursor-pointer"><ng-container i18n>Booking Engine</ng-container></a></li>
+          <li><a routerLink="/features/channel-manager" class="hover:text-gray-900 cursor-pointer"><ng-container i18n>Channel Manager</ng-container></a></li>
+          <li><a routerLink="/downloads" class="hover:text-gray-900"><ng-container i18n>Printer Agent</ng-container></a></li>
         </ul>
       </div>
 
       <div>
-        <h4 class="font-semibold text-gray-900 mb-4">Company</h4>
+        <h4 class="font-semibold text-gray-900 mb-4"><ng-container i18n>Company</ng-container></h4>
         <ul class="space-y-3 text-gray-600">
-          <li><a href="#" class="hover:text-gray-900">About</a></li>
-          <li><a href="#pricing" class="hover:text-gray-900">Pricing</a></li>
-          <li><a href="#" class="hover:text-gray-900">Careers</a></li>
-          <li><a href="#" class="hover:text-gray-900">Contact</a></li>
+          <li><a href="#" class="hover:text-gray-900"><ng-container i18n>About</ng-container></a></li>
+          <li><a href="#pricing" class="hover:text-gray-900"><ng-container i18n>Pricing</ng-container></a></li>
+          <li><a href="#" class="hover:text-gray-900"><ng-container i18n>Careers</ng-container></a></li>
+          <li><a href="#" class="hover:text-gray-900"><ng-container i18n>Contact</ng-container></a></li>
         </ul>
       </div>
 
       <div>
-        <h4 class="font-semibold text-gray-900 mb-4">Stay up to date</h4>
-        <p class="text-gray-600 mb-4">Subscribe to our newsletter for product news and tips.</p>
+        <h4 class="font-semibold text-gray-900 mb-4"><ng-container i18n>Stay up to date</ng-container></h4>
+        <p class="text-gray-600 mb-4"><ng-container i18n>Subscribe to our newsletter for product news and tips.</ng-container></p>
         <form class="flex gap-2">
-          <input type="email" placeholder="Your email" class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-          <button mat-flat-button color="primary">Subscribe</button>
+          <input type="email" placeholder="Your email" i18n-placeholder class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          <button mat-flat-button color="primary"><ng-container i18n>Subscribe</ng-container></button>
         </form>
       </div>
     </div>
 
     <div class="mt-12 pt-8 border-t border-outline-variant flex flex-col md:flex-row items-center justify-between text-sm text-gray-500">
-      <p>© {{ currentYear() }} ShopBot. All rights reserved.</p>
+      <p><ng-container i18n>© {{ currentYear() }} ShopBot. All rights reserved.</ng-container></p>
       <div class="flex gap-4 mt-4 md:mt-0">
-        <a href="#" class="hover:text-gray-800">Terms</a>
-        <a href="#" class="hover:text-gray-800">Privacy</a>
-        <a href="#" class="hover:text-gray-800">Security</a>
+        <a href="#" class="hover:text-gray-800"><ng-container i18n>Terms</ng-container></a>
+        <a href="#" class="hover:text-gray-800"><ng-container i18n>Privacy</ng-container></a>
+        <a href="#" class="hover:text-gray-800"><ng-container i18n>Security</ng-container></a>
       </div>
     </div>
   </div>

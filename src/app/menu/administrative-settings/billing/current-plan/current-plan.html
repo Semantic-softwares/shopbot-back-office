@@ -1,5 +1,5 @@
 <div class="mb-12">
-  <h2 class="text-sm font-semibold text-blue-600 mb-6">Current Plan</h2>
+  <h2 class="text-sm font-semibold text-blue-600 mb-6"><ng-container i18n>Current Plan</ng-container></h2>
 
   <!-- Plan Overview Card -->
   <mat-card appearance="outlined" class="mb-8">
@@ -29,7 +29,7 @@
         <div class="flex-1">
           <div class="flex items-baseline gap-2 mb-1">
             <p class="text-sm font-semibold text-gray-900">
-              {{ subscription().status === 'TRIAL' ? 'Free Trial' : 'Active Subscription' }}
+              @if (subscription().status === 'TRIAL') {<ng-container i18n>Free Trial</ng-container>} @else {<ng-container i18n>Active Subscription</ng-container>}
             </p>
             <span
               class="text-xs font-semibold px-2.5 py-0.5 rounded-full"
@@ -38,14 +38,14 @@
                 'bg-green-100 text-green-700': subscription().status === 'ACTIVE'
               }"
             >
-              {{ subscription().status === 'TRIAL' ? 'FREE TRIAL' : subscription().billingCycle }}
+              @if (subscription().status === 'TRIAL') {<ng-container i18n>FREE TRIAL</ng-container>} @else {<ng-container>{{ subscription().billingCycle }}</ng-container>}
             </span>
           </div>
           <p class="text-sm text-gray-500 mb-1">
-            {{ activeModules().length }} active module{{ activeModules().length !== 1 ? 's' : '' }}
+            <ng-container i18n>{{ activeModules().length }} active module{{ activeModules().length !== 1 ? 's' : '' }}</ng-container>
           </p>
           <p class="text-sm text-gray-500">
-            {{ subscription().status === 'TRIAL' ? 'Expires on' : 'Renews on' }}
+            @if (subscription().status === 'TRIAL') {<ng-container i18n>Expires on</ng-container>} @else {<ng-container i18n>Renews on</ng-container>}
             <span class="font-semibold text-gray-700">
               @if (subscription().status === 'TRIAL') {
                 {{ subscription().trialEndDate | date: 'MMM d, y' }}
@@ -67,11 +67,11 @@
           <div class="flex items-center gap-2">
             @if (subscription().status === 'TRIAL') {
               <button matButton="filled" color="primary" (click)="onUpgradeClick()">
-                Upgrade to Paid Plan
+                <ng-container i18n>Upgrade to Paid Plan</ng-container>
               </button>
             } @else {
               <button matButton="outlined" color="warn" (click)="onCancelClick()">
-                Cancel Subscription
+                <ng-container i18n>Cancel Subscription</ng-container>
               </button>
             }
           </div>
@@ -82,7 +82,7 @@
 
   <!-- Billing Cycle Toggle -->
   <div class="flex items-center justify-between mb-6">
-    <h3 class="text-sm font-semibold text-gray-700">Billing Cycle</h3>
+    <h3 class="text-sm font-semibold text-gray-700"><ng-container i18n>Billing Cycle</ng-container></h3>
     <div class="flex items-center gap-2">
       <button
         mat-stroked-button
@@ -93,16 +93,16 @@
         @if (changingCycle()) {
           <mat-spinner diameter="18" class="inline-block mr-2"></mat-spinner>
         }
-        Switch to {{ subscription().billingCycle === 'MONTHLY' ? 'Yearly' : 'Monthly' }}
+        <ng-container i18n>Switch to {{ subscription().billingCycle === 'MONTHLY' ? ('Yearly' | tr) : ('Monthly' | tr) }}</ng-container>
         @if (subscription().billingCycle === 'MONTHLY') {
-          <span class="ml-1 text-xs text-green-600 font-semibold">(Save ~17%)</span>
+          <span class="ml-1 text-xs text-green-600 font-semibold"><ng-container i18n>(Save ~17%)</ng-container></span>
         }
       </button>
     </div>
   </div>
 
   <!-- Active Modules -->
-  <h3 class="text-sm font-semibold text-gray-700 mb-4">Active Modules</h3>
+  <h3 class="text-sm font-semibold text-gray-700 mb-4"><ng-container i18n>Active Modules</ng-container></h3>
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
     @for (mod of activeModules(); track mod._id) {
       <mat-card appearance="outlined" class="border-l-4 border-l-green-500">
@@ -118,7 +118,7 @@
                 <p class="text-sm font-semibold text-gray-900">{{ getModuleDef(mod.moduleKey).label }}</p>
                 <p class="text-xs text-gray-500">{{ getModuleDef(mod.moduleKey).description }}</p>
                 <p class="text-xs text-gray-400 mt-1">
-                  Added {{ mod.addedAt | date: 'MMM d, y' }}
+                  <ng-container i18n>Added {{ mod.addedAt | date: 'MMM d, y' }}</ng-container>
                 </p>
               </div>
             </div>
@@ -134,7 +134,7 @@
                 (click)="removeModule(mod.moduleKey)"
                 [disabled]="removingModule() === mod.moduleKey"
                 class="mt-1"
-                [attr.aria-label]="'Remove ' + getModuleDef(mod.moduleKey).label"
+                [attr.aria-label]="('Remove ' | tr) + getModuleDef(mod.moduleKey).label"
               >
                 @if (removingModule() === mod.moduleKey) {
                   <mat-spinner diameter="18"></mat-spinner>
@@ -151,7 +151,7 @@
 
   <!-- Pending Removal Modules -->
   @if (pendingRemovalModules().length > 0) {
-    <h3 class="text-sm font-semibold text-gray-700 mb-4">Pending Removal</h3>
+    <h3 class="text-sm font-semibold text-gray-700 mb-4"><ng-container i18n>Pending Removal</ng-container></h3>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
       @for (mod of pendingRemovalModules(); track mod._id) {
         <mat-card appearance="outlined" class="border-l-4 border-l-yellow-500 opacity-75">
@@ -164,7 +164,7 @@
               </div>
               <div>
                 <p class="text-sm font-semibold text-gray-700">{{ getModuleDef(mod.moduleKey).label }}</p>
-                <p class="text-xs text-yellow-700">Access until end of current billing cycle</p>
+                <p class="text-xs text-yellow-700"><ng-container i18n>Access until end of current billing cycle</ng-container></p>
               </div>
             </div>
           </mat-card-content>
@@ -175,7 +175,7 @@
 
   <!-- Available to Add -->
   @if (availableToAdd().length > 0) {
-    <h3 class="text-sm font-semibold text-gray-700 mb-4">Add More Modules</h3>
+    <h3 class="text-sm font-semibold text-gray-700 mb-4"><ng-container i18n>Add More Modules</ng-container></h3>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       @for (def of availableToAdd(); track def.key) {
         <mat-card appearance="outlined" class="border border-dashed border-gray-300">
@@ -202,7 +202,7 @@
                 @if (addingModule() === def.key) {
                   <mat-spinner diameter="18"></mat-spinner>
                 } @else {
-                  Add
+                  <ng-container i18n>Add</ng-container>
                 }
               </button>
             </div>

@@ -53,7 +53,7 @@ export class PaymentCallbackComponent implements OnInit {
       next: (subscription) => {
         this.isProcessing.set(false);
         this.isSuccess.set(true);
-        this.snackBar.open('Payment successful! Your subscription is now active.', 'Close', {
+        this.snackBar.open($localize`Payment successful! Your subscription is now active.`, $localize`Close`, {
           duration: 5000,
         });
       },

@@ -1,7 +1,7 @@
 <!-- Header Section -->
 <app-page-header 
-  title="Channel Manager Property" 
-  subtitle="Configure and manage your channel manager settings for seamless integration with various online travel agencies (OTAs).">
+  title="Channel Manager Property" i18n-title 
+  subtitle="Configure and manage your channel manager settings for seamless integration with various online travel agencies (OTAs)." i18n-subtitle>
 
 </app-page-header>
 
@@ -9,7 +9,7 @@
 @if (loading()) {
   <div class="flex justify-center items-center py-12 bg-white">
     <mat-spinner diameter="40" class="!text-blue-600"></mat-spinner>
-    <span class="ml-3 text-gray-600">Loading settings...</span>
+    <span class="ml-3 text-gray-600"><ng-container i18n>Loading settings...</ng-container></span>
   </div>
 }
 

@@ -1,0 +1,17 @@
+<button mat-icon-button [matMenuTriggerFor]="menu" [matTooltip]="tooltip" [attr.aria-label]="tooltip">
+  <mat-icon>{{ theme.isDark() ? 'dark_mode' : 'light_mode' }}</mat-icon>
+</button>
+
+<mat-menu #menu="matMenu" xPosition="before">
+  @for (option of options; track option.value) {
+    <button mat-menu-item (click)="theme.set(option.value)" [attr.aria-pressed]="theme.preference() === option.value">
+      <mat-icon>{{ option.icon }}</mat-icon>
+      <span class="flex w-full min-w-24 items-center justify-between gap-4">
+        {{ option.label }}
+        @if (theme.preference() === option.value) {
+          <mat-icon class="!m-0 text-primary">check</mat-icon>
+        }
+      </span>
+    </button>
+  }
+</mat-menu>

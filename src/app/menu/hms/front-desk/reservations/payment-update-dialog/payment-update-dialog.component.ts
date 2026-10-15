@@ -17,6 +17,7 @@ import { AuthService } from '../../../../../shared/services/auth.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { QueryParamService } from '../../../../../shared/services/query-param.service';
 import { CurrencyMaskModule } from 'ng2-currency-mask';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 export interface PaymentUpdateDialogData {
   reservation: Reservation;
@@ -37,7 +38,7 @@ export interface PaymentUpdateResult {
   @Component({
   selector: 'app-payment-update-dialog',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

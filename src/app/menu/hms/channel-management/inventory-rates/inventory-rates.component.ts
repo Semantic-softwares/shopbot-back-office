@@ -37,6 +37,7 @@ import { environment } from '../../../../../environments/environment';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CreateRatePlanDialogComponent } from './create-rate-plan-dialog';
 import { ValueOverrideDialogComponent } from './value-override-dialog';
+import { TrPipe } from '../../../../shared/i18n/tr.pipe';
 
 // Domain Types - Following Channex/Channel Manager logic
 interface RoomTypeData {
@@ -98,7 +99,7 @@ interface PricingDraft {
 @Component({
   selector: 'app-inventory-rates',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
@@ -200,13 +201,13 @@ export class InventoryRatesComponent {
   
   // Available restrictions to display
   private availableRestrictions = [
-    { value: 'availability', label: 'Availability' },
-    { value: 'rate', label: 'Rate' },
-    { value: 'cta', label: 'Closed To Arrival' },
-    { value: 'ctd', label: 'Closed To Departure' },
-    { value: 'min-stay', label: 'Min Stay' },
-    { value: 'max-stay', label: 'Max Stay' },
-    { value: 'stop-sell', label: 'Stop Sell' },
+    { value: 'availability', label: $localize`Availability` },
+    { value: 'rate', label: $localize`Rate` },
+    { value: 'cta', label: $localize`Closed To Arrival` },
+    { value: 'ctd', label: $localize`Closed To Departure` },
+    { value: 'min-stay', label: $localize`Min Stay` },
+    { value: 'max-stay', label: $localize`Max Stay` },
+    { value: 'stop-sell', label: $localize`Stop Sell` },
   ];
   
   // Domain-specific state (Channex Channel Manager logic)

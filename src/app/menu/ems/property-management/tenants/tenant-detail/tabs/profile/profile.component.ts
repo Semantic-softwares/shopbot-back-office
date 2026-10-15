@@ -8,12 +8,13 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TenantDetailPageComponent } from '../../tenant-detail-page.component';
 import { EmergencyContact, Vehicle, Pet } from '../../../../../../../shared/models/estate.model';
+import { TrPipe } from '../../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-tenant-profile',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatCardModule,
     MatIconModule,

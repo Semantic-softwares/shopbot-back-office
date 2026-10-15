@@ -1,43 +1,43 @@
 <h2 mat-dialog-title>
-  {{ isEditMode() ? 'Edit Role' : 'Create Custom Role' }}
+  @if (isEditMode()) {<ng-container i18n>Edit Role</ng-container>} @else {<ng-container i18n>Create Custom Role</ng-container>}
 </h2>
 
 <mat-dialog-content>
   <form [formGroup]="roleForm" class="space-y-4">
     <!-- Role Name -->
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Role Name</mat-label>
-      <input matInput formControlName="name" placeholder="e.g., Night Shift Manager">
+      <mat-label><ng-container i18n>Role Name</ng-container></mat-label>
+      <input matInput formControlName="name" placeholder="e.g., Night Shift Manager" i18n-placeholder>
       @if (roleForm.get('name')?.hasError('required')) {
-        <mat-error>Role name is required</mat-error>
+        <mat-error><ng-container i18n>Role name is required</ng-container></mat-error>
       }
     </mat-form-field>
 
     <!-- Role Description -->
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Description</mat-label>
+      <mat-label><ng-container i18n>Description</ng-container></mat-label>
       <textarea matInput formControlName="description" rows="2" 
-        placeholder="Describe what this role is for..."></textarea>
+        placeholder="Describe what this role is for..." i18n-placeholder></textarea>
     </mat-form-field>
 
     <!-- Permissions Section -->
     <div>
       <div class="flex items-center justify-between p-4">
-        <h3 class="font-medium text-gray-700">Permissions</h3>
+        <h3 class="font-medium text-gray-700"><ng-container i18n>Permissions</ng-container></h3>
         <div class="flex gap-2">
           <button mat-stroked-button type="button" (click)="selectAll()" class="!text-sm">
             <mat-icon>check_box</mat-icon>
-            Select All
+            <ng-container i18n>Select All</ng-container>
           </button>
           <button mat-stroked-button type="button" (click)="deselectAll()" class="!text-sm">
             <mat-icon>check_box_outline_blank</mat-icon>
-            Deselect All
+            <ng-container i18n>Deselect All</ng-container>
           </button>
         </div>
       </div>
 
       <div class="text-sm text-gray-500 px-4 py-2">
-        Selected: {{ selectedPermissions().size }} / {{ allPermissions().length }} permissions
+        <ng-container i18n>Selected: {{ selectedPermissions().size }} / {{ allPermissions().length }} permissions</ng-container>
       </div>
 
       @if (permissionsResource.isLoading()) {
@@ -95,13 +95,13 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="p-4">
-  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button mat-dialog-close><ng-container i18n>Cancel</ng-container></button>
   <button mat-flat-button color="primary" 
     [disabled]="roleForm.invalid || saving() || selectedPermissions().size === 0"
     (click)="saveRole()">
     @if (saving()) {
       <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
     }
-    {{ isEditMode() ? 'Update Role' : 'Create Role' }}
+    @if (isEditMode()) {<ng-container i18n>Update Role</ng-container>} @else {<ng-container i18n>Create Role</ng-container>}
   </button>
 </mat-dialog-actions>

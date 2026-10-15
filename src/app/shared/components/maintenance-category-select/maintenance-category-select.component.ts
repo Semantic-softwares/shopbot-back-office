@@ -28,10 +28,10 @@ import { MaintenanceCategoryService } from '../../services/maintenance-category.
       <mat-label>{{ label }}</mat-label>
       <mat-select [formControl]="control">
         @if (categoriesResource.isLoading()) {
-          <mat-option disabled>Loading...</mat-option>
+          <mat-option disabled><ng-container i18n>Loading...</ng-container></mat-option>
         } @else {
           @if (showNone) {
-            <mat-option value="">None</mat-option>
+            <mat-option value=""><ng-container i18n>None</ng-container></mat-option>
           }
           @for (item of options(); track item.name) {
             <mat-option [value]="item.name">{{ item.name }}</mat-option>
@@ -42,7 +42,7 @@ import { MaintenanceCategoryService } from '../../services/maintenance-category.
         <mat-hint align="end">
           <a class="text-blue-600 cursor-pointer text-xs hover:underline" role="button" tabindex="0"
             (click)="createCategory()" (keydown.enter)="createCategory()">
-            Add category
+            <ng-container i18n>Add category</ng-container>
           </a>
         </mat-hint>
       }

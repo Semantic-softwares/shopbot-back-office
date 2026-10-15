@@ -18,6 +18,7 @@ import { StoreStore } from '../../shared/stores/store.store';
 import { Store } from '../../shared/models';
 import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.component';
 import { RolesService } from '../../shared/services/roles.service';
+import { TrPipe } from '../../shared/i18n/tr.pipe';
 
 interface NavItem {
   icon: string;
@@ -34,7 +35,7 @@ interface NavSection {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     MatSidenavModule,
     MatToolbarModule,
     MatListModule,
@@ -132,7 +133,7 @@ export class DashboardComponent {
       children: [
         {
           icon: 'space_dashboard',
-          label: 'Dashboard',
+          label: $localize`Dashboard`,
           link: './dashboard',
           permission: 'view_company',
         },
@@ -143,37 +144,37 @@ export class DashboardComponent {
       children: [
         {
           icon: 'leaderboard',
-          label: 'Sales summary',
+          label: $localize`Sales summary`,
           link: './reports/summary',
           permission: 'view_company',
         },
         {
           icon: 'shop',
-          label: 'Sales by item',
+          label: $localize`Sales by item`,
           link: './reports/sales-by-item',
           permission: 'view_timeline',
         },
         {
           icon: 'category',
-          label: 'Sales by category',
+          label: $localize`Sales by category`,
           link: './reports/sales-by-category',
           permission: 'view_company',
         },
         {
           icon: 'diversity_1',
-          label: 'Sales by employee',
+          label: $localize`Sales by employee`,
           link: './reports/sales-by-employee',
           permission: 'manage_home',
         },
         {
           icon: 'payments',
-          label: 'Sales by payment type',
+          label: $localize`Sales by payment type`,
           link: './reports/sales-by-payment-type',
           permission: 'manage_home',
         },
         {
           icon: 'description',
-          label: 'Receipts',
+          label: $localize`Receipts`,
           link: './reports/receipts',
           permission: 'manage_home',
         },
@@ -184,31 +185,31 @@ export class DashboardComponent {
       children: [
         {
           icon: 'local_mall',
-          label: 'Products',
+          label: $localize`Products`,
           link: './items/products',
           permission: 'view_company',
         },
         {
           icon: 'category_search',
-          label: 'Categories',
+          label: $localize`Categories`,
           link: './items/categories',
           permission: 'view_timeline',
         },
         {
           icon: 'palette',
-          label: 'Modifiers',
+          label: $localize`Modifiers`,
           link: './items/variants',
           permission: 'view_company',
         },
         {
           icon: 'check_box',
-          label: 'Options',
+          label: $localize`Options`,
           link: './items/options',
           permission: 'view_company',
         },
         {
           icon: 'restaurant',
-          label: 'Stations',
+          label: $localize`Stations`,
           link: './items/stations',
           permission: 'view_company',
         },
@@ -219,13 +220,13 @@ export class DashboardComponent {
       children: [
         {
           icon: 'table_restaurant',
-          label: 'Tables',
+          label: $localize`Tables`,
           link: './tables/list',
           permission: 'view_company',
         },
         {
           icon: 'category',
-          label: 'Table Categories',
+          label: $localize`Table Categories`,
           link: './tables/categories/list',
           permission: 'view_company',
         },
@@ -234,9 +235,9 @@ export class DashboardComponent {
     {
       name:  'Inventory',
       children: [
-        { icon: 'warehouse', label: 'Suppliers', link: './inventory/suppliers', permission: 'view_company' },
-        { icon: 'inventory_2', label: 'Restock', link: './inventory/restock', permission: 'view_company' },
-        { icon: 'calculate', label: 'Reconciliations', link: './inventory/reconciliations', permission: 'view_company' },
+        { icon: 'warehouse', label: $localize`Suppliers`, link: './inventory/suppliers', permission: 'view_company' },
+        { icon: 'inventory_2', label: $localize`Restock`, link: './inventory/restock', permission: 'view_company' },
+        { icon: 'calculate', label: $localize`Reconciliations`, link: './inventory/reconciliations', permission: 'view_company' },
       ]
     },
     {
@@ -244,13 +245,13 @@ export class DashboardComponent {
       children: [
         {
           icon: 'assignment_ind',
-          label: 'Employees',
+          label: $localize`Employees`,
           link: './employees/list',
           permission: 'view_company',
         },
         {
           icon: 'access_time',
-          label: 'Timecards',
+          label: $localize`Timecards`,
           link: './employees/timecards/list',
           permission: 'view_company',
         },
@@ -261,7 +262,7 @@ export class DashboardComponent {
       children: [
         {
           icon: 'groups',
-          label: 'Customers',
+          label: $localize`Customers`,
           link: './customers/list',
           permission: 'view_company',
         },

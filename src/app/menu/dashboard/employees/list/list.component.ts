@@ -104,7 +104,7 @@ export class EmployeeListComponent {
 
   deleteEmployee(employee: Employee) {
     if (employee.role === 'Owner') {
-      this.snackBar.open('Cannot delete an owner', 'Close', {
+      this.snackBar.open($localize`Cannot delete an owner`, $localize`Close`, {
         duration: 3000,
         horizontalPosition: 'end',
         verticalPosition: 'top'
@@ -121,7 +121,7 @@ export class EmployeeListComponent {
       if (result) {
         this.userService.deleteMerchant(employee._id!).subscribe({
           next: () => {
-            this.snackBar.open('Employee deleted successfully', 'Close', {
+            this.snackBar.open($localize`Employee deleted successfully`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'
@@ -129,7 +129,7 @@ export class EmployeeListComponent {
             this.employees.reload();
           },
           error: () => {
-            this.snackBar.open('Error deleting employee', 'Close', {
+            this.snackBar.open($localize`Error deleting employee`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'end',
               verticalPosition: 'top'

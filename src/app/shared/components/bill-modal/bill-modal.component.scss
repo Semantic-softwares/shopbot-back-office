@@ -33,7 +33,7 @@
     // Ensure good contrast for printing
     .text-gray-600,
     .text-gray-700 {
-      color: #000 !important;
+      color: light-dark(#000, #e6e1e1) !important;
     }
   }
 }

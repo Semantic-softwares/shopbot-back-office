@@ -18,6 +18,7 @@ import {
   RevenueTrend
 } from '../../../shared/services/analytics.service';
 import { StoreStore } from '../../../shared/stores/store.store';
+import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 
 @Component({
   selector: 'app-overview',
@@ -37,6 +38,8 @@ import { StoreStore } from '../../../shared/stores/store.store';
   styleUrls: ['./overview.component.scss'],
 })
 export class OverviewComponent implements OnInit, OnDestroy {
+  // Keeps Chart.js text/grid colours in step with the light/dark theme.
+  private readonly chartTheme = inject(ChartThemeService);
   private router = inject(Router);
   private analyticsService = inject(AnalyticsService);
   private destroy$ = new Subject<void>();
@@ -73,7 +76,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
     labels: [],
     datasets: [{
       data: [],
-      label: 'Occupancy Rate (%)',
+      label: $localize`Occupancy Rate (%)`,
       backgroundColor: 'rgba(59, 130, 246, 0.1)',
       borderColor: 'rgba(59, 130, 246, 1)',
       borderWidth: 2,
@@ -107,7 +110,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
     labels: [],
     datasets: [{
       data: [],
-      label: 'Daily Revenue',
+      label: $localize`Daily Revenue`,
       backgroundColor: 'rgba(34, 197, 94, 0.8)',
       borderColor: 'rgba(34, 197, 94, 1)',
       borderWidth: 1
@@ -179,7 +182,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
           labels: trends.map(t => new Date(t.date).toLocaleDateString('en-US', { weekday: 'short' })),
           datasets: [{
             data: trends.map(t => t.occupancyRate),
-            label: 'Occupancy Rate (%)',
+            label: $localize`Occupancy Rate (%)`,
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
             borderColor: 'rgba(59, 130, 246, 1)',
             borderWidth: 2,

@@ -1,9 +1,9 @@
-<app-page-header title="Guest Details" subtitle="View and manage guest information">
+<app-page-header title="Guest Details" i18n-title subtitle="View and manage guest information" i18n-subtitle>
   <ng-container actions>
     @if (!isLoading() && guest()) {
       <button matButton="outlined" (click)="onEdit()">
         <mat-icon>edit</mat-icon>
-        Edit Guest
+        <ng-container i18n>Edit Guest</ng-container>
       </button>
 
       <button matButton="outlined" [matMenuTriggerFor]="actionsMenu" [disabled]="isUpdating()">
@@ -12,21 +12,21 @@
         } @else {
           <mat-icon>more_vert</mat-icon>
         }
-        {{ isUpdating() ? 'Processing...' : 'Actions' }}
+        @if (isUpdating()) {<ng-container i18n>Processing...</ng-container>} @else {<ng-container i18n>Actions</ng-container>}
       </button>
       <mat-menu #actionsMenu="matMenu">
         <button mat-menu-item (click)="toggleVipStatus()" [disabled]="isUpdating()">
           <mat-icon>{{ guest()?.isVip ? 'star_border' : 'star' }}</mat-icon>
-          <span>{{ guest()?.isVip ? 'Remove VIP Status' : 'Make VIP' }}</span>
+          <span>@if (guest()?.isVip) {<ng-container i18n>Remove VIP Status</ng-container>} @else {<ng-container i18n>Make VIP</ng-container>}</span>
         </button>
         <button mat-menu-item (click)="toggleBlacklistStatus()" [disabled]="isUpdating()">
           <mat-icon>{{ guest()?.blacklisted ? 'check_circle' : 'block' }}</mat-icon>
-          <span>{{ guest()?.blacklisted ? 'Remove from Blacklist' : 'Add to Blacklist' }}</span>
+          <span>@if (guest()?.blacklisted) {<ng-container i18n>Remove from Blacklist</ng-container>} @else {<ng-container i18n>Add to Blacklist</ng-container>}</span>
         </button>
         <mat-divider></mat-divider>
         <button mat-menu-item (click)="onDelete()" [disabled]="isUpdating()">
           <mat-icon color="warn">delete</mat-icon>
-          <span>Delete Guest</span>
+          <span><ng-container i18n>Delete Guest</ng-container></span>
         </button>
       </mat-menu>
     }
@@ -85,20 +85,20 @@
                   @if (guestStatus() === 'blacklisted') {
                     <mat-icon class="text-sm mr-1">block</mat-icon>
                   }
-                  {{ guestStatus() | titlecase }} Guest
+                  <ng-container i18n>{{ guestStatus() | titlecase }} Guest</ng-container>
                 </mat-chip>
                 
                 @if (guest()?.loyaltyProgram?.tier) {
                   <mat-chip class="bg-amber-100! text-amber-800!">
                     <mat-icon class="text-sm mr-1">workspace_premium</mat-icon>
-                    {{ $safeNavigationMigration(guest()?.loyaltyProgram?.tier) | titlecase }} Member
+                    <ng-container i18n>{{ $safeNavigationMigration(guest()?.loyaltyProgram?.tier) | titlecase }} Member</ng-container>
                   </mat-chip>
                 }
 
                 @if (isUpdating()) {
                   <mat-chip class="bg-blue-100! text-blue-800!">
                     <mat-spinner diameter="16" class="mr-1"></mat-spinner>
-                    Updating...
+                    <ng-container i18n>Updating...</ng-container>
                   </mat-chip>
                 }
               </div>
@@ -110,19 +110,19 @@
             <mat-card appearance="outlined" class="bg-blue-50!">
               <mat-card-content class="p-4! text-center">
                 <div class="text-2xl font-bold text-blue-600">{{ guest()?.totalStays || 0 }}</div>
-                <div class="text-sm text-blue-700">Total Stays</div>
+                <div class="text-sm text-blue-700"><ng-container i18n>Total Stays</ng-container></div>
               </mat-card-content>
             </mat-card>
             <mat-card appearance="outlined" class="bg-green-50!">
               <mat-card-content class="p-4! text-center">
                 <div class="text-2xl font-bold text-green-600">{{ (guest()?.totalSpent || 0) | currency:(selectedStore()?.currency || 'USD'):'symbol':'1.0-0' }}</div>
-                <div class="text-sm text-green-700">Total Spent</div>
+                <div class="text-sm text-green-700"><ng-container i18n>Total Spent</ng-container></div>
               </mat-card-content>
             </mat-card>
             <mat-card appearance="outlined" class="bg-purple-50!">
               <mat-card-content class="p-4! text-center">
                 <div class="text-2xl font-bold text-purple-600">{{ guest()?.loyaltyProgram?.points || 0 }}</div>
-                <div class="text-sm text-purple-700">Loyalty Points</div>
+                <div class="text-sm text-purple-700"><ng-container i18n>Loyalty Points</ng-container></div>
               </mat-card-content>
             </mat-card>
           </div>
@@ -137,12 +137,12 @@
           <div class="flex items-start">
             <mat-icon class="text-purple-600 text-xl">star</mat-icon>
             <div class="ml-3 flex-1">
-              <h3 class="text-sm font-medium text-purple-800">VIP Guest</h3>
+              <h3 class="text-sm font-medium text-purple-800"><ng-container i18n>VIP Guest</ng-container></h3>
               <div class="mt-2 text-sm text-purple-700">
-                <p>This guest has VIP status and should receive premium service and privileges.</p>
+                <p><ng-container i18n>This guest has VIP status and should receive premium service and privileges.</ng-container></p>
                 @if (guest()?.vipSince) {
                   <div class="mt-1 text-xs text-purple-600">
-                    VIP member since {{ formatDate($safeNavigationMigration(guest()?.vipSince)) }}
+                    <ng-container i18n>VIP member since {{ formatDate($safeNavigationMigration(guest()?.vipSince)) }}</ng-container>
                   </div>
                 }
               </div>
@@ -159,17 +159,17 @@
           <div class="flex items-start">
             <mat-icon class="text-red-600 text-xl">warning</mat-icon>
             <div class="ml-3 flex-1">
-              <h3 class="text-sm font-medium text-red-800">This guest is blacklisted</h3>
+              <h3 class="text-sm font-medium text-red-800"><ng-container i18n>This guest is blacklisted</ng-container></h3>
               <div class="mt-2 text-sm text-red-700">
-                <p>This guest has been flagged and cannot make new reservations without manager approval.</p>
+                <p><ng-container i18n>This guest has been flagged and cannot make new reservations without manager approval.</ng-container></p>
                 @if (guest()?.blacklistReason) {
                   <div class="mt-2">
-                    <span class="font-medium">Reason:</span> {{ guest()?.blacklistReason }}
+                    <span class="font-medium"><ng-container i18n>Reason:</ng-container></span> {{ guest()?.blacklistReason }}
                   </div>
                 }
                 @if (guest()?.blacklistedAt) {
                   <div class="mt-1 text-xs text-red-600">
-                    Blacklisted on {{ formatDate($safeNavigationMigration(guest()?.blacklistedAt)) }}
+                    <ng-container i18n>Blacklisted on {{ formatDate($safeNavigationMigration(guest()?.blacklistedAt)) }}</ng-container>
                   </div>
                 }
               </div>
@@ -183,7 +183,7 @@
     <mat-card appearance="outlined">
       <mat-tab-group animationDuration="200ms">
         <!-- Personal Information Tab -->
-        <mat-tab label="Personal Information">
+        <mat-tab label="Personal Information" i18n-label>
           <div class="p-6 space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
@@ -191,40 +191,40 @@
               <mat-card appearance="outlined">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-purple-600">person</mat-icon>
-                  <mat-card-title>Personal Details</mat-card-title>
+                  <mat-card-title><ng-container i18n>Personal Details</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6! space-y-4">
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="text-sm font-medium text-gray-500">First Name</label>
-                      <p class="text-gray-900 mt-1">{{ guest()?.firstName || 'Not specified' }}</p>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>First Name</ng-container></label>
+                      <p class="text-gray-900 mt-1">@if (guest()?.firstName) {<ng-container>{{ guest()?.firstName }}</ng-container>} @else {<ng-container i18n>Not specified</ng-container>}</p>
                     </div>
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Last Name</label>
-                      <p class="text-gray-900 mt-1">{{ guest()?.lastName || 'Not specified' }}</p>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Last Name</ng-container></label>
+                      <p class="text-gray-900 mt-1">@if (guest()?.lastName) {<ng-container>{{ guest()?.lastName }}</ng-container>} @else {<ng-container i18n>Not specified</ng-container>}</p>
                     </div>
                   </div>
                   <div>
-                    <label class="text-sm font-medium text-gray-500">Email</label>
-                    <p class="text-gray-900 mt-1">{{ guest()?.email || 'Not specified' }}</p>
+                    <label class="text-sm font-medium text-gray-500"><ng-container i18n>Email</ng-container></label>
+                    <p class="text-gray-900 mt-1">@if (guest()?.email) {<ng-container>{{ guest()?.email }}</ng-container>} @else {<ng-container i18n>Not specified</ng-container>}</p>
                   </div>
                   <div>
-                    <label class="text-sm font-medium text-gray-500">Phone</label>
-                    <p class="text-gray-900 mt-1">{{ guest()?.phone || 'Not specified' }}</p>
+                    <label class="text-sm font-medium text-gray-500"><ng-container i18n>Phone</ng-container></label>
+                    <p class="text-gray-900 mt-1">@if (guest()?.phone) {<ng-container>{{ guest()?.phone }}</ng-container>} @else {<ng-container i18n>Not specified</ng-container>}</p>
                   </div>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Date of Birth</label>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Date of Birth</ng-container></label>
                       <p class="text-gray-900 mt-1">{{ formatDate($safeNavigationMigration(guest()?.dateOfBirth)) }}</p>
                     </div>
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Nationality</label>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Nationality</ng-container></label>
                       <p class="text-gray-900 mt-1">{{ getCountryName($safeNavigationMigration(guest()?.nationality)) }}</p>
                     </div>
                   </div>
                   @if (guest()?.lastStayDate) {
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Last Stay</label>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Last Stay</ng-container></label>
                       <p class="text-gray-900 mt-1">{{ formatDate($safeNavigationMigration(guest()?.lastStayDate)) }}</p>
                     </div>
                   }
@@ -235,36 +235,36 @@
               <mat-card appearance="outlined">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-purple-600">location_on</mat-icon>
-                  <mat-card-title>Address Information</mat-card-title>
+                  <mat-card-title><ng-container i18n>Address Information</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6! space-y-4">
                   @if (guest()?.address) {
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Street Address</label>
-                      <p class="text-gray-900 mt-1">{{ guest()?.address?.street || 'Not specified' }}</p>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Street Address</ng-container></label>
+                      <p class="text-gray-900 mt-1">@if (guest()?.address?.street) {<ng-container>{{ guest()?.address?.street }}</ng-container>} @else {<ng-container i18n>Not specified</ng-container>}</p>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label class="text-sm font-medium text-gray-500">City</label>
-                        <p class="text-gray-900 mt-1">{{ guest()?.address?.city || 'Not specified' }}</p>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>City</ng-container></label>
+                        <p class="text-gray-900 mt-1">@if (guest()?.address?.city) {<ng-container>{{ guest()?.address?.city }}</ng-container>} @else {<ng-container i18n>Not specified</ng-container>}</p>
                       </div>
                       <div>
-                        <label class="text-sm font-medium text-gray-500">State/Province</label>
-                        <p class="text-gray-900 mt-1">{{ guest()?.address?.state || 'Not specified' }}</p>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>State/Province</ng-container></label>
+                        <p class="text-gray-900 mt-1">@if (guest()?.address?.state) {<ng-container>{{ guest()?.address?.state }}</ng-container>} @else {<ng-container i18n>Not specified</ng-container>}</p>
                       </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Postal Code</label>
-                        <p class="text-gray-900 mt-1">{{ guest()?.address?.postalCode || 'Not specified' }}</p>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Postal Code</ng-container></label>
+                        <p class="text-gray-900 mt-1">@if (guest()?.address?.postalCode) {<ng-container>{{ guest()?.address?.postalCode }}</ng-container>} @else {<ng-container i18n>Not specified</ng-container>}</p>
                       </div>
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Country</label>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Country</ng-container></label>
                         <p class="text-gray-900 mt-1">{{ getCountryName($safeNavigationMigration(guest()?.address?.country)) }}</p>
                       </div>
                     </div>
                   } @else {
-                    <p class="text-gray-500 italic">No address information provided</p>
+                    <p class="text-gray-500 italic"><ng-container i18n>No address information provided</ng-container></p>
                   }
                 </mat-card-content>
               </mat-card>
@@ -273,7 +273,7 @@
         </mat-tab>
 
         <!-- Documents & Preferences Tab -->
-        <mat-tab label="Documents & Preferences">
+        <mat-tab label="Documents & Preferences" i18n-label>
           <div class="p-6 space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
@@ -281,32 +281,32 @@
               <mat-card appearance="outlined">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-purple-600">badge</mat-icon>
-                  <mat-card-title>ID Document</mat-card-title>
+                  <mat-card-title><ng-container i18n>ID Document</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6! space-y-4">
                   @if (guest()?.idDocument) {
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Document Type</label>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Document Type</ng-container></label>
                         <p class="text-gray-900 mt-1">{{ (guest()?.idDocument?.type || 'Not specified') | titlecase  }}</p>
                       </div>
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Document Number</label>
-                        <p class="text-gray-900 mt-1">{{ guest()?.idDocument?.number || 'Not specified' }}</p>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Document Number</ng-container></label>
+                        <p class="text-gray-900 mt-1">@if (guest()?.idDocument?.number) {<ng-container>{{ guest()?.idDocument?.number }}</ng-container>} @else {<ng-container i18n>Not specified</ng-container>}</p>
                       </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Expiry Date</label>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Expiry Date</ng-container></label>
                         <p class="text-gray-900 mt-1">{{ formatDate($safeNavigationMigration(guest()?.idDocument?.expiryDate)) }}</p>
                       </div>
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Issuing Country</label>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Issuing Country</ng-container></label>
                         <p class="text-gray-900 mt-1">{{ getCountryName($safeNavigationMigration(guest()?.idDocument?.issuingCountry)) }}</p>
                       </div>
                     </div>
                   } @else {
-                    <p class="text-gray-500 italic">No ID document information provided</p>
+                    <p class="text-gray-500 italic"><ng-container i18n>No ID document information provided</ng-container></p>
                   }
                 </mat-card-content>
               </mat-card>
@@ -315,33 +315,33 @@
               <mat-card appearance="outlined">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-purple-600">tune</mat-icon>
-                  <mat-card-title>Preferences</mat-card-title>
+                  <mat-card-title><ng-container i18n>Preferences</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6! space-y-4">
                   @if (guest()?.preferences) {
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Room Type</label>
-                        <p class="text-gray-900 mt-1">{{ guest()?.preferences?.roomType || 'No preference' | titlecase  }}</p>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Room Type</ng-container></label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.preferences?.roomType || ('No preference' | tr) | titlecase  }}</p>
                       </div>
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Smoking</label>
-                        <p class="text-gray-900 mt-1">{{ guest()?.preferences?.smokingPreference?.replace('_', ' ') || 'No preference' | titlecase }}</p>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Smoking</ng-container></label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.preferences?.smokingPreference?.replace('_', ' ') || ('No preference' | tr) | titlecase }}</p>
                       </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Bed Preference</label>
-                        <p class="text-gray-900 mt-1">{{ guest()?.preferences?.bedPreference?.replace('_', ' ') || 'No preference' | titlecase }}</p>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Bed Preference</ng-container></label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.preferences?.bedPreference?.replace('_', ' ') || ('No preference' | tr) | titlecase }}</p>
                       </div>
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Floor Preference</label>
-                        <p class="text-gray-900 mt-1">{{ guest()?.preferences?.floorPreference || 'No preference' | titlecase }}</p>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Floor Preference</ng-container></label>
+                        <p class="text-gray-900 mt-1">{{ guest()?.preferences?.floorPreference || ('No preference' | tr) | titlecase }}</p>
                       </div>
                     </div>
                     @if (guest()?.preferences?.specialRequests && guest()?.preferences?.specialRequests!.length > 0) {
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Special Requests</label>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Special Requests</ng-container></label>
                         <div class="mt-2 flex flex-wrap gap-2">
                           @for (request of guest()?.preferences?.specialRequests; track request) {
                             <mat-chip class="bg-blue-100! text-blue-800!">{{ request }}</mat-chip>
@@ -350,7 +350,7 @@
                       </div>
                     }
                   } @else {
-                    <p class="text-gray-500 italic">No preferences specified</p>
+                    <p class="text-gray-500 italic"><ng-container i18n>No preferences specified</ng-container></p>
                   }
                 </mat-card-content>
               </mat-card>
@@ -359,38 +359,38 @@
         </mat-tab>
 
         <!-- Emergency Contact Tab -->
-        <mat-tab label="Emergency Contact">
+        <mat-tab label="Emergency Contact" i18n-label>
           <div class="p-6 space-y-6">
             <div class="max-w-2xl">
               <mat-card appearance="outlined">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-purple-600">contact_emergency</mat-icon>
-                  <mat-card-title>Emergency Contact Information</mat-card-title>
+                  <mat-card-title><ng-container i18n>Emergency Contact Information</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6! space-y-4">
                   @if (guest()?.emergencyContact) {
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Contact Name</label>
-                        <p class="text-gray-900 mt-1">{{ guest()?.emergencyContact?.name || 'Not specified' }}</p>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Contact Name</ng-container></label>
+                        <p class="text-gray-900 mt-1">@if (guest()?.emergencyContact?.name) {<ng-container>{{ guest()?.emergencyContact?.name }}</ng-container>} @else {<ng-container i18n>Not specified</ng-container>}</p>
                       </div>
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Relationship</label>
-                        <p class="text-gray-900 mt-1">{{ guest()?.emergencyContact?.relationship || 'Not specified' }}</p>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Relationship</ng-container></label>
+                        <p class="text-gray-900 mt-1">@if (guest()?.emergencyContact?.relationship) {<ng-container>{{ guest()?.emergencyContact?.relationship }}</ng-container>} @else {<ng-container i18n>Not specified</ng-container>}</p>
                       </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Phone Number</label>
-                        <p class="text-gray-900 mt-1">{{ guest()?.emergencyContact?.phone || 'Not specified' }}</p>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Phone Number</ng-container></label>
+                        <p class="text-gray-900 mt-1">@if (guest()?.emergencyContact?.phone) {<ng-container>{{ guest()?.emergencyContact?.phone }}</ng-container>} @else {<ng-container i18n>Not specified</ng-container>}</p>
                       </div>
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Email Address</label>
-                        <p class="text-gray-900 mt-1">{{ guest()?.emergencyContact?.email || 'Not specified' }}</p>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Email Address</ng-container></label>
+                        <p class="text-gray-900 mt-1">@if (guest()?.emergencyContact?.email) {<ng-container>{{ guest()?.emergencyContact?.email }}</ng-container>} @else {<ng-container i18n>Not specified</ng-container>}</p>
                       </div>
                     </div>
                   } @else {
-                    <p class="text-gray-500 italic">No emergency contact information provided</p>
+                    <p class="text-gray-500 italic"><ng-container i18n>No emergency contact information provided</ng-container></p>
                   }
                 </mat-card-content>
               </mat-card>
@@ -399,7 +399,7 @@
         </mat-tab>
 
         <!-- Notes Tab -->
-        <mat-tab label="Notes">
+        <mat-tab label="Notes" i18n-label>
           <div class="p-6 space-y-6">
             
             <!-- VIP Information Section -->
@@ -408,12 +408,12 @@
                 <mat-card appearance="outlined" class="bg-purple-50! border-purple-200!">
                   <mat-card-header class="bg-purple-100!">
                     <mat-icon mat-card-avatar class="text-purple-600">star</mat-icon>
-                    <mat-card-title class="text-purple-900!">VIP Guest Information</mat-card-title>
+                    <mat-card-title class="text-purple-900!"><ng-container i18n>VIP Guest Information</ng-container></mat-card-title>
                   </mat-card-header>
                   <mat-card-content class="p-6! space-y-4">
                     @if (guest()?.vipSince) {
                       <div>
-                        <label class="text-sm font-medium text-purple-700">VIP Since</label>
+                        <label class="text-sm font-medium text-purple-700"><ng-container i18n>VIP Since</ng-container></label>
                         <p class="text-purple-900 mt-1">{{ formatDate($safeNavigationMigration(guest()?.vipSince)) }}</p>
                       </div>
                     }
@@ -421,14 +421,14 @@
                       <div class="flex items-start">
                         <mat-icon class="text-purple-600 text-sm mr-2 mt-0.5">workspace_premium</mat-icon>
                         <div class="text-sm text-purple-800">
-                          <p class="font-medium">VIP Benefits & Privileges:</p>
+                          <p class="font-medium"><ng-container i18n>VIP Benefits & Privileges:</ng-container></p>
                           <ul class="mt-2 space-y-1 text-purple-700">
-                            <li>• Priority reservations and check-in</li>
-                            <li>• Complimentary room upgrades (when available)</li>
-                            <li>• Late checkout privileges</li>
-                            <li>• Access to exclusive amenities</li>
-                            <li>• Dedicated customer service</li>
-                            <li>• Special welcome gifts and services</li>
+                            <li><ng-container i18n>• Priority reservations and check-in</ng-container></li>
+                            <li><ng-container i18n>• Complimentary room upgrades (when available)</ng-container></li>
+                            <li><ng-container i18n>• Late checkout privileges</ng-container></li>
+                            <li><ng-container i18n>• Access to exclusive amenities</ng-container></li>
+                            <li><ng-container i18n>• Dedicated customer service</ng-container></li>
+                            <li><ng-container i18n>• Special welcome gifts and services</ng-container></li>
                           </ul>
                         </div>
                       </div>
@@ -444,12 +444,12 @@
                 <mat-card appearance="outlined" class="bg-red-50! border-red-200!">
                   <mat-card-header class="bg-red-100!">
                     <mat-icon mat-card-avatar class="text-red-600">block</mat-icon>
-                    <mat-card-title class="text-red-900!">Blacklist Information</mat-card-title>
+                    <mat-card-title class="text-red-900!"><ng-container i18n>Blacklist Information</ng-container></mat-card-title>
                   </mat-card-header>
                   <mat-card-content class="p-6! space-y-4">
                     @if (guest()?.blacklistReason) {
                       <div>
-                        <label class="text-sm font-medium text-red-700">Blacklist Reason</label>
+                        <label class="text-sm font-medium text-red-700"><ng-container i18n>Blacklist Reason</ng-container></label>
                         <div class="mt-1 bg-white rounded-lg p-3 border border-red-200">
                           <p class="text-red-900">{{ guest()?.blacklistReason }}</p>
                         </div>
@@ -457,7 +457,7 @@
                     }
                     @if (guest()?.blacklistedAt) {
                       <div>
-                        <label class="text-sm font-medium text-red-700">Date Blacklisted</label>
+                        <label class="text-sm font-medium text-red-700"><ng-container i18n>Date Blacklisted</ng-container></label>
                         <p class="text-red-900 mt-1">{{ formatDate($safeNavigationMigration(guest()?.blacklistedAt)) }}</p>
                       </div>
                     }
@@ -465,11 +465,11 @@
                       <div class="flex items-start">
                         <mat-icon class="text-red-600 text-sm mr-2 mt-0.5">info</mat-icon>
                         <div class="text-sm text-red-800">
-                          <p class="font-medium">Blacklist Effects:</p>
+                          <p class="font-medium"><ng-container i18n>Blacklist Effects:</ng-container></p>
                           <ul class="mt-1 space-y-1 text-red-700">
-                            <li>• Cannot make new reservations without manager approval</li>
-                            <li>• Account is flagged in the system</li>
-                            <li>• Special authorization required for any bookings</li>
+                            <li><ng-container i18n>• Cannot make new reservations without manager approval</ng-container></li>
+                            <li><ng-container i18n>• Account is flagged in the system</ng-container></li>
+                            <li><ng-container i18n>• Special authorization required for any bookings</ng-container></li>
                           </ul>
                         </div>
                       </div>
@@ -484,7 +484,7 @@
               <mat-card appearance="outlined">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-purple-600">notes</mat-icon>
-                  <mat-card-title>Guest Notes</mat-card-title>
+                  <mat-card-title><ng-container i18n>Guest Notes</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6!">
                   @if (guest()?.notes) {
@@ -492,7 +492,7 @@
                       <p class="text-gray-900 whitespace-pre-wrap">{{ guest()?.notes }}</p>
                     </div>
                   } @else {
-                    <p class="text-gray-500 italic">No notes available for this guest</p>
+                    <p class="text-gray-500 italic"><ng-container i18n>No notes available for this guest</ng-container></p>
                   }
                 </mat-card-content>
               </mat-card>
@@ -512,11 +512,11 @@
         <div class="bg-gray-100 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
           <mat-icon class="text-gray-400 text-5xl!">person_off</mat-icon>
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Guest not found</h3>
-        <p class="text-gray-600 mb-6">The guest you're looking for doesn't exist or has been removed.</p>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2"><ng-container i18n>Guest not found</ng-container></h3>
+        <p class="text-gray-600 mb-6"><ng-container i18n>The guest you're looking for doesn't exist or has been removed.</ng-container></p>
         <button matButton="outlined" (click)="goBack()">
           <mat-icon>arrow_back</mat-icon>
-          Back to Guests List
+          <ng-container i18n>Back to Guests List</ng-container>
         </button>
       </mat-card-content>
     </mat-card>

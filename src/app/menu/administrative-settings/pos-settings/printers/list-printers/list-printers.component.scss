@@ -7,17 +7,17 @@ table {
 }
 
 th {
-  background-color: #f9fafb;
-  border-bottom: 2px solid #e5e7eb;
+  background-color: light-dark(#f9fafb, #1c1b1c);
+  border-bottom: 2px solid light-dark(#e5e7eb, #48464b);
 }
 
 td {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid light-dark(#e5e7eb, #48464b);
 }
 
 mat-chip {
   &[highlighted] {
-    background-color: #dbeafe;
-    color: #0369a1;
+    background-color: light-dark(#dbeafe, #152842);
+    color: light-dark(#0369a1, #7acaf6);
   }
 }

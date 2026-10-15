@@ -1,16 +1,16 @@
 <app-page-header 
-  [title]="room() ? (room()!.name || 'Room ' + room()!.roomNumber) : 'Room Details'" 
-  [subtitle]="room() ? getRoomTypeName() : 'Loading room information...'">
+  [title]="room() ? (room()!.name || 'Room ' + room()!.roomNumber) : ('Room Details' | tr)" 
+  [subtitle]="room() ? getRoomTypeName() : ('Loading room information...' | tr)">
   <ng-container actions>
     @if (!loading() && room()) {
       <button mat-stroked-button (click)="onEdit()">
         <mat-icon>edit</mat-icon>
-        Edit Room
+        <ng-container i18n>Edit Room</ng-container>
       </button>
 
       <button mat-stroked-button [matMenuTriggerFor]="actionsMenu">
         <mat-icon>more_vert</mat-icon>
-        Actions
+        <ng-container i18n>Actions</ng-container>
       </button>
     }
   </ng-container>
@@ -30,11 +30,11 @@
       <div class="w-16 h-16 bg-red-200 rounded-full flex items-center justify-center mx-auto mb-4">
         <mat-icon class="text-4xl text-red-500">error</mat-icon>
       </div>
-      <h3 class="text-lg font-semibold text-red-900 mb-2">Failed to Load Room</h3>
+      <h3 class="text-lg font-semibold text-red-900 mb-2"><ng-container i18n>Failed to Load Room</ng-container></h3>
       <p class="text-red-700 mb-4">{{ error() }}</p>
       <button mat-flat-button color="warn" (click)="loadRoomDetails()">
         <mat-icon>refresh</mat-icon>
-        Try Again
+        <ng-container i18n>Try Again</ng-container>
       </button>
     </mat-card-content>
   </mat-card>
@@ -63,7 +63,7 @@
                   {{ room()!.name }}
                   <span class="text-xl text-gray-500 font-normal ml-2">({{ room()!.roomNumber }})</span>
                 } @else {
-                  Room {{ room()!.roomNumber }}
+                  <ng-container i18n>Room {{ room()!.roomNumber }}</ng-container>
                 }
               </h2>
               <div class="flex items-center gap-4 text-sm text-gray-600 mb-3">
@@ -74,7 +74,7 @@
                 @if (room()!.floor !== undefined && room()!.floor !== null) {
                   <div class="flex items-center gap-1">
                     <mat-icon class="text-lg">layers</mat-icon>
-                    <span>Floor {{ room()!.floor }}</span>
+                    <span><ng-container i18n>Floor {{ room()!.floor }}</ng-container></span>
                   </div>
                 }
                 <div class="flex items-center gap-1">
@@ -113,10 +113,10 @@
               <mat-card-content class="p-4! text-center">
                 @if (room()!.priceOverride) {
                   <div class="text-2xl font-bold text-green-600">{{ room()!.priceOverride | currency:storeCurrency():'symbol':'1.0-2' }}</div>
-                  <div class="text-sm text-green-700">Custom Price/Night</div>
+                  <div class="text-sm text-green-700"><ng-container i18n>Custom Price/Night</ng-container></div>
                 } @else {
                   <div class="text-2xl font-bold text-green-600">{{ getRoomTypePrice() | currency:storeCurrency():'symbol':'1.0-2' }}</div>
-                  <div class="text-sm text-green-700">Price/Night</div>
+                  <div class="text-sm text-green-700"><ng-container i18n>Price/Night</ng-container></div>
                 }
               </mat-card-content>
             </mat-card>
@@ -128,7 +128,7 @@
                       <mat-icon class="text-amber-400 text-lg!">star</mat-icon>
                     }
                   </div>
-                  <div class="text-sm text-amber-700">Quality Rating</div>
+                  <div class="text-sm text-amber-700"><ng-container i18n>Quality Rating</ng-container></div>
                 </mat-card-content>
               </mat-card>
             }
@@ -142,7 +142,7 @@
       <mat-tab-group animationDuration="200ms">
         
         <!-- Room Information Tab -->
-        <mat-tab label="Room Information">
+        <mat-tab label="Room Information" i18n-label>
           <div class="p-6 space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
@@ -150,53 +150,53 @@
               <mat-card appearance="outlined">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-blue-600">info</mat-icon>
-                  <mat-card-title>Basic Details</mat-card-title>
+                  <mat-card-title><ng-container i18n>Basic Details</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6! space-y-4">
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Room Number</label>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Room Number</ng-container></label>
                       <p class="text-lg font-semibold text-gray-900 mt-1">{{ room()!.roomNumber }}</p>
                     </div>
                     @if (room()!.name) {
                       <div>
-                        <label class="text-sm font-medium text-gray-500">Room Name</label>
+                        <label class="text-sm font-medium text-gray-500"><ng-container i18n>Room Name</ng-container></label>
                         <p class="text-lg font-semibold text-gray-900 mt-1">{{ room()!.name }}</p>
                       </div>
                     }
                   </div>
                   <div>
-                    <label class="text-sm font-medium text-gray-500">Room Type</label>
+                    <label class="text-sm font-medium text-gray-500"><ng-container i18n>Room Type</ng-container></label>
                     <p class="text-gray-900 mt-1">{{ getRoomTypeName() }}</p>
                   </div>
                   @if (room()!.floor !== undefined) {
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Floor</label>
-                      <p class="text-gray-900 mt-1">Floor {{ room()!.floor }}</p>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Floor</ng-container></label>
+                      <p class="text-gray-900 mt-1"><ng-container i18n>Floor {{ room()!.floor }}</ng-container></p>
                     </div>
                   }
                   @if (room()!.size) {
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Room Size</label>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Room Size</ng-container></label>
                       <p class="text-gray-900 mt-1">{{ getSizeDisplayText() }}</p>
                     </div>
                   }
                   @if (room()!.bedConfiguration) {
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Bed Configuration</label>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Bed Configuration</ng-container></label>
                       <p class="text-gray-900 mt-1">{{ room()!.bedConfiguration }}</p>
                     </div>
                   }
                   <div>
-                    <label class="text-sm font-medium text-gray-500">Capacity</label>
+                    <label class="text-sm font-medium text-gray-500"><ng-container i18n>Capacity</ng-container></label>
                     <p class="text-gray-900 mt-1">{{ getCapacityText() }}</p>
                   </div>
                   @if (room()!.viewType) {
                     <div>
-                      <label class="text-sm font-medium text-gray-500">View Type</label>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>View Type</ng-container></label>
                       <div class="flex items-center gap-2 mt-1">
                         <mat-icon class="text-gray-500">{{ getViewIcon() }}</mat-icon>
-                        <span class="text-gray-900">{{ room()!.viewType | titlecase }} View</span>
+                        <span class="text-gray-900"><ng-container i18n>{{ room()!.viewType | titlecase }} View</ng-container></span>
                       </div>
                     </div>
                   }
@@ -207,11 +207,11 @@
               <mat-card appearance="outlined">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-green-600">assignment_turned_in</mat-icon>
-                  <mat-card-title>Status Information</mat-card-title>
+                  <mat-card-title><ng-container i18n>Status Information</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6! space-y-4">
                   <div>
-                    <label class="text-sm font-medium text-gray-500 mb-2 block">Room Status</label>
+                    <label class="text-sm font-medium text-gray-500 mb-2 block"><ng-container i18n>Room Status</ng-container></label>
                     <mat-chip [ngClass]="{
                       'bg-green-100! text-green-800!': room()!.status === 'available',
                       'bg-purple-100! text-purple-800!': room()!.status === 'occupied',
@@ -224,7 +224,7 @@
                   </div>
                   
                   <div>
-                    <label class="text-sm font-medium text-gray-500 mb-2 block">Housekeeping Status</label>
+                    <label class="text-sm font-medium text-gray-500 mb-2 block"><ng-container i18n>Housekeeping Status</ng-container></label>
                     <mat-chip [ngClass]="{
                       'bg-green-100! text-green-800!': room()!.housekeepingStatus === 'clean',
                       'bg-orange-100! text-orange-800!': room()!.housekeepingStatus === 'dirty',
@@ -237,14 +237,14 @@
                   
                   @if (room()!.lastCleaned) {
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Last Cleaned</label>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Last Cleaned</ng-container></label>
                       <p class="text-gray-900 mt-1">{{ formatDate(room()!.lastCleaned) }}</p>
                     </div>
                   }
                   
                   @if (room()!.lastInspected) {
                     <div>
-                      <label class="text-sm font-medium text-gray-500">Last Inspected</label>
+                      <label class="text-sm font-medium text-gray-500"><ng-container i18n>Last Inspected</ng-container></label>
                       <p class="text-gray-900 mt-1">{{ formatDate(room()!.lastInspected) }}</p>
                     </div>
                   }
@@ -256,7 +256,7 @@
               <mat-card appearance="outlined">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-gray-600">description</mat-icon>
-                  <mat-card-title>Description</mat-card-title>
+                  <mat-card-title><ng-container i18n>Description</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6!">
                   <p class="text-gray-700">{{ room()!.description }}</p>
@@ -267,7 +267,7 @@
         </mat-tab>
 
         <!-- Features & Amenities Tab -->
-        <mat-tab label="Features & Amenities">
+        <mat-tab label="Features & Amenities" i18n-label>
           <div class="p-6 space-y-6">
             
             <!-- Room Features -->
@@ -275,7 +275,7 @@
               <mat-card appearance="outlined">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-purple-600">star</mat-icon>
-                  <mat-card-title>Room Features</mat-card-title>
+                  <mat-card-title><ng-container i18n>Room Features</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6!">
                   <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -295,7 +295,7 @@
               <mat-card appearance="outlined">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-indigo-600">room_service</mat-icon>
-                  <mat-card-title>Room Amenities</mat-card-title>
+                  <mat-card-title><ng-container i18n>Room Amenities</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6!">
                   <div class="flex flex-wrap gap-2">
@@ -312,38 +312,38 @@
               <mat-card appearance="outlined">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-teal-600">accessible</mat-icon>
-                  <mat-card-title>Accessibility Features</mat-card-title>
+                  <mat-card-title><ng-container i18n>Accessibility Features</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6!">
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @if (room()!.accessibilityFeatures?.wheelchairAccessible) {
                       <div class="flex items-center gap-2 p-3 bg-teal-50 rounded-lg border border-teal-200">
                         <mat-icon class="text-lg text-teal-600">accessible</mat-icon>
-                        <span class="text-sm font-medium text-teal-900">Wheelchair Accessible</span>
+                        <span class="text-sm font-medium text-teal-900"><ng-container i18n>Wheelchair Accessible</ng-container></span>
                       </div>
                     }
                     @if (room()!.accessibilityFeatures?.hearingAccessible) {
                       <div class="flex items-center gap-2 p-3 bg-teal-50 rounded-lg border border-teal-200">
                         <mat-icon class="text-lg text-teal-600">hearing</mat-icon>
-                        <span class="text-sm font-medium text-teal-900">Hearing Accessible</span>
+                        <span class="text-sm font-medium text-teal-900"><ng-container i18n>Hearing Accessible</ng-container></span>
                       </div>
                     }
                     @if (room()!.accessibilityFeatures?.visuallyAccessible) {
                       <div class="flex items-center gap-2 p-3 bg-teal-50 rounded-lg border border-teal-200">
                         <mat-icon class="text-lg text-teal-600">visibility</mat-icon>
-                        <span class="text-sm font-medium text-teal-900">Visually Accessible</span>
+                        <span class="text-sm font-medium text-teal-900"><ng-container i18n>Visually Accessible</ng-container></span>
                       </div>
                     }
                     @if (room()!.accessibilityFeatures?.rollInShower) {
                       <div class="flex items-center gap-2 p-3 bg-teal-50 rounded-lg border border-teal-200">
                         <mat-icon class="text-lg text-teal-600">shower</mat-icon>
-                        <span class="text-sm font-medium text-teal-900">Roll-in Shower</span>
+                        <span class="text-sm font-medium text-teal-900"><ng-container i18n>Roll-in Shower</ng-container></span>
                       </div>
                     }
                     @if (room()!.accessibilityFeatures?.grabBars) {
                       <div class="flex items-center gap-2 p-3 bg-teal-50 rounded-lg border border-teal-200">
                         <mat-icon class="text-lg text-teal-600">support</mat-icon>
-                        <span class="text-sm font-medium text-teal-900">Grab Bars</span>
+                        <span class="text-sm font-medium text-teal-900"><ng-container i18n>Grab Bars</ng-container></span>
                       </div>
                     }
                   </div>
@@ -355,14 +355,14 @@
             @if (roomFeatures().length === 0 && (!room()!.amenities || room()!.amenities!.length === 0) && !hasAccessibilityFeatures()) {
               <div class="text-center py-12 text-gray-500">
                 <mat-icon class="text-6xl text-gray-300 mb-4">inventory_2</mat-icon>
-                <p>No features or amenities configured for this room.</p>
+                <p><ng-container i18n>No features or amenities configured for this room.</ng-container></p>
               </div>
             }
           </div>
         </mat-tab>
 
         <!-- Photos Tab -->
-        <mat-tab label="Photos">
+        <mat-tab label="Photos" i18n-label>
           <div class="p-6">
             @if (room()!.photos && room()!.photos.length > 0) {
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -381,20 +381,20 @@
             } @else {
               <div class="text-center py-12 text-gray-500">
                 <mat-icon class="text-6xl text-gray-300 mb-4">photo_library</mat-icon>
-                <p>No photos available for this room.</p>
+                <p><ng-container i18n>No photos available for this room.</ng-container></p>
               </div>
             }
           </div>
         </mat-tab>
 
         <!-- Notes Tab -->
-        <mat-tab label="Notes">
+        <mat-tab label="Notes" i18n-label>
           <div class="p-6 space-y-6">
             @if (room()!.notes) {
               <mat-card appearance="outlined">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-blue-600">notes</mat-icon>
-                  <mat-card-title>General Notes</mat-card-title>
+                  <mat-card-title><ng-container i18n>General Notes</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6!">
                   <p class="text-gray-700">{{ room()!.notes }}</p>
@@ -406,7 +406,7 @@
               <mat-card appearance="outlined" class="border-orange-200!">
                 <mat-card-header>
                   <mat-icon mat-card-avatar class="text-orange-600">build</mat-icon>
-                  <mat-card-title>Maintenance Notes</mat-card-title>
+                  <mat-card-title><ng-container i18n>Maintenance Notes</ng-container></mat-card-title>
                 </mat-card-header>
                 <mat-card-content class="p-6! bg-orange-50!">
                   <p class="text-orange-800">{{ room()!.maintenanceNotes }}</p>
@@ -417,45 +417,45 @@
             @if (!room()!.notes && !room()!.maintenanceNotes) {
               <div class="text-center py-12 text-gray-500">
                 <mat-icon class="text-6xl text-gray-300 mb-4">speaker_notes_off</mat-icon>
-                <p>No notes available for this room.</p>
+                <p><ng-container i18n>No notes available for this room.</ng-container></p>
               </div>
             }
           </div>
         </mat-tab>
 
         <!-- History Tab -->
-        <mat-tab label="History">
+        <mat-tab label="History" i18n-label>
           <div class="p-6">
             <mat-card appearance="outlined">
               <mat-card-header>
                 <mat-icon mat-card-avatar class="text-gray-600">schedule</mat-icon>
-                <mat-card-title>Timestamps</mat-card-title>
+                <mat-card-title><ng-container i18n>Timestamps</ng-container></mat-card-title>
               </mat-card-header>
               <mat-card-content class="p-6! space-y-4">
                 @if (room()!.createdAt) {
                   <div>
-                    <label class="text-sm font-medium text-gray-500">Created</label>
+                    <label class="text-sm font-medium text-gray-500"><ng-container i18n>Created</ng-container></label>
                     <p class="text-gray-900 mt-1">{{ formatDate(room()!.createdAt) }}</p>
                   </div>
                 }
                 
                 @if (room()!.updatedAt) {
                   <div>
-                    <label class="text-sm font-medium text-gray-500">Last Updated</label>
+                    <label class="text-sm font-medium text-gray-500"><ng-container i18n>Last Updated</ng-container></label>
                     <p class="text-gray-900 mt-1">{{ formatDate(room()!.updatedAt) }}</p>
                   </div>
                 }
 
                 @if (room()!.lastCleaned) {
                   <div>
-                    <label class="text-sm font-medium text-gray-500">Last Cleaned</label>
+                    <label class="text-sm font-medium text-gray-500"><ng-container i18n>Last Cleaned</ng-container></label>
                     <p class="text-gray-900 mt-1">{{ formatDate(room()!.lastCleaned) }}</p>
                   </div>
                 }
 
                 @if (room()!.lastInspected) {
                   <div>
-                    <label class="text-sm font-medium text-gray-500">Last Inspected</label>
+                    <label class="text-sm font-medium text-gray-500"><ng-container i18n>Last Inspected</ng-container></label>
                     <p class="text-gray-900 mt-1">{{ formatDate(room()!.lastInspected) }}</p>
                   </div>
                 }
@@ -472,21 +472,21 @@
 <mat-menu #actionsMenu="matMenu">
   <button mat-menu-item (click)="onEdit()">
     <mat-icon class="text-blue-600">edit</mat-icon>
-    <span>Edit Room</span>
+    <span><ng-container i18n>Edit Room</ng-container></span>
   </button>
   <mat-divider></mat-divider>
   <button mat-menu-item [matMenuTriggerFor]="statusMenu">
     <mat-icon class="text-green-600">assignment_turned_in</mat-icon>
-    <span>Update Status</span>
+    <span><ng-container i18n>Update Status</ng-container></span>
   </button>
   <button mat-menu-item [matMenuTriggerFor]="housekeepingMenu">
     <mat-icon class="text-purple-600">cleaning_services</mat-icon>
-    <span>Update Housekeeping</span>
+    <span><ng-container i18n>Update Housekeeping</ng-container></span>
   </button>
   <mat-divider></mat-divider>
   <button mat-menu-item (click)="onDeleteRoom()" class="text-red-600!">
     <mat-icon class="text-red-600">delete</mat-icon>
-    <span>Delete Room</span>
+    <span><ng-container i18n>Delete Room</ng-container></span>
   </button>
 </mat-menu>
 
@@ -494,23 +494,23 @@
 <mat-menu #statusMenu="matMenu">
   <button mat-menu-item (click)="onUpdateStatus('available')">
     <mat-icon class="text-green-600">check_circle</mat-icon>
-    <span>Available</span>
+    <span><ng-container i18n>Available</ng-container></span>
   </button>
   <button mat-menu-item (click)="onUpdateStatus('occupied')">
     <mat-icon class="text-purple-600">person</mat-icon>
-    <span>Occupied</span>
+    <span><ng-container i18n>Occupied</ng-container></span>
   </button>
   <button mat-menu-item (click)="onUpdateStatus('maintenance')">
     <mat-icon class="text-orange-600">build</mat-icon>
-    <span>Maintenance</span>
+    <span><ng-container i18n>Maintenance</ng-container></span>
   </button>
   <button mat-menu-item (click)="onUpdateStatus('cleaning')">
     <mat-icon class="text-cyan-600">cleaning_services</mat-icon>
-    <span>Cleaning</span>
+    <span><ng-container i18n>Cleaning</ng-container></span>
   </button>
   <button mat-menu-item (click)="onUpdateStatus('out_of_order')">
     <mat-icon class="text-red-600">block</mat-icon>
-    <span>Out of Order</span>
+    <span><ng-container i18n>Out of Order</ng-container></span>
   </button>
 </mat-menu>
 
@@ -518,18 +518,18 @@
 <mat-menu #housekeepingMenu="matMenu">
   <button mat-menu-item (click)="onUpdateHousekeepingStatus('clean')">
     <mat-icon class="text-green-600">check_circle</mat-icon>
-    <span>Clean</span>
+    <span><ng-container i18n>Clean</ng-container></span>
   </button>
   <button mat-menu-item (click)="onUpdateHousekeepingStatus('dirty')">
     <mat-icon class="text-orange-600">warning</mat-icon>
-    <span>Dirty</span>
+    <span><ng-container i18n>Dirty</ng-container></span>
   </button>
   <button mat-menu-item (click)="onUpdateHousekeepingStatus('inspected')">
     <mat-icon class="text-cyan-600">verified</mat-icon>
-    <span>Inspected</span>
+    <span><ng-container i18n>Inspected</ng-container></span>
   </button>
   <button mat-menu-item (click)="onUpdateHousekeepingStatus('out_of_order')">
     <mat-icon class="text-red-600">block</mat-icon>
-    <span>Out of Order</span>
+    <span><ng-container i18n>Out of Order</ng-container></span>
   </button>
 </mat-menu>

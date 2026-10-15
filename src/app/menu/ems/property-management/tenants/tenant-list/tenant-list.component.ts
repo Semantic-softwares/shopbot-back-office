@@ -21,12 +21,13 @@ import { Tenant, TenantStatus } from '../../../../../shared/models/estate.model'
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { NoRecordComponent } from '../../../../../shared/components/no-record/no-record.component';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-tenant-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatTableModule,
@@ -67,9 +68,9 @@ export class TenantListComponent {
   displayedColumns = ['name', 'contact', 'company', 'status', 'actions'];
 
   statusOptions = [
-    { value: '', label: 'All Status' },
-    { value: TenantStatus.ACTIVE, label: 'Active' },
-    { value: TenantStatus.INACTIVE, label: 'Inactive' },
+    { value: '', label: $localize`All Status` },
+    { value: TenantStatus.ACTIVE, label: $localize`Active` },
+    { value: TenantStatus.INACTIVE, label: $localize`Inactive` },
   ];
 
   private filterParams = computed(() => ({
@@ -144,17 +145,17 @@ export class TenantListComponent {
 
   async deleteTenant(tenant: Tenant): Promise<void> {
     const confirmDelete = confirm(
-      `Delete tenant "${tenant.firstName} ${tenant.lastName}"? This action cannot be undone.`,
+      $localize`Delete tenant "${tenant.firstName} ${tenant.lastName}"? This action cannot be undone.`,
     );
     if (!confirmDelete) return;
 
     this.isUpdating.set(true);
     try {
       await this.tenantService.deleteTenant(tenant._id).toPromise();
-      this.snackBar.open('Tenant deleted', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Tenant deleted`, $localize`Close`, { duration: 3000 });
       this.reloadData();
     } catch {
-      this.snackBar.open('Failed to delete tenant', 'Close', { duration: 5000 });
+      this.snackBar.open($localize`Failed to delete tenant`, $localize`Close`, { duration: 5000 });
     } finally {
       this.isUpdating.set(false);
     }

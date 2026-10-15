@@ -9,24 +9,24 @@
       </a> -->
       <a matButton (click)="onCancel()" color="primary">
         <mat-icon class="mr-1" style="font-size: 18px; width: 18px; height: 18px;">arrow_back</mat-icon>
-        Back to Reservations
+        <ng-container i18n>Back to Reservations</ng-container>
       </a>
       @if (isEditing()) {
       <!-- Edit Mode Header -->
       <h1 class="text-2xl font-bold text-gray-900">
-        Edit Reservation
+        <ng-container i18n>Edit Reservation</ng-container>
       </h1>
-      <p class="text-sm text-gray-600 mt-1">
+      <p i18n class="text-sm text-gray-600 mt-1">
         Confirmation: <span class="font-mono font-semibold text-gray-900">{{ reservation.value()?.confirmationNumber
           }}</span>
       </p>
       } @else {
       <!-- Create Mode Header -->
       <h1 class="text-2xl font-bold text-gray-900">
-        Create New {{ bookingType() === 'group' ? 'Group' : 'Single' }} Reservation
+        <ng-container i18n>Create New {{ bookingType() === 'group' ? ('Group' | tr) : ('Single' | tr) }} Reservation</ng-container>
       </h1>
       <p class="text-sm text-gray-600 mt-1">
-        Create a new guest reservation
+        <ng-container i18n>Create a new guest reservation</ng-container>
       </p>
       }
     </div>
@@ -40,27 +40,27 @@
       <a matButton="outlined" (click)="exportReservationToPDF()"
         [disabled]="exportingPDF() || statusUpdating() || isSubmitted()">
         <mat-icon>{{exportingPDF() ? 'download' : 'picture_as_pdf'}}</mat-icon>
-        {{ exportingPDF() ? 'Exporting...' : 'Export to PDF' }}
+        @if (exportingPDF()) {<ng-container i18n>Exporting...</ng-container>} @else {<ng-container i18n>Export to PDF</ng-container>}
       </a>
 
       @if (reservation.value()?.status !== ReservationStatus.CANCELLED && reservation.value()?.status !==
       ReservationStatus.NO_SHOW) {
       <a matButton="tonal" (click)="updateReservationStatus(ReservationStatus.CANCELLED)" [disabled]="statusUpdating() || isSubmitted()">
         <mat-icon>cancel</mat-icon>
-        Cancel
+        <ng-container i18n>Cancel</ng-container>
       </a>
       }
 
 
       <a matButton="outlined" (click)="payment()" [disabled]="isSubmitted() || hasRestrictionIssues()">
         <mat-icon>payment</mat-icon>
-        Payment
+        <ng-container i18n>Payment</ng-container>
       </a>
 
       @if (canChangeRooms() && isSingleBooking()) {
       <button matButton="tonal" (click)="openRoomChangeDialog()" [disabled]="statusUpdating() || isSubmitted()">
         <mat-icon>swap_horiz</mat-icon>
-        Change Room
+        <ng-container i18n>Change Room</ng-container>
       </button>
       }
 
@@ -69,7 +69,7 @@
       <button matButton="outlined" (click)="updateReservationStatus(ReservationStatus.CONFIRMED)"
         [disabled]="statusUpdating() || isSubmitted() || hasRestrictionIssues()">
         <mat-icon>verified</mat-icon>
-        Confirm
+        <ng-container i18n>Confirm</ng-container>
       </button>
       }
         @if (reservation.value()?.status === ReservationStatus.CHECKED_OUT || reservation.value()?.status ===
@@ -77,27 +77,27 @@
       <button matButton="outlined"  (click)="reopenReservation()"
         [disabled]="statusUpdating() || isSubmitted()">
         <mat-icon>redo</mat-icon>
-        Re-open
+        <ng-container i18n>Re-open</ng-container>
       </button>
       }
       @if (reservation.value()?.status === ReservationStatus.CONFIRMED) {
       <button matButton="outlined" (click)="updateReservationStatus(ReservationStatus.CHECKED_IN)"
         [disabled]="statusUpdating() || hasRestrictionIssues()">
         <mat-icon>check_circle_outline</mat-icon>
-        Check-in
+        <ng-container i18n>Check-in</ng-container>
       </button>
       }
       @if (reservation.value()?.status === ReservationStatus.CHECKED_IN) {
       <button matButton="outlined" (click)="updateReservationStatus(ReservationStatus.CHECKED_OUT)"
         [disabled]="statusUpdating() || hasRestrictionIssues()">
         <mat-icon>logout</mat-icon>
-        Check-out
+        <ng-container i18n>Check-out</ng-container>
       </button>
       }
 
       <button matButton="filled" color="primary" type="submit" (click)="onSubmit()" [disabled]="isSubmitted() || hasRestrictionIssues()">
         <mat-icon>save</mat-icon>
-        Save
+        <ng-container i18n>Save</ng-container>
       </button>
 
 
@@ -105,11 +105,11 @@
       
       <a matButton="outlined" (click)="payment()" [disabled]="isSubmitted() || hasRestrictionIssues()">
         <mat-icon>payment</mat-icon>
-        Payment
+        <ng-container i18n>Payment</ng-container>
       </a>
       <a matButton="filled" (click)="onSubmit()" [disabled]="isSubmitted() || hasRestrictionIssues()" color="primary">
         <mat-icon>event</mat-icon>
-        Reserve
+        <ng-container i18n>Reserve</ng-container>
       </a>
       }
     </div>
@@ -122,7 +122,7 @@
 <div class="flex justify-center items-center py-12">
   <mat-spinner diameter="40"></mat-spinner>
   <span class="ml-3 text-gray-600">
-    {{ isEditing() ? 'Loading reservation...' : 'Creating reservation...' }}
+    @if (isEditing()) {<ng-container i18n>Loading reservation...</ng-container>} @else {<ng-container i18n>Creating reservation...</ng-container>}
   </span>
 </div>
 }
@@ -136,9 +136,9 @@
     <div class="flex">
       <mat-icon class="text-red-500 mr-3">error</mat-icon>
       <div class="flex-1">
-        <h3 class="text-red-800 font-medium">Error</h3>
+        <h3 class="text-red-800 font-medium"><ng-container i18n>Error</ng-container></h3>
         <p class="text-red-700 text-sm mt-1">{{ reservation.error() }}</p>
-        <button mat-button (click)="clearError()" class="mt-2">Dismiss</button>
+        <button mat-button (click)="clearError()" class="mt-2"><ng-container i18n>Dismiss</ng-container></button>
       </div>
     </div>
   </div>

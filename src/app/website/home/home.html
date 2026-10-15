@@ -4,18 +4,18 @@
 <section class="pt-24 pb-12">
   <div class="max-w-4xl mx-auto px-6 text-center">
     <h1 class="hero-title inline-block bg-gradient-to-br from-gray-900 to-gray-800 bg-clip-text p-2 text-4xl font-bold tracking-tighter text-transparent sm:text-6xl md:text-7xl dark:from-gray-50 dark:to-gray-300 animate-fadeIn">
-      The platform for modern hotels
+      <ng-container i18n>The platform for modern hotels</ng-container>
     </h1>
     <p class="hero-subtitle mt-6 max-w-lg mx-auto text-lg text-gray-700 dark:text-gray-400 animate-fadeIn">
-      ShopBot is a general‑purpose hotel management platform built for  modern teams and the cloud era.
+      <ng-container i18n>ShopBot is a general‑purpose hotel management platform built for  modern teams and the cloud era.</ng-container>
     </p>
     <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
       <button matButton="filled" color="primary" (click)="navigateToSignup()" class="text-lg py-6 px-8">
-        Start 30‑day trial
+        <ng-container i18n>Start 30‑day trial</ng-container>
       </button>
       <button matButton="outlined" (click)="scrollToFeatures()" class="text-lg py-6 px-8">
         <mat-icon class="mr-2">play_circle</mat-icon>
-        Watch video
+        <ng-container i18n>Watch video</ng-container>
       </button>
     </div>
   </div>
@@ -26,7 +26,7 @@
 <section class="pb-20">
   <div class="max-w-6xl mx-auto px-6">
     <div class="rounded-2xl border border-gray-200 shadow-xl overflow-hidden bg-white">
-      <img src="assets/images/dashboard.png" alt="ShopBot dashboard preview" class="w-full h-auto" />
+      <img src="assets/images/dashboard.png" alt="ShopBot dashboard preview" i18n-alt class="w-full h-auto" />
     </div>
   </div>
 </section>
@@ -35,8 +35,8 @@
 <section id="features" class="py-20 ">
   <div class="max-w-6xl mx-auto px-6">
     <div class="text-center mb-16">
-      <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Powerful Features</h2>
-      <p class="text-xl text-gray-600">Everything you need to run your hospitality business</p>
+      <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4"><ng-container i18n>Powerful Features</ng-container></h2>
+      <p class="text-xl text-gray-600"><ng-container i18n>Everything you need to run your hospitality business</ng-container></p>
     </div>
 
     <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -47,9 +47,9 @@
             <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-100 mx-auto mb-5">
               <mat-icon class="text-blue-600 !text-3xl !w-8 !h-8">hotel</mat-icon>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Property Management</h3>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center"><ng-container i18n>Property Management</ng-container></h3>
             <p class="text-gray-600 text-center text-sm leading-relaxed">
-              Manage rooms, bookings, and reservations all in one place.
+              <ng-container i18n>Manage rooms, bookings, and reservations all in one place.</ng-container>
             </p>
           </mat-card-content>
         </mat-card>
@@ -62,9 +62,9 @@
             <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-green-100 mx-auto mb-5">
               <mat-icon class="text-green-600 !text-3xl !w-8 !h-8">point_of_sale</mat-icon>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">POS - Food & Beverage</h3>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center"><ng-container i18n>POS - Food & Beverage</ng-container></h3>
             <p class="text-gray-600 text-center text-sm leading-relaxed">
-              Fast and reliable point-of-sale for restaurants, bars, and cafes.
+              <ng-container i18n>Fast and reliable point-of-sale for restaurants, bars, and cafes.</ng-container>
             </p>
           </mat-card-content>
         </mat-card>
@@ -77,9 +77,9 @@
             <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-purple-100 mx-auto mb-5">
               <mat-icon class="text-purple-600 !text-3xl !w-8 !h-8">account_balance</mat-icon>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Accounting & Expenses</h3>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center"><ng-container i18n>Accounting & Expenses</ng-container></h3>
             <p class="text-gray-600 text-center text-sm leading-relaxed">
-              Track income, expenses, and generate financial reports.
+              <ng-container i18n>Track income, expenses, and generate financial reports.</ng-container>
             </p>
           </mat-card-content>
         </mat-card>
@@ -92,9 +92,9 @@
             <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-orange-100 mx-auto mb-5">
               <mat-icon class="text-orange-600 !text-3xl !w-8 !h-8">inventory_2</mat-icon>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Purchasing & Inventory</h3>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center"><ng-container i18n>Purchasing & Inventory</ng-container></h3>
             <p class="text-gray-600 text-center text-sm leading-relaxed">
-              Keep stock in check and never run out of essentials.
+              <ng-container i18n>Keep stock in check and never run out of essentials.</ng-container>
             </p>
           </mat-card-content>
         </mat-card>
@@ -107,9 +107,9 @@
             <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-teal-100 mx-auto mb-5">
               <mat-icon class="text-teal-600 !text-3xl !w-8 !h-8">cleaning_services</mat-icon>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Housekeeping</h3>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center"><ng-container i18n>Housekeeping</ng-container></h3>
             <p class="text-gray-600 text-center text-sm leading-relaxed">
-              Schedule cleaning and maintenance to keep your property flawless.
+              <ng-container i18n>Schedule cleaning and maintenance to keep your property flawless.</ng-container>
             </p>
           </mat-card-content>
         </mat-card>
@@ -122,9 +122,9 @@
             <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-red-100 mx-auto mb-5">
               <mat-icon class="text-red-600 !text-3xl !w-8 !h-8">analytics</mat-icon>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Reporting & Analytics</h3>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center"><ng-container i18n>Reporting & Analytics</ng-container></h3>
             <p class="text-gray-600 text-center text-sm leading-relaxed">
-              Gain insights from data to improve operations and revenue.
+              <ng-container i18n>Gain insights from data to improve operations and revenue.</ng-container>
             </p>
           </mat-card-content>
         </mat-card>
@@ -137,9 +137,9 @@
             <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-100 mx-auto mb-5">
               <mat-icon class="text-indigo-600 !text-3xl !w-8 !h-8">language</mat-icon>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Booking Engine</h3>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center"><ng-container i18n>Booking Engine</ng-container></h3>
             <p class="text-gray-600 text-center text-sm leading-relaxed">
-              Accept direct bookings online and manage reservations easily.
+              <ng-container i18n>Accept direct bookings online and manage reservations easily.</ng-container>
             </p>
           </mat-card-content>
         </mat-card>
@@ -152,9 +152,9 @@
             <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-100 mx-auto mb-5">
               <mat-icon class="text-amber-600 !text-3xl !w-8 !h-8">sync</mat-icon>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center">Channel Manager</h3>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 text-center"><ng-container i18n>Channel Manager</ng-container></h3>
             <p class="text-gray-600 text-center text-sm leading-relaxed">
-              Sync rates and availability across all online channels.
+              <ng-container i18n>Sync rates and availability across all online channels.</ng-container>
             </p>
           </mat-card-content>
         </mat-card>
@@ -169,8 +169,8 @@
 <section class="py-20">
   <div class="max-w-6xl mx-auto px-6">
     <div class="text-center mb-16">
-      <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">What Our Clients Say</h2>
-      <p class="text-xl text-gray-600">Trusted by businesses worldwide</p>
+      <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4"><ng-container i18n>What Our Clients Say</ng-container></h2>
+      <p class="text-xl text-gray-600"><ng-container i18n>Trusted by businesses worldwide</ng-container></p>
     </div>
 
     <div class="grid md:grid-cols-3 gap-8">
@@ -185,13 +185,13 @@
             <mat-icon class="text-yellow-500">star</mat-icon>
           </div>
           <p class="text-gray-600 mb-6 leading-relaxed italic">
-            "ShopBot transformed our restaurant operations. The POS system is incredibly fast and intuitive. Our staff loves it and our customers get served quicker."
+            <ng-container i18n>"ShopBot transformed our restaurant operations. The POS system is incredibly fast and intuitive. Our staff loves it and our customers get served quicker."</ng-container>
           </p>
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">JC</div>
+            <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold"><ng-container i18n>JC</ng-container></div>
             <div>
-              <p class="font-semibold text-gray-900">John Chen</p>
-              <p class="text-sm text-gray-600">Restaurant Owner</p>
+              <p class="font-semibold text-gray-900"><ng-container i18n>John Chen</ng-container></p>
+              <p class="text-sm text-gray-600"><ng-container i18n>Restaurant Owner</ng-container></p>
             </div>
           </div>
         </mat-card-content>
@@ -208,13 +208,13 @@
             <mat-icon class="text-yellow-500">star</mat-icon>
           </div>
           <p class="text-gray-600 mb-6 leading-relaxed italic">
-            "The reservation system cut our booking time in half. Managing room availability across all channels has never been easier. Highly recommend!"
+            <ng-container i18n>"The reservation system cut our booking time in half. Managing room availability across all channels has never been easier. Highly recommend!"</ng-container>
           </p>
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white font-bold">SM</div>
+            <div class="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white font-bold"><ng-container i18n>SM</ng-container></div>
             <div>
-              <p class="font-semibold text-gray-900">Sarah Martinez</p>
-              <p class="text-sm text-gray-600">Hotel Manager</p>
+              <p class="font-semibold text-gray-900"><ng-container i18n>Sarah Martinez</ng-container></p>
+              <p class="text-sm text-gray-600"><ng-container i18n>Hotel Manager</ng-container></p>
             </div>
           </div>
         </mat-card-content>
@@ -231,13 +231,13 @@
             <mat-icon class="text-yellow-500">star</mat-icon>
           </div>
           <p class="text-gray-600 mb-6 leading-relaxed italic">
-            "Digital menu management makes it so easy to update items and prices in real-time. Our customers love browsing menus on their phones!"
+            <ng-container i18n>"Digital menu management makes it so easy to update items and prices in real-time. Our customers love browsing menus on their phones!"</ng-container>
           </p>
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold">AO</div>
+            <div class="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold"><ng-container i18n>AO</ng-container></div>
             <div>
-              <p class="font-semibold text-gray-900">Ahmed Okonkwo</p>
-              <p class="text-sm text-gray-600">Cafe Owner</p>
+              <p class="font-semibold text-gray-900"><ng-container i18n>Ahmed Okonkwo</ng-container></p>
+              <p class="text-sm text-gray-600"><ng-container i18n>Cafe Owner</ng-container></p>
             </div>
           </div>
         </mat-card-content>
@@ -250,8 +250,8 @@
 <section id="pricing" class="py-20">
   <div class="max-w-5xl mx-auto px-6">
     <div class="text-center mb-16">
-      <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
-      <p class="text-xl text-gray-600">Start free. Upgrade when you're ready. One price for everything.</p>
+      <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4"><ng-container i18n>Simple, Transparent Pricing</ng-container></h2>
+      <p class="text-xl text-gray-600"><ng-container i18n>Start free. Upgrade when you're ready. One price for everything.</ng-container></p>
     </div>
 
     <div class="grid md:grid-cols-2 gap-8">
@@ -259,29 +259,29 @@
       <mat-card appearance="outlined" class="flex flex-col hover:shadow-xl transition-shadow">
         <mat-card-content class="p-8 flex-1">
           <div class="mb-6">
-            <h3 class="text-2xl font-bold text-gray-900">Free Trial</h3>
-            <p class="text-sm text-gray-600 mt-1">Try everything for 30 days</p>
+            <h3 class="text-2xl font-bold text-gray-900"><ng-container i18n>Free Trial</ng-container></h3>
+            <p class="text-sm text-gray-600 mt-1"><ng-container i18n>Try everything for 30 days</ng-container></p>
           </div>
           <div class="mb-8">
             <span class="text-5xl font-bold text-gray-900">$0</span>
-            <span class="text-gray-600">/30 days</span>
+            <span class="text-gray-600"><ng-container i18n>/30 days</ng-container></span>
           </div>
           <ul class="space-y-4 text-gray-600">
             <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              30-day free trial
+              <ng-container i18n>30-day free trial</ng-container>
             </li>
             <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              No credit card required
+              <ng-container i18n>No credit card required</ng-container>
             </li>
             <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Full access to all features
+              <ng-container i18n>Full access to all features</ng-container>
             </li>
             <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Cancel anytime
+              <ng-container i18n>Cancel anytime</ng-container>
             </li>
           </ul>
         </mat-card-content>
@@ -289,44 +289,44 @@
 
       <!-- Paid Plan -->
       <mat-card appearance="outlined" class="flex flex-col border-2 border-blue-600 relative hover:shadow-xl transition-shadow">
-        <div class="absolute -top-4 left-6 bg-blue-600 text-white px-4 py-1 rounded-full text-xs font-bold">Recommended</div>
+        <div class="absolute -top-4 left-6 bg-blue-600 text-white px-4 py-1 rounded-full text-xs font-bold"><ng-container i18n>Recommended</ng-container></div>
         <mat-card-content class="p-8 flex-1">
           <div class="mb-6">
-            <h3 class="text-2xl font-bold text-gray-900">Paid Plan</h3>
-            <p class="text-sm text-gray-600 mt-1">Everything you need to run your business</p>
+            <h3 class="text-2xl font-bold text-gray-900"><ng-container i18n>Paid Plan</ng-container></h3>
+            <p class="text-sm text-gray-600 mt-1"><ng-container i18n>Everything you need to run your business</ng-container></p>
           </div>
           <div class="mb-8">
             <span class="text-5xl font-bold text-gray-900">$87.45</span>
-            <span class="text-gray-600">/month</span>
+            <span class="text-gray-600"><ng-container i18n>/month</ng-container></span>
           </div>
           <ul class="space-y-4 text-gray-600">
             <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Unlimited rooms
+              <ng-container i18n>Unlimited rooms</ng-container>
             </li>
             <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Unlimited users & staff
+              <ng-container i18n>Unlimited users & staff</ng-container>
             </li>
             <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              POS, HMS & ERP modules
+              <ng-container i18n>POS, HMS & ERP modules</ng-container>
             </li>
             <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Channel manager integration
+              <ng-container i18n>Channel manager integration</ng-container>
             </li>
             <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              Receipt & kitchen printing
+              <ng-container i18n>Receipt & kitchen printing</ng-container>
             </li>
             <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              24/7 priority support
+              <ng-container i18n>24/7 priority support</ng-container>
             </li>
             <li class="flex items-center gap-3">
               <mat-icon class="text-green-600" [style.font-size]="'18px'">check_circle</mat-icon>
-              All current & future features
+              <ng-container i18n>All current & future features</ng-container>
             </li>
           </ul>
         </mat-card-content>
@@ -334,14 +334,14 @@
     </div>
 
     <div class="text-center mt-12">
-      <p class="text-gray-600 mb-6">30 days free trial. No credit card required.</p>
+      <p class="text-gray-600 mb-6"><ng-container i18n>30 days free trial. No credit card required.</ng-container></p>
       <button 
         matButton="outlined"
         color="primary" 
         (click)="navigateToSignup()"
         class="text-lg py-6 px-12"
       >
-        Start Your Free Trial
+        <ng-container i18n>Start Your Free Trial</ng-container>
       </button>
     </div>
   </div>
@@ -351,8 +351,8 @@
 <section class="py-20">
   <div class="max-w-4xl mx-auto px-6">
     <div class="text-center mb-16">
-      <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
-      <p class="text-xl text-gray-600">Everything you need to know about ShopBot</p>
+      <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4"><ng-container i18n>Frequently Asked Questions</ng-container></h2>
+      <p class="text-xl text-gray-600"><ng-container i18n>Everything you need to know about ShopBot</ng-container></p>
     </div>
 
     <div class="space-y-4">
@@ -360,11 +360,11 @@
       <mat-expansion-panel class="!shadow-none !rounded-none" [expanded]="true">
         <mat-expansion-panel-header class="!py-6">
           <mat-panel-title class="!text-base !font-medium !text-gray-700">
-            How does the 30-day free trial work?
+            <ng-container i18n>How does the 30-day free trial work?</ng-container>
           </mat-panel-title>
         </mat-expansion-panel-header>
         <p class="text-gray-600 leading-relaxed pb-4">
-          Start using ShopBot immediately with full access to all features. No credit card required. After 30 days, upgrade to our Paid plan at $87.45/month to continue using all features. You can cancel anytime during the trial.
+          <ng-container i18n>Start using ShopBot immediately with full access to all features. No credit card required. After 30 days, upgrade to our Paid plan at $87.45/month to continue using all features. You can cancel anytime during the trial.</ng-container>
         </p>
       </mat-expansion-panel>
 
@@ -372,11 +372,11 @@
       <mat-expansion-panel class="!shadow-none !rounded-none">
         <mat-expansion-panel-header class="!py-6">
           <mat-panel-title class="!text-base !font-medium !text-gray-700">
-            How does billing work after the trial?
+            <ng-container i18n>How does billing work after the trial?</ng-container>
           </mat-panel-title>
         </mat-expansion-panel-header>
         <p class="text-gray-600 leading-relaxed pb-4">
-          After your 30-day free trial, you can upgrade to our Paid plan for $87.45/month. This gives you access to all features with no limits — unlimited rooms, staff, and full POS, HMS, and ERP functionality.
+          <ng-container i18n>After your 30-day free trial, you can upgrade to our Paid plan for $87.45/month. This gives you access to all features with no limits — unlimited rooms, staff, and full POS, HMS, and ERP functionality.</ng-container>
         </p>
       </mat-expansion-panel>
 
@@ -384,11 +384,11 @@
       <mat-expansion-panel class="!shadow-none !rounded-none">
         <mat-expansion-panel-header class="!py-6">
           <mat-panel-title class="!text-base !font-medium !text-gray-700">
-            Do you offer training and onboarding support?
+            <ng-container i18n>Do you offer training and onboarding support?</ng-container>
           </mat-panel-title>
         </mat-expansion-panel-header>
         <p class="text-gray-600 leading-relaxed pb-4">
-          Yes! All users get access to our knowledge base and video tutorials. Our Paid plan includes personalized onboarding sessions with our customer success team.
+          <ng-container i18n>Yes! All users get access to our knowledge base and video tutorials. Our Paid plan includes personalized onboarding sessions with our customer success team.</ng-container>
         </p>
       </mat-expansion-panel>
 
@@ -396,11 +396,11 @@
       <mat-expansion-panel class="!shadow-none !rounded-none">
         <mat-expansion-panel-header class="!py-6">
           <mat-panel-title class="!text-base !font-medium !text-gray-700">
-            Is my data secure?
+            <ng-container i18n>Is my data secure?</ng-container>
           </mat-panel-title>
         </mat-expansion-panel-header>
         <p class="text-gray-600 leading-relaxed pb-4">
-          Security is our top priority. We use industry-standard encryption, regular backups, and comply with GDPR and other international data protection regulations. Your data is hosted on secure cloud infrastructure with 99.9% uptime.
+          <ng-container i18n>Security is our top priority. We use industry-standard encryption, regular backups, and comply with GDPR and other international data protection regulations. Your data is hosted on secure cloud infrastructure with 99.9% uptime.</ng-container>
         </p>
       </mat-expansion-panel>
 
@@ -408,11 +408,11 @@
       <mat-expansion-panel class="!shadow-none !rounded-none">
         <mat-expansion-panel-header class="!py-6">
           <mat-panel-title class="!text-base !font-medium !text-gray-700">
-            Can I integrate with my existing systems?
+            <ng-container i18n>Can I integrate with my existing systems?</ng-container>
           </mat-panel-title>
         </mat-expansion-panel-header>
         <p class="text-gray-600 leading-relaxed pb-4">
-          ShopBot integrates seamlessly with popular OTAs, payment gateways, and channel managers. Our Paid plan includes full API access for custom integrations with your existing tools.
+          <ng-container i18n>ShopBot integrates seamlessly with popular OTAs, payment gateways, and channel managers. Our Paid plan includes full API access for custom integrations with your existing tools.</ng-container>
         </p>
       </mat-expansion-panel>
 
@@ -420,11 +420,11 @@
       <mat-expansion-panel class="!shadow-none !rounded-none">
         <mat-expansion-panel-header class="!py-6">
           <mat-panel-title class="!text-base !font-medium !text-gray-700">
-            What payment methods do you accept?
+            <ng-container i18n>What payment methods do you accept?</ng-container>
           </mat-panel-title>
         </mat-expansion-panel-header>
         <p class="text-gray-600 leading-relaxed pb-4">
-          We accept all major credit and debit cards through Paystack, our secure payment processor. All payments are in USD. Your card details are never stored on our servers.
+          <ng-container i18n>We accept all major credit and debit cards through Paystack, our secure payment processor. All payments are in USD. Your card details are never stored on our servers.</ng-container>
         </p>
       </mat-expansion-panel>
     </div>

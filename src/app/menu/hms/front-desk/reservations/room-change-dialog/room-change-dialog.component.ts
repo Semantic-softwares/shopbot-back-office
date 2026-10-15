@@ -25,6 +25,7 @@ import {
   RateInventoryRecord,
 } from '../../../../../shared/services/rate-inventory.service';
 import { RoomType } from '../../../../../shared/models/room.model';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 export interface RoomChangeDialogData {
   reservationId: string;
@@ -65,7 +66,7 @@ export interface RoomChangeResult {
 @Component({
   selector: 'app-room-change-dialog',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
@@ -329,7 +330,7 @@ export class RoomChangeDialogComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         catchError(() => {
-          this.snackBar.open('Failed to load room types', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Failed to load room types`, $localize`Close`, { duration: 3000 });
           return of([]);
         }),
       )
@@ -403,7 +404,7 @@ export class RoomChangeDialogComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         catchError(() => {
-          this.snackBar.open('Failed to load available rooms', 'Close', { duration: 3000 });
+          this.snackBar.open($localize`Failed to load available rooms`, $localize`Close`, { duration: 3000 });
           return of([]);
         }),
       )
@@ -622,7 +623,7 @@ export class RoomChangeDialogComponent implements OnInit, OnDestroy {
       this.dialogRef.close(result);
     } catch (error) {
       console.error('Error submitting room change:', error);
-      this.snackBar.open('Failed to process room change', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`Failed to process room change`, $localize`Close`, { duration: 3000 });
     } finally {
       this.submitting.set(false);
     }

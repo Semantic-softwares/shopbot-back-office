@@ -97,7 +97,7 @@ export class ArrearsPageComponent {
     ])
       .catch((error) => {
         console.error('Error loading arrears data:', error);
-        this.snackBar.open('Failed to load arrears data', 'Close', { duration: 5000 });
+        this.snackBar.open($localize`Failed to load arrears data`, $localize`Close`, { duration: 5000 });
       })
       .finally(() => {
         this.isPageLoading.set(false);

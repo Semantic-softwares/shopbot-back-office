@@ -50,8 +50,8 @@ export class ForgotPasswordComponent {
             this.loading.set(false);
             this.emailSent.set(true);
             this.snackBar.open(
-              'Password reset link sent to your email. Please check your inbox.',
-              'Close',
+              $localize`Password reset link sent to your email. Please check your inbox.`,
+              $localize`Close`,
               {
                 duration: 5000,
                 horizontalPosition: 'end',
@@ -68,7 +68,7 @@ export class ForgotPasswordComponent {
             this.emailSent.set(false);
             this.snackBar.open(
               error.error?.msg || error.message || 'Failed to send reset link. Please try again.',
-              'Close',
+              $localize`Close`,
               {
                 duration: 5000,
                 horizontalPosition: 'end',

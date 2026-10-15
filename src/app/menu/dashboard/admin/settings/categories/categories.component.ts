@@ -76,7 +76,7 @@ export class CategoriesComponent {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Category',
+        title: $localize`Delete Category`,
         message: `Are you sure you want to delete the category "${category.name}"?`
       }
     });
@@ -87,13 +87,13 @@ export class CategoriesComponent {
           .subscribe({
             next: () => {
               this.categories.reload();
-              this.snackBar.open('Category deleted successfully', 'Close', {
+              this.snackBar.open($localize`Category deleted successfully`, $localize`Close`, {
                 duration: 3000,
                 panelClass: ['success-snackbar']
               });
             },
             error: () => {
-              this.snackBar.open('Failed to delete category', 'Close', {
+              this.snackBar.open($localize`Failed to delete category`, $localize`Close`, {
                 duration: 3000,
                 panelClass: ['error-snackbar']
               });

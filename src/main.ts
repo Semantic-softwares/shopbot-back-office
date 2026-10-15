@@ -1,7 +1,5 @@
-import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
-import { AppComponent } from './app/app.component';
 import { loadStorefrontLanguage } from './app/storefront/i18n/bootstrap-language';
+import { loadAppLanguage } from './app/shared/i18n/bootstrap-app-language';
 import { environment } from './environments/environment';
 
 // Table cards printed before the storefront moved to its own app point at
@@ -11,8 +9,18 @@ import { environment } from './environments/environment';
 if (environment.production && location.hash.startsWith('#/m/')) {
   location.replace(`${environment.storefrontUrl}/${location.hash.slice('#/m/'.length)}`);
 } else {
-  loadStorefrontLanguage().finally(() => {
-    bootstrapApplication(AppComponent, appConfig)
-      .catch((err) => console.error(err));
-  });
+  // The app itself is imported only AFTER the language file is loaded.
+  // $localize looks a message up the moment it runs, so any translated text
+  // evaluated while modules are still being imported (module-level constants,
+  // static field initialisers) would otherwise stay English.
+  Promise.all([loadStorefrontLanguage(), loadAppLanguage()])
+    .finally(async () => {
+      const [{ bootstrapApplication }, { appConfig }, { AppComponent }] = await Promise.all([
+        import('@angular/platform-browser'),
+        import('./app/app.config'),
+        import('./app/app.component'),
+      ]);
+      await bootstrapApplication(AppComponent, appConfig);
+    })
+    .catch((err) => console.error(err));
 }

@@ -1,17 +1,17 @@
-<h2 mat-dialog-title>Apply Discount</h2>
+<h2 mat-dialog-title><ng-container i18n>Apply Discount</ng-container></h2>
 
 <mat-dialog-content>
   <form [formGroup]="discountForm">
     <!-- Discount Type Toggle -->
     <div class="toggle-section">
-      <mat-button-toggle-group formControlName="discountType" aria-label="Discount Type">
+      <mat-button-toggle-group formControlName="discountType" aria-label="Discount Type" i18n-aria-label>
         <mat-button-toggle value="Amount">
           <mat-icon>attach_money</mat-icon>
-          Amount
+          <ng-container i18n>Amount</ng-container>
         </mat-button-toggle>
         <mat-button-toggle value="Percentage">
           <mat-icon>percent</mat-icon>
-          Percentage
+          <ng-container i18n>Percentage</ng-container>
         </mat-button-toggle>
       </mat-button-toggle-group>
     </div>
@@ -37,22 +37,22 @@
         />
       }
       @if (f['value'].hasError('required') && f['value'].touched) {
-        <mat-error>Value is required</mat-error>
+        <mat-error><ng-container i18n>Value is required</ng-container></mat-error>
       }
       @if (f['value'].hasError('min')) {
-        <mat-error>Value must be a positive number</mat-error>
+        <mat-error><ng-container i18n>Value must be a positive number</ng-container></mat-error>
       }
     </mat-form-field>
 
     <!-- Reference Field -->
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Reference (Optional)</mat-label>
+      <mat-label><ng-container i18n>Reference (Optional)</ng-container></mat-label>
       <mat-icon matPrefix>note</mat-icon>
       <input 
         matInput 
         type="text" 
         formControlName="reference" 
-        placeholder="Enter reference or reason"
+        placeholder="Enter reference or reason" i18n-placeholder
       />
     </mat-form-field>
   </form>
@@ -61,16 +61,16 @@
 <mat-dialog-actions align="end">
   @if (data.discount?.value) {
     <button mat-button color="warn" (click)="onRemoveDiscount()">
-      Remove Discount
+      <ng-container i18n>Remove Discount</ng-container>
     </button>
   }
-  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button (click)="onCancel()"><ng-container i18n>Cancel</ng-container></button>
   <button 
     mat-flat-button 
     color="primary" 
     (click)="onApply()" 
     [disabled]="discountForm.invalid"
   >
-    Apply
+    <ng-container i18n>Apply</ng-container>
   </button>
 </mat-dialog-actions>

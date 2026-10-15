@@ -9,13 +9,14 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTableModule } from '@angular/material/table';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { Reservation } from '../../../../../shared/models/reservation.model';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 
 
 @Component({
   selector: 'app-room-change-history',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     MatCardModule,
     MatIconModule,

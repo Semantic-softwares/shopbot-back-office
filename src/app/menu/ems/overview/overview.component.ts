@@ -16,6 +16,7 @@ import { EstatePaymentService } from '../../../shared/services/estate-payment.se
 import { StoreStore } from '../../../shared/stores/store.store';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { EstatePayment, InvoiceStatus, LeaseStatus, PaymentStatus } from '../../../shared/models/estate.model';
+import { ChartThemeService } from '../../../shared/services/chart-theme.service';
 
 @Component({
   selector: 'app-ems-overview',
@@ -33,6 +34,8 @@ import { EstatePayment, InvoiceStatus, LeaseStatus, PaymentStatus } from '../../
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmsOverviewComponent {
+  // Keeps Chart.js text/grid colours in step with the light/dark theme.
+  private readonly chartTheme = inject(ChartThemeService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private propertyService = inject(EstatePropertyService);
@@ -197,7 +200,7 @@ export class EmsOverviewComponent {
       datasets: [
         {
           data: series.income,
-          label: 'Income',
+          label: $localize`Income`,
           backgroundColor: '#2e9648',
           borderColor: '#2e9648',
           borderRadius: 4,
@@ -205,7 +208,7 @@ export class EmsOverviewComponent {
         },
         {
           data: series.expenses,
-          label: 'Expense',
+          label: $localize`Expense`,
           backgroundColor: '#e3a51a',
           borderColor: '#e3a51a',
           borderRadius: 4,

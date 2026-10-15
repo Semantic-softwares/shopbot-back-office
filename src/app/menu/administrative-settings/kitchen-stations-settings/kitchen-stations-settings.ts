@@ -22,6 +22,7 @@ import {
   StationStatusStep,
   StationStatusStepInput,
 } from '../../../shared/models';
+import { TrPipe } from '../../../shared/i18n/tr.pipe';
 
 const MIN_STEPS = 2;
 
@@ -47,7 +48,7 @@ interface StationDraft {
 @Component({
   selector: 'app-kitchen-stations-settings',
   standalone: true,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     DragDropModule,
     MatButtonModule,
@@ -105,7 +106,7 @@ export class KitchenStationsSettings implements OnInit {
       },
       error: () => {
         this.loading.set(false);
-        this.snackBar.open('Failed to load kitchen stations.', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Failed to load kitchen stations.`, $localize`Close`, { duration: 4000 });
       },
     });
   }
@@ -243,7 +244,7 @@ export class KitchenStationsSettings implements OnInit {
 
     const error = this.validationError(draft);
     if (error) {
-      this.snackBar.open(error, 'Close', { duration: 4000 });
+      this.snackBar.open(error, $localize`Close`, { duration: 4000 });
       return;
     }
 
@@ -256,11 +257,11 @@ export class KitchenStationsSettings implements OnInit {
     this.stationsService.updateStationStatusFlow(stationId, statusFlow).subscribe({
       next: (updated) => {
         this.updateDraft(stationId, (d) => ({ ...d, steps: this.toDrafts(updated), saving: false }));
-        this.snackBar.open('Status flow saved.', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Status flow saved.`, $localize`Close`, { duration: 3000 });
       },
       error: () => {
         this.setSaving(stationId, false);
-        this.snackBar.open('Failed to save status flow.', 'Close', { duration: 4000 });
+        this.snackBar.open($localize`Failed to save status flow.`, $localize`Close`, { duration: 4000 });
       },
     });
   }

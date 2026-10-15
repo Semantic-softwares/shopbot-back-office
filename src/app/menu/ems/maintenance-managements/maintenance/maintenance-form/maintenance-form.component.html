@@ -1,11 +1,11 @@
 <app-page-header
-  [title]="isEditMode() ? 'Edit Maintenance Request' : 'Create Maintenance Request'"
-  subtitle="Guided maintenance request wizard"
+  [title]="isEditMode() ? ('Edit Maintenance Request' | tr) : ('Create Maintenance Request' | tr)"
+  subtitle="Guided maintenance request wizard" i18n-subtitle
 >
   <ng-container actions>
     <button mat-button (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
-      Back
+      <ng-container i18n>Back</ng-container>
     </button>
     <button matButton="filled" (click)="submit()" [disabled]="submitting() || form.invalid">
       {{ isEditMode() ? (submitting() ? 'Submitting...' : 'Save Changes') : (submitting() ? 'Submitting...' : 'Create Request') }}
@@ -18,10 +18,10 @@
     <mat-card-content class="p-4!">
       <form [formGroup]="form">
         <mat-stepper orientation="vertical" linear>
-          <mat-step [stepControl]="reporterGroup" label="Reporter">
+          <mat-step [stepControl]="reporterGroup" label="Reporter" i18n-label>
             <div class="pt-4" [formGroup]="reporterGroup">
               <mat-form-field appearance="outline" class="w-full md:max-w-sm">
-                <mat-label>Reporter Type</mat-label>
+                <mat-label><ng-container i18n>Reporter Type</ng-container></mat-label>
                 <mat-select formControlName="reportedByType">
                   @for (item of reportedByOptions; track item) {
                     <mat-option [value]="item">{{ item }}</mat-option>
@@ -32,16 +32,16 @@
               @if (reportedByType() === 'TENANT') {
                 <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <mat-form-field appearance="outline" class="md:col-span-2">
-                    <mat-label>Tenant Reporter</mat-label>
+                    <mat-label><ng-container i18n>Tenant Reporter</ng-container></mat-label>
                     <input
                       matInput
                       [formControl]="tenantSearchControl"
                       [matAutocomplete]="tenantAuto"
-                      placeholder="Search tenant by name or email"
-                      aria-label="Search and select tenant reporter"
+                      placeholder="Search tenant by name or email" i18n-placeholder
+                      aria-label="Search and select tenant reporter" i18n-aria-label
                     />
                     @if (reporterGroup.controls['tenantId'].value) {
-                      <button matSuffix mat-icon-button type="button" (click)="clearReporterTenant()" aria-label="Clear selected tenant reporter">
+                      <button matSuffix mat-icon-button type="button" (click)="clearReporterTenant()" aria-label="Clear selected tenant reporter" i18n-aria-label>
                         <mat-icon>close</mat-icon>
                       </button>
                     }
@@ -53,7 +53,7 @@
                       }
                     </mat-autocomplete>
                     @if (reporterGroup.controls['tenantId'].invalid && reporterGroup.controls['tenantId'].touched) {
-                      <mat-error>Please select a tenant reporter</mat-error>
+                      <mat-error><ng-container i18n>Please select a tenant reporter</ng-container></mat-error>
                     }
                   </mat-form-field>
                 </div>
@@ -65,7 +65,7 @@
                     [control]="$any(reporterGroup.controls['reportedByUserId'])"
                     [storeId]="$safeNavigationMigration(storeStore.selectedStore()?._id)"
                     [preloadedManager]="preloadedManagerForSelector()"
-                    label="Staff Reporter">
+                    label="Staff Reporter" i18n-label>
                   </app-property-manager-selector>
                 </div>
               }
@@ -76,21 +76,21 @@
                     [control]="$any(reporterGroup.controls['reportedByUserId'])"
                     [storeId]="$safeNavigationMigration(storeStore.selectedStore()?._id)"
                     [preloadedManager]="preloadedManagerForSelector()"
-                    [label]="reportedByType() === 'MANAGER' ? 'Manager Reporter' : 'Admin Reporter'">
+                    [label]="reportedByType() === 'MANAGER' ? ('Manager Reporter' | tr) : ('Admin Reporter' | tr)">
                   </app-property-manager-selector>
                 </div>
               }
             </div>
 
             <div class="mt-4 flex justify-end">
-              <button mat-flat-button matStepperNext [disabled]="reporterGroup.invalid">Next</button>
+              <button mat-flat-button matStepperNext [disabled]="reporterGroup.invalid"><ng-container i18n>Next</ng-container></button>
             </div>
           </mat-step>
 
-          <mat-step [stepControl]="locationGroup" label="Property & Lease">
+          <mat-step [stepControl]="locationGroup" label="Property & Lease" i18n-label>
             <div class="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4" [formGroup]="locationGroup">
               <mat-form-field appearance="outline">
-                <mat-label>Property *</mat-label>
+                <mat-label><ng-container i18n>Property *</ng-container></mat-label>
                 <mat-select formControlName="propertyId">
                   @for (property of properties(); track property._id) {
                     <mat-option [value]="property._id">{{ property.name }}</mat-option>
@@ -99,9 +99,9 @@
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>Unit for selected property (optional)</mat-label>
+                <mat-label><ng-container i18n>Unit for selected property (optional)</ng-container></mat-label>
                 <mat-select formControlName="unitId" [disabled]="!locationGroup.controls['propertyId'].value">
-                  <mat-option value="">None</mat-option>
+                  <mat-option value=""><ng-container i18n>None</ng-container></mat-option>
                   @for (unit of units(); track unit._id) {
                     <mat-option [value]="unit._id">{{ unit.name }}</mat-option>
                   }
@@ -109,9 +109,9 @@
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="md:col-span-2">
-                <mat-label>Lease (optional)</mat-label>
+                <mat-label><ng-container i18n>Lease (optional)</ng-container></mat-label>
                 <mat-select formControlName="leaseId" [disabled]="!locationGroup.controls['propertyId'].value">
-                  <mat-option value="">None</mat-option>
+                  <mat-option value=""><ng-container i18n>None</ng-container></mat-option>
                   @for (lease of leases(); track lease._id) {
                     <mat-option [value]="lease._id">{{ lease.leaseNumber || lease._id }}</mat-option>
                   }
@@ -120,31 +120,31 @@
             </div>
 
             <div class="mt-4 flex justify-between">
-              <button mat-button matStepperPrevious>Previous</button>
-              <button mat-flat-button matStepperNext [disabled]="locationGroup.invalid">Next</button>
+              <button mat-button matStepperPrevious><ng-container i18n>Previous</ng-container></button>
+              <button mat-flat-button matStepperNext [disabled]="locationGroup.invalid"><ng-container i18n>Next</ng-container></button>
             </div>
           </mat-step>
 
-          <mat-step [stepControl]="infoGroup" label="Maintenance Info">
+          <mat-step [stepControl]="infoGroup" label="Maintenance Info" i18n-label>
             <div class="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4" [formGroup]="infoGroup">
               <mat-form-field appearance="outline" class="md:col-span-2">
-                <mat-label>Title *</mat-label>
-                <input matInput formControlName="title" placeholder="e.g. leaking pipe in A-102" />
+                <mat-label><ng-container i18n>Title *</ng-container></mat-label>
+                <input matInput formControlName="title" placeholder="e.g. leaking pipe in A-102" i18n-placeholder />
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="md:col-span-2">
-                <mat-label>Description</mat-label>
+                <mat-label><ng-container i18n>Description</ng-container></mat-label>
                 <textarea matInput rows="3" formControlName="description"></textarea>
               </mat-form-field>
 
               <app-maintenance-category-select
                 [control]="$any(infoGroup.controls['category'])"
-                label="Category *"
+                label="Category *" i18n-label
                 [showNone]="false"
               />
 
               <mat-form-field appearance="outline">
-                <mat-label>Priority *</mat-label>
+                <mat-label><ng-container i18n>Priority *</ng-container></mat-label>
                 <mat-select formControlName="priority">
                   @for (item of priorityOptions; track item.value) {
                     <mat-option [value]="item.value">{{ item.label }}</mat-option>
@@ -154,12 +154,12 @@
 
               <app-maintenance-vendor-select
                 [control]="$any(infoGroup.controls['vendorId'])"
-                label="Vendor *"
+                label="Vendor *" i18n-label
                 [showNone]="false"
               />
 
               <mat-form-field appearance="outline">
-                <mat-label>Status *</mat-label>
+                <mat-label><ng-container i18n>Status *</ng-container></mat-label>
                 <mat-select formControlName="status">
                   @for (item of statusOptions; track item.value) {
                     <mat-option [value]="item.value">{{ item.label }}</mat-option>
@@ -172,12 +172,12 @@
                   [control]="$any(infoGroup.controls['assignedTo'])"
                   [storeId]="$safeNavigationMigration(storeStore.selectedStore()?._id)"
                   [preloadedManager]="preloadedAssignedToForSelector()"
-                  label="Assigned Staff">
+                  label="Assigned Staff" i18n-label>
                 </app-property-manager-selector>
               </div>
 
               <mat-form-field appearance="outline">
-                <mat-label>Due Date</mat-label>
+                <mat-label><ng-container i18n>Due Date</ng-container></mat-label>
                 <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" />
                 <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
                 <mat-datepicker #dueDatePicker></mat-datepicker>
@@ -187,12 +187,12 @@
               <div class="md:col-span-2">
                 <div class="flex items-center justify-between mb-3">
                   <div>
-                    <p class="text-sm font-medium text-gray-800">Parts and Labor</p>
-                    <p class="text-xs text-gray-500">Add line items for parts, labor, and other costs</p>
+                    <p class="text-sm font-medium text-gray-800"><ng-container i18n>Parts and Labor</ng-container></p>
+                    <p class="text-xs text-gray-500"><ng-container i18n>Add line items for parts, labor, and other costs</ng-container></p>
                   </div>
                   <button mat-stroked-button type="button" (click)="addPartRow()">
                     <mat-icon>add</mat-icon>
-                    Add Row
+                    <ng-container i18n>Add Row</ng-container>
                   </button>
                 </div>
 
@@ -201,11 +201,11 @@
                     <table class="w-full text-sm">
                       <thead class="bg-gray-50">
                         <tr>
-                          <th class="px-3 py-2 text-left font-medium text-gray-600 w-20">QTY</th>
-                          <th class="px-3 py-2 text-left font-medium text-gray-600">ACCOUNT</th>
-                          <th class="px-3 py-2 text-left font-medium text-gray-600">DESCRIPTION</th>
-                          <th class="px-3 py-2 text-right font-medium text-gray-600 w-28">PRICE</th>
-                          <th class="px-3 py-2 text-right font-medium text-gray-600 w-28">TOTAL</th>
+                          <th class="px-3 py-2 text-left font-medium text-gray-600 w-20"><ng-container i18n>QTY</ng-container></th>
+                          <th class="px-3 py-2 text-left font-medium text-gray-600"><ng-container i18n>ACCOUNT</ng-container></th>
+                          <th class="px-3 py-2 text-left font-medium text-gray-600"><ng-container i18n>DESCRIPTION</ng-container></th>
+                          <th class="px-3 py-2 text-right font-medium text-gray-600 w-28"><ng-container i18n>PRICE</ng-container></th>
+                          <th class="px-3 py-2 text-right font-medium text-gray-600 w-28"><ng-container i18n>TOTAL</ng-container></th>
                           <th class="px-3 py-2 w-12"></th>
                         </tr>
                       </thead>
@@ -220,14 +220,14 @@
                             <td class="px-2 py-1">
                               <app-invoice-category-select
                                 [control]="getPartCategoryControl(i)"
-                                [label]="'Account'"
+                                [label]="('Account' | tr)"
                                 [side]="financialSide.EXPENSE"
                                 [allowLeaseOnly]="false"
                               />
                             </td>
                             <td class="px-2 py-1">
                               <mat-form-field appearance="outline" class="w-full compact-field">
-                                <input matInput formControlName="description" placeholder="Description" />
+                                <input matInput formControlName="description" placeholder="Description" i18n-placeholder />
                               </mat-form-field>
                             </td>
                             <td class="px-2 py-1">
@@ -243,7 +243,7 @@
                                 type="button"
                                 mat-icon-button
                                 (click)="removePartRow(i)"
-                                aria-label="Remove row"
+                                aria-label="Remove row" i18n-aria-label
                                 class="!w-8 !h-8"
                               >
                                 <mat-icon class="!text-base text-red-500">delete</mat-icon>
@@ -255,7 +255,7 @@
                       <tfoot class="border-t border-gray-200 bg-gray-50">
                         <tr>
                           <td colspan="4" class="px-3 py-2 text-right font-semibold text-gray-700">
-                            Estimated Total
+                            <ng-container i18n>Estimated Total</ng-container>
                           </td>
                           <td class="px-3 py-2 text-right font-semibold text-gray-900">
                             {{ partsAndLaborTotal() | number: '1.2-2' }}
@@ -267,7 +267,7 @@
                   </div>
                 } @else {
                   <div class="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500">
-                    No parts or labor items added yet. Click "Add Row" to begin.
+                    <ng-container i18n>No parts or labor items added yet. Click "Add Row" to begin.</ng-container>
                   </div>
                 }
               </div>
@@ -275,8 +275,8 @@
               <div class="md:col-span-2 rounded-lg border border-dashed border-gray-300 p-4">
                 <div class="flex items-center justify-between gap-3">
                   <div>
-                    <p class="text-sm font-medium text-gray-800">Maintenance Photos</p>
-                    <p class="text-xs text-gray-500">Upload multiple images</p>
+                    <p class="text-sm font-medium text-gray-800"><ng-container i18n>Maintenance Photos</ng-container></p>
+                    <p class="text-xs text-gray-500"><ng-container i18n>Upload multiple images</ng-container></p>
                   </div>
                   <label class="cursor-pointer">
                     <input
@@ -288,23 +288,23 @@
                     />
                     <span class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">
                       <mat-icon>upload</mat-icon>
-                      Select Photos
+                      <ng-container i18n>Select Photos</ng-container>
                     </span>
                   </label>
                 </div>
 
                 @if (uploadedPhotoUrls().length > 0) {
                   <div class="mt-4">
-                    <p class="text-xs text-gray-500 mb-2">Already attached</p>
+                    <p class="text-xs text-gray-500 mb-2"><ng-container i18n>Already attached</ng-container></p>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                       @for (photo of uploadedPhotoUrls(); track $index) {
                         <div class="relative rounded border border-gray-200 overflow-hidden">
-                          <img [src]="photo" alt="Uploaded photo" class="w-full h-24 object-cover" />
+                          <img [src]="photo" alt="Uploaded photo" i18n-alt class="w-full h-24 object-cover" />
                           <button
                             type="button"
                             class="absolute top-1 right-1 bg-white/90 rounded-full p-1"
                             (click)="removeUploadedPhoto($index)"
-                            aria-label="Remove uploaded photo"
+                            aria-label="Remove uploaded photo" i18n-aria-label
                           >
                             <mat-icon class="!text-base">close</mat-icon>
                           </button>
@@ -316,16 +316,16 @@
 
                 @if (selectedPhotoPreviews().length > 0) {
                   <div class="mt-4">
-                    <p class="text-xs text-gray-500 mb-2">Selected for upload</p>
+                    <p class="text-xs text-gray-500 mb-2"><ng-container i18n>Selected for upload</ng-container></p>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                       @for (preview of selectedPhotoPreviews(); track $index) {
                         <div class="relative rounded border border-gray-200 overflow-hidden">
-                          <img [src]="preview" alt="Selected photo preview" class="w-full h-24 object-cover" />
+                          <img [src]="preview" alt="Selected photo preview" i18n-alt class="w-full h-24 object-cover" />
                           <button
                             type="button"
                             class="absolute top-1 right-1 bg-white/90 rounded-full p-1"
                             (click)="removeSelectedPhoto($index)"
-                            aria-label="Remove selected photo"
+                            aria-label="Remove selected photo" i18n-aria-label
                           >
                             <mat-icon class="!text-base">close</mat-icon>
                           </button>

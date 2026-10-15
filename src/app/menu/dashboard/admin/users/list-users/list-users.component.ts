@@ -132,7 +132,7 @@ export class ListUsersComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.snackBar.open('Password updated successfully', 'Close', {
+        this.snackBar.open($localize`Password updated successfully`, $localize`Close`, {
           duration: 3000,
           horizontalPosition: 'end',
           verticalPosition: 'top'

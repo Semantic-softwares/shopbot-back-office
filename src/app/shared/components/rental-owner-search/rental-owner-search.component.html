@@ -9,10 +9,10 @@
       [matAutocomplete]="ownerAutoComplete"
     />
     @if (isLoading()) {
-      <span matSuffix class="text-xs text-gray-400 mr-2">Searching...</span>
+      <span matSuffix class="text-xs text-gray-400 mr-2"><ng-container i18n>Searching...</ng-container></span>
     }
     @if (searchControl.value) {
-      <button matSuffix mat-icon-button type="button" (click)="onClear()" aria-label="Clear search">
+      <button matSuffix mat-icon-button type="button" (click)="onClear()" aria-label="Clear search" i18n-aria-label>
         <mat-icon>close</mat-icon>
       </button>
     }
@@ -31,7 +31,7 @@
         </mat-option>
       }
       @if (filteredOwners().length === 0 && !isLoading() && searchControl.value && searchControl.value.length >= 2) {
-        <mat-option disabled>No rental owners found</mat-option>
+        <mat-option disabled><ng-container i18n>No rental owners found</ng-container></mat-option>
       }
     </mat-autocomplete>
   </mat-form-field>

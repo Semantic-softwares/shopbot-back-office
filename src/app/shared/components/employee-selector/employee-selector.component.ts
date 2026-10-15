@@ -23,15 +23,15 @@ import { UserService } from '../../services/user.service';
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>All employees</mat-label>
+      <mat-label><ng-container i18n>All employees</ng-container></mat-label>
       <mat-select
         [value]="selectedEmployee()"
         (selectionChange)="onSelectionChange($event.value)"
         >
-        <mat-option value="all">All employees</mat-option>
+        <mat-option value="all"><ng-container i18n>All employees</ng-container></mat-option>
         @for (employee of employees(); track employee._id) {
           <mat-option [value]="employee._id">
-            {{ employee.name }}@if (employee.deactivated) { (deactivated)}
+            {{ employee.name }}@if (employee.deactivated) { <ng-container i18n>(deactivated)</ng-container>}
           </mat-option>
         }
       </mat-select>

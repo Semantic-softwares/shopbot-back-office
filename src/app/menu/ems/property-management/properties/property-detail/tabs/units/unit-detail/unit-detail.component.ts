@@ -10,12 +10,13 @@ import { EstateUnitService } from '../../../../../../../../shared/services/estat
 import { StoreStore } from '../../../../../../../../shared/stores/store.store';
 import { Unit, Property, NON_LIVABLE_UNIT_TYPES } from '../../../../../../../../shared/models/estate.model';
 import { PageHeaderComponent } from '../../../../../../../../shared/components/page-header/page-header.component';
+import { TrPipe } from '../../../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-unit-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [TrPipe, 
     CommonModule,
     RouterOutlet,
     RouterLink,
@@ -39,9 +40,9 @@ export class UnitDetailComponent {
   );
 
   readonly tabs = [
-    { label: 'Summary', link: 'summary', icon: 'dashboard' },
-    { label: 'Leases', link: 'leases', icon: 'description' },
-    { label: 'Maintenance', link: 'maintenance', icon: 'handyman' },
+    { label: $localize`Summary`, link: 'summary', icon: 'dashboard' },
+    { label: $localize`Leases`, link: 'leases', icon: 'description' },
+    { label: $localize`Maintenance`, link: 'maintenance', icon: 'handyman' },
   ];
 
   unitResource = rxResource({

@@ -71,17 +71,17 @@ export class LeaseListComponent {
   ];
 
   readonly statusOptions = [
-    { value: '', label: 'All Statuses' },
-    { value: LeaseStatus.DRAFT, label: 'Draft' },
-    { value: LeaseStatus.ACTIVE, label: 'Active' },
-    { value: LeaseStatus.ENDED, label: 'Ended' },
-    { value: LeaseStatus.TERMINATED, label: 'Terminated' },
-    { value: LeaseStatus.CANCELLED, label: 'Cancelled' },
+    { value: '', label: $localize`All Statuses` },
+    { value: LeaseStatus.DRAFT, label: $localize`Draft` },
+    { value: LeaseStatus.ACTIVE, label: $localize`Active` },
+    { value: LeaseStatus.ENDED, label: $localize`Ended` },
+    { value: LeaseStatus.TERMINATED, label: $localize`Terminated` },
+    { value: LeaseStatus.CANCELLED, label: $localize`Cancelled` },
   ];
 
   readonly expiryOptions = [
-    { value: '', label: 'All leases' },
-    { value: 'expiringSoon', label: 'Expiring soon (30 days)' },
+    { value: '', label: $localize`All leases` },
+    { value: 'expiringSoon', label: $localize`Expiring soon (30 days)` },
   ];
 
   leasesResource = rxResource({
@@ -208,16 +208,16 @@ export class LeaseListComponent {
   }
 
   deleteLease(leaseId: string): void {
-    const confirmed = window.confirm('Delete this lease? This action cannot be undone.');
+    const confirmed = window.confirm($localize`Delete this lease? This action cannot be undone.`);
     if (!confirmed) return;
 
     this.leaseService.deleteLease(leaseId).subscribe({
       next: () => {
-        this.snackBar.open('Lease deleted successfully', 'Close', { duration: 3000 });
+        this.snackBar.open($localize`Lease deleted successfully`, $localize`Close`, { duration: 3000 });
         this.leasesResource.reload();
       },
       error: (err) => {
-        this.snackBar.open(err?.error?.message || 'Failed to delete lease', 'Close', {
+        this.snackBar.open(err?.error?.message || 'Failed to delete lease', $localize`Close`, {
           duration: 5000,
         });
       },

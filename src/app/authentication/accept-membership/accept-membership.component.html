@@ -1,37 +1,41 @@
+<div class="fixed top-3 right-3 z-50 flex items-center rounded-full shadow bg-[var(--mat-sys-surface-container)]">
+  <app-language-menu />
+  <app-theme-toggle />
+</div>
 <div class="min-h-screen w-full flex flex-col items-center justify-center px-6 py-12 bg-gray-50">
     <div class="w-full max-w-md text-center">
-        <img src="assets/logo/logo_vector.svg" alt="ShopBot Logo" class="h-9 w-9 mx-auto mb-6">
+        <img src="assets/logo/logo_vector.svg" alt="ShopBot Logo" i18n-alt class="h-9 w-9 mx-auto mb-6">
 
         @switch (state()) {
             @case ('accepting') {
                 <mat-spinner diameter="36" class="!mx-auto mb-4"></mat-spinner>
-                <h2 class="text-xl font-semibold text-gray-800">Accepting your invite…</h2>
+                <h2 class="text-xl font-semibold text-gray-800"><ng-container i18n>Accepting your invite…</ng-container></h2>
             }
             @case ('success') {
                 <mat-icon class="!text-5xl !w-14 !h-14 text-green-500 mb-3">check_circle</mat-icon>
                 <h2 class="text-xl font-semibold text-gray-800 mb-2">
-                    You're in{{ storeName() ? ' at ' + storeName() : '' }}!
+                    <ng-container i18n>You're in{{ storeName() ? (' at ' | tr) + storeName() : '' }}!</ng-container>
                 </h2>
-                <p class="text-gray-500 mb-6">You can start working in this store right away.</p>
-                <button matButton="filled" color="primary" (click)="continue()">Continue</button>
+                <p class="text-gray-500 mb-6"><ng-container i18n>You can start working in this store right away.</ng-container></p>
+                <button matButton="filled" color="primary" (click)="continue()"><ng-container i18n>Continue</ng-container></button>
             }
             @case ('not-found') {
                 <mat-icon class="!text-5xl !w-14 !h-14 text-gray-400 mb-3">info</mat-icon>
-                <h2 class="text-xl font-semibold text-gray-800 mb-2">This invite isn't waiting on this account</h2>
-                <p class="text-gray-500 mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-2"><ng-container i18n>This invite isn't waiting on this account</ng-container></h2>
+                <p i18n class="text-gray-500 mb-6">
                     You're signed in as <strong>{{ currentEmail() }}</strong>. If the invite was sent to a different
                     email, log out and sign in with that account. Otherwise it may already have been accepted or declined.
                 </p>
                 <div class="flex flex-col gap-2 items-center">
-                    <button matButton="filled" color="primary" (click)="switchAccount()">Sign in with a different account</button>
-                    <button matButton (click)="continue()">Go to my stores</button>
+                    <button matButton="filled" color="primary" (click)="switchAccount()"><ng-container i18n>Sign in with a different account</ng-container></button>
+                    <button matButton (click)="continue()"><ng-container i18n>Go to my stores</ng-container></button>
                 </div>
             }
             @case ('error') {
                 <mat-icon class="!text-5xl !w-14 !h-14 text-red-500 mb-3">error_outline</mat-icon>
-                <h2 class="text-xl font-semibold text-gray-800 mb-2">Something went wrong</h2>
+                <h2 class="text-xl font-semibold text-gray-800 mb-2"><ng-container i18n>Something went wrong</ng-container></h2>
                 <p class="text-gray-500 mb-6">{{ errorMessage() }}</p>
-                <button matButton="filled" color="primary" (click)="goToLogin()">Go to login</button>
+                <button matButton="filled" color="primary" (click)="goToLogin()"><ng-container i18n>Go to login</ng-container></button>
             }
         }
     </div>

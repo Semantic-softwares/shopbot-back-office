@@ -3,12 +3,12 @@
 <mat-dialog-content>
   <!-- Search Field -->
   <mat-form-field appearance="outline" class="w-full mb-4">
-    <mat-label>Search tables</mat-label>
+    <mat-label><ng-container i18n>Search tables</ng-container></mat-label>
     <input 
       matInput 
       [value]="searchQuery()" 
       (input)="onSearchChange($any($event.target).value)"
-      placeholder="Search by table name...">
+      placeholder="Search by table name..." i18n-placeholder>
     <mat-icon matPrefix>search</mat-icon>
   </mat-form-field>
 
@@ -23,8 +23,8 @@
   @if (tablesResource.error()) {
     <app-no-record 
       icon="error_outline"
-      title="Failed to Load Tables"
-      message="Unable to load tables. Please try again.">
+      title="Failed to Load Tables" i18n-title
+      message="Unable to load tables. Please try again." i18n-message>
     </app-no-record>
   }
 
@@ -45,8 +45,8 @@
     @if (filteredTables.length === 0) {
         <app-no-record
           icon="table_restaurant"
-          title="No Tables Found"
-          message="No tables match your search criteria.">
+          title="No Tables Found" i18n-title
+          message="No tables match your search criteria." i18n-message>
         </app-no-record>
     }
   }
@@ -55,8 +55,8 @@
 <mat-dialog-actions align="end">
   @if (selectedTable()) {
     <button mat-button color="warn" (click)="onRemoveSelection()">
-      Remove Selection
+      <ng-container i18n>Remove Selection</ng-container>
     </button>
   }
-  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button (click)="onCancel()"><ng-container i18n>Cancel</ng-container></button>
 </mat-dialog-actions>

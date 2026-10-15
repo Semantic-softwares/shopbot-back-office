@@ -77,7 +77,7 @@ export class PropertyOwnerSelectorComponent {
       (c) => c.get('ownerId')?.value === owner._id,
     );
     if (exists) {
-      this.snackBar.open('This owner is already added', 'Close', { duration: 3000 });
+      this.snackBar.open($localize`This owner is already added`, $localize`Close`, { duration: 3000 });
       return;
     }
 
