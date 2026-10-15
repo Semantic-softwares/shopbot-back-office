@@ -24,6 +24,10 @@ export const DASHBOARD_POS_ROUTES: Routes = [
                 loadChildren: () => import('./orders/orders.routes').then(m => m.ORDERS_ROUTES),
             },
             {
+                path: 'pending',
+                loadComponent: () => import('./pending/pending').then(m => m.PendingSales),
+            },
+            {
                 path: '**',
                 redirectTo: 'checkout'
             }

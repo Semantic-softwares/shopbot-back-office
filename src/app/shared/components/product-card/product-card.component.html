@@ -1,7 +1,13 @@
+<!-- The whole card is tappable: it does what the card's main button does (add to cart, or open the
+     options for a product that has them). The buttons below stay, and stop the tap reaching the card. -->
 <mat-card appearance="outlined"
-    class="overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer h-full flex flex-col">
-    <!-- Product Image -->
-    <div class="relative aspect-square bg-gray-100 overflow-hidden">
+    class="overflow-hidden hover:shadow-lg transition-shadow duration-200 h-full flex flex-col select-none"
+    [class.cursor-pointer]="!isOutOfStock()"
+    [class.active:scale-[0.98]]="!isOutOfStock()"
+    [class.cursor-not-allowed]="isOutOfStock()"
+    (click)="onCardTap()">
+    <!-- Product Image: 4:3 rather than square, so a card is about a quarter shorter -->
+    <div class="relative aspect-[4/3] bg-gray-100 overflow-hidden">
         @if (product().photos && product().photos!.length > 0) {
         <img [src]="product().photos![0]" [alt]="product().name"
             class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
@@ -23,62 +29,49 @@
         }
     </div>
 
-    <!-- Product Info -->
-    <mat-card-content class="p-4 flex-1 flex flex-col">
-        <h3 class="font-medium text-gray-900 text-sm line-clamp-2 mt-2 min-h-[2.5rem] leading-5">
+    <!-- Name, then price on the left and the one action on the right. The action never gets its own row:
+         "+" to add, a tune icon when the product has options, a - n + stepper once it is in the cart.
+         (The stepper wraps under the price when the card is too narrow for both.) -->
+    <div class="flex flex-1 flex-col gap-1 px-3 pt-2 pb-3">
+        <h3 class="font-medium text-gray-900 text-sm line-clamp-2 leading-5 min-h-[2.5rem]">
             {{ product().name }}
         </h3>
 
-        <!-- Price -->
-        <div class="flex items-center gap-2">
-            <span class="primary-text font-bold text-lg">
-                {{ product().price | currency: currency() : 'symbol' : '1.0-0' }}
-            </span>
-            @if (product().costPrice && product().costPrice! > product().price) {
-            <span class="text-gray-400 primary-text text-sm line-through">
-                {{ product().costPrice | currency: currency() : 'symbol' : '1.0-0' }}
-            </span>
+        <div class="mt-auto flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+            <div class="flex items-baseline gap-1.5 min-w-0">
+                <span class="primary-text font-bold text-base whitespace-nowrap">
+                    {{ product().price | currency: currency() : 'symbol' : '1.0-0' }}
+                </span>
+                @if (product().costPrice && product().costPrice! > product().price) {
+                <span class="text-gray-400 primary-text text-xs line-through whitespace-nowrap">
+                    {{ product().costPrice | currency: currency() : 'symbol' : '1.0-0' }}
+                </span>
+                }
+            </div>
+
+            @if (hasOptions()) {
+            <button mat-mini-fab color="primary" class="!w-9 !h-9 !min-w-0 ml-auto" [disabled]="isOutOfStock()"
+                [attr.aria-label]="'Options' | tr" (click)="onOpenOptions($event)">
+                <mat-icon>tune</mat-icon>
+            </button>
+            } @else if (isProductInCart()) {
+            <div class="ml-auto flex items-center rounded-full border border-outline-variant">
+                <button matIconButton color="warn" class="!w-8 !h-8 !p-0" [attr.aria-label]="'Decrease quantity' | tr"
+                    (click)="$event.stopPropagation(); removeOrDeleteProduct(product())">
+                    <mat-icon class="!text-lg !w-[18px] !h-[18px]">remove</mat-icon>
+                </button>
+                <span class="min-w-6 text-center text-sm font-semibold tabular-nums text-gray-900">{{ productQuantity() }}</span>
+                <button matIconButton color="primary" class="!w-8 !h-8 !p-0" [attr.aria-label]="'Increase quantity' | tr"
+                    (click)="onAddToCart($event)">
+                    <mat-icon class="!text-lg !w-[18px] !h-[18px]">add</mat-icon>
+                </button>
+            </div>
+            } @else {
+            <button mat-mini-fab color="primary" class="!w-9 !h-9 !min-w-0 ml-auto" [disabled]="isOutOfStock()"
+                [attr.aria-label]="'Add' | tr" (click)="onAddToCart($event)">
+                <mat-icon>add</mat-icon>
+            </button>
             }
         </div>
-    </mat-card-content>
-
-    <!-- Action Buttons -->
-    <mat-card-actions class="p-2 border-t border-outline-variant">
-        @if (!hasOptions()) {
-            @if (isProductInCart()) {
-           
-                <!-- Quantity Controls -->
-                <div class="flex items-center gap-1 w-full justify-between">
-                    <button mat-mini-fab color="warn" class="!w-8 !h-8 !min-w-0" (click)="removeOrDeleteProduct(product())">
-                        <mat-icon class="!text-lg">remove</mat-icon>
-                    </button>
-                    <span class="w-8 text-center font-semibold text-gray-900">
-                        {{ productQuantity() }}
-                    </span>
-                    <!-- [disabled]="productQuantity() >= product().qty!" -->
-                    <button mat-mini-fab color="primary" class="!w-8 !h-8 !min-w-0"
-                        
-                        (click)="onAddToCart($event)">
-                        <mat-icon class="!text-lg">add</mat-icon>
-                    </button>
-                </div>
-           
-            } @else {
-            <!-- Add to Cart Button -->
-            <button matButton="outlined" color="primary" class="w-full" [disabled]="isOutOfStock()"
-                (click)="onAddToCart($event)">
-                <mat-icon>add_shopping_cart</mat-icon>
-                <ng-container i18n>Add</ng-container>
-            </button>
-            }
-        } @else {
-        <!-- Has Options - Show Select Options Button -->
-            <button matButton="outlined" color="accent" class="w-full" [disabled]="isOutOfStock()"
-                (click)="onOpenOptions($event)">
-                <mat-icon>tune</mat-icon>
-                <ng-container i18n>Options</ng-container>
-            </button>
-        
-        }
-    </mat-card-actions>
+    </div>
 </mat-card>

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, HostListener, inject, OnInit, signal, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CategoryStore } from '../../../shared/stores/category.store';
 import { StoreStore } from '../../../shared/stores/store.store';
 import { CommonModule } from '@angular/common';
@@ -12,13 +12,14 @@ import { Category, Product, Option } from '../../../shared/models';
 import { MatChipsModule } from "@angular/material/chips";
 import { MatIconModule } from "@angular/material/icon";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
-import { MatSlideToggleModule } from "@angular/material/slide-toggle";
+import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatButtonModule } from "@angular/material/button";
-import { MatBadgeModule } from "@angular/material/badge";
 import { MatBottomSheet, MatBottomSheetModule } from "@angular/material/bottom-sheet";
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
+import { CartService } from '../../../shared/services/cart.service';
+import { TrPipe } from '../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'checkout',
@@ -31,21 +32,22 @@ import { map } from 'rxjs/operators';
     MatChipsModule, 
     MatIconModule,
     MatProgressSpinnerModule,
-    MatSlideToggleModule,
+    MatTooltipModule,
     MatButtonModule,
-    MatBadgeModule,
-    MatBottomSheetModule
+    MatBottomSheetModule,
+    TrPipe,
   ],
   templateUrl: './checkout.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './checkout.scss',
 })
-export class Checkout {
+export class Checkout implements OnInit {
   public categoryStore = inject(CategoryStore);
   public storeStore = inject(StoreStore);
   public productStore = inject(ProductsStore);
   public cartStore = inject(CartStore);
   private bottomSheet = inject(MatBottomSheet);
+  private cartService = inject(CartService);
   private breakpointObserver = inject(BreakpointObserver);
 
   public isMobile = toSignal(
@@ -54,6 +56,33 @@ export class Checkout {
     ),
     { initialValue: false }
   );
+
+  /** Don't hammer the API when someone flips between tabs quickly. */
+  private static readonly REFRESH_MIN_INTERVAL_MS = 30_000;
+  private lastCatalogRefresh = 0;
+
+  ngOnInit(): void {
+    // Products and categories are loaded once for the whole app, so prices or categories edited in the
+    // ERP (or on another device) would otherwise never reach the POS. Pull fresh data every time the
+    // POS opens…
+    this.refreshCatalog(true);
+  }
+
+  // …and when the cashier comes back to this tab after being away.
+  @HostListener('document:visibilitychange')
+  protected onVisibilityChange(): void {
+    if (document.visibilityState === 'visible') this.refreshCatalog(false);
+  }
+
+  private refreshCatalog(force: boolean): void {
+    const storeId = this.storeStore.selectedStore()?._id;
+    if (!storeId || this.productStore.isLoading() || this.categoryStore.isLoading()) return; // first load is already in flight
+    const now = Date.now();
+    if (!force && now - this.lastCatalogRefresh < Checkout.REFRESH_MIN_INTERVAL_MS) return;
+    this.lastCatalogRefresh = now;
+    this.productStore.refreshStoreProducts(storeId);
+    this.categoryStore.refreshCategories$(storeId);
+  }
 
   public searchFilter: string = "";
   @ViewChild("searchComponent") searchComponent!: SearchComponent;
@@ -107,6 +136,17 @@ export class Checkout {
   );
 
  
+  /** What the sticky "View cart" bar (phones and small tablets) shows: line count and the amount due. */
+  public cartCount = computed(() =>
+    this.cartStore.selectedCart()?.products.reduce((sum, p) => sum + p.quantity, 0) ?? 0
+  );
+  public cartTotal = computed(() => {
+    const cart = this.cartStore.selectedCart();
+    const store = this.storeStore.selectedStore();
+    return cart && store ? this.cartService.generateCartSummary(cart, store).totalCost : 0;
+  });
+  public currency = computed(() => this.storeStore.selectedStore()?.currency || '₦');
+
   // Cart state
   cartItems = signal<CartItem[]>([]);
   taxRate = signal(0);
@@ -187,6 +227,8 @@ export class Checkout {
   openCartModal(): void {
     this.bottomSheet.open(CartComponent, {
       panelClass: 'cart-bottom-sheet',
+      // A stray tap outside must not dismiss the cart mid-sale; it closes with its own X button.
+      disableClose: true,
     });
   }
 

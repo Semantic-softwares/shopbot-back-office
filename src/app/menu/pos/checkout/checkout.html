@@ -1,45 +1,41 @@
-<div class="flex h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)]">
-  <!-- Left Panel - Products & Categories (Full width on mobile/tablet, 70% on desktop) -->
-  <div class="w-full lg:w-[70%] h-full lg:border-r border-gray-200 flex flex-col">
-    <!-- Header & Search -->
-    <div class="p-4 border-b border-outline-variant">
-      <div class="flex items-center gap-3">
-        <div class="flex-1">
-          <app-search 
+<!-- --pos-bottom-nav is 4rem while the POS bottom navigation is showing (phones only) -->
+<div class="flex h-[calc(100vh-64px-var(--pos-bottom-nav,0px))]">
+  <!-- Left Panel - search, categories, products. The cart sits beside it from 1024px up; below that it opens
+       from the "View cart" bar at the bottom of this panel. -->
+  <div class="min-w-0 flex-1 h-full lg:border-r border-outline-variant flex flex-col">
+    <!-- Search + categories share one compact header: one border, not two stacked bars -->
+    <div class="px-3 pt-3 pb-2 border-b border-outline-variant">
+      <div class="flex items-center gap-2">
+        <div class="flex-1 min-w-0 [&_.mat-mdc-form-field-subscript-wrapper]:hidden">
+          <app-search
             #searchComponent
-            [filter]="searchFilter" 
-            (filterChange)="searchProduct($event)" 
+            [filter]="searchFilter"
+            (filterChange)="searchProduct($event)"
             [showRightIcon]="true"
-            (rightTap)="clearSearch()" 
+            (rightTap)="clearSearch()"
             searchText="Search by barcode or product">
           </app-search>
         </div>
-        <div class="hidden lg:flex items-center gap-2 shrink-0">
-          <span class="text-sm text-gray-600 whitespace-nowrap"><ng-container i18n>Barcode Scanner</ng-container></span>
-          <mat-slide-toggle
-            [checked]="storeStore.selectedStore()?.posSettings?.useBarcodeScanner ?? false"
-            (change)="toggleBarcodeScanner($event.checked)"
-            color="primary">
-          </mat-slide-toggle>
-        </div>
+        <!-- A setting, not a per-sale action: an icon toggle instead of a labelled switch that cost ~170px -->
+        <button matIconButton class="!hidden md:!inline-flex shrink-0" type="button"
+          [class.!bg-[var(--mat-sys-secondary-container)]]="storeStore.selectedStore()?.posSettings?.useBarcodeScanner"
+          [attr.aria-pressed]="storeStore.selectedStore()?.posSettings?.useBarcodeScanner ?? false"
+          [matTooltip]="storeStore.selectedStore()?.posSettings?.useBarcodeScanner ? ('Barcode scanner on. Tap to turn off' | tr) : ('Barcode scanner off. Tap to turn on' | tr)"
+          (click)="toggleBarcodeScanner(!(storeStore.selectedStore()?.posSettings?.useBarcodeScanner ?? false))">
+          <mat-icon>barcode_scanner</mat-icon>
+        </button>
       </div>
-    </div>
 
-    <!-- Categories -->
-    <div class="px-4 py-3 border-b border-outline-variant">
-      <div class="flex items-center gap-3 overflow-x-auto scrollbar-hide">
+      <div class="mt-1 flex items-center gap-3 overflow-x-auto scrollbar-hide">
         @if (categoryStore.isLoading()) {
           <mat-spinner diameter="20"></mat-spinner>
         } @else {
           <mat-chip-listbox aria-label="Select a category" i18n-aria-label class="flex-nowrap">
             @for (category of categoryStore.categories(); track category._id) {
-              <mat-chip-option 
+              <mat-chip-option
                 [selected]="categoryStore.selectedCategory()?._id === category._id"
                 [disabled]="category.activate === false"
                 (click)="selectCategory(category)">
-                @if (category.icon) {
-                  <mat-icon matChipAvatar>{{ category.icon }}</mat-icon>
-                }
                 {{ category.name }}
               </mat-chip-option>
             }
@@ -48,8 +44,8 @@
       </div>
     </div>
 
-    <!-- Products Grid -->
-    <div class="flex-1 p-4 overflow-auto pb-20 lg:pb-4">
+    <!-- Products Grid: as many ~150px+ columns as fit, instead of a fixed count per breakpoint -->
+    <div class="flex-1 p-3 overflow-auto">
       @if (productStore.isLoading()) {
         <div class="flex justify-center items-center h-full">
           <mat-spinner diameter="40"></mat-spinner>
@@ -61,9 +57,11 @@
           <p class="text-sm"><ng-container i18n>Select a category or search for products</ng-container></p>
         </div>
       } @else {
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 lg:gap-4">
-          @for (product of productStore.filteredProducts(); track product._id) {
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(9.5rem,1fr))] gap-3">
+          @for (product of productStore.filteredProducts(); track product._id; let i = $index) {
             <app-product-card
+              class="pos-card-enter"
+              [style.--i]="i"
               [product]="product"
               [cartQuantity]="getCartQuantity(product._id!)"
               (addToCart)="addToCart({ product: $event, isEditing: false })"
@@ -75,32 +73,36 @@
         </div>
       }
     </div>
+
+    <!-- Sticky cart bar (below 1024px). Unlike a floating button it never covers a product, and it keeps the
+         running total in view. -->
+    @if (cartCount() > 0) {
+      <div class="lg:hidden shrink-0 p-2 border-t border-outline-variant">
+        <button type="button" (click)="openCartModal()"
+          class="flex h-12 w-full items-center gap-3 rounded-full px-5 text-base font-medium bg-[var(--mat-sys-primary)] text-[var(--mat-sys-on-primary)] active:opacity-90">
+          <mat-icon>shopping_cart</mat-icon>
+          @if (cartCount() === 1) {
+            <span class="flex-1 text-left"><ng-container i18n>View cart · 1 item</ng-container></span>
+          } @else {
+            <span class="flex-1 text-left"><ng-container i18n>View cart · {{ cartCount() }} items</ng-container></span>
+          }
+          <span class="font-semibold tabular-nums">{{ cartTotal() | currency: currency() : 'symbol' : '1.0-0' }}</span>
+        </button>
+      </div>
+    }
   </div>
 
-    <!-- Right Panel - Cart & Checkout (Hidden on mobile/tablet, 30% on desktop) -->
-    <div class="hidden lg:block lg:w-[30%] h-full">
-      <app-cart
-        [items]="cartItems()"
-        [taxRate]="taxRate()"
-        (increment)="incrementQuantity($event)"
-        (decrement)="decrementQuantity($event)"
-        (removeItem)="removeFromCart($event)"
-        (clearCart)="clearCart()"
-        (addToCart)="addToCart({ product: $event, isEditing: false })"
-        (checkout)="checkout()">
-      </app-cart>
-    </div>
+  <!-- Right Panel - the cart: fixed width from 1024px, so a wide screen gives the extra room to the products -->
+  <div class="hidden lg:block lg:w-[21rem] xl:w-[25rem] shrink-0 h-full">
+    <app-cart
+      [items]="cartItems()"
+      [taxRate]="taxRate()"
+      (increment)="incrementQuantity($event)"
+      (decrement)="decrementQuantity($event)"
+      (removeItem)="removeFromCart($event)"
+      (clearCart)="clearCart()"
+      (addToCart)="addToCart({ product: $event, isEditing: false })"
+      (checkout)="checkout()">
+    </app-cart>
+  </div>
 </div>
-
-<!-- Floating Cart Button (Mobile & Tablet) -->
-<button 
-  mat-fab
-  color="primary"
-  class="!fixed !bottom-[88px] !right-4 !z-[60] lg:!hidden"
-  [matBadge]="cartStore.selectedCart()?.products?.length || 0"
-  [matBadgeHidden]="!cartStore.selectedCart()?.products?.length"
-  matBadgeColor="warn"
-  matBadgeSize="large"
-  (click)="openCartModal()">
-  <mat-icon>shopping_cart</mat-icon>
-</button>

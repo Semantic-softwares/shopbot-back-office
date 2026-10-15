@@ -182,6 +182,28 @@ export const ProductsStore = signalStore(
         )
       );
 
+      /**
+       * Re-fetches the store's products WITHOUT clearing the list or showing the spinner, so the POS
+       * picks up changes made elsewhere (ERP price edits, another device) without a visible reload.
+       * A failed refresh leaves the current list in place.
+       */
+      const refreshStoreProducts = rxMethod<string>(
+        pipe(
+          switchMap((storeId) =>
+            productService.getStoreProducts(storeId).pipe(
+              tapResponse({
+                next(response) {
+                  patchState(store, { products: response });
+                },
+                error(error) {
+                  console.warn('Could not refresh products', error);
+                },
+              })
+            )
+          )
+        )
+      );
+
       function updateProduct(
         productId: string,
         updatedProduct: Partial<Product>
@@ -338,6 +360,7 @@ export const ProductsStore = signalStore(
       return {
         updateProduct,
         getStoreProducts,
+        refreshStoreProducts,
         deleteProducts$,
       };
     }

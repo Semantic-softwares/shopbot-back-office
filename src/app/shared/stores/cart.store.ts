@@ -9,7 +9,8 @@ import {
 import { computed } from '@angular/core';
 import { Cart, CartSummary } from '../models/cart.model';
 import { Product } from '../models/product.model';
-import { Discount, PaymentMethod } from '../models';
+import { Discount, PaymentMethod, User } from '../models';
+import { Guest } from '../models/reservation.model';
 import { objectId } from '../constants/identity.constant';
 
 
@@ -18,7 +19,10 @@ type CartState = {
   selectedCart: Cart | null;
   quantity: number;
   isLoading: boolean;
-  pendingCarts: Cart[];
+  // Who the sale is for. Kept here (not in the cart component) so it survives the component being
+  // recreated (mobile bottom sheet reopening, or a held sale being restored).
+  customer: User | null;
+  guest: Guest | null;
   cartChangeType: 'add' | 'edit' | 'delete' | null;
 };
 
@@ -27,7 +31,8 @@ const initialState: CartState = {
   selectedCart: null,
   quantity: 1,
   isLoading: false,
-  pendingCarts: [],
+  customer: null,
+  guest: null,
   cartChangeType: null,
 };
 
@@ -36,12 +41,10 @@ export const CartStore = signalStore(
 
   withState(initialState),
 
-  withComputed(({ carts, selectedCart, pendingCarts }) => ({
+  withComputed(({ carts, selectedCart }) => ({
     cartCount: computed(() => carts().length),
 
     activeCarts: computed(() => carts().filter((cart) => cart.active)),
-
-    pendingCartsCount: computed(() => pendingCarts().length),
 
     selectedCartProducts: computed(() => {
       return selectedCart() ? selectedCart()!.products : [];
@@ -102,59 +105,35 @@ export const CartStore = signalStore(
       });
     },
 
-    addSelectedCartToPending(): void {
-      const selectedCart = store.selectedCart();
-
-      if (selectedCart) {
-        patchState(store, (state) => {
-          // Update the carts array to remove the selected cart
-          const updatedCarts = state.carts.filter(
-            (cart) => cart._id !== selectedCart._id
-          );
-
-          // Add the selected cart to pending carts
-          const updatedPendingCarts = [...state.pendingCarts, selectedCart];
-
-          return {
-            carts: updatedCarts,
-            pendingCarts: updatedPendingCarts,
-            selectedCart: null, // Clear the selected cart
-          };
-        });
-
-        // Create a new cart
-        // this.createCart();
-      }
-    },
-
-    deleteFromPendingCarts(cartId: string): void {
-      const pendingCarts = store.pendingCarts();
-      // Filter only the cart with the matching ID
-      const updatedCarts = pendingCarts.filter((cart) => cart._id !== cartId);
-      // Update the state with the remaining carts
-      patchState(store, {
-        pendingCarts: updatedCarts,
-      });
-    },
-
-    restorePendingCart(cart: Cart): void {
-      patchState(store, (state) => {
-        const cartExists = state.carts.some(
-          (existingCart) => existingCart._id === cart._id
-        );
-        return {
-          // Add the restored cart to carts if it's not already there
-          carts: cartExists ? state.carts : [...state.carts, cart],
-          // Update the selectedCart to the restored cart
-          selectedCart: cart,
-        };
-      });
+    /** Puts a (previously held) cart back as the active sale. */
+    restoreCart(cart: Cart): void {
+      patchState(store, (state) => ({
+        // Replace any stale copy of the same cart rather than keeping two.
+        carts: [...state.carts.filter((existing) => existing._id !== cart._id), cart],
+        selectedCart: cart,
+      }));
     },
 
     removeSelectedCart(): void {
       patchState(store, {
         selectedCart: null,
       });
+    },
+
+    /** Drops the active cart everywhere (selection AND the carts list); used when a sale is put on hold. */
+    releaseSelectedCart(): void {
+      patchState(store, (state) => ({
+        carts: state.carts.filter((cart) => cart._id !== state.selectedCart?._id),
+        selectedCart: null,
+      }));
+    },
+
+    setCustomer(customer: User | null): void {
+      patchState(store, { customer });
+    },
+
+    setGuest(guest: Guest | null): void {
+      patchState(store, { guest });
     },
 
     updateCartAction(action: 'add' | 'delete' | 'edit' | null): void {

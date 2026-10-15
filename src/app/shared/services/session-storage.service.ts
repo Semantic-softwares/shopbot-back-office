@@ -25,8 +25,15 @@ export class SessionStorageService {
         localStorage.removeItem(this.CURRENT_USER_KEY);
     }
 
+    // Device preferences (theme, language) are not part of the session and must survive a logout.
+    private readonly PRESERVED_KEYS = ['shopbot.theme', 'shopbot.lang'];
+
     clearAll(): void {
+        const preserved = this.PRESERVED_KEYS
+            .map((key) => [key, localStorage.getItem(key)] as const)
+            .filter(([, value]) => value !== null);
         localStorage.clear();
+        preserved.forEach(([key, value]) => localStorage.setItem(key, value!));
     }
 
     setAuthToken(token: string): void {

@@ -4,7 +4,7 @@
 //
 // Sources of translatable text:
 //   1. `ng extract-i18n`  — i18n attributes in templates and $localize`…` in TypeScript
-//   2. ('literal' | tr)   — strings inside template expressions, which the extractor cannot see
+//   2. 'literal' | tr     — strings inside template expressions, which the extractor cannot see
 // Both are matched to src/assets/i18n/app/<lang>.json by Angular message id.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -23,7 +23,7 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'i18n-'));
 execFileSync('npx', ['ng', 'extract-i18n', '--format', 'json', '--output-path', tmp], { cwd: root, stdio: 'ignore' });
 const messages = new Map(Object.entries(JSON.parse(fs.readFileSync(path.join(tmp, 'messages.json'), 'utf8')).translations));
 
-// 2. `tr` pipe literals
+// 2. `tr` pipe literals — 'text' | tr
 const walk = (dir, out = []) => {
   for (const f of fs.readdirSync(dir)) {
     const p = path.join(dir, f);
@@ -34,7 +34,7 @@ const walk = (dir, out = []) => {
 };
 for (const file of walk(path.join(root, 'src/app'))) {
   const text = fs.readFileSync(file, 'utf8');
-  for (const m of text.matchAll(/\(\s*'((?:[^'\\]|\\.)*)'\s*\|\s*tr\s*\)/g)) messages.set(computeMsgId(m[1], ''), m[1]);
+  for (const m of text.matchAll(/'((?:[^'\\]|\\.)*)'\s*\|\s*tr\b/g)) messages.set(computeMsgId(m[1], ''), m[1]);
 }
 
 // Text that is not prose (symbols, numbers, acronyms, emails, URLs) is intentionally left alone.

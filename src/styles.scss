@@ -49,3 +49,10 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   z-index: 10000 !important;
 }
 
+
+// POS cart bottom sheet (mobile): the cart supplies its own spacing, so drop Material's 8px 16px
+// container padding and let it use more of the screen height.
+.mat-bottom-sheet-container.cart-bottom-sheet {
+  padding: 0;
+  max-height: 94dvh;
+}

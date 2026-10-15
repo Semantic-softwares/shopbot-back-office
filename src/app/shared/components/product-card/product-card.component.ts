@@ -9,6 +9,7 @@ import { Product, Option } from '../../models';
 import { StoreStore } from '../../stores/store.store';
 import { CartStore } from '../../stores/cart.store';
 import { VariantStore } from '../../stores/variant.store';
+import { TrPipe } from '../../i18n/tr.pipe';
 import { ProductOptionsComponent, ProductOptionsDialogData, ProductOptionsDialogResult } from '../product-options/product-options.component';
 
 @Component({
@@ -20,6 +21,7 @@ import { ProductOptionsComponent, ProductOptionsDialogData, ProductOptionsDialog
     MatCardModule,
     MatButtonModule,
     MatIconModule,
+    TrPipe,
   ],
   templateUrl: './product-card.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -77,6 +79,16 @@ export class ProductCardComponent {
     const prod = this.product();
     return prod.active && prod.qty !== undefined && prod.qty <= 5;
   });
+
+  /** Tap anywhere on the card: same action as its primary button. Out-of-stock cards ignore taps. */
+  onCardTap(): void {
+    if (this.isOutOfStock()) return;
+    if (this.hasOptions()) {
+      this.openProductOptionsDialog();
+    } else {
+      this.addToCart.emit(this.product());
+    }
+  }
 
   onAddToCart(event: Event): void {
     console.log('Add to cart clicked for product:', this.product());

@@ -71,6 +71,8 @@ import { objectId, generateReference } from '../../constants/identity.constant';
 import { CartSummary } from '../../../shared/models/cart.model';
 import { AuthService } from '../../services/auth.service';
 import { OrderStore } from '../../stores/order.store';
+import { PendingSalesService } from '../../services/pending-sales.service';
+import { TrPipe } from '../../i18n/tr.pipe';
 import { MatDividerModule } from "@angular/material/divider";
 
 export interface CartItem {
@@ -83,6 +85,7 @@ export interface CartItem {
   selector: 'app-cart',
   standalone: true,
   imports: [
+    TrPipe,
     CommonModule,
     CurrencyPipe,
     MatCardModule,
@@ -111,11 +114,14 @@ export class CartComponent implements OnDestroy {
   @Optional() private readonly bottomSheetRef = inject(MatBottomSheetRef<CartComponent>, { optional: true });
   private readonly snackBar = inject(MatSnackBar);
   private readonly orderStore = inject(OrderStore);
+  private readonly pendingSales = inject(PendingSalesService);
   private selectedUser = this.accountService.currentUserValue;
   public cartSummary = signal<CartSummary | null>(null);
   // Selected buyer state
-  selectedGuest = signal<Guest | null>(null);
-  selectedCustomer = signal<User | null>(null);
+  // The buyer lives in CartStore (not here) so it survives this component being recreated and can be
+  // snapshotted/restored with a pending sale.
+  selectedGuest = this.cartStore.guest;
+  selectedCustomer = this.cartStore.customer;
 
   // Computed for button display
   selectedBuyerName = computed(() => {
@@ -174,6 +180,9 @@ export class CartComponent implements OnDestroy {
       .selectedCart()
       ?.products.reduce((sum, item) => sum + item.quantity, 0)
   );
+
+  /** True when the cart is shown in the bottom sheet (phones and small tablets) rather than the side panel. */
+  readonly isInSheet = !!this.bottomSheetRef;
 
   isMobile = toSignal(
     this.breakpointObserver.observe([Breakpoints.XSmall, Breakpoints.Small]).pipe(
@@ -303,8 +312,8 @@ export class CartComponent implements OnDestroy {
     this.cartStore.removeSelectedCart();
     this.saleTypeStore.setDefaultSaleType();
     this.tableStore.clearSelectedTable();
-    this.selectedCustomer.set(null);
-    this.selectedGuest.set(null);
+    this.cartStore.setCustomer(null);
+    this.cartStore.setGuest(null);
     this.clearCart.emit();
     this.cartSummary.set(null);
   }
@@ -337,6 +346,12 @@ export class CartComponent implements OnDestroy {
     const isMobile = this.breakpointObserver.isMatched([Breakpoints.XSmall, Breakpoints.Small]);
     
     if (!isMobile && !this.bottomSheetRef) {
+      // Leaving the checkout used to throw the sale away. Now that sales can be held, keep it instead
+      // (nothing happens if the cart is empty, being edited, or we're logging out).
+      const held = this.pendingSales.hold(this.cartSummary());
+      if (held) {
+        this.snackBar.open($localize`Sale set aside. Find it under Pending.`, $localize`Close`, { duration: 3000 });
+      }
       this.resetSalesSection();
     }
   }
@@ -415,8 +430,8 @@ export class CartComponent implements OnDestroy {
         if (result) {
           if (result.action === 'select' && result.customer) {
             // Clear guest if customer is selected
-            this.selectedGuest.set(null);
-            this.selectedCustomer.set(result.customer);
+            this.cartStore.setGuest(null);
+            this.cartStore.setCustomer(result.customer);
 
             // Update cart with customer ID
             const selectedCart = this.cartStore.selectedCart();
@@ -439,7 +454,7 @@ export class CartComponent implements OnDestroy {
               }
             );
           } else if (result.action === 'remove') {
-            this.selectedCustomer.set(null);
+            this.cartStore.setCustomer(null);
 
             // Clear user from cart
             const selectedCart = this.cartStore.selectedCart();
@@ -474,8 +489,8 @@ export class CartComponent implements OnDestroy {
         if (result) {
           if (result.action === 'select' && result.guest) {
             // Clear customer if guest is selected
-            this.selectedCustomer.set(null);
-            this.selectedGuest.set(result.guest);
+            this.cartStore.setCustomer(null);
+            this.cartStore.setGuest(result.guest);
             this.snackBar.open(
               $localize`Guest "${this.guestService.getGuestName(
                 result.guest
@@ -488,7 +503,7 @@ export class CartComponent implements OnDestroy {
               }
             );
           } else if (result.action === 'remove') {
-            this.selectedGuest.set(null);
+            this.cartStore.setGuest(null);
             this.snackBar.open($localize`Guest removed`, $localize`Close`, {
               duration: 3000,
               horizontalPosition: 'center',
@@ -512,8 +527,8 @@ export class CartComponent implements OnDestroy {
 
   // Clear all buyer selections
   clearBuyerSelection(): void {
-    this.selectedGuest.set(null);
-    this.selectedCustomer.set(null);
+    this.cartStore.setGuest(null);
+    this.cartStore.setCustomer(null);
   }
 
   // Discount action
@@ -604,19 +619,24 @@ export class CartComponent implements OnDestroy {
     console.log('Generate bill');
   }
 
-  // Pend order action
-  public onPendOrder(): void {
-    const selectedCart = this.cartStore.selectedCart();
-    if (selectedCart) {
-      this.cartStore.addSelectedCartToPending();
-      this.cartStore.removeSelectedCart();
+  /** Whether the "Pending" button is usable: there is a real new sale on screen. */
+  public canHold = computed(() => !this.isEmpty() && !this.saleTypeStore.isEditing());
 
-      this.snackBar.open($localize`Order pending`, $localize`Close`, {
-        duration: 3000,
-        horizontalPosition: 'center',
-        verticalPosition: 'bottom',
-      });
-    }
+  /** Sets the sale aside so the cashier can serve someone else; it appears under Pending in the sidebar. */
+  public onPendSale(): void {
+    const held = this.pendingSales.hold(this.cartSummary());
+    if (!held) return;
+
+    this.snackBar.open($localize`Sale set aside. Find it under Pending.`, $localize`Close`, {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+    });
+    // hold() already cleared the cart/table/buyer; this clears what only this component owns.
+    this.cartSummary.set(null);
+    this.clearCart.emit();
+    // On mobile the cart is a bottom sheet — close it so the cashier is back at the products.
+    this.bottomSheetRef?.dismiss();
   }
 
   public cartSummaryChange(summary: CartSummary): void {

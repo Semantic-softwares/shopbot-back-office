@@ -122,6 +122,34 @@ export const CategoryStore = signalStore(
         )
       );
 
+      /**
+       * Re-fetches the store's categories WITHOUT clearing the list, showing the spinner or resetting
+       * the cashier's selection, so the POS picks up categories renamed/added/removed elsewhere (ERP).
+       * The selected category is kept (refreshed to the latest copy); only if it no longer exists does
+       * the selection fall back to the first one. A failed refresh leaves the current list in place.
+       */
+      const refreshCategories$ = rxMethod<string>(
+        pipe(
+          switchMap((storeId) =>
+            categoryService.getStoreMenus(storeId).pipe(
+              tapResponse({
+                next(response) {
+                  const selectedId = store.selectedCategory()?._id;
+                  const stillThere = response.find((category) => category._id === selectedId);
+                  patchState(store, {
+                    categories: response,
+                    selectedCategory: stillThere ?? response[0] ?? null,
+                  });
+                },
+                error(error) {
+                  console.warn('Could not refresh categories', error);
+                },
+              })
+            )
+          )
+        )
+      );
+
       const createCategory$ = rxMethod<Partial<Category>>(
         pipe(
           tap(() =>
@@ -220,6 +248,7 @@ export const CategoryStore = signalStore(
         selectCategory,
         createCategory$,
         getCategories$,
+        refreshCategories$,
         deleteCategory$,
         updateCategory$
       };

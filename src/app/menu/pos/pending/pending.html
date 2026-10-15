@@ -1,0 +1,75 @@
+<div class="h-full overflow-y-auto p-4 md:p-6">
+  <div class="mb-4">
+    <h1 class="text-2xl font-semibold"><ng-container i18n>Pending sales</ng-container></h1>
+    <p class="text-sm text-gray-500">
+      <ng-container i18n>Sales set aside while you serve someone else. Restore one to carry on where you left off.</ng-container>
+    </p>
+  </div>
+
+  @if (store.forCurrentStore().length === 0) {
+    <app-no-record
+      icon="pause_circle"
+      [title]="'No pending sales' | tr"
+      [message]="'Use the Pending button at checkout to set a sale aside while you serve someone else.' | tr" />
+  } @else {
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+      @for (sale of store.forCurrentStore(); track sale.id) {
+        <mat-card appearance="outlined" class="flex flex-col">
+          <mat-card-content class="flex flex-1 flex-col gap-3 !p-4">
+            <!-- When, where, who -->
+            <div class="flex flex-wrap items-center gap-2 text-xs text-gray-600">
+              <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1">
+                <mat-icon class="!h-4 !w-4 !text-[16px]">schedule</mat-icon>{{ age(sale) }}
+              </span>
+              @if (sale.table) {
+                <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-blue-700">
+                  <mat-icon class="!h-4 !w-4 !text-[16px]">table_restaurant</mat-icon>{{ sale.table.name }}
+                </span>
+              }
+              @if (buyerName(sale); as buyer) {
+                <span class="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-green-700">
+                  <mat-icon class="!h-4 !w-4 !text-[16px]">person</mat-icon>{{ buyer }}
+                </span>
+              }
+            </div>
+
+            <!-- What's in it -->
+            <ul class="m-0 flex-1 list-none space-y-1 p-0 text-sm">
+              @for (line of preview(sale); track line._id) {
+                <li class="flex gap-2">
+                  <span class="w-8 shrink-0 font-medium text-gray-500">{{ line.quantity }}×</span>
+                  <span class="truncate">{{ line.name }}</span>
+                </li>
+              }
+              @if (hiddenLines(sale) > 0) {
+                <li class="text-gray-500"><ng-container i18n>+{{ hiddenLines(sale) }} more</ng-container></li>
+              }
+            </ul>
+
+            @if (sale.cart.note) {
+              <p class="m-0 line-clamp-2 text-xs italic text-gray-500">“{{ sale.cart.note }}”</p>
+            }
+
+            <!-- Total + actions -->
+            <div class="flex items-center justify-between border-t border-outline-variant pt-3">
+              <div>
+                <div class="text-xs text-gray-500"><ng-container i18n>{{ sale.itemCount }} items</ng-container></div>
+                <div class="text-lg font-bold">{{ sale.total | currency: currency() : 'symbol' : '1.0-0' }}</div>
+              </div>
+              <div class="flex items-center gap-1">
+                <button mat-icon-button color="warn" [matTooltip]="'Delete' | tr" [attr.aria-label]="'Delete' | tr"
+                  (click)="remove(sale)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+                <button matButton="filled" color="primary" (click)="restore(sale)">
+                  <mat-icon>play_circle</mat-icon>
+                  <ng-container i18n>Restore</ng-container>
+                </button>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

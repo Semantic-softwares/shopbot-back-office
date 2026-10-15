@@ -41,8 +41,8 @@
             </button>
             }
 
-            <!-- Close Button (Mobile only) -->
-            @if (isMobile()) {
+            <!-- Close Button (bottom sheet only; the sheet can't be dismissed by tapping outside) -->
+            @if (isInSheet) {
             <button matIconButton (click)="closeCart()" title="Close cart" i18n-title>
                 <mat-icon>close</mat-icon>
             </button>
@@ -54,8 +54,15 @@
     <!-- Cart Items -->
     <div class="flex-1 overflow-auto p-2">
         @if (!isEmpty()) {
-        <!-- Clear Cart Button -->
-        <div class="mb-3 flex justify-end">
+        <!-- Item count (left) and Clear Cart (right) share a row -->
+        <div class="mb-2 flex items-center justify-between">
+            <span class="text-sm text-on-surface-variant">
+                @if (itemsCount() === 1) {
+                <ng-container i18n>1 item</ng-container>
+                } @else {
+                <ng-container i18n>{{ itemsCount() }} items</ng-container>
+                }
+            </span>
             <button mat-button color="warn" (click)="cancelSales()">
                 <mat-icon>delete_outline</mat-icon>
                 <span><ng-container i18n>Clear Cart</ng-container></span>
@@ -64,10 +71,10 @@
         }
         <div class="space-y-3">
             @for (product of cartStore.selectedCart()?.products; track $index) {
-            <mat-card appearance="outlined" class="p-3">
+            <mat-card appearance="outlined" class="p-2.5 sm:p-3">
                 <div class="flex gap-3">
                     <!-- Item Image -->
-                    <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                         @if (product.photos && product.photos.length > 0) {
                         <img [src]="product.photos[0]" [alt]="product.name" class="w-full h-full object-cover">
                         } @else {
@@ -77,43 +84,46 @@
                         }
                     </div>
 
-                    <!-- Item Details -->
                     <div class="flex-1 min-w-0">
-                        <h4 class="font-medium text-sm truncate">{{ product.name }}</h4>
-                        <p class="primary-text font-semibold text-sm mt-0.5">
+                        <!-- Name + line total: the money sits with the name, away from the +/- controls -->
+                        <div class="flex items-baseline justify-between gap-2">
+                            <h4 class="font-medium text-sm truncate">{{ product.name }}</h4>
+                            <span class="font-semibold text-sm tabular-nums shrink-0">
+                                {{ getProductTotal(product) | currency: currency() : 'symbol' : '1.0-0' }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-0.5">
                             {{ product.price | currency: currency() : 'symbol' : '1.0-0' }}
+                            <ng-container i18n>each</ng-container>
                         </p>
 
                         <!-- Selected Options -->
                         @if (getOptionsDisplay(product).length > 0) {
-                        <p class="text-xs text-gray-500 mt-1 truncate">
+                        <p class="text-xs text-gray-500 mt-0.5 truncate">
                             {{ getOptionsDisplay(product).join(', ') }}
                         </p>
                         }
 
-                        <!-- Quantity Controls -->
+                        <!-- Quantity stepper (left) and remove (right) -->
                         <!-- [disabled]="product.qty !== undefined && product.quantity >= product.qty" -->
-                        <div class="flex items-center justify-between mt-2">
-                            <div class="flex items-center gap-2">
-                                <button mat-mini-fab color="warn" (click)="removeOrDeleteProduct(product)">
+                        <div class="flex items-center justify-between mt-1.5">
+                            <div class="flex items-center rounded-full border border-outline-variant">
+                                <button matIconButton color="warn" class="!w-9 !h-9" (click)="removeOrDeleteProduct(product)"
+                                    [attr.aria-label]="'Decrease quantity' | tr">
                                     <mat-icon>remove</mat-icon>
                                 </button>
-                                <span class="w-8 text-center font-semibold text-lg">{{ product.quantity }}</span>
-                                <button mat-mini-fab color="primary" (click)="onAddToCart($event, product)">
+                                <span class="min-w-7 text-center font-semibold tabular-nums">{{ product.quantity }}</span>
+                                <button matIconButton color="primary" class="!w-9 !h-9" (click)="onAddToCart($event, product)"
+                                    [attr.aria-label]="'Increase quantity' | tr">
                                     <mat-icon>add</mat-icon>
                                 </button>
                             </div>
-                            <span class="font-semibold">
-                                {{ getProductTotal(product) | currency: currency() : 'symbol' : '1.0-0' }}
-                            </span>
+                            <button matIconButton color="warn" class="!w-9 !h-9" (click)="onRemoveItem(product._id!)"
+                                [attr.aria-label]="'Remove item' | tr">
+                                <mat-icon>delete_outline</mat-icon>
+                            </button>
                         </div>
                     </div>
-
-                    <!-- Remove Button -->
-                    <button mat-icon-button color="warn" class="!w-8 !h-8 self-start"
-                        (click)="onRemoveItem(product._id!)">
-                        <mat-icon class="!text-lg">close</mat-icon>
-                    </button>
                 </div>
             </mat-card>
             } @empty {
@@ -147,26 +157,18 @@
             </button>
         </div>
 
-        <!-- Main Checkout Button -->
-        <div class="p-3">
-            <button matButton="filled" color="primary" class="w-full !h-12 !text-base" (click)="onCheckout()">
-                <ng-container i18n>Checkout {{ itemsCount() }} items ({{ (this.cartSummary()?.totalCost || 0 )| currency:
-                currency() : 'symbol' : '1.0-0' }})</ng-container>
+        <!-- Pending (icon only) and Checkout share a row; Checkout takes the rest -->
+        <div class="flex items-center gap-2 p-3">
+            <button matButton="outlined" class="!h-12 !w-12 !min-w-12 !shrink-0 !px-0" [disabled]="!canHold()"
+                [attr.aria-label]="'Set this sale aside as pending' | tr"
+                [matTooltip]="'Set this sale aside as pending' | tr" (click)="onPendSale()">
+                <mat-icon class="!m-0">pause_circle</mat-icon>
+            </button>
+            <button matButton="filled" color="primary" class="!flex-1 !h-12 !text-base !whitespace-nowrap"
+                [disabled]="isEmpty()" (click)="onCheckout()">
+                <ng-container i18n>Checkout · {{ (this.cartSummary()?.totalCost || 0 ) | currency: currency() : 'symbol' : '1.0-0' }}</ng-container>
             </button>
         </div>
 
-        <!-- Generate Bill & Pend Order Row (Hidden for now) -->
-        <!-- <div class="flex items-center gap-2 px-3 pb-3">
-            <button mat-stroked-button class="!flex-1" [disabled]="true" (click)="onGenerateBill()">
-                <mat-icon>receipt</mat-icon>
-                <span class="ml-1">Generate Bill</span>
-            </button>
-            <button mat-stroked-button color="warn" 
-                [disabled]="!cartStore.isSelectedCart() && cartStore.selectedCart()?.products!.length < 1"
-                class="!flex-1" (click)="onPendOrder()">
-                <mat-icon>pause_circle</mat-icon>
-                <span class="ml-1">Pend Order</span>
-            </button>
-        </div> -->
     </div>
 </div>

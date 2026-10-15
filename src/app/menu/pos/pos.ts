@@ -5,15 +5,17 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatBadgeModule } from '@angular/material/badge';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { map } from 'rxjs/operators';
 import { Store } from '../../shared/models';
 import { AuthService } from '../../shared/services/auth.service';
 import { RolesService } from '../../shared/services/roles.service';
 import { StoreStore } from '../../shared/stores/store.store';
 import { TrPipe } from '../../shared/i18n/tr.pipe';
+import { PendingSalesStore } from '../../shared/stores/pending-sales.store';
 
 @Component({
   selector: 'app-pos',
@@ -25,6 +27,7 @@ import { TrPipe } from '../../shared/i18n/tr.pipe';
     MatIconModule,
     MatMenuModule,
     MatExpansionModule,
+    MatBadgeModule,
   ],
   templateUrl: './pos.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -37,9 +40,11 @@ export class Pos {
   private breakpointObserver = inject(BreakpointObserver);
   public storeStore = inject(StoreStore);
   public rolesService = inject(RolesService);
+  private pendingSales = inject(PendingSalesStore);
 
+  /** Phones only (under 768px) get the bottom navigation; tablets and up keep the side rail like desktop. */
   public isMobile = toSignal(
-    this.breakpointObserver.observe([Breakpoints.Handset, Breakpoints.Small, Breakpoints.Medium, Breakpoints.Tablet]).pipe(
+    this.breakpointObserver.observe('(max-width: 767.98px)').pipe(
       map(result => result.matches)
     ),
     { initialValue: false }
@@ -53,7 +58,7 @@ export class Pos {
     initialValue: null,
   });
 
-  private navItemsConfig = [
+  private navItemsConfig: { icon: string; label: string; link: string; badge?: boolean }[] = [
     {
       icon: 'point_of_sale',
       label: $localize`Checkout`,
@@ -69,7 +74,16 @@ export class Pos {
       label: $localize`Orders`,
       link: './orders',
     },
+    {
+      icon: 'pause_circle',
+      label: $localize`Pending`,
+      link: './pending',
+      badge: true,
+    },
   ];
+
+  /** Number of sales set aside, shown as a badge on the Pending item. */
+  public pendingCount = this.pendingSales.count;
 
   // Nav items for the sidebar
   public navItems = computed(() => this.navItemsConfig);
