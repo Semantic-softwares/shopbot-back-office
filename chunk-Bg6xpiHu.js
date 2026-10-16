@@ -1,1 +1,0 @@
-import{c as z}from"./chunk-RykAvsdd.js";var n;z(()=>{n=[{path:``,loadComponent:()=>import(`./chunk-CELPwwon.js`).then(t=>t.ReceiptsComponent),children:[{path:``,loadComponent:()=>import(`./chunk-CtOwm1ct.js`).then(t=>t.ReceiptListComponent)},{path:`:id`,loadComponent:()=>import(`./chunk-Cbq4UmIr.js`).then(t=>t.ReceiptDetailComponent)}]}]})();export{n as RECEIPTS_ROUTES};

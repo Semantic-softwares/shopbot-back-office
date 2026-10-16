@@ -1,1 +1,0 @@
-import{c as z}from"./chunk-RykAvsdd.js";var e;z(()=>{e=[{path:``,loadComponent:()=>import(`./chunk-CeW_zyLJ.js`).then(t=>t.PaymentsComponent),children:[{path:``,loadComponent:()=>import(`./chunk-Dy9kNbCU.js`).then(t=>t.PaymentListComponent)},{path:`:id`,loadComponent:()=>import(`./chunk-DBuAi7V6.js`).then(t=>t.PaymentDetailComponent)}]}]})();export{e as PAYMENTS_ROUTES};

@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";function m(e){return n.find(o=>o.id===e)??n[0]}var n;var t=z(()=>{"use strict";n=[{id:`classic`,loadComponent:()=>import(`./chunk-Duf-F7fJ.js`).then(e=>e.ClassicThemeComponent)},{id:`modern`,loadComponent:()=>import(`./chunk-CwoIkVbS.js`).then(e=>e.ModernThemeComponent)}]});export{n,t as r,m as t};
