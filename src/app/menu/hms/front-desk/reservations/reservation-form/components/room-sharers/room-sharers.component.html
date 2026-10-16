@@ -1,121 +1,106 @@
-<!-- Room Sharers Card - Only for Single Reservation -->
+<!-- Room & guests card - single reservation -->
 <mat-card appearance="outlined" [formGroup]="reservationForm()!">
-  <mat-card-header>
-    <div class="flex justify-between items-center w-full">
-      <div>
-        <mat-card-title>
-          <ng-container i18n>Room Sharers</ng-container>
-        </mat-card-title>
-        <mat-card-subtitle>
-          <!-- Room Type / Room / Rate Plan selectors -->
-          <div class="flex items-center gap-3 mt-2 flex-wrap">
-            <!-- Room Type Dropdown -->
-            <mat-form-field appearance="outline" class="min-w-[180px] w-[180px]" subscriptSizing="dynamic">
-              <mat-label><ng-container i18n>Room Type</ng-container></mat-label>
-              <mat-select [value]="selectedRoomTypeId()" (selectionChange)="onRoomTypeChange($event.value)"
-                [disabled]="isEditing()">
-                <mat-option value=""><ng-container i18n>-- Select --</ng-container></mat-option>
-                @for (rt of roomTypesResource.value() || []; track rt._id) {
-                  <mat-option [value]="rt._id">{{ rt.name }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-
-            <!-- Room Dropdown -->
-            <mat-form-field appearance="outline" class="min-w-[180px] w-[180px]" subscriptSizing="dynamic">
-              <mat-label><ng-container i18n>Room</ng-container></mat-label>
-              <mat-select [value]="selectedRoomId()" (selectionChange)="onRoomChange($event.value)"
-                [disabled]="isEditing() || !selectedRoomTypeId()">
-                <mat-option value=""><ng-container i18n>-- Select --</ng-container></mat-option>
-                @for (room of filteredRooms(); track room._id) {
-                  <mat-option [value]="room._id">
-                    {{ room.name || room.roomNumber }}
-                    @if (room.priceOverride) {
-                      <span class="text-xs text-gray-500 ml-1">({{ room.priceOverride | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }})</span>
-                    }
-                  </mat-option>
-                }
-              </mat-select>
-              @if (!selectedRoomTypeId()) {
-                <mat-hint><ng-container i18n>Select a room type first</ng-container></mat-hint>
-              }
-            </mat-form-field>
-
-            <!-- Rate Plan Dropdown -->
-            <mat-form-field appearance="outline" class="min-w-[180px] w-[180px]" subscriptSizing="dynamic">
-              <mat-label><ng-container i18n>Rate Plan</ng-container></mat-label>
-              <mat-select [value]="selectedRatePlanId()" (selectionChange)="onRatePlanChangeHeader($event.value)"
-                [disabled]="isEditing() || !selectedRoomTypeId()">
-                <mat-option value=""><ng-container i18n>-- Default --</ng-container></mat-option>
-                @if (loadingRatePlans()) {
-                  <mat-option disabled><ng-container i18n>Loading...</ng-container></mat-option>
-                } @else {
-                  @for (plan of ratePlans(); track plan._id) {
-                    <mat-option [value]="plan._id">
-                      {{ plan.name }}
-                      @if (plan.isDefault) { <span class="text-xs text-gray-400 ml-1"><ng-container i18n>(default)</ng-container></span> }
-                    </mat-option>
-                  }
-                }
-              </mat-select>
-              @if (!selectedRoomTypeId()) {
-                <mat-hint><ng-container i18n>Select a room type first</ng-container></mat-hint>
-              }
-            </mat-form-field>
-          </div>
-        </mat-card-subtitle>
-      </div>
-      <!-- actions  -->
-      <div class="flex gap-2">
-        <a matButton color="accent" [disabled]="roomsResource.isLoading()" (click)="onEditRoomPricing()">
-          <mat-icon class="material-icons-outlined">edit</mat-icon>
-          <ng-container i18n>Edit Pricing</ng-container>
-        </a>
-        <a matButton="tonal" color="secondary"  (click)="onAddInfants()" [disabled]="!hasPrimaryGuest() || roomsResource.isLoading()"
-          [matTooltip]="!hasPrimaryGuest() ? 'Please assign a primary guest first' : ''">
-          <mat-icon class="material-icons-outlined">child_care</mat-icon>
-          <ng-container i18n>Add Infant</ng-container>
-        </a>
-
-        <a matButton="filled" color="primary" [disabled]="roomsResource.isLoading()" (click)="onCreateGuest()">
-          <mat-icon class="material-icons-outlined">person_add</mat-icon>
-          <ng-container i18n>ADD ROOM SHARER</ng-container>
-        </a>
-      </div>
+  <mat-card-header class="!items-center">
+    <mat-card-title><ng-container i18n>Room & guests</ng-container></mat-card-title>
+    <div class="ml-auto">
+      <button type="button" matButton (click)="onEditRoomPricing()" [disabled]="roomsResource.isLoading()">
+        <mat-icon class="material-icons-outlined">edit</mat-icon>
+        <ng-container i18n>Edit Pricing</ng-container>
+      </button>
     </div>
   </mat-card-header>
 
   <mat-card-content formArrayName="sharers">
-    @if(roomsResource.isLoading()){
-        <div class="flex justify-center py-12">
-        <mat-spinner diameter="40"></mat-spinner>
-      </div>
+    <!-- Room type / room / rate plan -->
+    <div class="grid grid-cols-1 gap-x-4 pt-4 sm:grid-cols-3">
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+        <mat-label><ng-container i18n>Room Type</ng-container></mat-label>
+        <mat-select [value]="selectedRoomTypeId()" (selectionChange)="onRoomTypeChange($event.value)" [disabled]="isEditing()">
+          <mat-option value=""><ng-container i18n>-- Select --</ng-container></mat-option>
+          @for (rt of roomTypesResource.value() || []; track rt._id) {
+            <mat-option [value]="rt._id">{{ rt.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+        <mat-label><ng-container i18n>Room</ng-container></mat-label>
+        <mat-select [value]="selectedRoomId()" (selectionChange)="onRoomChange($event.value)" [disabled]="isEditing() || !selectedRoomTypeId()">
+          <mat-option value=""><ng-container i18n>-- Select --</ng-container></mat-option>
+          @for (room of filteredRooms(); track room._id) {
+            <mat-option [value]="room._id">
+              {{ room.name || room.roomNumber }}
+              @if (room.priceOverride) {
+                <span class="ml-1 text-xs text-gray-500">({{ room.priceOverride | currency: storeStore.selectedStore()?.currency }})</span>
+              }
+            </mat-option>
+          }
+        </mat-select>
+        @if (!selectedRoomTypeId()) {
+          <mat-hint><ng-container i18n>Select a room type first</ng-container></mat-hint>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+        <mat-label><ng-container i18n>Rate Plan</ng-container></mat-label>
+        <mat-select [value]="selectedRatePlanId()" (selectionChange)="onRatePlanChangeHeader($event.value)" [disabled]="isEditing() || !selectedRoomTypeId()">
+          <mat-option value=""><ng-container i18n>-- Default --</ng-container></mat-option>
+          @if (loadingRatePlans()) {
+            <mat-option disabled><ng-container i18n>Loading...</ng-container></mat-option>
+          } @else {
+            @for (plan of ratePlans(); track plan._id) {
+              <mat-option [value]="plan._id">
+                {{ plan.name }}
+                @if (plan.isDefault) { <span class="ml-1 text-xs text-gray-400"><ng-container i18n>(default)</ng-container></span> }
+              </mat-option>
+            }
+          }
+        </mat-select>
+        @if (!selectedRoomTypeId()) {
+          <mat-hint><ng-container i18n>Select a room type first</ng-container></mat-hint>
+        }
+      </mat-form-field>
+    </div>
+
+    @if (roomsResource.isLoading()) {
+      <div class="flex justify-center py-10"><mat-spinner diameter="40"></mat-spinner></div>
     } @else {
-      <div class="py-4 space-y-3">
+      <!-- Guests staying in the room -->
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
+        <h3 class="m-0 text-sm font-semibold text-gray-900">
+          <ng-container i18n>Guests</ng-container>
+          <span class="font-normal text-gray-500"> ({{ getSharersFormArray().length }})</span>
+        </h3>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" matButton="tonal" (click)="onAddInfants()" [disabled]="!hasPrimaryGuest() || roomsResource.isLoading()"
+            [matTooltip]="!hasPrimaryGuest() ? ('Please assign a primary guest first' | tr) : ''">
+            <mat-icon class="material-icons-outlined">child_care</mat-icon>
+            <ng-container i18n>Add Infant</ng-container>
+          </button>
+          <button type="button" matButton="outlined" (click)="onCreateGuest()" [disabled]="roomsResource.isLoading()">
+            <mat-icon class="material-icons-outlined">person_add</mat-icon>
+            <ng-container i18n>Add guest</ng-container>
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-2 flex flex-col gap-2">
         @for (element of getSharersFormArray().controls; track $index; let i = $index) {
-        <div class="border border-gray-200 rounded-lg" [formGroup]="asFormGroup(element)">
-          <!-- Table-like Row -->
-          <div class="flex items-center gap-3 p-4">
-            <!-- ID Badge -->
-            <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold min-w-fit">
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-gray-200 px-3 py-2" [formGroup]="asFormGroup(element)">
+            <span class="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-orange-100 px-2 text-xs font-bold text-orange-700">
               <ng-container i18n>P{{ i + 1 }}</ng-container>
             </span>
 
-            <!-- Guest Name -->
-            <div class="flex items-center gap-2 min-w-[180px]">
-              <mat-icon class="text-gray-400">person</mat-icon>
-              <div class="flex flex-col">
-                <span class="font-medium text-gray-900 truncate">
-                  @if (getSharerName(element)) {<ng-container>{{ getSharerName(element) }}</ng-container>} @else {<ng-container i18n>Unassigned Guest</ng-container>}
-                </span>
-                <span class="text-xs text-gray-500 uppercase">
-                  @if (element.get('ageGrade')?.value) {<ng-container>{{ element.get('ageGrade')?.value }}</ng-container>} @else {<ng-container i18n>Adult</ng-container>}
-                </span>
+            <div class="min-w-[160px] flex-1">
+              <div class="truncate font-medium text-gray-900">
+                @if (getSharerName(element)) {<ng-container>{{ getSharerName(element) }}</ng-container>} @else {<ng-container i18n>Unassigned Guest</ng-container>}
+              </div>
+              <div class="text-xs uppercase text-gray-500">
+                @if (element.get('ageGrade')?.value) {<ng-container>{{ element.get('ageGrade')?.value }}</ng-container>} @else {<ng-container i18n>Adult</ng-container>}
               </div>
             </div>
 
-            <!-- Date Range Picker -->
-            <mat-form-field appearance="outline" class="min-w-[220px] w-[220px]">
+            <mat-form-field appearance="outline" class="w-full sm:w-[270px]" subscriptSizing="dynamic">
               <mat-label><ng-container i18n>Check-in to Check-out</ng-container></mat-label>
               <mat-date-range-input [rangePicker]="picker">
                 <input matStartDate formControlName="checkInDate" placeholder="Start date" i18n-placeholder />
@@ -123,139 +108,100 @@
               </mat-date-range-input>
               <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-date-range-picker #picker></mat-date-range-picker>
-              <mat-hint><ng-container i18n>{{ calculateNights($safeNavigationMigration(element.get('checkInDate')?.value), $safeNavigationMigration(element.get('checkOutDate')?.value)) }}
-                night(s)</ng-container></mat-hint>
             </mat-form-field>
 
-            <!-- Action Buttons -->
-            <div class="flex items-center gap-1 ml-auto">
-              <a mat-icon-button
-                matTooltip="{{ !hasPrimaryGuest() && element.get('ageGrade')?.value === 'child' ? 'Assign primary guest first' : 'Edit Guest' }}"
+            <div class="ml-auto flex items-center">
+              <button type="button" mat-icon-button
+                [matTooltip]="!hasPrimaryGuest() && element.get('ageGrade')?.value === 'child' ? ('Assign primary guest first' | tr) : ('Edit Guest' | tr)"
+                [attr.aria-label]="'Edit Guest' | tr"
                 (click)="editSharer(i, $safeNavigationMigration(element.get('ageGrade')?.value))"
-                [disabled]="!hasPrimaryGuest() && element.get('ageGrade')?.value === 'child'"
-                [ngClass]="!hasPrimaryGuest() && element.get('ageGrade')?.value === 'child' ? 'text-gray-300' : 'text-blue-600 hover:bg-blue-50'">
+                [disabled]="!hasPrimaryGuest() && element.get('ageGrade')?.value === 'child'">
                 <mat-icon class="material-icons-outlined">edit</mat-icon>
-              </a>
-              <a mat-icon-button matTooltip="Delete Guest" i18n-matTooltip [disabled]="i === 0" (click)="deleteSharer(i)"
-                [ngClass]="i === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-red-600 hover:bg-red-50'">
+              </button>
+              <button type="button" mat-icon-button color="warn" [matTooltip]="'Delete Guest' | tr" [attr.aria-label]="'Delete Guest' | tr"
+                [disabled]="i === 0" (click)="deleteSharer(i)">
                 <mat-icon class="material-icons-outlined">delete</mat-icon>
-              </a>
-              <!-- <a mat-icon-button matTooltip="CHECK-IN" (click)="onSharerHome(i)"
-                [ngClass]="i === 0 ? 'text-blue-600 hover:bg-blue-50' : 'text-gray-400 hover:bg-gray-100'">
-                <mat-icon class="material-icons-outlined">login</mat-icon>
-              </a> -->
+              </button>
             </div>
           </div>
-        </div>
         } @empty {
-        <div class="text-center py-8 text-gray-500">
-          <mat-icon class="text-4xl text-gray-300 mb-2">group_off</mat-icon>
-          <p class="text-sm"><ng-container i18n>No guests added yet</ng-container></p>
-        </div>
+          <div class="py-6 text-center text-gray-500">
+            <mat-icon class="mb-1 !h-10 !w-10 !text-4xl !leading-none text-gray-300">group_off</mat-icon>
+            <p class="m-0 text-sm"><ng-container i18n>No guests added yet</ng-container></p>
+          </div>
         }
-
-        <!-- Restriction Warnings (Stop-Sell, CTA, CTD, Min/Max Stay) -->
-        @if (loadingRestrictions()) {
-        <div class="mt-4 mb-2 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm">
-            <div class="flex items-center gap-2 text-yellow-600">
-                <mat-spinner diameter="16"></mat-spinner>
-                <span><ng-container i18n>Checking restrictions...</ng-container></span>
-            </div>
-        </div>
-        } @else if (restrictionIssues(); as issues) {
-        <div class="mt-4 mb-2 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm">
-            <div class="flex items-center gap-2 text-red-700 font-medium mb-2">
-                <mat-icon class="text-base! text-red-600">block</mat-icon>
-                <span><ng-container i18n>Booking Restricted</ng-container></span>
-            </div>
-            <div class="space-y-1">
-                @for (issue of issues; track issue.date + issue.type) {
-                <div class="flex items-start gap-2 text-xs text-red-600">
-                    <mat-icon class="text-sm! mt-0.5 shrink-0">warning</mat-icon>
-                    <span>
-                        <strong>{{ issue.date | date: 'EEE, MMM d' }}:</strong> {{ issue.detail }}
-                    </span>
-                </div>
-                }
-            </div>
-            <div class="mt-2 pt-2 border-t border-red-200 text-xs text-red-500">
-                <ng-container i18n>This booking cannot proceed while restrictions are active for the selected dates.</ng-container>
-            </div>
-        </div>
-        }
-
-        <!-- Per-Night Rate Breakdown (Inventory-based) — hidden for Channex/OTA bookings -->
-        @if (!isChannexBooking()) {
-        @if (loadingRates()) {
-        <div class="mt-4 mb-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
-            <div class="flex items-center gap-2 text-gray-400">
-                <mat-spinner diameter="16"></mat-spinner>
-                <span><ng-container i18n>Updating rates for new dates...</ng-container></span>
-            </div>
-        </div>
-        } @else if (rateBreakdown(); as breakdown) {
-        <div class="mt-4 mb-2 rounded-lg border px-4 py-3 text-sm leading-relaxed"
-            [class]="breakdown.hasRatePlan ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'">
-            <div class="flex items-center gap-2 mb-2">
-                @if (breakdown.hasRatePlan) {
-                <mat-icon class="text-green-600 text-base h-4 w-4">local_offer</mat-icon>
-                <span class="font-semibold text-green-700"><ng-container i18n>Rate Plan Applied — Nightly Breakdown</ng-container></span>
-                } @else {
-                <mat-icon class="text-blue-600 text-base h-4 w-4">calendar_today</mat-icon>
-                <span class="font-semibold text-gray-700"><ng-container i18n>Nightly Rate Breakdown</ng-container></span>
-                }
-            </div>
-            @if (breakdown.hasRatePlan) {
-            <div i18n class="text-xs text-gray-500 mb-2">
-                Avg: <span class="font-semibold text-green-700">{{ breakdown.averageRate | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}</span>/night
-            </div>
-            } @else {
-            <div class="text-xs text-gray-500 mb-2">
-                <ng-container i18n>{{ breakdown.averageRate | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}/night × {{ breakdown.numberOfNights }} nights</ng-container>
-            </div>
-            }
-            <div class="border-t border-gray-200 pt-2 space-y-1">
-                @for (night of breakdown.nights; track night.date) {
-                <div class="flex justify-between text-xs">
-                    <span class="text-gray-500">{{ night.date | date: 'EEE, MMM d' }}</span>
-                    <span [class]="night.source === 'rate_plan_day_of_week' || night.source === 'inventory' ? 'text-green-600 font-semibold' : 'text-gray-700'">
-                        {{ night.rate | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}
-                        @if (night.source === 'rate_plan_day_of_week') {
-                        <span class="text-[9px]">★</span>
-                        } @else if (night.source === 'inventory') {
-                        <span class="text-[9px] text-blue-500">●</span>
-                        }
-                    </span>
-                </div>
-                }
-                <div class="flex justify-between pt-2 border-t border-gray-200 font-semibold text-sm text-gray-800">
-                    <span><ng-container i18n>Total ({{ breakdown.numberOfNights }} nights)</ng-container></span>
-                    <span>{{ breakdown.totalRate | currency:$safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}</span>
-                </div>
-            </div>
-            <!-- Legend -->
-            <div class="flex items-center gap-3 mt-2 text-[10px] text-gray-400">
-                @if (breakdown.hasRatePlan) {
-                <span i18n><span class="text-green-600">★</span> Day-of-week rate</span>
-                }
-                <span i18n><span class="text-blue-500">●</span> Inventory rate</span>
-            </div>
-        </div>
-        }
-        } <!-- end: hide rate breakdown for Channex bookings -->
-
-        @if (roomsResource.hasValue()) {
-        <break-down-total [reservation]="reservation()" />
-        } @else {
-        <div class="text-center py-8 text-gray-500">
-          <mat-icon class="text-4xl text-gray-300 mb-2">meeting_room</mat-icon>
-          <p class="text-sm"><ng-container i18n>No rooms assigned yet</ng-container></p>
-        </div>
-        }
-
       </div>
+
+      <!-- Restrictions block the booking, so they are never folded away -->
+      @if (loadingRestrictions()) {
+        <div class="mt-4 flex items-center gap-2 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
+          <mat-spinner diameter="16"></mat-spinner>
+          <span><ng-container i18n>Checking restrictions...</ng-container></span>
+        </div>
+      } @else if (restrictionIssues(); as issues) {
+        <div class="mt-4 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm" role="alert">
+          <div class="mb-2 flex items-center gap-2 font-medium text-red-700">
+            <mat-icon class="!h-5 !w-5 !text-xl !leading-none text-red-600">block</mat-icon>
+            <span><ng-container i18n>Booking Restricted</ng-container></span>
+          </div>
+          <div class="flex flex-col gap-1">
+            @for (issue of issues; track issue.date + issue.type) {
+              <div class="flex items-start gap-2 text-xs text-red-600">
+                <mat-icon class="mt-0.5 !h-4 !w-4 shrink-0 !text-base !leading-none">warning</mat-icon>
+                <span><strong>{{ issue.date | date: 'EEE, MMM d' }}:</strong> {{ issue.detail }}</span>
+              </div>
+            }
+          </div>
+          <div class="mt-2 border-t border-red-200 pt-2 text-xs text-red-500">
+            <ng-container i18n>This booking cannot proceed while restrictions are active for the selected dates.</ng-container>
+          </div>
+        </div>
+      }
+
+      <!-- Per-night rates (inventory based; hidden for channel-manager bookings) -->
+      @if (!isChannexBooking()) {
+        @if (loadingRates()) {
+          <div class="mt-4 flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500">
+            <mat-spinner diameter="16"></mat-spinner>
+            <span><ng-container i18n>Updating rates for new dates...</ng-container></span>
+          </div>
+        } @else if (rateBreakdown(); as breakdown) {
+          <details class="group mt-4 rounded-lg border text-sm"
+            [class]="breakdown.hasRatePlan ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50'">
+            <summary class="flex cursor-pointer list-none items-center gap-2 px-4 py-2.5 font-medium text-gray-800">
+              <mat-icon class="!h-5 !w-5 !text-xl !leading-none" [class]="breakdown.hasRatePlan ? 'text-green-600' : 'text-gray-500'">
+                {{ breakdown.hasRatePlan ? 'local_offer' : 'calendar_today' }}
+              </mat-icon>
+              <span>
+                @if (breakdown.hasRatePlan) {<ng-container i18n>Rate Plan Applied — Nightly Breakdown</ng-container>} @else {<ng-container i18n>Nightly Rate Breakdown</ng-container>}
+              </span>
+              <span class="ml-auto text-xs font-normal text-gray-500 tabular-nums">
+                <ng-container i18n>{{ breakdown.averageRate | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}/night × {{ breakdown.numberOfNights }} nights</ng-container>
+              </span>
+              <mat-icon class="!h-5 !w-5 !text-xl !leading-none text-gray-500 transition-transform group-open:rotate-180">expand_more</mat-icon>
+            </summary>
+            <div class="flex flex-col gap-1 border-t border-gray-200 px-4 py-3 tabular-nums">
+              @for (night of breakdown.nights; track night.date) {
+                <div class="flex justify-between text-xs">
+                  <span class="text-gray-500">{{ night.date | date: 'EEE, MMM d' }}</span>
+                  <span [class]="night.source === 'rate_plan_day_of_week' || night.source === 'inventory' ? 'font-semibold text-green-700' : 'text-gray-700'">
+                    {{ night.rate | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}
+                    @if (night.source === 'rate_plan_day_of_week') {<span class="text-[9px]">★</span>} @else if (night.source === 'inventory') {<span class="text-[9px] text-blue-500">●</span>}
+                  </span>
+                </div>
+              }
+              <div class="mt-1 flex justify-between border-t border-gray-200 pt-2 text-sm font-semibold text-gray-800">
+                <span><ng-container i18n>Total ({{ breakdown.numberOfNights }} nights)</ng-container></span>
+                <span>{{ breakdown.totalRate | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}</span>
+              </div>
+              <div class="mt-1 flex items-center gap-3 text-[10px] text-gray-400">
+                @if (breakdown.hasRatePlan) {<span i18n><span class="text-green-600">★</span> Day-of-week rate</span>}
+                <span i18n><span class="text-blue-500">●</span> Inventory rate</span>
+              </div>
+            </div>
+          </details>
+        }
+      }
     }
   </mat-card-content>
-  <!-- <mat-card-actions align="start" class="border-t border-gray-200 pt-4 flex justify-end gap-2">
-  </mat-card-actions> -->
 </mat-card>

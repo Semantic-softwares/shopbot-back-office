@@ -28,7 +28,10 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { Subject, takeUntil, of, tap } from 'rxjs';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { Subject, takeUntil, of, tap, firstValueFrom } from 'rxjs';
 
 import { ReservationService } from '../../../../../shared/services/reservation.service';
 import { RoomsService } from '../../../../../shared/services/rooms.service';
@@ -42,12 +45,12 @@ import {
 import { AvailableRoom } from '../../../../../shared/models/room.model';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { ReservationStatus } from '../../../../../shared/enums/reservation-status.enum';
-import { toSignal, rxResource } from '@angular/core/rxjs-interop';
+import { toSignal, rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GuestDetailsComponent } from './components/guest-details/guest-details.component';
 import { StayDetailsComponent } from './components/stay-details/stay-details.component';
 import { RoomSharersComponent } from './components/room-sharers/room-sharers.component';
 import { RoomDetailsComponent } from './components/room-details/room-details.component';
-import { PaymentInfo } from './components/payment-info/payment-info.component';
+import { BreakDownTotal } from './components/break-down-total/break-down-total';
 import { SpecialRequestsComponent } from './components/special-requests/special-requests.component';
 import { ReservationFormService } from '../../../../../shared/services/reservation-form.service';
 import {
@@ -68,6 +71,8 @@ import { RoomChangeHistoryComponent } from '../room-change-history/room-change-h
 import { ReservationTransactionsComponent } from '../reservation-transactions/reservation-transactions.component';
 import { ReservationOrdersComponent } from '../reservation-orders/reservation-orders.component';
 import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
+import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { STAY_COLORS, STAY_ICONS, StayStatus } from '../reservation-view/reservations-calendar/tape-chart.util';
 
 @Component({
   selector: 'app-reservation-form',
@@ -84,11 +89,14 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
     MatDatepickerModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    MatMenuModule,
+    MatTabsModule,
+    MatTooltipModule,
     GuestDetailsComponent,
     StayDetailsComponent,
     RoomSharersComponent,
     RoomDetailsComponent,
-    PaymentInfo,
+    BreakDownTotal,
     SpecialRequestsComponent,
     RoomChangeHistoryComponent,
     ReservationTransactionsComponent,
@@ -159,7 +167,8 @@ export class ReservationFormComponent implements OnDestroy {
     if (!this.isEditing()) {
       return this.quickReservation()?.bookingType;
     } else {
-      return this.reservationForm.get('bookingType')?.value;
+      // Read the loaded reservation (a signal) so this updates when it arrives; the form value alone would be cached stale.
+      return this.reservation.value()?.bookingType ?? this.reservationForm.get('bookingType')?.value;
     }
   });
 
@@ -286,12 +295,12 @@ export class ReservationFormComponent implements OnDestroy {
       }),
   });
 
-  private checkIn = toSignal(
+  protected checkIn = toSignal(
     this.reservationForm.get('checkInDate')!.valueChanges,
     { initialValue: this.reservationForm.get('checkInDate')!.value }
   );
 
-  private checkOut = toSignal(
+  protected checkOut = toSignal(
     this.reservationForm.get('checkOutDate')!.valueChanges,
     { initialValue: this.reservationForm.get('checkOutDate')!.value }
   );
@@ -312,6 +321,95 @@ export class ReservationFormComponent implements OnDestroy {
         })
       ),
   });
+
+
+  // ── Header, status and rail state ─────────────────────────────────────────
+
+  /** True once the user has touched a control; cleared after a save or reload. */
+  public formDirty = signal(false);
+  private readonly watchDirty = this.reservationForm.valueChanges
+    .pipe(takeUntilDestroyed())
+    .subscribe(() => this.formDirty.set(this.reservationForm.dirty));
+
+  public status = computed(() => this.reservation.value()?.status ?? null);
+
+  public statusMeta = computed(() => {
+    const status = this.status();
+    if (!status) return null;
+    return {
+      label: this.statusLabel(status),
+      color: STAY_COLORS[status as StayStatus] ?? '#64748b',
+      icon: STAY_ICONS[status as StayStatus] ?? 'event',
+    };
+  });
+
+  /** Cancelled / no-show end the normal pending > confirmed > checked-in > checked-out path. */
+  public isClosedOut = computed(() => this.status() === ReservationStatus.CANCELLED || this.status() === ReservationStatus.NO_SHOW);
+
+  public lifecycle = computed(() => {
+    const status = this.status();
+    const path = ['pending', 'confirmed', 'checked_in', 'checked_out'];
+    const current = path.indexOf(status === 'reserved' ? 'pending' : (status ?? ''));
+    return path.map((key, index) => ({
+      key,
+      label: this.statusLabel(key === 'pending' && status === 'reserved' ? 'reserved' : key),
+      state: current < 0 ? 'todo' : index < current ? 'done' : index === current ? 'current' : 'todo',
+    }));
+  });
+
+  public statusLabel(status: string): string {
+    switch (status) {
+      case 'pending': return $localize`Pending`;
+      case 'reserved': return $localize`Reserved`;
+      case 'confirmed': return $localize`Confirmed`;
+      case 'checked_in': return $localize`Checked in`;
+      case 'checked_out': return $localize`Checked out`;
+      case 'cancelled': return $localize`Cancelled`;
+      case 'no_show': return $localize`No-show`;
+      default: return status;
+    }
+  }
+
+  /** Edit mode, finished loading, but the server had nothing (bad link, deleted, no access). */
+  public loadFailed = computed(() => this.isEditing() && !this.reservation.isLoading() && this.reservation.hasValue() && !this.reservation.value());
+
+  public guestName = computed(() => {
+    const guest = this.selectedGuest() ?? this.reservation.value()?.guest;
+    return guest ? this.guestService.getGuestName(guest as Guest) : '';
+  });
+
+  /** Where the booking came from, only when it is worth a chip (OTA / channel manager). */
+  public channelName = computed(() => {
+    const res = this.reservation.value();
+    return res?.channex?.channelType || (res?.channex?.bookingId ? $localize`Channel manager` : '');
+  });
+
+  public headerFacts = computed(() => {
+    const res = this.reservation.value();
+    const ci = new Date(this.checkIn() as Date);
+    const co = new Date(this.checkOut() as Date);
+    const valid = !isNaN(ci.getTime()) && !isNaN(co.getTime());
+    const rooms = (res?.rooms ?? [])
+      .map((r: any) => r?.room?.roomNumber || r?.room?.name)
+      .filter(Boolean) as string[];
+    return {
+      rooms,
+      checkIn: valid ? ci : null,
+      checkOut: valid ? co : null,
+      nights: valid ? Math.max(0, Math.round((co.getTime() - ci.getTime()) / 86_400_000)) : 0,
+      adults: res?.numberOfAdults ?? 0,
+      children: res?.numberOfChildren ?? 0,
+    };
+  });
+
+  public balanceDue = computed(() => this.reservation.value()?.pricing?.balance ?? 0);
+
+  public ordersCount = computed(() => ((this.reservation.value() as any)?.orders ?? []).length);
+
+  /** Small screens keep the breakdown at the bottom; the balance strip at the top jumps to it. */
+  scrollToSummary(): void {
+    document.getElementById('rf-summary')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
     // Reopen cancelled reservation with PIN authorization
     async reopenReservation(): Promise<void> {
@@ -434,21 +532,11 @@ export class ReservationFormComponent implements OnDestroy {
   });
 
   // Guest Management Methods
-  onAddGuest() {
-    // TODO: Open guest creation dialog
-    this.snackBar.open($localize`Guest creation dialog will be implemented`, $localize`Close`, {
-      duration: 3000,
-    });
-  }
-
-  onEditGuest() {
-    const guest = this.selectedGuest();
-    if (!guest) return;
-
-    // TODO: Open guest edit dialog with selected guest data
-    this.snackBar.open($localize`Guest edit dialog will be implemented`, $localize`Close`, {
-      duration: 3000,
-    });
+  /** The guest dialog already saved the guest; keep the card and the form's snapshot of them in sync. */
+  public onGuestEdited(guest: Guest): void {
+    this.selectedGuest.set(guest);
+    this.getPrimaryGuest()?.patchValue({ meta: guest });
+    this.getPrimaryRoom()?.patchValue({ assignedGuestName: this.guestService.getGuestName(guest) });
   }
 
   public onGuestSelected(guest: Guest): void {
@@ -480,41 +568,6 @@ export class ReservationFormComponent implements OnDestroy {
   }
 
 
-
-  onDeleteGuest() {
-    // I don't want to delete the primary guest if there are other guests in sharers with assigned IDs
-    const sharersArray = this.getSharersFormArray();
-
-    // Check if there are other sharers (besides primary) that have guests assigned
-    const hasOtherGuestsAssigned =
-      sharersArray.length > 1 &&
-      Array.from({ length: sharersArray.length - 1 }, (_, i) =>
-        sharersArray.at(i + 1)
-      ).some((sharer) => sharer?.get('guest')?.value);
-
-    if (this.isSingleBooking() && hasOtherGuestsAssigned) {
-      this.snackBar.open(
-        $localize`Cannot remove primary guest while there are other sharers assigned. Please remove sharers first.`,
-        $localize`Close`,
-        {
-          duration: 3000,
-          panelClass: ['error-snackbar'],
-        }
-      );
-      return;
-    }
-
-    this.selectedGuest.set(null);
-    this.getPrimaryGuest()?.patchValue({
-      guest: null,
-      meta: null,
-      guestType: null,
-    });
-    this.snackBar.open($localize`Guest removed`, $localize`Close`, {
-      duration: 2000,
-      panelClass: ['success-snackbar'],
-    });
-  }
 
   public getPrimaryGuest() {
     if (this.getSharersFormArray().length > 0) {
@@ -713,7 +766,9 @@ export class ReservationFormComponent implements OnDestroy {
             duration: 3000,
             panelClass: ['success-snackbar'],
           });
-         this.reservation.reload();
+          this.reservationForm.markAsPristine();
+          this.formDirty.set(false);
+          this.reservation.reload();
         },
         error: (error) => {
           console.error('Error updating reservation:', error);
@@ -932,7 +987,23 @@ export class ReservationFormComponent implements OnDestroy {
 
     // Confirm status change for critical statuses
     if (newStatus === ReservationStatus.CANCELLED || newStatus === ReservationStatus.NO_SHOW) {
-      const confirmed = confirm($localize`Are you sure you want to change the status to ${newStatus}?`);
+      const cancelling = newStatus === ReservationStatus.CANCELLED;
+      const confirmed = await firstValueFrom(
+        this.dialog
+          .open(ConfirmDialogComponent, {
+            width: '420px',
+            maxWidth: '92vw',
+            data: {
+              title: cancelling ? $localize`Cancel this reservation?` : $localize`Mark this guest as a no-show?`,
+              message: cancelling
+                ? $localize`The reservation will be marked as cancelled. It can be re-opened later with a manager PIN.`
+                : $localize`The reservation will be marked as a no-show.`,
+              confirmText: cancelling ? $localize`Cancel reservation` : $localize`Mark no-show`,
+              cancelText: $localize`Keep reservation`,
+            },
+          })
+          .afterClosed()
+      );
       if (!confirmed) return;
     }
 
@@ -1090,7 +1161,10 @@ export class ReservationFormComponent implements OnDestroy {
     this.location.back();
   }
 
-  clearError() {}
+  /** Try loading the reservation again after a failure. */
+  retry() {
+    this.reservation.reload();
+  }
 
   /**
    * Format a Date to 'YYYY-MM-DD' using local time (not UTC).

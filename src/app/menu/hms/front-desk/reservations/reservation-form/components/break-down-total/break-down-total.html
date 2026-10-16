@@ -1,155 +1,96 @@
-<div class="mt-6" [formGroup]="reservationForm()!">
-    <h3 class="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
-        <ng-container i18n>Price Breakdown</ng-container>
-    </h3>
+<section class="flex flex-col gap-4" aria-labelledby="bd-title">
+  <!-- Headline: what is still owed -->
+  <div>
+    <div class="flex items-center justify-between gap-2">
+      <h2 id="bd-title" class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+        @if (isSettled()) {<ng-container i18n>Settled</ng-container>} @else {<ng-container i18n>Balance due</ng-container>}
+      </h2>
+      @if (isSettled()) {
+        <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+          <mat-icon class="!h-4 !w-4 !text-base !leading-none">check_circle</mat-icon>
+          <ng-container i18n>Paid in full</ng-container>
+        </span>
+      }
+    </div>
+    <p class="mt-1 text-3xl font-bold tabular-nums"
+      [class.text-red-700]="breakdownBalance() > 0" [class.text-green-700]="breakdownBalance() <= 0 && isSettled()"
+      [class.text-gray-900]="breakdownBalance() <= 0 && !isSettled()">
+      {{ breakdownBalance() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}
+    </p>
 
-    <!-- Summary List -->
-    <mat-list formGroupName="pricing">
-        <!-- Total Nights -->
-        <mat-list-item>
-            <span matListItemTitle><ng-container i18n>Total Nights</ng-container></span>
-            <span matListItemMeta class="font-semibold">
-                <ng-container i18n>{{ totalNumberOfNights() }} night(s)</ng-container>
-            </span>
-        </mat-list-item>
+    <div class="mt-3 h-2 overflow-hidden rounded-full bg-gray-200" role="progressbar" [attr.aria-valuenow]="paidPercent()"
+      aria-valuemin="0" aria-valuemax="100" i18n-aria-label aria-label="Share of the total already paid">
+      <div class="h-full rounded-full bg-green-600 transition-all" [style.width.%]="paidPercent()"></div>
+    </div>
+    <div class="mt-1.5 flex justify-between text-xs text-gray-600 tabular-nums">
+      <span><ng-container i18n>Paid</ng-container> {{ paidAmount() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}</span>
+      <span>{{ paidPercent() }}%</span>
+    </div>
 
-        <!-- Base Total -->
-        <mat-list-item>
-            <span matListItemTitle><ng-container i18n>Base Total (all rooms)</ng-container></span>
-            <span matListItemMeta>
-                {{ breakdownSubtotal() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
-            </span>
-        </mat-list-item>
+    @if (canPay()) {
+      <button type="button" matButton="filled" class="mt-3 w-full" (click)="payClicked.emit()">
+        <mat-icon>payments</mat-icon>
+        <ng-container i18n>Record payment</ng-container>
+      </button>
+    }
+  </div>
 
-        <!-- Service Fee -->
-        <mat-list-item>
-            <span matListItemTitle><ng-container i18n>Service Fee</ng-container></span>
-            <span matListItemMeta>
-                {{ breakdownServiceFee() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
-            </span>
-        </mat-list-item>
+  <!-- Where the total comes from -->
+  <dl class="m-0 flex flex-col gap-2 border-t border-gray-200 pt-4 text-sm tabular-nums">
+    <div class="flex justify-between gap-3">
+      <dt class="text-gray-600">
+        <ng-container i18n>Rooms</ng-container>
+      </dt>
+      <dd class="m-0 text-gray-900">{{ breakdownSubtotal() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}</dd>
+    </div>
 
-        <!-- Cleaning Fee -->
-        <mat-list-item>
-            <span matListItemTitle><ng-container i18n>Cleaning Fee</ng-container></span>
-            <span matListItemMeta>
-                {{ breakdownCleaningFee() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
-            </span>
-        </mat-list-item>
+    @for (fee of feeLines(); track fee.label) {
+      <div class="flex justify-between gap-3">
+        <dt class="text-gray-600">{{ fee.label }}</dt>
+        <dd class="m-0 text-gray-900">{{ fee.amount | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}</dd>
+      </div>
+    }
 
-        <!-- Resort Fee -->
-        <mat-list-item>
-            <span matListItemTitle><ng-container i18n>Resort Fee</ng-container></span>
-            <span matListItemMeta>
-                {{ breakdownResortFee() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
-            </span>
-        </mat-list-item>
+    @if (breakdownTaxes()) {
+      <div class="flex justify-between gap-3">
+        <dt class="text-gray-600"><ng-container i18n>Taxes</ng-container></dt>
+        <dd class="m-0 text-gray-900">{{ breakdownTaxes() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}</dd>
+      </div>
+    }
 
-        <!-- Other Fees -->
-        <mat-list-item>
-            <span matListItemTitle><ng-container i18n>Other Fees</ng-container></span>
-            <span matListItemMeta>
-                {{ breakdownOtherFees() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
-            </span>
-        </mat-list-item>
+    @if (breakdownDiscount()) {
+      <div class="flex justify-between gap-3">
+        <dt class="text-gray-600"><ng-container i18n>Discount</ng-container></dt>
+        <dd class="m-0 text-green-700">−{{ breakdownDiscount() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}</dd>
+      </div>
+    }
 
-        <!-- Divider -->
-        <mat-divider></mat-divider>
+    <div class="flex justify-between gap-3 border-t border-gray-200 pt-2 text-base font-semibold">
+      <dt class="text-gray-900"><ng-container i18n>Reservation total</ng-container></dt>
+      <dd class="m-0 text-gray-900">{{ breakdownGrandTotal() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}</dd>
+    </div>
+  </dl>
 
-        <!-- Total Fees -->
-        <mat-list-item>
-            <span matListItemTitle class="font-semibold"><ng-container i18n>Total Fees</ng-container></span>
-            <span matListItemMeta class="font-semibold">
-                {{ breakdownTotalFees() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
-            </span>
-        </mat-list-item>
-
-        <!-- Divider -->
-        <mat-divider></mat-divider>
-
-        <!-- Taxes -->
-        <mat-list-item>
-            <span matListItemTitle><ng-container i18n>Taxes</ng-container></span>
-            <span matListItemMeta>
-                {{ breakdownTaxes() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
-            </span>
-        </mat-list-item>
-
-        <!-- Discount -->
-        <mat-list-item>
-            <span matListItemTitle><ng-container i18n>Discount</ng-container></span>
-            <span matListItemMeta>
-                {{ breakdownDiscount() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
-            </span>
-        </mat-list-item>
-
-        <!-- Divider -->
-        <mat-divider></mat-divider>
-
-        <!-- Grand Total -->
-        <mat-list-item class="py-4">
-            <span matListItemTitle class="font-bold text-lg"><ng-container i18n>Grand Total</ng-container></span>
-            <span matListItemMeta class="font-bold text-lg">
-                {{ breakdownGrandTotal() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
-            </span>
-        </mat-list-item>
-
-        <!-- Divider -->
-        <mat-divider></mat-divider>
-
-        <!-- Reservation Total (same as Grand Total, for clarity) -->
-        <mat-list-item class="py-4 bg-indigo-50">
-            <span matListItemTitle class="font-bold text-indigo-900"><ng-container i18n>Reservation Total</ng-container></span>
-            <span matListItemMeta class="font-bold text-indigo-900">
-                {{ breakdownGrandTotal() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
-            </span>
-        </mat-list-item>
-
-        <!-- Orders Grand Total -->
-        @if (ordersGrandTotal() > 0) {
-          <mat-list-item class="py-4 bg-green-50">
-              <span i18n matListItemTitle class="font-bold text-green-900 flex items-center gap-2">
-                <span class="text-sm">📦</span> Orders Total
-              </span>
-              <span matListItemMeta class="font-bold text-green-900">
-                  {{ ordersGrandTotal() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
-              </span>
-          </mat-list-item>
-
-          <!-- Orders Paid -->
-          <mat-list-item class="py-2 pl-8">
-              <span matListItemTitle class="text-sm text-gray-700"><ng-container i18n>Orders Paid</ng-container></span>
-              <span matListItemMeta class="text-sm text-green-700">
-                  {{ ordersPaidAmount() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
-              </span>
-          </mat-list-item>
-
-          <!-- Orders Balance -->
-          <mat-list-item class="py-2 pl-8 mb-2">
-              <span matListItemTitle class="text-sm text-gray-700"><ng-container i18n>Orders Balance</ng-container></span>
-              <span matListItemMeta class="text-sm" [class.text-red-700]="ordersBalanceAmount() > 0" [class.text-green-700]="ordersBalanceAmount() <= 0">
-                  {{ ordersBalanceAmount() | currency:$safeNavigationMigration(storeStore!.selectedStore()?.currency):'symbol':'1.2-2' }}
-              </span>
-          </mat-list-item>
-
-          <mat-divider></mat-divider>
-        }
-
-        <!-- Paid Amount -->
-        <mat-list-item class="py-4">
-            <span matListItemTitle ><ng-container i18n>Paid</ng-container></span>
-            <span matListItemMeta >
-                {{ paidAmount() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}
-            </span>
-        </mat-list-item>
-
-        <!-- Balance -->
-        <mat-list-item class="py-4">
-            <span matListItemTitle ><ng-container i18n>Balance</ng-container></span>
-            <span matListItemMeta >
-                {{ breakdownBalance() | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency):'symbol':'1.2-2' }}
-            </span>
-        </mat-list-item>
-    </mat-list>
-   <!-- <pre>{{ reservationForm()?.value | json }}</pre> -->
-</div>
+  <!-- Orders charged to the room, only when there are any -->
+  @if (ordersGrandTotal() > 0) {
+    <dl class="m-0 flex flex-col gap-2 rounded-lg bg-gray-50 p-3 text-sm tabular-nums">
+      <div class="flex items-center justify-between gap-3 font-medium">
+        <dt class="flex items-center gap-1.5 text-gray-900">
+          <mat-icon class="!h-4 !w-4 !text-base !leading-none">receipt_long</mat-icon>
+          <ng-container i18n>Orders</ng-container>
+        </dt>
+        <dd class="m-0 text-gray-900">{{ ordersGrandTotal() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}</dd>
+      </div>
+      <div class="flex justify-between gap-3 text-gray-600">
+        <dt><ng-container i18n>Orders paid</ng-container></dt>
+        <dd class="m-0 text-green-700">{{ ordersPaidAmount() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}</dd>
+      </div>
+      <div class="flex justify-between gap-3 text-gray-600">
+        <dt><ng-container i18n>Orders balance</ng-container></dt>
+        <dd class="m-0" [class.text-red-700]="ordersBalanceAmount() > 0" [class.text-green-700]="ordersBalanceAmount() <= 0">
+          {{ ordersBalanceAmount() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}
+        </dd>
+      </div>
+    </dl>
+  }
+</section>

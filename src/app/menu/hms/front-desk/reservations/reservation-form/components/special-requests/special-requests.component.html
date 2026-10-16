@@ -1,36 +1,22 @@
 <mat-card appearance="outlined">
   <mat-card-header>
-    <mat-card-title>
-      <ng-container i18n>Special Requests & Notes</ng-container>
-    </mat-card-title>
+    <mat-card-title><ng-container i18n>Requests & notes</ng-container></mat-card-title>
   </mat-card-header>
 
   <mat-card-content>
-    <div [formGroup]="getReservationForm()" class="space-y-4">
-      <!-- Special Requests Field -->
+    <div [formGroup]="getReservationForm()" class="grid grid-cols-1 gap-x-4 pt-4 md:grid-cols-2">
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label><ng-container i18n>Special Requests</ng-container></mat-label>
-        <textarea
-          matInput
-          formControlName="specialRequests"
-          placeholder="e.g., High floor, late arrival, anniversary celebration, dietary requirements..." i18n-placeholder
-          rows="3"
-          class="text-sm"
-        ></textarea>
-        <mat-hint><ng-container i18n>Enter any special requests from the guest (visible to guest)</ng-container></mat-hint>
+        <mat-label><ng-container i18n>Guest requests</ng-container></mat-label>
+        <textarea matInput formControlName="specialRequests" rows="3" class="text-sm"
+          placeholder="e.g., High floor, late arrival, anniversary, dietary needs" i18n-placeholder></textarea>
+        <mat-hint><ng-container i18n>Asked for by the guest; visible to the guest</ng-container></mat-hint>
       </mat-form-field>
 
-      <!-- Internal Notes Field -->
       <mat-form-field appearance="outline" class="w-full">
-        <mat-label><ng-container i18n>Internal Notes</ng-container></mat-label>
-        <textarea
-          matInput
-          formControlName="internalNotes"
-          placeholder="e.g., Guest prefers quiet hours, previous complaints, VIP notes, maintenance issues..." i18n-placeholder
-          rows="3"
-          class="text-sm"
-        ></textarea>
-        <mat-hint><ng-container i18n>Internal notes visible only to staff (not shown to guest)</ng-container></mat-hint>
+        <mat-label><ng-container i18n>Internal notes</ng-container></mat-label>
+        <textarea matInput formControlName="internalNotes" rows="3" class="text-sm"
+          placeholder="e.g., Prefers quiet hours, VIP, previous complaint" i18n-placeholder></textarea>
+        <mat-hint><ng-container i18n>Staff only; never shown to the guest</ng-container></mat-hint>
       </mat-form-field>
     </div>
   </mat-card-content>

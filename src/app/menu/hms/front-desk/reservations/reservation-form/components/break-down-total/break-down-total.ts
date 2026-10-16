@@ -1,6 +1,7 @@
-import { Component, inject, signal, computed, effect, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, effect, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { MatListModule } from "@angular/material/list";
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { StoreStore } from '../../../../../../../shared/stores/store.store';
 import { CommonModule } from '@angular/common';
 import { MatInputModule } from "@angular/material/input";
@@ -11,13 +12,16 @@ import { Reservation } from '../../../../../../../shared/models/reservation.mode
 
 @Component({
   selector: 'break-down-total',
-  imports: [MatListModule, CommonModule, ReactiveFormsModule, MatInputModule, CurrencyMaskModule],
+  imports: [MatButtonModule, MatIconModule, CommonModule, ReactiveFormsModule, MatInputModule, CurrencyMaskModule],
   templateUrl: './break-down-total.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './break-down-total.scss',
 })
 export class BreakDownTotal {
   reservation = input<Reservation | null>(null);
+  /** Show the "Record payment" button (an existing reservation that can still take money). */
+  canPay = input<boolean>(false);
+  payClicked = output<void>();
   
   private reservationFormService = inject(ReservationFormService);
   public reservationForm = toSignal<FormGroup | null>(this.reservationFormService.form$, { initialValue: null });
@@ -169,6 +173,26 @@ export class BreakDownTotal {
     return reservationBalance;
   });
 
+  /** How much of the reservation total is already paid, 0-100. */
+  public paidPercent = computed(() => {
+    const total = this.breakdownGrandTotal();
+    if (total <= 0) return 0;
+    return Math.min(100, Math.max(0, Math.round((this.paidAmount() / total) * 100)));
+  });
+
+  public isSettled = computed(() => this.breakdownGrandTotal() > 0 && this.breakdownBalance() <= 0);
+
+  /** Only the fees that actually apply, so a typical stay shows no empty rows. */
+  public feeLines = computed(() => {
+    const lines = [
+      { label: $localize`Service fee`, amount: this.breakdownServiceFee() },
+      { label: $localize`Cleaning fee`, amount: this.breakdownCleaningFee() },
+      { label: $localize`Resort fee`, amount: this.breakdownResortFee() },
+      { label: $localize`Other fees`, amount: this.breakdownOtherFees() },
+    ];
+    return lines.filter((line) => line.amount);
+  });
+
   // Computed signal for orders grand total
   public ordersGrandTotal = computed(() => {
     const res = this.reservation();
@@ -221,7 +245,11 @@ export class BreakDownTotal {
       const form = this.reservationForm();
       const pricingGroup = form?.get('pricing') as FormGroup;
       
-      if (pricingGroup) {
+      // Until the rooms have been loaded into the form there is nothing to total; patching now would
+      // overwrite the saved totals of an existing reservation with zeros.
+      const roomsLoaded = this.roomsChangeCounter() > 0 || (this.getRoomsFormArray()?.length ?? 0) > 0;
+
+      if (pricingGroup && roomsLoaded) {
         // Update pricing with calculated values
         pricingGroup.patchValue({
           subtotal: this.breakdownSubtotal(),

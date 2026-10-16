@@ -1,125 +1,126 @@
 <mat-card appearance="outlined">
-    <mat-card-header>
-        <mat-card-title>
-            @if (bookingType() === 'single') {<ng-container i18n>Guest Details</ng-container>} @else {<ng-container i18n>Booking Owner Details</ng-container>}
+  <mat-card-header class="!items-center">
+    <mat-card-title>
+      @if (bookingType() === 'single') {<ng-container i18n>Guest</ng-container>} @else {<ng-container i18n>Booking owner</ng-container>}
+    </mat-card-title>
+    @if (guest()) {
+      <div class="ml-auto flex items-center gap-1">
+        <button type="button" matButton (click)="onEditGuest()">
+          <mat-icon>edit</mat-icon>
+          <ng-container i18n>Edit</ng-container>
+        </button>
+        <button type="button" matButton (click)="changing.set(!changing())">
+          <mat-icon>swap_horiz</mat-icon>
+          <ng-container i18n>Change guest</ng-container>
+        </button>
+      </div>
+    }
+  </mat-card-header>
 
-        </mat-card-title>
-        <!-- <mat-card-subtitle>Primary guest and contact information</mat-card-subtitle> -->
-    </mat-card-header>
-    <mat-card-content>
-        <!-- No Guest Selected State -->
-        @if (!guest()) {
-        <div class="space-y-4">
-            <!-- Empty State Icon -->
-            <div class="text-center py-4">
-                <mat-icon class="text-gray-300 text-6xl mb-4 inline-block">person_outline</mat-icon>
-                <p class="text-gray-500 text-sm mb-4"><ng-container i18n>No guest selected</ng-container></p>
+  <mat-card-content>
+    <!-- Searching: first selection, or swapping the guest -->
+    @if (!guest() || changing()) {
+      <div class="flex flex-col gap-3 pt-2 sm:flex-row sm:items-start">
+        <div class="min-w-0 flex-1">
+          <app-guest-search placeholder="Search by name, email or phone" i18n-placeholder label="Find a guest" i18n-label
+            [guestType]="bookingType() === 'group' ? 'group' : 'single'"
+            (guestSelected)="onGuestSearchSelected($event)"></app-guest-search>
+        </div>
+        <button type="button" matButton="outlined" class="sm:mt-1" (click)="onAddGuest()">
+          <mat-icon>person_add</mat-icon>
+          <ng-container i18n>New guest</ng-container>
+        </button>
+        @if (guest() && changing()) {
+          <button type="button" matButton class="sm:mt-1" (click)="changing.set(false)">
+            <ng-container i18n>Keep current guest</ng-container>
+          </button>
+        }
+      </div>
+    }
+
+    @if (guest(); as g) {
+      @if (!changing()) {
+        @if (g.blacklisted) {
+          <div class="mb-3 flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
+            <mat-icon class="!h-5 !w-5 !text-xl !leading-none shrink-0">block</mat-icon>
+            <div>
+              <strong><ng-container i18n>This guest is blacklisted</ng-container></strong>
+              @if (g.blacklistReason) {<div class="text-red-700">{{ g.blacklistReason }}</div>}
+            </div>
+          </div>
+        }
+
+        <div class="flex items-start gap-4">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-base font-semibold text-indigo-800"
+            aria-hidden="true">{{ initials() }}</div>
+
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="truncate text-lg font-semibold text-gray-900">{{ g | getGuestName }}</span>
+              @if (g.isVip) {
+                <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                  <mat-icon class="!h-4 !w-4 !text-base !leading-none">star</mat-icon>
+                  <ng-container i18n>VIP</ng-container>
+                </span>
+              }
+              @if (isCorporate()) {
+                <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+                  @if (g.guestType === 'travel_agent') {<ng-container i18n>Travel agent</ng-container>} @else {<ng-container i18n>Corporate</ng-container>}
+                </span>
+              }
             </div>
 
-            <!-- Guest Search Component -->
-            <app-guest-search placeholder="Search for existing guest..." i18n-placeholder label="Select Guest" i18n-label
-                [guestType]="bookingType() === 'group' ? 'group' : 'single'"
-                (guestSelected)="onGuestSearchSelected($event)"></app-guest-search>
+            <div class="mt-1.5 flex flex-wrap gap-x-5 gap-y-1 text-sm text-gray-600">
+              @if (g.email) {
+                <span class="inline-flex min-w-0 items-center gap-1.5">
+                  <mat-icon class="!h-4 !w-4 !text-base !leading-none text-gray-400">mail</mat-icon>
+                  <span class="truncate">{{ g.email }}</span>
+                </span>
+              }
+              @if (g.phone) {
+                <span class="inline-flex items-center gap-1.5">
+                  <mat-icon class="!h-4 !w-4 !text-base !leading-none text-gray-400">call</mat-icon>
+                  {{ g.phone }}
+                </span>
+              }
+              @if (!g.email && !g.phone) {
+                <span class="text-gray-500"><ng-container i18n>No contact details on file</ng-container></span>
+              }
+            </div>
+
+            @if (hasMoreDetails()) {
+              <button type="button" class="mt-2 inline-flex items-center gap-0.5 text-sm font-medium text-indigo-700 hover:underline"
+                (click)="showMore.set(!showMore())" [attr.aria-expanded]="showMore()">
+                @if (showMore()) {<ng-container i18n>Less details</ng-container>} @else {<ng-container i18n>More details</ng-container>}
+                <mat-icon class="!h-5 !w-5 !text-xl !leading-none">{{ showMore() ? 'expand_less' : 'expand_more' }}</mat-icon>
+              </button>
+            }
+          </div>
         </div>
+
+        @if (showMore()) {
+          <dl class="m-0 mt-3 grid grid-cols-1 gap-x-6 gap-y-3 border-t border-gray-200 pt-3 text-sm sm:grid-cols-2">
+            @if (bookingType() === 'single' && g.dateOfBirth) {
+              <div><dt class="text-xs text-gray-500"><ng-container i18n>Date of birth</ng-container></dt><dd class="m-0 text-gray-900">{{ g.dateOfBirth | date: 'MMM dd, yyyy' }}</dd></div>
+            }
+            @if (g.nationality) {
+              <div><dt class="text-xs text-gray-500"><ng-container i18n>Nationality</ng-container></dt><dd class="m-0 text-gray-900">{{ g.nationality }}</dd></div>
+            }
+            @if (bookingType() === 'group' && g.companyRegistrationNumber) {
+              <div><dt class="text-xs text-gray-500"><ng-container i18n>Registration number</ng-container></dt><dd class="m-0 text-gray-900">{{ g.companyRegistrationNumber }}</dd></div>
+            }
+            @if (g.contactPersonFirstName) {
+              <div><dt class="text-xs text-gray-500"><ng-container i18n>Contact person</ng-container></dt><dd class="m-0 text-gray-900">{{ g.contactPersonFirstName }} {{ g.contactPersonLastName }}</dd></div>
+            }
+            @if (g.address?.street || g.address?.city || g.address?.country) {
+              <div class="sm:col-span-2">
+                <dt class="text-xs text-gray-500"><ng-container i18n>Address</ng-container></dt>
+                <dd class="m-0 text-gray-900">{{ addressLine() }}</dd>
+              </div>
+            }
+          </dl>
         }
-
-        <!-- Guest Selected State -->
-        @if (guest()) {
-        <div class="space-y-4">
-            <!-- Guest Header List Item -->
-            <mat-list>
-                <mat-list-item>
-
-                    <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">account_circle</mat-icon>
-                    <div matListItemTitle class="text-xl font-semibold text-gray-900">
-                        {{ guest() | getGuestName }}
-                    </div>
-
-                </mat-list-item>
-
-
-
-
-                <!-- Email -->
-                @if (guest()?.email) {
-                <mat-list-item>
-                    <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">mail_outline</mat-icon>
-                    <div matListItemTitle class="text-sm text-gray-600!"><ng-container i18n>Email</ng-container></div>
-                    <div matListItemLine class="text-gray-900 font-medium">{{ guest()?.email }}</div>
-                </mat-list-item>
-                }
-
-                <!-- Phone -->
-                @if (guest()?.phone) {
-                <mat-list-item>
-                    <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">phone_outline</mat-icon>
-                    <div matListItemTitle class="text-sm text-gray-600!"><ng-container i18n>Phone</ng-container></div>
-                    <div matListItemLine class="text-gray-900 font-medium">{{ guest()?.phone }}</div>
-                </mat-list-item>
-                }
-
-                <!-- Date of Birth (Individual only) -->
-                @if (bookingType() === 'single' && guest()?.dateOfBirth) {
-                <mat-list-item>
-                    <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">cake_outline</mat-icon>
-                    <div matListItemTitle class="text-sm text-gray-600!"><ng-container i18n>Date of Birth</ng-container></div>
-                    <div matListItemLine class="text-gray-900 font-medium">
-                        {{ $safeNavigationMigration(guest()?.dateOfBirth) | date: 'MMM dd, yyyy' }}
-                    </div>
-                </mat-list-item>
-                }
-
-                <!-- Company Registration (Corporate only) -->
-                @if (bookingType() === 'group' && guest()?.companyRegistrationNumber) {
-                <mat-list-item>
-                    <mat-icon matListItemIcon class="text-gray-600! material-icons-outlined">verified_outline</mat-icon>
-                    <div matListItemTitle class="text-sm text-gray-600!"><ng-container i18n>Registration Number</ng-container></div>
-                    <div matListItemLine class="text-gray-900 font-medium">
-                        {{ guest()?.companyRegistrationNumber }}
-                    </div>
-                </mat-list-item>
-                }
-
-                <!-- Address -->
-                @if (guest()?.address) {
-                <mat-list-item>
-                    <mat-icon matListItemIcon
-                        class="text-gray-600! material-icons-outlined">location_on_outline</mat-icon>
-                    <div matListItemTitle class="text-sm text-gray-600!"><ng-container i18n>Address</ng-container></div>
-                    <div matListItemLine class="text-gray-900 font-medium">
-                        @if (guest()?.address?.street) {
-                        <span>{{ guest()?.address?.street }}, </span>
-                        }
-                        @if (guest()?.address?.city) {
-                        <span>{{ guest()?.address?.city }}, </span>
-                        }
-                        @if (guest()?.address?.country) {
-                        <span>{{ guest()?.address?.country }}</span>
-                        }
-                    </div>
-                </mat-list-item>
-                }
-            </mat-list>
-        </div>
-        }
-    </mat-card-content>
-
-    <!-- Card Actions Footer -->
-    <mat-card-actions class="border-t border-gray-200 pt-4 flex justify-end gap-2">
-        @if (!guest()) {
-        <button type="button" matButton="filled" color="primary" (click)="onAddGuest()">
-            <mat-icon class="mr-2">person_add_outline</mat-icon>
-            <ng-container i18n>Add Guest</ng-container>
-        </button>
-        } @else {
-        <button type="button" mat-button (click)="onEditGuest()" color="primary">
-            <mat-icon class="mr-2">edit_outline</mat-icon>
-            <ng-container i18n>Edit</ng-container>
-        </button>
-        <button type="button" mat-button (click)="onDeleteGuest()" color="warn">
-            <mat-icon class="mr-2">delete_outline</mat-icon>
-            <ng-container i18n>Delete</ng-container>
-        </button>
-        }
-    </mat-card-actions>
+      }
+    }
+  </mat-card-content>
 </mat-card>

@@ -50,12 +50,13 @@ import { CurrencyMaskModule } from 'ng2-currency-mask';
 import { GuestFormModalComponent } from '../../../../../../../shared/components/guest-form-modal/guest-form-modal.component';
 import { PriceEditDialogComponent } from '../price-edit-dialog/price-edit-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { BreakDownTotal } from '../break-down-total/break-down-total';
 import { ReservationFormService } from '../../../../../../../shared/services/reservation-form.service';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { switchMap, forkJoin, map, of, catchError } from 'rxjs';
 import { Reservation } from '../../../../../../../shared/models/reservation.model';
 import { GuestService } from '../../../../../../../shared/services/guest.service';
+
+import { TrPipe } from '../../../../../../../shared/i18n/tr.pipe';
 
 @Component({
   selector: 'app-room-details',
@@ -78,7 +79,7 @@ import { GuestService } from '../../../../../../../shared/services/guest.service
     MatSnackBarModule,
     MatListModule,
     CurrencyMaskModule,
-    BreakDownTotal,
+    TrPipe,
   ],
   templateUrl: './room-details.component.html',
   styleUrl: './room-details.component.scss',

@@ -1,61 +1,32 @@
 <mat-card appearance="outlined">
-  <mat-card-header >
-    <mat-card-title>
-      <ng-container i18n>Stay Details</ng-container>
-    </mat-card-title>
+  <mat-card-header class="!items-center">
+    <mat-card-title><ng-container i18n>Stay</ng-container></mat-card-title>
+    @if (numberOfNights() > 0) {
+      <span class="ml-auto inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-sm font-medium text-gray-700 tabular-nums">
+        <mat-icon class="!h-4 !w-4 !text-base !leading-none">dark_mode</mat-icon>
+        <ng-container i18n>{{ numberOfNights() }} night(s)</ng-container>
+      </span>
+    }
   </mat-card-header>
   <mat-card-content>
     @if (reservationForm()) {
       <form [formGroup]="reservationForm()!">
-        <div class="space-y-4 py-3">
-          <!-- Check-in and Check-out Date Range -->
+        <div class="grid grid-cols-1 gap-x-4 pt-4 sm:grid-cols-2">
+          <!-- Check-in and check-out -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label><ng-container i18n>Stay Dates</ng-container></mat-label>
+            <mat-label><ng-container i18n>Check-in – Check-out</ng-container></mat-label>
             <mat-date-range-input [rangePicker]="stayPicker">
-              <input
-                matStartDate
-                formControlName="checkInDate"
-                placeholder="Check-in date" i18n-placeholder
-                (change)="onDateChange()"
-              />
-              <input
-                matEndDate
-                formControlName="checkOutDate"
-                placeholder="Check-out date" i18n-placeholder
-                (change)="onDateChange()"
-              />
+              <input matStartDate formControlName="checkInDate" placeholder="Check-in" i18n-placeholder (change)="onDateChange()" />
+              <input matEndDate formControlName="checkOutDate" placeholder="Check-out" i18n-placeholder (change)="onDateChange()" />
             </mat-date-range-input>
             <mat-datepicker-toggle matSuffix [for]="stayPicker"></mat-datepicker-toggle>
-            <mat-hint><ng-container i18n>{{ numberOfNights() }} night(s)</ng-container></mat-hint>
             <mat-date-range-picker #stayPicker></mat-date-range-picker>
           </mat-form-field>
 
-          <!-- Sales Person (Read-only) -->
+          <!-- Booking source -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label><ng-container i18n>Sales Person</ng-container></mat-label>
-            <input
-              
-              matInput
-              [value]="salesPersonName()"
-              readonly
-            />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label><ng-container i18n>Number of Nights</ng-container></mat-label>
-            <input
-            formControlName="numberOfNights"
-              matInput
-              
-              readonly
-            />
-          </mat-form-field>
-
-          <!-- Booking Source -->
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label><ng-container i18n>Booking Source</ng-container></mat-label>
+            <mat-label><ng-container i18n>Booking source</ng-container></mat-label>
             <mat-select formControlName="bookingSource">
-              <mat-option value=""><ng-container i18n>-- Select Source --</ng-container></mat-option>
               <mat-option value="direct"><ng-container i18n>Direct</ng-container></mat-option>
               <mat-option value="phone"><ng-container i18n>Phone</ng-container></mat-option>
               <mat-option value="online"><ng-container i18n>Online</ng-container></mat-option>
@@ -68,6 +39,13 @@
             </mat-select>
           </mat-form-field>
         </div>
+
+        @if (salesPersonName()) {
+          <p class="m-0 flex items-center gap-1.5 text-sm text-gray-600">
+            <mat-icon class="!h-4 !w-4 !text-base !leading-none text-gray-400">badge</mat-icon>
+            <ng-container i18n>Booked by</ng-container> <span class="font-medium text-gray-800">{{ salesPersonName() }}</span>
+          </p>
+        }
       </form>
     }
   </mat-card-content>

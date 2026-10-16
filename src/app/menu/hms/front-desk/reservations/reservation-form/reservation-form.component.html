@@ -1,211 +1,239 @@
-<!-- Header Section -->
+<div class="px-4 pb-16">
+  <!-- ═══ Sticky header: who, what state, when, and the next step ═══ -->
+  <header class="rf-head z-10 -mx-4 md:sticky md:top-0 border-b border-gray-200 bg-white px-4 py-3">
+    <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-x-6">
+      <div class="min-w-0 flex-1">
+        <button type="button" matButton (click)="onCancel()" class="-ml-3 !h-8">
+          <mat-icon>arrow_back</mat-icon>
+          <ng-container i18n>Reservations</ng-container>
+        </button>
 
-<div class="max-w-12xl  px-4 ">
-  <div class="flex justify-between items-center py-4">
-    <div>
-      <!-- <a href="/reservations" class="text-blue-600 hover:text-blue-800 hover:underline flex items-center mb-2">
-        <mat-icon class="mr-1" style="font-size: 18px; width: 18px; height: 18px;">arrow_back</mat-icon>
-        Back to Reservations
-      </a> -->
-      <a matButton (click)="onCancel()" color="primary">
-        <mat-icon class="mr-1" style="font-size: 18px; width: 18px; height: 18px;">arrow_back</mat-icon>
-        <ng-container i18n>Back to Reservations</ng-container>
-      </a>
-      @if (isEditing()) {
-      <!-- Edit Mode Header -->
-      <h1 class="text-2xl font-bold text-gray-900">
-        <ng-container i18n>Edit Reservation</ng-container>
-      </h1>
-      <p i18n class="text-sm text-gray-600 mt-1">
-        Confirmation: <span class="font-mono font-semibold text-gray-900">{{ reservation.value()?.confirmationNumber
-          }}</span>
-      </p>
-      } @else {
-      <!-- Create Mode Header -->
-      <h1 class="text-2xl font-bold text-gray-900">
-        <ng-container i18n>Create New {{ bookingType() === 'group' ? ('Group' | tr) : ('Single' | tr) }} Reservation</ng-container>
-      </h1>
-      <p class="text-sm text-gray-600 mt-1">
-        <ng-container i18n>Create a new guest reservation</ng-container>
-      </p>
-      }
-    </div>
-    <div class="flex space-x-3">
+        @if (isEditing()) {
+          <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <h1 class="m-0 text-2xl font-bold text-gray-900">
+              @if (guestName()) {<ng-container>{{ guestName() }}</ng-container>} @else {<ng-container i18n>Reservation</ng-container>}
+            </h1>
+            @if (statusMeta(); as meta) {
+              <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-sm font-medium text-white" [style.background]="meta.color">
+                <mat-icon class="!h-4 !w-4 !text-base !leading-none">{{ meta.icon }}</mat-icon>
+                {{ meta.label }}
+              </span>
+            }
+            @if (bookingType() === 'group') {
+              <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-sm font-medium text-gray-700"><ng-container i18n>Group</ng-container></span>
+            }
+            @if (channelName()) {
+              <span class="rounded-full bg-sky-100 px-2.5 py-0.5 text-sm font-medium text-sky-800">{{ channelName() }}</span>
+            }
+            <span class="whitespace-nowrap font-mono text-sm text-gray-500">#{{ reservation.value()?.confirmationNumber }}</span>
+          </div>
+        } @else {
+          <h1 class="m-0 mt-1 text-2xl font-bold text-gray-900">
+            <ng-container i18n>New {{ bookingType() === 'group' ? ('Group' | tr) : ('Single' | tr) }} Reservation</ng-container>
+          </h1>
+        }
 
-      @if (isEditing()) {
-      <!-- Edit Mode Actions -->
+        <!-- Key facts -->
+        @if (headerFacts(); as f) {
+          <p class="m-0 mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600 tabular-nums">
+            @if (f.rooms.length) {
+              <span class="inline-flex items-center gap-1.5 whitespace-nowrap">
+                <mat-icon class="!h-4 !w-4 !text-base !leading-none text-gray-400">bed</mat-icon>
+                <ng-container i18n>Room</ng-container> {{ f.rooms.join(', ') }}
+              </span>
+            }
+            @if (f.checkIn && f.checkOut) {
+              <span class="inline-flex flex-wrap items-center gap-x-1.5">
+                <mat-icon class="!h-4 !w-4 !text-base !leading-none text-gray-400">event</mat-icon>
+                {{ f.checkIn | date: 'EEE d MMM' }} → {{ f.checkOut | date: 'EEE d MMM y' }}
+                <span class="text-gray-400">·</span>
+                <ng-container i18n>{{ f.nights }} night(s)</ng-container>
+              </span>
+            }
+            @if (isEditing() && (f.adults || f.children)) {
+              <span class="inline-flex items-center gap-1.5 whitespace-nowrap">
+                <mat-icon class="!h-4 !w-4 !text-base !leading-none text-gray-400">group</mat-icon>
+                <ng-container i18n>{{ f.adults }} adult(s)</ng-container>@if (f.children) {, <ng-container i18n>{{ f.children }} child(ren)</ng-container>}
+              </span>
+            }
+          </p>
+        }
 
+        <!-- Where the stay is in its life -->
+        @if (isEditing() && status()) {
+          @if (isClosedOut()) {
+            <p class="m-0 mt-2 text-sm text-gray-600">
+              <ng-container i18n>This reservation is closed. Re-open it to make changes to its status.</ng-container>
+            </p>
+          } @else {
+            <ol class="m-0 mt-2 hidden list-none items-center gap-2 p-0 text-xs sm:flex" aria-label="Reservation progress" i18n-aria-label>
+              @for (step of lifecycle(); track step.key; let last = $last) {
+                <li class="flex items-center gap-2" [attr.aria-current]="step.state === 'current' ? 'step' : null">
+                  <span class="inline-flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-bold"
+                    [class]="step.state === 'done' ? 'border-green-600 bg-green-600 text-white' : step.state === 'current' ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-gray-300 text-gray-400'">
+                    @if (step.state === 'done') {<mat-icon class="!h-3.5 !w-3.5 !text-sm !leading-none">check</mat-icon>}
+                  </span>
+                  <span [class]="step.state === 'current' ? 'font-semibold text-gray-900' : step.state === 'done' ? 'text-gray-700' : 'text-gray-400'">{{ step.label }}</span>
+                  @if (!last) {<span class="h-px w-6 bg-gray-300" aria-hidden="true"></span>}
+                </li>
+              }
+            </ol>
+          }
+        }
+      </div>
 
+      <!-- Actions: one obvious next step, Save, everything else in the menu -->
+      <div class="flex flex-wrap items-center gap-2 md:justify-end">
+        @if (isEditing()) {
+          @if (status() === ReservationStatus.PENDING || status() === ReservationStatus.RESERVED) {
+            <button type="button" matButton="filled" (click)="updateReservationStatus(ReservationStatus.CONFIRMED)"
+              [disabled]="statusUpdating() || isSubmitted() || hasRestrictionIssues()">
+              <mat-icon>verified</mat-icon><ng-container i18n>Confirm</ng-container>
+            </button>
+          }
+          @if (status() === ReservationStatus.CONFIRMED) {
+            <button type="button" matButton="filled" (click)="updateReservationStatus(ReservationStatus.CHECKED_IN)"
+              [disabled]="statusUpdating() || hasRestrictionIssues()">
+              <mat-icon>login</mat-icon><ng-container i18n>Check-in</ng-container>
+            </button>
+          }
+          @if (status() === ReservationStatus.CHECKED_IN) {
+            <button type="button" matButton="filled" (click)="updateReservationStatus(ReservationStatus.CHECKED_OUT)"
+              [disabled]="statusUpdating() || hasRestrictionIssues()">
+              <mat-icon>logout</mat-icon><ng-container i18n>Check-out</ng-container>
+            </button>
+          }
+          @if (status() === ReservationStatus.CHECKED_OUT || status() === ReservationStatus.CANCELLED || status() === ReservationStatus.NO_SHOW) {
+            <button type="button" matButton="filled" (click)="reopenReservation()" [disabled]="statusUpdating() || isSubmitted()">
+              <mat-icon>redo</mat-icon><ng-container i18n>Re-open</ng-container>
+            </button>
+          }
 
-      <a matButton="outlined" (click)="exportReservationToPDF()"
-        [disabled]="exportingPDF() || statusUpdating() || isSubmitted()">
-        <mat-icon>{{exportingPDF() ? 'download' : 'picture_as_pdf'}}</mat-icon>
-        @if (exportingPDF()) {<ng-container i18n>Exporting...</ng-container>} @else {<ng-container i18n>Export to PDF</ng-container>}
-      </a>
+          <button type="button" [matButton]="formDirty() ? 'filled' : 'outlined'" (click)="onSubmit()" [disabled]="isSubmitted() || hasRestrictionIssues()">
+            <mat-icon>save</mat-icon>
+            <ng-container i18n>Save</ng-container>
+            @if (formDirty()) {<span class="ml-1 h-2 w-2 rounded-full bg-amber-400" [matTooltip]="'Unsaved changes' | tr" aria-hidden="true"></span>}
+          </button>
 
-      @if (reservation.value()?.status !== ReservationStatus.CANCELLED && reservation.value()?.status !==
-      ReservationStatus.NO_SHOW) {
-      <a matButton="tonal" (click)="updateReservationStatus(ReservationStatus.CANCELLED)" [disabled]="statusUpdating() || isSubmitted()">
-        <mat-icon>cancel</mat-icon>
-        <ng-container i18n>Cancel</ng-container>
-      </a>
-      }
-
-
-      <a matButton="outlined" (click)="payment()" [disabled]="isSubmitted() || hasRestrictionIssues()">
-        <mat-icon>payment</mat-icon>
-        <ng-container i18n>Payment</ng-container>
-      </a>
-
-      @if (canChangeRooms() && isSingleBooking()) {
-      <button matButton="tonal" (click)="openRoomChangeDialog()" [disabled]="statusUpdating() || isSubmitted()">
-        <mat-icon>swap_horiz</mat-icon>
-        <ng-container i18n>Change Room</ng-container>
-      </button>
-      }
-
-      @if (reservation.value()?.status === ReservationStatus.PENDING || reservation.value()?.status ===
-      ReservationStatus.RESERVED) {
-      <button matButton="outlined" (click)="updateReservationStatus(ReservationStatus.CONFIRMED)"
-        [disabled]="statusUpdating() || isSubmitted() || hasRestrictionIssues()">
-        <mat-icon>verified</mat-icon>
-        <ng-container i18n>Confirm</ng-container>
-      </button>
-      }
-        @if (reservation.value()?.status === ReservationStatus.CHECKED_OUT || reservation.value()?.status ===
-      ReservationStatus.CANCELLED || reservation.value()?.status === ReservationStatus.NO_SHOW) {
-      <button matButton="outlined"  (click)="reopenReservation()"
-        [disabled]="statusUpdating() || isSubmitted()">
-        <mat-icon>redo</mat-icon>
-        <ng-container i18n>Re-open</ng-container>
-      </button>
-      }
-      @if (reservation.value()?.status === ReservationStatus.CONFIRMED) {
-      <button matButton="outlined" (click)="updateReservationStatus(ReservationStatus.CHECKED_IN)"
-        [disabled]="statusUpdating() || hasRestrictionIssues()">
-        <mat-icon>check_circle_outline</mat-icon>
-        <ng-container i18n>Check-in</ng-container>
-      </button>
-      }
-      @if (reservation.value()?.status === ReservationStatus.CHECKED_IN) {
-      <button matButton="outlined" (click)="updateReservationStatus(ReservationStatus.CHECKED_OUT)"
-        [disabled]="statusUpdating() || hasRestrictionIssues()">
-        <mat-icon>logout</mat-icon>
-        <ng-container i18n>Check-out</ng-container>
-      </button>
-      }
-
-      <button matButton="filled" color="primary" type="submit" (click)="onSubmit()" [disabled]="isSubmitted() || hasRestrictionIssues()">
-        <mat-icon>save</mat-icon>
-        <ng-container i18n>Save</ng-container>
-      </button>
-
-
-      } @else {
-      
-      <a matButton="outlined" (click)="payment()" [disabled]="isSubmitted() || hasRestrictionIssues()">
-        <mat-icon>payment</mat-icon>
-        <ng-container i18n>Payment</ng-container>
-      </a>
-      <a matButton="filled" (click)="onSubmit()" [disabled]="isSubmitted() || hasRestrictionIssues()" color="primary">
-        <mat-icon>event</mat-icon>
-        <ng-container i18n>Reserve</ng-container>
-      </a>
-      }
-    </div>
-  </div>
-</div>
-
-
-<!-- Loading State -->
-@if (isEditing() && reservation.isLoading()) {
-<div class="flex justify-center items-center py-12">
-  <mat-spinner diameter="40"></mat-spinner>
-  <span class="ml-3 text-gray-600">
-    @if (isEditing()) {<ng-container i18n>Loading reservation...</ng-container>} @else {<ng-container i18n>Creating reservation...</ng-container>}
-  </span>
-</div>
-}
-
-<!-- Main Form Content -->
-@if (reservation.hasValue()) {
-<div class="max-w-12xl px-4">
-  <!-- Error State -->
-  @if (reservation.error()) {
-  <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-    <div class="flex">
-      <mat-icon class="text-red-500 mr-3">error</mat-icon>
-      <div class="flex-1">
-        <h3 class="text-red-800 font-medium"><ng-container i18n>Error</ng-container></h3>
-        <p class="text-red-700 text-sm mt-1">{{ reservation.error() }}</p>
-        <button mat-button (click)="clearError()" class="mt-2"><ng-container i18n>Dismiss</ng-container></button>
+          <button type="button" mat-icon-button [matMenuTriggerFor]="moreMenu" [attr.aria-label]="'More actions' | tr" [matTooltip]="'More actions' | tr">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #moreMenu="matMenu" xPosition="before">
+            @if (balanceDue() > 0 && !isClosedOut()) {
+              <button mat-menu-item (click)="payment()" [disabled]="isSubmitted() || hasRestrictionIssues()">
+                <mat-icon>payments</mat-icon><span><ng-container i18n>Payment</ng-container></span>
+              </button>
+            }
+            @if (canChangeRooms() && isSingleBooking()) {
+              <button mat-menu-item (click)="openRoomChangeDialog()" [disabled]="statusUpdating() || isSubmitted()">
+                <mat-icon>swap_horiz</mat-icon><span><ng-container i18n>Change Room</ng-container></span>
+              </button>
+            }
+            <button mat-menu-item (click)="exportReservationToPDF()" [disabled]="exportingPDF() || statusUpdating() || isSubmitted()">
+              <mat-icon>{{ exportingPDF() ? 'download' : 'picture_as_pdf' }}</mat-icon>
+              <span>@if (exportingPDF()) {<ng-container i18n>Exporting...</ng-container>} @else {<ng-container i18n>Export to PDF</ng-container>}</span>
+            </button>
+            @if (status() !== ReservationStatus.CANCELLED && status() !== ReservationStatus.NO_SHOW) {
+              <button mat-menu-item (click)="updateReservationStatus(ReservationStatus.CANCELLED)" [disabled]="statusUpdating() || isSubmitted()">
+                <mat-icon class="!text-red-700">cancel</mat-icon><span class="text-red-700"><ng-container i18n>Cancel</ng-container></span>
+              </button>
+            }
+          </mat-menu>
+        } @else {
+          <button type="button" matButton="outlined" (click)="payment()" [disabled]="isSubmitted() || hasRestrictionIssues()">
+            <mat-icon>payment</mat-icon><ng-container i18n>Payment</ng-container>
+          </button>
+          <button type="button" matButton="filled" (click)="onSubmit()" [disabled]="isSubmitted() || hasRestrictionIssues()">
+            <mat-icon>event</mat-icon><ng-container i18n>Reserve</ng-container>
+          </button>
+        }
       </div>
     </div>
-  </div>
-  }
-  <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
-    <!-- Main Grid Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <!-- <pre>{{reservationForm.value | json}}</pre> -->
-      <!-- Row 1: Guest Details (2 cols) + Stay Details (1 col) + Payment Details (1 col) -->
+  </header>
 
-      <!-- Guest Details Component - Top Row Left -->
-      <app-guest-details class="lg:col-span-2" [guest]="selectedGuest()" (guestAdded)="onAddGuest()"
-        (guestEdited)="onEditGuest()" (guestDeleted)="onDeleteGuest()"
-        (guestSelected)="onGuestSelected($event)"></app-guest-details>
-
-      <!-- Stay Details Component - Top Row Center -->
-      <app-stay-details [quickReservation]="quickReservation()" [isEditing]="isEditing()" [reservation]="reservation.value()"></app-stay-details>
-
-      <!-- Payment Details Component - Top Row Right -->
-      <payment-info [reservationForm]="reservationForm" />
-
-      <!-- [(selectedGuest)]="selectedGuest"
-        (selectedGuestChange)="onSelectedGuestChange($event)" -->
-      @if (isSingleBooking()) {
-      <!-- Row 2: Room Sharers Component - Only for Single Reservation -->
-      <app-room-sharers class="lg:col-span-4" [(selectedGuest)]="selectedGuest"
-        (selectedGuestChange)="onSelectedGuestChange($event)" [quickReservation]="quickReservation()"
-        [reservation]="reservation.value()" (sharerAdded)="onAddSharer()" (sharerEdited)="onEditSharer($event)"
-        (sharerDeleted)="onDeleteSharer($event)"
-        (hasRestrictions)="hasRestrictionIssues.set($event)"></app-room-sharers>
-      } @else {
-      <!-- Row 2: Room Details Component - Only for Group Reservation -->
-      <!-- <pre>{{reservation.value() | json}}</pre> -->
-      <app-room-details class="lg:col-span-4" [reservation]="reservation.value()"
-        [selectedRoomIds]="selectedRoomIds()"
-        [ratePlanId]="quickReservation()?.ratePlanId || ''"
-        (roomChangeRequested)="openRoomChangeDialog($event)"
-        (hasRestrictions)="hasRestrictionIssues.set($event)" />
-      }
-
-      <!-- Row 3: Special Requests & Notes - Full Width -->
-      <app-special-requests class="lg:col-span-4" [reservationForm]="reservationForm" />
-
-      <!-- Row 4: Room Change History - Only shown in edit mode when there are room changes -->
-      @if (isEditing() && (reservation.value()?.roomChanges?.length ?? 0) > 0) {
-        <app-room-change-history 
-          class="lg:col-span-4" 
-          [reservation]="reservation.value()!"
-           />
-      }
-
-      <!-- Row 5: Payment Transactions - Only shown in edit mode -->
-      @if (isEditing()) {
-        <app-reservation-transactions 
-          class="lg:col-span-4" 
-          [reservation]="reservation.value()!"
-        />
-      }
-
-      <!-- Row 6: Orders - Only shown in edit mode -->
-      @if (isEditing()) {
-        <app-reservation-orders 
-          class="lg:col-span-4" 
-          [reservation]="reservation.value()!"
-        />
-      }
+  <!-- ═══ Loading / failure ═══ -->
+  @if (isEditing() && reservation.isLoading() && !reservation.hasValue()) {
+    <div class="flex items-center justify-center gap-3 py-16 text-gray-600">
+      <mat-spinner diameter="36"></mat-spinner>
+      <span><ng-container i18n>Loading reservation...</ng-container></span>
     </div>
-  </form>
+  } @else if (loadFailed()) {
+    <div class="mx-auto mt-10 max-w-md rounded-lg border border-red-200 bg-red-50 p-6 text-center">
+      <mat-icon class="mb-2 !h-10 !w-10 !text-4xl !leading-none text-red-500">error</mat-icon>
+      <h2 class="m-0 text-lg font-semibold text-red-800"><ng-container i18n>Reservation not found</ng-container></h2>
+      <p class="mt-1 text-sm text-red-700"><ng-container i18n>It may have been deleted, or you may not have access to it.</ng-container></p>
+      <div class="mt-4 flex justify-center gap-2">
+        <button type="button" matButton (click)="onCancel()"><ng-container i18n>Go back</ng-container></button>
+        <button type="button" matButton="filled" (click)="retry()"><ng-container i18n>Try again</ng-container></button>
+      </div>
+    </div>
+  } @else if (reservation.hasValue()) {
+    <!-- Small screens: the balance first, the full breakdown sits at the bottom -->
+    @if (isEditing() && !isClosedOut()) {
+      <button type="button" (click)="scrollToSummary()" class="mt-3 flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left text-sm lg:hidden"
+        [class]="balanceDue() > 0 ? 'border-red-200 bg-red-50 text-red-800' : 'border-green-200 bg-green-50 text-green-800'">
+        <span class="font-medium">@if (balanceDue() > 0) {<ng-container i18n>Balance due</ng-container>} @else {<ng-container i18n>Paid in full</ng-container>}</span>
+        <span class="font-bold tabular-nums">{{ balanceDue() | currency: storeStore.selectedStore()?.currency:'symbol':'1.2-2' }}</span>
+      </button>
+    }
+
+    <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()" class="mt-4">
+      <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <!-- ─ Left: the booking itself ─ -->
+        <div class="flex min-w-0 flex-col gap-4">
+          <app-guest-details [guest]="selectedGuest()" (guestEdited)="onGuestEdited($event)"
+            (guestSelected)="onGuestSelected($event)"></app-guest-details>
+
+          <app-stay-details [quickReservation]="quickReservation()" [isEditing]="isEditing()" [reservation]="reservation.value()"></app-stay-details>
+
+          @if (isSingleBooking()) {
+            <app-room-sharers [(selectedGuest)]="selectedGuest" (selectedGuestChange)="onSelectedGuestChange($event)"
+              [quickReservation]="quickReservation()" [reservation]="reservation.value()"
+              (hasRestrictions)="hasRestrictionIssues.set($event)"></app-room-sharers>
+          } @else {
+            <app-room-details [reservation]="reservation.value()" [selectedRoomIds]="selectedRoomIds()"
+              [ratePlanId]="quickReservation()?.ratePlanId || ''" (roomChangeRequested)="openRoomChangeDialog($event)"
+              (hasRestrictions)="hasRestrictionIssues.set($event)" />
+          }
+
+          <app-special-requests [reservationForm]="reservationForm" />
+
+          <!-- History of the stay: payments, orders and room moves -->
+          @if (isEditing() && reservation.value(); as res) {
+            <mat-tab-group animationDuration="0ms" dynamicHeight mat-align-tabs="start" class="rounded-lg border border-gray-200">
+              <mat-tab>
+                <ng-template mat-tab-label><mat-icon class="mr-2 !h-5 !w-5 !text-xl !leading-none">payments</mat-icon><ng-container i18n>Payments</ng-container></ng-template>
+                <div class="p-3"><app-reservation-transactions [reservation]="res" /></div>
+              </mat-tab>
+              <mat-tab>
+                <ng-template mat-tab-label>
+                  <mat-icon class="mr-2 !h-5 !w-5 !text-xl !leading-none">receipt_long</mat-icon><ng-container i18n>Orders</ng-container>
+                  @if (ordersCount()) {<span class="ml-2 rounded-full bg-gray-200 px-1.5 text-xs font-semibold text-gray-700">{{ ordersCount() }}</span>}
+                </ng-template>
+                <div class="p-3"><app-reservation-orders [reservation]="res" /></div>
+              </mat-tab>
+              @if ((res.roomChanges?.length ?? 0) > 0) {
+                <mat-tab>
+                  <ng-template mat-tab-label>
+                    <mat-icon class="mr-2 !h-5 !w-5 !text-xl !leading-none">swap_horiz</mat-icon><ng-container i18n>Room changes</ng-container>
+                    <span class="ml-2 rounded-full bg-gray-200 px-1.5 text-xs font-semibold text-gray-700">{{ res.roomChanges?.length }}</span>
+                  </ng-template>
+                  <div class="p-3"><app-room-change-history [reservation]="res" /></div>
+                </mat-tab>
+              }
+            </mat-tab-group>
+          }
+        </div>
+
+        <!-- ─ Right: money, always in view on wide screens ─ -->
+        <aside id="rf-summary" class="rf-rail lg:sticky">
+          <mat-card appearance="outlined">
+            <mat-card-content class="!p-4">
+              <break-down-total [reservation]="reservation.value()" [canPay]="isEditing() && !isClosedOut()" (payClicked)="payment()" />
+            </mat-card-content>
+          </mat-card>
+        </aside>
+      </div>
+    </form>
+  }
 </div>
-}

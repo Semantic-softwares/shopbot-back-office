@@ -1,3 +1,4 @@
+import { TrPipe } from '../../../../../../../shared/i18n/tr.pipe';
 import {
   Component,
   input,
@@ -41,7 +42,6 @@ import {
   Reservation,
 } from '../../../../../../../shared/models/reservation.model';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
-import { BreakDownTotal } from '../break-down-total/break-down-total';
 import { PriceEditDialogComponent } from '../price-edit-dialog/price-edit-dialog.component';
 import { RoomsService } from '../../../../../../../shared/services/rooms.service';
 import { RateInventoryService, StayRates, RateInventoryRecord, RatePlan } from '../../../../../../../shared/services/rate-inventory.service';
@@ -73,8 +73,8 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
     MatDatepickerModule,
     MatNativeDateModule,
     MatCheckboxModule,
-    BreakDownTotal,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    TrPipe
 ],
   templateUrl: './room-sharers.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,

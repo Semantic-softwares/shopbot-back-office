@@ -1,15 +1,10 @@
-/* Reservation Form Styling */
+// The payment rail stays in view next to the long form on wide screens; just below the sticky header.
+.rf-rail {
+  top: 9.5rem;
+}
 
-
-
-// Responsive adjustments
-@media (max-width: 768px) {
-  .grid {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-  
-  .pricing-summary {
-    margin-left: 1rem;
-    margin-right: 1rem;
+@media (max-width: 1023px) {
+  .rf-rail {
+    position: static;
   }
 }

@@ -13,7 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatListModule } from '@angular/material/list';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Guest } from '../../../../../../../shared/models/reservation.model';
@@ -22,6 +22,7 @@ import { GuestSearchComponent } from '../../../../../../../shared/components/gue
 import { Form, FormArray, FormGroup } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReservationFormService } from '../../../../../../../shared/services/reservation-form.service';
+import { GuestService } from '../../../../../../../shared/services/guest.service';
 import { GetGuestNamePipe } from "../../../../../../../shared/pipes/get-guest-name.pipe";
 
 @Component({
@@ -34,7 +35,7 @@ import { GetGuestNamePipe } from "../../../../../../../shared/pipes/get-guest-na
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatListModule,
+    MatTooltipModule,
     GuestSearchComponent,
     GetGuestNamePipe
 ],
@@ -49,12 +50,34 @@ export class GuestDetailsComponent {
       { initialValue: null }
     );
   guest = input<Guest | null>(null);
-  bookingType = signal<string>(this.reservationForm()!.get('bookingType')?.value || 'single'); 
-  guestAdded = output<void>();
-  guestEdited = output<void>();
-  guestDeleted = output<void>();
+  bookingType = signal<string>(this.reservationForm()!.get('bookingType')?.value || 'single');
+  guestEdited = output<Guest>();
   guestSelected = output<Guest>();
   private dialog = inject(MatDialog);
+
+  /** Searching for a different guest while the current one stays on the card until a new one is picked. */
+  changing = signal(false);
+  showMore = signal(false);
+
+  private guestService = inject(GuestService);
+
+  initials = computed(() => {
+    const parts = (this.guestService.getGuestName(this.guest()) || '').split(/\s+/).filter(Boolean);
+    return ((parts[0]?.[0] ?? '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase() || '?';
+  });
+
+  addressLine = computed(() => {
+    const a = this.guest()?.address;
+    return [a?.street, a?.city, a?.country].filter(Boolean).join(', ');
+  });
+
+  isCorporate = computed(() => this.guest()?.guestType !== undefined && this.guest()?.guestType !== 'individual');
+
+  /** Anything beyond name + contact that is worth a "more details" fold. */
+  hasMoreDetails = computed(() => {
+    const g = this.guest();
+    return !!(g?.dateOfBirth || g?.nationality || g?.companyRegistrationNumber || g?.address?.street || g?.address?.city || g?.address?.country || g?.contactPersonFirstName);
+  });
 
   public onAddGuest(): void {
     const dialogRef = this.dialog.open(GuestFormModalComponent, {
@@ -65,15 +88,13 @@ export class GuestDetailsComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        // Guest was created, set it as selected
         this.onGuestSearchSelected(result);
       }
     });
   }
 
-  
-
   public onGuestSearchSelected(guest: Guest): void {
+    this.changing.set(false);
     this.guestSelected.emit(guest);
   }
 
@@ -84,7 +105,7 @@ export class GuestDetailsComponent {
     const dialogRef = this.dialog.open(GuestFormModalComponent, {
       width: '600px',
       disableClose: false,
-      data: { 
+      data: {
         guest: guest,
         bookingType: this.bookingType(),
         ageGrade: 'adult'
@@ -93,15 +114,8 @@ export class GuestDetailsComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        // Guest was updated, emit the event
-        this.guestEdited.emit();
+        this.guestEdited.emit(result);
       }
     });
-  }
-
-  onDeleteGuest() {
-    if (confirm($localize`Are you sure you want to remove this guest?`)) {
-      this.guestDeleted.emit();
-    }
   }
 }
