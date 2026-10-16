@@ -158,6 +158,12 @@
                         <mat-chip [class]="getStatusColor(order.category)">
                             {{ order.category }}
                         </mat-chip>
+                        @if (order.refundStatus === 'Partial' || order.refundStatus === 'Full') {
+                            <mat-chip [class]="getRefundStatusColor(order.refundStatus)" class="text-xs mt-1">
+                                @if (order.refundStatus === 'Full') { <ng-container i18n>Refunded</ng-container> }
+                                @else { <ng-container i18n>Partially refunded</ng-container> }
+                            </mat-chip>
+                        }
                     </td>
                 </ng-container>
 
@@ -221,6 +227,18 @@
                                 <button mat-menu-item (click)="editOrder(order)">
                                     <mat-icon>edit</mat-icon>
                                     <span><ng-container i18n>Edit</ng-container></span>
+                                </button>
+                            }
+                            @if (canRefundOrder(order)) {
+                                <button mat-menu-item (click)="refundOrder(order)">
+                                    <mat-icon>currency_exchange</mat-icon>
+                                    <span><ng-container i18n>Refund</ng-container></span>
+                                </button>
+                            }
+                            @if (canVoidOrder(order)) {
+                                <button mat-menu-item (click)="voidOrder(order)">
+                                    <mat-icon>block</mat-icon>
+                                    <span><ng-container i18n>Void order</ng-container></span>
                                 </button>
                             }
                         </mat-menu>
@@ -288,6 +306,18 @@
                                 <span><ng-container i18n>Edit</ng-container></span>
                             </button>
                         }
+                        @if (canRefundOrder(order)) {
+                            <button mat-menu-item (click)="refundOrder(order)">
+                                <mat-icon>currency_exchange</mat-icon>
+                                <span><ng-container i18n>Refund</ng-container></span>
+                            </button>
+                        }
+                        @if (canVoidOrder(order)) {
+                            <button mat-menu-item (click)="voidOrder(order)">
+                                <mat-icon>block</mat-icon>
+                                <span><ng-container i18n>Void order</ng-container></span>
+                            </button>
+                        }
                     </mat-menu>
                 </div>
 
@@ -304,6 +334,12 @@
                     <mat-chip [class]="getPaymentStatusColor(order.paymentStatus!)" class="text-xs">
                         {{ order.paymentStatus }}
                     </mat-chip>
+                    @if (order.refundStatus === 'Partial' || order.refundStatus === 'Full') {
+                        <mat-chip [class]="getRefundStatusColor(order.refundStatus)" class="text-xs">
+                            @if (order.refundStatus === 'Full') { <ng-container i18n>Refunded</ng-container> }
+                            @else { <ng-container i18n>Partially refunded</ng-container> }
+                        </mat-chip>
+                    }
                 </div>
 
                 <!-- Details -->

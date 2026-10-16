@@ -11,6 +11,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -77,6 +78,7 @@ export class ListReceiptsComponent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
   public storeStore = inject(StoreStore);
   private query = toSignal(this.queryParams.getAllParams$);
   public activeTab = 'all';
@@ -226,6 +228,19 @@ export class ListReceiptsComponent {
     });
   }
 
+  /** A sale that took money is a financial record: it is refunded or voided, never deleted. */
+  isPaid(order: any): boolean {
+    return order?.paymentStatus === 'Paid' || (order?.refundedAmount || 0) > 0;
+  }
+
+  private deleteFailed(err: any): void {
+    this.snackBar.open(
+      err?.error?.message || $localize`The receipt could not be deleted.`,
+      $localize`Close`,
+      { duration: 6000 },
+    );
+  }
+
   deleteReceipt(orderId: string) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
@@ -248,6 +263,7 @@ export class ListReceiptsComponent {
           error: (err) => {
             console.error('Error deleting receipt:', err);
             this.isDeleting.set(false);
+            this.deleteFailed(err);
           },
         });
       }
@@ -269,7 +285,14 @@ export class ListReceiptsComponent {
   }
 
   deleteMultiple() {
-    const selectedReceipts = this.selection.selected;
+    const selectedReceipts = this.selection.selected.filter((r: any) => !this.isPaid(r));
+    if (selectedReceipts.length !== this.selection.selected.length) {
+      this.snackBar.open(
+        $localize`Paid sales cannot be deleted. Refund or void them instead.`,
+        $localize`Close`,
+        { duration: 6000 },
+      );
+    }
     if (selectedReceipts.length === 0) return;
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -298,6 +321,8 @@ export class ListReceiptsComponent {
           (error) => {
             console.error('Error deleting receipts:', error);
             this.isDeleting.set(false);
+            this.dataSource.reload();
+            this.deleteFailed(error);
           }
         );
       }

@@ -1,0 +1,131 @@
+<h2 mat-dialog-title class="!pb-1">
+  <ng-container i18n>Refund order</ng-container>
+  @if (info()?.reference) { <span class="ml-2 text-on-surface-variant font-normal">#{{ info()!.reference }}</span> }
+</h2>
+
+<mat-dialog-content class="!pt-2">
+  @if (loading()) {
+    <div class="flex justify-center py-10"><mat-spinner diameter="36"></mat-spinner></div>
+  } @else if (loadError()) {
+    <p class="py-6 text-center text-on-surface-variant">{{ loadError() }}</p>
+  } @else if (info(); as inf) {
+    <p class="mb-3 text-sm text-on-surface-variant">
+      <ng-container i18n>Paid</ng-container> {{ inf.total | currency: currency() : 'symbol' : '1.0-2' }}
+      @if (inf.refundedAmount > 0) {
+        · <ng-container i18n>already refunded</ng-container> {{ inf.refundedAmount | currency: currency() : 'symbol' : '1.0-2' }}
+      }
+    </p>
+
+    <mat-button-toggle-group class="mb-3 w-full" [value]="mode()" (change)="mode.set($event.value)" hideSingleSelectionIndicator>
+      <mat-button-toggle value="items" class="flex-1"><ng-container i18n>Items</ng-container></mat-button-toggle>
+      <mat-button-toggle value="amount" class="flex-1"><ng-container i18n>An amount</ng-container></mat-button-toggle>
+    </mat-button-toggle-group>
+
+    @if (mode() === 'items') {
+      <div class="mb-1 flex items-center justify-between">
+        <span class="text-sm font-medium"><ng-container i18n>Choose what comes back</ng-container></span>
+        <span class="flex gap-3 text-sm">
+          <button type="button" class="text-primary" (click)="selectAll()"><ng-container i18n>Select all</ng-container></button>
+          @if (pickedCount() > 0) { <button type="button" class="text-on-surface-variant" (click)="clearAll()"><ng-container i18n>Clear</ng-container></button> }
+        </span>
+      </div>
+      <ul class="divide-y divide-outline-variant rounded-lg border border-outline-variant">
+        @for (line of inf.lines; track line.lineId) {
+          <li class="flex flex-wrap items-center gap-x-3 gap-y-1 p-2.5" [class.opacity-50]="line.refundableQuantity === 0">
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-medium">{{ line.name }}</p>
+              <p class="text-xs text-on-surface-variant">
+                {{ line.unitPrice | currency: currency() : 'symbol' : '1.0-2' }} ·
+                @if (line.refundableQuantity === 0) { <ng-container i18n>Fully refunded</ng-container> }
+                @else { <ng-container i18n>{{ line.refundableQuantity }} left to refund</ng-container> }
+              </p>
+            </div>
+            @if (line.refundableQuantity > 0) {
+              <div class="flex items-center rounded-full border border-outline-variant">
+                <button matIconButton class="!h-9 !w-9" type="button" [attr.aria-label]="'Decrease quantity' | tr"
+                  [disabled]="!quantities()[line.lineId]" (click)="setQty(line.lineId, (quantities()[line.lineId] || 0) - 1, line.refundableQuantity)">
+                  <mat-icon>remove</mat-icon>
+                </button>
+                <span class="min-w-7 text-center font-semibold tabular-nums">{{ quantities()[line.lineId] || 0 }}</span>
+                <button matIconButton class="!h-9 !w-9" type="button" [attr.aria-label]="'Increase quantity' | tr"
+                  [disabled]="(quantities()[line.lineId] || 0) >= line.refundableQuantity"
+                  (click)="setQty(line.lineId, (quantities()[line.lineId] || 0) + 1, line.refundableQuantity)">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
+            }
+            @if ((quantities()[line.lineId] || 0) > 0) {
+              <div class="flex w-full items-center gap-2 pl-0.5 text-xs">
+                <mat-icon class="!h-4 !w-4 !text-base text-on-surface-variant">inventory_2</mat-icon>
+                <button type="button" class="rounded-full border px-2.5 py-0.5"
+                  [class.bg-secondary-container]="stockFor(line.lineId) === 'RETURN'" [class.border-outline-variant]="stockFor(line.lineId) !== 'RETURN'"
+                  (click)="setStock(line.lineId, 'RETURN')"><ng-container i18n>Back to stock</ng-container></button>
+                <button type="button" class="rounded-full border px-2.5 py-0.5"
+                  [class.bg-secondary-container]="stockFor(line.lineId) === 'WASTE'" [class.border-outline-variant]="stockFor(line.lineId) !== 'WASTE'"
+                  (click)="setStock(line.lineId, 'WASTE')"><ng-container i18n>Waste</ng-container></button>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label><ng-container i18n>Amount to refund</ng-container></mat-label>
+        <input matInput type="number" min="0" [max]="inf.remainingAmount" [ngModel]="amount()" (ngModelChange)="amount.set($event)" />
+        <mat-hint><ng-container i18n>At most</ng-container> {{ inf.remainingAmount | currency: currency() : 'symbol' : '1.0-2' }}</mat-hint>
+      </mat-form-field>
+    }
+
+    <div class="mt-4 flex items-baseline justify-between rounded-lg bg-surface-container px-3 py-2.5">
+      <span class="text-sm"><ng-container i18n>Refund total</ng-container></span>
+      <span class="text-xl font-bold tabular-nums">{{ total() | currency: currency() : 'symbol' : '1.0-2' }}</span>
+    </div>
+    @if (mode() === 'items') {
+      <p class="mt-1 text-xs text-on-surface-variant"><ng-container i18n>Discount, tax and fees are returned in proportion to the items.</ng-container></p>
+    }
+
+    @if (showPin()) {
+      <mat-form-field appearance="outline" class="mt-4 w-full">
+        <mat-label><ng-container i18n>Manager or owner PIN</ng-container></mat-label>
+        <input matInput type="password" inputmode="numeric" autocomplete="off" maxlength="12" [ngModel]="pin()" (ngModelChange)="pin.set($event)" />
+        <mat-hint><ng-container i18n>A manager must approve this refund.</ng-container></mat-hint>
+      </mat-form-field>
+    }
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label><ng-container i18n>Reason</ng-container></mat-label>
+      <mat-select [ngModel]="reason()" (ngModelChange)="reason.set($event)">
+        @for (r of reasons(); track r.code) { <mat-option [value]="r.code">{{ r.label }}</mat-option> }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label><ng-container i18n>Note (optional)</ng-container></mat-label>
+      <textarea matInput rows="2" maxlength="500" [ngModel]="note()" (ngModelChange)="note.set($event)"></textarea>
+    </mat-form-field>
+
+    @if (inf.tenders.length > 1 && singleTenders().length > 0) {
+      <p class="mb-1 text-sm font-medium"><ng-container i18n>Give the money back as</ng-container></p>
+      <mat-radio-group class="mb-3 flex flex-col" [ngModel]="tender()" (ngModelChange)="tender.set($event)">
+        <mat-radio-button value=""><ng-container i18n>The original payment methods</ng-container></mat-radio-button>
+        @for (t of singleTenders(); track t.method) { <mat-radio-button [value]="t.method">{{ t.method }}</mat-radio-button> }
+      </mat-radio-group>
+    } @else if (inf.tenders.length === 1) {
+      <p class="mb-3 text-sm text-on-surface-variant"><ng-container i18n>Money goes back to</ng-container> {{ inf.tenders[0].method }}.</p>
+    }
+
+    @if (error()) {
+      <p class="mt-2 rounded-lg bg-error-container px-3 py-2 text-sm text-on-error-container" role="alert">{{ error() }}</p>
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="!px-6 !pb-4">
+  <button matButton (click)="close()" [disabled]="submitting()"><ng-container i18n>Cancel</ng-container></button>
+  @if (info() && !loadError()) {
+    <button matButton="filled" color="primary" [disabled]="!canSubmit()" (click)="submit()">
+      @if (submitting()) { <mat-spinner diameter="18" class="mr-2 inline-block"></mat-spinner> }
+      <ng-container i18n>Refund {{ total() | currency: currency() : 'symbol' : '1.0-2' }}</ng-container>
+    </button>
+  }
+</mat-dialog-actions>

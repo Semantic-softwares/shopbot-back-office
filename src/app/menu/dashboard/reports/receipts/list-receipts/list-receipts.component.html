@@ -167,10 +167,12 @@
                     <mat-icon>visibility</mat-icon>
                     <span><ng-container i18n>View Receipt Details</ng-container></span>
                   </button>
-                  <button mat-menu-item (click)="deleteReceipt(element._id)">
-                    <mat-icon>delete</mat-icon>
-                    <span><ng-container i18n>Delete</ng-container></span>
-                  </button>
+                  @if (!isPaid(element)) {
+                      <button mat-menu-item (click)="deleteReceipt(element._id)">
+                        <mat-icon>delete</mat-icon>
+                        <span><ng-container i18n>Delete</ng-container></span>
+                      </button>
+                  }
                 </mat-menu>
               </td>
             </ng-container>
@@ -236,10 +238,12 @@
                       <mat-icon>visibility</mat-icon>
                       <span><ng-container i18n>View Receipt Details</ng-container></span>
                     </button>
-                    <button mat-menu-item (click)="deleteReceipt(element._id)">
-                      <mat-icon>delete</mat-icon>
-                      <span><ng-container i18n>Delete</ng-container></span>
-                    </button>
+                    @if (!isPaid(element)) {
+                        <button mat-menu-item (click)="deleteReceipt(element._id)">
+                          <mat-icon>delete</mat-icon>
+                          <span><ng-container i18n>Delete</ng-container></span>
+                        </button>
+                    }
                   </mat-menu>
                 </div>
 

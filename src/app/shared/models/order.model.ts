@@ -77,6 +77,10 @@ export interface Order {
   promo?: string; // Reference to Promo
   note?: string;
   orderCancellationReason?: string;
+  /** Running refund totals, kept by the backend. The refunds themselves are separate tickets. */
+  refundedAmount?: number;
+  refundStatus?: 'None' | 'Partial' | 'Full';
+  voidedAt?: Date;
   status?: Status[];
   reference?: string;
   // Free-text name captured for orders with no account (self-order, no

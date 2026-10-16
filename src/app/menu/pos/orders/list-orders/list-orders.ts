@@ -1,5 +1,8 @@
 import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RefundDialogComponent, RefundDialogData } from '../refund-dialog/refund-dialog.component';
+import { VoidDialogComponent, VoidDialogData } from '../void-dialog/void-dialog.component';
+import { Refund } from '../../../../shared/models/refund.model';
 import { Router, RouterModule } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { MatTableModule } from '@angular/material/table';
@@ -253,6 +256,10 @@ export class ListOrders {
     return colors[status] || 'bg-gray-100 text-gray-800';
   }
 
+  getRefundStatusColor(status?: string): string {
+    return status === 'Full' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800';
+  }
+
   getPaymentStatusColor(status: string): string {
     return status === 'Paid' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800';
   }
@@ -372,6 +379,56 @@ export class ListOrders {
         },
       });
     });
+  }
+
+  /** A paid sale that still has something left to refund. */
+  public canRefundOrder(order: Order): boolean {
+    return order.paymentStatus === 'Paid' && order.category !== OrderCategoryType.CANCEL && order.refundStatus !== 'Full';
+  }
+
+  /** An order nobody has paid for can be cancelled; a paid one is refunded instead. */
+  public canVoidOrder(order: Order): boolean {
+    return order.paymentStatus !== 'Paid' && order.category !== OrderCategoryType.CANCEL;
+  }
+
+  public refundOrder(order: Order): void {
+    const ref = this.dialog.open(RefundDialogComponent, {
+      width: '560px',
+      maxWidth: '96vw',
+      maxHeight: '92vh',
+      data: { orderId: order._id } as RefundDialogData,
+    });
+    ref.afterClosed().subscribe((refund: Refund | undefined) => {
+      if (!refund) return;
+      this.snackBar.open(
+        $localize`Refund ${refund.refundNumber} of ${this.formatMoney(refund.total)} recorded`,
+        $localize`Close`,
+        { duration: 5000 },
+      );
+      this.reloadData();
+    });
+  }
+
+  public voidOrder(order: Order): void {
+    const ref = this.dialog.open(VoidDialogComponent, {
+      width: '460px',
+      maxWidth: '96vw',
+      data: { orderId: order._id, reference: order.reference } as VoidDialogData,
+    });
+    ref.afterClosed().subscribe((voided: Order | undefined) => {
+      if (!voided) return;
+      // The table is freed on the server; reflect it in the table view too.
+      if (order.table?._id) {
+        this.tableStore.updateTable(order.table._id, { orderId: null, order: null });
+        this.tableStore.updateTableOrderSync(order.table._id, { orderId: null });
+      }
+      this.snackBar.open($localize`Order voided`, $localize`Close`, { duration: 3000 });
+      this.reloadData();
+    });
+  }
+
+  private formatMoney(amount: number): string {
+    return `${this.currency()}${new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(amount)}`;
   }
 
   /** Completed + paid orders are final — no in-place edits once a sale is closed out. */

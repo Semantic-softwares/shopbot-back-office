@@ -6,8 +6,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { OrderService } from '../../../../../shared/services/orders.service';
@@ -17,6 +19,11 @@ import { PageHeaderComponent } from '../../../../../shared/components/page-heade
 import { DeliveryAddressCardComponent } from '../../../../../shared/components/delivery-address-card/delivery-address-card.component';
 import { MatListModule } from "@angular/material/list";
 import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
+import { RefundService } from '../../../../../shared/services/refund.service';
+import { PrintJobService } from '../../../../../shared/services/print-job.service';
+import { Refund } from '../../../../../shared/models/refund.model';
+import { RefundDialogComponent, refundReasonLabel } from '../../../../pos/orders/refund-dialog/refund-dialog.component';
+import { VoidDialogComponent } from '../../../../pos/orders/void-dialog/void-dialog.component';
 
 
 @Component({
@@ -34,6 +41,7 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
     MatMenuModule,
     MatTableModule,
     MatChipsModule,
+    MatTooltipModule,
     PageHeaderComponent,
     DeliveryAddressCardComponent,
     MatListModule,
@@ -47,6 +55,9 @@ export class ReceiptsDetailsComponent {
   private storeService = inject(StoreService);
   private snackBar = inject(MatSnackBar);
   private location = inject(Location);
+  private dialog = inject(MatDialog);
+  private refundService = inject(RefundService);
+  private printJobService = inject(PrintJobService);
 
   exporting = signal(false);
   claiming = signal(false);
@@ -175,6 +186,75 @@ export class ReceiptsDetailsComponent {
     }),
     stream: ({ params }) => this.orderService.getOrder(params.id!)
   });
+
+  /** The refund tickets raised against this sale (the sale itself is never rewritten). */
+  refundsResource = rxResource({
+    params: () => ({ id: this.route.snapshot.paramMap.get('id') }),
+    stream: ({ params }) => this.refundService.listForOrder(params.id!),
+  });
+  refunds = computed<Refund[]>(() => (this.refundsResource.hasValue() ? this.refundsResource.value() : []));
+  reasonLabel = refundReasonLabel;
+
+  canRefund = computed(() => {
+    const o: any = this.orderResource.value();
+    return !!o && o.paymentStatus === 'Paid' && o.category !== 'Cancel' && o.refundStatus !== 'Full';
+  });
+
+  canVoid = computed(() => {
+    const o: any = this.orderResource.value();
+    return !!o && o.paymentStatus !== 'Paid' && o.category !== 'Cancel';
+  });
+
+  /** Category and payment status come in as 'Complete' / 'Paid', so compare case-insensitively. */
+  is(value: string | undefined, expected: string): boolean {
+    return (value || '').toLowerCase() === expected;
+  }
+
+  openRefund(): void {
+    const order: any = this.orderResource.value();
+    if (!order?._id) return;
+    this.dialog
+      .open(RefundDialogComponent, { width: '560px', maxWidth: '96vw', maxHeight: '92vh', data: { orderId: order._id } })
+      .afterClosed()
+      .subscribe((refund: Refund | undefined) => {
+        if (!refund) return;
+        this.snackBar.open($localize`Refund ${refund.refundNumber} recorded`, $localize`Close`, { duration: 5000 });
+        this.orderResource.reload();
+        this.refundsResource.reload();
+      });
+  }
+
+  /** Prints (or reprints) the refund's receipt, with the credit note's QR for stores that report sales. */
+  printRefund(refund: Refund): void {
+    const sending = this.snackBar.open($localize`Sending to printer...`, '', { duration: 0 });
+    this.printJobService.printRefund(refund._id).subscribe({
+      next: (response) => {
+        sending.dismiss();
+        this.snackBar.open(
+          response.success ? response.message || $localize`Print job created` : $localize`Failed to create print job`,
+          $localize`Close`,
+          { duration: 4000 },
+        );
+      },
+      error: (error) => {
+        sending.dismiss();
+        this.snackBar.open($localize`Print failed: ${error.error?.error || error.message}`, $localize`Close`, { duration: 5000 });
+      },
+    });
+  }
+
+  openVoid(): void {
+    const order: any = this.orderResource.value();
+    if (!order?._id) return;
+    this.dialog
+      .open(VoidDialogComponent, { width: '460px', maxWidth: '96vw', data: { orderId: order._id, reference: order.reference } })
+      .afterClosed()
+      .subscribe((voided: unknown) => {
+        if (!voided) return;
+        this.snackBar.open($localize`Order voided`, $localize`Close`, { duration: 3000 });
+        this.orderResource.reload();
+      });
+  }
 
   // Computed currency signal for use in template
   currency = computed(() => {

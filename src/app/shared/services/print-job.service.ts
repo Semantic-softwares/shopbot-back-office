@@ -65,4 +65,14 @@ export class PrintJobService {
     );
   }
 
+  /**
+   * Prints (or reprints) the receipt for a refund ticket on the store's master printer. For a store that reports
+   * sales the receipt carries the credit note's reference and QR code.
+   */
+  printRefund(refundId: string): Observable<{ success: boolean; jobs: PrintJob[]; message: string }> {
+    return this.http.post<{ success: boolean; jobs: PrintJob[]; message: string }>(
+      `${this.apiUrl}/print-refund`,
+      { refundId },
+    );
+  }
 }

@@ -1,5 +1,6 @@
 // Lists UI text that has no translation yet, per language.
 //   npm run i18n:check            -> report, exit 0
+//   npm run i18n:check -- --all    -> print every missing message, not just the first 40
 //   npm run i18n:check -- --strict -> exit 1 when anything is missing (for CI)
 //
 // Sources of translatable text:
@@ -17,6 +18,7 @@ const require = createRequire(path.join(root, 'package.json'));
 const { computeMsgId } = await import(require.resolve('@angular/compiler'));
 const LANGS = ['fr', 'it', 'rw'];
 const strict = process.argv.includes('--strict');
+const showAll = process.argv.includes('--all');
 
 // 1. extractor
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'i18n-'));
@@ -52,8 +54,8 @@ for (const lang of LANGS) {
   const missing = [...messages].filter(([id, text]) => !storefront.test(id) && needsTranslation(text) && !(id in have));
   missingTotal += missing.length;
   console.log(`\n${lang}: ${missing.length} missing`);
-  missing.slice(0, 40).forEach(([id, text]) => console.log(`  ${id}  ${text.replace(/\s+/g, ' ').trim().slice(0, 100)}`));
-  if (missing.length > 40) console.log(`  … and ${missing.length - 40} more`);
+  missing.slice(0, showAll ? undefined : 40).forEach(([id, text]) => console.log(`  ${id}  ${text.replace(/\s+/g, ' ').trim().slice(0, 100)}`));
+  if (!showAll && missing.length > 40) console.log(`  … and ${missing.length - 40} more`);
 }
 fs.rmSync(tmp, { recursive: true, force: true });
 if (strict && missingTotal) process.exit(1);
