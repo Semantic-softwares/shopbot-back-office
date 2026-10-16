@@ -56,3 +56,10 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   padding: 0;
   max-height: 94dvh;
 }
+
+// Reservation tape chart hover card: one fact per line.
+.tc-tip .mdc-tooltip__surface {
+  white-space: pre-line;
+  text-align: left;
+  max-width: 320px;
+}

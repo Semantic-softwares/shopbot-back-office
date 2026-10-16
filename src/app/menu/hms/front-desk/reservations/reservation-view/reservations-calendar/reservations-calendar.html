@@ -1,329 +1,285 @@
-<app-page-header 
-  title="Reservations" i18n-title 
+<app-page-header
+  title="Reservations" i18n-title
   subtitle="Manage hotel reservations and guest bookings" i18n-subtitle
   [showViewToggle]="true"
-  [hideActions]="isMobile()"
   viewToggleRoute="/menu/hms/front-desk/reservations/view">
-  
-  <ng-container actions>
-    <button matButton="outlined" (click)="clearFilters()">
-      <mat-icon>clear</mat-icon>
-      <ng-container i18n>Clear Filters</ng-container>
-    </button>
-
-    <button matButton="outlined" (click)="reloadData()">
-      <mat-icon class="mr-1">refresh</mat-icon>
-      <ng-container i18n>Reload</ng-container>
-    </button>
-    
-    <button matButton="filled" (click)="createReservation()">
-      <mat-icon class="mr-1">add</mat-icon>
-      <ng-container i18n>Create Reservation</ng-container>
-    </button>
-  </ng-container>
-  
 </app-page-header>
 
-<div class="h-screen flex flex-col overflow-hidden">
-  <!-- Calendar Controls Header (hidden on mobile — actions moved to FAB menu) -->
-  @if (!isMobile()) {
-  <div class="py-4 px-4">
-    <div class="flex justify-end items-center gap-4">
-      <div class="flex gap-3 items-center">
-        <!-- View Mode Menu -->
-        <button mat-stroked-button [matMenuTriggerFor]="viewMenu">
-          {{ viewMode() | titlecase }}
-          <mat-icon class="ml-1">expand_more</mat-icon>
-        </button>
-        <mat-menu #viewMenu="matMenu">
-          <button mat-menu-item (click)="onViewModeChange('weekly')"><ng-container i18n>Weekly</ng-container></button>
-          <button mat-menu-item (click)="onViewModeChange('monthly')"><ng-container i18n>Monthly</ng-container></button>
-        </mat-menu>
+<section class="tc" [style.--day-w.px]="dayWidth()" [style.--left-w.px]="leftWidth()" [style.--row-h.px]="rowHeight()">
 
-        <!-- Status Filter -->
-        <button mat-stroked-button [matMenuTriggerFor]="statusMenu">
-          <ng-container i18n>Status: {{ selectedStatus() | titlecase }}</ng-container>
-          <mat-icon class="ml-1">expand_more</mat-icon>
-        </button>
-        <mat-menu #statusMenu="matMenu">
-          <button mat-menu-item (click)="onStatusChange('all')"><ng-container i18n>All</ng-container></button>
-          @for (s of reservationStatuses; track s) {
-            <button mat-menu-item (click)="onStatusChange(s)">{{ s | titlecase }}</button>
-          }
-        </mat-menu>
-
-        <!-- Navigation -->
-        <button matButton="tonal" (click)="previousWeek()">
-          <mat-icon class="mr-1">chevron_left</mat-icon>
-          <ng-container i18n>Previous</ng-container>
-        </button>
-        <button matButton color="warn" class="min-w-48">
-          {{getPeriodLabel()}}
-        </button>
-        <button matButton="tonal" (click)="nextWeek()">
-          <ng-container i18n>Next</ng-container>
-          <mat-icon class="ml-1">chevron_right</mat-icon>
-        </button>
-      </div>
-    </div>
-  </div>
-  }
-
-  <!-- Mobile: Compact navigation bar -->
-  @if (isMobile()) {
-    <div class="flex items-center justify-between px-3 py-2 border-b border-gray-200">
-      <button mat-icon-button (click)="previousWeek()" aria-label="Previous period" i18n-aria-label>
+  <!-- Move around, narrow down, create -->
+  <div class="tc-toolbar">
+    <div class="tc-nav">
+      <button matIconButton type="button" (click)="shift(-7)" [attr.aria-label]="'Back one week' | tr" [matTooltip]="'Back one week' | tr">
         <mat-icon>chevron_left</mat-icon>
       </button>
-      <span class="text-sm font-semibold text-gray-800 truncate">{{ getPeriodLabel() }}</span>
-      <button mat-icon-button (click)="nextWeek()" aria-label="Next period" i18n-aria-label>
+      <button matButton="outlined" type="button" class="tc-today" (click)="goToday()"><ng-container i18n>Today</ng-container></button>
+      <button matIconButton type="button" (click)="shift(7)" [attr.aria-label]="'Forward one week' | tr" [matTooltip]="'Forward one week' | tr">
         <mat-icon>chevron_right</mat-icon>
       </button>
+      <button type="button" class="tc-period" (click)="picker.showPicker()" [attr.aria-label]="'Jump to a date' | tr">
+        <span>{{ periodLabel() }}</span>
+        <mat-icon>calendar_month</mat-icon>
+      </button>
+      <input #picker type="date" class="tc-sr" tabindex="-1" aria-hidden="true" (change)="jump($any($event.target).value)" />
     </div>
-  }
 
-  <!-- Loading Overlay -->
-  @if (reservations.isLoading()) {
-    <div class="absolute inset-0 z-50 flex items-center justify-center bg-white/60">
-      <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+    <div class="tc-seg" role="group" [attr.aria-label]="'Days shown' | tr">
+      @for (n of rangeOptions; track n) {
+        <button type="button" [class.on]="rangeDays() === n" [attr.aria-pressed]="rangeDays() === n" (click)="setRange(n)">{{ n }}<ng-container i18n>d</ng-container></button>
+      }
     </div>
-  }
 
-  <!-- Calendar Grid Container (single scroll surface) -->
-  <div class="flex-1 min-h-0 relative overflow-hidden">
-    <div class="calendar-scroll">
-      <!-- Header Row (sticky top) -->
-      <div class="calendar-row calendar-header">
-        <div class="calendar-left calendar-cell-left calendar-header-cell">
-          <span class="text-xs font-semibold text-gray-700 uppercase"><ng-container i18n>Rooms</ng-container></span>
-        </div>
-        <div class="calendar-row-cells" [style.width.px]="dateRange().length * cellWidthPx()">
-          @for (date of dateRange(); track date.key) {
-            <div
-              class="calendar-cell calendar-cell-header"
-              [style.width.px]="cellWidthPx()"
-              [class.bg-blue-50]="hoveredDateKey() === date.key"
-              (mouseenter)="hoveredDateKey.set(date.key)"
-              (mouseleave)="hoveredDateKey.set(null)">
-              <p class="text-xs font-semibold text-gray-600">{{ date.dayName }}</p>
-              <p class="text-sm font-bold text-gray-900">{{ date.day }}</p>
-            </div>
+    <label class="tc-search">
+      <mat-icon>search</mat-icon>
+      <input type="search" [value]="search()" (input)="search.set($any($event.target).value)"
+        [placeholder]="'Find a guest or confirmation number' | tr" [attr.aria-label]="'Find a guest or confirmation number' | tr" />
+      @if (search()) {
+        <span class="tc-count">{{ matchCount() }}</span>
+        <button type="button" matIconButton class="tc-clear" (click)="search.set('')" [attr.aria-label]="'Clear search' | tr"><mat-icon>close</mat-icon></button>
+      }
+    </label>
+
+    <div class="tc-tools">
+      @if (roomTypeOptions().length > 1) {
+        <button matButton="outlined" type="button" [matMenuTriggerFor]="typeMenu">
+          <mat-icon>bed</mat-icon>
+          @if (typeFilter().size === 0) { <ng-container i18n>All room types</ng-container> }
+          @else { <ng-container i18n>{{ typeFilter().size }} room types</ng-container> }
+        </button>
+        <mat-menu #typeMenu="matMenu">
+          @for (t of roomTypeOptions(); track t.id) {
+            <button mat-menu-item type="button" (click)="toggleType(t.id); $event.stopPropagation()">
+              <mat-icon>{{ typeFilter().size === 0 || typeFilter().has(t.id) ? 'check_box' : 'check_box_outline_blank' }}</mat-icon>
+              <span>{{ t.name }}</span>
+            </button>
           }
-        </div>
-      </div>
-
-      <!-- Body Rows -->
-      @for (row of roomsWithReservations(); track $index) {
-        @if (row.isGroup) {
-          <div class="calendar-row calendar-group">
-            <div class="calendar-left calendar-cell-left calendar-group-cell">
-              <span class="text-xs font-semibold text-gray-800">{{ row.roomTypeName }}</span>
-            </div>
-            <div class="calendar-row-cells" [style.width.px]="dateRange().length * cellWidthPx()">
-              @for (date of dateRange(); track date.key) {
-                @let groupCellInfo = getCellInfo(row.roomTypeId, date.key);
-                <div
-                  class="calendar-cell calendar-cell-group"
-                  [style.width.px]="cellWidthPx()"
-                  [class.bg-blue-100]="hoveredDateKey() === date.key"
-                  [class.cell-disabled-group]="groupCellInfo?.isDisabled"
-                  (mouseenter)="hoveredDateKey.set(date.key)"
-                  (mouseleave)="hoveredDateKey.set(null)">
-                  @if (groupCellInfo) {
-                    <div class="cell-group-info">
-                      @if (groupCellInfo.availability !== null) {
-                        <span class="cell-availability" 
-                              [class.text-red-500]="groupCellInfo.availability <= 0"
-                              [class.text-amber-500]="groupCellInfo.availability === 1"
-                              [class.text-gray-400]="groupCellInfo.availability! > 1">
-                          {{ groupCellInfo.availability }}
-                      </span>
-                      }
-                      @if (groupCellInfo.restrictions?.stopSell) {
-                        <span class="cell-restriction-badge bg-red-100 text-red-600"><ng-container i18n>SS</ng-container></span>
-                      } @else if (groupCellInfo.restrictions?.closedToArrival) {
-                        <span class="cell-restriction-badge bg-amber-100 text-amber-600"><ng-container i18n>CTA</ng-container></span>
-                      } @else if (groupCellInfo.restrictions?.closedToDeparture) {
-                        <span class="cell-restriction-badge bg-purple-100 text-purple-600"><ng-container i18n>CTD</ng-container></span>
-                      }
-                    </div>
-                  }
-                </div>
-              }
-            </div>
-          </div>
-        } @else {
-          <div class="calendar-row calendar-room">
-            <div
-              class="calendar-left calendar-cell-left calendar-room-cell"
-              [ngClass]="getHousekeepingStatusClass(row.housekeepingStatus)"
-              [matTooltip]="('Housekeeping: ' | tr) + (row.housekeepingStatus | titlecase) + (' (Right-click to change)' | tr)"
-              matTooltipPosition="right"
-              [cdkContextMenuTriggerFor]="housekeepingMenu"
-              [cdkContextMenuTriggerData]="{ roomId: row.roomId, currentStatus: row.housekeepingStatus }">
-              <span>{{ row.roomName }}</span>
-            </div>
-            <div class="calendar-row-cells" [style.width.px]="dateRange().length * cellWidthPx()">
-              @for (date of dateRange(); track date.key) {
-                @let cellInfo = getCellInfo(row.roomTypeId, date.key);
-                @let cellDisabled = cellInfo?.isDisabled || row.housekeepingStatus === 'out_of_order';
-                <div
-                  class="calendar-cell calendar-cell-room"
-                  [style.width.px]="cellWidthPx()"
-                  [class.bg-blue-50]="hoveredDateKey() === date.key && !isCellInSelection(date, row) && !cellDisabled"
-                  [class.bg-blue-100]="isCellInSelection(date, row) && !dragSelection().hasConflict"
-                  [class.bg-red-100]="isCellInSelection(date, row) && dragSelection().hasConflict"
-                  [class.cell-disabled]="cellDisabled"
-                  [class.cell-cta]="cellInfo?.restrictions?.closedToArrival && !cellInfo?.isDisabled"
-                  [class.cell-ctd]="cellInfo?.restrictions?.closedToDeparture && !cellInfo?.isDisabled"
-                  [class.cursor-pointer]="!hasReservationOnDate(row.roomId, date.date) && !cellDisabled"
-                  [class.cursor-not-allowed]="hasReservationOnDate(row.roomId, date.date) || cellDisabled"
-                  [matTooltip]="getCellRestrictionTooltip(row.roomTypeId, date.key)"
-                  matTooltipPosition="above"
-                  [matTooltipDisabled]="!cellInfo?.disableReason"
-                  (mousedown)="onCellMouseDown($event, date, row)"
-                  (mouseenter)="onCellMouseEnter(date, row); hoveredDateKey.set(date.key)"
-                  (mouseleave)="hoveredDateKey.set(null)"
-                  (mouseup)="onCellMouseUp()">
-                  <!-- Faint rate placeholder -->
-                  @if (cellInfo?.rate && !hasReservationOnDate(row.roomId, date.date)) {
-                    <span class="cell-rate-label"
-                          [class.cell-rate-disabled]="cellDisabled">{{ cellInfo!.rate | currency : (storeStore.selectedStore()?.currencyCode || 'NGN') : 'symbol-narrow' : '1.0-0' }}</span>
-                  }
-                  @for (reservation of row.reservations; track $index) {
-                    @if (shouldRenderReservationFromDate(reservation, date)) {
-                      <div
-                        class="reservation-block"
-                        [style.backgroundColor]="getBookingSourceColor(reservation)"
-                        [style.top.%]="getReservationTopPercent(row.reservations, date, reservation)"
-                        [style.height.%]="getReservationHeightPercent(row.reservations, date)"
-                        [style.width.px]="getReservationWidth(reservation, date)"
-                        [matTooltip]="getReservationTooltip(reservation, row.roomName)"
-                        matTooltipPosition="above"
-                        (click)="openReservationPreview(reservation.reservation, row); $event.stopPropagation()"
-                        (mousedown)="$event.stopPropagation()">
-                        <div class="reservation-content">
-                          <div class="reservation-text">
-                            <div class="reservation-meta">
-                              <span class="reservation-nights">{{ getReservationNightsLabel(reservation) }}</span>
-                              @if (isReservationModified(reservation)) {
-                                <span class="reservation-modified"><ng-container i18n>MOD</ng-container></span>
-                              }
-                            </div>
-                            <span class="reservation-name">{{ getReservationBlockLabel(reservation) }}</span>
-                          </div>
-                          <div class="reservation-source">
-                            @if (getBookingSourceLogoUrl(reservation)) {
-                              <img
-                                [src]="getBookingSourceLogoUrl(reservation)"
-                                [alt]="getBookingSourceLabel(reservation)"
-                                class="reservation-source-icon"
-                                loading="lazy"
-                              />
-                            } @else {
-                              <mat-icon class="reservation-source-icon">directions_walk</mat-icon>
-                            }
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  }
-                </div>
-              }
-            </div>
-          </div>
+          @if (typeFilter().size > 0) {
+            <button mat-menu-item type="button" (click)="clearTypes()"><mat-icon>filter_list_off</mat-icon><span><ng-container i18n>Show all</ng-container></span></button>
+          }
+        </mat-menu>
+      }
+      <button matIconButton type="button" class="tc-status-btn" [matMenuTriggerFor]="statusMenu" [attr.aria-label]="'Show or hide reservations by status' | tr">
+        <mat-icon>filter_list</mat-icon>
+      </button>
+      <mat-menu #statusMenu="matMenu">
+        @for (item of legend; track item.status) {
+          <button mat-menu-item type="button" (click)="toggleStatus(item.status); $event.stopPropagation()">
+            <mat-icon>{{ hidden().has(item.status) ? 'check_box_outline_blank' : 'check_box' }}</mat-icon>
+            <span>{{ item.label }} ({{ statusCounts()[item.status] ?? 0 }})</span>
+          </button>
         }
+      </mat-menu>
+      <button matIconButton type="button" (click)="collapseAll(!allCollapsed())"
+        [attr.aria-label]="(allCollapsed() ? 'Expand all room types' : 'Collapse all room types') | tr"
+        [matTooltip]="(allCollapsed() ? 'Expand all room types' : 'Collapse all room types') | tr">
+        <mat-icon>{{ allCollapsed() ? 'unfold_more' : 'unfold_less' }}</mat-icon>
+      </button>
+      <button matIconButton type="button" class="tc-density-btn" (click)="setDensity(density() === 'compact' ? 'comfortable' : 'compact')"
+        [attr.aria-label]="(density() === 'compact' ? 'Comfortable rows' : 'Compact rows') | tr"
+        [matTooltip]="(density() === 'compact' ? 'Comfortable rows' : 'Compact rows') | tr">
+        <mat-icon>{{ density() === 'compact' ? 'density_large' : 'density_small' }}</mat-icon>
+      </button>
+      <button matIconButton type="button" (click)="reload()" [attr.aria-label]="'Reload' | tr" [matTooltip]="'Reload' | tr">
+        <mat-icon>refresh</mat-icon>
+      </button>
+      <button matButton="filled" type="button" class="tc-new" (click)="createReservation()">
+        <mat-icon>add</mat-icon>
+        <span class="tc-new-label"><ng-container i18n>New reservation</ng-container></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Today at a glance (tap one to highlight those stays on the chart) -->
+  <div class="tc-strip">
+    <div class="tc-kpis">
+      <button type="button" class="tc-kpi" [class.on]="focus() === 'arrivals'" (click)="setFocus('arrivals')">
+        <mat-icon>login</mat-icon><span class="v">{{ kpis().arrivals ?? '–' }}</span><span class="l"><ng-container i18n>Arrivals</ng-container></span>
+      </button>
+      <button type="button" class="tc-kpi" [class.on]="focus() === 'departures'" (click)="setFocus('departures')">
+        <mat-icon>logout</mat-icon><span class="v">{{ kpis().departures ?? '–' }}</span><span class="l"><ng-container i18n>Departures</ng-container></span>
+      </button>
+      <button type="button" class="tc-kpi" [class.on]="focus() === 'inhouse'" (click)="setFocus('inhouse')">
+        <mat-icon>hotel</mat-icon><span class="v">{{ kpis().inHouse ?? '–' }}</span><span class="l"><ng-container i18n>In house</ng-container></span>
+      </button>
+      <div class="tc-kpi static">
+        <mat-icon>donut_small</mat-icon>
+        <span class="v">@if (kpis().occupancy !== null) { {{ kpis().occupancy }}% } @else { – }</span>
+        <span class="l"><ng-container i18n>Occupied tonight</ng-container></span>
+      </div>
+    </div>
+
+    <div class="tc-legend" role="group" [attr.aria-label]="'Show or hide reservations by status' | tr">
+      @for (item of legend; track item.status) {
+        <button type="button" class="tc-chip" [class.off]="hidden().has(item.status)" [attr.aria-pressed]="!hidden().has(item.status)" (click)="toggleStatus(item.status)">
+          <span class="dot" [style.background]="item.color"><mat-icon>{{ item.icon }}</mat-icon></span>
+          <span>{{ item.label }}</span>
+          <span class="n">{{ statusCounts()[item.status] ?? 0 }}</span>
+        </button>
       }
     </div>
   </div>
 
+  <!-- The chart -->
+  <div class="tc-frame">
+    @if (refreshing()) { <mat-progress-bar mode="indeterminate" class="tc-loading"></mat-progress-bar> }
 
-</div>
+    @if (!ready()) {
+      <div class="tc-empty"><mat-progress-bar mode="indeterminate" class="w-40"></mat-progress-bar></div>
+    } @else if (rows().length === 0) {
+      <div class="tc-empty">
+        <mat-icon>bed</mat-icon>
+        <p><ng-container i18n>No rooms to show</ng-container></p>
+        <button matButton type="button" (click)="resetView()"><ng-container i18n>Reset view</ng-container></button>
+      </div>
+    } @else {
+      <div class="tc-scroll" #scroller>
+        <div class="tc-grid" [style.width.px]="leftWidth() + trackWidth()">
 
-<!-- Mobile FAB Menu -->
-@if (isMobile()) {
-  <button mat-fab
-          class="!fixed bottom-6 right-6 z-50"
-          color="primary"
-          aria-label="Actions menu" i18n-aria-label
-          [matMenuTriggerFor]="fabMenu">
-    <mat-icon>more_vert</mat-icon>
-  </button>
+          <!-- Weekend, today and hover columns sit behind every row -->
+          <div class="tc-overlay" aria-hidden="true">
+            @for (col of columns(); track col.key) {
+              @if (col.isWeekend || col.isToday || hoverCol() === col.index) {
+                <div class="tc-col" [class.we]="col.isWeekend" [class.today]="col.isToday" [class.hover]="hoverCol() === col.index"
+                  [style.left.px]="col.index * dayWidth()" [style.width.px]="dayWidth()"></div>
+              }
+            }
+          </div>
 
-  <mat-menu #fabMenu="matMenu" class="fab-actions-menu">
-    <button mat-menu-item (click)="createReservation()">
-      <mat-icon>add</mat-icon>
-      <span><ng-container i18n>New Reservation</ng-container></span>
-    </button>
-    <button mat-menu-item (click)="reloadData()">
-      <mat-icon>refresh</mat-icon>
-      <span><ng-container i18n>Reload</ng-container></span>
-    </button>
-    <button mat-menu-item (click)="clearFilters()">
-      <mat-icon>filter_list_off</mat-icon>
-      <span><ng-container i18n>Clear Filters</ng-container></span>
-    </button>
-    <mat-divider></mat-divider>
-    <button mat-menu-item (click)="navigateToView('list')">
-      <mat-icon>list</mat-icon>
-      <span><ng-container i18n>List View</ng-container></span>
-    </button>
-    <button mat-menu-item (click)="navigateToView('calendar')">
-      <mat-icon>calendar_month</mat-icon>
-      <span><ng-container i18n>Calendar View</ng-container></span>
-    </button>
-    <mat-divider></mat-divider>
-    <button mat-menu-item (click)="onViewModeChange('weekly')">
-      <mat-icon>view_week</mat-icon>
-      <span><ng-container i18n>Weekly</ng-container></span>
-    </button>
-    <button mat-menu-item (click)="onViewModeChange('monthly')">
-      <mat-icon>calendar_view_month</mat-icon>
-      <span><ng-container i18n>Monthly</ng-container></span>
-    </button>
-    <mat-divider></mat-divider>
-    <button mat-menu-item [matMenuTriggerFor]="mobileStatusMenu">
-      <mat-icon>filter_list</mat-icon>
-      <span><ng-container i18n>Status: {{ selectedStatus() | titlecase }}</ng-container></span>
-    </button>
-  </mat-menu>
+          <!-- Dates -->
+          <div class="tc-row tc-head">
+            <div class="tc-left tc-head-left"><span><ng-container i18n>Rooms</ng-container></span></div>
+            <div class="tc-head-days" [style.width.px]="trackWidth()">
+              <div class="tc-months">
+                @for (band of monthBands(); track $index) {
+                  <div class="tc-month" [style.width.px]="band.span * dayWidth()"><span>{{ band.label }}</span></div>
+                }
+              </div>
+              <div class="tc-days">
+                @for (col of columns(); track col.key) {
+                  <div class="tc-day" [class.today]="col.isToday" [class.we]="col.isWeekend" [class.hover]="hoverCol() === col.index" [style.width.px]="dayWidth()">
+                    <span class="wd">{{ col.weekday }}</span>
+                    <span class="d">{{ col.day }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
 
-  <mat-menu #mobileStatusMenu="matMenu">
-    <button mat-menu-item (click)="onStatusChange('all')">
-      <span><ng-container i18n>All</ng-container></span>
-    </button>
-    @for (s of reservationStatuses; track s) {
-      <button mat-menu-item (click)="onStatusChange(s)">
-        <span>{{ s | titlecase }}</span>
-      </button>
-    }
-  </mat-menu>
-}
+          <!-- How full the house is -->
+          <div class="tc-row tc-occ">
+            <div class="tc-left"><span><ng-container i18n>Occupancy</ng-container></span></div>
+            <div class="tc-track" [style.width.px]="trackWidth()">
+              @for (col of columns(); track col.key) {
+                @let o = occupancy()[col.index];
+                <div class="tc-occ-cell" [style.width.px]="dayWidth()" [matTooltip]="o.occupied + ' / ' + o.sellable">
+                  <span class="bar" [style.height.%]="o.percent ?? 0" [class.full]="(o.percent ?? 0) >= 90" [class.busy]="(o.percent ?? 0) >= 60 && (o.percent ?? 0) < 90"></span>
+                  <span class="t">{{ o.percent === null ? '–' : o.percent + '%' }}</span>
+                </div>
+              }
+            </div>
+          </div>
 
-<!-- Housekeeping Status Context Menu -->
-<ng-template #housekeepingMenu let-roomId="roomId" let-currentStatus="currentStatus">
-  <div class="bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[200px]" cdkMenu>
-    <div class="px-4 py-2 border-b border-gray-100">
-      <span class="text-xs font-semibold text-gray-500 uppercase"><ng-container i18n>Update Housekeeping Status</ng-container></span>
-    </div>
-    @for (status of housekeepingStatuses; track status.key) {
-      <button 
-        class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-3 transition-colors"
-        [class.bg-gray-50]="currentStatus === status.key"
-        [class.font-semibold]="currentStatus === status.key"
-        cdkMenuItem
-        (cdkMenuItemTriggered)="updateHousekeepingStatus(roomId, status.key)">
-        <mat-icon class="text-base" [ngClass]="{
-          'text-green-600': status.key === 'clean',
-          'text-amber-600': status.key === 'dirty',
-          'text-blue-600': status.key === 'inspected',
-          'text-red-600': status.key === 'out_of_order'
-        }">{{ getHousekeepingStatusIcon(status.key) }}</mat-icon>
-        <span>{{ status.label }}</span>
-        @if (currentStatus === status.key) {
-          <mat-icon class="ml-auto text-base text-green-600">check</mat-icon>
-        }
-      </button>
+          @for (row of rows(); track row.id) {
+            @switch (row.kind) {
+
+              @case ('group') {
+                <div class="tc-row tc-group">
+                  <div class="tc-left">
+                    <button type="button" class="tc-toggle" (click)="toggleCollapsed(row.id)" [attr.aria-expanded]="!row.collapsed">
+                      <mat-icon>{{ row.collapsed ? 'chevron_right' : 'expand_more' }}</mat-icon>
+                      <span class="name">{{ row.name }}</span>
+                      <span class="count">{{ row.roomCount }}</span>
+                    </button>
+                  </div>
+                  <div class="tc-track" [style.width.px]="trackWidth()">
+                    @for (cell of row.cells; track $index) {
+                      <div class="tc-gcell" [style.width.px]="dayWidth()" [class.closed]="cell.closed" [matTooltip]="cell.tip" [matTooltipDisabled]="!cell.tip">
+                        <span class="free" [class.none]="(cell.availability ?? 0) <= 0" [class.low]="cell.availability === 1">{{ cell.availability ?? '–' }}</span>
+                        @if (cell.badge) { <span class="badge">{{ cell.badge }}</span> }
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+
+              @case ('room') {
+                <div class="tc-row tc-room" [class.ooo]="row.outOfOrder">
+                  <div class="tc-left tc-room-left">
+                    <button type="button" class="tc-hk" [ngClass]="hkClass(row.hk)" [matMenuTriggerFor]="hkMenu" [matMenuTriggerData]="{ room: row }"
+                      [attr.aria-label]="('Room status: ' | tr) + hkLabel(row.hk)" [matTooltip]="('Room status: ' | tr) + hkLabel(row.hk)"></button>
+                    <span class="name" [matTooltip]="row.name">{{ row.name }}</span>
+                    <span class="cap"><mat-icon>person</mat-icon>{{ row.capacity }}</span>
+                  </div>
+                  <div class="tc-track tc-bookable" [style.width.px]="trackWidth()"
+                    (pointerdown)="trackDown($event, row)" (pointermove)="trackMove($event, row)" (pointerup)="trackUp($event)"
+                    (pointercancel)="trackCancel()" (pointerleave)="hoverCol.set(null)">
+                    @if (row.outOfOrder) { <span class="tc-ooo-label"><ng-container i18n>Out of order</ng-container></span> }
+                    @for (bar of row.bars; track bar.key) {
+                      <button type="button" class="tc-bar" [class.dim]="isDim(bar)" [class.open-l]="bar.startsBefore" [class.open-r]="bar.endsAfter"
+                        [class.urg-arriving]="bar.urgency === 'arriving'" [class.urg-departing]="bar.urgency === 'departing'"
+                        [class.urg-bad]="bar.urgency === 'overdue' || bar.urgency === 'late'" [class.cancelled]="bar.status === 'cancelled'"
+                        [style.left.px]="bar.left * dayWidth() + 1" [style.width.px]="bar.width * dayWidth() - 2" [style.background]="bar.color"
+                        [matTooltip]="bar.tooltip" matTooltipClass="tc-tip" matTooltipShowDelay="350" (click)="openReservation(bar, row)">
+                        <mat-icon class="st">{{ bar.icon }}</mat-icon>
+                        <span class="txt">
+                          <span class="g">{{ bar.guest }}</span>
+                          @if (density() === 'comfortable') { <span class="s">{{ bar.nights }}<ng-container i18n>n</ng-container> · {{ bar.source }}</span> }
+                        </span>
+                        @if (bar.urgency === 'arriving') { <mat-icon class="fl" [matTooltip]="'Arriving today' | tr">flag</mat-icon> }
+                        @if (bar.urgency === 'departing') { <mat-icon class="fl" [matTooltip]="'Leaving today' | tr">flag</mat-icon> }
+                        @if (bar.urgency === 'overdue' || bar.urgency === 'late') { <mat-icon class="fl">error</mat-icon> }
+                        @if (bar.balance > 0) { <mat-icon class="fl" [matTooltip]="'Balance due' | tr">payments</mat-icon> }
+                        @if (bar.sourceLogo) { <img class="logo" [src]="bar.sourceLogo" [alt]="bar.source" loading="lazy" /> }
+                      </button>
+                    }
+                    @if (selectionBox(row); as box) {
+                      <div class="tc-sel" [class.bad]="!box.ok" [style.left.px]="box.left * dayWidth()" [style.width.px]="box.width * dayWidth()">
+                        <span>{{ box.width }} {{ box.width === 1 ? ('night' | tr) : ('nights' | tr) }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+
+              @case ('ota') {
+                <div class="tc-row tc-room tc-ota">
+                  <div class="tc-left tc-room-left">
+                    <mat-icon class="ota-ico">cloud_queue</mat-icon>
+                    <span class="name"><ng-container i18n>Unassigned</ng-container></span>
+                  </div>
+                  <div class="tc-track" [style.width.px]="trackWidth()" (pointermove)="hoverCol.set(null)">
+                    @for (bar of row.bars; track bar.key) {
+                      <button type="button" class="tc-bar dashed" [class.dim]="isDim(bar)" [class.open-l]="bar.startsBefore" [class.open-r]="bar.endsAfter"
+                        [style.left.px]="bar.left * dayWidth() + 1" [style.width.px]="bar.width * dayWidth() - 2" [style.background]="bar.color"
+                        [matTooltip]="bar.tooltip" matTooltipClass="tc-tip" matTooltipShowDelay="350" (click)="openReservation(bar, row)">
+                        <mat-icon class="st">{{ bar.icon }}</mat-icon>
+                        <span class="txt"><span class="g">{{ bar.guest }}</span>@if (density() === 'comfortable') { <span class="s"><ng-container i18n>Needs a room</ng-container></span> }</span>
+                        @if (bar.sourceLogo) { <img class="logo" [src]="bar.sourceLogo" [alt]="bar.source" loading="lazy" /> }
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            }
+          }
+        </div>
+      </div>
     }
   </div>
-</ng-template>
+
+  <p class="tc-hint"><ng-container i18n>Click and drag across free nights in a room to start a booking. Bars begin at check-in and end at check-out, so a room can turn over the same day.</ng-container></p>
+</section>
+
+<mat-menu #hkMenu="matMenu">
+  <ng-template matMenuContent let-room="room">
+    <div class="tc-menu-title"><ng-container i18n>Update room status</ng-container></div>
+    @for (status of housekeepingOptions; track status.key) {
+      <button mat-menu-item type="button" (click)="updateHousekeeping(room.roomId, status.key)">
+        <mat-icon [ngClass]="hkClass(status.key)">{{ status.icon }}</mat-icon>
+        <span>{{ status.label }}</span>
+        @if (room.hk === status.key) { <mat-icon class="ml-auto">check</mat-icon> }
+      </button>
+    }
+  </ng-template>
+</mat-menu>

@@ -58,12 +58,12 @@
             <div class="ml-auto flex items-center rounded-full border border-outline-variant">
                 <button matIconButton color="warn" class="!w-8 !h-8 !p-0" [attr.aria-label]="'Decrease quantity' | tr"
                     (click)="$event.stopPropagation(); removeOrDeleteProduct(product())">
-                    <mat-icon class="!text-lg !w-[18px] !h-[18px]">remove</mat-icon>
+                    <mat-icon class="!h-[18px] !w-[18px] !text-[18px] !leading-none">remove</mat-icon>
                 </button>
                 <span class="min-w-6 text-center text-sm font-semibold tabular-nums text-gray-900">{{ productQuantity() }}</span>
                 <button matIconButton color="primary" class="!w-8 !h-8 !p-0" [attr.aria-label]="'Increase quantity' | tr"
                     (click)="onAddToCart($event)">
-                    <mat-icon class="!text-lg !w-[18px] !h-[18px]">add</mat-icon>
+                    <mat-icon class="!h-[18px] !w-[18px] !text-[18px] !leading-none">add</mat-icon>
                 </button>
             </div>
             } @else {

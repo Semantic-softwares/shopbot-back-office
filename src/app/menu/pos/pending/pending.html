@@ -19,16 +19,16 @@
             <!-- When, where, who -->
             <div class="flex flex-wrap items-center gap-2 text-xs text-gray-600">
               <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1">
-                <mat-icon class="!h-4 !w-4 !text-[16px]">schedule</mat-icon>{{ age(sale) }}
+                <mat-icon class="!h-4 !w-4 !text-[16px] !leading-none">schedule</mat-icon>{{ age(sale) }}
               </span>
               @if (sale.table) {
                 <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-blue-700">
-                  <mat-icon class="!h-4 !w-4 !text-[16px]">table_restaurant</mat-icon>{{ sale.table.name }}
+                  <mat-icon class="!h-4 !w-4 !text-[16px] !leading-none">table_restaurant</mat-icon>{{ sale.table.name }}
                 </span>
               }
               @if (buyerName(sale); as buyer) {
                 <span class="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-green-700">
-                  <mat-icon class="!h-4 !w-4 !text-[16px]">person</mat-icon>{{ buyer }}
+                  <mat-icon class="!h-4 !w-4 !text-[16px] !leading-none">person</mat-icon>{{ buyer }}
                 </span>
               }
             </div>

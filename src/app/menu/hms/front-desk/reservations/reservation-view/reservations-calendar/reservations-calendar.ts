@@ -1,1356 +1,742 @@
-import { Component, inject, OnInit, signal, computed, HostListener, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component, DestroyRef, ElementRef, afterNextRender, computed, effect, inject, signal, viewChild, ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDialog } from '@angular/material/dialog';
-import { Router, ActivatedRoute } from '@angular/router';
-import { MatDialogModule } from '@angular/material/dialog';
-import { CdkMenuModule } from '@angular/cdk/menu';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
 import { QuickReservationModalComponent, QuickReservationData, QuickReservationDialogData } from '../../quick-reservation-modal/quick-reservation-modal.component';
 import { ReservationPreviewDialogComponent } from '../reservation-preview-dialog/reservation-preview-dialog.component';
 import { StoreStore } from '../../../../../../shared/stores/store.store';
 import { ReservationService } from '../../../../../../shared/services/reservation.service';
 import { RoomsService } from '../../../../../../shared/services/rooms.service';
 import { RateInventoryService } from '../../../../../../shared/services/rate-inventory.service';
-import type { InventoryGrid, AvailabilityCell, RateInventoryRecord } from '../../../../../../shared/services/rate-inventory.service';
+import type { AvailabilityCell } from '../../../../../../shared/services/rate-inventory.service';
 import { PageHeaderComponent } from '../../../../../../shared/components/page-header/page-header.component';
-import { rxResource, toSignal } from '@angular/core/rxjs-interop';
-import { CurrencyPipe } from '@angular/common';
-import { map } from 'rxjs/operators';
-import type { Reservation, ReservationStatus } from '../../../../../../shared/models/reservation.model';
 import { TrPipe } from '../../../../../../shared/i18n/tr.pipe';
+import {
+  STAY_COLORS, STAY_ICONS, StayStatus, Urgency, addDays, dayKey, layoutBar, occupancyPerNight, overlapsAny, parseDay, urgencyOf,
+} from './tape-chart.util';
 
-interface DateRange {
+type Density = 'comfortable' | 'compact';
+type Focus = 'arrivals' | 'departures' | 'inhouse' | null;
+type RangeDays = 7 | 14 | 30;
+
+interface DayColumn {
+  index: number;
   key: string;
-  day: number;
-  dayName: string;
   date: Date;
+  day: number;
+  weekday: string;
+  isToday: boolean;
+  isWeekend: boolean;
 }
 
-interface RoomWithReservations {
+/** One stay of one room, ready to draw. */
+interface Bar {
+  key: string;
+  reservation: any;
+  roomId: string | null;
+  left: number;
+  width: number;
+  startsBefore: boolean;
+  endsAfter: boolean;
+  nights: number;
+  status: StayStatus;
+  statusLabel: string;
+  icon: string;
+  color: string;
+  guest: string;
+  isGroup: boolean;
+  modified: boolean;
+  balance: number;
+  urgency: Urgency;
+  source: string;
+  sourceLogo: string | null;
+  checkInKey: string;
+  checkOutKey: string;
+  haystack: string;
+  tooltip: string;
+}
+
+interface GroupCell {
+  availability: number | null;
+  badge: 'SS' | 'CTA' | 'CTD' | null;
+  closed: boolean;
+  tip: string;
+}
+
+interface GroupRow {
+  kind: 'group';
+  id: string;
+  name: string;
+  roomCount: number;
+  collapsed: boolean;
+  cells: GroupCell[];
+}
+
+interface RoomRow {
+  kind: 'room';
+  id: string;
+  roomId: string;
+  name: string;
+  capacity: number;
+  typeId: string | null;
+  typeName: string;
+  hk: string;
+  outOfOrder: boolean;
+  bars: Bar[];
+}
+
+interface OtaRow {
+  kind: 'ota';
+  id: string;
+  typeId: string | null;
+  typeName: string;
+  bars: Bar[];
+}
+
+type Row = GroupRow | RoomRow | OtaRow;
+
+interface Selection {
+  rowId: string;
   roomId: string;
   roomName: string;
-  capacity: number;
-  reservations: any[];
+  typeId: string | null;
+  typeName: string;
+  from: number;
+  to: number;
+  ok: boolean;
+  reason: string;
 }
 
-// Represents a single room stay (per room within a reservation)
-interface RoomStay {
-  reservationId: string;
-  roomAssignmentId?: string;
-  checkInDate: string | Date;
-  checkOutDate: string | Date;
-  guest?: any;
-  status?: string;
-  bookingType?: string;
-  confirmationNumber?: string;
-  reservation?: any; // original reservation reference, if needed
-}
+const STATUS_LABELS: Record<StayStatus, () => string> = {
+  pending: () => $localize`Pending`,
+  confirmed: () => $localize`Confirmed`,
+  reserved: () => $localize`Reserved`,
+  checked_in: () => $localize`Checked in`,
+  checked_out: () => $localize`Checked out`,
+  cancelled: () => $localize`Cancelled`,
+  no_show: () => $localize`No-show`,
+};
 
-// Drag selection state interface
-interface DragSelection {
-  isSelecting: boolean;
-  startDate: Date | null;
-  endDate: Date | null;
-  roomId: string | null;
-  roomName: string | null;
-  roomTypeId: string | null;
-  roomTypeName: string | null;
-  hasConflict: boolean;
-}
+const SOURCE_COLORS: Record<string, string> = {
+  'booking.com': '#003580', expedia: '#002F6C', airbnb: '#FF5A5F', agoda: '#5C2D91', walk_in: '#16A34A', direct: '#4B5563',
+  phone: '#0EA5E9', online: '#6366F1', travel_agent: '#7C3AED', corporate: '#334155',
+};
+const SOURCE_NAMES: Record<string, () => string> = {
+  'booking.com': () => 'Booking.com', expedia: () => 'Expedia', agoda: () => 'Agoda', airbnb: () => 'Airbnb', direct: () => $localize`Direct`,
+  phone: () => $localize`Phone`, online: () => $localize`Online`, walk_in: () => $localize`Walk-in`, travel_agent: () => $localize`Agent`, corporate: () => $localize`Corporate`,
+};
+const SOURCE_LOGOS: Record<string, string> = {
+  airbnb: 'https://cdn.brandfetch.io/idkuvXnjOH/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1717146459610',
+  agoda: 'https://cdn.brandfetch.io/idrJbkwvG0/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1724730098837',
+  expedia: 'https://cdn.brandfetch.io/idAGaivHFH/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1740983477322',
+  'booking.com': 'https://cdn.brandfetch.io/id9mEmLNcV/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1725855381233',
+};
+
+const PREFS_KEY = 'shopbot.tapechart';
+const MIN_DAY_WIDTH: Record<RangeDays, number> = { 7: 96, 14: 64, 30: 46 };
 
 @Component({
   selector: 'app-reservations-calendar',
   standalone: true,
-  imports: [TrPipe, 
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatMenuModule,
-    MatDividerModule,
-    MatProgressSpinnerModule,
-    MatTooltipModule,
-    MatDialogModule,
-    CdkMenuModule,
-    PageHeaderComponent,
-    CurrencyPipe,
+  imports: [
+    TrPipe, CommonModule, MatButtonModule, MatIconModule, MatMenuModule, MatTooltipModule, MatProgressBarModule,
+    MatDialogModule, PageHeaderComponent,
   ],
   templateUrl: './reservations-calendar.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './reservations-calendar.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
 })
-export class ReservationsCalendar implements OnInit {
+export class ReservationsCalendar {
   public storeStore = inject(StoreStore);
-  public reservationService = inject(ReservationService);
-  public roomService = inject(RoomsService);
+  private reservationService = inject(ReservationService);
+  private roomService = inject(RoomsService);
   private rateInventoryService = inject(RateInventoryService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
   private breakpointObserver = inject(BreakpointObserver);
+  private destroyRef = inject(DestroyRef);
 
-  // Responsive: mobile detection via CDK BreakpointObserver → signal
-  public isMobile = toSignal(
-    this.breakpointObserver.observe([
-      Breakpoints.XSmall,
-      Breakpoints.Small,
-    ]).pipe(map(result => result.matches)),
-    { initialValue: false },
-  );
+  private scroller = viewChild<ElementRef<HTMLElement>>('scroller');
 
-  // Signals
-  public viewMode = signal<'weekly' | 'monthly'>('monthly');
-  private startDate = signal<Date>(new Date());
-  public selectedStatus = signal<ReservationStatus | 'all'>('all');
-  public excludedStatuses = signal<Set<ReservationStatus>>(
-    new Set(['checked_out', 'cancelled', 'no_show'])
-  );
-  
-  // Drag selection signal for click-and-drag room booking
-  public dragSelection = signal<DragSelection>({
-    isSelecting: false,
-    startDate: null,
-    endDate: null,
-    roomId: null,
-    roomName: null,
-    roomTypeId: null,
-    roomTypeName: null,
-    hasConflict: false,
+  public isMobile = toSignal(this.breakpointObserver.observe([Breakpoints.XSmall]).pipe(map((r) => r.matches)), { initialValue: false });
+
+  // ---- view state (remembered between visits) -----------------------------------------------------------
+  private prefs = this.readPrefs();
+  readonly rangeOptions: RangeDays[] = [7, 14, 30];
+  readonly rangeDays = signal<RangeDays>(this.prefs.days);
+  readonly density = signal<Density>(this.prefs.density);
+  readonly hidden = signal<Set<StayStatus>>(new Set(this.prefs.hidden));
+  readonly typeFilter = signal<Set<string>>(new Set());
+  readonly collapsed = signal<Set<string>>(new Set());
+  readonly search = signal('');
+  readonly focus = signal<Focus>(null);
+  readonly hoverCol = signal<number | null>(null);
+  readonly selection = signal<Selection | null>(null);
+  readonly viewportWidth = signal(1200);
+
+  /** "Today" is fixed for the life of the page; the chart does not need to tick over at midnight. */
+  readonly today = parseDay(new Date());
+  readonly todayKey = dayKey(this.today);
+  readonly start = signal<Date>(addDays(this.today, -1));
+
+  private savePrefs = effect(() => {
+    const payload = { days: this.rangeDays(), density: this.density(), hidden: [...this.hidden()] };
+    try { localStorage.setItem(PREFS_KEY, JSON.stringify(payload)); } catch { /* private mode: nothing to remember */ }
   });
 
-  // Track hovered date for column highlighting
-  public hoveredDateKey = signal<string | null>(null);
+  constructor() {
+    afterNextRender(() => {
+      const el = this.scroller()?.nativeElement;
+      if (!el || typeof ResizeObserver === 'undefined') return;
+      const observer = new ResizeObserver(([entry]) => this.viewportWidth.set(entry.contentRect.width));
+      observer.observe(el);
+      this.viewportWidth.set(el.clientWidth);
+      this.destroyRef.onDestroy(() => observer.disconnect());
+    });
+  }
 
-  public reservationStatuses: ReservationStatus[] = [
-    'pending',
-    'confirmed',
-    'checked_in',
-    'checked_out',
-    'cancelled',
-    'no_show',
-    'reserved',
-  ];
+  // ---- geometry -------------------------------------------------------------------------------------
+  readonly leftWidth = computed(() => (this.isMobile() ? 112 : 188));
+  readonly dayWidth = computed(() => {
+    const days = this.rangeDays();
+    const fit = Math.floor((this.viewportWidth() - this.leftWidth()) / days);
+    return Math.min(220, Math.max(MIN_DAY_WIDTH[days], fit));
+  });
+  readonly rowHeight = computed(() => (this.density() === 'compact' ? 32 : 46));
+  readonly trackWidth = computed(() => this.rangeDays() * this.dayWidth());
 
-  public housekeepingStatuses = [
-    { key: 'clean', label: 'Clean' },
-    { key: 'dirty', label: 'Dirty' },
-    { key: 'inspected', label: 'Inspected' },
-    { key: 'out_of_order', label: 'Out of Order' },
-  ];
-
-  private statusColorMap: Record<ReservationStatus, string> = {
-    pending: 'bg-yellow-500',
-    confirmed: 'bg-blue-600',
-    checked_in: 'bg-green-600',
-    checked_out: 'bg-gray-500',
-    cancelled: 'bg-red-600',
-    no_show: 'bg-orange-600',
-    reserved: 'bg-indigo-600',
-  };
-
-  public dateRange = computed(() => {
-    const dates: DateRange[] = [];
-    const mode = this.viewMode();
-    const start = this.alignStartOfPeriod(this.startDate(), mode);
-
-    if (mode === 'weekly') {
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(start);
-        d.setDate(d.getDate() + i);
-        dates.push({
-          key: this.formatLocalDate(d),
-          day: d.getDate(),
-          dayName: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()],
-          date: new Date(d),
-        });
-      }
-    } else {
-      // monthly
-      const year = start.getFullYear();
-      const month = start.getMonth();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      for (let i = 0; i < daysInMonth; i++) {
-        const d = new Date(year, month, i + 1);
-        dates.push({
-          key: this.formatLocalDate(d),
-          day: d.getDate(),
-          dayName: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()],
-          date: new Date(d),
-        });
-      }
+  readonly columns = computed<DayColumn[]>(() => {
+    const out: DayColumn[] = [];
+    const names = [$localize`Sun`, $localize`Mon`, $localize`Tue`, $localize`Wed`, $localize`Thu`, $localize`Fri`, $localize`Sat`];
+    for (let i = 0; i < this.rangeDays(); i++) {
+      const date = addDays(this.start(), i);
+      out.push({
+        index: i, key: dayKey(date), date, day: date.getDate(), weekday: names[date.getDay()],
+        isToday: dayKey(date) === this.todayKey, isWeekend: date.getDay() === 0 || date.getDay() === 6,
+      });
     }
-    return dates;
+    return out;
   });
 
+  /** Month names above the day numbers, each spanning its days. */
+  readonly monthBands = computed(() => {
+    const bands: { label: string; span: number }[] = [];
+    for (const col of this.columns()) {
+      const label = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' }).format(col.date);
+      const last = bands[bands.length - 1];
+      if (last && last.label === label) last.span++;
+      else bands.push({ label, span: 1 });
+    }
+    return bands;
+  });
 
-  // Resources
-  public rooms = rxResource({
+  readonly periodLabel = computed(() => {
+    const first = this.start();
+    const last = addDays(first, this.rangeDays() - 1);
+    const fmt = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
+    const year = new Intl.DateTimeFormat(undefined, { year: 'numeric' }).format(last);
+    return `${fmt.format(first)} – ${fmt.format(last)}, ${year}`;
+  });
+
+  readonly todayInView = computed(() => this.columns().some((c) => c.isToday));
+
+  // ---- data (previous data stays on screen while a new window loads) ------------------------------------
+  readonly rooms = rxResource({
     params: () => ({ storeId: this.storeStore.selectedStore()?._id }),
     stream: ({ params }) => this.roomService.getRooms(params.storeId!),
   });
-
-  public reservations = rxResource({
-    params: () => {
-      const storeId = this.storeStore.selectedStore()?._id;
-      const mode = this.viewMode();
-      const start = this.alignStartOfPeriod(this.startDate(), mode);
-      const { dateFrom, dateTo } = this.getPeriodDateRangeStrings(start, mode);
-      const statusSel = this.selectedStatus();
-      const status = statusSel === 'all' ? undefined : statusSel;
-      return { storeId, dateFrom, dateTo, status };
-    },
-    stream: ({ params }) =>
-      this.reservationService.getReservations({
-        storeId: params.storeId!,
-        dateFrom: params.dateFrom,
-        dateTo: params.dateTo,
-        status: params.status,
-      }),
-  });
-
-  public roomTypes = rxResource({
+  readonly roomTypes = rxResource({
     params: () => ({ storeId: this.storeStore.selectedStore()?._id }),
-    stream: ({ params }) =>
-      this.roomService.getRoomTypes(params.storeId!),
+    stream: ({ params }) => this.roomService.getRoomTypes(params.storeId!),
   });
-
-  // Inventory grid: rates, availability, restrictions per room type per date
-  public inventoryGrid = rxResource({
+  readonly reservations = rxResource({
     params: () => {
-      const storeId = this.storeStore.selectedStore()?._id;
-      const mode = this.viewMode();
-      const start = this.alignStartOfPeriod(this.startDate(), mode);
-      const { dateFrom, dateTo } = this.getPeriodDateRangeStrings(start, mode);
-      return { storeId, dateFrom, dateTo };
+      const first = this.start();
+      return {
+        storeId: this.storeStore.selectedStore()?._id,
+        dateFrom: dayKey(first),
+        dateTo: dayKey(addDays(first, this.rangeDays() - 1)),
+      };
     },
     stream: ({ params }) =>
-      this.rateInventoryService.getInventoryGrid(params.storeId!, params.dateFrom, params.dateTo),
+      this.reservationService.getReservations({ storeId: params.storeId!, dateFrom: params.dateFrom, dateTo: params.dateTo }),
+  });
+  readonly inventoryGrid = rxResource({
+    params: () => {
+      const first = this.start();
+      return { storeId: this.storeStore.selectedStore()?._id, dateFrom: dayKey(first), dateTo: dayKey(addDays(first, this.rangeDays() - 1)) };
+    },
+    stream: ({ params }) => this.rateInventoryService.getInventoryGrid(params.storeId!, params.dateFrom, params.dateTo),
+  });
+  readonly overview = rxResource({
+    params: () => ({ storeId: this.storeStore.selectedStore()?._id }),
+    stream: ({ params }) => this.reservationService.getFrontDeskOverview(params.storeId!),
   });
 
-  /**
-   * Pre-computed lookup: cellInfoMap[roomTypeId][dateKey] = { rate, availability, restrictions, isDisabled, disableReason }
-   * Consumed by template for per-cell rate display and disable state.
-   */
-  public cellInfoMap = computed(() => {
-    const grid = this.inventoryGrid.value();
-    const map: Record<string, Record<string, CellInfo>> = {};
-    if (!grid?.grid) return map;
+  private lastReservations = signal<any>(null);
+  private lastInventory = signal<any>(null);
+  private keepLast = effect(() => {
+    const r = this.reservations.value();
+    if (r) this.lastReservations.set(r);
+    const g = this.inventoryGrid.value();
+    if (g) this.lastInventory.set(g);
+  });
 
-    for (const roomTypeId of Object.keys(grid.grid)) {
-      map[roomTypeId] = {};
-      const rtGrid = grid.grid[roomTypeId];
-      const availabilityGrid = rtGrid?.['_availability'] || {};
+  readonly refreshing = computed(() => this.reservations.isLoading() || this.inventoryGrid.isLoading() || this.rooms.isLoading());
+  readonly ready = computed(() => this.rooms.hasValue() && (this.reservations.hasValue() || !!this.lastReservations()));
 
-      // Find the first rate plan key to read rates from
-      const ratePlanKeys = Object.keys(rtGrid).filter(k => k !== '_availability');
+  private reservationList = computed<any[]>(() => {
+    const data = this.reservations.value() ?? this.lastReservations();
+    return Array.isArray(data) ? data : data?.reservations || [];
+  });
 
-      for (const date of this.dateRange()) {
-        const dateKey = date.key;
-
-        // Availability + restrictions from the shared _availability bucket
-        const avail = availabilityGrid[dateKey] as AvailabilityCell | undefined;
-        const availability = avail?.availability ?? null;
-        const restrictions = avail?.restrictions ?? null;
-
-        // Rate: pick from the first rate plan that has data for this date
+  /** Per room type per night: free rooms, restrictions and whether the type is closed to new bookings. */
+  private inventoryCells = computed(() => {
+    const grid: any = this.inventoryGrid.value() ?? this.lastInventory();
+    const out = new Map<string, Map<string, { availability: number | null; badge: 'SS' | 'CTA' | 'CTD' | null; closed: boolean; rate: number | null; tip: string }>>();
+    if (!grid?.grid) return out;
+    for (const typeId of Object.keys(grid.grid)) {
+      const typeGrid = grid.grid[typeId];
+      const availability = typeGrid?.['_availability'] || {};
+      const ratePlans = Object.keys(typeGrid).filter((k) => k !== '_availability');
+      const byDay = new Map();
+      for (const col of this.columns()) {
+        const cell = availability[col.key] as AvailabilityCell | undefined;
+        const restrictions: any = cell?.restrictions ?? null;
+        const free = cell?.availability ?? null;
         let rate: number | null = null;
-        for (const rpKey of ratePlanKeys) {
-          const record = rtGrid[rpKey]?.[dateKey] as RateInventoryRecord | undefined;
-          if (record?.rate != null && record.rate > 0) {
-            rate = record.rate;
-            break;
-          }
+        for (const plan of ratePlans) {
+          const rec = typeGrid[plan]?.[col.key];
+          if (rec?.rate > 0) { rate = rec.rate; break; }
         }
-
-        // Determine if cell should be disabled
-        let isDisabled = false;
-        let disableReason = '';
-
-        if (restrictions?.stopSell) {
-          isDisabled = true;
-          disableReason = 'Stop sell';
-        } else if (availability !== null && availability <= 0) {
-          isDisabled = true;
-          disableReason = 'Sold out';
-        } else if (restrictions?.closedToArrival) {
-          // Only disables as a check-in date, but we flag it
-          disableReason = 'CTA';
-        } else if (restrictions?.closedToDeparture) {
-          disableReason = 'CTD';
-        }
-
-        map[roomTypeId][dateKey] = {
-          rate,
-          availability,
-          restrictions,
-          isDisabled,
-          disableReason,
-        };
+        const badge = restrictions?.stopSell ? 'SS' : restrictions?.closedToArrival ? 'CTA' : restrictions?.closedToDeparture ? 'CTD' : null;
+        const closed = !!restrictions?.stopSell || (free !== null && free <= 0);
+        const tip = restrictions?.stopSell ? $localize`Stop sell` : free !== null && free <= 0 ? $localize`Sold out`
+          : restrictions?.closedToArrival ? $localize`Closed to arrival` : restrictions?.closedToDeparture ? $localize`Closed to departure` : '';
+        byDay.set(col.key, { availability: free, badge, closed, rate, tip });
       }
+      out.set(typeId, byDay);
     }
-    return map;
+    return out;
   });
 
-  /** Get cell info for a specific room type + date */
-  public getCellInfo(roomTypeId: string | null, dateKey: string): CellInfo | null {
-    if (!roomTypeId) return null;
-    return this.cellInfoMap()?.[roomTypeId]?.[dateKey] ?? null;
-  }
+  // ---- rows -----------------------------------------------------------------------------------------
+  readonly rows = computed<Row[]>(() => {
+    const rooms: any[] = this.rooms.value() ?? [];
+    const types: any[] = this.roomTypes.value() ?? [];
+    const hidden = this.hidden();
+    const typeFilter = this.typeFilter();
+    const collapsed = this.collapsed();
+    const first = this.start();
+    const days = this.rangeDays();
 
-  /** Check if a cell is disabled (stop sell or sold out) */
-  public isCellDisabled(roomTypeId: string | null, dateKey: string): boolean {
-    const info = this.getCellInfo(roomTypeId, dateKey);
-    return info?.isDisabled ?? false;
-  }
+    const typeNames = new Map<string, string>();
+    for (const t of types) if (t?._id) typeNames.set(t._id, t.name || $localize`Room`);
 
-  /** Check if a cell is closed to arrival */
-  public isCellClosedToArrival(roomTypeId: string | null, dateKey: string): boolean {
-    const info = this.getCellInfo(roomTypeId, dateKey);
-    return info?.restrictions?.closedToArrival ?? false;
-  }
+    const reservations = this.reservationList().filter((r) => !hidden.has(r.status));
+    const assigned = reservations.filter((r) => r.rooms?.some((x: any) => x?.room?._id));
+    const unassigned = reservations.filter(
+      (r) => r.channex?.bookingId && (!r.rooms?.length || r.rooms.every((x: any) => !x?.room?._id)),
+    );
 
-  /** Check if a cell is closed to departure */
-  public isCellClosedToDeparture(roomTypeId: string | null, dateKey: string): boolean {
-    const info = this.getCellInfo(roomTypeId, dateKey);
-    return info?.restrictions?.closedToDeparture ?? false;
-  }
-
-  /** Get formatted rate for display */
-  public getCellRate(roomTypeId: string | null, dateKey: string): number | null {
-    return this.getCellInfo(roomTypeId, dateKey)?.rate ?? null;
-  }
-
-  /** Get availability count */
-  public getCellAvailability(roomTypeId: string | null, dateKey: string): number | null {
-    return this.getCellInfo(roomTypeId, dateKey)?.availability ?? null;
-  }
-
-  /** Get tooltip for disabled/restricted cells */
-  public getCellRestrictionTooltip(roomTypeId: string | null, dateKey: string): string {
-    const info = this.getCellInfo(roomTypeId, dateKey);
-    if (!info) return '';
-    const parts: string[] = [];
-    if (info.restrictions?.stopSell) parts.push('Stop Sell');
-    if (info.availability !== null && info.availability <= 0) parts.push('Sold Out');
-    if (info.restrictions?.closedToArrival) parts.push('Closed to Arrival');
-    if (info.restrictions?.closedToDeparture) parts.push('Closed to Departure');
-    if (info.restrictions?.minStay && info.restrictions.minStay > 1) parts.push(`Min Stay: ${info.restrictions.minStay}`);
-    if (info.restrictions?.maxStay && info.restrictions.maxStay < 365) parts.push(`Max Stay: ${info.restrictions.maxStay}`);
-    if (info.availability !== null && info.availability > 0) parts.push(`${info.availability} available`);
-    return parts.join(' · ');
-  }
-
-  // Computed signal for grouped rooms with reservations
-  public roomsWithReservations = computed(() => {
-    const rooms = this.rooms.value() || [];
-    const types = this.roomTypes.value() || [];
-    const reservationsData = this.reservations.value();
-    const reservationsList = Array.isArray(reservationsData)
-      ? reservationsData
-      : reservationsData?.reservations || [];
-    const excluded = this.excludedStatuses();
-
-    // Filter out reservations that are in excluded statuses
-    const filteredReservations = reservationsList.filter((r: any) => {
-      // If a specific status is selected (not 'all'), only include that status
-      if (this.selectedStatus() !== 'all') {
-        return r.status === this.selectedStatus();
-      }
-      // Otherwise, exclude the statuses in the excludedStatuses set
-      return !excluded.has(r.status);
-    });
-
-    // Separate assigned reservations from unassigned OTA reservations
-    // A reservation is "assigned" if it has rooms with actual room._id assignments
-    const assignedReservations = filteredReservations.filter((r: any) => {
-      if (!r.rooms || r.rooms.length === 0) return false;
-      // Check if at least one room has a room._id (actual assignment)
-      return r.rooms.some((room: any) => room?.room?._id);
-    });
-
-    // OTA unassigned reservations: have channex data but rooms only have roomType (no room._id)
-    const unassignedOTAReservations = filteredReservations.filter((r: any) => {
-      if (!r.channex?.bookingId) return false;
-      if (!r.rooms || r.rooms.length === 0) return true; // OTA with no rooms array
-      // If all rooms lack room._id, it's unassigned OTA
-      return r.rooms.every((room: any) => !room?.room?._id);
-    });
-
-    // Map typeId -> typeName from API
-    const typesById = new Map<string, string>();
-    for (const t of types as any[]) {
-      if (t && t._id) typesById.set(t._id, t.name || 'Room');
-    }
-
-    // Build groups: key by typeId if available, fallback to typeName
-    const groupsMap = new Map<string, { typeName: string; rooms: any[] }>();
+    // Rooms grouped by type, in the order the API lists the types
+    const groups = new Map<string, { name: string; rooms: any[] }>();
     for (const room of rooms) {
-      let typeId: string | undefined;
-      let typeName: string = 'Room';
-      if (typeof room.roomType === 'string') {
-        typeId = room.roomType;
-        typeName = typesById.get(room.roomType) || room.roomType;
-      } else if (room.roomType) {
-        typeId = room.roomType._id;
-        typeName = room.roomType.name || 'Room';
-      }
-      const key = typeId || typeName;
-      if (!groupsMap.has(key)) groupsMap.set(key, { typeName, rooms: [] });
-      groupsMap.get(key)!.rooms.push(room);
+      const typeId = typeof room.roomType === 'string' ? room.roomType : room.roomType?._id;
+      const name = (typeId && typeNames.get(typeId)) || room.roomType?.name || $localize`Room`;
+      const key = typeId || name;
+      if (typeFilter.size && !typeFilter.has(key)) continue;
+      if (!groups.has(key)) groups.set(key, { name, rooms: [] });
+      groups.get(key)!.rooms.push(room);
     }
+    const order = [...types.map((t) => t._id).filter((id) => groups.has(id)), ...[...groups.keys()].filter((k) => !types.some((t) => t._id === k))];
 
-    // Order types: prefer API order, then any leftover keys
-    const orderedKeys: string[] = [];
-    for (const t of types as any[]) {
-      if (t && t._id && groupsMap.has(t._id)) orderedKeys.push(t._id);
-    }
-    for (const key of groupsMap.keys()) {
-      if (!orderedKeys.includes(key)) orderedKeys.push(key);
-    }
-
-    // Build group of unassigned OTA reservations by room type (for integration into sections)
-    const otaByRoomType = new Map<string, any[]>();
-    
-    if (unassignedOTAReservations.length > 0) {
-      for (const ota of unassignedOTAReservations) {
-        const roomsArray = ota.rooms || [];
-        
-        if (roomsArray.length > 0) {
-          for (const roomEntry of roomsArray) {
-            const rtId = typeof roomEntry.roomType === 'string' ? roomEntry.roomType : roomEntry.roomType?._id;
-            const rtName = typesById.get(rtId) || 'Unknown Room Type';
-            const key = `${rtId}`;
-            
-            if (!otaByRoomType.has(key)) {
-              otaByRoomType.set(key, []);
-            }
-            
-            // Check if this OTA is already added for this room type to avoid duplicates
-            const existingIndex = otaByRoomType.get(key)!.findIndex((r: any) => r._id === ota._id);
-            if (existingIndex === -1) {
-              otaByRoomType.get(key)!.push({
-                ...ota,
-                _requiredRoomTypeName: rtName,
-                _requiredRoomTypeId: rtId,
-              });
-            }
-          }
-        } else {
-          // Fallback: if no room type info, add to a generic OTA section
-          if (!otaByRoomType.has('unknown-ota')) {
-            otaByRoomType.set('unknown-ota', []);
-          }
-          otaByRoomType.get('unknown-ota')!.push(ota);
-        }
-      }
-    }
-
-    // Build interleaved array of group headers + room rows
-    const result: Array<any> = [];
-    
-    // Build all room type sections (assigned rooms + OTA unassigned within same section)
-    for (const key of orderedKeys) {
-      const group = groupsMap.get(key);
-      if (!group) continue;
-      result.push({ isGroup: true, roomTypeName: group.typeName, roomTypeId: key });
-      
-      // Add assigned physical rooms for this type
-      for (const room of group.rooms) {
-        // Build per-room stays using the room's own assignment dates (stayPeriod.from/to)
-        const stays: RoomStay[] = [];
-        for (const r of assignedReservations as any[]) {
-          if (!r?.rooms) continue;
-          const matchingAssignments = r.rooms.filter((rr: any) => rr?.room?._id === room._id);
-          if (!matchingAssignments?.length) continue;
-          for (const rr of matchingAssignments) {
-            const checkIn = rr?.stayPeriod?.from || r.checkInDate;
-            const checkOut = rr?.stayPeriod?.to || r.checkOutDate;
-            // Prefer assignedGuest from the room assignment; fallback to reservation guest for older data
-            const guestForRoom = rr?.assignedGuest || r.guest;
-            stays.push({
-              reservationId: r._id,
-              roomAssignmentId: rr?._id,
-              checkInDate: checkIn,
-              checkOutDate: checkOut,
-              guest: guestForRoom,
-              status: r.status,
-              bookingType: r.bookingType,
-              confirmationNumber: r.confirmationNumber,
-              reservation: r,
-            });
+    const out: Row[] = [];
+    for (const key of order) {
+      const group = groups.get(key)!;
+      const roomRows: RoomRow[] = group.rooms.map((room) => {
+        const bars: Bar[] = [];
+        for (const r of assigned) {
+          for (const assignment of (r.rooms || []).filter((x: any) => x?.room?._id === room._id)) {
+            const bar = this.makeBar(r, assignment?.stayPeriod?.from || r.checkInDate, assignment?.stayPeriod?.to || r.checkOutDate, first, days, room._id, assignment?.assignedGuest || r.guest, `${r._id}:${assignment?._id ?? room._id}`);
+            if (bar) bars.push(bar);
           }
         }
-
-        result.push({
-          isGroup: false,
-          roomId: room._id,
-          roomName: `${room.name} ${room.roomNumber ?? ''}`,
-          roomTypeId: typeof room.roomType === 'string' ? room.roomType : room.roomType?._id,
-          roomTypeName: group.typeName,
-          capacity: room.capacity || 2,
-          housekeepingStatus: room.housekeepingStatus || 'clean',
-          reservations: stays,
-        });
-      }
-      
-      // Add OTA unassigned row for this room type (if any)
-      const otaList = otaByRoomType.get(key);
-      if (otaList && otaList.length > 0) {
-        const roomTypeName = otaList[0]._requiredRoomTypeName || 'Unknown Room Type';
-        
-        // Create a virtual "room row" for unassigned OTA reservations of this type
-        const otaStays: RoomStay[] = otaList.map((r: any) => ({
-          reservationId: r._id,
-          roomAssignmentId: undefined,
-          checkInDate: r.checkInDate,
-          checkOutDate: r.checkOutDate,
-          guest: r.guest,
-          status: r.status,
-          bookingType: r.bookingType,
-          confirmationNumber: r.confirmationNumber,
-          reservation: r,
-        }));
-
-        result.push({
-          isGroup: false,
-          roomId: `unassigned-ota-${key}`,
-          roomName: `OTA Unassigned - ${roomTypeName}`,
-          roomTypeId: key !== 'unknown-ota' ? key : null,
-          roomTypeName: `OTA - ${roomTypeName}`,
-          capacity: 0,
-          housekeepingStatus: 'clean',
-          isOTAUnassigned: true, // Flag to indicate this is an OTA unassigned row
-          reservations: otaStays,
-        });
-      }
-    }
-    
-    // Handle OTA with unknown room types (if any exist after the above loop)
-    const unknownOTA = otaByRoomType.get('unknown-ota');
-    if (unknownOTA && unknownOTA.length > 0) {
-      result.push({ isGroup: true, roomTypeName: 'OTA - Unassigned', roomTypeId: null });
-      
-      const otaStays: RoomStay[] = unknownOTA.map((r: any) => ({
-        reservationId: r._id,
-        roomAssignmentId: undefined,
-        checkInDate: r.checkInDate,
-        checkOutDate: r.checkOutDate,
-        guest: r.guest,
-        status: r.status,
-        bookingType: r.bookingType,
-        confirmationNumber: r.confirmationNumber,
-        reservation: r,
-      }));
-
-      result.push({
-        isGroup: false,
-        roomId: `unassigned-ota-unknown`,
-        roomName: `OTA Unassigned`,
-        roomTypeId: null,
-        roomTypeName: 'OTA - Unassigned',
-        capacity: 0,
-        housekeepingStatus: 'clean',
-        isOTAUnassigned: true,
-        reservations: otaStays,
+        const hk = room.housekeepingStatus || 'clean';
+        return {
+          kind: 'room', id: room._id, roomId: room._id, name: `${room.name ?? ''} ${room.roomNumber ?? ''}`.trim(), capacity: room.capacity || 2,
+          typeId: typeof room.roomType === 'string' ? room.roomType : room.roomType?._id, typeName: group.name, hk, outOfOrder: hk === 'out_of_order', bars,
+        };
       });
+
+      const otaBars: Bar[] = [];
+      for (const r of unassigned) {
+        const wantsType = (r.rooms || []).some((x: any) => (typeof x.roomType === 'string' ? x.roomType : x.roomType?._id) === key);
+        if (!wantsType) continue;
+        const bar = this.makeBar(r, r.checkInDate, r.checkOutDate, first, days, null, r.guest, `${r._id}:ota:${key}`);
+        if (bar) otaBars.push(bar);
+      }
+
+      // How many rooms are free each night: the channel manager's figure when there is one, otherwise what the grid shows.
+      const inv = this.inventoryCells().get(key);
+      const sellable = roomRows.filter((x) => !x.outOfOrder).length;
+      const cells: GroupCell[] = this.columns().map((col) => {
+        const info = inv?.get(col.key);
+        let availability = info?.availability ?? null;
+        if (availability === null) {
+          const used = roomRows.filter((x) => !x.outOfOrder && x.bars.some((b) => this.barCoversNight(b, col.index))).length
+            + otaBars.filter((b) => this.barCoversNight(b, col.index)).length;
+          availability = Math.max(0, sellable - used);
+        }
+        return { availability, badge: info?.badge ?? null, closed: info?.closed ?? false, tip: info?.tip ?? '' };
+      });
+
+      const isCollapsed = collapsed.has(key);
+      out.push({ kind: 'group', id: key, name: group.name, roomCount: group.rooms.length, collapsed: isCollapsed, cells });
+      if (!isCollapsed) {
+        out.push(...roomRows);
+        if (otaBars.length) out.push({ kind: 'ota', id: `ota-${key}`, typeId: key, typeName: group.name, bars: otaBars });
+      }
     }
-
-    return result;
+    return out;
   });
 
-   confirmedCount = computed(() => {
-    return this.reservations.value()?.reservations.filter(r => r.status === 'confirmed').length;
-  });
-
-  checkedInCount = computed(() => {
-    return this.reservations.value()?.reservations.filter(r => r.status === 'checked_in').length;
-  });
-
-  pendingCount = computed(() => {
-    return this.reservations.value()?.reservations.filter(r => r.status === 'pending').length;
-  });
-
-  cancelledCount = computed(() => {
-    return this.reservations.value()?.reservations.filter(r => r.status === 'cancelled').length;
-  });
-
-  totalRevenue = computed(() => {
-    return this.reservations.value()?.reservations.reduce((sum, r) => sum + this.getEffectiveTotal(r), 0);
-  });
-
-  getEffectiveTotal(reservation: Reservation): number {
-      // The pricing.total already includes approved extension costs (updated by backend)
-      return reservation.pricing?.total || 0;
-    }
-
-  ngOnInit() {
-    // Initialize start date aligned to current month (default view)
-    const today = new Date();
-    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-    this.startDate.set(monthStart);
+  /** A bar covers night n when it starts at or before the middle of column n and ends after it. */
+  private barCoversNight(bar: Bar, night: number): boolean {
+    return bar.left <= night + 0.5 && bar.left + bar.width > night + 0.5;
   }
 
-  reloadData() {
+  readonly roomTypeOptions = computed(() => {
+    const rooms: any[] = this.rooms.value() ?? [];
+    const types: any[] = this.roomTypes.value() ?? [];
+    const seen = new Set(rooms.map((r) => (typeof r.roomType === 'string' ? r.roomType : r.roomType?._id)));
+    return types.filter((t) => seen.has(t._id)).map((t) => ({ id: t._id as string, name: t.name as string }));
+  });
+
+  readonly occupancy = computed(() => {
+    const roomRows = this.rows().filter((r): r is RoomRow => r.kind === 'room');
+    const otaRows = this.rows().filter((r): r is OtaRow => r.kind === 'ota');
+    const stays = [...roomRows, ...otaRows].flatMap((r) => r.bars).map((b) => ({ checkIn: b.checkInKey, checkOut: b.checkOutKey }));
+    const sellable = roomRows.filter((r) => !r.outOfOrder).length;
+    return occupancyPerNight(stays, this.start(), this.rangeDays(), sellable);
+  });
+
+  readonly statusCounts = computed(() => {
+    const counts: Partial<Record<StayStatus, number>> = {};
+    for (const r of this.reservationList()) counts[r.status as StayStatus] = (counts[r.status as StayStatus] ?? 0) + 1;
+    return counts;
+  });
+
+  readonly legend = (['confirmed', 'pending', 'checked_in', 'checked_out', 'reserved', 'no_show', 'cancelled'] as StayStatus[]).map((s) => ({
+    status: s, color: STAY_COLORS[s], icon: STAY_ICONS[s], label: STATUS_LABELS[s](),
+  }));
+
+  readonly housekeepingOptions = [
+    { key: 'clean', label: $localize`Clean`, icon: 'check_circle' },
+    { key: 'dirty', label: $localize`Dirty`, icon: 'warning' },
+    { key: 'inspected', label: $localize`Inspected`, icon: 'verified' },
+    { key: 'out_of_order', label: $localize`Out of Order`, icon: 'do_not_disturb' },
+  ];
+
+  readonly matchCount = computed(() => {
+    const term = this.search().trim();
+    if (!term) return 0;
+    return this.rows().reduce((n, r) => n + (r.kind === 'group' ? 0 : r.bars.filter((b) => !this.isDim(b)).length), 0);
+  });
+
+  /** The numbers a front-desk agent looks at first: from the property overview, plus how full tonight is. */
+  readonly kpis = computed(() => {
+    const stats = this.overview.value()?.stats;
+    const todayCol = this.columns().find((c) => c.isToday);
+    const occ = todayCol ? this.occupancy()[todayCol.index] : null;
+    return {
+      arrivals: stats?.totalArrivals ?? null,
+      departures: stats?.totalDepartures ?? null,
+      inHouse: stats?.totalInHouse ?? null,
+      occupancy: occ?.percent ?? null,
+    };
+  });
+
+  // ---- building a bar ---------------------------------------------------------------------------------
+  private makeBar(reservation: any, checkIn: any, checkOut: any, windowStart: Date, days: number, roomId: string | null, guestSource: any, key: string): Bar | null {
+    const layout = layoutBar(checkIn, checkOut, windowStart, days);
+    if (!layout) return null;
+    const status = (reservation.status as StayStatus) in STAY_COLORS ? (reservation.status as StayStatus) : 'confirmed';
+    const g = guestSource || {};
+    const guest = g.companyName ? g.companyName : `${g.firstName || ''} ${g.lastName || ''}`.trim() || $localize`Guest`;
+    const sourceKey = String(reservation.bookingSource || '').toLowerCase();
+    const balance = Number(reservation.pricing?.balance) || 0;
+    const source = (SOURCE_NAMES[sourceKey] ?? SOURCE_NAMES['direct'])();
+    const urgency = urgencyOf(status, checkIn, checkOut, this.today);
+    const ci = parseDay(checkIn);
+    const co = parseDay(checkOut);
+    const fmt = new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+    const lines = [
+      `${guest}${reservation.bookingType === 'group' ? ' (' + $localize`Group` + ')' : ''}`,
+      `${fmt.format(ci)} → ${fmt.format(co.getTime() <= ci.getTime() ? addDays(ci, 1) : co)} · ${layout.nights} ${layout.nights === 1 ? $localize`night` : $localize`nights`}`,
+      `${STATUS_LABELS[status]()} · ${source}`,
+    ];
+    if (reservation.confirmationNumber) lines.push(`#${reservation.confirmationNumber}`);
+    if (balance > 0 && status !== 'cancelled') lines.push($localize`Balance due: ${balance}`);
+    if (urgency === 'arriving') lines.push($localize`Arriving today`);
+    if (urgency === 'departing') lines.push($localize`Leaving today`);
+    if (urgency === 'overdue') lines.push($localize`Still in the room after check-out day`);
+    if (urgency === 'late') lines.push($localize`Arrival day has passed and the guest has not checked in`);
+    return {
+      key, reservation, roomId, ...layout, status, statusLabel: STATUS_LABELS[status](), icon: STAY_ICONS[status], color: STAY_COLORS[status],
+      guest, isGroup: reservation.bookingType === 'group', modified: !!reservation.modification?.isModified, balance: status === 'cancelled' ? 0 : balance,
+      urgency, source, sourceLogo: SOURCE_LOGOS[sourceKey] ?? null, checkInKey: dayKey(ci), checkOutKey: dayKey(co.getTime() <= ci.getTime() ? addDays(ci, 1) : co),
+      haystack: `${guest} ${reservation.confirmationNumber ?? ''} ${source} ${g.email ?? ''} ${g.phone ?? ''}`.toLowerCase(), tooltip: lines.join('\n'),
+    };
+  }
+
+  /** Bars that don't match the search or the highlighted KPI fade back, so the ones that do stand out. */
+  isDim(bar: Bar): boolean {
+    const term = this.search().trim().toLowerCase();
+    if (term && !bar.haystack.includes(term)) return true;
+    switch (this.focus()) {
+      case 'arrivals': return bar.checkInKey !== this.todayKey;
+      case 'departures': return bar.checkOutKey !== this.todayKey;
+      case 'inhouse': return bar.status !== 'checked_in';
+      default: return false;
+    }
+  }
+
+  // ---- navigation & controls ---------------------------------------------------------------------------
+  shift(days: number): void {
+    this.start.set(addDays(this.start(), days));
+  }
+
+  goToday(): void {
+    this.start.set(addDays(this.today, -1));
+  }
+
+  jump(value: string): void {
+    if (!value) return;
+    this.start.set(addDays(parseDay(value), -1));
+  }
+
+  setRange(days: RangeDays): void {
+    this.rangeDays.set(days);
+  }
+
+  toggleStatus(status: StayStatus): void {
+    const next = new Set(this.hidden());
+    if (next.has(status)) next.delete(status);
+    else next.add(status);
+    this.hidden.set(next);
+  }
+
+  toggleType(id: string): void {
+    const next = new Set(this.typeFilter());
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    this.typeFilter.set(next);
+  }
+
+  clearTypes(): void {
+    this.typeFilter.set(new Set());
+  }
+
+  toggleCollapsed(id: string): void {
+    const next = new Set(this.collapsed());
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    this.collapsed.set(next);
+  }
+
+  collapseAll(collapse: boolean): void {
+    this.collapsed.set(collapse ? new Set(this.rows().filter((r) => r.kind === 'group').map((r) => r.id)) : new Set());
+  }
+
+  allCollapsed = computed(() => {
+    const groups = this.rows().filter((r) => r.kind === 'group');
+    return groups.length > 0 && groups.every((g) => (g as GroupRow).collapsed);
+  });
+
+  setFocus(focus: Focus): void {
+    this.focus.set(this.focus() === focus ? null : focus);
+    if (this.focus() && !this.todayInView()) this.goToday();
+  }
+
+  setDensity(density: Density): void {
+    this.density.set(density);
+  }
+
+  resetView(): void {
+    this.search.set('');
+    this.focus.set(null);
+    this.typeFilter.set(new Set());
+    this.hidden.set(new Set(['cancelled', 'no_show']));
+    this.collapsed.set(new Set());
+    this.goToday();
+  }
+
+  reload(): void {
     this.reservations.reload();
     this.inventoryGrid.reload();
+    this.rooms.reload();
+    this.overview.reload();
   }
 
-  clearFilters() {
-    // Reset view mode to monthly
-    this.viewMode.set('monthly');
-    // Reset status filter to show all
-    this.selectedStatus.set('all');
-    // Reset date range to current month
-    const today = new Date();
-    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-    this.startDate.set(monthStart);
+  // ---- housekeeping ------------------------------------------------------------------------------------
+  hkLabel(status: string): string {
+    return this.housekeepingOptions.find((o) => o.key === status)?.label ?? status;
   }
 
-  createReservation() {
-    const dialogRef = this.dialog.open(QuickReservationModalComponent, {
-      width: '600px',
-      disableClose: false,
-    });
-
-    dialogRef.afterClosed().subscribe((result: QuickReservationData | undefined) => {
-      if (result) {
-        this.router.navigate(['../create'], {
-          relativeTo: this.route.parent,
-          queryParams: { quickReservation: JSON.stringify(result) },
-        });
-      }
-    });
+  hkClass(status: string): string {
+    return `hk-${status}`;
   }
 
-  /** Human-readable label for the current view period (start – end, local) */
-  public getPeriodLabel(): string {
-    const mode = this.viewMode();
-    const start = this.alignStartOfPeriod(this.startDate(), mode);
-    let end = new Date(start);
-    if (mode === 'weekly') {
-      end.setDate(end.getDate() + 6);
-    } else {
-      // monthly: last day of the same month
-      end = new Date(start.getFullYear(), start.getMonth() + 1, 0);
-      end.setHours(0, 0, 0, 0);
-    }
-    const fmt = new Intl.DateTimeFormat(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-    return `${fmt.format(start)} – ${fmt.format(end)}`;
-  }
-
-  /**
-   * Check if a reservation spans across a specific date
-   */
-  isReservationOnDate(reservation: any, date: DateRange): boolean {
-    const checkIn = new Date(reservation.checkInDate);
-    const checkOut = new Date(reservation.checkOutDate);
-    
-    // Remove time component for date comparison
-    checkIn.setHours(0, 0, 0, 0);
-    checkOut.setHours(0, 0, 0, 0);
-    const compareDate = new Date(date.date);
-    compareDate.setHours(0, 0, 0, 0);
-    
-    return compareDate >= checkIn && compareDate < checkOut;
-  }
-
-  /**
-   * Check if reservation starts on the given date (normalized)
-   */
-  isReservationStartingOnDate(reservation: any, date: DateRange): boolean {
-    const checkIn = this.parseDateOnly(reservation.checkInDate);
-    const compareDate = this.parseDateOnly(date.date);
-    return compareDate.getTime() === checkIn.getTime();
-  }
-
-  /**
-   * Check if the reservation block should render starting from this date.
-   * Returns true if:
-   * - Reservation starts on this date, OR
-   * - Reservation spans across this date AND this is the first visible date in the current range
-   * This ensures multi-day reservations spanning month/week boundaries display correctly.
-   */
-  shouldRenderReservationFromDate(reservation: any, date: DateRange): boolean {
-    const checkIn = this.parseDateOnly(reservation.checkInDate);
-    const checkOut = this.parseDateOnly(reservation.checkOutDate);
-    const compareDate = this.parseDateOnly(date.date);
-
-    // Case 1: Reservation starts on this date
-    if (compareDate.getTime() === checkIn.getTime()) {
-      return true;
-    }
-
-    // Case 2: Reservation spans this date AND this is the first visible date
-    // (means the reservation started before the current view)
-    const dates = this.dateRange();
-    if (Array.isArray(dates) && dates.length > 0) {
-      const firstVisible = this.parseDateOnly(dates[0].date);
-      // If this date is the first visible date AND the reservation spans it (started before and ends after/on it)
-      if (compareDate.getTime() === firstVisible.getTime() && compareDate >= checkIn && compareDate < checkOut) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * Parse a date string and extract just the date portion (ignoring time/timezone)
-   * This handles ISO strings like "2026-01-04T00:00:00.000Z"
-   */
-  private parseDateOnly(dateInput: string | Date): Date {
-    if (dateInput instanceof Date) {
-      return new Date(dateInput.getFullYear(), dateInput.getMonth(), dateInput.getDate());
-    }
-    const dateStr = String(dateInput);
-    // Handle plain YYYY-MM-DD format explicitly (no timezone ambiguity)
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-      const [year, month, day] = dateStr.split('-').map(Number);
-      return new Date(year, month - 1, day);
-    }
-    // For ISO strings like "2026-03-03T23:00:00.000Z", parse into Date object
-    // and extract LOCAL date components. This correctly interprets the date
-    // in the user's timezone (e.g. 23:00 UTC = 00:00 WAT on the next day).
-    const d = new Date(dateStr);
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  }
-
-  /**
-   * Calculate the width in pixels of the reservation block based on duration
-   * Note: Calendar display is inclusive of the checkout date for visual continuity
-   */
-  getReservationWidth(reservation: any, date: DateRange): number {
-    const cellWidth = this.cellWidthPx();
-
-    // Parse dates properly to avoid timezone issues
-    const checkInNorm = this.parseDateOnly(reservation.checkInDate);
-    const checkOutNorm = this.parseDateOnly(reservation.checkOutDate);
-    const compareDateNorm = this.parseDateOnly(date.date);
-
-    // Check if we should render from this date
-    if (!this.shouldRenderReservationFromDate(reservation, date)) {
-      return 0;
-    }
-
-    // Determine where rendering actually starts
-    let renderStartDate = checkInNorm;
-    
-    // If this reservation started before the visible range, start from the first visible date
-    const dates = this.dateRange();
-    if (Array.isArray(dates) && dates.length > 0) {
-      const firstVisible = this.parseDateOnly(dates[0].date);
-      if (checkInNorm < firstVisible && checkOutNorm > firstVisible) {
-        renderStartDate = firstVisible;
-      }
-    }
-
-    // The last occupied night is the day BEFORE checkout
-    const lastOccupiedDate = new Date(checkOutNorm);
-    lastOccupiedDate.setDate(lastOccupiedDate.getDate() - 1);
-
-    // Determine the end date for width calculation (clamped to visible range)
-    let renderEndDate = lastOccupiedDate;
-    let checkoutVisible = false;
-    if (Array.isArray(dates) && dates.length > 0) {
-      const lastVisible = this.parseDateOnly(dates[dates.length - 1].date);
-      if (lastOccupiedDate > lastVisible) {
-        renderEndDate = lastVisible;
-      }
-      // Check if checkout date itself is within the visible range
-      checkoutVisible = checkOutNorm.getTime() <= lastVisible.getTime()
-        && checkOutNorm.getTime() > renderStartDate.getTime();
-    }
-
-    // Calculate number of occupied night cells
-    const msPerDay = 1000 * 60 * 60 * 24;
-    const cellCount = Math.floor((renderEndDate.getTime() - renderStartDate.getTime()) / msPerDay) + 1;
-    
-    if (cellCount <= 0) return 0;
-
-    // Width = occupied nights + half cell for checkout day (guest departs that morning)
-    const padding = 8; // 4px left + 4px right for inner padding
-    const checkoutExtension = checkoutVisible ? Math.floor(cellWidth / 2) : 0;
-    const width = (cellCount * cellWidth) + checkoutExtension - padding;
-    
-    return Math.max(width, cellWidth - padding);
-  }
-
-  /**
-   * Get dynamic styling for reservation blocks
-   */
-  getReservationStyle(reservation: any): string {
-    const status = (reservation?.status || 'reserved') as ReservationStatus;
-    return this.statusColorMap[status] || 'bg-gray-500';
-  }
-
-  public getStatusColorClass(status: ReservationStatus): string {
-    return this.statusColorMap[status] || 'bg-gray-500';
-  }
-
-  /** Get background color class based on housekeeping status */
-  public getHousekeepingStatusClass(status: string): string {
-    const colorMap: Record<string, string> = {
-      'clean': 'bg-green-100 border-l-4 border-l-green-500',
-      'dirty': 'bg-amber-100 border-l-4 border-l-amber-500',
-      'inspected': 'bg-blue-100 border-l-4 border-l-blue-500',
-      'out_of_order': 'bg-red-100 border-l-4 border-l-red-500',
-    };
-    return colorMap[status] || 'bg-gray-50';
-  }
-
-  /** Get icon for housekeeping status */
-  public getHousekeepingStatusIcon(status: string): string {
-    const iconMap: Record<string, string> = {
-      'clean': 'check_circle',
-      'dirty': 'warning',
-      'inspected': 'verified',
-      'out_of_order': 'do_not_disturb',
-    };
-    return iconMap[status] || 'help';
-  }
-
-  /** Update housekeeping status for a room */
-  public updateHousekeepingStatus(roomId: string, status: string): void {
+  updateHousekeeping(roomId: string, status: string): void {
     this.roomService.updateHousekeepingStatus(roomId, status as any).subscribe({
-      next: () => {
-        // Reload rooms to reflect the update
-        this.rooms.reload();
-      },
-      error: (err) => {
-        console.error('Failed to update housekeeping status:', err);
-      }
+      next: () => this.rooms.reload(),
+      error: () => this.snackBar.open($localize`Could not update the room status.`, $localize`Close`, { duration: 4000 }),
     });
   }
 
-  /** Navigate to previous period based on view mode */
-  previousWeek() {
-    const mode = this.viewMode();
-    const date = new Date(this.startDate());
-    if (mode === 'weekly') {
-      date.setDate(date.getDate() - 7);
-    } else {
-      // monthly
-      date.setMonth(date.getMonth() - 1);
-    }
-    this.startDate.set(this.alignStartOfPeriod(date, mode));
-  }
-
-  /** Navigate to next period based on view mode */
-  nextWeek() {
-    const mode = this.viewMode();
-    const date = new Date(this.startDate());
-    if (mode === 'weekly') {
-      date.setDate(date.getDate() + 7);
-    } else {
-      // monthly
-      date.setMonth(date.getMonth() + 1);
-    }
-    this.startDate.set(this.alignStartOfPeriod(date, mode));
-  }
-
-  /** Go to current period start */
-  goToToday() {
-    const today = new Date();
-    this.startDate.set(this.alignStartOfPeriod(today, this.viewMode()));
-  }
-
-  /** Change view mode and align start date */
-  onViewModeChange(mode: 'weekly' | 'monthly') {
-    this.viewMode.set(mode);
-    this.goToToday();
-  }
-
-  /** Change status filter */
-  onStatusChange(status: ReservationStatus | 'all') {
-    this.selectedStatus.set(status);
-  }
-
-  /** Navigate to list or calendar view */
-  navigateToView(view: 'list' | 'calendar') {
-    this.router.navigate(['/menu/hms/front-desk/reservations/view', view]);
-  }
-
-  /** Helper: align a date to the start of its period */
-  private alignStartOfPeriod(date: Date, mode: 'weekly' | 'monthly') {
-    const d = new Date(date);
-    if (mode === 'weekly') {
-      // Start at current day, normalized (7 days from here)
-      d.setHours(0, 0, 0, 0);
-      return d;
-    }
-    // monthly
-    return new Date(d.getFullYear(), d.getMonth(), 1);
-  }
-
-  /** Helper: get dateFrom/dateTo strings (YYYY-MM-DD) for current period */
-  private getPeriodDateRangeStrings(start: Date, mode: 'weekly' | 'monthly') {
-    const startDay = new Date(start);
-    startDay.setHours(0, 0, 0, 0);
-    let endDay = new Date(startDay);
-    if (mode === 'weekly') {
-      endDay.setDate(endDay.getDate() + 6);
-    } else {
-      // monthly: end is last day of month
-      endDay = new Date(startDay.getFullYear(), startDay.getMonth() + 1, 0);
-      endDay.setHours(0, 0, 0, 0);
-    }
-    const df = this.formatLocalDate(startDay);
-    const dt = this.formatLocalDate(endDay);
-    return { dateFrom: df, dateTo: dt };
-  }
-
-  /** Tooltip content for a reservation block */
-  getReservationTooltip(reservation: any, roomName?: string): string {
-    const guest = reservation.guest?.firstName && reservation.guest?.lastName
-      ? `${reservation.guest.firstName} ${reservation.guest.lastName}`
-      : (reservation.guestName || 'Guest');
-    const room = roomName || 'Room';
-    const checkIn = new Date(reservation.checkInDate);
-    const checkOut = new Date(reservation.checkOutDate);
-    const fmt: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: '2-digit' };
-    const ci = checkIn.toLocaleDateString(undefined, fmt);
-    const co = checkOut.toLocaleDateString(undefined, fmt);
-    return `${room} | ${guest} | Check-in: ${ci} | Check-out: ${co}`;
-  }
-
-  /** Fixed cell width per mode (px) */
-  public cellWidthPx(): number {
-    const mode = this.viewMode();
-    if (mode === 'weekly') return 160; // standard week cell width
-    return 80; // compact monthly cells (wider)
-  }
-
-  /** Gap between cells per mode (px) */
-  public cellGapPx(): number {
-    const mode = this.viewMode();
-    if (mode === 'weekly') return 4;
-    return 2;
-  }
-
-  /** Number of reservations starting on a specific date within a row */
-  public getCellReservationsCount(reservations: any[], date: DateRange): number {
-    return (reservations || []).filter(r => this.isReservationStartingOnDate(r, date)).length;
-  }
-
-  /** Stack index for the reservation among those starting on the same date */
-  public getCellStackIndex(reservations: any[], date: DateRange, reservation: any): number {
-    const starters = (reservations || []).filter(r => this.isReservationStartingOnDate(r, date));
-    // Try to identify uniquely using assignment + reservation ids if present
-    const idx = starters.findIndex(r => (
-      r === reservation ||
-      (r.roomAssignmentId && reservation.roomAssignmentId && r.roomAssignmentId === reservation.roomAssignmentId) ||
-      (r.reservationId && reservation.reservationId && r.reservationId === reservation.reservationId)
-    ));
-    return idx >= 0 ? idx : 0;
-  }
-
-  /** Top offset percent for a reservation in a cell based on local stacking */
-  public getReservationTopPercent(reservations: any[], date: DateRange, reservation: any): number {
-    const count = this.getCellReservationsCount(reservations, date);
-    if (count <= 1) return 0;
-    const idx = this.getCellStackIndex(reservations, date, reservation);
-    return (idx * (100 / count));
-  }
-
-  /** Height percent each reservation should occupy in a cell */
-  public getReservationHeightPercent(reservations: any[], date: DateRange): number {
-    const count = this.getCellReservationsCount(reservations, date);
-    return 100 / (count || 1);
-  }
-
-  /** Determine if a reservation is a group reservation */
-  public isGroupReservation(reservation: any): boolean {
-    if (!reservation) return false;
-    const r = reservation;
-    return (
-      r.reservationType === 'group' ||
-      r.bookingType === 'group' ||
-      r.groupReservation === true ||
-      r.guest?.type === 'group' ||
-      r.guest?.guestType === 'group' ||
-      !!r.guest?.companyName
-    );
-  }
-
-  /** Label for reservation block, prefix 'G' for group reservations */
-  public getReservationBlockLabel(reservation: any): string {
-    const g = reservation?.guest || {};
-    const name = `${g.firstName || ''} ${g.lastName || ''}`.trim() || 'Guest';
-    const prefix = this.isGroupReservation(reservation) ? '(G)' : '';
-    return `${prefix} ${name}`;
-  }
-
-  /** Whether this reservation has been flagged as modified */
-  public isReservationModified(reservation: any): boolean {
-    const source = reservation?.reservation || reservation;
-    return !!source?.modification?.isModified;
-  }
-
-  /** Nights label for reservation block */
-  public getReservationNightsLabel(reservation: any): string {
-    const checkIn = this.parseDateOnly(reservation.checkInDate);
-    const checkOut = this.parseDateOnly(reservation.checkOutDate);
-    const msPerDay = 1000 * 60 * 60 * 24;
-    const nights = Math.max(1, Math.round((checkOut.getTime() - checkIn.getTime()) / msPerDay));
-    return `${nights} night${nights === 1 ? '' : 's'}`;
-  }
-
-  /** Booking source label for badge */
-  public getBookingSourceLabel(reservation: any): string {
-    const source = String(reservation?.bookingSource || reservation?.reservation?.bookingSource || '').toLowerCase();
-    const map: Record<string, string> = {
-      'booking.com': 'Booking.com',
-      expedia: 'Expedia',
-      agoda: 'Agoda',
-      airbnb: 'Airbnb',
-      direct: 'Direct',
-      phone: 'Phone',
-      online: 'Online',
-      walk_in: 'Walk-in',
-      travel_agent: 'Agent',
-      corporate: 'Corporate',
-    };
-    return map[source] || 'Direct';
-  }
-
-  /** Booking source logo URL (null for icon fallback) */
-  public getBookingSourceLogoUrl(reservation: any): string | null {
-    const source = String(reservation?.bookingSource || reservation?.reservation?.bookingSource || '').toLowerCase();
-    const map: Record<string, string> = {
-      airbnb: 'https://cdn.brandfetch.io/idkuvXnjOH/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1717146459610',
-      agoda: 'https://cdn.brandfetch.io/idrJbkwvG0/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1724730098837',
-      expedia: 'https://cdn.brandfetch.io/idAGaivHFH/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1740983477322',
-      'booking.com': 'https://cdn.brandfetch.io/id9mEmLNcV/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1725855381233',
-    };
-    return map[source] || null;
-  }
-
-  /** Booking source background color */
-  public getBookingSourceColor(reservation: any): string {
-    const source = String(reservation?.bookingSource || reservation?.reservation?.bookingSource || '').toLowerCase();
-    const map: Record<string, string> = {
-      'booking.com': '#003580',
-      expedia: '#002F6C',
-      airbnb: '#FF5A5F',
-      agoda: '#5C2D91',
-      walk_in: '#16A34A',
-      direct: '#4B5563',
-      phone: '#0EA5E9',
-      online: '#6366F1',
-      travel_agent: '#7C3AED',
-      corporate: '#334155',
-    };
-    return map[source] || '#4B5563';
-  }
-
-  /** Open reservation preview dialog with the full reservation object */
-  openReservationPreview(reservation: any, row: any) {
-    if (!reservation) return;
+  // ---- opening things ---------------------------------------------------------------------------------
+  openReservation(bar: Bar, row: RoomRow | OtaRow): void {
     this.dialog.open(ReservationPreviewDialogComponent, {
       width: '700px',
-      data: { reservation, room: { name: row?.roomName, id: row?.roomId } },
+      maxWidth: '96vw',
+      data: { reservation: bar.reservation, room: { name: row.kind === 'room' ? row.name : undefined, id: row.kind === 'room' ? row.roomId : undefined } },
     });
   }
 
-  // ========== Drag Selection Methods ==========
-
-  /** Check if a specific date has a reservation conflict for a room */
-  public hasReservationOnDate(roomId: string, date: Date): boolean {
-    const rooms = this.roomsWithReservations();
-    const roomRow = rooms.find((r: any) => !r.isGroup && r.roomId === roomId);
-    if (!roomRow || !roomRow.reservations) return false;
-
-    const checkDate = this.parseDateOnly(date);
-
-    return roomRow.reservations.some((res: any) => {
-      const checkIn = this.parseDateOnly(res.checkInDate);
-      const checkOut = this.parseDateOnly(res.checkOutDate);
-      // A date is occupied if it's >= checkIn and < checkOut
-      return checkDate >= checkIn && checkDate < checkOut;
-    });
+  createReservation(): void {
+    this.dialog
+      .open(QuickReservationModalComponent, { width: '600px', maxWidth: '96vw' })
+      .afterClosed()
+      .subscribe((result: QuickReservationData | undefined) => this.continueToForm(result));
   }
 
-  /** Check if room type has OTA unassigned bookings during a date range */
-  private hasOTAUnassignedConflictInRange(roomTypeId: string, startDate: Date, endDate: Date): boolean {
-    const rooms = this.roomsWithReservations();
-    const start = this.parseDateOnly(startDate);
-    const end = this.parseDateOnly(endDate);
-    
-    // Find all OTA unassigned rows for this room type
-    const otaRows = rooms.filter((r: any) => 
-      r.isOTAUnassigned && r.roomTypeId === roomTypeId && r.reservations
-    );
-    
-    if (otaRows.length === 0) return false;
-    
-    // Check if any OTA booking overlaps with the selected date range
-    for (const otaRow of otaRows) {
-      for (const otaRes of otaRow.reservations) {
-        const otaCheckIn = this.parseDateOnly(otaRes.checkInDate);
-        const otaCheckOut = this.parseDateOnly(otaRes.checkOutDate);
-        
-        // Check if date ranges overlap: start < otaCheckOut AND end >= otaCheckIn
-        if (start < otaCheckOut && end >= otaCheckIn) {
-          return true; // Conflict detected
+  private continueToForm(result: QuickReservationData | undefined): void {
+    if (!result) return;
+    this.router.navigate(['../create'], { relativeTo: this.route.parent, queryParams: { quickReservation: JSON.stringify(result) } });
+  }
+
+  navigateToView(view: 'list' | 'calendar'): void {
+    this.router.navigate([view], { relativeTo: this.route.parent });
+  }
+
+  // ---- drag to book ------------------------------------------------------------------------------------
+  /** Which day column a pointer is over, from its position inside a row's track. */
+  private columnAt(event: PointerEvent): number {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const col = Math.floor((event.clientX - rect.left) / this.dayWidth());
+    return Math.min(this.rangeDays() - 1, Math.max(0, col));
+  }
+
+  trackDown(event: PointerEvent, row: RoomRow): void {
+    if (event.button !== 0 || (event.target as HTMLElement).closest('.tc-bar')) return;
+    const from = this.columnAt(event);
+    (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
+    this.selection.set(this.evaluate(row, from, from));
+  }
+
+  trackMove(event: PointerEvent, row: RoomRow): void {
+    const col = this.columnAt(event);
+    this.hoverCol.set(col);
+    const current = this.selection();
+    if (!current || current.rowId !== row.id) return;
+    if (col !== current.to) this.selection.set(this.evaluate(row, current.from, col));
+  }
+
+  trackUp(event: PointerEvent): void {
+    const current = this.selection();
+    (event.currentTarget as HTMLElement).releasePointerCapture?.(event.pointerId);
+    this.selection.set(null);
+    if (!current) return;
+    if (!current.ok) {
+      this.snackBar.open(current.reason, $localize`Close`, { duration: 3500 });
+      return;
+    }
+    const first = Math.min(current.from, current.to);
+    const last = Math.max(current.from, current.to);
+    const checkIn = addDays(this.start(), first);
+    const checkOut = addDays(this.start(), last + 1);
+    const data: QuickReservationDialogData = {
+      checkInDate: checkIn,
+      checkOutDate: checkOut,
+      preselectedRoomId: current.roomId,
+      preselectedRoomName: current.roomName,
+      preselectedRoomTypeId: current.typeId ?? undefined,
+      preselectedRoomTypeName: current.typeName,
+    };
+    this.dialog
+      .open(QuickReservationModalComponent, { width: '600px', maxWidth: '96vw', data })
+      .afterClosed()
+      .subscribe((result: QuickReservationData | undefined) => this.continueToForm(result));
+  }
+
+  trackCancel(): void {
+    this.selection.set(null);
+  }
+
+  /** Can these nights be booked in this room, and if not, why not (in words the agent can act on). */
+  private evaluate(row: RoomRow, a: number, b: number): Selection {
+    const from = Math.min(a, b);
+    const to = Math.max(a, b);
+    const checkIn = addDays(this.start(), from);
+    const checkOut = addDays(this.start(), to + 1);
+    let reason = '';
+    if (checkIn.getTime() < this.today.getTime()) reason = $localize`Dates in the past cannot be booked.`;
+    else if (row.outOfOrder) reason = $localize`This room is out of order.`;
+    else if (overlapsAny(row.bars.map((x) => ({ checkIn: x.checkInKey, checkOut: x.checkOutKey })), checkIn, checkOut)) reason = $localize`This room is already booked for those nights.`;
+    else {
+      const inv = row.typeId ? this.inventoryCells().get(row.typeId) : undefined;
+      for (let i = from; i <= to && !reason; i++) {
+        const info = inv?.get(this.columns()[i].key);
+        if (info?.closed) reason = $localize`${row.typeName} is closed for sale on ${this.columns()[i].key}.`;
+      }
+      if (!reason) {
+        const ota = this.rows().find((r): r is OtaRow => r.kind === 'ota' && r.typeId === row.typeId);
+        if (ota && overlapsAny(ota.bars.map((x) => ({ checkIn: x.checkInKey, checkOut: x.checkOutKey })), checkIn, checkOut)) {
+          reason = $localize`Unassigned channel bookings already use up this room type for those nights.`;
         }
       }
     }
-    
-    return false;
+    return { rowId: row.id, roomId: row.roomId, roomName: row.name, typeId: row.typeId, typeName: row.typeName, from: a, to: b, ok: !reason, reason };
   }
 
-  /** Check if any date in a range has conflicts */
-  public hasConflictInRange(roomId: string, startDate: Date, endDate: Date): boolean {
-    const start = new Date(Math.min(startDate.getTime(), endDate.getTime()));
-    const end = new Date(Math.max(startDate.getTime(), endDate.getTime()));
-    start.setHours(0, 0, 0, 0);
-    end.setHours(0, 0, 0, 0);
-
-    const current = new Date(start);
-    while (current <= end) {
-      if (this.hasReservationOnDate(roomId, current)) {
-        return true;
-      }
-      current.setDate(current.getDate() + 1);
-    }
-    
-    // Also check for OTA unassigned bookings for the same room type
-    const rooms = this.roomsWithReservations();
-    const roomRow = rooms.find((r: any) => !r.isGroup && r.roomId === roomId);
-    if (roomRow && roomRow.roomTypeId) {
-      if (this.hasOTAUnassignedConflictInRange(roomRow.roomTypeId, start, end)) {
-        return true;
-      }
-    }
-    
-    return false;
+  /** Where the live selection is drawn, in day-columns. */
+  selectionBox(row: RoomRow): { left: number; width: number; ok: boolean } | null {
+    const s = this.selection();
+    if (!s || s.rowId !== row.id) return null;
+    const first = Math.min(s.from, s.to);
+    const last = Math.max(s.from, s.to);
+    return { left: first + 0.5, width: last - first + 1, ok: s.ok };
   }
 
-  /** Start drag selection on mousedown */
-  public onCellMouseDown(event: MouseEvent, date: DateRange, row: any): void {
-    // Only start if it's a room row (not a group header) and not an OTA unassigned row
-    if (row.isGroup || row.isOTAUnassigned) return;
-    
-    // Block selection on disabled cells (stop sell, sold out)
-    if (this.isCellDisabled(row.roomTypeId, date.key)) return;
+  trackRow = (_: number, row: Row) => row.id;
+  trackBar = (_: number, bar: Bar) => bar.key;
 
-    // Block starting a reservation on a date closed to arrival
-    if (this.isCellClosedToArrival(row.roomTypeId, date.key)) return;
-    
-    // Prevent text selection during drag
-    event.preventDefault();
-
-    // Check for conflicts on selected date AND next day (minimum 1 night = 2 days highlighted)
-    const selectedDate = new Date(date.date);
-    const nextDay = new Date(date.date);
-    nextDay.setDate(nextDay.getDate() + 1);
-    
-    const hasConflict = this.hasReservationOnDate(row.roomId, selectedDate) || 
-                        this.hasReservationOnDate(row.roomId, nextDay);
-
-    this.dragSelection.set({
-      isSelecting: true,
-      startDate: new Date(date.date),
-      endDate: new Date(date.date),
-      roomId: row.roomId,
-      roomName: row.roomName,
-      roomTypeId: row.roomTypeId || null,
-      roomTypeName: row.roomTypeName || null,
-      hasConflict,
-    });
-  }
-
-  /** Extend selection on mousemove/mouseenter */
-  public onCellMouseEnter(date: DateRange, row: any): void {
-    const selection = this.dragSelection();
-    if (!selection.isSelecting) return;
-    
-    // Only extend selection for the same room
-    if (row.roomId !== selection.roomId) return;
-
-    const newEndDate = new Date(date.date);
-    let hasConflict = this.hasConflictInRange(
-      selection.roomId!,
-      selection.startDate!,
-      newEndDate
-    );
-
-    // Also check for disabled cells (stop sell / sold out) in the drag range
-    if (!hasConflict && row.roomTypeId) {
-      hasConflict = this.hasDisabledCellInRange(row.roomTypeId, selection.startDate!, newEndDate);
-    }
-
-    this.dragSelection.update(s => ({
-      ...s,
-      endDate: newEndDate,
-      hasConflict,
-    }));
-  }
-
-  /** Check if any date in a range has a disabled cell (stop sell / sold out) */
-  private hasDisabledCellInRange(roomTypeId: string, startDate: Date, endDate: Date): boolean {
-    const start = new Date(Math.min(startDate.getTime(), endDate.getTime()));
-    const end = new Date(Math.max(startDate.getTime(), endDate.getTime()));
-    start.setHours(0, 0, 0, 0);
-    end.setHours(0, 0, 0, 0);
-
-    const current = new Date(start);
-    while (current <= end) {
-      const key = this.formatLocalDate(current);
-      if (this.isCellDisabled(roomTypeId, key)) return true;
-      current.setDate(current.getDate() + 1);
-    }
-    return false;
-  }
-
-  /** Complete selection on mouseup */
-  public onCellMouseUp(): void {
-    const selection = this.dragSelection();
-    if (!selection.isSelecting) return;
-
-    if (!selection.hasConflict && selection.startDate && selection.endDate && selection.roomId) {
-      // Normalize dates (start should be before end)
-      const start = new Date(Math.min(selection.startDate.getTime(), selection.endDate.getTime()));
-      const end = new Date(Math.max(selection.startDate.getTime(), selection.endDate.getTime()));
-      
-      // The end date IS the checkout date (last selected cell is checkout day)
-      // But ensure minimum 1 night: if start == end (single cell clicked), checkout is next day
-      let checkOutDate = new Date(end);
-      if (start.getTime() === end.getTime()) {
-        // Single cell selected - minimum 1 night, so checkout is next day
-        checkOutDate.setDate(checkOutDate.getDate() + 1);
-      }
-
-      console.log('Check-in:', start, 'Check-out:', checkOutDate);
-      // Open quick reservation modal with pre-filled data
-      this.openQuickReservationWithDates(
-        start, 
-        checkOutDate, 
-        selection.roomId, 
-        selection.roomName,
-        selection.roomTypeId,
-        selection.roomTypeName
-      );
-    }
-
-    // Reset selection
-    this.resetDragSelection();
-  }
-
-  /** Reset drag selection state */
-  public resetDragSelection(): void {
-    this.dragSelection.set({
-      isSelecting: false,
-      startDate: null,
-      endDate: null,
-      roomId: null,
-      roomName: null,
-      roomTypeId: null,
-      roomTypeName: null,
-      hasConflict: false,
-    });
-  }
-
-  /** Check if a cell is within the current selection */
-  public isCellInSelection(date: DateRange, row: any): boolean {
-    const selection = this.dragSelection();
-    if (!selection.isSelecting || !selection.startDate || !selection.endDate) return false;
-    if (row.isGroup || row.roomId !== selection.roomId) return false;
-
-    const cellDate = new Date(date.date);
-    cellDate.setHours(0, 0, 0, 0);
-    
-    const start = new Date(Math.min(selection.startDate.getTime(), selection.endDate.getTime()));
-    let end = new Date(Math.max(selection.startDate.getTime(), selection.endDate.getTime()));
-    start.setHours(0, 0, 0, 0);
-    end.setHours(0, 0, 0, 0);
-
-    // For single-cell selection, extend visual highlight to show minimum 1 night (2 cells: check-in + check-out)
-    if (start.getTime() === end.getTime()) {
-      end = new Date(end);
-      end.setDate(end.getDate() + 1);
-    }
-
-    return cellDate >= start && cellDate <= end;
-  }
-
-  /** Open quick reservation modal with pre-filled dates from drag selection */
-  private openQuickReservationWithDates(
-    checkIn: Date, 
-    checkOut: Date, 
-    roomId: string, 
-    roomName: string | null,
-    roomTypeId: string | null,
-    roomTypeName: string | null
-  ): void {
-    const dialogData: QuickReservationDialogData = {
-      checkInDate: checkIn,
-      checkOutDate: checkOut,
-      preselectedRoomId: roomId,
-      preselectedRoomName: roomName ?? undefined,
-      preselectedRoomTypeId: roomTypeId ?? undefined,
-      preselectedRoomTypeName: roomTypeName ?? undefined,
-    };
-
-    const dialogRef = this.dialog.open(QuickReservationModalComponent, {
-      width: '600px',
-      data: dialogData,
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        if (result) {
-        this.router.navigate(['../create'], {
-          relativeTo: this.route.parent,
-          queryParams: { quickReservation: JSON.stringify(result) },
-        });
-      }
-      }
-    });
-  }
-
-  /** HostListener to cancel selection if mouse leaves the calendar area */
-  @HostListener('document:mouseup')
-  onDocumentMouseUp(): void {
-    if (this.dragSelection().isSelecting) {
-      this.onCellMouseUp();
+  private readPrefs(): { days: RangeDays; density: Density; hidden: StayStatus[] } {
+    const fallback = { days: 14 as RangeDays, density: 'comfortable' as Density, hidden: ['cancelled', 'no_show'] as StayStatus[] };
+    try {
+      const saved = JSON.parse(localStorage.getItem(PREFS_KEY) || 'null');
+      if (!saved) return fallback;
+      return {
+        days: [7, 14, 30].includes(saved.days) ? saved.days : fallback.days,
+        density: saved.density === 'compact' ? 'compact' : 'comfortable',
+        hidden: Array.isArray(saved.hidden) ? saved.hidden : fallback.hidden,
+      };
+    } catch {
+      return fallback;
     }
   }
-
-  /**
-   * Format a Date to 'YYYY-MM-DD' using local time (not UTC).
-   * Avoids timezone shift that toISOString() causes.
-   */
-  private formatLocalDate(date: Date): string {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-}
-
-/** Per-cell inventory info for a room type on a specific date */
-interface CellInfo {
-  rate: number | null;
-  availability: number | null;
-  restrictions: {
-    minStay?: number;
-    maxStay?: number;
-    closedToArrival?: boolean;
-    closedToDeparture?: boolean;
-    stopSell?: boolean;
-  } | null;
-  isDisabled: boolean;
-  disableReason: string;
 }

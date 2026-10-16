@@ -1,49 +1,39 @@
 <div class="p-3 md:p-4 min-h-screen">
-  <!-- Progress Bar -->
   @if (isDeleting()) {
     <mat-progress-bar mode="indeterminate" color="warn"></mat-progress-bar>
   }
 
-  <!-- Header Section -->
-  <app-page-header title="Receipts Reports" i18n-title subtitle="View and manage all receipts" i18n-subtitle>
-    <ng-container actions>
-      <date-range-selector />
-      <app-employee-selector />
-      <mat-form-field appearance="outline" class="!w-full sm:!w-48">
-        <mat-label><ng-container i18n>Sales Channel</ng-container></mat-label>
-        <mat-select [value]="selectedSalesChannel()" (selectionChange)="onSalesChannelChange($event.value)">
-          @for (option of salesChannelOptions; track option.value) {
-            <mat-option [value]="option.value">{{ option.label }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="!w-full sm:!w-48">
-        <mat-label><ng-container i18n>Order Type</ng-container></mat-label>
-        <mat-select [value]="selectedOrderType()" (selectionChange)="onOrderTypeChange($event.value)">
-          @for (option of orderTypeOptions; track option.value) {
-            <mat-option [value]="option.value">{{ option.label }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      <button matButton  (click)="dataSource.reload()">
-          <mat-icon class="mr-2">refresh</mat-icon>
-          <ng-container i18n>Refresh</ng-container>
-      </button>
-      @if (selection.selected.length > 0) {
-        <button matButton color="warn" (click)="deleteMultiple()" [disabled]="isDeleting()">
-          <mat-icon class="mr-2">delete</mat-icon>
-          <ng-container i18n>Delete ({{selection.selected.length}})</ng-container>
+  <!-- Title, then ONE aligned row: the period and person on the left, the actions on the right. (Not inside the
+       page-header actions strip: that scrolls sideways and clips the floating field labels.) -->
+  <header class="mb-4 border-b border-outline-variant pb-4">
+    <h1 class="text-2xl/7 font-bold sm:text-3xl"><ng-container i18n>Receipts</ng-container></h1>
+    <p class="mt-1 text-on-surface-variant"><ng-container i18n>What was sold, what is still open and what was given back</ng-container></p>
+
+    <div class="mt-4 flex flex-wrap items-center gap-3 [&_.mat-mdc-form-field-subscript-wrapper]:hidden">
+      <date-range-selector class="block w-full sm:w-72" />
+      <app-employee-selector class="block w-full sm:w-56" />
+
+      <div class="flex w-full items-center justify-end gap-2 sm:ml-auto sm:w-auto">
+        @if (selection.selected.length > 0) {
+          <button matButton color="warn" class="!h-10" (click)="deleteMultiple()" [disabled]="isDeleting()">
+            <mat-icon>delete</mat-icon>
+            <ng-container i18n>Delete ({{selection.selected.length}})</ng-container>
+          </button>
+        }
+        <button matIconButton type="button" (click)="dataSource.reload(); refundsResource.reload()" [attr.aria-label]="'Refresh' | tr" [matTooltip]="'Refresh' | tr">
+          <mat-icon>refresh</mat-icon>
         </button>
-      }
-        <button matButton="filled" color="primary" [matMenuTriggerFor]="exportMenu">
-          <mat-icon class="mr-2">file_download</mat-icon>
+        <button matButton="filled" color="primary" class="!h-10" [matMenuTriggerFor]="exportMenu">
+          <mat-icon>file_download</mat-icon>
           <ng-container i18n>Export Data</ng-container>
         </button>
         <mat-menu #exportMenu="matMenu">
-          <button mat-menu-item (click)="exportData('pdf')">
-            <mat-icon>picture_as_pdf</mat-icon>
-            <span><ng-container i18n>Export as PDF</ng-container></span>
-          </button>
+          @if (!isRefundTab()) {
+            <button mat-menu-item (click)="exportData('pdf')">
+              <mat-icon>picture_as_pdf</mat-icon>
+              <span><ng-container i18n>Export as PDF</ng-container></span>
+            </button>
+          }
           <button mat-menu-item (click)="exportData('csv')">
             <mat-icon>description</mat-icon>
             <span><ng-container i18n>Export as CSV</ng-container></span>
@@ -53,240 +43,357 @@
             <span><ng-container i18n>Export as Excel</ng-container></span>
           </button>
         </mat-menu>
-    </ng-container>
-  </app-page-header>
+      </div>
+    </div>
+  </header>
 
-  <mat-card class="py-2 md:py-4" appearance="outlined">
-    <!-- Tabs Section -->
-    @if (dataSource.hasValue()) {
-    <nav mat-tab-nav-bar class="grid grid-cols-3" [tabPanel]="tabPanel">
-      @for (tab of tabStats ; track tab.value) {
-      <a mat-tab-link (click)="onTabChange(tab.value)" [active]="activeTab === tab.value"
-        class="!h-auto !min-h-[72px] md:!min-h-[100px] !px-2 md:!px-4 !py-3 md:!py-4 border-b">
-        <div class="text-center">
-          <h3 class="text-gray-600 font-medium text-xs md:text-base mb-1">{{tab.label}}</h3>
-          <p class="text-lg md:text-2xl font-semibold">{{tab.count}}</p>
-        </div>
-      </a>
+  @if (!data()) {
+    <div class="flex items-center justify-center min-h-[300px]">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else {
+
+  <!-- KPI strip: the period at a glance. Open orders and refunds are buttons, because they are the two numbers
+       somebody will want to act on. -->
+  @if (kpis(); as k) {
+    <section class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4" aria-label="Key figures" i18n-aria-label>
+      <div class="col-span-2 lg:col-span-1 rounded-2xl bg-primary-container text-on-primary-container p-4">
+        <p class="text-xs font-medium uppercase tracking-wide opacity-80"><ng-container i18n>Net sales</ng-container></p>
+        <p class="mt-1 text-2xl md:text-3xl font-bold tabular-nums">{{ k.netSales | currency: currency() : 'symbol' : '1.0-0' }}</p>
+        <p class="mt-1 text-xs opacity-80"><ng-container i18n>Gross sales minus refunds</ng-container></p>
+      </div>
+
+      <div class="rounded-2xl border border-outline-variant p-4">
+        <p class="text-xs font-medium uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Gross sales</ng-container></p>
+        <p class="mt-1 text-xl md:text-2xl font-semibold tabular-nums">{{ k.grossSales | currency: currency() : 'symbol' : '1.0-0' }}</p>
+        <p class="mt-1 text-xs text-on-surface-variant"><ng-container i18n>{{ summary()?.sales }} paid receipts</ng-container></p>
+      </div>
+
+      <button type="button" (click)="onTabChange('refund')"
+        class="text-left rounded-2xl border p-4 transition-colors hover:bg-surface-container"
+        [class.border-outline-variant]="k.refunds.amount === 0" [class.border-orange-300]="k.refunds.amount > 0">
+        <p class="text-xs font-medium uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Refunds</ng-container></p>
+        <p class="mt-1 text-xl md:text-2xl font-semibold tabular-nums" [class.text-orange-700]="k.refunds.amount > 0">{{ k.refunds.amount | currency: currency() : 'symbol' : '1.0-0' }}</p>
+        <p class="mt-1 text-xs text-on-surface-variant">
+          <ng-container i18n>{{ k.refunds.count }} tickets · {{ refundRate() | number: '1.0-1' }}% of sales</ng-container>
+        </p>
+      </button>
+
+      <button type="button" (click)="onTabChange('open')"
+        class="text-left rounded-2xl border p-4 transition-colors hover:bg-surface-container"
+        [class.border-outline-variant]="k.open.count === 0" [class.border-amber-400]="k.open.count > 0" [class.bg-amber-50]="k.open.count > 0">
+        <p class="text-xs font-medium uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Still open</ng-container></p>
+        <p class="mt-1 text-xl md:text-2xl font-semibold tabular-nums">{{ k.open.amount | currency: currency() : 'symbol' : '1.0-0' }}</p>
+        <p class="mt-1 text-xs text-on-surface-variant"><ng-container i18n>{{ k.open.count }} unpaid orders</ng-container></p>
+      </button>
+
+      <div class="rounded-2xl border border-outline-variant p-4">
+        <p class="text-xs font-medium uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Average receipt</ng-container></p>
+        <p class="mt-1 text-xl md:text-2xl font-semibold tabular-nums">{{ k.averageReceipt | currency: currency() : 'symbol' : '1.0-0' }}</p>
+        <p class="mt-1 text-xs text-on-surface-variant"><ng-container i18n>Per paid receipt</ng-container></p>
+      </div>
+    </section>
+  }
+
+  <div class="relative rounded-2xl border border-outline-variant overflow-hidden">
+    @if (refreshing()) {
+      <mat-progress-bar mode="indeterminate" class="!absolute !inset-x-0 !top-0 !z-10 !h-0.5"></mat-progress-bar>
+    }
+    <!-- Where to look: segmented tabs, urgent ones flagged -->
+    <div class="flex gap-1 overflow-x-auto scrollbar-hide p-2 border-b border-outline-variant" role="tablist" aria-label="Receipt views" i18n-aria-label>
+      @for (tab of tabs(); track tab.value) {
+        <button type="button" role="tab" (click)="onTabChange(tab.value)" [attr.aria-selected]="activeTab() === tab.value"
+          class="inline-flex h-10 shrink-0 items-center gap-2 rounded-full pl-3.5 pr-2 text-sm font-medium leading-none whitespace-nowrap transition-colors"
+          [class.bg-secondary-container]="activeTab() === tab.value" [class.text-on-secondary-container]="activeTab() === tab.value"
+          [class.hover:bg-surface-container]="activeTab() !== tab.value">
+          <mat-icon class="!m-0 !flex !h-5 !w-5 !items-center !justify-center !text-[20px] !leading-none">{{ tab.icon }}</mat-icon>
+          <span>{{ tab.label }}</span>
+          <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-xs font-semibold tabular-nums"
+            [class.bg-amber-200]="tab.urgent" [class.text-amber-900]="tab.urgent"
+            [class.bg-surface-container-high]="!tab.urgent">{{ tab.count }}</span>
+        </button>
       }
-    </nav>
-    <mat-tab-nav-panel #tabPanel>
-      <div class="p-3 md:p-6">
+    </div>
 
-        <!-- Desktop / tablet: table -->
-        <div class="table-container hidden md:block overflow-x-auto">
-          <table mat-table [dataSource]="orders()" matSort class=" w-full">
+    <!-- Find and narrow -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-3 px-3 pt-3 md:px-4">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm:col-span-2 xl:col-span-1">
+        <mat-icon matPrefix class="mr-2">search</mat-icon>
+        <input matInput type="search" [ngModel]="search()" (ngModelChange)="onSearch($event)"
+          [placeholder]="'Search receipts' | tr" [attr.aria-label]="'Search receipts' | tr" />
+      </mat-form-field>
+      @if (!isRefundTab()) {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label><ng-container i18n>Sort by</ng-container></mat-label>
+          <mat-select [value]="sortBy()" (selectionChange)="sortBy.set($event.value)">
+            @for (option of sortOptions; track option.value) { <mat-option [value]="option.value">{{ option.label }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label><ng-container i18n>Sales Channel</ng-container></mat-label>
+          <mat-select [value]="selectedSalesChannel()" (selectionChange)="onSalesChannelChange($event.value)">
+            @for (option of salesChannelOptions; track option.value) { <mat-option [value]="option.value">{{ option.label }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label><ng-container i18n>Order Type</ng-container></mat-label>
+          <mat-select [value]="selectedOrderType()" (selectionChange)="onOrderTypeChange($event.value)">
+            @for (option of orderTypeOptions; track option.value) { <mat-option [value]="option.value">{{ option.label }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+      }
+    </div>
+
+    <div class="p-3 md:p-4">
+      @if (loading()) {
+        <div class="flex items-center justify-center min-h-[200px]"><mat-spinner diameter="32"></mat-spinner></div>
+      } @else if (activeRows().length === 0) {
+        <div class="flex flex-col items-center justify-center gap-2 py-14 text-center text-on-surface-variant">
+          <mat-icon class="!h-12 !w-12 !text-[48px] !leading-none opacity-60">{{ isRefundTab() ? 'currency_exchange' : 'receipt_long' }}</mat-icon>
+          @if (isRefundTab()) {
+            <p class="font-medium"><ng-container i18n>No refunds in this period</ng-container></p>
+            <p class="text-sm"><ng-container i18n>Refund tickets appear here as soon as a sale is refunded.</ng-container></p>
+          } @else if (activeTab() === 'open') {
+            <p class="font-medium"><ng-container i18n>Nothing is waiting to be paid</ng-container></p>
+          } @else {
+            <p class="font-medium"><ng-container i18n>No receipts for the selected filters.</ng-container></p>
+          }
+        </div>
+      } @else if (!isRefundTab()) {
+
+        <!-- Receipts: table on larger screens -->
+        <div class="hidden md:block overflow-x-auto">
+          <table mat-table [dataSource]="pagedRows()" class="w-full">
             <ng-container matColumnDef="select">
-              <th mat-header-cell *matHeaderCellDef>
-                <mat-checkbox [checked]="isAllSelected()" [indeterminate]="selection.hasValue() && !isAllSelected()"
-                  (change)="toggleAllRows($event)">
-                </mat-checkbox>
+              <th mat-header-cell *matHeaderCellDef class="!w-12">
+                <mat-checkbox [checked]="isAllSelected()" [indeterminate]="selection.hasValue() && !isAllSelected()" [disabled]="deletable().length === 0"
+                  (change)="toggleAllRows($event.checked)" [attr.aria-label]="'Select all' | tr"></mat-checkbox>
               </th>
-              <td mat-cell *matCellDef="let row">
-                <mat-checkbox [checked]="selection.isSelected(row)" (change)="selection.toggle(row)">
-                </mat-checkbox>
+              <td mat-cell *matCellDef="let row" class="relative">
+                <span class="absolute inset-y-0 left-0 w-1" [ngClass]="accentBg(row)"></span>
+                <mat-checkbox [checked]="selection.isSelected(row)" (change)="selection.toggle(row)" [disabled]="isPaid(row)"
+                  [matTooltip]="isPaid(row) ? ('Paid sales cannot be deleted. Refund or void them instead.' | tr) : ''"></mat-checkbox>
               </td>
             </ng-container>
 
-            <ng-container matColumnDef="receiptNo">
+            <ng-container matColumnDef="receipt">
               <th mat-header-cell *matHeaderCellDef><ng-container i18n>Receipt no.</ng-container></th>
-              <td mat-cell *matCellDef="let element">
-                <div class="flex items-center gap-1">
-                  <span>{{element.receiptNo}}</span>
-                  @if (element.note) {
-                  <mat-icon
-                    class="!text-base !w-4 !h-4 text-amber-600"
-                    [matTooltip]="element.note">
-                    sticky_note_2
-                  </mat-icon>
-                  }
-                </div>
+              <td mat-cell *matCellDef="let row">
+                <button type="button" class="text-left" (click)="viewRecipesDetails(row._id)">
+                  <span class="flex items-center gap-1 font-semibold">
+                    #{{ row.receiptNo }}
+                    @if (row.note) { <mat-icon class="!h-4 !w-4 !text-[16px] !leading-none text-amber-600" [matTooltip]="row.note">sticky_note_2</mat-icon> }
+                  </span>
+                  <span class="text-xs text-on-surface-variant">{{ channelLabel(row.salesChannel) }} · {{ row.ordertype | titlecase }}</span>
+                </button>
               </td>
             </ng-container>
 
             <ng-container matColumnDef="date">
               <th mat-header-cell *matHeaderCellDef><ng-container i18n>Date</ng-container></th>
-              <td mat-cell *matCellDef="let element">{{element.date | date: 'medium'}}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="orderedBy">
-              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Ordered by</ng-container></th>
-              <td mat-cell *matCellDef="let element">@if (element?.orderedBy?.name != null) {<ng-container>{{ element?.orderedBy?.name }}</ng-container>} @else {<ng-container i18n>Admin</ng-container>}</td>
-            </ng-container>
-
-            <!-- The employee handling the order. Same person as "Ordered by"
-                 on a POS sale; the customer vs. their server on a self-order. -->
-            <ng-container matColumnDef="servedBy">
-              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Served by</ng-container></th>
-              <td mat-cell *matCellDef="let element">
-                @if (element?.servedBy?.name != null) {<ng-container>{{ element?.servedBy?.name }}</ng-container>} @else {<ng-container i18n>Unassigned</ng-container>}
+              <td mat-cell *matCellDef="let row">
+                <span class="block">{{ row.date | date: 'MMM d, y' }}</span>
+                <span class="text-xs text-on-surface-variant">{{ row.date | date: 'shortTime' }}</span>
               </td>
             </ng-container>
 
-            <ng-container matColumnDef="category">
+            <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
-              <td mat-cell *matCellDef="let element">
-                <span class="inline-block px-2 py-1 rounded-full text-xs font-semibold" [ngClass]="statusClass(element.category)">
-                  {{element.category}}
-                </span>
+              <td mat-cell *matCellDef="let row">
+                <span class="inline-block rounded-full px-2.5 py-1 text-xs font-semibold" [ngClass]="toneClass(statusOf(row).tone)">{{ statusOf(row).label }}</span>
               </td>
             </ng-container>
 
-            <ng-container matColumnDef="type">
+            <ng-container matColumnDef="payment">
               <th mat-header-cell *matHeaderCellDef><ng-container i18n>Payment Type</ng-container></th>
-              <td mat-cell *matCellDef="let element">{{element.type}}</td>
+              <td mat-cell *matCellDef="let row">{{ row.paymentStatus === 'Paid' ? row.type : '—' }}</td>
             </ng-container>
 
-            <ng-container matColumnDef="ordertype">
-              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Order Type</ng-container></th>
-              <td mat-cell *matCellDef="let element">{{element.ordertype | titlecase}}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="salesChannel">
-              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Channel</ng-container></th>
-              <td mat-cell *matCellDef="let element">
-                <span class="inline-block px-2 py-1 rounded-full text-xs font-semibold" [ngClass]="channelClass(element.salesChannel)">
-                  {{ channelLabel(element.salesChannel) }}
+            <ng-container matColumnDef="people">
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Served by</ng-container></th>
+              <td mat-cell *matCellDef="let row">
+                <span class="block">
+                  @if (row.servedBy?.name) { <span>{{ row.servedBy.name }}</span> } @else { <ng-container i18n>Unassigned</ng-container> }
                 </span>
+                @if (row.orderedBy?.name && row.orderedBy.name !== row.servedBy?.name) {
+                  <span class="text-xs text-on-surface-variant"><ng-container i18n>for</ng-container> {{ row.orderedBy.name }}</span>
+                }
               </td>
             </ng-container>
 
             <ng-container matColumnDef="total">
-              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Total</ng-container></th>
-              <td mat-cell *matCellDef="let element">{{element.total | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</td>
+              <th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Total</ng-container></th>
+              <td mat-cell *matCellDef="let row" class="!text-right">
+                <span class="block font-semibold tabular-nums" [class.line-through]="row.category === 'Cancel'" [class.opacity-60]="row.category === 'Cancel'">
+                  {{ row.total | currency: currency() : 'symbol' : '1.2-2' }}
+                </span>
+                @if (row.refundedAmount > 0) {
+                  <span class="text-xs tabular-nums text-orange-700">−{{ row.refundedAmount | currency: currency() : 'symbol' : '1.2-2' }} <ng-container i18n>refunded</ng-container></span>
+                }
+              </td>
             </ng-container>
 
             <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Actions</ng-container></th>
-              <td mat-cell *matCellDef="let element">
-                <button mat-icon-button [matMenuTriggerFor]="menu">
-                  <mat-icon>more_vert</mat-icon>
-                </button>
+              <th mat-header-cell *matHeaderCellDef class="!w-14"></th>
+              <td mat-cell *matCellDef="let row">
+                <button mat-icon-button [matMenuTriggerFor]="menu" [attr.aria-label]="'Receipt actions' | tr"><mat-icon>more_vert</mat-icon></button>
                 <mat-menu #menu="matMenu">
-                  <button mat-menu-item (click)="viewRecipesDetails(element._id)">
-                    <mat-icon>visibility</mat-icon>
-                    <span><ng-container i18n>View Receipt Details</ng-container></span>
+                  <button mat-menu-item (click)="viewRecipesDetails(row._id)">
+                    <mat-icon>visibility</mat-icon><span><ng-container i18n>View Receipt Details</ng-container></span>
                   </button>
-                  @if (!isPaid(element)) {
-                      <button mat-menu-item (click)="deleteReceipt(element._id)">
-                        <mat-icon>delete</mat-icon>
-                        <span><ng-container i18n>Delete</ng-container></span>
-                      </button>
+                  @if (canRefund(row)) {
+                    <button mat-menu-item (click)="refundReceipt(row)">
+                      <mat-icon>currency_exchange</mat-icon><span><ng-container i18n>Refund</ng-container></span>
+                    </button>
+                  }
+                  @if (canVoid(row)) {
+                    <button mat-menu-item (click)="voidReceipt(row)">
+                      <mat-icon>block</mat-icon><span><ng-container i18n>Void order</ng-container></span>
+                    </button>
+                  }
+                  @if (!isPaid(row)) {
+                    <button mat-menu-item (click)="deleteReceipt(row._id)">
+                      <mat-icon>delete</mat-icon><span><ng-container i18n>Delete</ng-container></span>
+                    </button>
                   }
                 </mat-menu>
               </td>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            <tr mat-header-row *matHeaderRowDef="columns"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns;" class="hover:bg-surface-container/50"></tr>
           </table>
-
-          @if (orders().length === 0) {
-            <p class="text-center text-sm text-gray-500 py-10"><ng-container i18n>No receipts for the selected filters.</ng-container></p>
-          }
-
-        <mat-paginator  [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
-          aria-label="Select page" i18n-aria-label>
-        </mat-paginator>
         </div>
 
-        <!-- Mobile: one card per receipt -->
-        <div class="md:hidden">
-          @if (orders().length > 0) {
-            <div class="flex items-center justify-between mb-3 px-1">
-              <mat-checkbox [checked]="isAllSelected()" [indeterminate]="selection.hasValue() && !isAllSelected()"
-                (change)="toggleAllRows($event)">
-                <span class="text-sm"><ng-container i18n>Select all</ng-container></span>
-              </mat-checkbox>
-              <span class="text-xs text-gray-500"><ng-container i18n>{{ orders().length }} receipts</ng-container></span>
+        <!-- Receipts: one card each on a phone -->
+        <div class="md:hidden flex flex-col gap-3">
+          @for (row of pagedRows(); track row._id) {
+            <div class="rounded-xl border border-outline-variant border-l-4 p-3" [ngClass]="accentBorder(row)">
+              <div class="flex items-start gap-2">
+                <button type="button" class="flex-1 min-w-0 text-left" (click)="viewRecipesDetails(row._id)">
+                  <span class="flex items-center gap-1 font-semibold">
+                    #{{ row.receiptNo }}
+                    @if (row.note) { <mat-icon class="!h-4 !w-4 !text-[16px] !leading-none text-amber-600">sticky_note_2</mat-icon> }
+                  </span>
+                  <span class="block text-xs text-on-surface-variant">{{ row.date | date: 'MMM d, h:mm a' }}</span>
+                </button>
+                <div class="text-right">
+                  <p class="font-semibold tabular-nums" [class.line-through]="row.category === 'Cancel'">{{ row.total | currency: currency() : 'symbol' : '1.2-2' }}</p>
+                  <span class="mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold" [ngClass]="toneClass(statusOf(row).tone)">{{ statusOf(row).label }}</span>
+                </div>
+                <button mat-icon-button class="-mr-2 -mt-1 shrink-0" [matMenuTriggerFor]="cardMenu" [attr.aria-label]="'Receipt actions' | tr"><mat-icon>more_vert</mat-icon></button>
+                <mat-menu #cardMenu="matMenu">
+                  <button mat-menu-item (click)="viewRecipesDetails(row._id)">
+                    <mat-icon>visibility</mat-icon><span><ng-container i18n>View Receipt Details</ng-container></span>
+                  </button>
+                  @if (canRefund(row)) {
+                    <button mat-menu-item (click)="refundReceipt(row)"><mat-icon>currency_exchange</mat-icon><span><ng-container i18n>Refund</ng-container></span></button>
+                  }
+                  @if (canVoid(row)) {
+                    <button mat-menu-item (click)="voidReceipt(row)"><mat-icon>block</mat-icon><span><ng-container i18n>Void order</ng-container></span></button>
+                  }
+                  @if (!isPaid(row)) {
+                    <button mat-menu-item (click)="deleteReceipt(row._id)"><mat-icon>delete</mat-icon><span><ng-container i18n>Delete</ng-container></span></button>
+                  }
+                </mat-menu>
+              </div>
+              <p class="mt-2 text-xs text-on-surface-variant">
+                {{ channelLabel(row.salesChannel) }} · {{ row.ordertype | titlecase }}
+                @if (row.paymentStatus === 'Paid') { · {{ row.type }} }
+                @if (row.servedBy?.name) { · {{ row.servedBy.name }} }
+              </p>
+              @if (row.refundedAmount > 0) {
+                <p class="mt-1 text-xs tabular-nums text-orange-700">−{{ row.refundedAmount | currency: currency() : 'symbol' : '1.2-2' }} <ng-container i18n>refunded</ng-container></p>
+              }
             </div>
           }
-
-          <div class="flex flex-col gap-3">
-            @for (element of orders(); track element._id) {
-              <div class="rounded-xl border border-gray-200 bg-white p-3"
-                   [class.!border-blue-400]="selection.isSelected(element)">
-                <div class="flex items-start gap-2">
-                  <mat-checkbox class="-ml-2 -mt-2" [checked]="selection.isSelected(element)" (change)="selection.toggle(element)"
-                    [attr.aria-label]="('Select receipt ' | tr) + element.receiptNo">
-                  </mat-checkbox>
-
-                  <button type="button" class="flex-1 min-w-0 text-left" (click)="viewRecipesDetails(element._id)">
-                    <div class="flex items-center gap-1">
-                      <span class="font-semibold text-gray-900 truncate">#{{ element.receiptNo }}</span>
-                      @if (element.note) {
-                        <mat-icon class="!text-base !w-4 !h-4 text-amber-600 flex-shrink-0" [matTooltip]="element.note">sticky_note_2</mat-icon>
-                      }
-                    </div>
-                    <p class="text-xs text-gray-500 mt-0.5">{{ element.date | date: 'medium' }}</p>
-                  </button>
-
-                  <div class="text-right flex-shrink-0">
-                    <p class="font-semibold text-gray-900 tabular-nums">
-                      {{ element.total | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency) }}
-                    </p>
-                    <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[11px] font-semibold" [ngClass]="statusClass(element.category)">
-                      {{ element.category }}
-                    </span>
-                  </div>
-
-                  <button mat-icon-button class="-mr-2 -mt-2 flex-shrink-0" [matMenuTriggerFor]="cardMenu" aria-label="Receipt actions" i18n-aria-label>
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #cardMenu="matMenu">
-                    <button mat-menu-item (click)="viewRecipesDetails(element._id)">
-                      <mat-icon>visibility</mat-icon>
-                      <span><ng-container i18n>View Receipt Details</ng-container></span>
-                    </button>
-                    @if (!isPaid(element)) {
-                        <button mat-menu-item (click)="deleteReceipt(element._id)">
-                          <mat-icon>delete</mat-icon>
-                          <span><ng-container i18n>Delete</ng-container></span>
-                        </button>
-                    }
-                  </mat-menu>
-                </div>
-
-                <div class="grid grid-cols-2 gap-x-3 gap-y-2 mt-3 pt-3 border-t border-gray-100 text-xs">
-                  <div class="min-w-0">
-                    <p class="text-gray-500"><ng-container i18n>Payment</ng-container></p>
-                    <p class="text-gray-900 truncate">{{ element.type || '—' }}</p>
-                  </div>
-                  <div class="min-w-0">
-                    <p class="text-gray-500"><ng-container i18n>Order type</ng-container></p>
-                    <p class="text-gray-900 truncate">{{ (element.ordertype | titlecase) || '—' }}</p>
-                  </div>
-                  <div class="min-w-0">
-                    <p class="text-gray-500"><ng-container i18n>Ordered by</ng-container></p>
-                    <p class="text-gray-900 truncate">@if (element?.orderedBy?.name != null) {<ng-container>{{ element?.orderedBy?.name }}</ng-container>} @else {<ng-container i18n>Admin</ng-container>}</p>
-                  </div>
-                  <div class="min-w-0">
-                    <p class="text-gray-500"><ng-container i18n>Served by</ng-container></p>
-                    <p class="text-gray-900 truncate">@if (element?.servedBy?.name != null) {<ng-container>{{ element?.servedBy?.name }}</ng-container>} @else {<ng-container i18n>Unassigned</ng-container>}</p>
-                  </div>
-                </div>
-
-                <div class="mt-3">
-                  <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold" [ngClass]="channelClass(element.salesChannel)">
-                    {{ channelLabel(element.salesChannel) }}
-                  </span>
-                </div>
-              </div>
-            } @empty {
-              <p class="text-center text-sm text-gray-500 py-10"><ng-container i18n>No receipts for the selected filters.</ng-container></p>
-            }
-          </div>
         </div>
-      </div>
 
-    </mat-tab-nav-panel>
-    } @else {
-    <div class="flex items-center justify-center min-h-[300px]">
-      <mat-spinner diameter="40"></mat-spinner>
+      } @else {
+
+        <!-- Refund tickets: each refund is its own record, listed with the sale it belongs to -->
+        <div class="hidden md:block overflow-x-auto">
+          <table mat-table [dataSource]="pagedRows()" class="w-full">
+            <ng-container matColumnDef="ticket">
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Refund ticket</ng-container></th>
+              <td mat-cell *matCellDef="let r" class="relative">
+                <span class="absolute inset-y-0 left-0 w-1 bg-orange-400"></span>
+                <span class="block font-semibold">{{ r.refundNumber }}</span>
+                <button type="button" class="text-xs text-primary hover:underline" (click)="viewRecipesDetails(r.order)"><ng-container i18n>Sale</ng-container> #{{ r.orderReference }}</button>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Date</ng-container></th>
+              <td mat-cell *matCellDef="let r">
+                <span class="block">{{ r.createdAt | date: 'MMM d, y' }}</span>
+                <span class="text-xs text-on-surface-variant">{{ r.createdAt | date: 'shortTime' }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="items">
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Returned</ng-container></th>
+              <td mat-cell *matCellDef="let r" class="max-w-[280px]">
+                <span class="block truncate" [matTooltip]="refundSummary(r)">{{ refundSummary(r) }}</span>
+                <span class="text-xs text-on-surface-variant">{{ reasonLabel(r.reasonCode) }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="method">
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Refunded via</ng-container></th>
+              <td mat-cell *matCellDef="let r">{{ refundMethods(r) || '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="by">
+              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Issued by</ng-container></th>
+              <td mat-cell *matCellDef="let r">
+                <span class="block">{{ r.createdBy?.name || '—' }}</span>
+                @if (r.approvedBy) { <span class="text-xs text-on-surface-variant"><ng-container i18n>manager approved</ng-container></span> }
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Amount</ng-container></th>
+              <td mat-cell *matCellDef="let r" class="!text-right font-semibold tabular-nums text-orange-700">−{{ r.total | currency: currency() : 'symbol' : '1.2-2' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="!w-14"></th>
+              <td mat-cell *matCellDef="let r">
+                <button mat-icon-button [matMenuTriggerFor]="refundMenu" [attr.aria-label]="'Refund actions' | tr"><mat-icon>more_vert</mat-icon></button>
+                <mat-menu #refundMenu="matMenu">
+                  <button mat-menu-item (click)="viewRecipesDetails(r.order)"><mat-icon>visibility</mat-icon><span><ng-container i18n>View Receipt Details</ng-container></span></button>
+                  <button mat-menu-item (click)="printRefund(r)"><mat-icon>print</mat-icon><span><ng-container i18n>Print receipt</ng-container></span></button>
+                </mat-menu>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="refundColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: refundColumns;"></tr>
+          </table>
+        </div>
+
+        <div class="md:hidden flex flex-col gap-3">
+          @for (r of pagedRows(); track r._id) {
+            <div class="rounded-xl border border-outline-variant border-l-4 border-l-orange-400 p-3">
+              <div class="flex items-start gap-2">
+                <div class="flex-1 min-w-0">
+                  <p class="font-semibold">{{ r.refundNumber }}</p>
+                  <button type="button" class="text-xs text-primary" (click)="viewRecipesDetails(r.order)"><ng-container i18n>Sale</ng-container> #{{ r.orderReference }}</button>
+                  <p class="text-xs text-on-surface-variant">{{ r.createdAt | date: 'MMM d, h:mm a' }}</p>
+                </div>
+                <p class="font-semibold tabular-nums text-orange-700">−{{ r.total | currency: currency() : 'symbol' : '1.2-2' }}</p>
+                <button mat-icon-button class="-mr-2 -mt-1 shrink-0" [matMenuTriggerFor]="cardRefundMenu" [attr.aria-label]="'Refund actions' | tr"><mat-icon>more_vert</mat-icon></button>
+                <mat-menu #cardRefundMenu="matMenu">
+                  <button mat-menu-item (click)="viewRecipesDetails(r.order)"><mat-icon>visibility</mat-icon><span><ng-container i18n>View Receipt Details</ng-container></span></button>
+                  <button mat-menu-item (click)="printRefund(r)"><mat-icon>print</mat-icon><span><ng-container i18n>Print receipt</ng-container></span></button>
+                </mat-menu>
+              </div>
+              <p class="mt-2 text-sm">{{ refundSummary(r) }}</p>
+              <p class="mt-1 text-xs text-on-surface-variant">{{ reasonLabel(r.reasonCode) }} · {{ refundMethods(r) }} @if (r.createdBy?.name) { · {{ r.createdBy.name }} }</p>
+            </div>
+          }
+        </div>
+      }
     </div>
+
+    @if (activeRows().length > 0) {
+      <mat-paginator [length]="activeRows().length" [pageSize]="pageSize()" [pageIndex]="pageIndex()" [pageSizeOptions]="pageSizeOptions"
+        showFirstLastButtons (page)="onPage($event)" aria-label="Select page" i18n-aria-label></mat-paginator>
     }
-
-  </mat-card>
-
-
+  </div>
+  }
 </div>
