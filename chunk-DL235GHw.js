@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";function i(t){if(typeof t==`string`&&/^\d{4}-\d{2}-\d{2}$/.test(t))return t;let n=t instanceof Date?t:new Date(t),r=String(n.getMonth()+1).padStart(2,`0`),e=String(n.getDate()).padStart(2,`0`);return`${n.getFullYear()}-${r}-${e}`}var g=z(()=>{"use strict";});export{i as n,g as t};
