@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";var n;z(()=>{n=[{path:``,loadComponent:()=>import(`./chunk-9Zi1NJBm.js`).then(t=>t.RatePlansComponent),children:[{path:``,redirectTo:`list`,pathMatch:`full`},{path:`list`,loadComponent:()=>import(`./chunk-D4fp9M5K.js`).then(t=>t.RatePlansListComponent)}]}]})();export{n as RATE_PLANS_ROUTES};

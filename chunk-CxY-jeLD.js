@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";var n;z(()=>{n=[{path:``,loadComponent:()=>import(`./chunk-BdAL24Wb.js`).then(o=>o.CategoriesComponent),children:[{path:``,loadComponent:()=>import(`./chunk-BEMnAFdI.js`).then(o=>o.CategoryListComponent)},{path:`:id/edit`,loadComponent:()=>import(`./chunk-ZTFjHVnR.js`).then(o=>o.CategoryFormComponent)}]}]})();export{n as CATEGORY_ROUTES};
