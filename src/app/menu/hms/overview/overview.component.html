@@ -1,237 +1,295 @@
-<!-- Modern Hotel Management Dashboard -->
-<div class="min-h-screen  p-4 md:p-6 lg:p-8">
-  <div class="max-w-7xl mx-auto space-y-6">
-
-    <!-- Header Section with Refresh Button -->
-    <div class="text-center space-y-2">
-      <div class="flex items-center justify-center space-x-4">
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-800"><ng-container i18n>Hotel Management Dashboard</ng-container></h1>
-        <button
-          matIconButton
-          color="primary"
-          (click)="refreshData()"
-          [disabled]="loading()"
-          >
-          <mat-icon [class.animate-spin]="loading()">refresh</mat-icon>
-        </button>
-      </div>
-      <p class="text-gray-600 text-lg"><ng-container i18n>Welcome back! Here's what's happening at your hotel today.</ng-container></p>
-
-      <!-- Error Alert -->
-      @if (error()) {
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4 max-w-2xl mx-auto">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-              <mat-icon class="text-red-600">error</mat-icon>
-              <span class="text-red-800">{{error()}}</span>
+<div class="mx-auto flex max-w-[1600px] flex-col gap-5 p-4 pb-16 md:gap-6 md:p-6">
+  @if (failed()) {
+    <div class="flex flex-col items-center gap-3 rounded-3xl border border-red-200 bg-red-50 p-10 text-center text-red-900" role="alert">
+      <mat-icon class="!h-12 !w-12 !text-5xl !leading-none text-red-600">cloud_off</mat-icon>
+      <p class="m-0 text-lg font-semibold"><ng-container i18n>Could not load the dashboard.</ng-container></p>
+      <button matButton="filled" (click)="reload()"><ng-container i18n>Try again</ng-container></button>
+    </div>
+  } @else if (!data()) {
+    <!-- Loading skeleton: the page keeps its shape while the numbers arrive -->
+    <div class="h-56 animate-pulse rounded-3xl bg-surface-container-high md:h-64"></div>
+    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      @for (i of [1, 2, 3, 4]; track i) { <div class="h-36 animate-pulse rounded-2xl bg-surface-container-high"></div> }
+    </div>
+    <div class="h-72 animate-pulse rounded-3xl bg-surface-container-high"></div>
+  } @else if (data(); as d) {
+    @if (d.rooms.total === 0) {
+      <!-- ═════════════ A brand-new hotel: say what to do first ═════════════ -->
+      <section class="relative overflow-hidden rounded-3xl border border-outline-variant/50 bg-linear-to-br from-primary-container via-primary-container/60 to-surface-container-lowest p-6 md:p-10">
+        <div aria-hidden="true" class="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-primary/15 blur-3xl"></div>
+        <div class="relative max-w-2xl text-on-primary-container">
+          <p class="m-0 text-xs font-semibold uppercase tracking-[0.14em] opacity-70">{{ dateLabel() }}@if (storeName()) { · {{ storeName() }} }</p>
+          <h1 class="m-0 mt-2 text-3xl font-bold leading-tight tracking-tight md:text-5xl md:leading-[1.08]"><ng-container i18n>Let's get your hotel ready</ng-container></h1>
+          <p class="m-0 mt-3 text-base opacity-80 md:text-lg"><ng-container i18n>Your dashboard fills in by itself as soon as you add rooms and take bookings. Four steps, in this order.</ng-container></p>
+        </div>
+      </section>
+      <ol class="m-0 grid list-none gap-4 p-0 md:grid-cols-2 xl:grid-cols-4">
+        @for (step of setupSteps; track step.link; let i = $index) {
+          <li class="flex flex-col rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-5">
+            <div class="flex items-center gap-3">
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-on-primary">{{ i + 1 }}</span>
+              <span class="flex h-9 w-9 items-center justify-center rounded-xl" [class]="step.tone"><mat-icon class="!h-5 !w-5 !text-xl !leading-none">{{ step.icon }}</mat-icon></span>
             </div>
-            <button mat-icon-button (click)="clearError()" class="!text-red-600">
-              <mat-icon>close</mat-icon>
-            </button>
+            <h2 class="m-0 mt-4 text-lg font-semibold">{{ step.title }}</h2>
+            <p class="m-0 mt-1 flex-1 text-sm text-on-surface-variant">{{ step.text }}</p>
+            <a matButton="tonal" class="mt-4 self-start" [routerLink]="step.link">{{ step.action }}<mat-icon iconPositionEnd>arrow_forward</mat-icon></a>
+          </li>
+        }
+      </ol>
+    } @else {
+
+    <!-- ═════════════ Hero: the day in one sentence ═════════════ -->
+    <section class="relative overflow-hidden rounded-3xl border border-outline-variant/50 bg-linear-to-br from-primary-container via-primary-container/60 to-surface-container-lowest p-5 md:p-8">
+      <div aria-hidden="true" class="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-primary/15 blur-3xl"></div>
+      <div aria-hidden="true" class="pointer-events-none absolute -bottom-24 left-1/3 h-60 w-60 rounded-full bg-tertiary/10 blur-3xl"></div>
+
+      <div class="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div class="min-w-0 text-on-primary-container">
+          <p class="m-0 text-xs font-semibold uppercase tracking-[0.14em] opacity-70">{{ dateLabel() }}@if (storeName()) { · {{ storeName() }} }</p>
+          <h1 class="m-0 mt-2 text-3xl font-bold leading-tight tracking-tight md:text-5xl md:leading-[1.08]">{{ heroLine() }}</h1>
+          <p class="m-0 mt-3 max-w-xl text-base opacity-80 md:text-lg">{{ heroSub() }}</p>
+
+          <div class="mt-6 flex flex-wrap items-center gap-2">
+            <a matButton="filled" routerLink="/menu/hms/front-desk/reservations/create"><mat-icon>add</mat-icon><ng-container i18n>New reservation</ng-container></a>
+            <a matButton="tonal" routerLink="/menu/hms/reports"><mat-icon>assessment</mat-icon><ng-container i18n>Reports</ng-container></a>
+            <button matIconButton (click)="reload()" [disabled]="loading()" aria-label="Refresh" i18n-aria-label matTooltip="Refresh" i18n-matTooltip><mat-icon [class.animate-spin]="loading()">refresh</mat-icon></button>
+          </div>
+
+          <div class="mt-4 flex flex-wrap gap-2 text-xs font-medium">
+            @if (d.businessDay.enabled) {
+              <a routerLink="/menu/hms/night-audit" class="inline-flex items-center gap-1.5 rounded-full bg-surface/70 px-3 py-1.5 text-inherit no-underline backdrop-blur hover:bg-surface">
+                <span class="h-2 w-2 rounded-full" [class]="d.businessDay.daysBehind > 0 ? 'bg-amber-500' : 'bg-emerald-500'"></span>
+                @if (d.businessDay.daysBehind > 0) {<ng-container i18n>Business day behind by {{ d.businessDay.daysBehind }}</ng-container>} @else {<ng-container i18n>Business day is current</ng-container>}
+              </a>
+            }
+            @if (d.payments; as pay) {
+              <a routerLink="/menu/hms/cashier" class="inline-flex items-center gap-1.5 rounded-full bg-surface/70 px-3 py-1.5 text-inherit no-underline backdrop-blur hover:bg-surface">
+                <span class="h-2 w-2 rounded-full" [class]="pay.shiftsOpen ? 'bg-emerald-500' : 'bg-outline'"></span>
+                @if (pay.shiftsOpen) {{{ pay.shiftsOpen }} <ng-container i18n>till(s) open</ng-container>} @else {<ng-container i18n>No till is open</ng-container>}
+              </a>
+            }
           </div>
         </div>
+
+        <!-- Occupancy ring -->
+        <a routerLink="/menu/hms/reports/occupancy" class="group relative mx-auto h-40 w-40 shrink-0 text-on-primary-container no-underline md:mx-0 md:h-52 md:w-52" aria-label="Occupancy tonight" i18n-aria-label>
+          <svg viewBox="0 0 120 120" class="h-full w-full -rotate-90" aria-hidden="true">
+            <circle cx="60" cy="60" r="52" fill="none" stroke-width="10" class="stroke-on-primary-container/15" />
+            <circle cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-linecap="round" class="stroke-primary transition-[stroke-dashoffset] duration-700 motion-reduce:transition-none" [attr.stroke-dasharray]="ringLength" [attr.stroke-dashoffset]="ringOffset()" />
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span class="text-4xl font-bold tabular-nums md:text-5xl">{{ d.kpis.occupancy.percent === null ? '—' : (d.kpis.occupancy.percent | number: '1.0-0') }}<span class="text-xl font-semibold opacity-70 md:text-2xl">%</span></span>
+            <span class="text-xs font-medium uppercase tracking-wide opacity-70"><ng-container i18n>occupied</ng-container></span>
+            @if (delta(d.kpis.occupancy.percent, d.kpis.occupancy.yesterdayPercent); as dv) {
+              <span class="mt-1 inline-flex items-center gap-0.5 rounded-full bg-surface/70 px-2 py-0.5 text-[11px] font-semibold" [class]="dv > 0 ? 'text-emerald-700' : 'text-red-700'"><mat-icon class="!h-3.5 !w-3.5 !text-sm !leading-none">{{ dv > 0 ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>{{ dv > 0 ? '+' : '' }}{{ dv }}</span>
+            }
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ═════════════ The numbers, each with its recent shape ═════════════ -->
+    <section class="grid grid-cols-2 gap-3 md:gap-4" [class]="tiles().length > 2 ? 'lg:grid-cols-4' : 'lg:grid-cols-2'" aria-label="Key figures" i18n-aria-label>
+      @for (t of tiles(); track t.key) {
+        <a [routerLink]="t.link" class="group flex flex-col overflow-hidden rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-4 text-inherit no-underline transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none md:p-5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="truncate text-xs font-semibold uppercase tracking-wide text-on-surface-variant">{{ t.label }}</span>
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" [class]="t.tone"><mat-icon class="!h-5 !w-5 !text-xl !leading-none">{{ t.icon }}</mat-icon></span>
+          </div>
+          <div class="mt-3 truncate text-3xl font-bold tabular-nums tracking-tight md:text-4xl">
+            @if (t.value === null) {—} @else if (t.kind === 'money') {{{ t.value | currency: currency() : 'symbol' : '1.0-0' }}} @else if (t.kind === 'percent') {{{ t.value | number: '1.0-0' }}<span class="text-xl text-on-surface-variant">%</span>} @else {{{ t.value | number: '1.0-0' }}}
+          </div>
+          <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-on-surface-variant">
+            <span class="truncate">{{ t.sub }}</span>
+            @if (t.delta !== null && t.delta !== 0) {
+              <span class="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 font-semibold" [class]="t.delta > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'"><mat-icon class="!h-3 !w-3 !text-xs !leading-none">{{ t.delta > 0 ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>{{ t.delta > 0 ? '+' : '' }}{{ t.delta }} {{ t.deltaUnit }}</span>
+            }
+          </div>
+          @if (t.spark; as sp) {
+            <svg viewBox="0 0 120 36" preserveAspectRatio="none" class="mt-auto h-10 w-full overflow-visible pt-3 box-content" aria-hidden="true">
+              <path [attr.d]="sp.area" stroke="none" [class]="t.sparkTone" />
+              <path [attr.d]="sp.line" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" [class]="t.sparkTone" />
+            </svg>
+          }
+        </a>
+      }
+    </section>
+
+    <!-- ═════════════ Needs attention ═════════════ -->
+    <section aria-labelledby="attn-title" class="rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-5 md:p-6">
+      <div class="flex items-center gap-3" [class.mb-4]="d.attention.length">
+        <span class="flex h-10 w-10 items-center justify-center rounded-xl" [class]="d.attention.length ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'"><mat-icon>{{ d.attention.length ? 'notification_important' : 'task_alt' }}</mat-icon></span>
+        <div class="min-w-0 flex-1">
+          <h2 id="attn-title" class="m-0 text-lg font-semibold"><ng-container i18n>Needs your attention</ng-container>@if (d.attention.length) { <span class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 align-middle text-xs font-bold text-amber-800">{{ d.attention.length }}</span> }</h2>
+          <p class="m-0 text-sm text-on-surface-variant">@if (d.attention.length) {<ng-container i18n>Most urgent first. Tap a card to deal with it.</ng-container>} @else {<ng-container i18n>All clear. Nothing is waiting on you right now.</ng-container>}</p>
+        </div>
+      </div>
+      @if (d.attention.length) {
+        <div class="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
+          @for (item of d.attention; track item.code) {
+            <div class="flex flex-col gap-2 rounded-2xl border p-3.5 transition hover:shadow-md motion-reduce:transition-none" [class]="attentionCard(item)">
+              <button type="button" class="flex w-full cursor-pointer items-center gap-3 border-0 bg-transparent p-0 text-left text-inherit" (click)="go(item)">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" [class]="attentionIconTone(item)"><mat-icon>{{ attentionIcon(item) }}</mat-icon></span>
+                <span class="min-w-0 flex-1 text-sm font-semibold leading-snug">{{ attentionText(item) }}</span>
+                <mat-icon class="shrink-0 opacity-60">chevron_right</mat-icon>
+              </button>
+              @if (item.samples.length) {
+                <div class="flex flex-wrap gap-1.5 pl-[52px]">
+                  @for (s of item.samples; track s.id) {
+                    <button type="button" class="cursor-pointer rounded-full border border-current/20 bg-surface/70 px-2.5 py-1 text-xs font-medium text-inherit hover:bg-surface" (click)="openSample(s.kind, s.id)">{{ s.label }}@if (s.amount !== undefined) { <b class="ml-1 tabular-nums">{{ s.amount | currency: currency() : 'symbol' : '1.0-0' }}</b> }</button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- ═════════════ Movements and the room map ═════════════ -->
+    <div class="grid items-start gap-5 md:gap-6 xl:grid-cols-[minmax(0,1fr)_26rem]">
+      <section class="grid gap-5 md:gap-6 lg:grid-cols-2" aria-label="Today's movements" i18n-aria-label>
+        @for (col of [{ id: 'in', icon: 'login', title: ('Arriving' | tr), done: d.kpis.arrivals.arrived, total: d.kpis.arrivals.expected, rows: d.arrivalsToday, link: 'arrivals', empty: ('No arrivals today.' | tr), bar: 'bg-emerald-500', iconTone: 'bg-emerald-100 text-emerald-700' }, { id: 'out', icon: 'logout', title: ('Leaving' | tr), done: d.kpis.departures.left, total: d.kpis.departures.due, rows: d.departuresToday, link: 'departures', empty: ('Nobody is due to leave today.' | tr), bar: 'bg-amber-500', iconTone: 'bg-amber-100 text-amber-700' }]; track col.id) {
+          <div class="flex flex-col rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-5 md:p-6">
+            <div class="flex items-center gap-3">
+              <span class="flex h-10 w-10 items-center justify-center rounded-xl" [class]="col.iconTone"><mat-icon>{{ col.icon }}</mat-icon></span>
+              <div class="min-w-0 flex-1">
+                <h2 class="m-0 text-lg font-semibold">{{ col.title }}</h2>
+                <p class="m-0 text-sm text-on-surface-variant tabular-nums">{{ col.done }} / {{ col.total }} <ng-container i18n>done today</ng-container></p>
+              </div>
+              <a matButton routerLink="/menu/hms/reports/guests/{{ col.link }}" [queryParams]="{ from: d.today, to: d.today }"><ng-container i18n>All</ng-container></a>
+            </div>
+            <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-container-high" role="progressbar" [attr.aria-valuenow]="progress(col.done, col.total)" aria-valuemin="0" aria-valuemax="100"><div class="h-full rounded-full transition-[width] duration-700 motion-reduce:transition-none" [class]="col.bar" [style.width.%]="progress(col.done, col.total)"></div></div>
+
+            @if (col.rows.length === 0) {
+              <div class="flex flex-1 flex-col items-center justify-center gap-1 py-10 text-center text-on-surface-variant"><mat-icon class="!h-10 !w-10 !text-4xl !leading-none opacity-60">{{ col.icon }}</mat-icon><p class="m-0 text-sm">{{ col.empty }}</p></div>
+            } @else {
+              <ul class="m-0 mt-2 list-none p-0">
+                @for (s of col.rows; track s.id) {
+                  <li>
+                    <a [routerLink]="['/menu/hms/front-desk/reservations/edit', s.id]" class="group flex items-center gap-3 rounded-2xl px-2 py-2.5 text-inherit no-underline transition hover:bg-surface-container motion-reduce:transition-none">
+                      <span class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold" [class]="avatarTone(s.guest)">{{ initials(s.guest) }}<span class="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-surface-container-lowest" [class]="statusDot(s.status)" [matTooltip]="statusText(s.status)"></span></span>
+                      <span class="min-w-0 flex-1">
+                        <span class="flex items-center gap-1 text-sm font-semibold"><span class="truncate">{{ s.guest || '—' }}</span>@if (s.vip) { <mat-icon class="!h-4 !w-4 !text-base !leading-none text-amber-500" aria-label="VIP">star</mat-icon> }</span>
+                        <span class="block truncate text-xs text-on-surface-variant">@if (s.rooms) {<ng-container i18n>Room</ng-container> {{ s.rooms }}} @else {<ng-container i18n>No room yet</ng-container>} · {{ s.nights }} <ng-container i18n>night(s)</ng-container> · {{ s.adults + s.children }} <ng-container i18n>guest(s)</ng-container></span>
+                      </span>
+                      @if (d.canSeeMoney && s.balance > 0) { <span class="shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold tabular-nums text-red-700">{{ s.balance | currency: currency() : 'symbol' : '1.0-0' }}</span> }
+                    </a>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+      </section>
+
+      <!-- Room map -->
+      <section class="rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-5 md:p-6" aria-labelledby="map-title">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h2 id="map-title" class="m-0 text-lg font-semibold"><ng-container i18n>Rooms right now</ng-container></h2>
+            <p class="m-0 text-sm text-on-surface-variant">{{ d.rooms.total }} <ng-container i18n>rooms</ng-container> · {{ d.rooms.occupied }} <ng-container i18n>occupied</ng-container></p>
+          </div>
+          <a matButton routerLink="/menu/hms/reports/housekeeping/room-status"><ng-container i18n>Board</ng-container></a>
+        </div>
+        <div class="mt-4 grid grid-cols-[repeat(auto-fill,minmax(3.25rem,1fr))] gap-2">
+          @for (r of d.roomMap; track r.id) {
+            <a routerLink="/menu/hms/reports/housekeeping/room-status" class="flex aspect-square min-w-0 items-center justify-center rounded-xl text-xs font-bold no-underline transition hover:scale-105 hover:shadow-md motion-reduce:transition-none" [class]="roomTones[r.state]" [matTooltip]="roomTip(r)">{{ r.number }}</a>
+          }
+        </div>
+        <ul class="m-0 mt-4 grid list-none grid-cols-2 gap-x-3 gap-y-1.5 p-0 text-xs text-on-surface-variant">
+          @for (s of board(); track s.key) {
+            <li class="flex items-center gap-2"><span class="h-3 w-3 shrink-0 rounded" [class]="s.bar"></span><span class="min-w-0 flex-1 truncate">{{ s.label }}</span><b class="tabular-nums text-on-surface">{{ s.value }}</b></li>
+          }
+        </ul>
+        @if (d.rooms.byType.length > 1) {
+          <div class="mt-5 flex flex-col gap-3 border-t border-outline-variant/60 pt-4">
+            @for (t of d.rooms.byType; track t.name) {
+              <div>
+                <div class="mb-1 flex justify-between text-sm"><span class="font-medium">{{ t.name }}</span><span class="tabular-nums text-on-surface-variant">{{ t.occupied }} / {{ t.total }}</span></div>
+                <div class="h-1.5 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" [style.width.%]="progress(t.occupied, t.total)"></div></div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    </div>
+
+    <!-- ═════════════ Trends ═════════════ -->
+    <div class="grid gap-5 md:gap-6" [class]="d.canSeeMoney ? 'lg:grid-cols-2' : ''">
+      <section class="rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-5 md:p-6">
+        <h2 class="m-0 text-lg font-semibold"><ng-container i18n>Occupancy, two weeks back and ahead</ng-container></h2>
+        <p class="m-0 text-sm text-on-surface-variant">@if (forecast(); as f) {<ng-container i18n>Next two weeks: {{ f.avg }}% on average, busiest {{ f.peak | date: 'EEE d MMM' }} at {{ f.peakPercent }}%.</ng-container>} @else {<ng-container i18n>Rooms on the books for each night.</ng-container>}</p>
+        <div class="relative mt-4 h-60"><canvas baseChart [data]="occupancyData()" [options]="occupancyOptions" type="bar" role="img" aria-label="Occupancy by day" i18n-aria-label></canvas></div>
+        <p class="m-0 mt-3 flex flex-wrap items-center gap-4 text-xs text-on-surface-variant"><span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm bg-indigo-500/80"></span><ng-container i18n>Past</ng-container></span><span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm bg-indigo-600"></span><ng-container i18n>Today</ng-container></span><span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm bg-indigo-500/35"></span><ng-container i18n>On the books</ng-container></span></p>
+      </section>
+      @if (d.canSeeMoney) {
+        <section class="rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-5 md:p-6">
+          <h2 class="m-0 text-lg font-semibold"><ng-container i18n>Room revenue, last two weeks</ng-container></h2>
+          <p class="m-0 text-sm text-on-surface-variant"><ng-container i18n>Before taxes, one bar per night.</ng-container></p>
+          <div class="relative mt-4 h-60"><canvas baseChart [data]="revenueData()" [options]="revenueOptions" type="bar" role="img" aria-label="Room revenue by day" i18n-aria-label></canvas></div>
+        </section>
       }
     </div>
 
-    <!-- Key Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <!-- Total Rooms Card -->
-      <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide"><ng-container i18n>Total Rooms</ng-container></p>
-            <p class="text-3xl font-bold text-gray-900 mt-2" [class.animate-pulse]="loading()">
-              {{dashboardStats()?.totalRooms || defaultValue}}
-            </p>
-            <p i18n class="text-sm text-emerald-600 mt-1">
-              <span class="font-medium">{{dashboardStats()?.availableRooms || defaultValue}}</span> Available
-            </p>
-          </div>
-          <div class="p-3 border  border-outline-variant rounded-lg">
-            <mat-icon>hotel</mat-icon>
-          </div>
-        </div>
-      </mat-card>
-
-      <!-- Current Occupancy Card -->
-      <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide"><ng-container i18n>Occupancy Rate</ng-container></p>
-            <p class="text-3xl font-bold text-gray-900 mt-2" [class.animate-pulse]="loading()">
-              {{dashboardStats()?.occupancyRate || defaultValue}}%
-            </p>
-            <p i18n class="text-sm text-amber-600 mt-1">
-              <span class="font-medium">{{dashboardStats()?.checkedInGuests || defaultValue}}</span> Guests
-            </p>
-          </div>
-          <div class="p-3 border  border-outline-variant rounded-lg">
-            <mat-icon>people</mat-icon>
-          </div>
-        </div>
-      </mat-card>
-      <!-- Today's Reservations Card -->
-      <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide"><ng-container i18n>Today's Check-ins</ng-container></p>
-            <p class="text-3xl font-bold text-gray-900 mt-2" [class.animate-pulse]="loading()">
-              {{dashboardStats()?.todayCheckins || defaultValue}}
-            </p>
-            <p i18n class="text-sm text-purple-600 mt-1">
-              <span class="font-medium">{{dashboardStats()?.todayCheckouts || defaultValue}}</span> Check-outs
-            </p>
-          </div>
-          <div class="p-3 border  border-outline-variant rounded-lg">
-            <mat-icon>event_available</mat-icon>
-          </div>
-        </div>
-      </mat-card>
-
-      <!-- Revenue Card -->
-      <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6 overflow-hidden">
-        <div class="flex items-center justify-between gap-2">
-          <div class="min-w-0 flex-1">
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide"><ng-container i18n>Today's Revenue</ng-container></p>
-            <p class="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mt-2 truncate" [class.animate-pulse]="loading()">
-              {{($safeNavigationMigration(dashboardStats()?.todayRevenue)  | currency: currency) || defaultValue}}
-            </p>
-            <p i18n class="text-sm text-green-600 mt-1 truncate">
-              <span class="font-medium">{{($safeNavigationMigration(dashboardStats()?.monthlyRevenue) | currency: currency) || defaultValue}}</span> This Month
-            </p>
-          </div>
-          <div class="p-3 border border-outline-variant rounded-lg flex-shrink-0">
-            <mat-icon>trending_up</mat-icon>
-          </div>
-        </div>
-      </mat-card>
-    </div>
-
-    <!-- Charts Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Occupancy Chart -->
-      <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-lg font-semibold text-gray-800"><ng-container i18n>Weekly Occupancy</ng-container></h3>
-          <div class="flex items-center space-x-2 text-sm text-gray-500">
-            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
-            <span><ng-container i18n>Occupancy Rate</ng-container></span>
-          </div>
-        </div>
-        <div class="h-64 relative">
-          <canvas
-            baseChart
-            [data]="occupancyChartData()"
-            [options]="occupancyChartOptions"
-            type="line"
-            class="!h-full !w-full">
-          </canvas>
-        </div>
-      </mat-card>
-
-      <!-- Revenue Chart -->
-      <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-lg font-semibold text-gray-800"><ng-container i18n>Revenue Trend</ng-container></h3>
-          <div class="flex items-center space-x-2 text-sm text-gray-500">
-            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-            <span><ng-container i18n>Daily Revenue</ng-container></span>
-          </div>
-        </div>
-        <div class="h-64 relative">
-          <canvas
-            baseChart
-            [data]="revenueChartData()"
-            [options]="revenueChartOptions"
-            type="bar"
-            class="!h-full !w-full">
-          </canvas>
-        </div>
-      </mat-card>
-    </div>
-
-    <!-- Quick Actions Section -->
-    <!-- <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6">
-      <h3 class="text-lg font-semibold text-gray-800 mb-6">Quick Actions</h3>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <button
-          mat-stroked-button
-          (click)="navigateTo('./reservations')"
-          class="!h-20 !flex !flex-col !items-center !justify-center !space-y-2 !border-blue-200 hover:!bg-blue-50 hover:!border-blue-300 !transition-all !duration-200">
-          <mat-icon class="!text-blue-600">book_online</mat-icon>
-          <span class="!text-sm !font-medium !text-gray-700">New Reservation</span>
-        </button>
-
-        <button
-          mat-stroked-button
-          (click)="navigateTo('./checkin-checkout')"
-          class="!h-20 !flex !flex-col !items-center !justify-center !space-y-2 !border-emerald-200 hover:!bg-emerald-50 hover:!border-emerald-300 !transition-all !duration-200">
-          <mat-icon class="!text-emerald-600">how_to_reg</mat-icon>
-          <span class="!text-sm !font-medium !text-gray-700">Check-In / Out</span>
-        </button>
-
-        <button
-          mat-stroked-button
-          (click)="navigateTo('./guests')"
-          class="!h-20 !flex !flex-col !items-center !justify-center !space-y-2 !border-purple-200 hover:!bg-purple-50 hover:!border-purple-300 !transition-all !duration-200">
-          <mat-icon class="!text-purple-600">person_add</mat-icon>
-          <span class="!text-sm !font-medium !text-gray-700">Manage Guests</span>
-        </button>
-
-        <button
-          mat-stroked-button
-          (click)="navigateTo('./rooms')"
-          class="!h-20 !flex !flex-col !items-center !justify-center !space-y-2 !border-amber-200 hover:!bg-amber-50 hover:!border-amber-300 !transition-all !duration-200">
-          <mat-icon class="!text-amber-600">hotel</mat-icon>
-          <span class="!text-sm !font-medium !text-gray-700">Room Management</span>
-        </button>
-      </div>
-    </mat-card> -->
-
-    <!-- Recent Activity Section -->
-    <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-6">
-      <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-semibold text-gray-800"><ng-container i18n>Recent Activity</ng-container></h3>
-        <button matButton><ng-container i18n>View All</ng-container></button>
-      </div>
-
-      <mat-list>
-        @for (activity of recentActivities(); track activity; let i = $index) {
-          <mat-list-item class="!h-auto !py-3">
-            <div matListItemIcon>
-              <mat-icon>{{activity.icon}}</mat-icon>
-            </div>
-            <span matListItemTitle class="text-gray-900">{{activity.title}}</span>
-            <span matListItemLine class="text-gray-500">{{activity.time}}</span>
-            <span matListItemMeta class="text-xs text-gray-400">{{activity.type}}</span>
-          </mat-list-item>
-          @if (i < recentActivities().length - 1) {
-            <mat-divider></mat-divider>
+    <!-- ═════════════ Money and activity ═════════════ -->
+    <div class="grid gap-5 md:gap-6 lg:grid-cols-3">
+      @if (d.kpis.revenue; as rev) {
+        <section class="rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-5 md:p-6">
+          <h2 class="m-0 text-lg font-semibold"><ng-container i18n>This month so far</ng-container></h2>
+          <p class="m-0 text-sm text-on-surface-variant">{{ asDay(d.today) | date: 'LLLL y' }}</p>
+          <div class="mt-4 truncate text-4xl font-bold tabular-nums tracking-tight">{{ rev.monthToDate | currency: currency() : 'symbol' : '1.0-0' }}</div>
+          @if (change(rev.monthToDate, rev.lastMonthSamePeriod); as ch) {
+            <p class="m-0 mt-2 flex flex-wrap items-center gap-x-2 text-sm"><span class="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 font-semibold" [class]="ch > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'"><mat-icon class="!h-3.5 !w-3.5 !text-sm !leading-none">{{ ch > 0 ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>{{ ch > 0 ? '+' : '' }}{{ ch }}%</span><span class="text-on-surface-variant"><ng-container i18n>vs the same days last month</ng-container> ({{ rev.lastMonthSamePeriod | currency: currency() : 'symbol' : '1.0-0' }})</span></p>
           }
+          @if (sourceSegs().length) {
+            <h3 class="m-0 mb-2 mt-6 text-xs font-semibold uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Where it came from</ng-container></h3>
+            <div class="flex h-3 overflow-hidden rounded-full bg-surface-container-high">@for (s of sourceSegs(); track s.label) { <span [class]="s.tone" [style.width.%]="s.percent" [matTooltip]="methodLabel(s.label)"></span> }</div>
+            <ul class="m-0 mt-3 flex list-none flex-col gap-1.5 p-0 text-sm">
+              @for (s of sourceSegs(); track s.label) { <li class="flex items-center gap-2"><span class="h-2.5 w-2.5 shrink-0 rounded-full" [class]="s.tone"></span><span class="min-w-0 flex-1 truncate first-letter:uppercase">{{ methodLabel(s.label) }}</span><span class="tabular-nums text-on-surface-variant">{{ s.amount | currency: currency() : 'symbol' : '1.0-0' }}</span></li> }
+            </ul>
+          }
+        </section>
+      }
+
+      @if (d.payments; as pay) {
+        <section class="rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-5 md:p-6">
+          <h2 class="m-0 text-lg font-semibold"><ng-container i18n>Money taken today</ng-container></h2>
+          <p class="m-0 text-sm text-on-surface-variant">@if (pay.shiftsOpen) {{{ pay.shiftsOpen }} <ng-container i18n>till(s) open</ng-container>} @else {<ng-container i18n>No till is open</ng-container>}</p>
+          <div class="mt-4 truncate text-4xl font-bold tabular-nums tracking-tight">{{ pay.total | currency: currency() : 'symbol' : '1.0-0' }}</div>
+          @if (paymentSegs().length) {
+            <div class="mt-5 flex h-3 overflow-hidden rounded-full bg-surface-container-high">@for (s of paymentSegs(); track s.label) { <span [class]="s.tone" [style.width.%]="s.percent"></span> }</div>
+            <ul class="m-0 mt-3 flex list-none flex-col gap-1.5 p-0 text-sm">
+              @for (s of paymentSegs(); track s.label) { <li class="flex items-center gap-2"><span class="h-2.5 w-2.5 shrink-0 rounded-full" [class]="s.tone"></span><span class="min-w-0 flex-1 truncate first-letter:uppercase">{{ methodLabel(s.label) }}</span><span class="tabular-nums text-on-surface-variant">{{ s.amount | currency: currency() : 'symbol' : '1.0-0' }}</span></li> }
+            </ul>
+          } @else {
+            <p class="m-0 mt-4 text-sm text-on-surface-variant"><ng-container i18n>No payment has been taken yet today.</ng-container></p>
+          }
+          @if (d.roomOrders; as ro) {
+            <p class="m-0 mt-5 border-t border-outline-variant/60 pt-4 text-sm text-on-surface-variant"><b class="text-on-surface tabular-nums">{{ ro.orders }}</b>&nbsp;<ng-container i18n>order(s) charged to rooms</ng-container> · <span class="tabular-nums">{{ ro.total | currency: currency() : 'symbol' : '1.0-0' }}</span>@if (ro.unpaid > 0) { · <span class="font-medium text-red-600 tabular-nums">{{ ro.unpaid | currency: currency() : 'symbol' : '1.0-0' }} <ng-container i18n>unpaid</ng-container></span> }</p>
+          }
+        </section>
+      }
+
+      <section class="rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-5 md:p-6" [class]="!d.canSeeMoney ? 'lg:col-span-3' : ''">
+        <h2 class="m-0 text-lg font-semibold"><ng-container i18n>Recent activity</ng-container></h2>
+        @if (d.activity.length === 0) {
+          <p class="m-0 mt-4 text-sm text-on-surface-variant"><ng-container i18n>Bookings and check-ins will show up here.</ng-container></p>
+        } @else {
+          <ol class="m-0 mt-4 list-none border-l border-outline-variant/70 p-0">
+            @for (a of d.activity; track a.id) {
+              <li class="relative pb-4 pl-6 last:pb-0">
+                <span class="absolute -left-[13px] top-0 flex h-6 w-6 items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant ring-4 ring-surface-container-lowest"><mat-icon class="!h-3.5 !w-3.5 !text-sm !leading-none">{{ activityIcon(a.type) }}</mat-icon></span>
+                <a [routerLink]="['/menu/hms/front-desk/reservations/edit', a.id]" class="block rounded-lg text-inherit no-underline hover:underline">
+                  <span class="block text-sm"><b>{{ a.guest || '—' }}</b> {{ activityText(a.type) }}</span>
+                  <span class="block text-xs text-on-surface-variant">@if (a.rooms) {<ng-container i18n>Room</ng-container> {{ a.rooms }} · }{{ timeAgo(a.at) }}</span>
+                </a>
+              </li>
+            }
+          </ol>
         }
-
-        <!-- Placeholder when no data -->
-        @if (!recentActivities() || recentActivities().length === 0) {
-          <div class="text-center py-8 text-gray-500">
-            <mat-icon class="!text-3xl mb-2">history</mat-icon>
-            <p><ng-container i18n>Recent activity will appear here</ng-container></p>
-          </div>
-        }
-      </mat-list>
-    </mat-card>
-
-    <!-- System Status Footer -->
-    <mat-card appearance="outlined" class="hover:shadow-lg transition-all duration-300 p-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-          <span class="text-sm text-gray-600"><ng-container i18n>System Status: Online</ng-container></span>
-        </div>
-        <div class="text-xs text-gray-400">
-          <ng-container i18n>Last updated: {{lastUpdated() | date:'short'}}</ng-container>
-        </div>
-      </div>
-    </mat-card>
-
-  </div>
+      </section>
+    </div>
+    }
+  }
 </div>

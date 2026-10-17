@@ -1,0 +1,108 @@
+<app-page-header [title]="'Reports' | tr" [subtitle]="'Every list and figure your hotel runs on. Open one, filter it, and export it to Excel.' | tr" />
+
+<div class="mx-auto flex max-w-[1500px] flex-col gap-6 p-4 pb-16 md:p-6">
+  <!-- Search first: most visits are "I know what I want" -->
+  <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+    <mat-label><ng-container i18n>Find a report</ng-container></mat-label>
+    <mat-icon matPrefix class="mr-2 text-on-surface-variant">search</mat-icon>
+    <input #searchBox matInput type="search" autocomplete="off" [value]="search()" (input)="onSearch($any($event.target).value)" (keydown.enter)="openFirst()" placeholder="Try “arrivals”, “cancelled”, “rooms”…" i18n-placeholder />
+    @if (search()) {
+      <button matIconButton matSuffix type="button" aria-label="Clear search" i18n-aria-label (click)="onSearch('')"><mat-icon>close</mat-icon></button>
+    } @else {
+      <kbd matSuffix class="mr-3 hidden rounded-md border border-outline-variant bg-surface-container px-2 py-0.5 font-mono text-xs text-on-surface-variant sm:inline" aria-hidden="true">/</kbd>
+    }
+  </mat-form-field>
+
+  @if (!search()) {
+    <!-- The daily four, with the number that matters -->
+    <section aria-labelledby="daily-title">
+      <h2 id="daily-title" class="m-0 mb-3 text-sm font-semibold uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Every day</ng-container></h2>
+      <div class="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
+        @for (d of daily(); track d.meta.id) {
+          <a [routerLink]="link(d.meta)" class="group relative flex min-w-0 flex-col gap-3 overflow-hidden rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-4 text-inherit no-underline transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none md:p-5">
+            <span aria-hidden="true" class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full opacity-60 blur-2xl" [class]="accent(d.meta.category).tile"></span>
+            <span class="relative flex h-11 w-11 items-center justify-center rounded-2xl" [class]="accent(d.meta.category).tile"><mat-icon>{{ d.meta.icon }}</mat-icon></span>
+            <span class="relative min-w-0">
+              <span class="block text-3xl font-bold tabular-nums leading-none md:text-4xl">@if (d.value === null) {<span class="inline-block h-8 w-10 animate-pulse rounded-lg bg-surface-container-high align-middle"></span>} @else {{{ d.value }}}</span>
+              <span class="mt-1 block truncate text-xs text-on-surface-variant">{{ d.unit }}</span>
+            </span>
+            <span class="relative flex items-center justify-between gap-2 text-sm font-semibold"><span class="truncate">{{ d.meta.title }}</span><mat-icon class="!h-5 !w-5 !text-xl !leading-none shrink-0 opacity-50 transition group-hover:translate-x-0.5 group-hover:opacity-100 motion-reduce:transition-none">arrow_forward</mat-icon></span>
+          </a>
+        }
+      </div>
+    </section>
+
+    @if (shortcuts().length) {
+      <section aria-labelledby="short-title" class="flex flex-wrap items-center gap-2">
+        <h2 id="short-title" class="m-0 mr-1 text-sm font-semibold uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Your shortcuts</ng-container></h2>
+        <mat-chip-set aria-label="Your shortcuts" i18n-aria-label>
+          @for (s of shortcuts(); track s.meta.id) { <a mat-chip [routerLink]="link(s.meta)"><mat-icon matChipAvatar [class]="s.pinned ? 'text-amber-500' : ''">{{ s.pinned ? 'star' : 'history' }}</mat-icon>{{ s.meta.title }}</a> }
+        </mat-chip-set>
+      </section>
+    }
+  }
+
+  <!-- Phones and tablets: categories as a swipeable row -->
+  <div class="lg:hidden"><mat-chip-listbox class="-mx-1 overflow-x-auto px-1" [value]="category()" (change)="category.set($event.value ?? 'all')" aria-label="Report groups" i18n-aria-label>
+    <mat-chip-option value="all"><ng-container i18n>All</ng-container>&nbsp;<b>{{ counts()['all'] }}</b></mat-chip-option>
+    @for (c of categories; track c.id) { @if (counts()[c.id]) { <mat-chip-option [value]="c.id"><mat-icon matChipAvatar>{{ c.icon }}</mat-icon>{{ c.title }}&nbsp;<b>{{ counts()[c.id] }}</b></mat-chip-option> } }
+  </mat-chip-listbox></div>
+
+  <div class="grid items-start gap-6 lg:grid-cols-[17rem_minmax(0,1fr)]">
+    <!-- Desktop: a sticky category rail -->
+    <nav class="sticky top-4 hidden rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-2 lg:block" aria-label="Report groups" i18n-aria-label>
+      <mat-nav-list class="!p-0">
+        <button mat-list-item type="button" class="!text-left" [activated]="category() === 'all'" (click)="category.set('all')">
+          <mat-icon matListItemIcon>apps</mat-icon>
+          <span matListItemTitle><ng-container i18n>All reports</ng-container></span>
+          <span matListItemMeta class="!text-sm tabular-nums">{{ counts()['all'] }}</span>
+        </button>
+        @for (c of categories; track c.id) {
+          <button mat-list-item type="button" class="!text-left" [activated]="category() === c.id" [disabled]="!counts()[c.id]" (click)="category.set(c.id)">
+            <mat-icon matListItemIcon [class]="accent(c.id).text">{{ c.icon }}</mat-icon>
+            <span matListItemTitle>{{ c.title }}</span>
+            <span matListItemMeta class="!text-sm tabular-nums">{{ counts()[c.id] }}</span>
+          </button>
+        }
+      </mat-nav-list>
+    </nav>
+
+    <div class="flex min-w-0 flex-col gap-6">
+      @for (g of groups(); track g.id) {
+        <section [attr.aria-labelledby]="'cat-' + g.id">
+          <div class="mb-2 flex items-baseline gap-3 px-1">
+            <h2 [id]="'cat-' + g.id" class="m-0 text-lg font-semibold">{{ g.title }}</h2>
+            <p class="m-0 min-w-0 truncate text-sm text-on-surface-variant">{{ g.description }}</p>
+          </div>
+          <div class="grid gap-1 rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-2 xl:grid-cols-2">
+            @for (r of g.reports; track r.id) {
+              <div class="group relative flex items-center gap-3 rounded-2xl px-3 py-3 transition hover:bg-surface-container motion-reduce:transition-none">
+                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl" [class]="accent(g.id).tile"><mat-icon>{{ r.icon }}</mat-icon></span>
+                <span class="min-w-0 flex-1">
+                  <span class="flex items-center gap-2">
+                    <!-- The whole row is the link; the pin stays separately clickable -->
+                    <a [routerLink]="link(r)" class="truncate font-semibold text-inherit no-underline after:absolute after:inset-0 after:content-['']">{{ r.title }}</a>
+                    <span class="hidden shrink-0 rounded-full border border-outline-variant px-2 py-px text-[11px] font-medium text-on-surface-variant sm:inline">{{ kind(r) }}</span>
+                  </span>
+                  <span class="line-clamp-2 text-sm text-on-surface-variant">{{ r.description }}</span>
+                </span>
+                <button matIconButton type="button" class="relative z-10 shrink-0" [attr.aria-pressed]="isFavourite(r.id)" [attr.aria-label]="isFavourite(r.id) ? ('Unpin' | tr) : ('Pin' | tr)" [matTooltip]="isFavourite(r.id) ? ('Unpin' | tr) : ('Pin' | tr)" (click)="toggleFavourite($event, r.id)">
+                  <mat-icon [class]="isFavourite(r.id) ? 'text-amber-500' : 'text-on-surface-variant'">{{ isFavourite(r.id) ? 'star' : 'star_outline' }}</mat-icon>
+                </button>
+                <mat-icon class="hidden shrink-0 text-on-surface-variant opacity-0 transition group-hover:opacity-100 sm:block motion-reduce:transition-none">chevron_right</mat-icon>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      @if (empty()) {
+        <div class="flex flex-col items-center gap-2 rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-10 text-center">
+          <mat-icon class="!h-12 !w-12 !text-5xl !leading-none text-on-surface-variant">search_off</mat-icon>
+          <p class="m-0 font-medium"><ng-container i18n>No report matches that.</ng-container></p>
+          <button matButton (click)="onSearch('')"><ng-container i18n>Clear the search</ng-container></button>
+        </div>
+      }
+    </div>
+  </div>
+</div>

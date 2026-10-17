@@ -15,7 +15,7 @@ import {
 } from '../../../../shared/services/occupancy.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
 import { RoomsService } from '../../../../shared/services/rooms.service';
-import { ExportService } from '../../../../shared/services/export.service';
+import { ReportExportService } from '../../../../shared/services/report-export.service';
 import { toDateOnly } from '../../../../shared/utils/date-only';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { MatCardModule } from '@angular/material/card';
@@ -70,7 +70,7 @@ export class OccupancyReportComponent {
   private occupancyService = inject(OccupancyService);
   private storeStore = inject(StoreStore);
   private roomsService = inject(RoomsService);
-  private exportService = inject(ExportService);
+  private reportExport = inject(ReportExportService);
 
   // Computed values
   selectedStore = computed(() => this.storeStore.selectedStore());
@@ -362,25 +362,33 @@ export class OccupancyReportComponent {
   }
 
   exportData(format: 'pdf' | 'csv' | 'excel'): void {
-    const rows = this.occupancyData().map((r) => ({
-      Date: toDateOnly(r.date),
-      'Total Rooms': r.totalRooms,
-      'Rooms Sold': r.occupiedRooms,
-      'Available Rooms': r.availableRooms,
-      'Out of Order': r.outOfOrderRooms,
-      Maintenance: r.maintenanceRooms,
-      'Occupancy (%)': r.occupancyRate,
-      'Room Revenue': r.revenue,
-      ADR: r.averageRate,
-      RevPAR: r.revpar ?? 0,
-      Reservations: r.reservationCount,
-    }));
-    if (!rows.length) return;
-    const filename = 'occupancy-report';
-    const range = { from: toDateOnly(this.filterForm.value.startDate), to: toDateOnly(this.filterForm.value.endDate) };
-    if (format === 'pdf') this.exportService.exportToPdf(rows, filename, range);
-    else if (format === 'csv') this.exportService.exportToCSV(rows, filename);
-    else this.exportService.exportToExcel(rows, filename);
+    const data = this.occupancyData();
+    if (!data.length) return;
+    const store = this.storeStore.selectedStore();
+    const from = toDateOnly(this.filterForm.value.startDate);
+    const to = toDateOnly(this.filterForm.value.endDate);
+    const columns = [
+      { key: 'date', label: $localize`Date`, type: 'date' as const },
+      { key: 'totalRooms', label: $localize`Total rooms`, type: 'number' as const },
+      { key: 'occupiedRooms', label: $localize`Rooms sold`, type: 'number' as const },
+      { key: 'availableRooms', label: $localize`Available rooms`, type: 'number' as const },
+      { key: 'outOfOrderRooms', label: $localize`Out of order`, type: 'number' as const },
+      { key: 'maintenanceRooms', label: $localize`Maintenance`, type: 'number' as const },
+      { key: 'occupancyRate', label: $localize`Occupancy (%)`, type: 'number' as const },
+      { key: 'revenue', label: $localize`Room revenue`, type: 'currency' as const },
+      { key: 'averageRate', label: 'ADR', type: 'currency' as const },
+      { key: 'revpar', label: 'RevPAR', type: 'currency' as const },
+      { key: 'reservationCount', label: $localize`Reservations`, type: 'number' as const },
+    ];
+    this.reportExport.export(format === 'excel' ? 'xlsx' : format, {
+      title: $localize`Occupancy report`,
+      storeName: store?.name ?? '',
+      currency: store?.currencyCode ?? store?.currency,
+      subtitle: `${from} → ${to}`,
+      columns,
+      rows: data.map((r) => ({ ...r, date: toDateOnly(r.date), revpar: r.revpar ?? 0 })),
+      filename: `${store?.name ?? 'hotel'}-occupancy-${from}_${to}`,
+    });
   }
 
   getRoomStatusClass(status: RoomStatus['status']): string {

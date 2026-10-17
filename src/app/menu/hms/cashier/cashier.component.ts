@@ -4,6 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { firstValueFrom, of } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,12 +15,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CashierService, CashierShift } from '../../../shared/services/cashier.service';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StoreStore } from '../../../shared/stores/store.store';
 import { CashierCloseDialogComponent, CashierDropDialogComponent } from './cashier-dialogs';
 
 @Component({
   selector: 'app-cashier',
-  imports: [CurrencyPipe, DatePipe, KeyValuePipe, FormsModule, MatButtonModule, MatDialogModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressBarModule, MatSnackBarModule],
+  imports: [CurrencyPipe, DatePipe, FormsModule, PageHeaderComponent, MatButtonModule, MatCardModule, MatChipsModule, MatTableModule, MatTooltipModule, MatDialogModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressBarModule, MatSnackBarModule],
   templateUrl: './cashier.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
 })
@@ -52,6 +57,15 @@ export class CashierComponent {
   dropsTotal = computed(() => (this.shift()?.drops ?? []).reduce((s, d) => s + d.amount, 0));
   cashTaken = computed(() => this.summary()?.totalsByMethod?.['cash'] ?? 0);
   allTaken = computed(() => Object.values(this.summary()?.totalsByMethod ?? {}).reduce((s, v) => s + v, 0));
+
+  readonly columns = ['opened', 'closed', 'float', 'counted', 'expected', 'variance'];
+  methods = computed(() => Object.entries(this.summary()?.totalsByMethod ?? {}).map(([key, value]) => ({ key, value })));
+  tiles = computed(() => [
+    { label: $localize`Opening float`, value: this.shift()?.openingFloat ?? 0 },
+    { label: $localize`Cash taken`, value: this.cashTaken() },
+    { label: $localize`Dropped to the safe`, value: this.dropsTotal() },
+    { label: $localize`All payments taken`, value: this.allTaken() },
+  ]);
 
   reload() {
     this.refresh.update((n) => n + 1);

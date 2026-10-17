@@ -1,100 +1,108 @@
-<div class="mx-auto flex max-w-4xl flex-col gap-5 p-4 pb-16 md:p-6">
-  <header>
-    <h1 class="m-0 text-2xl font-bold text-gray-900"><ng-container i18n>Cashier</ng-container></h1>
-    <p class="m-0 mt-1 text-sm text-gray-600"><ng-container i18n>Open a shift before taking payments, and close it with a count when you finish.</ng-container></p>
-  </header>
+<app-page-header title="Cashier" i18n-title subtitle="Open a shift before taking payments, and close it with a count when you finish." i18n-subtitle>
+  <ng-container actions>
+    <button matIconButton (click)="reload()" aria-label="Refresh" i18n-aria-label matTooltip="Refresh" i18n-matTooltip><mat-icon>refresh</mat-icon></button>
+  </ng-container>
+</app-page-header>
 
+<div class="flex flex-col gap-4 p-4 pb-16 md:gap-6 md:p-6">
   @if (loading()) {
     <mat-progress-bar mode="indeterminate" />
   } @else if (failed()) {
-    <div class="rounded-lg border border-red-200 bg-red-50 p-6 text-center" role="alert">
-      <p class="m-0 font-semibold text-red-800"><ng-container i18n>Could not load your shift.</ng-container></p>
-      <button matButton class="mt-2" (click)="reload()"><ng-container i18n>Try again</ng-container></button>
-    </div>
+    <mat-card appearance="outlined" class="!bg-error-container">
+      <mat-card-content class="!flex flex-col items-center gap-2 p-6! text-center" role="alert">
+        <mat-icon class="!h-10 !w-10 !text-4xl !leading-none text-error">error</mat-icon>
+        <p class="m-0 font-semibold"><ng-container i18n>Could not load your shift.</ng-container></p>
+        <button matButton="filled" (click)="reload()"><ng-container i18n>Try again</ng-container></button>
+      </mat-card-content>
+    </mat-card>
   } @else {
     <!-- Just closed: now the system's figure is shown -->
     @if (justClosed(); as c) {
-      <section class="rounded-xl border p-4 md:p-5" [class]="(c.variance ?? 0) === 0 ? 'border-green-300 bg-green-50' : 'border-amber-300 bg-amber-50'" role="status">
-        <h2 class="m-0 flex items-center gap-2 text-lg font-semibold">
-          <mat-icon>{{ (c.variance ?? 0) === 0 ? 'check_circle' : 'warning' }}</mat-icon>
-          @if ((c.variance ?? 0) === 0) {<ng-container i18n>Shift closed. The till balances.</ng-container>} @else {<ng-container i18n>Shift closed with a cash difference.</ng-container>}
-        </h2>
-        <dl class="m-0 mt-3 grid grid-cols-3 gap-3 text-sm tabular-nums">
-          <div><dt class="text-gray-600"><ng-container i18n>You counted</ng-container></dt><dd class="m-0 text-lg font-semibold">{{ c.countedCash | currency: currency() : 'symbol' : '1.2-2' }}</dd></div>
-          <div><dt class="text-gray-600"><ng-container i18n>System expected</ng-container></dt><dd class="m-0 text-lg font-semibold">{{ c.expectedCash | currency: currency() : 'symbol' : '1.2-2' }}</dd></div>
-          <div><dt class="text-gray-600"><ng-container i18n>Difference</ng-container></dt><dd class="m-0 text-lg font-semibold" [class.text-red-700]="(c.variance ?? 0) < 0">{{ (c.variance ?? 0) > 0 ? '+' : '' }}{{ c.variance | currency: currency() : 'symbol' : '1.2-2' }}</dd></div>
-        </dl>
-      </section>
+      <mat-card appearance="outlined" [class]="(c.variance ?? 0) === 0 ? '!bg-secondary-container' : '!bg-tertiary-container'" role="status">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="!h-10 !w-10 !text-4xl !leading-none">{{ (c.variance ?? 0) === 0 ? 'check_circle' : 'warning' }}</mat-icon>
+          <mat-card-title>
+            @if ((c.variance ?? 0) === 0) {<ng-container i18n>Shift closed. The till balances.</ng-container>} @else {<ng-container i18n>Shift closed with a cash difference.</ng-container>}
+          </mat-card-title>
+          <mat-card-subtitle><ng-container i18n>Your count is now compared with the system's figure.</ng-container></mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="!pt-4">
+          <dl class="m-0 grid grid-cols-1 gap-3 tabular-nums sm:grid-cols-3">
+            <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>You counted</ng-container></dt><dd class="m-0 text-xl font-bold">{{ c.countedCash | currency: currency() : 'symbol' : '1.2-2' }}</dd></div>
+            <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>System expected</ng-container></dt><dd class="m-0 text-xl font-bold">{{ c.expectedCash | currency: currency() : 'symbol' : '1.2-2' }}</dd></div>
+            <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Difference</ng-container></dt><dd class="m-0 text-xl font-bold" [class.text-error]="(c.variance ?? 0) < 0">{{ (c.variance ?? 0) > 0 ? '+' : '' }}{{ c.variance | currency: currency() : 'symbol' : '1.2-2' }}</dd></div>
+          </dl>
+        </mat-card-content>
+      </mat-card>
     }
 
     @if (shift(); as s) {
       <!-- A shift is open -->
-      <section class="rounded-xl border border-gray-200 p-4 md:p-5" aria-labelledby="shift-title">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 id="shift-title" class="m-0 flex items-center gap-2 text-lg font-semibold"><span class="h-2.5 w-2.5 rounded-full bg-green-500" aria-hidden="true"></span><ng-container i18n>Your shift is open</ng-container></h2>
-            <p class="m-0 mt-0.5 text-sm text-gray-600"><ng-container i18n>Since</ng-container> {{ s.openedAt | date: 'EEE d MMM, HH:mm' }}</p>
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <span mat-card-avatar class="flex !h-10 !w-10 items-center justify-center rounded-full bg-primary-container text-on-primary-container"><mat-icon class="!leading-none">point_of_sale</mat-icon></span>
+          <mat-card-title><ng-container i18n>Your shift is open</ng-container></mat-card-title>
+          <mat-card-subtitle><ng-container i18n>Since</ng-container> {{ s.openedAt | date: 'EEE d MMM, HH:mm' }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="!pt-4">
+          <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+            @for (tile of tiles(); track tile.label) {
+              <div class="rounded-xl border border-outline-variant p-3">
+                <div class="text-xs text-on-surface-variant">{{ tile.label }}</div>
+                <div class="text-xl font-bold tabular-nums">{{ tile.value | currency: currency() : 'symbol' : '1.2-2' }}</div>
+              </div>
+            }
           </div>
-          <div class="flex gap-2">
-            <button matButton="outlined" (click)="drop()"><mat-icon>move_to_inbox</mat-icon><ng-container i18n>Drop cash</ng-container></button>
-            <button matButton="filled" (click)="close()" [disabled]="busy()"><mat-icon>lock</mat-icon><ng-container i18n>Close shift</ng-container></button>
-          </div>
-        </div>
-
-        <div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500"><ng-container i18n>Opening float</ng-container></div><div class="text-xl font-bold tabular-nums">{{ s.openingFloat | currency: currency() : 'symbol' : '1.2-2' }}</div></div>
-          <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500"><ng-container i18n>Cash taken</ng-container></div><div class="text-xl font-bold tabular-nums">{{ cashTaken() | currency: currency() : 'symbol' : '1.2-2' }}</div></div>
-          <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500"><ng-container i18n>Dropped to the safe</ng-container></div><div class="text-xl font-bold tabular-nums">{{ dropsTotal() | currency: currency() : 'symbol' : '1.2-2' }}</div></div>
-          <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500"><ng-container i18n>All payments taken</ng-container></div><div class="text-xl font-bold tabular-nums">{{ allTaken() | currency: currency() : 'symbol' : '1.2-2' }}</div></div>
-        </div>
-        @if ((summary()?.totalsByMethod | keyvalue)?.length) {
-          <p class="m-0 mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 tabular-nums">
-            @for (m of summary()?.totalsByMethod | keyvalue; track m.key) {<span>{{ m.key.replace('_', ' ') }} <b>{{ m.value | currency: currency() : 'symbol' : '1.2-2' }}</b></span>}
-          </p>
-        }
-      </section>
+          @if (methods().length) {
+            <mat-chip-set class="mt-3" aria-label="Payments by method" i18n-aria-label>
+              @for (m of methods(); track m.key) {<mat-chip class="capitalize">{{ m.key.replace('_', ' ') }}&nbsp;<b class="tabular-nums">{{ m.value | currency: currency() : 'symbol' : '1.2-2' }}</b></mat-chip>}
+            </mat-chip-set>
+          }
+        </mat-card-content>
+        <mat-card-actions class="flex-wrap !gap-2 !p-4">
+          <button matButton="outlined" (click)="drop()"><mat-icon>move_to_inbox</mat-icon><ng-container i18n>Drop cash</ng-container></button>
+          <button matButton="filled" (click)="close()" [disabled]="busy()"><mat-icon>lock</mat-icon><ng-container i18n>Close shift</ng-container></button>
+        </mat-card-actions>
+      </mat-card>
     } @else {
       <!-- No shift yet -->
-      <section class="rounded-xl border border-gray-200 p-5">
-        <h2 class="m-0 text-lg font-semibold"><ng-container i18n>Open your till</ng-container></h2>
-        <p class="mt-1 text-sm text-gray-600"><ng-container i18n>Enter the cash you start with. Every payment you take is then counted in this shift.</ng-container></p>
-        <div class="flex flex-wrap items-start gap-3">
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <span mat-card-avatar class="flex !h-10 !w-10 items-center justify-center rounded-full bg-primary-container text-on-primary-container"><mat-icon class="!leading-none">lock_open</mat-icon></span>
+          <mat-card-title><ng-container i18n>Open your till</ng-container></mat-card-title>
+          <mat-card-subtitle><ng-container i18n>Enter the cash you start with. Every payment you take is then counted in this shift.</ng-container></mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="!flex flex-col gap-2 !pt-4 sm:flex-row sm:items-start">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full sm:w-64">
             <mat-label><ng-container i18n>Opening float</ng-container></mat-label>
             <input matInput type="number" min="0" inputmode="decimal" [(ngModel)]="openingFloat" (keyup.enter)="open()" />
+            <span matTextSuffix class="pr-3 text-on-surface-variant">{{ currency() }}</span>
           </mat-form-field>
-          <button matButton="filled" class="mt-1" (click)="open()" [disabled]="busy()"><mat-icon>lock_open</mat-icon><ng-container i18n>Open shift</ng-container></button>
-        </div>
-      </section>
+          <button matButton="filled" class="sm:!mt-1" (click)="open()" [disabled]="busy()"><mat-icon>lock_open</mat-icon><ng-container i18n>Open shift</ng-container></button>
+        </mat-card-content>
+      </mat-card>
     }
 
     <!-- Past shifts -->
     <section aria-labelledby="past-title">
-      <h2 id="past-title" class="m-0 mb-2 text-base font-semibold"><ng-container i18n>Recent shifts</ng-container></h2>
+      <h2 id="past-title" class="m-0 mb-2 text-sm font-semibold uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Recent shifts</ng-container></h2>
       @if (shifts().length === 0) {
-        <p class="text-sm text-gray-500"><ng-container i18n>No shifts yet.</ng-container></p>
+        <mat-card appearance="outlined"><mat-card-content class="p-6! text-center text-sm text-on-surface-variant"><ng-container i18n>No shifts yet.</ng-container></mat-card-content></mat-card>
       } @else {
-        <div class="overflow-x-auto rounded-lg border border-gray-200">
-          <table class="w-full border-collapse text-sm tabular-nums">
-            <thead><tr class="text-left text-xs text-gray-500">
-              <th class="p-3" scope="col"><ng-container i18n>Opened</ng-container></th><th class="p-3" scope="col"><ng-container i18n>Closed</ng-container></th>
-              <th class="p-3 text-right" scope="col"><ng-container i18n>Float</ng-container></th><th class="p-3 text-right" scope="col"><ng-container i18n>Counted</ng-container></th>
-              <th class="p-3 text-right" scope="col"><ng-container i18n>Expected</ng-container></th><th class="p-3 text-right" scope="col"><ng-container i18n>Difference</ng-container></th>
-            </tr></thead>
-            <tbody>
-              @for (h of shifts(); track h._id) {
-                <tr class="border-t border-gray-200">
-                  <td class="p-3">{{ h.openedAt | date: 'd MMM, HH:mm' }}</td>
-                  <td class="p-3">@if (h.closedAt) {{{ h.closedAt | date: 'd MMM, HH:mm' }}} @else {<span class="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800"><ng-container i18n>open</ng-container></span>}</td>
-                  <td class="p-3 text-right">{{ h.openingFloat | currency: currency() : 'symbol' : '1.2-2' }}</td>
-                  <td class="p-3 text-right">@if (h.status === 'closed') {{{ h.countedCash | currency: currency() : 'symbol' : '1.2-2' }}}</td>
-                  <td class="p-3 text-right">@if (h.status === 'closed') {{{ h.expectedCash | currency: currency() : 'symbol' : '1.2-2' }}}</td>
-                  <td class="p-3 text-right">@if (h.status === 'closed') {<span class="rounded-full px-2 py-0.5 text-xs" [class]="(h.variance ?? 0) === 0 ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-900'">{{ (h.variance ?? 0) > 0 ? '+' : '' }}{{ h.variance | currency: currency() : 'symbol' : '1.2-2' }}</span>}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+        <mat-card appearance="outlined">
+          <div class="overflow-x-auto">
+            <table mat-table [dataSource]="shifts()" class="w-full min-w-[640px] tabular-nums">
+              <ng-container matColumnDef="opened"><th mat-header-cell *matHeaderCellDef><ng-container i18n>Opened</ng-container></th><td mat-cell *matCellDef="let h">{{ h.openedAt | date: 'd MMM, HH:mm' }}</td></ng-container>
+              <ng-container matColumnDef="closed"><th mat-header-cell *matHeaderCellDef><ng-container i18n>Closed</ng-container></th><td mat-cell *matCellDef="let h">@if (h.closedAt) {{{ h.closedAt | date: 'd MMM, HH:mm' }}} @else {<mat-chip-set><mat-chip highlighted><ng-container i18n>open</ng-container></mat-chip></mat-chip-set>}</td></ng-container>
+              <ng-container matColumnDef="float"><th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Float</ng-container></th><td mat-cell *matCellDef="let h" class="!text-right">{{ h.openingFloat | currency: currency() : 'symbol' : '1.2-2' }}</td></ng-container>
+              <ng-container matColumnDef="counted"><th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Counted</ng-container></th><td mat-cell *matCellDef="let h" class="!text-right">@if (h.status === 'closed') {{{ h.countedCash | currency: currency() : 'symbol' : '1.2-2' }}}</td></ng-container>
+              <ng-container matColumnDef="expected"><th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Expected</ng-container></th><td mat-cell *matCellDef="let h" class="!text-right">@if (h.status === 'closed') {{{ h.expectedCash | currency: currency() : 'symbol' : '1.2-2' }}}</td></ng-container>
+              <ng-container matColumnDef="variance"><th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Difference</ng-container></th><td mat-cell *matCellDef="let h" class="!text-right">@if (h.status === 'closed') {<span class="flex justify-end"><mat-chip-set><mat-chip [highlighted]="(h.variance ?? 0) === 0" [class.!bg-error-container]="(h.variance ?? 0) !== 0">{{ (h.variance ?? 0) > 0 ? '+' : '' }}{{ h.variance | currency: currency() : 'symbol' : '1.2-2' }}</mat-chip></mat-chip-set></span>}</td></ng-container>
+              <tr mat-header-row *matHeaderRowDef="columns"></tr>
+              <tr mat-row *matRowDef="let row; columns: columns"></tr>
+            </table>
+          </div>
+        </mat-card>
       }
     </section>
   }

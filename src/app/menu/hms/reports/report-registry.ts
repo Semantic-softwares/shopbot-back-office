@@ -1,0 +1,127 @@
+/**
+ * Everything the app knows about the hotel reports: how they are grouped, what each one is for, which filters it
+ * offers, and the words for every column. The server decides which columns a report has; the labels live here so
+ * they can be translated.
+ */
+
+export type ReportFilterKind = 'dateRange' | 'status' | 'search' | 'roomType';
+
+export interface ReportMeta {
+  id: string;
+  category: string;
+  title: string;
+  description: string;
+  icon: string;
+  /** Opens a date range (today by default) rather than a live list. */
+  filters: ReportFilterKind[];
+  statuses?: Array<{ value: string; label: string }>;
+  /** A report that already has its own screen. */
+  legacyLink?: string;
+  /** Wide tables print landscape. */
+  wide?: boolean;
+}
+
+export interface ReportCategory {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+}
+
+export const REPORT_CATEGORIES: ReportCategory[] = [
+  { id: 'guests', title: $localize`Guests`, description: $localize`Who is coming, who is here, who is leaving`, icon: 'groups' },
+  { id: 'reservations', title: $localize`Reservations`, description: $localize`Bookings that did not happen as planned`, icon: 'event_note' },
+  { id: 'orders', title: $localize`Orders`, description: $localize`What guests charged to their rooms`, icon: 'receipt_long' },
+  { id: 'housekeeping', title: $localize`Housekeeping`, description: $localize`The state of every room`, icon: 'cleaning_services' },
+  { id: 'financial', title: $localize`Financial`, description: $localize`Revenue and payments`, icon: 'payments' },
+  { id: 'performance', title: $localize`Performance`, description: $localize`Occupancy and how the hotel is doing`, icon: 'monitoring' },
+];
+
+const RESERVATION_STATUSES = [
+  { value: 'all', label: $localize`All statuses` },
+  { value: 'waiting', label: $localize`Not arrived yet` },
+  { value: 'checked_in', label: $localize`Checked in` },
+  { value: 'checked_out', label: $localize`Checked out` },
+];
+
+export const REPORTS: ReportMeta[] = [
+  { id: 'arrivals', category: 'guests', title: $localize`Incoming guests`, description: $localize`Everyone arriving in the period, and who has already checked in`, icon: 'login', filters: ['dateRange', 'status', 'roomType', 'search'], statuses: RESERVATION_STATUSES, wide: true },
+  { id: 'in-house', category: 'guests', title: $localize`Checked-in guests`, description: $localize`Everyone in the hotel right now, with nights left and balances`, icon: 'hotel', filters: ['status', 'roomType', 'search'], statuses: [{ value: 'all', label: $localize`All guests` }, { value: 'departing_today', label: $localize`Leaving today` }, { value: 'overdue', label: $localize`Past check-out day` }], wide: true },
+  { id: 'departures', category: 'guests', title: $localize`Departing guests`, description: $localize`Who is due out, who has left, and who still owes`, icon: 'logout', filters: ['dateRange', 'status', 'roomType', 'search'], statuses: [{ value: 'all', label: $localize`All statuses` }, { value: 'checked_in', label: $localize`Still in` }, { value: 'checked_out', label: $localize`Left` }], wide: true },
+  { id: 'guest-register', category: 'guests', title: $localize`Guest register`, description: $localize`Every guest staying, with identity details, ready to print and sign`, icon: 'badge', filters: ['dateRange', 'roomType', 'search'], wide: true },
+  { id: 'no-shows', category: 'reservations', title: $localize`No-shows`, description: $localize`Guests who never arrived, and the revenue that left with them`, icon: 'person_off', filters: ['dateRange', 'roomType', 'search'] },
+  { id: 'cancellations', category: 'reservations', title: $localize`Cancellations`, description: $localize`Who cancelled, when, why, and the fees and refunds`, icon: 'event_busy', filters: ['dateRange', 'roomType', 'search'], wide: true },
+  { id: 'room-orders', category: 'orders', title: $localize`Orders charged to rooms`, description: $localize`Restaurant, bar and room-service orders put on guests' rooms`, icon: 'room_service', filters: ['dateRange', 'status', 'search'], statuses: [{ value: 'all', label: $localize`All orders` }, { value: 'paid', label: $localize`Paid` }, { value: 'unpaid', label: $localize`Unpaid` }], wide: true },
+  { id: 'room-status', category: 'housekeeping', title: $localize`Room status`, description: $localize`Every room: occupied, vacant, dirty or out of order, and who comes next`, icon: 'bed', filters: ['status', 'roomType', 'search'], statuses: [{ value: 'all', label: $localize`All rooms` }, { value: 'occupied', label: $localize`Occupied` }, { value: 'available', label: $localize`Vacant` }, { value: 'dirty', label: $localize`Dirty` }, { value: 'out_of_order', label: $localize`Out of order` }], wide: true },
+  { id: 'revenue', category: 'financial', title: $localize`Revenue`, description: $localize`Room, fee and service revenue by day, week or month`, icon: 'monetization_on', filters: [], legacyLink: '/menu/hms/reports/revenue' },
+  { id: 'occupancy', category: 'performance', title: $localize`Occupancy`, description: $localize`Occupancy, ADR and RevPAR by day, week or month`, icon: 'assessment', filters: [], legacyLink: '/menu/hms/reports/occupancy' },
+  { id: 'guest-flow', category: 'guests', title: $localize`Guest movement`, description: $localize`Check-ins, check-outs, new and returning guests over time`, icon: 'people_outline', filters: [], legacyLink: '/menu/hms/reports/guest' },
+];
+
+export const reportById = (id: string | null | undefined) => REPORTS.find((r) => r.id === id);
+export const reportLink = (r: ReportMeta): string[] => (r.legacyLink ? [r.legacyLink] : ['/menu/hms/reports', r.category, r.id]);
+
+/** Headings for every column the server can send. */
+export const COLUMN_LABELS: Record<string, string> = {
+  confirmation: $localize`Confirmation`, guest: $localize`Guest`, vip: $localize`VIP`, rooms: $localize`Room(s)`, checkIn: $localize`Check-in`, checkOut: $localize`Check-out`,
+  nights: $localize`Nights`, nightsLeft: $localize`Nights left`, adults: $localize`Adults`, children: $localize`Children`, source: $localize`Source`, status: $localize`Status`,
+  total: $localize`Total`, paid: $localize`Paid`, balance: $localize`Balance`, notes: $localize`Requests`, cancelledAt: $localize`Cancelled on`, leadDays: $localize`Days before arrival`,
+  reason: $localize`Reason`, fee: $localize`Fee`, refund: $localize`Refund`, orderNumber: $localize`Order`, date: $localize`Date`, reservation: $localize`Reservation`,
+  type: $localize`Type`, paymentStatus: $localize`Payment`, method: $localize`Method`, staff: $localize`Taken by`, nationality: $localize`Nationality`, idType: $localize`ID type`,
+  idNumber: $localize`ID number`, dateOfBirth: $localize`Date of birth`, address: $localize`Address`, phone: $localize`Phone`, signature: $localize`Signature`, room: $localize`Room`,
+  roomType: $localize`Room type`, floor: $localize`Floor`, housekeeping: $localize`Housekeeping`, nextArrival: $localize`Next arrival`, nextGuest: $localize`Next guest`, lastCleaned: $localize`Last cleaned`,
+};
+
+export const KPI_LABELS: Record<string, string> = {
+  expected: $localize`Expected`, arrived: $localize`Arrived`, notYetArrived: $localize`Not arrived yet`, balanceDue: $localize`Balance due`,
+  guestsInHouse: $localize`Guests in house`, stays: $localize`Stays`, departingToday: $localize`Leaving today`, overdue: $localize`Past check-out day`,
+  dueOut: $localize`Due out`, left: $localize`Left`, stillIn: $localize`Still in`, noShows: $localize`No-shows`, nightsLost: $localize`Nights lost`, revenueAtRisk: $localize`Revenue lost`,
+  paid: $localize`Paid`, cancellations: $localize`Cancellations`, fees: $localize`Fees kept`, refunds: $localize`Refunded`, averageLeadDays: $localize`Average days before arrival`,
+  orders: $localize`Orders`, total: $localize`Total`, unpaid: $localize`Unpaid`, guests: $localize`Guests`, nationalities: $localize`Nationalities`, missingId: $localize`Without ID on file`,
+  rooms: $localize`Rooms`, occupied: $localize`Occupied`, vacantClean: $localize`Vacant and clean`, dirty: $localize`Dirty`, outOfOrder: $localize`Out of order`,
+};
+
+/** Words for the values of "status" columns (reservations, orders, rooms, housekeeping). */
+export const STATUS_LABELS: Record<string, string> = {
+  pending: $localize`Pending`, reserved: $localize`Reserved`, confirmed: $localize`Confirmed`, checked_in: $localize`Checked in`, checked_out: $localize`Checked out`,
+  cancelled: $localize`Cancelled`, no_show: $localize`No-show`, available: $localize`Vacant`, occupied: $localize`Occupied`, maintenance: $localize`Maintenance`,
+  out_of_order: $localize`Out of order`, cleaning: $localize`Cleaning`, clean: $localize`Clean`, dirty: $localize`Dirty`, inspected: $localize`Inspected`,
+  Paid: $localize`Paid`, Unpaid: $localize`Unpaid`, Complete: $localize`Complete`, Cancel: $localize`Cancelled`, Processing: $localize`Processing`, New: $localize`New`,
+};
+
+export const statusLabel = (value: unknown) => STATUS_LABELS[String(value)] ?? String(value ?? '');
+
+/** Chip colours for status values, as [background, text]. */
+export const STATUS_TONES: Record<string, [string, string]> = {
+  confirmed: ['#dbeafe', '#1e40af'], pending: ['#fef3c7', '#92400e'], reserved: ['#e0e7ff', '#3730a3'], checked_in: ['#dcfce7', '#166534'], checked_out: ['#e2e8f0', '#334155'],
+  cancelled: ['#fee2e2', '#991b1b'], no_show: ['#ffedd5', '#9a3412'], Paid: ['#dcfce7', '#166534'], Unpaid: ['#fee2e2', '#991b1b'], Cancel: ['#fee2e2', '#991b1b'], Complete: ['#e2e8f0', '#334155'],
+  available: ['#dcfce7', '#166534'], occupied: ['#fee2e2', '#991b1b'], out_of_order: ['#e2e8f0', '#334155'], maintenance: ['#fef3c7', '#92400e'],
+  clean: ['#dcfce7', '#166534'], inspected: ['#dbeafe', '#1e40af'], dirty: ['#fef3c7', '#92400e'], cleaning: ['#fef3c7', '#92400e'],
+};
+
+/** An icon and a colour for each headline figure, in the same style as the other PMS stat cards. */
+export const KPI_STYLE: Record<string, { icon: string; tone: 'primary' | 'success' | 'warn' | 'danger' | 'neutral' }> = {
+  expected: { icon: 'event_available', tone: 'primary' }, arrived: { icon: 'login', tone: 'success' }, notYetArrived: { icon: 'hourglass_top', tone: 'warn' }, balanceDue: { icon: 'account_balance_wallet', tone: 'danger' },
+  guestsInHouse: { icon: 'groups', tone: 'primary' }, stays: { icon: 'hotel', tone: 'neutral' }, departingToday: { icon: 'logout', tone: 'warn' }, overdue: { icon: 'schedule', tone: 'danger' },
+  dueOut: { icon: 'logout', tone: 'primary' }, left: { icon: 'check_circle', tone: 'success' }, stillIn: { icon: 'hotel', tone: 'warn' },
+  noShows: { icon: 'person_off', tone: 'danger' }, nightsLost: { icon: 'bedtime_off', tone: 'warn' }, revenueAtRisk: { icon: 'trending_down', tone: 'danger' }, paid: { icon: 'paid', tone: 'success' },
+  cancellations: { icon: 'event_busy', tone: 'danger' }, fees: { icon: 'receipt', tone: 'success' }, refunds: { icon: 'undo', tone: 'warn' }, averageLeadDays: { icon: 'update', tone: 'neutral' },
+  orders: { icon: 'receipt_long', tone: 'primary' }, total: { icon: 'summarize', tone: 'neutral' }, unpaid: { icon: 'money_off', tone: 'danger' },
+  guests: { icon: 'groups', tone: 'primary' }, nationalities: { icon: 'public', tone: 'neutral' }, missingId: { icon: 'badge', tone: 'warn' },
+  rooms: { icon: 'meeting_room', tone: 'neutral' }, occupied: { icon: 'person', tone: 'danger' }, vacantClean: { icon: 'check_circle', tone: 'success' }, dirty: { icon: 'cleaning_services', tone: 'warn' }, outOfOrder: { icon: 'build', tone: 'neutral' },
+};
+
+export const TONE_CLASSES: Record<string, string> = {
+  primary: 'bg-primary-container text-on-primary-container',
+  success: 'bg-green-100 text-green-800',
+  warn: 'bg-amber-100 text-amber-800',
+  danger: 'bg-error-container text-on-error-container',
+  neutral: 'bg-surface-container-high text-on-surface-variant',
+};
+
+/** Quick date choices, in the order they are offered. */
+export const DATE_PRESETS = [
+  { id: 'today', label: $localize`Today` }, { id: 'yesterday', label: $localize`Yesterday` }, { id: 'tomorrow', label: $localize`Tomorrow` }, { id: 'next7', label: $localize`Next 7 days` },
+  { id: 'week', label: $localize`This week` }, { id: 'month', label: $localize`This month` }, { id: 'lastMonth', label: $localize`Last month` },
+] as const;
+export type DatePreset = (typeof DATE_PRESETS)[number]['id'];

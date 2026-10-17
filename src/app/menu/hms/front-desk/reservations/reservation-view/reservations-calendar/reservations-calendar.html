@@ -205,8 +205,10 @@
 
               @case ('room') {
                 <div class="tc-row tc-room" [class.ooo]="row.outOfOrder">
-                  <div class="tc-left tc-room-left">
-                    <button type="button" class="tc-hk" [ngClass]="hkClass(row.hk)" [matMenuTriggerFor]="hkMenu" [matMenuTriggerData]="{ room: row }"
+                  <!-- Anywhere on the room label opens the status menu: a click, or a right-click like any file manager. -->
+                  <div class="tc-left tc-room-left tc-room-menu" [matMenuTriggerFor]="hkMenu" [matMenuTriggerData]="{ room: row }" #roomMenu="matMenuTrigger"
+                    (contextmenu)="$event.preventDefault(); roomMenu.openMenu()">
+                    <button type="button" class="tc-hk" [ngClass]="hkClass(row.hk)"
                       [attr.aria-label]="('Room status: ' | tr) + hkLabel(row.hk)" [matTooltip]="('Room status: ' | tr) + hkLabel(row.hk)"></button>
                     <span class="name" [matTooltip]="row.name">{{ row.name }}</span>
                     <span class="cap"><mat-icon>person</mat-icon>{{ row.capacity }}</span>
@@ -273,7 +275,7 @@
 
 <mat-menu #hkMenu="matMenu">
   <ng-template matMenuContent let-room="room">
-    <div class="tc-menu-title"><ng-container i18n>Update room status</ng-container></div>
+    <div class="tc-menu-title"><ng-container i18n>Update room status</ng-container> · {{ room.name }}</div>
     @for (status of housekeepingOptions; track status.key) {
       <button mat-menu-item type="button" (click)="updateHousekeeping(room.roomId, status.key)">
         <mat-icon [ngClass]="hkClass(status.key)">{{ status.icon }}</mat-icon>

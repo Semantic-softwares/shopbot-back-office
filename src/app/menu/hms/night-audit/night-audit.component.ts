@@ -1,14 +1,21 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { firstValueFrom, of } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTableModule } from '@angular/material/table';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatListModule } from '@angular/material/list';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatTabsModule } from '@angular/material/tabs';
+
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TrPipe } from '../../../shared/i18n/tr.pipe';
 import { AuditIssue, AuditRun, AuditStep, NightAuditService } from '../../../shared/services/night-audit.service';
@@ -32,7 +39,7 @@ const RESERVATION_CODES = new Set(['OVERDUE_DEPARTURES', 'ARRIVALS_NOT_CHECKED_I
 
 @Component({
   selector: 'app-night-audit',
-  imports: [TrPipe, DatePipe, RouterLink, MatButtonModule, MatDialogModule, MatIconModule, MatProgressBarModule, MatSnackBarModule, MatTabsModule, MatTooltipModule, AuditSnapshotComponent],
+  imports: [TrPipe, CurrencyPipe, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, MatButtonModule, MatCardModule, MatChipsModule, MatDividerModule, MatExpansionModule, MatListModule, MatDialogModule, MatIconModule, MatProgressBarModule, MatSnackBarModule, MatTableModule, MatTooltipModule, AuditSnapshotComponent],
   templateUrl: './night-audit.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
 })
@@ -69,11 +76,57 @@ export class NightAuditComponent {
   canOverride = computed(() => this.roles.hasAny(['hotel.nightaudit.override']));
 
   steps = computed(() =>
-    ORDER.map((key) => ({ key, ...STEP_META[key], step: this.run()?.steps?.find((s) => s.key === key) ?? null })),
+    ORDER.map((key) => {
+      const step = this.run()?.steps?.find((s) => s.key === key) ?? null;
+      return { key, ...STEP_META[key], step, shown: this.shownStatus(step) };
+    }),
   );
   signedOff = computed(() => new Set((this.run()?.overrides ?? []).map((o) => o.code)));
   blockers = computed(() => (this.run()?.steps ?? []).flatMap((s) => s.issues).filter((i) => i.severity === 'blocker' && !this.signedOff().has(i.code)));
   hasRun = computed(() => (this.run()?.steps?.length ?? 0) > 0);
+
+  /** A step whose blockers have all been signed off reads as a warning, not as stuck. */
+  private shownStatus(step: AuditStep | null): string | undefined {
+    if (!step) return undefined;
+    if (step.status === 'blocked') {
+      const open = step.issues.some((i) => i.severity === 'blocker' && !this.signedOff().has(i.code));
+      return open ? 'blocked' : 'warning';
+    }
+    return step.status;
+  }
+
+  /** Steps that have finished (clean or with warnings only). */
+  recentRuns = computed(() => this.history().slice(0, 8));
+  doneCount = computed(() => this.steps().filter((s) => s.shown === 'ok' || s.shown === 'warning').length);
+  progress = computed(() => Math.round((this.doneCount() / ORDER.length) * 100));
+  warningCount = computed(() => (this.run()?.steps ?? []).flatMap((s) => s.issues).filter((i) => i.severity === 'warning').length);
+
+  /** What the big panel at the top says: one state, one colour, one next step. */
+  hero = computed(() => {
+    if (!this.hasRun()) {
+      const n = this.status()?.preflight?.length ?? 0;
+      return {
+        state: 'idle', icon: 'play_circle', tone: 'bg-surface-container-low', iconTone: 'bg-primary-container text-on-primary-container',
+        title: $localize`Ready to start`,
+        text: n ? $localize`${n} thing(s) to look at before you start. Run the checks to see them in detail.` : $localize`Run the checks to see what needs attention before you close.`,
+      };
+    }
+    const b = this.blockers().length;
+    if (b > 0) {
+      return { state: 'blocked', icon: 'error', tone: 'bg-error-container text-on-error-container', iconTone: 'bg-error text-on-error', title: $localize`${b} blocker(s) stop the day from closing`, text: $localize`Fix each one, or sign it off with a reason if a manager accepts it.` };
+    }
+    const w = this.warningCount();
+    return { state: 'ready', icon: 'task_alt', tone: 'bg-secondary-container text-on-secondary-container', iconTone: 'bg-primary text-on-primary', title: $localize`Ready to close`, text: w ? $localize`Every check passed. ${w} warning(s) are worth a look but do not stop you.` : $localize`Every check passed. Close the day when the last till is counted.` };
+  });
+
+  stepCircle(status: string | undefined): string {
+    switch (status) {
+      case 'ok': return 'bg-green-100 text-green-700';
+      case 'warning': return 'bg-amber-100 text-amber-700';
+      case 'blocked': case 'failed': return 'bg-error-container text-on-error-container';
+      default: return 'border border-outline-variant text-on-surface-variant';
+    }
+  }
 
   /** The business day is a calendar date: read it at noon so no timezone can move it. */
   asDate(day: string | undefined) {
@@ -87,8 +140,22 @@ export class NightAuditComponent {
   statusIcon(status: string | undefined) {
     return status === 'ok' ? 'check_circle' : status === 'warning' ? 'warning' : status === 'blocked' || status === 'failed' ? 'error' : 'radio_button_unchecked';
   }
+  /** Alert colours for an issue, from the Material theme so dark mode follows. */
+  issueTone(issue: AuditIssue): string {
+    if (issue.severity === 'blocker' && !this.signedOff().has(issue.code)) return 'bg-error-container text-on-error-container';
+    if (issue.severity === 'warning') return 'bg-amber-100 text-amber-900';
+    return 'bg-secondary-container text-on-secondary-container';
+  }
+  issueIcon(issue: AuditIssue): string {
+    return issue.severity === 'blocker' ? 'block' : issue.severity === 'warning' ? 'warning' : 'info';
+  }
+  /** A step is worth opening when it has something to say. */
+  stepHasIssues(step: AuditStep | null): boolean {
+    return !!step && step.issues.length > 0;
+  }
+
   statusColour(status: string | undefined) {
-    return status === 'ok' ? 'text-green-600' : status === 'warning' ? 'text-amber-500' : status === 'blocked' || status === 'failed' ? 'text-red-600' : 'text-gray-400';
+    return status === 'ok' ? 'text-green-600' : status === 'warning' ? 'text-amber-500' : status === 'blocked' || status === 'failed' ? 'text-red-600' : 'text-outline';
   }
 
   /** Where to go to fix something an issue points at. */
@@ -175,8 +242,15 @@ export class NightAuditComponent {
     }
   }
 
-  async openRun(run: AuditRun) {
-    const full = await firstValueFrom(this.api.getRun(this.storeId(), run._id));
-    this.dialog.open(AuditRunDialogComponent, { width: '860px', maxWidth: '96vw', data: { run: full, currency: this.currency() } });
+  /** Opens at once with a skeleton (the dialog loads its own data) and never twice: one closing on screen at a time. */
+  openRun(run: AuditRun) {
+    if (this.dialog.getDialogById('audit-run')) return;
+    this.dialog.open(AuditRunDialogComponent, { id: 'audit-run', width: '860px', maxWidth: '96vw', data: { run, currency: this.currency(), storeId: this.storeId() } });
+  }
+
+  /** Weekday and day number for the little calendar tile on each closing. */
+  tileDay(day: string) {
+    const d = this.asDate(day);
+    return d ? { weekday: new Intl.DateTimeFormat(undefined, { weekday: 'short' }).format(d), day: d.getDate() } : { weekday: '', day: 0 };
   }
 }

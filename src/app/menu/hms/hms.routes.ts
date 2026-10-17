@@ -67,6 +67,7 @@ export const DASHBOARD_HMS_ROUTES: Routes = [
                 canActivate: [roleGuard],
                 data: {
                     requiredPermissions: [
+                        'hotel.reports.view',
                         'finance.reports.view',
                         'finance.reports.export',
                         'finance.transactions.view'

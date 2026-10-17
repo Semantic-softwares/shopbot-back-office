@@ -11,7 +11,9 @@ export interface AuditIssue {
   severity: IssueSeverity;
   message: string;
   count?: number;
-  refs?: Array<{ id: string; label: string }>;
+  /** Money total for the whole issue, as a number: format it in the store currency. */
+  amount?: number;
+  refs?: Array<{ id: string; label: string; amount?: number }>;
 }
 
 export interface AuditStep {
