@@ -14,6 +14,9 @@ import {
   OccupancyFilters 
 } from '../../../../shared/services/occupancy.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
+import { RoomsService } from '../../../../shared/services/rooms.service';
+import { ExportService } from '../../../../shared/services/export.service';
+import { toDateOnly } from '../../../../shared/utils/date-only';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -66,6 +69,8 @@ export class OccupancyReportComponent {
   private fb = inject(FormBuilder);
   private occupancyService = inject(OccupancyService);
   private storeStore = inject(StoreStore);
+  private roomsService = inject(RoomsService);
+  private exportService = inject(ExportService);
 
   // Computed values
   selectedStore = computed(() => this.storeStore.selectedStore());
@@ -128,17 +133,22 @@ export class OccupancyReportComponent {
           this.updateCharts(result.occupancyData);
           return result;
         }),
-        catchError(error => {
-          console.error('Error loading data:', error);
-          return of(null);
-        })
       );
     }
   });
 
+  // The hotel's own room types for the filter (never a hard-coded list).
+  roomTypes = rxResource({
+    params: () => ({ storeId: this.storeStore.selectedStore()?._id || '' }),
+    stream: ({ params }) => (params.storeId ? this.roomsService.getRoomTypes(params.storeId) : of([])),
+  });
+
+  // Floors that really exist, from the room board.
+  floors = computed(() => [...new Set(this.roomStatuses().map((r) => r.floorNumber))].sort((a, b) => a - b));
+
   // Computed values from resource
   loading = computed(() => this.occupancyResource.isLoading());
-  error = computed(() => this.occupancyResource.error() ? 'Failed to load occupancy data. Please try again.' : null);
+  error = computed(() => (this.occupancyResource.error() ? $localize`Could not load the occupancy report. Check your connection and try again.` : null));
   occupancyData = computed(() => this.occupancyResource.value()?.occupancyData || []);
   roomStatuses = computed(() => this.occupancyResource.value()?.roomStatuses || []);
   occupancyStats = computed(() => this.occupancyResource.value()?.stats || null);
@@ -296,8 +306,9 @@ export class OccupancyReportComponent {
     this.filterTrigger.update(v => v + 1);
   }
 
+  /** Try the same request again. */
   clearError() {
-    this.occupancyService.clearError();
+    this.refreshData();
   }
 
   private getFilters(): OccupancyFilters {
@@ -350,38 +361,26 @@ export class OccupancyReportComponent {
     });
   }
 
-  exportToCSV() {
-    const filters = this.getFilters();
-    this.occupancyService.exportToCSV(filters).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `occupancy-report-${this.formatDateISO(new Date())}.csv`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-      },
-      error: (error) => {
-        console.error('Export error:', error);
-      }
-    });
-  }
-
-  exportToPDF() {
-    const filters = this.getFilters();
-    this.occupancyService.exportToPDF(filters).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `occupancy-report-${this.formatDateISO(new Date())}.pdf`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-      },
-      error: (error) => {
-        console.error('Export error:', error);
-      }
-    });
+  exportData(format: 'pdf' | 'csv' | 'excel'): void {
+    const rows = this.occupancyData().map((r) => ({
+      Date: toDateOnly(r.date),
+      'Total Rooms': r.totalRooms,
+      'Rooms Sold': r.occupiedRooms,
+      'Available Rooms': r.availableRooms,
+      'Out of Order': r.outOfOrderRooms,
+      Maintenance: r.maintenanceRooms,
+      'Occupancy (%)': r.occupancyRate,
+      'Room Revenue': r.revenue,
+      ADR: r.averageRate,
+      RevPAR: r.revpar ?? 0,
+      Reservations: r.reservationCount,
+    }));
+    if (!rows.length) return;
+    const filename = 'occupancy-report';
+    const range = { from: toDateOnly(this.filterForm.value.startDate), to: toDateOnly(this.filterForm.value.endDate) };
+    if (format === 'pdf') this.exportService.exportToPdf(rows, filename, range);
+    else if (format === 'csv') this.exportService.exportToCSV(rows, filename);
+    else this.exportService.exportToExcel(rows, filename);
   }
 
   getRoomStatusClass(status: RoomStatus['status']): string {

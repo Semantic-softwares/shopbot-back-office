@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, catchError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { toDateOnly } from '../../../../shared/utils/date-only';
 
 export interface GuestData {
   date: string;
@@ -40,176 +41,44 @@ export interface GuestBreakdown {
 }
 
 export interface GuestFilters {
-  startDate: string;
-  endDate: string;
+  startDate: Date | string;
+  endDate: Date | string;
   reportType: 'daily' | 'weekly' | 'monthly';
   guestType?: string;
+  /** Room type id. */
   roomType?: string;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+/** Loads the guest-movement report. A failure is an error for the screen to show, never invented numbers. */
+@Injectable({ providedIn: 'root' })
 export class GuestService {
+  private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/guests`;
 
-  constructor(private http: HttpClient) {}
-
-  getGuestData(storeId: string, filters: GuestFilters): Observable<GuestData[]> {
-    const params = {
+  private params(storeId: string, filters: GuestFilters) {
+    return {
       storeId,
-      startDate: filters.startDate,
-      endDate: filters.endDate,
+      startDate: toDateOnly(filters.startDate),
+      endDate: toDateOnly(filters.endDate),
       reportType: filters.reportType,
       ...(filters.guestType && { guestType: filters.guestType }),
-      ...(filters.roomType && { roomType: filters.roomType })
+      ...(filters.roomType && { roomType: filters.roomType }),
     };
+  }
 
-    return this.http.get<GuestData[]>(`${this.apiUrl}/data`, { params }).pipe(
-      catchError(error => {
-        console.error('Error fetching guest data:', error);
-        return of(this.getMockGuestData());
-      })
-    );
+  getGuestData(storeId: string, filters: GuestFilters): Observable<GuestData[]> {
+    return this.http.get<GuestData[]>(`${this.apiUrl}/data`, { params: this.params(storeId, filters) });
   }
 
   getGuestBreakdown(storeId: string, filters: GuestFilters): Observable<GuestBreakdown[]> {
-    const params = {
-      storeId,
-      startDate: filters.startDate,
-      endDate: filters.endDate,
-      reportType: filters.reportType,
-      ...(filters.guestType && { guestType: filters.guestType }),
-      ...(filters.roomType && { roomType: filters.roomType })
-    };
-
-    return this.http.get<GuestBreakdown[]>(`${this.apiUrl}/breakdown`, { params }).pipe(
-      catchError(error => {
-        console.error('Error fetching guest breakdown:', error);
-        return of(this.getMockGuestBreakdown());
-      })
-    );
+    return this.http.get<GuestBreakdown[]>(`${this.apiUrl}/breakdown`, { params: this.params(storeId, filters) });
   }
 
   getGuestStats(storeId: string, filters: GuestFilters): Observable<GuestStats> {
-    const params = {
-      storeId,
-      startDate: filters.startDate,
-      endDate: filters.endDate,
-      reportType: filters.reportType,
-      ...(filters.guestType && { guestType: filters.guestType }),
-      ...(filters.roomType && { roomType: filters.roomType })
-    };
-
-    return this.http.get<GuestStats>(`${this.apiUrl}/stats`, { params }).pipe(
-      catchError(error => {
-        console.error('Error fetching guest stats:', error);
-        return of(this.getMockGuestStats());
-      })
-    );
+    return this.http.get<GuestStats>(`${this.apiUrl}/stats`, { params: this.params(storeId, filters) });
   }
 
   exportToCSV(storeId: string, filters: GuestFilters): Observable<Blob> {
-    const params = {
-      storeId,
-      startDate: filters.startDate,
-      endDate: filters.endDate,
-      reportType: filters.reportType,
-      ...(filters.guestType && { guestType: filters.guestType }),
-      ...(filters.roomType && { roomType: filters.roomType })
-    };
-
-    return this.http.get(`${this.apiUrl}/export/csv`, { 
-      params, 
-      responseType: 'blob' 
-    });
-  }
-
-  exportToPDF(storeId: string, filters: GuestFilters): Observable<Blob> {
-    const params = {
-      storeId,
-      startDate: filters.startDate,
-      endDate: filters.endDate,
-      reportType: filters.reportType,
-      ...(filters.guestType && { guestType: filters.guestType }),
-      ...(filters.roomType && { roomType: filters.roomType })
-    };
-
-    return this.http.get(`${this.apiUrl}/export/pdf`, { 
-      params, 
-      responseType: 'blob' 
-    });
-  }
-
-  private getMockGuestData(): GuestData[] {
-    const data: GuestData[] = [];
-    const currentDate = new Date();
-    
-    for (let i = 29; i >= 0; i--) {
-      const date = new Date(currentDate);
-      date.setDate(date.getDate() - i);
-      
-      const totalGuests = Math.floor(Math.random() * 100) + 50;
-      const newGuests = Math.floor(totalGuests * 0.3);
-      const returningGuests = totalGuests - newGuests;
-      
-      data.push({
-        date: date.toISOString(),
-        totalGuests,
-        newGuests,
-        returningGuests,
-        checkIns: Math.floor(Math.random() * 30) + 10,
-        checkOuts: Math.floor(Math.random() * 25) + 8,
-        averageStayDuration: Math.floor(Math.random() * 5) + 2,
-        occupancyRate: Math.floor(Math.random() * 40) + 60,
-        guestGrowth: (Math.random() - 0.5) * 20
-      });
-    }
-    
-    return data;
-  }
-
-  private getMockGuestBreakdown(): GuestBreakdown[] {
-    return [
-      {
-        category: 'Business Travelers',
-        value: 120,
-        percentage: 35,
-        averageStay: 2.5
-      },
-      {
-        category: 'Leisure Travelers',
-        value: 150,
-        percentage: 45,
-        averageStay: 4.2
-      },
-      {
-        category: 'Group Bookings',
-        value: 45,
-        percentage: 15,
-        averageStay: 3.8
-      },
-      {
-        category: 'Extended Stay',
-        value: 18,
-        percentage: 5,
-        averageStay: 14.5
-      }
-    ];
-  }
-
-  private getMockGuestStats(): GuestStats {
-    return {
-      totalGuests: 2156,
-      totalCheckIns: 456,
-      totalCheckOuts: 442,
-      averageStayDuration: 3.8,
-      occupancyRate: 78.5,
-      guestGrowth: 12.5,
-      newGuestsPercentage: 32.4,
-      returningGuestsPercentage: 67.6,
-      peakOccupancyDate: new Date().toISOString(),
-      monthlyProjection: 6800
-    };
+    return this.http.get(`${this.apiUrl}/export/csv`, { params: this.params(storeId, filters), responseType: 'blob' });
   }
 }

@@ -150,6 +150,23 @@ export class HmsDashboardComponent {
       ],
     },
     {
+      name: 'End of Day',
+      children: [
+        {
+          icon: 'nights_stay',
+          label: $localize`Night Audit`,
+          link: './night-audit',
+          permissions: ['hotel.nightaudit.view', 'hotel.nightaudit.run'],
+        },
+        {
+          icon: 'point_of_sale',
+          label: $localize`Cashier`,
+          link: './cashier',
+          permissions: ['hotel.cashier.manage'],
+        },
+      ],
+    },
+    {
       name: 'Reports',
       children: [
         {

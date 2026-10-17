@@ -1,0 +1,101 @@
+<div class="mx-auto flex max-w-4xl flex-col gap-5 p-4 pb-16 md:p-6">
+  <header>
+    <h1 class="m-0 text-2xl font-bold text-gray-900"><ng-container i18n>Cashier</ng-container></h1>
+    <p class="m-0 mt-1 text-sm text-gray-600"><ng-container i18n>Open a shift before taking payments, and close it with a count when you finish.</ng-container></p>
+  </header>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  } @else if (failed()) {
+    <div class="rounded-lg border border-red-200 bg-red-50 p-6 text-center" role="alert">
+      <p class="m-0 font-semibold text-red-800"><ng-container i18n>Could not load your shift.</ng-container></p>
+      <button matButton class="mt-2" (click)="reload()"><ng-container i18n>Try again</ng-container></button>
+    </div>
+  } @else {
+    <!-- Just closed: now the system's figure is shown -->
+    @if (justClosed(); as c) {
+      <section class="rounded-xl border p-4 md:p-5" [class]="(c.variance ?? 0) === 0 ? 'border-green-300 bg-green-50' : 'border-amber-300 bg-amber-50'" role="status">
+        <h2 class="m-0 flex items-center gap-2 text-lg font-semibold">
+          <mat-icon>{{ (c.variance ?? 0) === 0 ? 'check_circle' : 'warning' }}</mat-icon>
+          @if ((c.variance ?? 0) === 0) {<ng-container i18n>Shift closed. The till balances.</ng-container>} @else {<ng-container i18n>Shift closed with a cash difference.</ng-container>}
+        </h2>
+        <dl class="m-0 mt-3 grid grid-cols-3 gap-3 text-sm tabular-nums">
+          <div><dt class="text-gray-600"><ng-container i18n>You counted</ng-container></dt><dd class="m-0 text-lg font-semibold">{{ c.countedCash | currency: currency() : 'symbol' : '1.2-2' }}</dd></div>
+          <div><dt class="text-gray-600"><ng-container i18n>System expected</ng-container></dt><dd class="m-0 text-lg font-semibold">{{ c.expectedCash | currency: currency() : 'symbol' : '1.2-2' }}</dd></div>
+          <div><dt class="text-gray-600"><ng-container i18n>Difference</ng-container></dt><dd class="m-0 text-lg font-semibold" [class.text-red-700]="(c.variance ?? 0) < 0">{{ (c.variance ?? 0) > 0 ? '+' : '' }}{{ c.variance | currency: currency() : 'symbol' : '1.2-2' }}</dd></div>
+        </dl>
+      </section>
+    }
+
+    @if (shift(); as s) {
+      <!-- A shift is open -->
+      <section class="rounded-xl border border-gray-200 p-4 md:p-5" aria-labelledby="shift-title">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 id="shift-title" class="m-0 flex items-center gap-2 text-lg font-semibold"><span class="h-2.5 w-2.5 rounded-full bg-green-500" aria-hidden="true"></span><ng-container i18n>Your shift is open</ng-container></h2>
+            <p class="m-0 mt-0.5 text-sm text-gray-600"><ng-container i18n>Since</ng-container> {{ s.openedAt | date: 'EEE d MMM, HH:mm' }}</p>
+          </div>
+          <div class="flex gap-2">
+            <button matButton="outlined" (click)="drop()"><mat-icon>move_to_inbox</mat-icon><ng-container i18n>Drop cash</ng-container></button>
+            <button matButton="filled" (click)="close()" [disabled]="busy()"><mat-icon>lock</mat-icon><ng-container i18n>Close shift</ng-container></button>
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500"><ng-container i18n>Opening float</ng-container></div><div class="text-xl font-bold tabular-nums">{{ s.openingFloat | currency: currency() : 'symbol' : '1.2-2' }}</div></div>
+          <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500"><ng-container i18n>Cash taken</ng-container></div><div class="text-xl font-bold tabular-nums">{{ cashTaken() | currency: currency() : 'symbol' : '1.2-2' }}</div></div>
+          <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500"><ng-container i18n>Dropped to the safe</ng-container></div><div class="text-xl font-bold tabular-nums">{{ dropsTotal() | currency: currency() : 'symbol' : '1.2-2' }}</div></div>
+          <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500"><ng-container i18n>All payments taken</ng-container></div><div class="text-xl font-bold tabular-nums">{{ allTaken() | currency: currency() : 'symbol' : '1.2-2' }}</div></div>
+        </div>
+        @if ((summary()?.totalsByMethod | keyvalue)?.length) {
+          <p class="m-0 mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 tabular-nums">
+            @for (m of summary()?.totalsByMethod | keyvalue; track m.key) {<span>{{ m.key.replace('_', ' ') }} <b>{{ m.value | currency: currency() : 'symbol' : '1.2-2' }}</b></span>}
+          </p>
+        }
+      </section>
+    } @else {
+      <!-- No shift yet -->
+      <section class="rounded-xl border border-gray-200 p-5">
+        <h2 class="m-0 text-lg font-semibold"><ng-container i18n>Open your till</ng-container></h2>
+        <p class="mt-1 text-sm text-gray-600"><ng-container i18n>Enter the cash you start with. Every payment you take is then counted in this shift.</ng-container></p>
+        <div class="flex flex-wrap items-start gap-3">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label><ng-container i18n>Opening float</ng-container></mat-label>
+            <input matInput type="number" min="0" inputmode="decimal" [(ngModel)]="openingFloat" (keyup.enter)="open()" />
+          </mat-form-field>
+          <button matButton="filled" class="mt-1" (click)="open()" [disabled]="busy()"><mat-icon>lock_open</mat-icon><ng-container i18n>Open shift</ng-container></button>
+        </div>
+      </section>
+    }
+
+    <!-- Past shifts -->
+    <section aria-labelledby="past-title">
+      <h2 id="past-title" class="m-0 mb-2 text-base font-semibold"><ng-container i18n>Recent shifts</ng-container></h2>
+      @if (shifts().length === 0) {
+        <p class="text-sm text-gray-500"><ng-container i18n>No shifts yet.</ng-container></p>
+      } @else {
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full border-collapse text-sm tabular-nums">
+            <thead><tr class="text-left text-xs text-gray-500">
+              <th class="p-3" scope="col"><ng-container i18n>Opened</ng-container></th><th class="p-3" scope="col"><ng-container i18n>Closed</ng-container></th>
+              <th class="p-3 text-right" scope="col"><ng-container i18n>Float</ng-container></th><th class="p-3 text-right" scope="col"><ng-container i18n>Counted</ng-container></th>
+              <th class="p-3 text-right" scope="col"><ng-container i18n>Expected</ng-container></th><th class="p-3 text-right" scope="col"><ng-container i18n>Difference</ng-container></th>
+            </tr></thead>
+            <tbody>
+              @for (h of shifts(); track h._id) {
+                <tr class="border-t border-gray-200">
+                  <td class="p-3">{{ h.openedAt | date: 'd MMM, HH:mm' }}</td>
+                  <td class="p-3">@if (h.closedAt) {{{ h.closedAt | date: 'd MMM, HH:mm' }}} @else {<span class="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800"><ng-container i18n>open</ng-container></span>}</td>
+                  <td class="p-3 text-right">{{ h.openingFloat | currency: currency() : 'symbol' : '1.2-2' }}</td>
+                  <td class="p-3 text-right">@if (h.status === 'closed') {{{ h.countedCash | currency: currency() : 'symbol' : '1.2-2' }}}</td>
+                  <td class="p-3 text-right">@if (h.status === 'closed') {{{ h.expectedCash | currency: currency() : 'symbol' : '1.2-2' }}}</td>
+                  <td class="p-3 text-right">@if (h.status === 'closed') {<span class="rounded-full px-2 py-0.5 text-xs" [class]="(h.variance ?? 0) === 0 ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-900'">{{ (h.variance ?? 0) > 0 ? '+' : '' }}{{ h.variance | currency: currency() : 'symbol' : '1.2-2' }}</span>}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

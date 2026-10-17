@@ -47,7 +47,11 @@
         <div class="flex-1">
           <p class="text-sm text-yellow-700">{{ error() }}</p>
         </div>
-        <button mat-icon-button (click)="clearError()">
+        <button mat-button (click)="refreshData()">
+          <mat-icon>refresh</mat-icon>
+          <ng-container i18n>Try again</ng-container>
+        </button>
+        <button mat-icon-button (click)="clearError()" aria-label="Dismiss" i18n-aria-label>
           <mat-icon class="text-yellow-500">close</mat-icon>
         </button>
       </div>

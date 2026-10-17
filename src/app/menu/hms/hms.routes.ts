@@ -75,6 +75,19 @@ export const DASHBOARD_HMS_ROUTES: Routes = [
                 }
             },
             
+            {
+                path: 'night-audit',
+                loadComponent: () => import('./night-audit/night-audit.component').then(m => m.NightAuditComponent),
+                canActivate: [roleGuard],
+                data: { requiredPermissions: ['hotel.nightaudit.view', 'hotel.nightaudit.run'], permissionMode: 'any' }
+            },
+            {
+                path: 'cashier',
+                loadComponent: () => import('./cashier/cashier.component').then(m => m.CashierComponent),
+                canActivate: [roleGuard],
+                data: { requiredPermissions: ['hotel.cashier.manage'], permissionMode: 'any' }
+            },
+
             // TODO: Add more routes as components are created
             {
                 path: '**',

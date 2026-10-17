@@ -29,6 +29,7 @@ import {
 } from './revenue.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
 import { ExportService } from '../../../../shared/services/export.service';
+import { toDateOnly } from '../../../../shared/utils/date-only';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { ChartThemeService } from '../../../../shared/services/chart-theme.service';
 
@@ -108,6 +109,7 @@ export class RevenueReportComponent {
     params: this.filterParams,
     stream: ({ params }) => {
       if (!params.storeId) return of(null);
+      this.error.set(null);
       return forkJoin({
         revenueData: this.revenueService.getRevenueData(params.storeId, params.filters),
         revenueBreakdown: this.revenueService.getRevenueBreakdown(params.storeId, params.filters),
@@ -119,6 +121,7 @@ export class RevenueReportComponent {
         }),
         catchError(error => {
           console.error('Error loading data:', error);
+          this.error.set($localize`Could not load the revenue report. Check your connection and try again.`);
           return of(null);
         })
       );
@@ -300,58 +303,14 @@ export class RevenueReportComponent {
     };
   }
 
-  exportToCSV() {
-    const storeId = this.selectedStore()?._id || '';
-    const filters = this.getFilters();
-    this.isExporting.set(true);
-    
-    this.revenueService.exportToCSV(storeId, filters).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `revenue-report-${this.formatDateISO(new Date())}.csv`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-        this.isExporting.set(false);
-      },
-      error: (error) => {
-        console.error('Export error:', error);
-        this.isExporting.set(false);
-      }
-    });
-  }
-
-  exportToPDF() {
-    const storeId = this.selectedStore()?._id || '';
-    const filters = this.getFilters();
-    this.isExporting.set(true);
-    
-    this.revenueService.exportToPDF(storeId, filters).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `revenue-report-${this.formatDateISO(new Date())}.pdf`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-        this.isExporting.set(false);
-      },
-      error: (error) => {
-        console.error('Export error:', error);
-        this.isExporting.set(false);
-      }
-    });
-  }
-
   exportData(format: 'pdf' | 'csv' | 'excel'): void {
     if (!this.revenueData().length) return;
     
     const data = this.revenueData();
     const filename = 'revenue-report';
     const dateRange = {
-      from: this.filterForm.value.startDate?.toISOString() || '',
-      to: this.filterForm.value.endDate?.toISOString() || ''
+      from: toDateOnly(this.filterForm.value.startDate),
+      to: toDateOnly(this.filterForm.value.endDate)
     };
     
     switch (format) {

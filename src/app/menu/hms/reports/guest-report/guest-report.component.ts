@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData } from 'chart.js';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { forkJoin, map } from 'rxjs';
+import { forkJoin, map, catchError, of } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -27,6 +27,8 @@ import {
   GuestBreakdown 
 } from './guest.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
+import { RoomsService } from '../../../../shared/services/rooms.service';
+import { toDateOnly } from '../../../../shared/utils/date-only';
 import { ExportService } from '../../../../shared/services/export.service';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { ChartThemeService } from '../../../../shared/services/chart-theme.service';
@@ -71,6 +73,7 @@ export class GuestReportComponent {
   private fb = inject(FormBuilder);
   private guestService = inject(GuestService);
   private storeStore = inject(StoreStore);
+  private roomsService = inject(RoomsService);
   private exportService = inject(ExportService);
 
   // Export state
@@ -102,6 +105,7 @@ export class GuestReportComponent {
       trigger: this.filterTrigger()
     }),
     stream: ({ params }) => {
+      this.error.set(null);
       return forkJoin({
         guestData: this.guestService.getGuestData(params.storeId, params.filters),
         guestBreakdown: this.guestService.getGuestBreakdown(params.storeId, params.filters),
@@ -110,9 +114,20 @@ export class GuestReportComponent {
         map(result => {
           this.lastUpdated.set(new Date());
           return result;
+        }),
+        catchError(error => {
+          console.error('Error loading guest report:', error);
+          this.error.set($localize`Could not load the guest report. Check your connection and try again.`);
+          return of(null);
         })
       );
     }
+  });
+
+  // The hotel's own room types for the filter (never a hard-coded list).
+  roomTypes = rxResource({
+    params: () => ({ storeId: this.selectedStore()?._id || '' }),
+    stream: ({ params }) => (params.storeId ? this.roomsService.getRoomTypes(params.storeId) : of([])),
   });
 
   // Computed signals from resource
@@ -270,60 +285,14 @@ export class GuestReportComponent {
     this.loadData();
   }
 
-  exportToCSV() {
-    const storeId = this.selectedStore()?._id || '';
-    const filters = this.getFilters();
-    this.isExporting.set(true);
-    
-    this.guestService.exportToCSV(storeId, filters).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `guest-report-${this.formatDateISO(new Date())}.csv`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-        this.isExporting.set(false);
-      },
-      error: (error) => {
-        console.error('Export error:', error);
-        this.error.set('Failed to export CSV. Please try again.');
-        this.isExporting.set(false);
-      }
-    });
-  }
-
-  exportToPDF() {
-    const storeId = this.selectedStore()?._id || '';
-    const filters = this.getFilters();
-    this.isExporting.set(true);
-    
-    this.guestService.exportToPDF(storeId, filters).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `guest-report-${this.formatDateISO(new Date())}.pdf`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-        this.isExporting.set(false);
-      },
-      error: (error) => {
-        console.error('Export error:', error);
-        this.error.set('Failed to export PDF. Please try again.');
-        this.isExporting.set(false);
-      }
-    });
-  }
-
   exportData(format: 'pdf' | 'csv' | 'excel'): void {
     if (!this.guestData().length) return;
     
     const data = this.guestData();
     const filename = 'guest-report';
     const dateRange = {
-      from: this.filterForm.value.startDate?.toISOString() || '',
-      to: this.filterForm.value.endDate?.toISOString() || ''
+      from: toDateOnly(this.filterForm.value.startDate),
+      to: toDateOnly(this.filterForm.value.endDate)
     };
     
     switch (format) {

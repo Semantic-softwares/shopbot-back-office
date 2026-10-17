@@ -35,7 +35,11 @@
       <mat-card-content class="flex items-center gap-3 py-3">
         <mat-icon class="text-yellow-600">warning</mat-icon>
         <span class="flex-1 text-yellow-700">{{ error() }}</span>
-        <button mat-icon-button (click)="clearError()">
+        <button mat-button (click)="refreshData()">
+          <mat-icon>refresh</mat-icon>
+          <ng-container i18n>Try again</ng-container>
+        </button>
+        <button mat-icon-button (click)="clearError()" aria-label="Dismiss" i18n-aria-label>
           <mat-icon>close</mat-icon>
         </button>
       </mat-card-content>
@@ -92,10 +96,9 @@
           <mat-label><ng-container i18n>Room Type</ng-container></mat-label>
           <mat-select formControlName="roomType">
             <mat-option value="all"><ng-container i18n>All Rooms</ng-container></mat-option>
-            <mat-option value="standard"><ng-container i18n>Standard</ng-container></mat-option>
-            <mat-option value="deluxe"><ng-container i18n>Deluxe</ng-container></mat-option>
-            <mat-option value="suite"><ng-container i18n>Suite</ng-container></mat-option>
-            <mat-option value="executive"><ng-container i18n>Executive</ng-container></mat-option>
+            @for (type of roomTypes.value() || []; track type._id) {
+              <mat-option [value]="type._id">{{ type.name }}</mat-option>
+            }
           </mat-select>
         </mat-form-field>
       </form>

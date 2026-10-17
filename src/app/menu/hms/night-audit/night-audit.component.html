@@ -1,0 +1,168 @@
+<div class="mx-auto flex max-w-5xl flex-col gap-5 p-4 pb-16 md:p-6">
+  <header class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h1 class="m-0 text-2xl font-bold text-gray-900"><ng-container i18n>Night audit</ng-container></h1>
+      <p class="m-0 mt-1 text-sm text-gray-600"><ng-container i18n>Close the business day: check, post, balance, then open the next one.</ng-container></p>
+    </div>
+    @if (canOverride()) {
+      <button matButton="outlined" (click)="openSettings()"><mat-icon>tune</mat-icon><ng-container i18n>Settings</ng-container></button>
+    }
+  </header>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  } @else if (failed() && !status()) {
+    <div class="rounded-lg border border-red-200 bg-red-50 p-6 text-center" role="alert">
+      <p class="m-0 font-semibold text-red-800"><ng-container i18n>Could not load the night audit.</ng-container></p>
+      <button matButton class="mt-2" (click)="reload()"><ng-container i18n>Try again</ng-container></button>
+    </div>
+  } @else if (status(); as st) {
+    @if (!st.enabled) {
+      <!-- Not switched on yet -->
+      <section class="rounded-xl border border-gray-200 p-8 text-center">
+        <mat-icon class="mb-2 !h-12 !w-12 !text-5xl !leading-none text-indigo-600">nights_stay</mat-icon>
+        <h2 class="m-0 text-xl font-semibold"><ng-container i18n>Night audit is not turned on</ng-container></h2>
+        <p class="mx-auto mt-2 max-w-xl text-sm text-gray-600"><ng-container i18n>Turn it on to give your hotel a business day that you close each night. Room charges are posted per night, the books are checked, and a report pack is saved.</ng-container></p>
+        @if (canOverride()) {
+          <button matButton="filled" class="mt-4" (click)="openSettings()"><ng-container i18n>Turn on night audit</ng-container></button>
+        } @else {
+          <p class="mt-4 text-sm text-gray-500"><ng-container i18n>Ask a manager to turn it on.</ng-container></p>
+        }
+      </section>
+    } @else {
+      <!-- Today's business day -->
+      <section class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-gray-200 p-4 md:p-5" aria-labelledby="bd-title">
+        <div>
+          <div id="bd-title" class="text-xs font-semibold uppercase tracking-wide text-gray-500"><ng-container i18n>Business day</ng-container></div>
+          <div class="text-2xl font-bold text-gray-900">{{ asDate(st.businessDate) | date: 'EEEE d MMMM y' }}</div>
+          <div class="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+            @if (run(); as r) {
+              <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
+                [class]="r.status === 'blocked' ? 'bg-red-100 text-red-800' : 'bg-indigo-100 text-indigo-800'">
+                @if (r.status === 'blocked') {<ng-container i18n>Needs attention</ng-container>} @else if (hasRun()) {<ng-container i18n>Ready to close</ng-container>} @else {<ng-container i18n>Started</ng-container>}
+              </span>
+            } @else {
+              <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700"><ng-container i18n>Not started</ng-container></span>
+            }
+            @if (st.lastClosed; as last) {
+              <span><ng-container i18n>Last closed</ng-container> {{ asDate(last.businessDate) | date: 'd MMM' }}@if (last.trigger === 'auto') { (<ng-container i18n>automatic</ng-container>)}</span>
+            }
+          </div>
+        </div>
+        @if (canRun()) {
+          <div class="flex flex-wrap gap-2">
+            <button matButton="outlined" (click)="runChecks()" [disabled]="!!busy()"><mat-icon>play_arrow</mat-icon>@if (hasRun()) {<ng-container i18n>Run checks again</ng-container>} @else {<ng-container i18n>Run checks</ng-container>}</button>
+            <button matButton="filled" (click)="closeDay()" [disabled]="!!busy() || !hasRun()" [matTooltip]="hasRun() ? '' : ('Run the checks first' | tr)"><mat-icon>lock</mat-icon><ng-container i18n>Close the day</ng-container></button>
+          </div>
+        }
+      </section>
+
+      @if (busy()) {
+        <mat-progress-bar mode="indeterminate" [attr.aria-label]="busy() === 'close' ? ('Closing the day' | tr) : ('Running the checks' | tr)" />
+      }
+
+      @if (refused().length) {
+        <div class="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-900" role="alert">
+          <strong><ng-container i18n>The day was not closed. These blockers are still open:</ng-container></strong>
+          <ul class="mb-0 mt-1 pl-5">@for (b of refused(); track b.code) {<li>{{ b.message }}</li>}</ul>
+        </div>
+      }
+
+      <mat-tab-group animationDuration="0ms" mat-align-tabs="start" dynamicHeight>
+        <mat-tab>
+          <ng-template mat-tab-label><ng-container i18n>Today</ng-container></ng-template>
+          <div class="flex flex-col gap-5 pt-4">
+            <!-- Before the first run: what a run would find right now -->
+            @if (!hasRun() && st.preflight.length) {
+              <section class="rounded-lg border border-gray-200 p-4" aria-labelledby="pre-title">
+                <h2 id="pre-title" class="m-0 text-base font-semibold"><ng-container i18n>What the audit would find right now</ng-container></h2>
+                <ul class="m-0 mt-2 flex list-none flex-col gap-2 p-0">
+                  @for (issue of st.preflight; track issue.code) {
+                    <li class="flex items-start gap-2 text-sm">
+                      <mat-icon class="!h-5 !w-5 shrink-0 !text-xl !leading-none" [class]="issue.severity === 'blocker' ? 'text-red-600' : issue.severity === 'warning' ? 'text-amber-500' : 'text-sky-600'">{{ issue.severity === 'blocker' ? 'error' : issue.severity === 'warning' ? 'warning' : 'info' }}</mat-icon>
+                      <span>{{ issue.message }}</span>
+                    </li>
+                  }
+                </ul>
+              </section>
+            }
+
+            <!-- The checklist -->
+            <ol class="m-0 flex list-none flex-col gap-3 p-0">
+              @for (item of steps(); track item.key) {
+                <li class="rounded-lg border p-4" [class]="item.step?.status === 'blocked' || item.step?.status === 'failed' ? 'border-red-300' : 'border-gray-200'">
+                  <div class="flex items-start gap-3">
+                    <mat-icon class="mt-0.5 !h-6 !w-6 shrink-0 !text-2xl !leading-none" [class]="statusColour(item.step?.status)" [attr.aria-label]="item.step?.status ?? 'pending'">{{ statusIcon(item.step?.status) }}</mat-icon>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex flex-wrap items-center gap-x-3">
+                        <h3 class="m-0 text-base font-semibold">{{ item.title }}</h3>
+                        @if (item.step?.summary; as summary) {<span class="text-sm text-gray-600">{{ summary }}</span>}
+                      </div>
+                      @if (!item.step) {<p class="m-0 mt-0.5 text-sm text-gray-500">{{ item.hint }}</p>}
+
+                      @for (issue of item.step?.issues ?? []; track issue.code) {
+                        <div class="mt-3 rounded-lg px-3 py-2 text-sm"
+                          [class]="issue.severity === 'blocker' && !signedOff().has(issue.code) ? 'bg-red-50 text-red-900' : issue.severity === 'warning' ? 'bg-amber-50 text-amber-900' : 'bg-sky-50 text-sky-900'">
+                          <div class="flex flex-wrap items-start justify-between gap-2">
+                            <div class="flex min-w-0 flex-1 items-start gap-2">
+                              <mat-icon class="!h-5 !w-5 shrink-0 !text-xl !leading-none">{{ issue.severity === 'blocker' ? 'block' : issue.severity === 'warning' ? 'warning' : 'info' }}</mat-icon>
+                              <span>{{ issue.message }}@if (signedOff().has(issue.code)) { <b>· <ng-container i18n>Signed off</ng-container></b>}</span>
+                            </div>
+                            @if (issue.severity === 'blocker' && !signedOff().has(issue.code) && canOverride()) {
+                              <button matButton (click)="signOff(issue)"><ng-container i18n>Sign off</ng-container></button>
+                            }
+                          </div>
+                          @if (issue.refs?.length || issueLink(issue)) {
+                            <div class="mt-2 flex flex-wrap gap-1.5 pl-7">
+                              @for (ref of issue.refs ?? []; track ref.id) {
+                                <a class="rounded-full border border-current px-2 py-0.5 text-xs no-underline hover:underline" [routerLink]="refLink(issue, ref.id)">{{ ref.label }}</a>
+                              }
+                              @if ((issue.count ?? 0) > (issue.refs?.length ?? 0)) {<span class="px-1 text-xs">+ {{ (issue.count ?? 0) - (issue.refs?.length ?? 0) }} <ng-container i18n>more</ng-container></span>}
+                              @if (!issue.refs?.length && issueLink(issue); as link) {<a class="text-xs underline" [routerLink]="link"><ng-container i18n>Open</ng-container></a>}
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </li>
+              }
+            </ol>
+
+            @if (run()?.snapshot) {
+              <section class="rounded-xl border border-gray-200 p-4 md:p-5">
+                <h2 class="m-0 mb-4 text-lg font-semibold"><ng-container i18n>Report pack</ng-container></h2>
+                <app-audit-snapshot [snapshot]="run()?.snapshot" [currency]="currency()" />
+              </section>
+            }
+          </div>
+        </mat-tab>
+
+        <mat-tab>
+          <ng-template mat-tab-label><ng-container i18n>History</ng-container></ng-template>
+          <div class="pt-4">
+            @if (history().length === 0) {
+              <p class="text-sm text-gray-500"><ng-container i18n>No business day has been closed yet.</ng-container></p>
+            } @else {
+              <ul class="m-0 flex list-none flex-col gap-2 p-0">
+                @for (h of history(); track h._id) {
+                  <li>
+                    <button type="button" class="flex w-full flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 px-4 py-3 text-left hover:bg-gray-50" (click)="openRun(h)">
+                      <span class="font-medium">{{ asDate(h.businessDate) | date: 'EEE d MMM y' }}</span>
+                      <span class="flex items-center gap-3 text-sm text-gray-600">
+                        @if (h.overrides.length) {<span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-900">{{ h.overrides.length }} <ng-container i18n>signed off</ng-container></span>}
+                        <span class="rounded-full px-2 py-0.5 text-xs" [class]="h.status === 'closed' ? 'bg-green-100 text-green-800' : h.status === 'blocked' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-700'">{{ h.status }}</span>
+                        @if (h.closedAt) {<span>{{ h.closedAt | date: 'd MMM, HH:mm' }}@if (h.trigger === 'auto') { · <ng-container i18n>auto</ng-container>}</span>}
+                        <mat-icon class="!h-5 !w-5 !text-xl !leading-none">chevron_right</mat-icon>
+                      </span>
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    }
+  }
+</div>
