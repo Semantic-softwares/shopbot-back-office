@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, computed, effect, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -186,6 +186,17 @@ export class QuickReservationModalComponent implements OnInit {
     }),
   });
 
+  /**
+   * The last availability list that came back. A reload (new dates, slow network) empties the resource while it loads,
+   * which used to label every room "Unavailable" until the answer arrived. Rooms now say "Checking…" instead.
+   */
+  private readonly lastAvailable = signal<any[] | null>(null);
+  private readonly rememberAvailable = effect(() => {
+    if (this.availableRoomsResource.hasValue()) this.lastAvailable.set((this.availableRoomsResource.value() as any[]) ?? []);
+  });
+  public readonly checkingAvailability = computed(() => this.availableRoomsResource.isLoading());
+  public readonly availabilityFailed = computed(() => !!this.availableRoomsResource.error() && !this.availableRoomsResource.isLoading());
+
   // Fetch ALL rooms for the store (regardless of status/availability)
   public allRoomsResource = rxResource({
     params: () => ({ storeId: this.storeStore.selectedStore()?._id }),
@@ -256,7 +267,9 @@ export class QuickReservationModalComponent implements OnInit {
 
   public filteredRooms = computed(() => {
     const allRooms = (this.allRoomsResource.value() || []) as any[];
-    const availableRooms = this.availableRoomsResource.value() || [];
+    const checking = this.checkingAvailability();
+    const failed = this.availabilityFailed();
+    const availableRooms = (this.availableRoomsResource.hasValue() ? this.availableRoomsResource.value() : this.lastAvailable()) || [];
     const availableIds = new Set(availableRooms.map((r: any) => r._id || r.id));
     const selectedType = this.roomTypeValue();
 
@@ -286,17 +299,22 @@ export class QuickReservationModalComponent implements OnInit {
       const id = room._id || room.id;
       const inAvailableList = availableIds.has(id);
       const isDirty = room.housekeepingStatus === 'dirty';
-      const isBookable = inAvailableList && !isDirty;
+      const isBookable = !checking && !failed && inAvailableList && !isDirty;
 
       let unavailableReason: string | null = null;
-      if (!inAvailableList) {
-        if (room.status === 'occupied') unavailableReason = 'Occupied';
-        else if (room.status === 'maintenance') unavailableReason = 'Maintenance';
-        else if (room.status === 'out_of_order') unavailableReason = 'Out of Order';
-        else if (room.status === 'cleaning') unavailableReason = 'Cleaning';
-        else unavailableReason = 'Unavailable';
+      if (checking) {
+        unavailableReason = $localize`Checking…`;
+      } else if (failed) {
+        unavailableReason = $localize`Could not check`;
+      } else if (!inAvailableList) {
+        if (room.status === 'occupied') unavailableReason = $localize`Occupied`;
+        else if (room.status === 'maintenance') unavailableReason = $localize`Maintenance`;
+        else if (room.status === 'out_of_order') unavailableReason = $localize`Out of Order`;
+        else if (room.status === 'cleaning') unavailableReason = $localize`Cleaning`;
+        // The room itself is fine, so it can only be a booking: say so instead of a bare "Unavailable".
+        else unavailableReason = $localize`Booked for these dates`;
       } else if (isDirty) {
-        unavailableReason = 'Dirty';
+        unavailableReason = $localize`Dirty`;
       }
 
       return {
