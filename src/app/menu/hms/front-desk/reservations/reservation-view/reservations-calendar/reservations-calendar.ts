@@ -1,5 +1,5 @@
 import {
-  Component, DestroyRef, ElementRef, afterNextRender, computed, effect, inject, signal, viewChild, ChangeDetectionStrategy,
+  Component, DestroyRef, ElementRef, computed, effect, inject, signal, viewChild, ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -197,23 +197,32 @@ export class ReservationsCalendar {
     try { localStorage.setItem(PREFS_KEY, JSON.stringify(payload)); } catch { /* private mode: nothing to remember */ }
   });
 
+  private resizeObserver?: ResizeObserver;
+
+  /**
+   * Measure the scroll area whenever it exists. It is only rendered once the data is ready, so a one-off
+   * measurement at first render would miss it and the days would stay at the 1200px default width.
+   */
+  private watchViewport = effect(() => {
+    const el = this.scroller()?.nativeElement;
+    this.resizeObserver?.disconnect();
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    this.resizeObserver = new ResizeObserver(([entry]) => this.viewportWidth.set(entry.contentRect.width));
+    this.resizeObserver.observe(el);
+    this.viewportWidth.set(el.clientWidth);
+  });
+
   constructor() {
-    afterNextRender(() => {
-      const el = this.scroller()?.nativeElement;
-      if (!el || typeof ResizeObserver === 'undefined') return;
-      const observer = new ResizeObserver(([entry]) => this.viewportWidth.set(entry.contentRect.width));
-      observer.observe(el);
-      this.viewportWidth.set(el.clientWidth);
-      this.destroyRef.onDestroy(() => observer.disconnect());
-    });
+    this.destroyRef.onDestroy(() => this.resizeObserver?.disconnect());
   }
 
   // ---- geometry -------------------------------------------------------------------------------------
   readonly leftWidth = computed(() => (this.isMobile() ? 112 : 188));
   readonly dayWidth = computed(() => {
     const days = this.rangeDays();
-    const fit = Math.floor((this.viewportWidth() - this.leftWidth()) / days);
-    return Math.min(220, Math.max(MIN_DAY_WIDTH[days], fit));
+    // Stretch the days to fill the card; never narrower than the readable minimum (then it scrolls sideways).
+    const fit = (this.viewportWidth() - this.leftWidth()) / days;
+    return Math.max(MIN_DAY_WIDTH[days], fit);
   });
   readonly rowHeight = computed(() => (this.density() === 'compact' ? 32 : 46));
   readonly trackWidth = computed(() => this.rangeDays() * this.dayWidth());
