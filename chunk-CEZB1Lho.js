@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";import{Xt as __,_n as dw}from"./chunk-DTckT2H2.js";var o;var i;var p=z(()=>{"use strict";__();o=globalThis.$localize,i=class t{transform(r){return r?r.startsWith(`:`)?r:o(Object.assign([r],{raw:[r]})):r??``}static ɵfac=function(s){return new(s||t)};static ɵpipe=dw({name:`tr`,type:t,pure:!0})}});export{p as n,i as t};

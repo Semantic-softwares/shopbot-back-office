@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";var e;z(()=>{e=[{path:``,loadComponent:()=>import(`./chunk-o39Ydaix.js`).then(o=>o.MessagingComponent)},{path:`:threadId`,loadComponent:()=>import(`./chunk-o39Ydaix.js`).then(o=>o.MessagingComponent)}]})();export{e as MESSAGING_ROUTES};
