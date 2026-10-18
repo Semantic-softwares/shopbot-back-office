@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";var n;z(()=>{n=[{path:``,loadComponent:()=>import(`./chunk-CdgaIZ6-.js`).then(t=>t.TimecardsComponent),children:[{path:``,redirectTo:`list`,pathMatch:`full`},{path:`list`,loadComponent:()=>import(`./chunk-Og6GUn_G.js`).then(t=>t.ListTimecardsComponent)}]}]})();export{n as TIMECARDS_ROUTES};
