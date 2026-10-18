@@ -18,6 +18,7 @@ import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { RoomsService } from '../../../../../shared/services/rooms.service';
 import { RateInventoryService, StayRates, AvailabilityCheck, RateInventoryRecord, RatePlan } from '../../../../../shared/services/rate-inventory.service';
 import { StoreStore } from '../../../../../shared/stores/store.store';
+import { RolesService } from '../../../../../shared/services/roles.service';
 import { of, forkJoin, map, switchMap, catchError } from 'rxjs';
 
 interface AvailableRoom {
@@ -93,7 +94,18 @@ export class QuickReservationModalComponent implements OnInit {
   public ratePlanField = new FormControl('');
 
   // Min date signal - today or later
-  public minDate = signal(new Date());
+  private roles = inject(RolesService);
+  /** Entering a stay that already began is a right of its own; everyone else still starts today. */
+  public canBackdate = computed(() => this.roles.hasAny(['hotel.reservations.create_backdated']));
+  public minDate = computed(() => (this.canBackdate() ? null : new Date()));
+  /** The stay starts before today: it will be recorded as a historical entry on the next screen. */
+  public isBackdated = computed(() => {
+    const start = this.checkIn();
+    if (!start) return false;
+    const day = new Date(start); day.setHours(0, 0, 0, 0);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    return day < today;
+  });
 
   public quickReservationForm = this.fb.group({
     bookingType: ['single', Validators.required],
@@ -298,7 +310,7 @@ export class QuickReservationModalComponent implements OnInit {
     return rooms.map((room: any) => {
       const id = room._id || room.id;
       const inAvailableList = availableIds.has(id);
-      const isDirty = room.housekeepingStatus === 'dirty';
+      const isDirty = room.housekeepingStatus === 'dirty' && !this.isBackdated(); // today's cleaning state means nothing for a past stay
       const isBookable = !checking && !failed && inAvailableList && !isDirty;
 
       let unavailableReason: string | null = null;
@@ -604,6 +616,13 @@ export class QuickReservationModalComponent implements OnInit {
     const nights = this.numberOfNights();
     if (nights <= 0) return false;
 
+    // A stay that already began is priced by hand on the next screen: rates, stop-sells and live availability describe
+    // today's selling, not the past. The server still refuses a room clash.
+    if (this.isBackdated()) {
+      const room: unknown = this.selectedRoomId();
+      return Array.isArray(room) ? room.length > 0 : !!room;
+    }
+
     // Must have a room type and rate plan selected
     if (!this.roomTypeIdFromDropdown()) return false;
     if (!this.ratePlanValue()) return false;
@@ -650,6 +669,7 @@ export class QuickReservationModalComponent implements OnInit {
 
   private minDateValidator(control: any) {
     if (!control.value) return null;
+    if (this.roles.hasAny(['hotel.reservations.create_backdated'])) return null;
     const selectedDate = new Date(control.value);
     const today = new Date();
     today.setHours(0, 0, 0, 0);

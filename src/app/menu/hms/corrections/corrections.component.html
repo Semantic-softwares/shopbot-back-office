@@ -1,0 +1,65 @@
+<app-page-header title="Historical corrections" i18n-title subtitle="Stays entered for days that were already audited. Closed days never change; approved charges post onto today." i18n-subtitle>
+  <ng-container actions>
+    <button matIconButton (click)="reload()" [disabled]="loading()" aria-label="Refresh" i18n-aria-label matTooltip="Refresh" i18n-matTooltip><mat-icon [class.animate-spin]="loading()">refresh</mat-icon></button>
+  </ng-container>
+</app-page-header>
+
+<div class="flex flex-col gap-4 p-4 pb-16 md:p-6">
+  <mat-chip-listbox [value]="status()" (change)="setStatus($event.value)" aria-label="Filter by status" i18n-aria-label>
+    @for (f of filters; track f.value) { <mat-chip-option [value]="f.value">{{ f.label }}</mat-chip-option> }
+  </mat-chip-listbox>
+
+  @if (loading() && !data()) { <mat-progress-bar mode="indeterminate" /> }
+
+  @if (failed()) {
+    <div class="flex flex-col items-center gap-2 rounded-3xl border border-red-200 bg-red-50 p-8 text-center text-red-900" role="alert">
+      <mat-icon class="!h-10 !w-10 !text-4xl !leading-none text-red-600">error</mat-icon>
+      <p class="m-0 font-semibold"><ng-container i18n>Could not load the corrections.</ng-container></p>
+      <button matButton="filled" (click)="reload()"><ng-container i18n>Try again</ng-container></button>
+    </div>
+  } @else if (data()) {
+    @if (rows().length === 0) {
+      <div class="flex flex-col items-center gap-2 rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-10 text-center">
+        <mat-icon class="!h-12 !w-12 !text-5xl !leading-none text-on-surface-variant">task_alt</mat-icon>
+        <p class="m-0 font-medium"><ng-container i18n>No corrections here.</ng-container></p>
+        <p class="m-0 max-w-md text-sm text-on-surface-variant"><ng-container i18n>A case appears when a stay that already happened is entered for days that night audit has closed, and its charges are missing.</ng-container></p>
+      </div>
+    } @else {
+      <div class="overflow-x-auto rounded-3xl border border-outline-variant/60 bg-surface-container-lowest">
+        <table mat-table [dataSource]="rows()" class="w-full min-w-[820px]">
+          <ng-container matColumnDef="reservation">
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Reservation</ng-container></th>
+            <td mat-cell *matCellDef="let c"><span class="font-semibold">{{ c.confirmationNumber || '—' }}</span></td>
+          </ng-container>
+          <ng-container matColumnDef="nights">
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Nights affected</ng-container></th>
+            <td mat-cell *matCellDef="let c" class="whitespace-nowrap">{{ range(c) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Amount</ng-container></th>
+            <td mat-cell *matCellDef="let c" class="!text-right tabular-nums">{{ c.financialImpact.total | currency: currency() : 'symbol' : '1.2-2' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="reason">
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Reason</ng-container></th>
+            <td mat-cell *matCellDef="let c" class="max-w-[16rem]"><span class="line-clamp-2 text-sm">{{ c.reason }}</span></td>
+          </ng-container>
+          <ng-container matColumnDef="raised">
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Raised</ng-container></th>
+            <td mat-cell *matCellDef="let c" class="whitespace-nowrap text-sm"><div>{{ person(c.createdBy) || '—' }}</div><div class="text-xs text-on-surface-variant">{{ c.createdAt | date: 'd MMM, HH:mm' }}</div></td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
+            <td mat-cell *matCellDef="let c"><span class="whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium" [class]="tone(c.status)">{{ statusText(c.status) }}</span></td>
+          </ng-container>
+          <ng-container matColumnDef="go">
+            <th mat-header-cell *matHeaderCellDef class="!w-10"></th>
+            <td mat-cell *matCellDef="let c"><mat-icon class="text-on-surface-variant">chevron_right</mat-icon></td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns" class="cursor-pointer hover:bg-surface-container" tabindex="0" (click)="open(row)" (keydown.enter)="open(row)"></tr>
+        </table>
+      </div>
+      <mat-paginator [length]="data()!.total" [pageSize]="pageSize" [pageIndex]="page() - 1" [hidePageSize]="true" (page)="onPage($event)" aria-label="Pages" i18n-aria-label />
+    }
+  }
+</div>

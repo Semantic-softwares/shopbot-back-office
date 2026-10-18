@@ -100,6 +100,19 @@ import { AuditSnapshot } from '../../../shared/services/night-audit.service';
           </section>
         </div>
 
+        @if (s.earlierNightAdjustments?.length) {
+          <section aria-labelledby="adj-title">
+            <h3 id="adj-title" class="m-0 mb-2 text-sm font-semibold uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Added today for earlier nights</ng-container></h3>
+            <p class="m-0 mb-2 text-sm text-on-surface-variant"><ng-container i18n>Approved historical corrections. These are not part of this day's revenue above.</ng-container></p>
+            <div class="overflow-x-auto"><table mat-table [dataSource]="s.earlierNightAdjustments!" class="w-full">
+              <ng-container matColumnDef="code"><th mat-header-cell *matHeaderCellDef><ng-container i18n>Code</ng-container></th><td mat-cell *matCellDef="let r" class="!font-mono !text-sm">{{ r.code }}</td></ng-container>
+              <ng-container matColumnDef="amount"><th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Amount</ng-container></th><td mat-cell *matCellDef="let r" class="!text-right tabular-nums">{{ r.amount | currency: currency() : 'symbol' : '1.2-2' }}</td></ng-container>
+              <tr mat-header-row *matHeaderRowDef="['code', 'amount']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['code', 'amount']"></tr>
+            </table></div>
+          </section>
+        }
+
         @if (s.overrides.length) {
           <section aria-labelledby="ov-title">
             <h3 id="ov-title" class="m-0 mb-2 text-sm font-semibold uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Signed off by a manager</ng-container></h3>

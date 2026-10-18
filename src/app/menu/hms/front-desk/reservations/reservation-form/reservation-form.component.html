@@ -177,6 +177,18 @@
       </button>
     }
 
+    @if (isEditing() && $any(reservation.value())?.backdating?.isBackdated) {
+      @let hist = $any(reservation.value()).backdating;
+      <div class="mt-4 flex flex-wrap items-start gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+        <mat-icon class="shrink-0 text-amber-700">history</mat-icon>
+        <div class="min-w-0 flex-1">
+          <b><ng-container i18n>Historical entry.</ng-container></b> {{ hist.reason }}
+          @if (hist.closedNights?.length) {<div class="mt-0.5 text-xs"><ng-container i18n>Entered after night audit had closed</ng-container> {{ hist.closedNights.length }} <ng-container i18n>of its nights.</ng-container></div>}
+        </div>
+        @if (hist.correction) { <a matButton routerLink="/menu/hms/corrections"><ng-container i18n>View correction</ng-container></a> }
+      </div>
+    }
+
     <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()" class="mt-4">
       <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
         <!-- ─ Left: the booking itself ─ -->
@@ -185,6 +197,10 @@
             (guestSelected)="onGuestSelected($event)"></app-guest-details>
 
           <app-stay-details [quickReservation]="quickReservation()" [isEditing]="isEditing()" [reservation]="reservation.value()"></app-stay-details>
+
+          @if (!isEditing()) {
+            <app-historical-entry [form]="reservationForm" [storeId]="storeStore.selectedStore()?._id || ''" (stateChange)="historicalState.set($event)" />
+          }
 
           @if (isSingleBooking()) {
             <app-room-sharers [(selectedGuest)]="selectedGuest" (selectedGuestChange)="onSelectedGuestChange($event)"

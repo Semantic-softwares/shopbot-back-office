@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { toDateOnly } from '../../../shared/utils/date-only';
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -109,7 +109,7 @@ export class AuditSettingsDialogComponent {
 /** A past audit: its report pack, who closed it, and anything that was signed off. Opens at once and fills in as the run arrives. */
 @Component({
   selector: 'app-audit-run-dialog',
-  imports: [DatePipe, MatDialogModule, MatButtonModule, MatIconModule, AuditSnapshotComponent],
+  imports: [CurrencyPipe, DatePipe, MatDialogModule, MatButtonModule, MatIconModule, AuditSnapshotComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <h2 mat-dialog-title>{{ asDate(data.run.businessDate) | date: 'EEEE d MMMM y' }}</h2>
@@ -123,6 +123,26 @@ export class AuditSettingsDialogComponent {
       </p>
       @if (full(); as run) {
         <app-audit-snapshot [snapshot]="run.snapshot" [currency]="data.currency" />
+
+        <!-- What happened to this day after it closed. The audited figures above never change; corrections sit beside them. -->
+        @if (run.corrections; as k) {
+          @if (k.cases.length) {
+            <section class="mt-6 rounded-2xl border border-outline-variant p-4" aria-labelledby="after-title">
+              <h3 id="after-title" class="m-0 text-sm font-semibold uppercase tracking-wide text-on-surface-variant"><ng-container i18n>After this day closed</ng-container></h3>
+              <dl class="m-0 mt-3 grid grid-cols-1 gap-3 tabular-nums sm:grid-cols-3">
+                <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Room revenue as audited</ng-container></dt><dd class="m-0 text-lg font-bold">{{ (run.snapshot?.flash?.roomRevenue ?? 0) | currency: data.currency : 'symbol' : '1.2-2' }}</dd></div>
+                <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Added by approved corrections</ng-container></dt><dd class="m-0 text-lg font-bold">{{ k.adjustments.room | currency: data.currency : 'symbol' : '1.2-2' }}</dd></div>
+                <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Room revenue, corrected</ng-container></dt><dd class="m-0 text-lg font-bold">{{ (run.snapshot?.flash?.roomRevenue ?? 0) + k.adjustments.room | currency: data.currency : 'symbol' : '1.2-2' }}</dd></div>
+              </dl>
+              @if (k.pending > 0) { <p class="m-0 mt-2 text-sm text-on-surface-variant"><ng-container i18n>Still waiting for approval:</ng-container> <b class="tabular-nums">{{ k.pending | currency: data.currency : 'symbol' : '1.2-2' }}</b></p> }
+              <ul class="m-0 mt-3 flex list-none flex-col gap-1 p-0 text-sm">
+                @for (c of k.cases; track c._id) {
+                  <li class="flex items-center justify-between gap-2"><span>{{ c.confirmationNumber || '—' }}</span><span class="tabular-nums text-on-surface-variant">{{ c.amount | currency: data.currency : 'symbol' : '1.2-2' }}</span><span class="rounded-full bg-surface-container-high px-2 py-0.5 text-xs">{{ status(c.status) }}</span></li>
+                }
+              </ul>
+            </section>
+          }
+        }
       } @else if (failed()) {
         <div class="flex flex-col items-center gap-2 py-8 text-center" role="alert">
           <mat-icon class="!h-10 !w-10 !text-4xl !leading-none text-error">error</mat-icon>
@@ -158,6 +178,8 @@ export class AuditRunDialogComponent {
   }
 
   /** A business day is a calendar date: read it at noon so no timezone can move it. */
+  readonly status = (s: string) => ({ PENDING_REVIEW: $localize`Pending review`, APPROVED: $localize`Approved`, PROCESSING: $localize`Processing`, COMPLETED: $localize`Completed`, REJECTED: $localize`Rejected`, FAILED: $localize`Failed` })[s as 'PENDING_REVIEW'] ?? s;
+
   asDate(day: string) {
     return new Date(day + 'T12:00:00');
   }

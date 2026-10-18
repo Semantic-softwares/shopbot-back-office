@@ -10,7 +10,7 @@ import {
   ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import {
   FormBuilder,
   Validators,
@@ -48,6 +48,7 @@ import { ReservationStatus } from '../../../../../shared/enums/reservation-statu
 import { toSignal, rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GuestDetailsComponent } from './components/guest-details/guest-details.component';
 import { StayDetailsComponent } from './components/stay-details/stay-details.component';
+import { HistoricalEntryComponent, HistoricalEntryState } from './components/historical-entry/historical-entry.component';
 import { RoomSharersComponent } from './components/room-sharers/room-sharers.component';
 import { RoomDetailsComponent } from './components/room-details/room-details.component';
 import { BreakDownTotal } from './components/break-down-total/break-down-total';
@@ -94,6 +95,8 @@ import { STAY_COLORS, STAY_ICONS, StayStatus } from '../reservation-view/reserva
     MatTooltipModule,
     GuestDetailsComponent,
     StayDetailsComponent,
+    HistoricalEntryComponent,
+    RouterLink,
     RoomSharersComponent,
     RoomDetailsComponent,
     BreakDownTotal,
@@ -150,6 +153,8 @@ export class ReservationFormComponent implements OnDestroy {
   public selectedGuest = signal<Guest | null>(null);
 
   public isEditing = computed(() => !!this.id());
+  /** What the server says about the dates (past? already audited? may this person enter them?). */
+  public historicalState = signal<HistoricalEntryState>({ isBackdated: false, canBackdate: true, unknown: false, closedNights: [] });
   private paymentRedirection = signal<boolean>(false);
 
   constructor() {
@@ -270,6 +275,12 @@ export class ReservationFormComponent implements OnDestroy {
       total: [0, [Validators.required, Validators.min(0)]],
       paid: [0, [Validators.min(0)]],
       balance: [0],
+    }),
+
+    // Only for a stay entered after its dates began: what happened, and why. Turned into `status` and `backdating` on save.
+    historical: this.fb.group({
+      outcome: ['checked_out'],
+      reason: [''],
     }),
 
     // Special requests and notes
@@ -669,7 +680,27 @@ export class ReservationFormComponent implements OnDestroy {
       return;
     }
 
-    const formData = this.reservationForm.getRawValue();
+    const historical = this.historicalState();
+    const historicalGroup = this.reservationForm.get('historical') as FormGroup;
+    if (!this.isEditing() && historical.isBackdated) {
+      if (!historical.canBackdate) {
+        this.snackBar.open($localize`You do not have permission to create backdated reservations. Ask a manager.`, $localize`Close`, { duration: 6000, panelClass: ['error-snackbar'] });
+        return;
+      }
+      if (String(historicalGroup.get('reason')?.value ?? '').trim().length < 5) {
+        historicalGroup.get('reason')?.markAsTouched();
+        this.snackBar.open($localize`Say why this reservation is being entered for a past date.`, $localize`Close`, { duration: 5000, panelClass: ['error-snackbar'] });
+        return;
+      }
+    }
+
+    const formData: any = this.reservationForm.getRawValue();
+    // The server decides what a historical entry means; the form only says what happened and why.
+    if (!this.isEditing() && historical.isBackdated) {
+      formData.status = formData.historical?.outcome || 'confirmed';
+      formData.backdating = { reason: String(formData.historical?.reason ?? '').trim() };
+    }
+    delete formData.historical;
 
     // Normalize dates to YYYY-MM-DD strings to prevent timezone shift during JSON serialization.
     // Without this, Date objects serialize as ISO strings (e.g. "2026-03-03T23:00:00.000Z" for
@@ -725,10 +756,12 @@ export class ReservationFormComponent implements OnDestroy {
       .subscribe({
         next: (reservation) => {
           this.isSubmitted.set(false);
-          this.snackBar.open($localize`Reservation created successfully`, $localize`Close`, {
-            duration: 3000,
-            panelClass: ['success-snackbar'],
-          });
+          const pending = (reservation as any)?.historicalCorrection;
+          this.snackBar.open(
+            pending ? $localize`Reservation recorded. The charges for days that were already closed are waiting for a manager's approval.` : $localize`Reservation created successfully`,
+            $localize`Close`,
+            { duration: pending ? 9000 : 3000, panelClass: ['success-snackbar'] },
+          );
           // Redirect to edit the newly created reservation
              this.router.navigate(['../edit', reservation._id], { relativeTo: this.route }).then(() => {
               if (payment) {
@@ -740,11 +773,13 @@ export class ReservationFormComponent implements OnDestroy {
         error: (error) => {
           this.isSubmitted.set(false);
           console.error('Error creating reservation:', error);
+          // The server explains refusals (a room already taken, a past date without the right or a reason): say what it said.
+          const serverMessage = error?.error?.message ?? error?.error?.error;
           this.snackBar.open(
-            $localize`Failed to create reservation. Please try again.`,
+            typeof serverMessage === 'string' && [400, 403, 409].includes(error?.status) ? serverMessage : $localize`Failed to create reservation. Please try again.`,
             $localize`Close`,
             {
-              duration: 3000,
+              duration: 6000,
               panelClass: ['error-snackbar'],
             }
           );

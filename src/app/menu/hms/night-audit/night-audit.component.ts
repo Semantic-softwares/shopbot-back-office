@@ -164,6 +164,7 @@ export class NightAuditComponent {
     return ['/menu/hms/cashier'];
   }
   issueLink(issue: AuditIssue): string[] | null {
+    if (issue.code === 'CORRECTIONS_PENDING') return ['/menu/hms/corrections'];
     return issue.code === 'OPEN_SHIFTS' || issue.code === 'CASH_VARIANCE' ? ['/menu/hms/cashier'] : null;
   }
 

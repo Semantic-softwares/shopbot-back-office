@@ -46,10 +46,18 @@ export interface AuditSnapshot {
     roomRevenue: number; taxes: number; fees: number; arrivals: number; departures: number; guests: number; noShows: number;
   } | null;
   revenueByCode: Array<{ code: string; amount: number }>;
+  /** Charges added on this day for EARLIER nights (approved corrections): shown apart from the day's own revenue. */
+  earlierNightAdjustments?: Array<{ code: string; amount: number }>;
   paymentsByMethod: Record<string, number>;
   shifts: Array<{ id: string; user: string; counted?: number; expected?: number; variance?: number }>;
   trialBalance: TrialBalance | null;
   overrides: Array<{ code: string; reason: string }>;
+}
+
+export interface AuditRunCorrections {
+  cases: Array<{ _id: string; status: string; confirmationNumber?: string; reservation: string; amount: number }>;
+  adjustments: { room: number; tax: number; fee: number; total: number };
+  pending: number;
 }
 
 export interface AuditRun {
@@ -60,6 +68,8 @@ export interface AuditRun {
   steps: AuditStep[];
   overrides: Array<{ code: string; reason: string; by: string; at: string }>;
   snapshot?: AuditSnapshot;
+  /** What happened to this day after it closed: the audited figures are never changed, these sit beside them. */
+  corrections?: AuditRunCorrections;
   closedBy?: string;
   closedAt?: string;
   nextBusinessDate?: string;

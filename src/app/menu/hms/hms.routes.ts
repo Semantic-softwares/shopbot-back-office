@@ -88,6 +88,12 @@ export const DASHBOARD_HMS_ROUTES: Routes = [
                 canActivate: [roleGuard],
                 data: { requiredPermissions: ['hotel.cashier.manage'], permissionMode: 'any' }
             },
+            {
+                path: 'corrections',
+                loadComponent: () => import('./corrections/corrections.component').then(m => m.CorrectionsComponent),
+                canActivate: [roleGuard],
+                data: { requiredPermissions: ['hotel.corrections.view', 'hotel.corrections.approve'], permissionMode: 'any' }
+            },
 
             // TODO: Add more routes as components are created
             {

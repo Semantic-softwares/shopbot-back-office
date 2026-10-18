@@ -164,6 +164,12 @@ export class HmsDashboardComponent {
           link: './cashier',
           permissions: ['hotel.cashier.manage'],
         },
+        {
+          icon: 'history_edu',
+          label: $localize`Corrections`,
+          link: './corrections',
+          permissions: ['hotel.corrections.view', 'hotel.corrections.approve'],
+        },
       ],
     },
     {

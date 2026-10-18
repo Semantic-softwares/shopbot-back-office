@@ -35,6 +35,13 @@
                 }
             </mat-form-field>
 
+            @if (isBackdated()) {
+                <div class="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900" role="status">
+                    <mat-icon class="shrink-0 text-amber-700">history</mat-icon>
+                    <span><b><ng-container i18n>Past date.</ng-container></b> <ng-container i18n>This will be recorded as a historical entry. On the next screen you will say what happened and why, and set the price by hand: rates and availability describe today's selling, not the past.</ng-container></span>
+                </div>
+            }
+
             <!-- Room Type Selection -->
             <mat-form-field appearance="outline" class="w-full">
                 <mat-label><ng-container i18n>Room Type</ng-container></mat-label>
@@ -254,9 +261,11 @@
         <ng-container i18n>Cancel</ng-container>
     </button>
     <button matButton="filled" color="primary" (click)="onProceed()"
-        [disabled]="quickReservationForm.invalid || ratesResource.isLoading() || availabilityResource.isLoading() || inventoryRestrictionsResource.isLoading() || !canProceed()">
-        @if (ratesResource.isLoading() || availabilityResource.isLoading() || inventoryRestrictionsResource.isLoading()) {
+        [disabled]="quickReservationForm.invalid || (!isBackdated() && (ratesResource.isLoading() || availabilityResource.isLoading() || inventoryRestrictionsResource.isLoading())) || checkingAvailability() || !canProceed()">
+        @if (!isBackdated() && (ratesResource.isLoading() || availabilityResource.isLoading() || inventoryRestrictionsResource.isLoading())) {
             <ng-container i18n>Loading...</ng-container>
+        } @else if (isBackdated()) {
+            <ng-container i18n>Continue as a historical entry</ng-container>
         } @else if (restrictionIssues()) {
             <ng-container i18n>Restricted</ng-container>
         } @else if (availabilityIssues()) {
