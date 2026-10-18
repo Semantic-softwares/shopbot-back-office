@@ -166,7 +166,7 @@ export class HmsDashboardComponent {
         },
         {
           icon: 'history_edu',
-          label: $localize`Corrections`,
+          label: $localize`Historical corrections`,
           link: './corrections',
           permissions: ['hotel.corrections.view', 'hotel.corrections.approve'],
         },

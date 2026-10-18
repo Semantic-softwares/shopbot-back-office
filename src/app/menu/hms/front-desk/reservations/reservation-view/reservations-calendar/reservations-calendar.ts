@@ -276,12 +276,12 @@ export class ReservationsCalendar {
       const first = this.start();
       return {
         storeId: this.storeStore.selectedStore()?._id,
-        dateFrom: dayKey(first),
-        dateTo: dayKey(addDays(first, this.rangeDays() - 1)),
+        stayFrom: dayKey(first),
+        stayTo: dayKey(addDays(first, this.rangeDays() - 1)),
       };
     },
     stream: ({ params }) =>
-      this.reservationService.getReservations({ storeId: params.storeId!, dateFrom: params.dateFrom, dateTo: params.dateTo }),
+      this.reservationService.getReservations({ storeId: params.storeId!, stayFrom: params.stayFrom, stayTo: params.stayTo, limit: 1000 }),
   });
   readonly inventoryGrid = rxResource({
     params: () => {

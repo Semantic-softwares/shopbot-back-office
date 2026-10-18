@@ -30,6 +30,9 @@ export class ReservationService {
     status?: string;
     dateFrom?: string;
     dateTo?: string;
+    /** Every stay overlapping this window, including one that began before it (the calendar uses this). */
+    stayFrom?: string;
+    stayTo?: string;
     guestId?: string;
     roomId?: string;
     page?: number;
