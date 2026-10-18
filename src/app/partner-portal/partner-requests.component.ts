@@ -51,7 +51,7 @@ const KIND_TEXT: Record<string, () => string> = { new: () => $localize`Booking r
               <span class="ml-auto text-xs text-on-surface-variant">{{ r.createdAt | date: 'd MMM y, HH:mm' }}</span>
             </div>
             @if (r.kind === 'new') {
-              <div class="text-sm"><strong>{{ r.rooms }} × {{ r.roomTypeName }}</strong> · {{ r.checkIn | date: 'EEE d MMM' }} – {{ r.checkOut | date: 'EEE d MMM y' }} · {{ r.guest?.firstName }} {{ r.guest?.lastName }}@if (r.quote) { · <span class="tabular-nums">{{ r.quote.total | currency: r.quote.currency : 'symbol' : '1.0-2' }}</span> }</div>
+              <div class="text-sm"><strong>{{ r.roomTypeName }}</strong> · {{ r.checkIn | date: 'EEE d MMM' }} – {{ r.checkOut | date: 'EEE d MMM y' }} · {{ r.guest?.firstName }} {{ r.guest?.lastName }}@if (r.quote) { · <span class="tabular-nums">{{ r.quote.total | currency: r.quote.currency : 'symbol' : '1.0-2' }}</span> }</div>
             } @else {
               <div class="text-sm">@if (r.reservation) { <strong>{{ r.reservation.confirmationNumber }}</strong> · } {{ r.checkIn | date: 'd MMM' }} – {{ r.checkOut | date: 'd MMM y' }}@if (r.proposedCheckIn) { → <strong>{{ r.proposedCheckIn | date: 'd MMM' }} – {{ r.proposedCheckOut | date: 'd MMM y' }}</strong> }</div>
             }

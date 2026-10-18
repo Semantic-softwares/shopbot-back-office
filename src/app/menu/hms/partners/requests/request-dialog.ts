@@ -45,7 +45,7 @@ const EVENT_TEXT: Record<string, () => string> = {
         <div class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
           <div><div class="text-xs uppercase tracking-wide text-on-surface-variant" i18n>Partner</div><div class="font-medium">{{ r.partner.name }}</div><div class="text-xs text-on-surface-variant">{{ r.requestedBy?.name || r.requestedBy?.email }}</div></div>
           @if (r.kind === 'new') {
-            <div><div class="text-xs uppercase tracking-wide text-on-surface-variant" i18n>Rooms</div><div class="font-medium">{{ r.rooms }} × {{ r.roomTypeName }}</div></div>
+            <div><div class="text-xs uppercase tracking-wide text-on-surface-variant" i18n>Rooms</div><div class="font-medium">{{ r.roomTypeName }}</div></div>
             <div><div class="text-xs uppercase tracking-wide text-on-surface-variant" i18n>Stay</div><div class="font-medium">{{ r.checkIn | date: 'd MMM' }} – {{ r.checkOut | date: 'd MMM y' }}</div></div>
             <div><div class="text-xs uppercase tracking-wide text-on-surface-variant" i18n>Guests</div><div class="font-medium">{{ r.adults }} <ng-container i18n>adult(s)</ng-container>@if (r.children) { , {{ r.children }} <ng-container i18n>child(ren)</ng-container> }</div></div>
           } @else {
@@ -61,10 +61,10 @@ const EVENT_TEXT: Record<string, () => string> = {
           </div>
           @if (r.quote; as q) {
             <div class="mt-3 grid grid-cols-2 gap-3 rounded-2xl bg-surface-container p-4 sm:grid-cols-4">
-              <div><div class="text-xs text-on-surface-variant" i18n>Quoted to the partner</div><div class="text-lg font-semibold tabular-nums">{{ (q.agreedTotal ?? 0) * (r.rooms ?? 1) | currency: q.currency || data.currency : 'symbol' : '1.0-2' }}</div></div>
-              <div><div class="text-xs text-on-surface-variant" i18n>Public rate</div><div class="text-sm tabular-nums">{{ (q.publicTotal ?? 0) * (r.rooms ?? 1) | currency: q.currency || data.currency : 'symbol' : '1.0-2' }}</div></div>
+              <div><div class="text-xs text-on-surface-variant" i18n>Quoted to the partner</div><div class="text-lg font-semibold tabular-nums">{{ q.total ?? 0 | currency: q.currency || data.currency : 'symbol' : '1.0-2' }}</div></div>
+              <div><div class="text-xs text-on-surface-variant" i18n>Public rate</div><div class="text-sm tabular-nums">{{ q.publicTotal ?? 0 | currency: q.currency || data.currency : 'symbol' : '1.0-2' }}</div></div>
               <div><div class="text-xs text-on-surface-variant" i18n>Agreement</div><div class="text-sm">{{ q.agreement?.code }}</div></div>
-              @if (q.estimatedCommission) { <div><div class="text-xs text-on-surface-variant" i18n>Estimated commission</div><div class="text-sm tabular-nums">{{ q.estimatedCommission * (r.rooms ?? 1) | currency: q.currency || data.currency : 'symbol' : '1.0-2' }}</div></div> }
+              @if (q.estimatedCommission) { <div><div class="text-xs text-on-surface-variant" i18n>Estimated commission</div><div class="text-sm tabular-nums">{{ q.estimatedCommission | currency: q.currency || data.currency : 'symbol' : '1.0-2' }}</div></div> }
             </div>
           }
         }
@@ -77,10 +77,15 @@ const EVENT_TEXT: Record<string, () => string> = {
         @if (open() && data.canProcess && r.kind === 'new' && !declining()) {
           <h3 class="m-0 mb-1 mt-4 text-sm font-semibold"><ng-container i18n>Rooms to give them</ng-container>&nbsp;<span class="font-normal text-on-surface-variant">({{ picked().length }} / {{ needed() }})</span></h3>
           @if (rooms.isLoading()) { <mat-progress-bar mode="indeterminate" /> }
-          @if (freeRooms().length === 0 && !rooms.isLoading()) { <p class="m-0 text-sm text-red-800" i18n>No room of this type is free for these dates any more.</p> }
-          <div class="flex flex-wrap gap-x-4">
-            @for (room of freeRooms(); track room._id) { <mat-checkbox [checked]="picked().includes(room._id)" (change)="toggle(room._id)">{{ room.roomNumber }}</mat-checkbox> }
-          </div>
+          @for (line of roomLines(); track line.index) {
+            <div class="mb-2">
+              <div class="text-sm font-medium">{{ line.needed }} × {{ line.roomTypeName }}</div>
+              @if (line.rooms.length === 0 && !rooms.isLoading()) { <p class="m-0 text-sm text-red-800" i18n>No room of this type is free for these dates any more.</p> }
+              <div class="flex flex-wrap gap-x-4">
+                @for (room of line.rooms; track room._id) { <mat-checkbox [checked]="picked().includes(room._id)" (change)="toggle(room._id)">{{ room.roomNumber }}</mat-checkbox> }
+              </div>
+            </div>
+          }
           <p class="m-0 mt-1 text-xs text-on-surface-variant" i18n>Accepting books these rooms for the partner at the quoted price. The price and the rooms are checked again as you accept.</p>
         }
         @if (declining()) {
@@ -131,15 +136,15 @@ export class RequestDialogComponent {
   readonly open = computed(() => ['pending', 'processing'].includes(this.r()?.status ?? ''));
   readonly events = computed(() => [...(this.r()?.events ?? [])].reverse());
   readonly needed = computed(() => this.r()?.rooms ?? 1);
+  readonly roomLines = computed(() => (this.rooms.hasValue() ? this.rooms.value()?.lines ?? [] : []));
 
   readonly rooms = rxResource({
     params: () => ({ ok: this.open() && this.r()?.kind === 'new' && this.data.canProcess, n: this.reload() }),
     stream: ({ params }) => (params.ok ? this.api.rooms(this.data.storeId, this.data.id) : of(null)),
   });
-  readonly freeRooms = computed(() => (this.rooms.hasValue() ? this.rooms.value()?.rooms ?? [] : []));
   readonly chosen = signal<string[] | null>(null);
   /** Until the person chooses, the first rooms that are free are ticked. */
-  readonly picked = computed(() => this.chosen() ?? this.freeRooms().slice(0, this.needed()).map((x) => x._id));
+  readonly picked = computed(() => this.chosen() ?? this.roomLines().flatMap((l) => l.rooms.slice(0, l.needed).map((x) => x._id)));
 
   readonly busy = signal(false);
   readonly error = signal('');

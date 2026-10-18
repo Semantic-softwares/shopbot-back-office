@@ -18,7 +18,6 @@ export interface Offer {
   roomNights: number;
   agreement: { name: string };
   available: number;
-  fitsGuests: boolean;
 }
 export interface Unavailable {
   roomType: Offer['roomType'];
@@ -32,7 +31,6 @@ export interface AvailabilityResult {
   checkIn: string;
   checkOut: string;
   nights: number;
-  rooms: number;
   adults: number;
   offers: Offer[];
   unavailable: Unavailable[];
@@ -46,6 +44,7 @@ export interface PortalRequest {
   store: string;
   hotel?: string;
   roomTypeName?: string;
+  lines?: Array<{ roomTypeName: string; rooms: number; perRoom?: number }>;
   checkIn?: string;
   checkOut?: string;
   proposedCheckIn?: string;
@@ -56,7 +55,7 @@ export interface PortalRequest {
   guest?: { firstName?: string; lastName?: string; email?: string; phone?: string; nationality?: string };
   partnerReference?: string;
   notes?: string;
-  quote?: { currency: string; perRoom: number; total: number };
+  quote?: { currency: string; total: number; agreementName?: string };
   reservation?: { _id: string; confirmationNumber: string; status: string } | null;
   decisionNote?: string;
   createdAt: string;
@@ -108,11 +107,10 @@ export interface PortalCommission {
 }
 export interface SubmitBody {
   idempotencyKey: string;
-  roomTypeId: string;
-  ratePlanId?: string | null;
+  /** One line per kind of room, with how many of it. */
+  lines: Array<{ roomTypeId: string; ratePlanId?: string | null; rooms: number }>;
   checkIn: string;
   checkOut: string;
-  rooms: number;
   adults: number;
   children: number;
   quotedTotal: number;
@@ -127,8 +125,8 @@ export class PartnerPortalApiService {
   private readonly base = `${environment.apiUrl}/partner-portal`;
 
   hotels(): Observable<{ hotels: PortalHotel[] }> { return this.http.get<{ hotels: PortalHotel[] }>(`${this.base}/hotels`); }
-  availability(storeId: string, q: { checkIn: string; checkOut: string; adults: number; rooms: number }): Observable<AvailabilityResult> {
-    const p = new HttpParams().set('checkIn', q.checkIn).set('checkOut', q.checkOut).set('adults', q.adults).set('rooms', q.rooms);
+  availability(storeId: string, q: { checkIn: string; checkOut: string; adults: number }): Observable<AvailabilityResult> {
+    const p = new HttpParams().set('checkIn', q.checkIn).set('checkOut', q.checkOut).set('adults', q.adults);
     return this.http.get<AvailabilityResult>(`${this.base}/hotels/${storeId}/availability`, { params: p });
   }
   submit(storeId: string, body: SubmitBody): Observable<{ request: PortalRequest; replay: boolean }> { return this.http.post<{ request: PortalRequest; replay: boolean }>(`${this.base}/hotels/${storeId}/requests`, body); }

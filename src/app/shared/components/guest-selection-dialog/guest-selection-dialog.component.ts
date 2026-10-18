@@ -79,30 +79,21 @@ export class GuestSelectionDialogComponent implements OnInit {
     if (!room) return [];
     
     const guests: Guest[] = [];
-    
-    // Find the specific room entry in reservation.rooms that matches the selected room
-    if (room.currentReservation && typeof room.currentReservation === 'object') {
-      const reservation = room.currentReservation;
-      
-      if (reservation.rooms && Array.isArray(reservation.rooms)) {
-        // Find matching room entry by comparing room IDs
-        const matchingReservationRoom = reservation.rooms.find((resRoom: any) => {
-          const roomId = typeof resRoom.room === 'object' ? resRoom.room._id : resRoom.room;
-          return roomId === room._id;
-        });
-        
-        // Add the assigned guest for this specific room
-        if (matchingReservationRoom?.assignedGuest && typeof matchingReservationRoom.assignedGuest === 'object') {
-          guests.push(matchingReservationRoom.assignedGuest as Guest);
-        }
-      }
+    const add = (g: unknown) => {
+      if (g && typeof g === 'object' && (g as Guest)._id && !guests.some((x) => String(x._id) === String((g as Guest)._id))) guests.push(g as Guest);
+    };
+    const idOf = (v: any) => String(v?._id ?? v ?? '');
+    const reservation = room.currentReservation && typeof room.currentReservation === 'object' ? room.currentReservation : null;
+
+    // The guest assigned to this very room, then the room's current guest, then everyone on the reservation.
+    const line = (reservation?.rooms ?? []).find((r: any) => idOf(r.room) === idOf(room._id));
+    add(line?.assignedGuest);
+    add(room.currentGuest);
+    if (reservation) {
+      add(reservation.guest);
+      for (const s of reservation.sharers ?? []) add(s?.guest);
     }
-    
-    // Fallback: Add currentGuest if no reservation data found
-    if (guests.length === 0 && room.currentGuest && typeof room.currentGuest === 'object') {
-      guests.push(room.currentGuest as Guest);
-    }
-    
+
     return guests;
   });
 
