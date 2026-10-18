@@ -76,6 +76,9 @@ const METHODS = [
         </div>
         <p class="m-0 mt-2 text-xs text-on-surface-variant"><ng-container i18n>Worked out on room revenue after discounts and before taxes and fees, from the terms the booking was made under.</ng-container>@if (c.basis?.source === 'quote') { <ng-container i18n> The stay is not complete yet, so this is an estimate.</ng-container> }</p>
 
+        @if (c.status === 'estimated') {
+          <p class="m-0 mt-3 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900" i18n>This commission is an estimate. It can be approved once the guest has checked out; then you can record what you pay the partner.</p>
+        }
         @if (c.review; as r) {
           <div class="mt-3 flex flex-col gap-2 rounded-2xl border border-amber-300 bg-amber-50 p-3 text-amber-900" role="alert">
             <p class="m-0 flex items-start gap-2 text-sm"><mat-icon class="!h-5 !w-5 !text-xl !leading-none">rule</mat-icon><span>{{ reviewText(r.reason) }} <strong><ng-container i18n>It would now be</ng-container> {{ r.newAmount | currency: cur(c) : 'symbol' : '1.0-2' }}</strong> ({{ r.delta | currency: cur(c) : 'symbol' : '1.0-2' }}). <ng-container i18n>Nothing has been changed on its own.</ng-container></span></p>

@@ -9,7 +9,11 @@
 
 <div class="flex flex-col gap-4 pb-16" [class.p-4]="!embedded()" [class.md:p-6]="!embedded()" [class.pt-4]="embedded()">
   @if (totals(); as t) {
-    <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div class="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div class="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-4">
+        <div class="text-xs uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Expected (stays to come)</ng-container></div>
+        <div class="mt-1 text-xl font-semibold tabular-nums">{{ t.expected | currency: currency() : 'symbol' : '1.0-2' }}</div>
+      </div>
       <div class="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-4">
         <div class="text-xs uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Awaiting approval</ng-container></div>
         <div class="mt-1 text-xl font-semibold tabular-nums">{{ t.pendingReview | currency: currency() : 'symbol' : '1.0-2' }}</div>

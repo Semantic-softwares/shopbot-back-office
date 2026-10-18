@@ -73,5 +73,6 @@ export class PartnerShellComponent {
     { link: '/partner/search', icon: 'travel_explore', label: $localize`Find rooms` },
     { link: '/partner/requests', icon: 'outgoing_mail', label: $localize`My requests` },
     { link: '/partner/reservations', icon: 'event_available', label: $localize`My reservations` },
+    { link: '/partner/commissions', icon: 'payments', label: $localize`My commissions` },
   ];
 }

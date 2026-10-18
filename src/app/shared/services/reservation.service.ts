@@ -607,6 +607,15 @@ export class ReservationService {
     );
   }
 
+  /**
+   * A booking document as a file. For a reservation that came through a travel partner the hotel keeps two copies: one with the
+   * prices, and one for the partner's customer with none.
+   */
+  downloadDocument(reservationId: string, kind: 'folio' | 'pdf', hidePrices: boolean): Observable<Blob> {
+    const path = kind === 'folio' ? 'folio' : 'export/pdf';
+    return this.http.get(`${this.baseUrl}/${reservationId}/${path}`, { responseType: 'blob', params: hidePrices ? { prices: 'hide' } : {} });
+  }
+
   // Print folio
   printFolio(reservationId: string): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/${reservationId}/folio`, {

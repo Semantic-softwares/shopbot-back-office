@@ -78,6 +78,34 @@ export interface PortalReservation {
   total?: number;
   openRequest?: 'change' | 'cancel';
 }
+export interface CommissionSummary {
+  hotel: string;
+  currency: string;
+  bookings: number;
+  completedStays: number;
+  roomNights: number;
+  roomRevenue: number;
+  expected: number;
+  inReview: number;
+  owed: number;
+  paid: number;
+}
+export type PortalCommissionStatus = 'expected' | 'in_review' | 'approved' | 'paid' | 'void';
+export interface PortalCommission {
+  _id: string;
+  status: PortalCommissionStatus;
+  confirmationNumber?: string;
+  reservationId?: string;
+  partnerReference?: string;
+  leadGuest: string;
+  checkIn?: string;
+  checkOut?: string;
+  currency: string;
+  amount: number;
+  paid: number;
+  outstanding: number;
+  payments: Array<{ date?: string; amount: number; method?: string; reference?: string }>;
+}
 export interface SubmitBody {
   idempotencyKey: string;
   roomTypeId: string;
@@ -111,6 +139,18 @@ export class PartnerPortalApiService {
     let p = new HttpParams();
     for (const [k, v] of Object.entries(q)) if (v !== undefined && v !== '' && v !== 'all') p = p.set(k, String(v));
     return this.http.get<{ requests: PortalRequest[]; total: number; page: number; limit: number }>(`${this.base}/requests`, { params: p });
+  }
+  commissionSummary(storeId: string): Observable<CommissionSummary> { return this.http.get<CommissionSummary>(`${this.base}/hotels/${storeId}/commissions/summary`); }
+  commissions(storeId: string, q: { status?: string; page?: number; limit?: number } = {}): Observable<{ commissions: PortalCommission[]; total: number; page: number; limit: number }> {
+    let p = new HttpParams();
+    for (const [k, v] of Object.entries(q)) if (v !== undefined && v !== '' && v !== 'all') p = p.set(k, String(v));
+    return this.http.get<{ commissions: PortalCommission[]; total: number; page: number; limit: number }>(`${this.base}/hotels/${storeId}/commissions`, { params: p });
+  }
+  /** The booking document for one of their reservations. The guest copy carries no prices, so it can go to their customer. */
+  document(storeId: string, reservationId: string, type: 'folio' | 'confirmation', hidePrices: boolean): Observable<Blob> {
+    let p = new HttpParams().set('type', type);
+    if (hidePrices) p = p.set('prices', 'hide');
+    return this.http.get(`${this.base}/hotels/${storeId}/reservations/${reservationId}/document`, { params: p, responseType: 'blob' });
   }
   cancelRequest(id: string): Observable<PortalRequest> { return this.http.post<PortalRequest>(`${this.base}/requests/${id}/cancel`, {}); }
   reservations(q: { storeId?: string; status?: string; page?: number; limit?: number } = {}): Observable<{ reservations: PortalReservation[]; total: number; page: number; limit: number }> {

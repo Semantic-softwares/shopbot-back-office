@@ -133,6 +133,17 @@
               <mat-icon>{{ exportingPDF() ? 'download' : 'picture_as_pdf' }}</mat-icon>
               <span>@if (exportingPDF()) {<ng-container i18n>Exporting...</ng-container>} @else {<ng-container i18n>Export to PDF</ng-container>}</span>
             </button>
+            <button mat-menu-item (click)="downloadDocument('folio', false)" [disabled]="exportingPDF() || statusUpdating() || isSubmitted()">
+              <mat-icon>receipt_long</mat-icon><span>@if (reservation.value()?.partner) {<ng-container i18n>Folio with prices</ng-container>} @else {<ng-container i18n>Folio</ng-container>}</span>
+            </button>
+            @if (reservation.value()?.partner) {
+              <button mat-menu-item (click)="downloadDocument('folio', true)" [disabled]="exportingPDF() || statusUpdating() || isSubmitted()">
+                <mat-icon>visibility_off</mat-icon><span><ng-container i18n>Folio for the guest (no prices)</ng-container></span>
+              </button>
+              <button mat-menu-item (click)="downloadDocument('pdf', true)" [disabled]="exportingPDF() || statusUpdating() || isSubmitted()">
+                <mat-icon>visibility_off</mat-icon><span><ng-container i18n>Booking PDF for the guest (no prices)</ng-container></span>
+              </button>
+            }
             @if (status() !== ReservationStatus.CANCELLED && status() !== ReservationStatus.NO_SHOW) {
               <button mat-menu-item (click)="updateReservationStatus(ReservationStatus.CANCELLED)" [disabled]="statusUpdating() || isSubmitted()">
                 <mat-icon class="!text-red-700">cancel</mat-icon><span class="text-red-700"><ng-container i18n>Cancel</ng-container></span>

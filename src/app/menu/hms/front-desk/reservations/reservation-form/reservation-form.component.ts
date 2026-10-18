@@ -196,6 +196,30 @@ export class ReservationFormComponent implements OnDestroy {
     }
   });
 
+  /** The folio or booking PDF, with or without prices. Without is the copy to hand to a partner's customer. */
+  downloadDocument(kind: 'folio' | 'pdf', hidePrices: boolean): void {
+    const reservation = this.reservation.value();
+    if (!reservation || this.exportingPDF()) return;
+    this.exportingPDF.set(true);
+    this.reservationService.downloadDocument(reservation._id, kind, hidePrices).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${kind === 'folio' ? 'folio' : 'reservation'}-${reservation.confirmationNumber}${hidePrices ? '-guest' : ''}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        this.exportingPDF.set(false);
+      },
+      error: () => {
+        this.exportingPDF.set(false);
+        this.snackBar.open($localize`The document could not be created. Try again.`, $localize`Close`, { duration: 5000, panelClass: ['error-snackbar'] });
+      },
+    });
+  }
+
    // PDF Export functionality
   async exportReservationToPDF(): Promise<void> {
     const reservation = this.reservation.value();

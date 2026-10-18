@@ -60,7 +60,7 @@ export interface CommissionList {
   total: number;
   page: number;
   limit: number;
-  totals: { estimated: number; pendingReview: number; approvedOwed: number; paid: number; needsReview: number };
+  totals: { expected: number; estimated: number; pendingReview: number; approvedOwed: number; paid: number; needsReview: number };
 }
 
 export interface CommissionQuery {

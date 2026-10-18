@@ -12,6 +12,7 @@ export const PARTNER_PORTAL_ROUTES: Routes = [
       { path: '', pathMatch: 'full', redirectTo: 'search' },
       { path: 'search', loadComponent: () => import('./partner-search.component').then((m) => m.PartnerSearchComponent) },
       { path: 'requests', loadComponent: () => import('./partner-requests.component').then((m) => m.PartnerRequestsComponent) },
+      { path: 'commissions', loadComponent: () => import('./partner-commissions.component').then((m) => m.PartnerCommissionsComponent) },
       { path: 'reservations', loadComponent: () => import('./partner-reservations.component').then((m) => m.PartnerReservationsComponent) },
     ],
   },

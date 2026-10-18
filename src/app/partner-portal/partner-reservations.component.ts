@@ -52,6 +52,10 @@ const TEXT: Record<string, () => string> = {
             <div class="text-sm"><strong>{{ r.leadGuest || '—' }}</strong> · {{ r.checkIn | date: 'EEE d MMM' }} – {{ r.checkOut | date: 'EEE d MMM y' }} · {{ r.nights }} <ng-container i18n>nights</ng-container> · {{ r.rooms.join(', ') }} · {{ r.adults }} <ng-container i18n>adult(s)</ng-container>@if (r.children) { , {{ r.children }} <ng-container i18n>child(ren)</ng-container> }</div>
             <div class="flex flex-wrap items-center justify-between gap-2">
               <span class="text-sm text-on-surface-variant">@if (r.partnerReference) { <ng-container i18n>Your reference</ng-container> {{ r.partnerReference }} · } @if (r.total !== undefined) { <span class="tabular-nums">{{ r.total | currency: r.currency : 'symbol' : '1.0-2' }}</span> }</span>
+              <span class="flex flex-wrap gap-1">
+                <button matButton type="button" [disabled]="downloading() === r._id" (click)="download(r, false)"><mat-icon>receipt_long</mat-icon><ng-container i18n>Folio with rates</ng-container></button>
+                <button matButton type="button" [disabled]="downloading() === r._id" (click)="download(r, true)"><mat-icon>visibility_off</mat-icon><ng-container i18n>Folio for the guest</ng-container></button>
+              </span>
               @if ((r.status === 'confirmed' || r.status === 'pending') && !r.openRequest) {
                 <span class="flex gap-1">
                   <button matButton type="button" (click)="amend(r, 'change')" i18n>Ask for a change</button>
@@ -80,6 +84,7 @@ export class PartnerReservationsComponent {
     { value: 'cancelled', label: $localize`Cancelled` },
   ];
   readonly status = signal('all');
+  readonly downloading = signal('');
   readonly page = signal(1);
   readonly pageSize = 15;
   private readonly refresh = signal(0);
@@ -98,6 +103,27 @@ export class PartnerReservationsComponent {
   setStatus(v: string | null) { this.status.set(v ?? 'all'); this.page.set(1); }
   onPage(e: PageEvent) { this.page.set(e.pageIndex + 1); }
   reload() { this.refresh.update((n) => n + 1); }
+
+  /** With rates is the agent's own copy. The guest copy has no money on it, to hand to their customer. */
+  download(r: PortalReservation, hidePrices: boolean) {
+    const hotel = this.ctx.hotels().find((h) => h.hotel.name === r.hotel) ?? this.ctx.current();
+    if (!hotel) return;
+    this.downloading.set(r._id);
+    this.api.document(hotel.storeId, r._id, 'folio', hidePrices).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `folio-${r.confirmationNumber}${hidePrices ? '-guest' : ''}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        this.downloading.set('');
+      },
+      error: () => { this.downloading.set(''); this.snack.open($localize`The document could not be created. Try again.`, undefined, { duration: 5000 }); },
+    });
+  }
 
   amend(r: PortalReservation, kind: 'change' | 'cancel') {
     const hotel = this.ctx.hotels().find((h) => h.hotel.name === r.hotel) ?? this.ctx.current();
