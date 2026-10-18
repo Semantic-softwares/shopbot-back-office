@@ -84,7 +84,8 @@ export class RevenueReportComponent {
 
   currency = computed(() => {
     const store = this.selectedStore();
-    const currencyValue = store?.currency || store?.currencyCode || 'USD';
+    // The ISO code first: `currency` is a display symbol ("Rs", "₦") and Intl.NumberFormat throws on anything that isn't a code.
+    const currencyValue = store?.currencyCode || store?.currency || 'USD';
     return this.currencySymbolToCode[currencyValue] || currencyValue;
   });
 

@@ -50,6 +50,12 @@ export class EmployeeListComponent {
   private userService = inject(UserService);  
   public storeStore = inject(StoreStore);
   displayedColumns: string[] = ['name', 'gender', 'email', 'phoneNumber', 'role', 'actions'];
+
+  /** A role arrives populated (an object) for platform roles and as a plain string for older accounts. */
+  roleName(employee: Employee): string {
+    const role = employee.role;
+    return typeof role === 'string' ? role : role?.name ?? '';
+  }
   dataSource!: MatTableDataSource<Employee>;
   searchText: string = '';
 
