@@ -25,18 +25,6 @@ export const DASHBOARD_FRONT_DESK_ROUTES: Routes = [
         }
       },
       {
-        path: 'check-in-check-out',
-        loadChildren: () =>
-          import('./check-in-check-out/check-in-check-out.routes').then(
-            (m) => m.DASHBOARD_CHECK_IN_CHECK_OUT_ROUTES
-          ),
-        canActivate: [roleGuard],
-        data: {
-          requiredPermissions: ['hotel.reservations.checkin', 'hotel.reservations.checkout'],
-          permissionMode: 'any'
-        }
-      },
-      {
         path: 'guests',
         loadChildren: () =>
           import('./guests/guests.routes').then(

@@ -52,6 +52,12 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
   styleUrls: ['./reservation-details.component.scss']
 })
 export class ReservationDetailsComponent implements OnInit {
+  /** The travel partner on this booking, when the server populated it. */
+  partnerOf(r: { partner?: unknown }): { name: string; code?: string } | null {
+    const p = r.partner as any;
+    return p && typeof p === 'object' && p.name ? p : null;
+  }
+
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private location = inject(Location);

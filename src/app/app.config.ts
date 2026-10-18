@@ -9,6 +9,7 @@ import { routes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withFetch, withInterceptors, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { authInterceptor } from './shared/interceptors/auth.interceptor';
+import { partnerPortalInterceptor } from './partner-portal/partner-portal.interceptor';
 import { subscriptionInterceptor } from './shared/interceptors/subscription.interceptor';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { MAT_ICON_DEFAULT_OPTIONS } from '@angular/material/icon';
@@ -37,7 +38,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withFetch(),
       withInterceptorsFromDi(),
-      withInterceptors([authInterceptor, subscriptionInterceptor, progressInterceptor])
+      withInterceptors([authInterceptor, partnerPortalInterceptor, subscriptionInterceptor, progressInterceptor])
     ), 
     provideCharts(withDefaultRegisterables()),
     provideEchartsCore({ echarts: () => import('echarts') }),

@@ -10,6 +10,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return next(req);
     }
 
+    // The partner portal has its own sign-in and its own token (partnerPortalInterceptor). A staff session in the same browser
+    // must never be sent there.
+    if (req.url.startsWith(`${environment.apiUrl}/partner-portal`)) {
+        return next(req);
+    }
+
     const sessionStorage = inject(SessionStorageService);
     const token = sessionStorage.getItem<string>('auth_token');
     const storeStore = inject(StoreStore);

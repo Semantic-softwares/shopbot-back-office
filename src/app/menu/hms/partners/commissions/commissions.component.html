@@ -1,0 +1,107 @@
+@if (!embedded()) {
+  <app-page-header title="Commissions" i18n-title subtitle="What the hotel owes its travel partners, from the bookings they brought." i18n-subtitle>
+    <ng-container actions>
+      <a matButton routerLink="/menu/hms/reports/financial/partner-commissions"><mat-icon>description</mat-icon><ng-container i18n>Statement</ng-container></a>
+      <button matIconButton (click)="reload()" [disabled]="loading()" aria-label="Refresh" i18n-aria-label matTooltip="Refresh" i18n-matTooltip><mat-icon [class.animate-spin]="loading()">refresh</mat-icon></button>
+    </ng-container>
+  </app-page-header>
+}
+
+<div class="flex flex-col gap-4 pb-16" [class.p-4]="!embedded()" [class.md:p-6]="!embedded()" [class.pt-4]="embedded()">
+  @if (totals(); as t) {
+    <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div class="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-4">
+        <div class="text-xs uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Awaiting approval</ng-container></div>
+        <div class="mt-1 text-xl font-semibold tabular-nums">{{ t.pendingReview | currency: currency() : 'symbol' : '1.0-2' }}</div>
+      </div>
+      <div class="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-4">
+        <div class="text-xs uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Approved, still owed</ng-container></div>
+        <div class="mt-1 text-xl font-semibold tabular-nums">{{ t.approvedOwed | currency: currency() : 'symbol' : '1.0-2' }}</div>
+      </div>
+      <div class="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-4">
+        <div class="text-xs uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Paid</ng-container></div>
+        <div class="mt-1 text-xl font-semibold tabular-nums">{{ t.paid | currency: currency() : 'symbol' : '1.0-2' }}</div>
+      </div>
+      <button type="button" class="rounded-2xl border p-4 text-left" [class]="t.needsReview > 0 ? 'border-amber-300 bg-amber-50 text-amber-900' : 'border-outline-variant/60 bg-surface-container-lowest'" (click)="setStatus('review')">
+        <div class="text-xs uppercase tracking-wide" [class.text-on-surface-variant]="t.needsReview === 0"><ng-container i18n>Needs a look</ng-container></div>
+        <div class="mt-1 text-xl font-semibold tabular-nums">{{ t.needsReview }}</div>
+      </button>
+    </div>
+  }
+
+  <div class="flex flex-wrap items-center gap-3">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full sm:w-72">
+      <mat-icon matPrefix class="ml-3 text-on-surface-variant">search</mat-icon>
+      <input matInput [value]="search()" (input)="onSearch($any($event.target).value)" placeholder="Search booking, guest or partner" i18n-placeholder autocomplete="off" />
+    </mat-form-field>
+    @if (!embedded()) {
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full sm:w-56">
+        <mat-label><ng-container i18n>Partner</ng-container></mat-label>
+        <mat-select [value]="partner()" (selectionChange)="setPartner($event.value)">
+          <mat-option value="all"><ng-container i18n>All partners</ng-container></mat-option>
+          @for (p of partnerOptions(); track p._id) { <mat-option [value]="p._id">{{ p.name }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+    }
+    <mat-chip-listbox [value]="status()" (change)="setStatus($event.value)" aria-label="Filter by status" i18n-aria-label>
+      @for (s of statuses; track s.value) { <mat-chip-option [value]="s.value">{{ s.label }}</mat-chip-option> }
+    </mat-chip-listbox>
+  </div>
+
+  @if (loading() && !data()) { <mat-progress-bar mode="indeterminate" /> }
+
+  @if (failed()) {
+    <div class="flex flex-col items-center gap-2 rounded-3xl border border-red-200 bg-red-50 p-8 text-center text-red-900" role="alert">
+      <mat-icon class="!h-10 !w-10 !text-4xl !leading-none text-red-600">error</mat-icon>
+      <p class="m-0 font-semibold"><ng-container i18n>Could not load the commissions.</ng-container></p>
+      <button matButton="filled" (click)="reload()"><ng-container i18n>Try again</ng-container></button>
+    </div>
+  } @else if (data()) {
+    @if (rows().length === 0) {
+      <div class="flex flex-col items-center gap-2 rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-10 text-center">
+        <mat-icon class="!h-12 !w-12 !text-5xl !leading-none text-on-surface-variant">payments</mat-icon>
+        <p class="m-0 font-medium"><ng-container i18n>No commissions here.</ng-container></p>
+        <p class="m-0 max-w-md text-sm text-on-surface-variant"><ng-container i18n>A commission appears when a reservation from a partner is covered by an agreement that pays one.</ng-container></p>
+      </div>
+    } @else {
+      <div class="overflow-x-auto rounded-3xl border border-outline-variant/60 bg-surface-container-lowest">
+        <table mat-table [dataSource]="rows()" class="w-full min-w-[820px]">
+          <ng-container matColumnDef="reservation">
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Reservation</ng-container></th>
+            <td mat-cell *matCellDef="let c"><div class="font-semibold">{{ c.reservation.confirmationNumber }}</div><div class="text-xs text-on-surface-variant">{{ c.reservation.guest || '—' }}</div></td>
+          </ng-container>
+          <ng-container matColumnDef="partner">
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Partner</ng-container></th>
+            <td mat-cell *matCellDef="let c"><div class="text-sm">{{ c.partner.name }}</div><div class="text-xs text-on-surface-variant">{{ c.agreement?.code }}</div></td>
+          </ng-container>
+          <ng-container matColumnDef="stay">
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Stay</ng-container></th>
+            <td mat-cell *matCellDef="let c" class="whitespace-nowrap text-sm">{{ c.reservation.checkInDate | date: 'd MMM' }} – {{ c.reservation.checkOutDate | date: 'd MMM y' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
+            <td mat-cell *matCellDef="let c">
+              <span class="whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium" [class]="tone(c.status)">{{ statusText(c.status) }}</span>
+              @if (c.review) { <mat-icon class="ml-1 !h-5 !w-5 !align-middle !text-xl !leading-none text-amber-600" matTooltip="The stay changed after approval" i18n-matTooltip>rule</mat-icon> }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Commission</ng-container></th>
+            <td mat-cell *matCellDef="let c" class="!text-right font-medium tabular-nums">{{ c.amount | currency: cur(c) : 'symbol' : '1.0-2' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="owed">
+            <th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Still owed</ng-container></th>
+            <td mat-cell *matCellDef="let c" class="!text-right tabular-nums">{{ c.outstanding | currency: cur(c) : 'symbol' : '1.0-2' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="go">
+            <th mat-header-cell *matHeaderCellDef class="!w-10"></th>
+            <td mat-cell *matCellDef="let c"><mat-icon class="text-on-surface-variant">chevron_right</mat-icon></td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns" class="cursor-pointer hover:bg-surface-container" tabindex="0" (click)="open(row)" (keydown.enter)="open(row)"></tr>
+        </table>
+      </div>
+      <mat-paginator [length]="data()!.total" [pageSize]="pageSize" [pageIndex]="page() - 1" [hidePageSize]="true" (page)="onPage($event)" aria-label="Pages" i18n-aria-label />
+    }
+  }
+</div>

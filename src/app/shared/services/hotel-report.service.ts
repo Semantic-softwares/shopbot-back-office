@@ -55,6 +55,8 @@ export class HotelReportService {
       if (value === undefined || value === null || value === '' || value === 'all') continue;
       p = p.set(key, key === 'all' ? '1' : String(value));
     }
-    return this.http.get<ReportResult>(`${environment.apiUrl}/stores/${storeId}/hotel-reports/${reportId}`, { params: p });
+    // The partner reports live behind the commissions right, on their own endpoint, in the same shape.
+    const area = reportId.startsWith('partner-') ? 'partner-reports' : 'hotel-reports';
+    return this.http.get<ReportResult>(`${environment.apiUrl}/stores/${storeId}/${area}/${reportId}`, { params: p });
   }
 }

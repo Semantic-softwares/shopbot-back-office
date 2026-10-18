@@ -69,6 +69,12 @@ export const routes: Routes = [
         canActivate: [authGuard, storeSelectedGuard, subscriptionActiveGuard],
         resolve: { role: roleResolver, subscription: subscriptionResolver }
     },
+    // The travel-partner booking portal: its own sign-in and session, separate from staff. Public sign-in pages; the rest is
+    // behind partnerPortalGuard inside the route file.
+    {
+        path: 'partner',
+        loadChildren: () => import('./partner-portal/partner-portal.routes').then(m => m.PARTNER_PORTAL_ROUTES),
+    },
     // Public self-service table ordering — deliberately no canActivate/resolve.
     // Scanned from a printed table QR code; must work with no auth session.
     {

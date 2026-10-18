@@ -130,11 +130,11 @@ const STATUS_LABELS: Record<StayStatus, () => string> = {
 
 const SOURCE_COLORS: Record<string, string> = {
   'booking.com': '#003580', expedia: '#002F6C', airbnb: '#FF5A5F', agoda: '#5C2D91', walk_in: '#16A34A', direct: '#4B5563',
-  phone: '#0EA5E9', online: '#6366F1', travel_agent: '#7C3AED', corporate: '#334155',
+  phone: '#0EA5E9', online: '#6366F1', travel_agent: '#7C3AED', corporate: '#334155', email: '#0D9488', partner_portal: '#9333EA',
 };
 const SOURCE_NAMES: Record<string, () => string> = {
   'booking.com': () => 'Booking.com', expedia: () => 'Expedia', agoda: () => 'Agoda', airbnb: () => 'Airbnb', direct: () => $localize`Direct`,
-  phone: () => $localize`Phone`, online: () => $localize`Online`, walk_in: () => $localize`Walk-in`, travel_agent: () => $localize`Agent`, corporate: () => $localize`Corporate`,
+  phone: () => $localize`Phone`, online: () => $localize`Online`, walk_in: () => $localize`Walk-in`, travel_agent: () => $localize`Agent`, corporate: () => $localize`Corporate`, email: () => $localize`Email`, partner_portal: () => $localize`Partner portal`,
 };
 const SOURCE_LOGOS: Record<string, string> = {
   airbnb: 'https://cdn.brandfetch.io/idkuvXnjOH/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1717146459610',
@@ -498,6 +498,8 @@ export class ReservationsCalendar {
       `${fmt.format(ci)} → ${fmt.format(co.getTime() <= ci.getTime() ? addDays(ci, 1) : co)} · ${layout.nights} ${layout.nights === 1 ? $localize`night` : $localize`nights`}`,
       `${STATUS_LABELS[status]()} · ${source}`,
     ];
+    const partnerName: string = reservation.partner?.name ?? '';
+    if (partnerName) lines.push($localize`Partner: ${partnerName}`);
     if (reservation.confirmationNumber) lines.push(`#${reservation.confirmationNumber}`);
     if (balance > 0 && status !== 'cancelled') lines.push($localize`Balance due: ${balance}`);
     if (urgency === 'arriving') lines.push($localize`Arriving today`);
@@ -508,7 +510,7 @@ export class ReservationsCalendar {
       key, reservation, roomId, ...layout, status, statusLabel: STATUS_LABELS[status](), icon: STAY_ICONS[status], color: STAY_COLORS[status],
       guest, isGroup: reservation.bookingType === 'group', modified: !!reservation.modification?.isModified, balance: status === 'cancelled' ? 0 : balance,
       urgency, source, sourceLogo: SOURCE_LOGOS[sourceKey] ?? null, checkInKey: dayKey(ci), checkOutKey: dayKey(co.getTime() <= ci.getTime() ? addDays(ci, 1) : co),
-      haystack: `${guest} ${reservation.confirmationNumber ?? ''} ${source} ${g.email ?? ''} ${g.phone ?? ''}`.toLowerCase(), tooltip: lines.join('\n'),
+      haystack: `${guest} ${reservation.confirmationNumber ?? ''} ${source} ${partnerName} ${reservation.partnerReference ?? ''} ${g.email ?? ''} ${g.phone ?? ''}`.toLowerCase(), tooltip: lines.join('\n'),
     };
   }
 

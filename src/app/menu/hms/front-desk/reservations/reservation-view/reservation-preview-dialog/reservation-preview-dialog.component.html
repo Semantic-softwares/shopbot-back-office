@@ -28,6 +28,12 @@
       Source
       <span matListItemMeta class="capitalize">{{ bookingSource() }}</span>
     </mat-list-item>
+    @if (partnerName()) {
+      <mat-list-item i18n>
+        Partner
+        <span matListItemMeta>{{ partnerName() }}</span>
+      </mat-list-item>
+    }
   </mat-list>
 
   <mat-divider></mat-divider>

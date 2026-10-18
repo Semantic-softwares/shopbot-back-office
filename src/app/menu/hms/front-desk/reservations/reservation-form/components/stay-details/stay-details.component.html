@@ -23,21 +23,37 @@
             <mat-date-range-picker #stayPicker></mat-date-range-picker>
           </mat-form-field>
 
-          <!-- Booking source -->
+          <!-- Booking channel: HOW the booking reached the hotel -->
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label><ng-container i18n>Booking source</ng-container></mat-label>
+            <mat-label><ng-container i18n>Booking channel</ng-container></mat-label>
             <mat-select formControlName="bookingSource">
-              <mat-option value="direct"><ng-container i18n>Direct</ng-container></mat-option>
-              <mat-option value="phone"><ng-container i18n>Phone</ng-container></mat-option>
-              <mat-option value="online"><ng-container i18n>Online</ng-container></mat-option>
-              <mat-option value="walk_in"><ng-container i18n>Walk-in</ng-container></mat-option>
-              <mat-option value="booking.com"><ng-container i18n>Booking.com</ng-container></mat-option>
-              <mat-option value="expedia"><ng-container i18n>Expedia</ng-container></mat-option>
-              <mat-option value="airbnb"><ng-container i18n>Airbnb</ng-container></mat-option>
-              <mat-option value="travel_agent"><ng-container i18n>Travel Agent</ng-container></mat-option>
-              <mat-option value="corporate"><ng-container i18n>Corporate</ng-container></mat-option>
+              @for (c of channels(); track c.value) { <mat-option [value]="c.value">{{ c.label }}</mat-option> }
             </mat-select>
           </mat-form-field>
+
+          <!-- Travel partner: WHO brought it -->
+          @if (canAttribute()) {
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label><ng-container i18n>Travel partner</ng-container></mat-label>
+              <mat-select formControlName="partner">
+                <mat-option value=""><ng-container i18n>No partner (direct booking)</ng-container></mat-option>
+                @for (p of partnerOptions(); track p._id) { <mat-option [value]="p._id">{{ p.name }}@if (p.inactive) { <span> · <ng-container i18n>inactive</ng-container></span> }</mat-option> }
+              </mat-select>
+              <mat-hint><ng-container i18n>The agency, tour operator or DMC that brought this booking</ng-container></mat-hint>
+            </mat-form-field>
+            @if (partnerId()) {
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label><ng-container i18n>Partner reference</ng-container></mat-label>
+                <input matInput formControlName="partnerReference" autocomplete="off" maxlength="80" />
+                <mat-hint><ng-container i18n>The agency's own booking number, if it gave one</ng-container></mat-hint>
+              </mat-form-field>
+            }
+          } @else if (attributedPartnerName()) {
+            <p class="m-0 flex items-center gap-1.5 self-center text-sm text-gray-600">
+              <mat-icon class="!h-4 !w-4 !text-base !leading-none text-gray-400">handshake</mat-icon>
+              <ng-container i18n>Partner</ng-container> <span class="font-medium text-gray-800">{{ attributedPartnerName() }}</span>
+            </p>
+          }
         </div>
 
         @if (salesPersonName()) {

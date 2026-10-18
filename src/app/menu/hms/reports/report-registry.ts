@@ -53,6 +53,8 @@ export const REPORTS: ReportMeta[] = [
   { id: 'cancellations', category: 'reservations', title: $localize`Cancellations`, description: $localize`Who cancelled, when, why, and the fees and refunds`, icon: 'event_busy', filters: ['dateRange', 'roomType', 'search'], wide: true },
   { id: 'room-orders', category: 'orders', title: $localize`Orders charged to rooms`, description: $localize`Restaurant, bar and room-service orders put on guests' rooms`, icon: 'room_service', filters: ['dateRange', 'status', 'search'], statuses: [{ value: 'all', label: $localize`All orders` }, { value: 'paid', label: $localize`Paid` }, { value: 'unpaid', label: $localize`Unpaid` }], wide: true },
   { id: 'room-status', category: 'housekeeping', title: $localize`Room status`, description: $localize`Every room: occupied, vacant, dirty or out of order, and who comes next`, icon: 'bed', filters: ['status', 'roomType', 'search'], statuses: [{ value: 'all', label: $localize`All rooms` }, { value: 'occupied', label: $localize`Occupied` }, { value: 'available', label: $localize`Vacant` }, { value: 'dirty', label: $localize`Dirty` }, { value: 'out_of_order', label: $localize`Out of order` }], wide: true },
+  { id: 'partner-performance', category: 'financial', title: $localize`Travel partners`, description: $localize`Reservations, completed stays and commission by agency, tour operator or DMC`, icon: 'handshake', filters: ['dateRange', 'search'], wide: true },
+  { id: 'partner-commissions', category: 'financial', title: $localize`Partner commission statement`, description: $localize`Every commission owed to a partner: the stay, the rule, what is owed and what is paid`, icon: 'request_quote', filters: ['dateRange', 'status', 'search'], statuses: [{ value: 'all', label: $localize`All statuses` }, { value: 'estimated', label: $localize`Estimated` }, { value: 'pending_review', label: $localize`Awaiting approval` }, { value: 'approved', label: $localize`Approved` }, { value: 'paid', label: $localize`Paid` }, { value: 'void', label: $localize`Void` }, { value: 'review', label: $localize`Needs a decision` }], wide: true },
   { id: 'revenue', category: 'financial', title: $localize`Revenue`, description: $localize`Room, fee and service revenue by day, week or month`, icon: 'monetization_on', filters: [], legacyLink: '/menu/hms/reports/revenue' },
   { id: 'occupancy', category: 'performance', title: $localize`Occupancy`, description: $localize`Occupancy, ADR and RevPAR by day, week or month`, icon: 'assessment', filters: [], legacyLink: '/menu/hms/reports/occupancy' },
   { id: 'guest-flow', category: 'guests', title: $localize`Guest movement`, description: $localize`Check-ins, check-outs, new and returning guests over time`, icon: 'people_outline', filters: [], legacyLink: '/menu/hms/reports/guest' },
@@ -70,6 +72,10 @@ export const COLUMN_LABELS: Record<string, string> = {
   type: $localize`Type`, paymentStatus: $localize`Payment`, method: $localize`Method`, staff: $localize`Taken by`, nationality: $localize`Nationality`, idType: $localize`ID type`,
   idNumber: $localize`ID number`, dateOfBirth: $localize`Date of birth`, address: $localize`Address`, phone: $localize`Phone`, signature: $localize`Signature`, room: $localize`Room`,
   roomType: $localize`Room type`, floor: $localize`Floor`, housekeeping: $localize`Housekeeping`, nextArrival: $localize`Next arrival`, nextGuest: $localize`Next guest`, lastCleaned: $localize`Last cleaned`,
+  partner: $localize`Partner`, code: $localize`Code`, agreement: $localize`Agreement`, roomNights: $localize`Room nights`, revenue: $localize`Room revenue`, rule: $localize`Commission rule`,
+  amount: $localize`Commission`, outstanding: $localize`Still owed`, needsReview: $localize`Needs a decision`, reservations: $localize`Reservations`, completedStays: $localize`Completed stays`,
+  cancelled: $localize`Cancelled`, noShows: $localize`No-shows`, bookedRevenue: $localize`Booked room revenue`, completedRevenue: $localize`Completed-stay revenue`, received: $localize`Received from guests`,
+  commissionEstimated: $localize`Commission estimated`, commissionApproved: $localize`Commission approved, unpaid`, commissionPaid: $localize`Commission paid`,
 };
 
 export const KPI_LABELS: Record<string, string> = {
@@ -79,6 +85,9 @@ export const KPI_LABELS: Record<string, string> = {
   paid: $localize`Paid`, cancellations: $localize`Cancellations`, fees: $localize`Fees kept`, refunds: $localize`Refunded`, averageLeadDays: $localize`Average days before arrival`,
   orders: $localize`Orders`, total: $localize`Total`, unpaid: $localize`Unpaid`, guests: $localize`Guests`, nationalities: $localize`Nationalities`, missingId: $localize`Without ID on file`,
   rooms: $localize`Rooms`, occupied: $localize`Occupied`, vacantClean: $localize`Vacant and clean`, dirty: $localize`Dirty`, outOfOrder: $localize`Out of order`,
+  partnerReservations: $localize`Partner reservations`, partnerBookedRevenue: $localize`Booked room revenue`, partnerCompletedRevenue: $localize`Completed-stay revenue`,
+  partnerCommissionEstimated: $localize`Commission estimated`, partnerCommissionApproved: $localize`Commission approved, unpaid`, partnerCommissionPaid: $localize`Commission paid`,
+  commissionRecords: $localize`Commissions`, commissionEstimated: $localize`Estimated`, commissionPaid: $localize`Paid`, commissionOwed: $localize`Approved, still owed`, commissionNeedsReview: $localize`Need a decision`,
 };
 
 /** Words for the values of "status" columns (reservations, orders, rooms, housekeeping). */
@@ -87,6 +96,7 @@ export const STATUS_LABELS: Record<string, string> = {
   cancelled: $localize`Cancelled`, no_show: $localize`No-show`, available: $localize`Vacant`, occupied: $localize`Occupied`, maintenance: $localize`Maintenance`,
   out_of_order: $localize`Out of order`, cleaning: $localize`Cleaning`, clean: $localize`Clean`, dirty: $localize`Dirty`, inspected: $localize`Inspected`,
   Paid: $localize`Paid`, Unpaid: $localize`Unpaid`, Complete: $localize`Complete`, Cancel: $localize`Cancelled`, Processing: $localize`Processing`, New: $localize`New`,
+  estimated: $localize`Estimated`, pending_review: $localize`Awaiting approval`, approved: $localize`Approved`, paid: $localize`Paid`, void: $localize`Void`,
 };
 
 export const statusLabel = (value: unknown) => STATUS_LABELS[String(value)] ?? String(value ?? '');
@@ -97,6 +107,7 @@ export const STATUS_TONES: Record<string, [string, string]> = {
   cancelled: ['#fee2e2', '#991b1b'], no_show: ['#ffedd5', '#9a3412'], Paid: ['#dcfce7', '#166534'], Unpaid: ['#fee2e2', '#991b1b'], Cancel: ['#fee2e2', '#991b1b'], Complete: ['#e2e8f0', '#334155'],
   available: ['#dcfce7', '#166534'], occupied: ['#fee2e2', '#991b1b'], out_of_order: ['#e2e8f0', '#334155'], maintenance: ['#fef3c7', '#92400e'],
   clean: ['#dcfce7', '#166534'], inspected: ['#dbeafe', '#1e40af'], dirty: ['#fef3c7', '#92400e'], cleaning: ['#fef3c7', '#92400e'],
+  estimated: ['#e0e7ff', '#3730a3'], pending_review: ['#fef3c7', '#92400e'], approved: ['#dbeafe', '#1e40af'], paid: ['#dcfce7', '#166534'], void: ['#e2e8f0', '#334155'],
 };
 
 /** An icon and a colour for each headline figure, in the same style as the other PMS stat cards. */
@@ -108,6 +119,9 @@ export const KPI_STYLE: Record<string, { icon: string; tone: 'primary' | 'succes
   cancellations: { icon: 'event_busy', tone: 'danger' }, fees: { icon: 'receipt', tone: 'success' }, refunds: { icon: 'undo', tone: 'warn' }, averageLeadDays: { icon: 'update', tone: 'neutral' },
   orders: { icon: 'receipt_long', tone: 'primary' }, total: { icon: 'summarize', tone: 'neutral' }, unpaid: { icon: 'money_off', tone: 'danger' },
   guests: { icon: 'groups', tone: 'primary' }, nationalities: { icon: 'public', tone: 'neutral' }, missingId: { icon: 'badge', tone: 'warn' },
+  partnerReservations: { icon: 'handshake', tone: 'primary' }, partnerBookedRevenue: { icon: 'event_available', tone: 'primary' }, partnerCompletedRevenue: { icon: 'check_circle', tone: 'success' },
+  partnerCommissionEstimated: { icon: 'hourglass_top', tone: 'warn' }, partnerCommissionApproved: { icon: 'verified', tone: 'primary' }, partnerCommissionPaid: { icon: 'paid', tone: 'success' },
+  commissionRecords: { icon: 'request_quote', tone: 'neutral' }, commissionEstimated: { icon: 'hourglass_top', tone: 'warn' }, commissionOwed: { icon: 'account_balance_wallet', tone: 'danger' }, commissionPaid: { icon: 'paid', tone: 'success' }, commissionNeedsReview: { icon: 'rule', tone: 'warn' },
   rooms: { icon: 'meeting_room', tone: 'neutral' }, occupied: { icon: 'person', tone: 'danger' }, vacantClean: { icon: 'check_circle', tone: 'success' }, dirty: { icon: 'cleaning_services', tone: 'warn' }, outOfOrder: { icon: 'build', tone: 'neutral' },
 };
 

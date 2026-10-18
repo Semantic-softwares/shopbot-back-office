@@ -103,6 +103,19 @@
           </mat-form-field>
         </div>
 
+        <!-- Travel partner -->
+        @if (canSeePartners()) {
+        <div>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label><ng-container i18n>Travel partner</ng-container></mat-label>
+            <mat-select formControlName="partner">
+              <mat-option value=""><ng-container i18n>All bookings</ng-container></mat-option>
+              @for (p of partnerOptions.value()?.partners ?? []; track p._id) { <mat-option [value]="p._id">{{ p.name }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+        </div>
+        }
+
         <!-- Date Range -->
         <div class="lg:col-span-2">
           <mat-form-field appearance="outline" class="w-full">
@@ -153,6 +166,19 @@
           <th mat-header-cell *matHeaderCellDef><ng-container i18n>Guest Information</ng-container></th>
           <td mat-cell *matCellDef="let reservation">
             {{ reservation.guest | getGuestName }}
+          </td>
+        </ng-container>
+
+        <!-- Travel partner Column -->
+        <ng-container matColumnDef="partner">
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Partner</ng-container></th>
+          <td mat-cell *matCellDef="let reservation">
+            @if (reservation.partner?.name) {
+              <div class="text-sm font-medium">{{ reservation.partner.name }}</div>
+              <div class="text-xs text-gray-500">{{ channelLabel(reservation.bookingSource) }}@if (reservation.partnerReference) { · {{ reservation.partnerReference }} }</div>
+            } @else {
+              <span class="text-xs text-gray-500">{{ channelLabel(reservation.bookingSource) }}</span>
+            }
           </td>
         </ng-container>
 

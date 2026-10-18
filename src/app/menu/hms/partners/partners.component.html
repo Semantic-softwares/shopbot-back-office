@@ -1,0 +1,78 @@
+<app-page-header title="Travel partners" i18n-title subtitle="Agencies, tour operators and DMCs that send business to this hotel." i18n-subtitle>
+  <ng-container actions>
+    <button matIconButton (click)="reload()" [disabled]="loading()" aria-label="Refresh" i18n-aria-label matTooltip="Refresh" i18n-matTooltip><mat-icon [class.animate-spin]="loading()">refresh</mat-icon></button>
+    @if (canManage()) {
+      <button matButton="filled" (click)="create()"><mat-icon>add</mat-icon><ng-container i18n>New partner</ng-container></button>
+    }
+  </ng-container>
+</app-page-header>
+
+<div class="flex flex-col gap-4 p-4 pb-16 md:p-6">
+  <div class="flex flex-wrap items-center gap-3">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full sm:w-72">
+      <mat-icon matPrefix class="ml-3 text-on-surface-variant">search</mat-icon>
+      <input matInput [value]="search()" (input)="onSearch($any($event.target).value)" placeholder="Search name, code or contact" i18n-placeholder autocomplete="off" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full sm:w-56">
+      <mat-label><ng-container i18n>Type</ng-container></mat-label>
+      <mat-select [value]="type()" (selectionChange)="setType($event.value)">
+        <mat-option value="all"><ng-container i18n>All types</ng-container></mat-option>
+        @for (t of types; track t) { <mat-option [value]="t">{{ typeLabel(t) }}</mat-option> }
+      </mat-select>
+    </mat-form-field>
+    <mat-chip-listbox [value]="status()" (change)="setStatus($event.value)" aria-label="Filter by status" i18n-aria-label>
+      @for (s of statuses; track s.value) { <mat-chip-option [value]="s.value">{{ s.label }}</mat-chip-option> }
+    </mat-chip-listbox>
+  </div>
+
+  @if (loading() && !data()) { <mat-progress-bar mode="indeterminate" /> }
+
+  @if (failed()) {
+    <div class="flex flex-col items-center gap-2 rounded-3xl border border-red-200 bg-red-50 p-8 text-center text-red-900" role="alert">
+      <mat-icon class="!h-10 !w-10 !text-4xl !leading-none text-red-600">error</mat-icon>
+      <p class="m-0 font-semibold"><ng-container i18n>Could not load the partners.</ng-container></p>
+      <button matButton="filled" (click)="reload()"><ng-container i18n>Try again</ng-container></button>
+    </div>
+  } @else if (data()) {
+    @if (rows().length === 0) {
+      <div class="flex flex-col items-center gap-2 rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-10 text-center">
+        <mat-icon class="!h-12 !w-12 !text-5xl !leading-none text-on-surface-variant">handshake</mat-icon>
+        <p class="m-0 font-medium"><ng-container i18n>No partners here yet.</ng-container></p>
+        <p class="m-0 max-w-md text-sm text-on-surface-variant"><ng-container i18n>Add the agencies and tour operators you work with, then attribute their reservations to them.</ng-container></p>
+        @if (canManage()) { <button matButton="filled" (click)="create()"><ng-container i18n>Add the first partner</ng-container></button> }
+      </div>
+    } @else {
+      <div class="overflow-x-auto rounded-3xl border border-outline-variant/60 bg-surface-container-lowest">
+        <table mat-table [dataSource]="rows()" class="w-full min-w-[720px]">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Partner</ng-container></th>
+            <td mat-cell *matCellDef="let p"><div class="font-semibold">{{ p.name }}</div><div class="text-xs text-on-surface-variant">{{ p.code }}</div></td>
+          </ng-container>
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Type</ng-container></th>
+            <td mat-cell *matCellDef="let p" class="whitespace-nowrap text-sm">{{ typeLabel(p.type) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="contact">
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Contact</ng-container></th>
+            <td mat-cell *matCellDef="let p" class="text-sm"><div>{{ p.contact?.name || '—' }}</div><div class="text-xs text-on-surface-variant">{{ p.contact?.email || p.contact?.phone || '' }}</div></td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
+            <td mat-cell *matCellDef="let p">
+              <span class="whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium" [class]="p.status === 'active' ? 'bg-green-100 text-green-900' : 'bg-gray-100 text-gray-700'">
+                @if (p.status === 'active') { <ng-container i18n>Active</ng-container> } @else { <ng-container i18n>Inactive</ng-container> }
+              </span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="go">
+            <th mat-header-cell *matHeaderCellDef class="!w-10"></th>
+            <td mat-cell *matCellDef="let p"><mat-icon class="text-on-surface-variant">chevron_right</mat-icon></td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns" class="cursor-pointer hover:bg-surface-container" tabindex="0" (click)="open(row)" (keydown.enter)="open(row)"></tr>
+        </table>
+      </div>
+      <mat-paginator [length]="data()!.total" [pageSize]="pageSize" [pageIndex]="page() - 1" [hidePageSize]="true" (page)="onPage($event)" aria-label="Pages" i18n-aria-label />
+    }
+  }
+</div>

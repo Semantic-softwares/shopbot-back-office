@@ -33,6 +33,9 @@ export class ReservationService {
     /** Every stay overlapping this window, including one that began before it (the calendar uses this). */
     stayFrom?: string;
     stayTo?: string;
+    /** Only the reservations a given travel partner brought, or that arrived through a given channel. */
+    partner?: string;
+    bookingSource?: string;
     guestId?: string;
     roomId?: string;
     page?: number;

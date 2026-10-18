@@ -13,8 +13,8 @@
       @for (control of data.invalidControls; track control) {
         <mat-list-item>
           <mat-icon matListItemIcon>warning</mat-icon>
-          <div matListItemTitle>{{ formatFieldName(control) }}</div>
-          <div matListItemLine>{{ formatFullPath(control) }}</div>
+          <div matListItemTitle>{{ titleOf(control) }}</div>
+          @if (detailOf(control)) { <div matListItemLine>{{ detailOf(control) }}</div> }
         </mat-list-item>
       }
 

@@ -7,6 +7,8 @@ import { MatListModule } from '@angular/material/list';
 
 export interface ValidationErrorsDialogData {
   invalidControls: string[];
+  /** Plain-language name (and optional explanation) for a control path. Paths without one fall back to the generated name. */
+  labels?: Record<string, { title: string; detail?: string }>;
   title?: string;
   message?: string;
 }
@@ -29,6 +31,15 @@ export class ValidationErrorsDialogComponent {
   data: ValidationErrorsDialogData = inject(MAT_DIALOG_DATA);
 
   constructor() {}
+
+  titleOf(path: string): string {
+    return this.data.labels?.[path]?.title ?? this.formatFieldName(path);
+  }
+
+  detailOf(path: string): string {
+    const custom = this.data.labels?.[path];
+    return custom ? custom.detail ?? '' : this.formatFullPath(path);
+  }
 
   /**
    * Convert a control path to a human-readable field name

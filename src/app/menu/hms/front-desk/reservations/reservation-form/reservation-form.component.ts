@@ -34,6 +34,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subject, takeUntil, of, tap, firstValueFrom } from 'rxjs';
 
 import { ReservationService } from '../../../../../shared/services/reservation.service';
+import { PartnerService } from '../../../../../shared/services/partner.service';
 import { RoomsService } from '../../../../../shared/services/rooms.service';
 import { GuestService } from '../../../../../shared/services/guest.service';
 import { AuthService } from '../../../../../shared/services/auth.service';
@@ -48,6 +49,7 @@ import { ReservationStatus } from '../../../../../shared/enums/reservation-statu
 import { toSignal, rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GuestDetailsComponent } from './components/guest-details/guest-details.component';
 import { StayDetailsComponent } from './components/stay-details/stay-details.component';
+import { PartnerTermsComponent } from './components/partner-terms/partner-terms.component';
 import { HistoricalEntryComponent, HistoricalEntryState } from './components/historical-entry/historical-entry.component';
 import { RoomSharersComponent } from './components/room-sharers/room-sharers.component';
 import { RoomDetailsComponent } from './components/room-details/room-details.component';
@@ -96,6 +98,7 @@ import { STAY_COLORS, STAY_ICONS, StayStatus } from '../reservation-view/reserva
     GuestDetailsComponent,
     StayDetailsComponent,
     HistoricalEntryComponent,
+    PartnerTermsComponent,
     RouterLink,
     RoomSharersComponent,
     RoomDetailsComponent,
@@ -115,6 +118,7 @@ export class ReservationFormComponent implements OnDestroy {
   private location = inject(Location);
   private fb = inject(FormBuilder);
   private reservationService = inject(ReservationService);
+  private partnerService = inject(PartnerService);
   private roomsService = inject(RoomsService);
   private guestService = inject(GuestService);
   private authService = inject(AuthService);
@@ -253,6 +257,11 @@ export class ReservationFormComponent implements OnDestroy {
     ],
     numberOfNights: [1, [Validators.required, Validators.min(1)]],
     bookingSource: ['walk_in', [Validators.required]],
+    // WHO brought the booking (a travel partner) and the partner's own reference. The channel above is HOW it arrived.
+    partner: [''],
+    partnerReference: [''],
+    // Why a partner booking is saved at a price other than the agreement's (only people with the right can; the server checks).
+    partnerPriceOverrideReason: [''],
     createdBy: [this.currentUser()?._id, [Validators.required]],
     paymentInfo: this.fb.group({
       method: [{value: 'cash', disabled: true}, [Validators.required]],
@@ -612,6 +621,8 @@ export class ReservationFormComponent implements OnDestroy {
       checkOutDate: new Date(reservation.checkOutDate),
       numberOfNights: reservation.numberOfNights,
       bookingSource: reservation.bookingSource,
+      partner: (reservation.partner as any)?._id ?? reservation.partner ?? '',
+      partnerReference: reservation.partnerReference ?? '',
       createdBy: reservation?.createdBy?._id,
       paymentInfo: {
         method: reservation.paymentInfo?.method || 'cash',
@@ -701,6 +712,12 @@ export class ReservationFormComponent implements OnDestroy {
       formData.backdating = { reason: String(formData.historical?.reason ?? '').trim() };
     }
     delete formData.historical;
+    // A partner is chosen from the list or not at all; an empty choice means a direct booking.
+    formData.partner = formData.partner || undefined;
+    formData.partnerReference = formData.partner ? String(formData.partnerReference ?? '').trim() || undefined : undefined;
+    const overrideReason = String(formData.partnerPriceOverrideReason ?? '').trim();
+    formData.partnerPriceOverride = formData.partner && overrideReason ? { reason: overrideReason } : undefined;
+    delete formData.partnerPriceOverrideReason;
 
     // Normalize dates to YYYY-MM-DD strings to prevent timezone shift during JSON serialization.
     // Without this, Date objects serialize as ISO strings (e.g. "2026-03-03T23:00:00.000Z" for
@@ -718,6 +735,8 @@ export class ReservationFormComponent implements OnDestroy {
       formData.rooms = formData.rooms.map((room: any) => ({
         ...room,
         ratePlanId: room.ratePlanId || null,
+        // The guest may have been picked before the room was added, which leaves this blank. A single booking's room belongs to its guest.
+        assignedGuest: room.assignedGuest || (this.isSingleBooking() && formData.guest ? formData.guest : null),
         stayPeriod: room.stayPeriod ? {
           from: room.stayPeriod.from ? this.formatLocalDate(new Date(room.stayPeriod.from)) : room.stayPeriod.from,
           to: room.stayPeriod.to ? this.formatLocalDate(new Date(room.stayPeriod.to)) : room.stayPeriod.to,
@@ -776,7 +795,7 @@ export class ReservationFormComponent implements OnDestroy {
           // The server explains refusals (a room already taken, a past date without the right or a reason): say what it said.
           const serverMessage = error?.error?.message ?? error?.error?.error;
           this.snackBar.open(
-            typeof serverMessage === 'string' && [400, 403, 409].includes(error?.status) ? serverMessage : $localize`Failed to create reservation. Please try again.`,
+            typeof serverMessage === 'string' && [400, 403, 404, 409, 422].includes(error?.status) ? serverMessage : $localize`Failed to create reservation. Please try again.`,
             $localize`Close`,
             {
               duration: 6000,
@@ -791,31 +810,57 @@ export class ReservationFormComponent implements OnDestroy {
     const reservationId = this.id();
     if (!reservationId) return;
 
-    this.reservationService
-      .updateReservation(reservationId, data)
+    // The server keeps partner changes out of the ordinary update: they go through their own audited call afterwards.
+    const before: any = this.reservation.value();
+    const beforePartner = String(before?.partner?._id ?? before?.partner ?? '');
+    const beforeReference = String(before?.partnerReference ?? '');
+    const nextPartner = String(data.partner ?? '');
+    const nextReference = String(data.partnerReference ?? '');
+    const attributionChanged = beforePartner !== nextPartner || beforeReference !== nextReference;
+    const { partner: _partner, partnerReference: _reference, ...body } = data;
+
+    // The partner changes first: moving a booking to another partner drops the old partner's terms, so the new price in this save is
+    // then checked against the new partner's agreement and not against the old snapshot.
+    const saveStay = () =>
+      this.reservationService
+        .updateReservation(reservationId, body)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.isSubmitted.set(false);
+            this.snackBar.open($localize`Reservation updated successfully`, $localize`Close`, {
+              duration: 3000,
+              panelClass: ['success-snackbar'],
+            });
+            this.reservationForm.markAsPristine();
+            this.formDirty.set(false);
+            this.reservation.reload();
+          },
+          error: (error) => {
+            console.error('Error updating reservation:', error);
+            this.isSubmitted.set(false);
+            const serverMessage = error?.error?.message;
+            this.snackBar.open(
+              typeof serverMessage === 'string' && [400, 403, 404, 409, 422].includes(error?.status) ? serverMessage : $localize`Failed to update reservation. Please try again.`,
+              $localize`Close`,
+              { duration: 6000, panelClass: ['error-snackbar'] },
+            );
+            this.reservation.reload();
+          },
+        });
+
+    if (!attributionChanged) {
+      saveStay();
+      return;
+    }
+    this.partnerService
+      .setAttribution(reservationId, { partner: nextPartner || null, partnerReference: nextReference })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (reservation) => {
+        next: saveStay,
+        error: (e) => {
           this.isSubmitted.set(false);
-          this.snackBar.open($localize`Reservation updated successfully`, $localize`Close`, {
-            duration: 3000,
-            panelClass: ['success-snackbar'],
-          });
-          this.reservationForm.markAsPristine();
-          this.formDirty.set(false);
-          this.reservation.reload();
-        },
-        error: (error) => {
-          console.error('Error updating reservation:', error);
-          this.isSubmitted.set(false);
-          this.snackBar.open(
-            $localize`Failed to update reservation. Please try again.`,
-            $localize`Close`,
-            {
-              duration: 3000,
-              panelClass: ['error-snackbar'],
-            }
-          );
+          this.snackBar.open(e?.error?.message ?? $localize`The partner could not be changed.`, $localize`Close`, { duration: 7000, panelClass: ['error-snackbar'] });
         },
       });
   }

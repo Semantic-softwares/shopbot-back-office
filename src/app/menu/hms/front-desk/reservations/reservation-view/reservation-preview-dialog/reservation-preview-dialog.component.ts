@@ -275,6 +275,11 @@ export class ReservationPreviewDialogComponent {
   });
 
   /** Booking source */
+  public partnerName = computed(() => {
+    const p = (this.reservation() as any)?.partner;
+    return p && typeof p === 'object' ? p.name : '';
+  });
+
   public bookingSource = computed(() => {
     return this.reservation()?.bookingSource || '—';
   });

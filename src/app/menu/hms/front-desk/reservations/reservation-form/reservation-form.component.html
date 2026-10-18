@@ -198,6 +198,8 @@
 
           <app-stay-details [quickReservation]="quickReservation()" [isEditing]="isEditing()" [reservation]="reservation.value()"></app-stay-details>
 
+          <app-partner-terms [form]="reservationForm" [storeId]="storeStore.selectedStore()?._id || ''" [reservation]="reservation.value()" [isEditing]="isEditing()" />
+
           @if (!isEditing()) {
             <app-historical-entry [form]="reservationForm" [storeId]="storeStore.selectedStore()?._id || ''" (stateChange)="historicalState.set($event)" />
           }

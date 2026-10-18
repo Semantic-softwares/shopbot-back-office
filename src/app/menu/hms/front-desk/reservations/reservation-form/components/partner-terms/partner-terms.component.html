@@ -1,0 +1,86 @@
+@if (partnerId()) {
+  <section class="flex flex-col gap-3 rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-4 md:p-5" aria-live="polite">
+    <header class="flex flex-wrap items-center gap-2">
+      <mat-icon class="text-on-surface-variant">handshake</mat-icon>
+      <h3 class="m-0 text-base font-semibold"><ng-container i18n>Partner terms</ng-container></h3>
+      @if (showSaved()) {
+        <span class="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-900">{{ savedTerms().agreementCode }}</span>
+      } @else if (quote()?.agreement; as a) {
+        <span class="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-900">{{ a.code }}</span>
+      }
+    </header>
+
+    @if (showSaved()) {
+      <!-- the terms this booking was made under -->
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div><div class="text-xs uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Agreement</ng-container></div><div class="text-sm font-medium">{{ savedTerms().agreementName }}</div></div>
+        <div><div class="text-xs uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Guest pays</ng-container></div><div class="text-sm font-medium">{{ savedRateText() }}</div></div>
+        <div><div class="text-xs uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Hotel owes</ng-container></div><div class="text-sm font-medium">{{ savedCommissionText() }}</div></div>
+      </div>
+      <p class="m-0 text-sm text-on-surface-variant"><ng-container i18n>Taken when this booking was made, so a later change to the agreement does not move it. Agreed room price:</ng-container>&nbsp;<strong class="text-on-surface">{{ savedTotal() | currency: (savedTerms().currency || '') : 'symbol' : '1.0-2' }}</strong>. <ng-container i18n>Change the dates or rooms to price it again under today's agreement.</ng-container></p>
+      @if (commission(); as c) {
+        <p class="m-0 flex flex-wrap items-center gap-2 text-sm"><ng-container i18n>Commission:</ng-container> <strong class="tabular-nums">{{ c.amount | currency: (c.currency || savedTerms().currency || '') : 'symbol' : '1.0-2' }}</strong> <span class="rounded-full px-2.5 py-0.5 text-xs font-medium" [class]="commissionTone(c.status)">{{ commissionStatusText(c.status) }}</span>@if (c.review) { <span class="text-amber-800"><ng-container i18n>The stay changed after approval. Review it on the commissions page.</ng-container></span> }</p>
+      }
+      @if (savedTerms().priceOverridden; as o) {
+        <p class="m-0 flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-900"><mat-icon class="!h-5 !w-5 !text-xl !leading-none">edit_note</mat-icon><span><ng-container i18n>Saved at a different price than the agreement:</ng-container> {{ o.reason }}</span></p>
+      }
+    } @else {
+      @if (loading() && !quote() && !problem()) { <mat-progress-bar mode="indeterminate" /> }
+
+      @if (problem(); as p) {
+        <p class="m-0 flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-900" role="alert"><mat-icon class="!h-5 !w-5 !text-xl !leading-none">warning</mat-icon>{{ p.message }}</p>
+      } @else if (quote(); as q) {
+        @if (!q.agreement) {
+          <p class="m-0 text-sm text-on-surface-variant"><ng-container i18n>No agreement covers these dates and rooms for this partner, so the booking is sold at your own price and no commission is tracked.</ng-container></p>
+        } @else {
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div><div class="text-xs uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Agreement</ng-container></div><div class="text-sm font-medium">{{ q.agreement.name }}</div></div>
+            <div><div class="text-xs uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Guest pays</ng-container></div><div class="text-sm font-medium">{{ rateText() }}</div></div>
+            <div><div class="text-xs uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Hotel owes</ng-container></div><div class="text-sm font-medium">{{ commissionText() }}</div></div>
+          </div>
+
+          <div class="flex flex-wrap items-end gap-x-8 gap-y-2 rounded-2xl bg-surface-container p-3">
+            <div><div class="text-xs text-on-surface-variant"><ng-container i18n>Public rate</ng-container></div><div class="text-sm tabular-nums" [class.line-through]="agreedTotal() !== publicTotal()">{{ publicTotal() | currency: q.quotes[0].currency : 'symbol' : '1.0-2' }}</div></div>
+            <div><div class="text-xs text-on-surface-variant"><ng-container i18n>Agreed room price</ng-container></div><div class="text-lg font-semibold tabular-nums">{{ agreedTotal() | currency: q.quotes[0].currency : 'symbol' : '1.0-2' }}</div></div>
+            @if (estimatedCommission() > 0) {
+              <div><div class="text-xs text-on-surface-variant"><ng-container i18n>Estimated commission</ng-container></div><div class="text-sm font-medium tabular-nums">{{ estimatedCommission() | currency: q.quotes[0].currency : 'symbol' : '1.0-2' }}</div></div>
+            }
+          </div>
+          @if (estimatedCommission() > 0) {
+            <p class="m-0 text-xs text-on-surface-variant"><ng-container i18n>Commission is what the hotel owes the partner. It is not added to the guest's price, and it is worked out on room revenue after discounts and before taxes.</ng-container></p>
+          }
+
+          <details class="text-sm">
+            <summary class="cursor-pointer text-on-surface-variant"><ng-container i18n>Nightly prices</ng-container></summary>
+            @for (r of q.quotes; track r.index) {
+              <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                @if (q.quotes.length > 1) { <span class="font-medium"><ng-container i18n>Room</ng-container> {{ r.index + 1 }}</span> }
+                @for (n of r.nights; track n.date) { <span class="tabular-nums">{{ n.date | date: 'd MMM' }}: {{ n.agreedRate | currency: r.currency : 'symbol' : '1.0-2' }}@if (n.agreedRate !== n.publicRate) { <s class="text-on-surface-variant"> {{ n.publicRate | currency: r.currency : 'symbol' : '1.0-2' }}</s> }</span> }
+              </div>
+            }
+          </details>
+
+          @if (noRate()) {
+            <p class="m-0 flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-900"><mat-icon class="!h-5 !w-5 !text-xl !leading-none">warning</mat-icon><ng-container i18n>One or more nights have no public rate set, so the agreed price may be too low. Set the rates first.</ng-container></p>
+          }
+
+          @if (differs()) {
+            <div class="flex flex-col gap-2 rounded-2xl border border-amber-300 bg-amber-50 p-3 text-amber-900">
+              <p class="m-0 flex items-start gap-2 text-sm"><mat-icon class="!h-5 !w-5 !text-xl !leading-none">price_change</mat-icon><ng-container i18n>The room price on this booking is not the agreed price. The hotel's server will not accept it unless it is changed or overridden.</ng-container></p>
+              <div class="flex flex-wrap items-center gap-2">
+                <button matButton="filled" type="button" (click)="apply()"><ng-container i18n>Apply the agreed price</ng-container></button>
+              </div>
+              @if (canOverride()) {
+                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+                  <mat-label><ng-container i18n>Keep a different price: why?</ng-container></mat-label>
+                  <input matInput [value]="overrideReason()" (input)="setReason($any($event.target).value)" autocomplete="off" />
+                  <mat-hint><ng-container i18n>Recorded on the booking. Needed only to save a price other than the agreed one.</ng-container></mat-hint>
+                </mat-form-field>
+              }
+            </div>
+          }
+        }
+      }
+    }
+  </section>
+}

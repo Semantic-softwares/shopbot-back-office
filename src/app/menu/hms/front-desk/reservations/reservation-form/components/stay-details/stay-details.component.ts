@@ -28,7 +28,11 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../../../../../../shared/services/auth.service';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
+import { of } from 'rxjs';
+import { RolesService } from '../../../../../../../shared/services/roles.service';
+import { StoreStore } from '../../../../../../../shared/stores/store.store';
+import { BOOKING_CHANNELS, Partner, PartnerService } from '../../../../../../../shared/services/partner.service';
 import { ReservationFormService } from '../../../../../../../shared/services/reservation-form.service';
 import { distinctUntilChanged } from 'rxjs';
 import { Reservation } from '../../../../../../../shared/models/reservation.model';
@@ -96,6 +100,39 @@ export class StayDetailsComponent implements AfterViewInit {
 
   // Computed signal for current user
   currentUser = toSignal(this.authService.currentUser, { initialValue: null });
+
+  // ---- booking channel and travel partner ----
+  private partnerApi = inject(PartnerService);
+  private storeStore = inject(StoreStore);
+  private roles = inject(RolesService);
+
+  /** Channels offered for a new booking; the two older "who" labels only appear on a booking that already has one. */
+  channels = computed(() => {
+    const current = this.reservationForm()?.get('bookingSource')?.value;
+    return BOOKING_CHANNELS.filter((c) => !c.legacy || c.value === current).map((c) => ({ value: c.value, label: c.label() }));
+  });
+
+  canAttribute = computed(() => this.roles.isAdmin() || this.roles.hasAny(['hotel.partners.attribute']));
+  private partnerControl = this.reservationForm()?.get('partner');
+  partnerId = toSignal<string>(this.partnerControl!.valueChanges, { initialValue: this.partnerControl?.value ?? '' });
+
+  private partnersRes = rxResource({
+    params: () => ({ store: this.storeStore.selectedStore()?._id, allowed: this.canAttribute() }),
+    stream: ({ params }) => (params.store && params.allowed ? this.partnerApi.list(params.store, { activeOnly: true, limit: 200 }) : of(null)),
+  });
+
+  /** Active partners, plus the one already on this booking even if it has since been deactivated. */
+  partnerOptions = computed<Array<{ _id: string; name: string; inactive: boolean }>>(() => {
+    const list: Array<{ _id: string; name: string; inactive: boolean }> = (this.partnersRes.hasValue() ? this.partnersRes.value()?.partners ?? [] : []).map((p: Partner) => ({ _id: p._id, name: p.name, inactive: false }));
+    const current = this.reservation()?.partner;
+    if (current && typeof current === 'object' && !list.some((p) => p._id === current._id)) list.unshift({ _id: current._id, name: current.name, inactive: current.status === 'inactive' });
+    return list;
+  });
+  /** What to show when the person may not change partners but the booking has one. */
+  attributedPartnerName = computed(() => {
+    const p = this.reservation()?.partner;
+    return p && typeof p === 'object' ? p.name : '';
+  });
 
   // Display name for sales person
   salesPersonName = computed(() => {

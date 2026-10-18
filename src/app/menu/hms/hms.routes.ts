@@ -95,6 +95,31 @@ export const DASHBOARD_HMS_ROUTES: Routes = [
                 data: { requiredPermissions: ['hotel.corrections.view', 'hotel.corrections.approve'], permissionMode: 'any' }
             },
 
+            {
+                path: 'partners',
+                loadComponent: () => import('./partners/partners.component').then(m => m.PartnersComponent),
+                canActivate: [roleGuard],
+                data: { requiredPermissions: ['hotel.partners.view'], permissionMode: 'any' }
+            },
+            {
+                path: 'partners/commissions',
+                loadComponent: () => import('./partners/commissions/commissions.component').then(m => m.CommissionsComponent),
+                canActivate: [roleGuard],
+                data: { requiredPermissions: ['hotel.commissions.view'], permissionMode: 'any' }
+            },
+            {
+                path: 'partners/requests',
+                loadComponent: () => import('./partners/requests/requests.component').then(m => m.PartnerRequestsAdminComponent),
+                canActivate: [roleGuard],
+                data: { requiredPermissions: ['hotel.partners.requests.view', 'hotel.partners.requests.process'], permissionMode: 'any' }
+            },
+            {
+                path: 'partners/:id',
+                loadComponent: () => import('./partners/partner-detail.component').then(m => m.PartnerDetailComponent),
+                canActivate: [roleGuard],
+                data: { requiredPermissions: ['hotel.partners.view'], permissionMode: 'any' }
+            },
+
             // TODO: Add more routes as components are created
             {
                 path: '**',

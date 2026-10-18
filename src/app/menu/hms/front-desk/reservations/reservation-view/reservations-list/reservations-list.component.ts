@@ -30,6 +30,9 @@ import { QuickReservationModalComponent, QuickReservationData } from '../../quic
 import { RoomChangeDialogComponent, RoomChangeDialogData, RoomChangeResult } from '../../room-change-dialog/room-change-dialog.component';
 import { GetGuestNamePipe } from "../../../../../../shared/pipes/get-guest-name.pipe";
 import { rxResource } from '@angular/core/rxjs-interop';
+import { of } from 'rxjs';
+import { RolesService } from '../../../../../../shared/services/roles.service';
+import { PartnerService, channelLabel } from '../../../../../../shared/services/partner.service';
 
 @Component({
   selector: 'app-reservations-list',
@@ -65,6 +68,9 @@ export class ReservationsListComponent {
   public storeStore = inject(StoreStore);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
+  private roles = inject(RolesService);
+  private partnerApi = inject(PartnerService);
+  readonly channelLabel = channelLabel;
   currentPage = signal<number>(1);
   pageSize = signal<number>(10);
   
@@ -77,11 +83,13 @@ export class ReservationsListComponent {
   dateToFilter = signal<Date | null>(null);
   sortByFilter = signal<string>('createdAt');
   sortOrderFilter = signal<string>('desc');
+  partnerFilter = signal<string>('');
   
   // Filter form
   filterForm = this.fb.group({
     search: [''],
     status: [''],
+    partner: [''],
     dateRange: this.fb.group({
       start: [null as Date | null],
       end: [null as Date | null]
@@ -135,6 +143,11 @@ export class ReservationsListComponent {
       params.status = this.statusFilter().trim();
     }
 
+    // Only what one travel partner brought
+    if (this.partnerFilter()) {
+      params.partner = this.partnerFilter();
+    }
+
     // Add date filters
     if (this.dateFromFilter()) {
       params.dateFrom = this.formatLocalDate(new Date(this.dateFromFilter()!));
@@ -148,7 +161,7 @@ export class ReservationsListComponent {
   });
 
   // Table configuration
-  displayedColumns = ['confirmationNumber', 'guest', 'rooms', 'stayPeriod', 'nights', 'status', 'total', 'actions'];
+  displayedColumns = ['confirmationNumber', 'guest', 'partner', 'rooms', 'stayPeriod', 'nights', 'status', 'total', 'actions'];
 
   // Status options
   statusOptions: { value: ReservationStatus | '', label: string, color: string }[] = [
@@ -178,6 +191,7 @@ export class ReservationsListComponent {
       // Update filter signals
       this.searchFilter.set(formValues.search || '');
       this.statusFilter.set(formValues.status || '');
+      this.partnerFilter.set(formValues.partner || '');
       this.dateFromFilter.set(formValues.dateRange?.start || null);
       this.dateToFilter.set(formValues.dateRange?.end || null);
       this.sortByFilter.set(formValues.sortBy || 'createdAt');
@@ -209,6 +223,13 @@ export class ReservationsListComponent {
   //   });
   // }
 
+  /** Partners to filter by, for people who may see them. */
+  canSeePartners = computed(() => this.roles.isAdmin() || this.roles.hasAny(['hotel.partners.view']));
+  partnerOptions = rxResource({
+    params: () => ({ store: this.storeStore.selectedStore()?._id, allowed: this.canSeePartners() }),
+    stream: ({ params }) => (params.store && params.allowed ? this.partnerApi.list(params.store, { limit: 200 }) : of(null)),
+  });
+
   public reservations = rxResource({
     params: () => ({ params: this.filterParams() }),
     stream: ({ params }) => this.reservationService.getReservations(params.params),
@@ -228,6 +249,7 @@ export class ReservationsListComponent {
     this.filterForm.reset({
       search: '',
       status: '',
+      partner: '',
       dateRange: {
         start: null,
         end: null

@@ -72,16 +72,33 @@ export class HmsDashboardComponent {
           permissions: ['hotel.reservations.view', 'hotel.reservations.create'],
         },
         {
-          icon: 'check_in',
-          label: $localize`Check-In / Check-Out`,
-          link: './front-desk/check-in-check-out',
-          permissions: ['hotel.reservations.checkin', 'hotel.reservations.checkout'],
-        },
-        {
           icon: 'people',
           label: $localize`Guests`,
           link: './front-desk/guests',
           permissions: ['hotel.guests.view', 'hotel.guests.create'],
+        },
+      ],
+    },
+    {
+      name: 'Partners',
+      children: [
+        {
+          icon: 'handshake',
+          label: $localize`Travel partners`,
+          link: './partners',
+          permissions: ['hotel.partners.view'],
+        },
+        {
+          icon: 'outgoing_mail',
+          label: $localize`Partner requests`,
+          link: './partners/requests',
+          permissions: ['hotel.partners.requests.view', 'hotel.partners.requests.process'],
+        },
+        {
+          icon: 'payments',
+          label: $localize`Commissions`,
+          link: './partners/commissions',
+          permissions: ['hotel.commissions.view'],
         },
       ],
     },

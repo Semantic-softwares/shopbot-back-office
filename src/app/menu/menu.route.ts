@@ -82,6 +82,12 @@ export const MENU_ROUTES: Routes = [
         'hotel.reservations.checkin',
         'hotel.reservations.checkout',
         'hotel.reservations.export',
+        // Travel partners and their commissions
+        'hotel.partners.view',
+        'hotel.partners.attribute',
+        'hotel.commissions.view',
+        'hotel.partners.requests.view',
+        'hotel.partners.requests.process',
         // Guests
         'hotel.guests.view',
         'hotel.guests.create',

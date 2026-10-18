@@ -45,6 +45,22 @@ export interface Reservation {
     conversionRate?: number;
     convertedAt?: string;
   };
+  /** The travel partner that brought the booking (populated by the server with name and code). */
+  partner?: { _id: string; name: string; code?: string; type?: string; status?: string } | string | null;
+  partnerReference?: string;
+  /** The agreement terms this booking was priced under, snapshotted by the server. */
+  partnerTerms?: {
+    agreement?: string;
+    agreementCode?: string;
+    agreementName?: string;
+    pricingMode?: string;
+    pricingValue?: number;
+    currency?: string;
+    rooms?: Array<{ agreedTotal: number; publicTotal: number; nights?: Array<{ date: string; publicRate: number; agreedRate: number }> }>;
+    commissionRule?: { enabled: boolean; type?: string; value?: number };
+    priceOverridden?: { reason?: string };
+    history?: Array<{ agreementCode?: string; agreedTotal?: number; replacedAt?: string }>;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -308,7 +324,9 @@ export type BookingSource =
   | 'expedia' 
   | 'airbnb'
   | 'travel_agent'
-  | 'corporate';
+  | 'corporate'
+  | 'email'
+  | 'partner_portal';
 
 export type PaymentMethod = 
   | 'cash' 
