@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";var n;z(()=>{n=[{path:``,loadComponent:()=>import(`./chunk-ISFOEnTn.js`).then(o=>o.ListRestockComponent)},{path:`add`,loadComponent:()=>import(`./chunk-1dQS9CrS.js`).then(o=>o.RestockComponent)},{path:`edit/:id`,loadComponent:()=>import(`./chunk-1dQS9CrS.js`).then(o=>o.RestockComponent)}]})();export{n as RESTOCK_ROUTES};
