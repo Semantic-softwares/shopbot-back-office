@@ -1,0 +1,28 @@
+{
+  "releases": [
+    {
+      "id": "2026.10.21",
+      "date": "2026-10-21",
+      "title": { "en": "Purchasing, supplier orders and sharper reports", "fr": "Achats, commandes fournisseurs et rapports plus clairs", "it": "Acquisti, ordini ai fornitori e report più chiari", "rw": "Amatumizwa, ibicuruzwa by’abatanga ibicuruzwa na raporo zisobanutse" },
+      "items": [
+        { "type": "new", "text": { "en": "Purchase orders: create them from low-stock suggestions or by hand, one order per supplier.", "fr": "Bons de commande : créez-les à partir des suggestions de stock faible ou à la main, une commande par fournisseur.", "it": "Ordini d’acquisto: creali dai suggerimenti di scorta bassa o a mano, un ordine per fornitore.", "rw": "Amatumizwa: uyakore ukoresheje ibyifuzo by’ibigiye kurangira cyangwa ubwawe, itumizwa rimwe kuri buri utanga ibicuruzwa." } },
+        { "type": "new", "text": { "en": "Email a purchase order PDF to your supplier and record their confirmation.", "fr": "Envoyez le PDF du bon de commande à votre fournisseur par e-mail et enregistrez sa confirmation.", "it": "Invia il PDF dell’ordine d’acquisto al fornitore via e-mail e registra la sua conferma.", "rw": "Ohereza PDF y’itumizwa kuri imeri y’utanga ibicuruzwa kandi wandike ukwemezwa kwe." } },
+        { "type": "new", "text": { "en": "Receive goods against an order, including partial deliveries and rejected items. Only accepted goods are added to stock.", "fr": "Réceptionnez les marchandises d’une commande, y compris les livraisons partielles et les articles refusés. Seules les marchandises acceptées entrent en stock.", "it": "Ricevi la merce di un ordine, anche con consegne parziali e articoli rifiutati. Solo la merce accettata entra in magazzino.", "rw": "Akira ibicuruzwa by’itumizwa, harimo ibitanzwe igice n’ibyanzwe. Ibyemewe gusa ni byo byongerwa mu bubiko." } },
+        { "type": "improved", "text": { "en": "Sales reports (summary, by item, category, employee and payment type) have a new look, work on phones and in dark mode, and have sortable tables with totals.", "fr": "Les rapports de ventes (synthèse, par article, catégorie, employé et mode de paiement) ont un nouveau look, fonctionnent sur mobile et en mode sombre, avec des tableaux triables et des totaux.", "it": "I report vendite (riepilogo, per articolo, categoria, dipendente e metodo di pagamento) hanno un nuovo aspetto, funzionano su telefono e in modalità scura, con tabelle ordinabili e totali.", "rw": "Raporo z’igurisha (incamake, ku gicuruzwa, ku cyiciro, ku mukozi no ku buryo bwo kwishyura) zifite isura nshya, zikora kuri telefone no mu bwirabura, zifite imbonerahamwe zitondekwa n’ibiteranyo." } },
+        { "type": "improved", "text": { "en": "Suppliers, Quick stock-in and Reconciliation pages were redesigned, with better dark mode.", "fr": "Les pages Fournisseurs, Entrée de stock rapide et Rapprochement ont été repensées, avec un meilleur mode sombre.", "it": "Le pagine Fornitori, Carico rapido e Riconciliazione sono state ridisegnate, con una migliore modalità scura.", "rw": "Impapuro z’Abatanga ibicuruzwa, Kwinjiza ibicuruzwa vuba no Kugenzura zakozwe bundi bushya, zirushaho kuba nziza mu bwirabura." } },
+        { "type": "fixed", "text": { "en": "The Critical Stock value on a product is now saved.", "fr": "La valeur de stock critique d’un produit est maintenant enregistrée.", "it": "Il valore di scorta critica di un prodotto ora viene salvato.", "rw": "Agaciro k’ibicuruzwa bigiye kurangira ku gicuruzwa noneho kabikwa." } },
+        { "type": "fixed", "text": { "en": "Employees and Timecards were removed from the ERP menu.", "fr": "Employés et Pointages ont été retirés du menu ERP.", "it": "Dipendenti e Timbrature sono stati rimossi dal menu ERP.", "rw": "Abakozi n’Amasaha y’akazi byakuwe ku rutonde rwa ERP." } }
+      ]
+    },
+    {
+      "id": "2026.10.19",
+      "date": "2026-10-19",
+      "title": { "en": "Point of sale and partner portal improvements", "fr": "Améliorations du point de vente et du portail partenaires", "it": "Miglioramenti al punto vendita e al portale partner", "rw": "Impinduka ku gicuruzwa no ku rubuga rw’abafatanyabikorwa" },
+      "items": [
+        { "type": "new", "text": { "en": "Point of sale: a sale for a hotel guest can skip payment and be settled later.", "fr": "Point de vente : une vente pour un client de l’hôtel peut sauter le paiement et être réglée plus tard.", "it": "Punto vendita: una vendita per un ospite dell’hotel può saltare il pagamento ed essere saldata dopo.", "rw": "Aho bagurishiriza: igurisha ry’umushyitsi w’hoteli rishobora gusimbuka kwishyura ryishyurwe nyuma." } },
+        { "type": "new", "text": { "en": "Partner portal: request several rooms in one booking, pick dates on a calendar, and get faster search results.", "fr": "Portail partenaires : demandez plusieurs chambres en une réservation, choisissez les dates sur un calendrier et obtenez des résultats plus rapides.", "it": "Portale partner: richiedi più camere in una prenotazione, scegli le date su un calendario e ottieni risultati più veloci.", "rw": "Urubuga rw’abafatanyabikorwa: saba ibyumba byinshi mu cyifuzo kimwe, uhitemo amatariki ku kalendari kandi ubone ibisubizo vuba." } },
+        { "type": "fixed", "text": { "en": "Choosing an occupied room at the point of sale now finds the guest staying there.", "fr": "Choisir une chambre occupée au point de vente retrouve maintenant le client qui y séjourne.", "it": "Scegliendo una camera occupata al punto vendita ora si trova l’ospite che la occupa.", "rw": "Guhitamo icyumba gifite umuntu aho bagurishiriza ubu bibonera umushyitsi urimo." } }
+      ]
+    }
+  ]
+}

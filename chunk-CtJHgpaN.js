@@ -1,0 +1,256 @@
+import{c as z}from"./chunk-RykAvsdd.js";import{E as Jm,G as Se$1,M as Mf,Rt as k,Tt as ee,wt as du,x as I,z as P}from"./chunk-DMEhUgHW.js";import{$t as aM,An as iM,B as Jm$1,Cn as eu,Cr as sw,Ct as UL,D as HL,Dr as tu,E as Ge,Fr as uw,Hr as wm,It as Xd,Jr as y,Ln as jo,Lr as vi,Or as tv,T as GL,X as Mm,Xt as __,Z as N,cn as cM,dn as cv,fn as cy,ht as SI,ii as zs,l as Bd,m as Cm,mn as dT,mr as rN,nr as nu,pr as rM,qt as Ze$1,rn as av,rr as nv,sn as cI,ti as z$1,u as Bt,un as cm,ur as qM,ut as Qo,vr as sN,vt as Si,xn as em,xr as sm,yt as Tc,z as Ji}from"./chunk-DTckT2H2.js";import{At as U,Dn as Ut,Ft as s,It as z$2,Kt as ce,Nn as ai,Nt as k$1,Qn as ut,Tn as Qe,Wt as Fe,bn as Ie,kn as Xe$1,ln as _,or as x,pn as Ae$1,rr as L,sn as O,wn as Ot,yn as Fi}from"./chunk-BsQ53arL.js";import{a as T,i as S,r as M}from"./chunk-B3HK2H0i.js";var Q;var Ee;var Ae;var Pe;var Se=z(()=>{"use strict";__();__();du();Ot();S();Q=new N(`CdkAccordion`),Ee=(()=>{class n{_stateChanges=new I;_openCloseAllActions=new I;id=y(Ie).getId(`cdk-accordion-`);multi=!1;openAll(){this.multi&&this._openCloseAllActions.next(!0)}closeAll(){this._openCloseAllActions.next(!1)}ngOnChanges(e){this._stateChanges.next(e)}ngOnDestroy(){this._stateChanges.complete(),this._openCloseAllActions.complete()}static ɵfac=function(t){return new(t||n)};static ɵdir=uw({type:n,selectors:[[`cdk-accordion`],[``,`cdkAccordion`,``]],inputs:{multi:[2,`multi`,`multi`,UL]},exportAs:[`cdkAccordion`],features:[qM([{provide:Q,useExisting:n}]),cI]})}return n})(),Ae=(()=>{class n{accordion=y(Q,{optional:!0,skipSelf:!0});_changeDetectorRef=y(HL);_expansionDispatcher=y(T);_openCloseAllSubscription=P.EMPTY;closed=new Ze$1;opened=new Ze$1;destroyed=new Ze$1;expandedChange=new Ze$1;id=y(Ie).getId(`cdk-accordion-child-`);get expanded(){return this._expanded}set expanded(e){if(this._expanded!==e){if(this._expanded=e,this.expandedChange.emit(e),e){this.opened.emit();let t=this.accordion?this.accordion.id:this.id;this._expansionDispatcher.notify(this.id,t)}else this.closed.emit();this._changeDetectorRef.markForCheck()}}_expanded=!1;get disabled(){return this._disabled()}set disabled(e){this._disabled.set(e)}_disabled=Ge(!1);_removeUniqueSelectionListener=()=>{};ngOnInit(){this._removeUniqueSelectionListener=this._expansionDispatcher.listen((e,t)=>{this.accordion&&!this.accordion.multi&&this.accordion.id===t&&this.id!==e&&(this.expanded=!1)}),this.accordion&&(this._openCloseAllSubscription=this._subscribeToOpenCloseAllActions())}ngOnDestroy(){this.opened.complete(),this.closed.complete(),this.destroyed.emit(),this.destroyed.complete(),this._removeUniqueSelectionListener(),this._openCloseAllSubscription.unsubscribe()}toggle(){this.disabled||(this.expanded=!this.expanded)}close(){this.disabled||(this.expanded=!1)}open(){this.disabled||(this.expanded=!0)}_subscribeToOpenCloseAllActions(){return this.accordion._openCloseAllActions.subscribe(e=>{this.disabled||(this.expanded=e)})}static ɵfac=function(t){return new(t||n)};static ɵdir=uw({type:n,selectors:[[`cdk-accordion-item`],[``,`cdkAccordionItem`,``]],inputs:{expanded:[2,`expanded`,`expanded`,UL],disabled:[2,`disabled`,`disabled`,UL]},outputs:{closed:`closed`,opened:`opened`,destroyed:`destroyed`,expandedChange:`expandedChange`},exportAs:[`cdkAccordionItem`],features:[qM([{provide:Q,useValue:void 0}])]})}return n})(),Pe=(()=>{class n{static ɵfac=function(t){return new(t||n)};static ɵmod=em({type:n});static ɵinj=zs({})}return n})()});var B;var ke;var Ke;var Ne;var Ue;var Ze;var Pn;var Sn;var kn;var Nn;var Xe=z(()=>{"use strict";__();__();Se();M();k$1();ai();du();Xd();Ut();Xe$1();L();ce();_();B=new N(`MAT_ACCORDION`),ke=new N(`MAT_EXPANSION_PANEL`),Ke=(()=>{class n{_template=y(jo);_expansionPanel=y(ke,{optional:!0});static ɵfac=function(t){return new(t||n)};static ɵdir=uw({type:n,selectors:[[`ng-template`,`matExpansionPanelContent`,``]]})}return n})(),Ne=new N(`MAT_EXPANSION_PANEL_DEFAULT_OPTIONS`),Ue=(()=>{class n extends Ae{_viewContainerRef=y(Ji);_animationsDisabled=Fi();_document=y(Bt);_ngZone=y(z$1);_elementRef=y(Qo);_renderer=y(Tc);_cleanupTransitionEnd;get hideToggle(){return this._hideToggle||this.accordion&&this.accordion.hideToggle}set hideToggle(e){this._hideToggle=e}_hideToggle=!1;get togglePosition(){return this._togglePosition||this.accordion&&this.accordion.togglePosition}set togglePosition(e){this._togglePosition=e}_togglePosition;afterExpand=new Ze$1;afterCollapse=new Ze$1;_inputChanges=new I;accordion=y(B,{optional:!0,skipSelf:!0});_lazyContent;_body;_bodyWrapper;_portal;_headerId=y(Ie).getId(`mat-expansion-panel-header-`);constructor(){super();let e=y(Ne,{optional:!0});this._expansionDispatcher=y(T),e&&(this.hideToggle=e.hideToggle)}_hasSpacing(){return this.accordion?this.expanded&&this.accordion.displayMode==="default":!1}_getExpandedState(){return this.expanded?`expanded`:`collapsed`}toggle(){this.expanded=!this.expanded}close(){this.expanded=!1}open(){this.expanded=!0}ngAfterContentInit(){this._lazyContent&&this._lazyContent._expansionPanel===this&&this.opened.pipe(Jm(null),ee(()=>this.expanded&&!this._portal),Se$1(1)).subscribe(()=>{this._portal=new s(this._lazyContent._template,this._viewContainerRef)}),this._setupAnimationEvents()}ngOnChanges(e){this._inputChanges.next(e)}ngOnDestroy(){super.ngOnDestroy(),this._cleanupTransitionEnd?.(),this._inputChanges.complete()}_containsFocus(){if(this._body){let e=this._document.activeElement,t=this._body.nativeElement;return e===t||t.contains(e)}return!1}_transitionEndListener=({target:e,propertyName:t})=>{e===this._bodyWrapper?.nativeElement&&t===`grid-template-rows`&&this._ngZone.run(()=>{this.expanded?this.afterExpand.emit():this.afterCollapse.emit()})};_setupAnimationEvents(){this._ngZone.runOutsideAngular(()=>{this._animationsDisabled?(this.opened.subscribe(()=>this._ngZone.run(()=>this.afterExpand.emit())),this.closed.subscribe(()=>this._ngZone.run(()=>this.afterCollapse.emit()))):setTimeout(()=>{let e=this._elementRef.nativeElement;this._cleanupTransitionEnd=this._renderer.listen(e,`transitionend`,this._transitionEndListener),e.classList.add(`mat-expansion-panel-animations-enabled`)},200)})}static ɵfac=function(t){return new(t||n)};static ɵcmp=(function(){let e=[`body`],t=[`bodyWrapper`],p=[[[`mat-expansion-panel-header`]],`*`,[[`mat-action-row`]]],d=[`mat-expansion-panel-header`,`*`,`mat-action-row`];function o(i,s){}return sw({type:n,selectors:[[`mat-expansion-panel`]],contentQueries:function(s,r,g){if(s&1&&tv(g,Ke,5),s&2){let W;aM(W=cM())&&(r._lazyContent=W.first)}},viewQuery:function(s,r){if(s&1&&nv(e,5)(t,5),s&2){let g;aM(g=cM())&&(r._body=g.first),aM(g=cM())&&(r._bodyWrapper=g.first)}},hostAttrs:[1,`mat-expansion-panel`],hostVars:4,hostBindings:function(s,r){s&2&&cv(`mat-expanded`,r.expanded)(`mat-expansion-panel-spacing`,r._hasSpacing())},inputs:{hideToggle:[2,`hideToggle`,`hideToggle`,UL],togglePosition:`togglePosition`},outputs:{afterExpand:`afterExpand`,afterCollapse:`afterCollapse`},exportAs:[`matExpansionPanel`],features:[qM([{provide:B,useValue:void 0},{provide:ke,useExisting:n}]),sm,cI],ngContentSelectors:d,decls:9,vars:4,consts:[[`bodyWrapper`,``],[`body`,``],[1,`mat-expansion-panel-content-wrapper`],[`role`,`region`,1,`mat-expansion-panel-content`,3,`id`],[1,`mat-expansion-panel-body`],[3,`cdkPortalOutlet`]],template:function(s,r){s&1&&(rM(p),iM(0),Si(1,`div`,2,0)(3,`div`,3,1)(5,`div`,4),iM(6,1),cm(7,o,0,0,`ng-template`,5),eu(),iM(8,2),eu()()),s&2&&(dT(),Cm(`inert`,r.expanded?null:``),dT(2),wm(`id`,r.id),Cm(`aria-labelledby`,r._headerId),dT(4),wm(`cdkPortalOutlet`,r._portal))},dependencies:[U],styles:[`.mat-expansion-panel {
+  box-sizing: content-box;
+  display: block;
+  margin: 0;
+  overflow: hidden;
+}
+.mat-expansion-panel.mat-expansion-panel-animations-enabled {
+  transition: margin 225ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mat-expansion-panel {
+  position: relative;
+  background: var(--%NS%mat-expansion-container-background-color, var(--%NS%mat-sys-surface));
+  color: var(--%NS%mat-expansion-container-text-color, var(--%NS%mat-sys-on-surface));
+  border-radius: var(--%NS%mat-expansion-container-shape, 12px);
+}
+.mat-expansion-panel:not([class*=mat-elevation-z]) {
+  box-shadow: var(--%NS%mat-expansion-container-elevation-shadow, 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12));
+}
+.mat-accordion .mat-expansion-panel:not(.mat-expanded), .mat-accordion .mat-expansion-panel:not(.mat-expansion-panel-spacing) {
+  border-radius: 0;
+}
+.mat-accordion .mat-expansion-panel:first-of-type {
+  border-top-right-radius: var(--%NS%mat-expansion-container-shape, 12px);
+  border-top-left-radius: var(--%NS%mat-expansion-container-shape, 12px);
+}
+.mat-accordion .mat-expansion-panel:last-of-type {
+  border-bottom-right-radius: var(--%NS%mat-expansion-container-shape, 12px);
+  border-bottom-left-radius: var(--%NS%mat-expansion-container-shape, 12px);
+}
+@media (forced-colors: active) {
+  .mat-expansion-panel {
+    outline: solid 1px;
+  }
+}
+
+.mat-expansion-panel-content-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  grid-template-columns: 100%;
+}
+.mat-expansion-panel-animations-enabled .mat-expansion-panel-content-wrapper {
+  transition: grid-template-rows 225ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mat-expansion-panel.mat-expanded > .mat-expansion-panel-content-wrapper {
+  grid-template-rows: 1fr;
+}
+@supports not (grid-template-rows: 0fr) {
+  .mat-expansion-panel-content-wrapper {
+    height: 0;
+  }
+  .mat-expansion-panel.mat-expanded > .mat-expansion-panel-content-wrapper {
+    height: auto;
+  }
+}
+@media print {
+  .mat-expansion-panel-content-wrapper {
+    height: 0;
+  }
+  .mat-expansion-panel.mat-expanded > .mat-expansion-panel-content-wrapper {
+    height: auto;
+  }
+}
+
+.mat-expansion-panel-content {
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+  min-height: 0;
+  visibility: hidden;
+}
+.mat-expansion-panel-animations-enabled .mat-expansion-panel-content {
+  transition: visibility 190ms linear;
+}
+.mat-expansion-panel.mat-expanded > .mat-expansion-panel-content-wrapper > .mat-expansion-panel-content {
+  visibility: visible;
+}
+.mat-expansion-panel-content {
+  font-family: var(--%NS%mat-expansion-container-text-font, var(--%NS%mat-sys-body-large-font));
+  font-size: var(--%NS%mat-expansion-container-text-size, var(--%NS%mat-sys-body-large-size));
+  font-weight: var(--%NS%mat-expansion-container-text-weight, var(--%NS%mat-sys-body-large-weight));
+  line-height: var(--%NS%mat-expansion-container-text-line-height, var(--%NS%mat-sys-body-large-line-height));
+  letter-spacing: var(--%NS%mat-expansion-container-text-tracking, var(--%NS%mat-sys-body-large-tracking));
+}
+
+.mat-expansion-panel-body {
+  padding: 0 24px 16px;
+}
+
+.mat-expansion-panel-spacing {
+  margin: 16px 0;
+}
+.mat-accordion > .mat-expansion-panel-spacing:first-child, .mat-accordion > *:first-child:not(.mat-expansion-panel) .mat-expansion-panel-spacing {
+  margin-top: 0;
+}
+.mat-accordion > .mat-expansion-panel-spacing:last-child, .mat-accordion > *:last-child:not(.mat-expansion-panel) .mat-expansion-panel-spacing {
+  margin-bottom: 0;
+}
+
+.mat-action-row {
+  border-top-style: solid;
+  border-top-width: 1px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  padding: 16px 8px 16px 24px;
+  border-top-color: var(--%NS%mat-expansion-actions-divider-color, var(--%NS%mat-sys-outline));
+}
+.mat-action-row .mat-button-base,
+.mat-action-row .mat-mdc-button-base {
+  margin-left: 8px;
+}
+[dir=rtl] .mat-action-row .mat-button-base,
+[dir=rtl] .mat-action-row .mat-mdc-button-base {
+  margin-left: 0;
+  margin-right: 8px;
+}
+`],encapsulation:2})})()}return n})(),Ze=(()=>{class n{panel=y(Ue,{host:!0});_element=y(Qo);_focusMonitor=y(ut);_changeDetectorRef=y(HL);_parentChangeSubscription=P.EMPTY;constructor(){y(x).load(Fe);let e=this.panel,t=y(Ne,{optional:!0}),p=y(new cy(`tabindex`),{optional:!0}),d=e.accordion?e.accordion._stateChanges.pipe(ee(o=>!!(o.hideToggle||o.togglePosition))):k;this.tabIndex=parseInt(p||``)||0,this._parentChangeSubscription=Mf(e.opened,e.closed,d,e._inputChanges.pipe(ee(o=>!!(o.hideToggle||o.disabled||o.togglePosition)))).subscribe(()=>this._changeDetectorRef.markForCheck()),e.closed.pipe(ee(()=>e._containsFocus())).subscribe(()=>this._focusMonitor.focusVia(this._element,`program`)),t&&(this.expandedHeight=t.expandedHeight,this.collapsedHeight=t.collapsedHeight)}expandedHeight;collapsedHeight;tabIndex=0;get disabled(){return this.panel.disabled}_toggle(){this.disabled||this.panel.toggle()}_isExpanded(){return this.panel.expanded}_getExpandedState(){return this.panel._getExpandedState()}_getPanelId(){return this.panel.id}_getTogglePosition(){return this.panel.togglePosition}_showToggle(){return!this.panel.hideToggle&&!this.panel.disabled}_getHeaderHeight(){let e=this._isExpanded();return e&&this.expandedHeight?this.expandedHeight:!e&&this.collapsedHeight?this.collapsedHeight:null}_keydown(e){switch(e.keyCode){case 32:case 13:Qe(e)||(e.preventDefault(),this._toggle());break;default:this.panel.accordion&&this.panel.accordion._handleHeaderKeydown(e);return}}focus(e,t){e?this._focusMonitor.focusVia(this._element,e,t):this._element.nativeElement.focus(t)}ngAfterViewInit(){this._focusMonitor.monitor(this._element).subscribe(e=>{e&&this.panel.accordion&&this.panel.accordion._handleHeaderFocus(this)})}ngOnDestroy(){this._parentChangeSubscription.unsubscribe(),this._focusMonitor.stopMonitoring(this._element)}static ɵfac=function(t){return new(t||n)};static ɵcmp=(function(){let e=[[[`mat-panel-title`]],[[`mat-panel-description`]],`*`],t=[`mat-panel-title`,`mat-panel-description`,`*`];function p(d,o){d&1&&(tu(0,`span`,1),Bd(),tu(1,`svg`,2),Mm(2,`path`,3),nu()())}return sw({type:n,selectors:[[`mat-expansion-panel-header`]],hostAttrs:[`role`,`button`,1,`mat-expansion-panel-header`,`mat-focus-indicator`],hostVars:13,hostBindings:function(o,i){o&1&&Jm$1(`click`,function(){return i._toggle()})(`keydown`,function(r){return i._keydown(r)}),o&2&&(Cm(`id`,i.panel._headerId)(`tabindex`,i.disabled?-1:i.tabIndex)(`aria-controls`,i._getPanelId())(`aria-expanded`,i._isExpanded())(`aria-disabled`,i.panel.disabled),av(`height`,i._getHeaderHeight()),cv(`mat-expanded`,i._isExpanded())(`mat-expansion-toggle-indicator-after`,i._getTogglePosition()===`after`)(`mat-expansion-toggle-indicator-before`,i._getTogglePosition()===`before`))},inputs:{expandedHeight:`expandedHeight`,collapsedHeight:`collapsedHeight`,tabIndex:[2,`tabIndex`,`tabIndex`,d=>d==null?0:GL(d)]},ngContentSelectors:t,decls:5,vars:3,consts:[[1,`mat-content`],[1,`mat-expansion-indicator`],[`xmlns`,`http://www.w3.org/2000/svg`,`viewBox`,`0 -960 960 960`,`aria-hidden`,`true`,`focusable`,`false`],[`d`,`M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z`]],template:function(o,i){o&1&&(rM(e),tu(0,`span`,0),iM(1),iM(2,1),iM(3,2),nu(),rN(4,p,3,0,`span`,1)),o&2&&(cv(`mat-content-hide-toggle`,!i._showToggle()),dT(4),sN(i._showToggle()?4:-1))},styles:[`.mat-expansion-panel-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 24px;
+  border-radius: inherit;
+  outline: 0;
+}
+.mat-expansion-panel-animations-enabled .mat-expansion-panel-header {
+  transition: height 225ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mat-expansion-panel-header::before {
+  border-radius: inherit;
+}
+.mat-expansion-panel-header {
+  height: var(--%NS%mat-expansion-header-collapsed-state-height, 48px);
+  font-family: var(--%NS%mat-expansion-header-text-font, var(--%NS%mat-sys-title-medium-font));
+  font-size: var(--%NS%mat-expansion-header-text-size, var(--%NS%mat-sys-title-medium-size));
+  font-weight: var(--%NS%mat-expansion-header-text-weight, var(--%NS%mat-sys-title-medium-weight));
+  line-height: var(--%NS%mat-expansion-header-text-line-height, var(--%NS%mat-sys-title-medium-line-height));
+  letter-spacing: var(--%NS%mat-expansion-header-text-tracking, var(--%NS%mat-sys-title-medium-tracking));
+}
+.mat-expansion-panel-header.mat-expanded {
+  height: var(--%NS%mat-expansion-header-expanded-state-height, 64px);
+}
+.mat-expansion-panel-header[aria-disabled=true] {
+  color: var(--%NS%mat-expansion-header-disabled-state-text-color, color-mix(in srgb, var(--%NS%mat-sys-on-surface) 38%, transparent));
+}
+.mat-expansion-panel-header:not([aria-disabled=true]) {
+  cursor: pointer;
+}
+.mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header:not([aria-disabled=true]):hover {
+  background: var(--%NS%mat-expansion-header-hover-state-layer-color, color-mix(in srgb, var(--%NS%mat-sys-on-surface) calc(var(--%NS%mat-sys-hover-state-layer-opacity) * 100%), transparent));
+}
+@media (hover: none) {
+  .mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header:not([aria-disabled=true]):hover {
+    background: var(--%NS%mat-expansion-container-background-color, var(--%NS%mat-sys-surface));
+  }
+}
+.mat-expansion-panel .mat-expansion-panel-header:not([aria-disabled=true]).cdk-keyboard-focused, .mat-expansion-panel .mat-expansion-panel-header:not([aria-disabled=true]).cdk-program-focused {
+  background: var(--%NS%mat-expansion-header-focus-state-layer-color, color-mix(in srgb, var(--%NS%mat-sys-on-surface) calc(var(--%NS%mat-sys-focus-state-layer-opacity) * 100%), transparent));
+}
+.mat-expansion-panel-header._mat-animation-noopable {
+  transition: none;
+}
+.mat-expansion-panel-header.mat-expanded:focus, .mat-expansion-panel-header.mat-expanded:hover {
+  background: inherit;
+}
+.mat-expansion-panel-header.mat-expansion-toggle-indicator-before {
+  flex-direction: row-reverse;
+}
+.mat-expansion-panel-header.mat-expansion-toggle-indicator-before .mat-expansion-indicator {
+  margin: 0 16px 0 0;
+}
+[dir=rtl] .mat-expansion-panel-header.mat-expansion-toggle-indicator-before .mat-expansion-indicator {
+  margin: 0 0 0 16px;
+}
+
+.mat-content {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  overflow: hidden;
+}
+.mat-content.mat-content-hide-toggle {
+  margin-right: 8px;
+}
+[dir=rtl] .mat-content.mat-content-hide-toggle {
+  margin-right: 0;
+  margin-left: 8px;
+}
+.mat-expansion-toggle-indicator-before .mat-content.mat-content-hide-toggle {
+  margin-left: 24px;
+  margin-right: 0;
+}
+[dir=rtl] .mat-expansion-toggle-indicator-before .mat-content.mat-content-hide-toggle {
+  margin-right: 24px;
+  margin-left: 0;
+}
+
+.mat-expansion-panel-header-title {
+  color: var(--%NS%mat-expansion-header-text-color, var(--%NS%mat-sys-on-surface));
+}
+
+.mat-expansion-panel-header-title,
+.mat-expansion-panel-header-description {
+  display: flex;
+  flex-grow: 1;
+  flex-basis: 0;
+  margin-right: 16px;
+  align-items: center;
+}
+[dir=rtl] .mat-expansion-panel-header-title,
+[dir=rtl] .mat-expansion-panel-header-description {
+  margin-right: 0;
+  margin-left: 16px;
+}
+.mat-expansion-panel-header[aria-disabled=true] .mat-expansion-panel-header-title,
+.mat-expansion-panel-header[aria-disabled=true] .mat-expansion-panel-header-description {
+  color: inherit;
+}
+
+.mat-expansion-panel-header-description {
+  flex-grow: 2;
+  color: var(--%NS%mat-expansion-header-description-color, var(--%NS%mat-sys-on-surface-variant));
+}
+
+.mat-expansion-panel-animations-enabled .mat-expansion-indicator {
+  transition: transform 225ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mat-expansion-panel-header.mat-expanded .mat-expansion-indicator {
+  transform: rotate(180deg);
+}
+.mat-expansion-indicator::after {
+  border-style: solid;
+  border-width: 0 2px 2px 0;
+  content: "";
+  padding: 3px;
+  transform: rotate(45deg);
+  vertical-align: middle;
+  color: var(--%NS%mat-expansion-header-indicator-color, var(--%NS%mat-sys-on-surface-variant));
+  display: var(--%NS%mat-expansion-legacy-header-indicator-display, none);
+}
+.mat-expansion-indicator svg {
+  width: 24px;
+  height: 24px;
+  margin: 0 -8px;
+  vertical-align: middle;
+  fill: var(--%NS%mat-expansion-header-indicator-color, var(--%NS%mat-sys-on-surface-variant));
+  display: var(--%NS%mat-expansion-header-indicator-display, inline-block);
+}
+
+@media (forced-colors: active) {
+  .mat-expansion-panel-content {
+    border-top: 1px solid;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+`],encapsulation:2})})()}return n})(),Pn=(()=>{class n{static ɵfac=function(t){return new(t||n)};static ɵdir=uw({type:n,selectors:[[`mat-panel-description`]],hostAttrs:[1,`mat-expansion-panel-header-description`]})}return n})(),Sn=(()=>{class n{static ɵfac=function(t){return new(t||n)};static ɵdir=uw({type:n,selectors:[[`mat-panel-title`]],hostAttrs:[1,`mat-expansion-panel-header-title`]})}return n})(),kn=(()=>{class n extends Ee{_keyManager;_ownHeaders=new vi;_headers;hideToggle=!1;displayMode=`default`;togglePosition=`after`;ngAfterContentInit(){this._headers.changes.pipe(Jm(this._headers)).subscribe(e=>{this._ownHeaders.reset(e.filter(t=>t.panel.accordion===this)),this._ownHeaders.notifyOnChanges()}),this._keyManager=new Ae$1(this._ownHeaders).withWrap().withHomeAndEnd()}_handleHeaderKeydown(e){this._keyManager.onKeydown(e)}_handleHeaderFocus(e){this._keyManager.updateActiveItem(e)}ngOnDestroy(){super.ngOnDestroy(),this._keyManager?.destroy(),this._ownHeaders.destroy()}static ɵfac=(()=>{let e;return function(p){return(e||(e=SI(n)))(p||n)}})();static ɵdir=uw({type:n,selectors:[[`mat-accordion`]],contentQueries:function(t,p,d){if(t&1&&tv(d,Ze,5),t&2){let o;aM(o=cM())&&(p._headers=o)}},hostAttrs:[1,`mat-accordion`],hostVars:2,hostBindings:function(t,p){t&2&&cv(`mat-accordion-multi`,p.multi)},inputs:{hideToggle:[2,`hideToggle`,`hideToggle`,UL],displayMode:`displayMode`,togglePosition:`togglePosition`},exportAs:[`matAccordion`],features:[qM([{provide:B,useExisting:n}]),sm]})}return n})(),Nn=(()=>{class n{static ɵfac=function(t){return new(t||n)};static ɵmod=em({type:n});static ɵinj=zs({imports:[Pe,z$2,O]})}return n})()});export{Xe as a,Ue as i,Pn as n,Ze as o,Sn as r,kn as s,Nn as t};
