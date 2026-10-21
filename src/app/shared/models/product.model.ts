@@ -33,6 +33,7 @@ export interface Product {
   profit?: number;
   initialStock?: number;
   criticalStockLevel?: number;
+  reorderTarget?: number;
   stockLevelAlert?: boolean;
   qty?: number;
   station?: Station | string | any;

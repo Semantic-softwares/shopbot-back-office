@@ -17,6 +17,11 @@ export const DASHBOARD_INVENTORIES_ROUTES: Routes = [
           import('./suppliers/suppliers.routes').then((m) => m.DASHBOARD_SUPPLIERS_ROUTES),
       },
       {
+        path: 'purchasing',
+        loadChildren: () =>
+          import('./purchasing/purchasing.routes').then((m) => m.PURCHASING_ROUTES),
+      },
+      {
         path: 'restock',
         loadChildren: () =>
           import('./restock/restock.routes').then((m) => m.RESTOCK_ROUTES),

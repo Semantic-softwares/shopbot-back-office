@@ -62,6 +62,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     'erp.suppliers.create',
     'erp.suppliers.edit',
     'erp.suppliers.delete',
+    'erp.purchasing.view',
   ];
 
   // HMS (Hotel Management System) module permissions

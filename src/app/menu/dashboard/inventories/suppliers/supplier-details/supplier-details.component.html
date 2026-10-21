@@ -1,256 +1,90 @@
-<div class="p-6 max-w-4xl mx-auto">
-  <!-- Header -->
-  <div class="flex justify-between items-start mb-6">
-    <div class="flex items-center space-x-4">
-      <button
-        (click)="goBack()"
-        class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-        >
-        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900"><ng-container i18n>Supplier Details</ng-container></h1>
-        <p class="text-gray-600 mt-1"><ng-container i18n>View and manage supplier information</ng-container></p>
-      </div>
-    </div>
-
+<app-page-header [title]="supplier()?.name ?? ('Supplier' | tr)" [subtitle]="'Contact details, terms and the products they supply.' | tr">
+  <ng-container actions>
+    <button matButton (click)="goBack()"><mat-icon>arrow_back</mat-icon><ng-container i18n>Suppliers</ng-container></button>
     @if (supplier()) {
-      <div class="flex space-x-3">
-        <button
-          (click)="editSupplier()"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-          >
-          <ng-container i18n>Edit Supplier</ng-container>
-        </button>
-      </div>
+      <button matButton="outlined" (click)="newOrder()"><mat-icon>shopping_bag</mat-icon><ng-container i18n>New purchase order</ng-container></button>
+      <button matButton="filled" (click)="editSupplier()"><mat-icon>edit</mat-icon><ng-container i18n>Edit</ng-container></button>
     }
-  </div>
-</div>
+  </ng-container>
+</app-page-header>
 
-<!-- Loading State -->
-@if (loading()) {
-  <div class="flex justify-center items-center py-12">
-    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-  </div>
-}
+<div class="mx-auto flex max-w-4xl flex-col gap-5 p-4 pb-16 md:p-6">
+  @if (loading()) { <div class="flex justify-center py-12"><mat-spinner diameter="36"></mat-spinner></div> }
 
-<!-- Error State -->
-@if (error()) {
-  <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-    <div class="flex">
-      <div class="flex-shrink-0">
-        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-        </svg>
-      </div>
-      <div class="ml-3">
-        <p class="text-sm text-red-800">{{ error() }}</p>
-      </div>
-    </div>
-  </div>
-}
+  @if (error()) {
+    <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900" role="alert">{{ error() }}</div>
+  }
 
-<!-- Supplier Details -->
-@if (supplier() && !loading()) {
-  <div class="space-y-6">
-    <!-- Status and Basic Info Card -->
-    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-3">
-            <div class="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <span class="text-blue-600 font-semibold text-lg">
-                {{ supplier()!.name.charAt(0).toUpperCase() }}
-              </span>
-            </div>
-            <div>
-              <h2 class="text-xl font-semibold text-gray-900">{{ supplier()!.name }}</h2>
-              @if (supplier()!.description) {
-                <p class="text-gray-500">{{ supplier()!.description }}</p>
-              }
-            </div>
-          </div>
-          <div class="flex items-center space-x-3">
-            <span
-              class="inline-flex px-3 py-1 text-sm font-semibold rounded-full"
-              [ngClass]="{
-                'bg-green-100 text-green-800': supplier()!.active,
-                'bg-red-100 text-red-800': !supplier()!.active
-              }"
-              >
-              @if (supplier()!.active) {<ng-container i18n>Active</ng-container>} @else {<ng-container i18n>Inactive</ng-container>}
-            </span>
-            <button
-              (click)="toggleSupplierStatus()"
-              class="text-sm px-3 py-1 rounded-md border transition-colors"
-              [ngClass]="{
-                'border-red-300 text-red-700 hover:bg-red-50': supplier()!.active,
-                'border-green-300 text-green-700 hover:bg-green-50': !supplier()!.active
-              }"
-              >
-              @if (supplier()!.active) {<ng-container i18n>Deactivate</ng-container>} @else {<ng-container i18n>Activate</ng-container>}
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="px-6 py-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Contact Information -->
+  @if (supplier() && !loading()) {
+    <mat-card appearance="outlined"><mat-card-content class="!p-5">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="flex h-14 w-14 items-center justify-center rounded-full bg-primary-container text-xl font-semibold text-on-primary-container">{{ supplier()!.name.charAt(0).toUpperCase() }}</div>
           <div>
-            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3"><ng-container i18n>Contact Information</ng-container></h3>
-            <div class="space-y-3">
-              <div>
-                <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Email</ng-container></label>
-                <p class="mt-1 text-sm text-gray-900">{{ supplier()!.email }}</p>
-              </div>
-              @if (supplier()!.phone) {
-                <div>
-                  <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Phone</ng-container></label>
-                  <p class="mt-1 text-sm text-gray-900">{{ supplier()!.phone }}</p>
-                </div>
-              }
-              @if (supplier()!.contactPerson) {
-                <div>
-                  <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Contact Person</ng-container></label>
-                  <p class="mt-1 text-sm text-gray-900">{{ supplier()!.contactPerson }}</p>
-                </div>
-              }
-              @if (supplier()!.website) {
-                <div>
-                  <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Website</ng-container></label>
-                  <a
-                    [href]="supplier()!.website"
-                    target="_blank"
-                    class="mt-1 text-sm text-blue-600 hover:text-blue-800 underline"
-                    >
-                    {{ supplier()!.website }}
-                  </a>
-                </div>
-              }
-            </div>
+            <h2 class="m-0 text-xl font-semibold">{{ supplier()!.name }}</h2>
+            @if (supplier()!.description) { <p class="m-0 text-sm text-on-surface-variant">{{ supplier()!.description }}</p> }
           </div>
-          <!-- Business Information -->
-          <div>
-            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3"><ng-container i18n>Business Information</ng-container></h3>
-            <div class="space-y-3">
-              @if (supplier()!.taxId) {
-                <div>
-                  <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Tax ID</ng-container></label>
-                  <p class="mt-1 text-sm text-gray-900">{{ supplier()!.taxId }}</p>
-                </div>
-              }
-              @if (supplier()!.paymentTerms) {
-                <div>
-                  <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Payment Terms</ng-container></label>
-                  <p class="mt-1 text-sm text-gray-900">{{ supplier()!.paymentTerms }}</p>
-                </div>
-              }
-              @if (supplier()!.creditLimit) {
-                <div>
-                  <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Credit Limit</ng-container></label>
-                  <p class="mt-1 text-sm text-gray-900">${{ supplier()!.creditLimit | number:'1.2-2' }}</p>
-                </div>
-              }
-            </div>
-          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="rounded-full px-3 py-1 text-sm font-medium" [class]="supplier()!.active ? 'bg-green-100 text-green-900' : 'bg-gray-100 text-gray-700'">@if (supplier()!.active) {<ng-container i18n>Active</ng-container>} @else {<ng-container i18n>Inactive</ng-container>}</span>
+          <button matButton="outlined" (click)="toggleSupplierStatus()">@if (supplier()!.active) {<ng-container i18n>Deactivate</ng-container>} @else {<ng-container i18n>Activate</ng-container>}</button>
         </div>
       </div>
-    </div>
-    <!-- Address Information -->
-    @if (supplier()!.address && hasAddressInfo()) {
-      <div class="bg-white shadow-sm rounded-lg">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900"><ng-container i18n>Address Information</ng-container></h3>
+
+      <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div>
+          <h3 class="m-0 mb-3 text-xs font-medium uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Contact</ng-container></h3>
+          <dl class="m-0 flex flex-col gap-3 text-sm">
+            <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Email</ng-container></dt><dd class="m-0">{{ supplier()!.email }}</dd></div>
+            @if (supplier()!.phone) { <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Phone</ng-container></dt><dd class="m-0">{{ supplier()!.phone }}</dd></div> }
+            @if (supplier()!.contactPerson) { <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Contact person</ng-container></dt><dd class="m-0">{{ supplier()!.contactPerson }}</dd></div> }
+            @if (supplier()!.website) { <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Website</ng-container></dt><dd class="m-0"><a [href]="supplier()!.website" target="_blank" rel="noopener" class="text-primary underline">{{ supplier()!.website }}</a></dd></div> }
+          </dl>
         </div>
-        <div class="px-6 py-4">
-          <div class="text-sm text-gray-900">
-            @if (supplier()!.address!.street) {
-              <div class="mb-1">{{ supplier()!.address!.street }}</div>
+        <div>
+          <h3 class="m-0 mb-3 text-xs font-medium uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Business</ng-container></h3>
+          <dl class="m-0 flex flex-col gap-3 text-sm">
+            @if (supplier()!.taxId) { <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Tax ID</ng-container></dt><dd class="m-0">{{ supplier()!.taxId }}</dd></div> }
+            @if (supplier()!.paymentTerms) { <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Payment terms</ng-container></dt><dd class="m-0">{{ supplier()!.paymentTerms }}</dd></div> }
+            @if (supplier()!.creditLimit) { <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Credit limit</ng-container></dt><dd class="m-0 tabular-nums">{{ supplier()!.creditLimit | number:'1.2-2' }}</dd></div> }
+            @if (hasAddressInfo()) {
+              <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Address</ng-container></dt><dd class="m-0">{{ addressLine() }}</dd></div>
             }
-            <div class="flex space-x-2">
-              @if (supplier()!.address!.city) {
-                <span>{{ supplier()!.address!.city }}</span>
-              }
-              @if (supplier()!.address!.state) {
-                <span>, {{ supplier()!.address!.state }}</span>
-              }
-              @if (supplier()!.address!.postalCode) {
-                <span>{{ supplier()!.address!.postalCode }}</span>
-              }
-            </div>
-            @if (supplier()!.address!.country) {
-              <div class="mt-1">{{ supplier()!.address!.country }}</div>
-            }
-          </div>
+          </dl>
         </div>
       </div>
-    }
-    <!-- Notes -->
+    </mat-card-content></mat-card>
+
+    <mat-card appearance="outlined"><mat-card-content class="!p-5">
+      <h3 class="m-0 mb-3 text-base font-semibold"><ng-container i18n>Products they supply</ng-container></h3>
+      @if (!products().length) {
+        <p class="m-0 text-sm text-on-surface-variant"><ng-container i18n>No products are linked to this supplier yet. Open a product and add this supplier under Suppliers & purchasing.</ng-container></p>
+      } @else {
+        <ul class="m-0 flex list-none flex-col gap-2 p-0 text-sm">
+          @for (l of products(); track l._id) {
+            <li class="flex flex-wrap items-center justify-between gap-2 border-b border-outline-variant/40 pb-2 last:border-0 last:pb-0">
+              <span class="font-medium">{{ l.product?.name }} @if (l.preferred) { <span class="ml-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-normal text-green-900"><ng-container i18n>Preferred</ng-container></span> }</span>
+              <span class="text-xs text-on-surface-variant tabular-nums">@if (l.supplierSku) { {{ l.supplierSku }} · }{{ l.defaultCost | number:'1.2-2' }} / {{ l.purchaseUnit }}@if ((l.packSize || 1) > 1) { · {{ l.packSize }} <ng-container i18n>each</ng-container> }</span>
+            </li>
+          }
+        </ul>
+      }
+    </mat-card-content></mat-card>
+
     @if (supplier()!.notes) {
-      <div class="bg-white shadow-sm rounded-lg">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900"><ng-container i18n>Notes</ng-container></h3>
-        </div>
-        <div class="px-6 py-4">
-          <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ supplier()!.notes }}</p>
-        </div>
-      </div>
+      <mat-card appearance="outlined"><mat-card-content class="!p-5">
+        <h3 class="m-0 mb-2 text-base font-semibold"><ng-container i18n>Notes</ng-container></h3>
+        <p class="m-0 whitespace-pre-line text-sm">{{ supplier()!.notes }}</p>
+      </mat-card-content></mat-card>
     }
-    <!-- Metadata -->
-    <div class="bg-white shadow-sm rounded-lg">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900"><ng-container i18n>Record Information</ng-container></h3>
-      </div>
-      <div class="px-6 py-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          @if (supplier()!.createdAt) {
-            <div>
-              <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Created At</ng-container></label>
-              <p class="mt-1 text-sm text-gray-900">{{ supplier()!.createdAt | date:'medium' }}</p>
-            </div>
-          }
-          @if (supplier()!.updatedAt) {
-            <div>
-              <label class="block text-sm font-medium text-gray-700"><ng-container i18n>Last Updated</ng-container></label>
-              <p class="mt-1 text-sm text-gray-900">{{ supplier()!.updatedAt | date:'medium' }}</p>
-            </div>
-          }
-        </div>
-      </div>
+
+    <div class="flex justify-end"><button matButton (click)="deleteSupplier()" class="!text-red-700"><mat-icon>delete</mat-icon><ng-container i18n>Delete supplier</ng-container></button></div>
+  }
+
+  @if (!supplier() && !loading() && !error()) {
+    <div class="flex flex-col items-center gap-2 rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-10 text-center">
+      <p class="m-0 font-medium"><ng-container i18n>Supplier not found</ng-container></p>
+      <p class="m-0 text-sm text-on-surface-variant"><ng-container i18n>The requested supplier could not be found.</ng-container></p>
     </div>
-    <!-- Action Buttons -->
-    <div class="flex justify-between items-center pt-6">
-      <button
-        (click)="deleteSupplier()"
-        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-        >
-        <ng-container i18n>Delete Supplier</ng-container>
-      </button>
-      <div class="flex space-x-3">
-        <button
-          (click)="goBack()"
-          class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 font-medium transition-colors"
-          >
-          <ng-container i18n>Back to List</ng-container>
-        </button>
-        <button
-          (click)="editSupplier()"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-          >
-          <ng-container i18n>Edit Supplier</ng-container>
-        </button>
-      </div>
-    </div>
-    @if (!supplier() && !loading()) {
-      <div class="text-center py-12">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2M4 13h2m13-8l-4 4m0 0l-4-4m4 4V3" />
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900"><ng-container i18n>Supplier Not Found</ng-container></h3>
-        <p class="mt-1 text-sm text-gray-500"><ng-container i18n>The requested supplier could not be found.</ng-container></p>
-      </div>
-    }
-  </div>
-}
+  }
+</div>

@@ -1,165 +1,93 @@
-    <div class="p-6 max-w-7xl mx-auto">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900"><ng-container i18n>Restock History</ng-container></h1>
-          <p class="text-gray-600 mt-1"><ng-container i18n>Track all product restocking activities</ng-container></p>
-        </div>
-        <button
-          mat-raised-button
-          color="primary"
-          [routerLink]="['./add']"
-          class="flex items-center space-x-2"
-        >
-          <mat-icon>add</mat-icon>
-          <span><ng-container i18n>Add Stock</ng-container></span>
-        </button>
-      </div>
+<app-page-header title="Quick stock-in" i18n-title subtitle="Stock you add straight away, such as a supplier invoice for goods already in hand. For orders you place first, use Purchase orders." i18n-subtitle>
+  <ng-container actions>
+    <button matButton="outlined" routerLink="/menu/erp/inventory/purchasing"><mat-icon>shopping_bag</mat-icon><ng-container i18n>Purchase orders</ng-container></button>
+    <button matButton="filled" [routerLink]="['./add']"><mat-icon>add</mat-icon><ng-container i18n>Add stock</ng-container></button>
+  </ng-container>
+</app-page-header>
 
-      <!-- Filters -->
-      <mat-card class="mb-6">
-        <mat-card-content class="p-4">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <mat-form-field appearance="outline">
-              <mat-label><ng-container i18n>Status</ng-container></mat-label>
-              <mat-select [(ngModel)]="filters.status" (selectionChange)="loadRestocks()">
-                <mat-option value=""><ng-container i18n>All</ng-container></mat-option>
-                <mat-option value="draft"><ng-container i18n>Draft</ng-container></mat-option>
-                <mat-option value="completed"><ng-container i18n>Completed</ng-container></mat-option>
-                <mat-option value="cancelled"><ng-container i18n>Cancelled</ng-container></mat-option>
-              </mat-select>
-            </mat-form-field>
+<div class="flex flex-col gap-4 p-4 pb-16 md:p-6">
+  <div class="flex flex-wrap items-start gap-3">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full sm:w-48">
+      <mat-label><ng-container i18n>Status</ng-container></mat-label>
+      <mat-select [(ngModel)]="filters.status" (selectionChange)="loadRestocks()">
+        <mat-option value=""><ng-container i18n>All</ng-container></mat-option>
+        <mat-option value="draft"><ng-container i18n>Draft</ng-container></mat-option>
+        <mat-option value="completed"><ng-container i18n>Completed</ng-container></mat-option>
+        <mat-option value="cancelled"><ng-container i18n>Cancelled</ng-container></mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full sm:w-56">
+      <mat-label><ng-container i18n>Supplier</ng-container></mat-label>
+      <mat-select [(ngModel)]="filters.supplier" (selectionChange)="loadRestocks()">
+        <mat-option value=""><ng-container i18n>All suppliers</ng-container></mat-option>
+        @for (supplier of suppliers.value(); track supplier._id) { <mat-option [value]="supplier._id">{{ supplier.name }}</mat-option> }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full sm:w-44">
+      <mat-label><ng-container i18n>From date</ng-container></mat-label>
+      <input matInput [matDatepicker]="fromPicker" [(ngModel)]="filters.dateFrom" (dateChange)="loadRestocks()">
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
+      <mat-datepicker #fromPicker></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full sm:w-44">
+      <mat-label><ng-container i18n>To date</ng-container></mat-label>
+      <input matInput [matDatepicker]="toPicker" [(ngModel)]="filters.dateTo" (dateChange)="loadRestocks()">
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
+      <mat-datepicker #toPicker></mat-datepicker>
+    </mat-form-field>
+  </div>
 
-            <mat-form-field appearance="outline">
-              <mat-label><ng-container i18n>Supplier</ng-container></mat-label>
-              <mat-select [(ngModel)]="filters.supplier" (selectionChange)="loadRestocks()">
-                <mat-option value=""><ng-container i18n>All Suppliers</ng-container></mat-option>
-                @for (supplier of suppliers.value(); track supplier._id) {
-                  <mat-option [value]="supplier._id">{{ supplier.name }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label><ng-container i18n>From Date</ng-container></mat-label>
-              <input matInput [matDatepicker]="fromPicker" [(ngModel)]="filters.dateFrom" (dateChange)="loadRestocks()">
-              <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
-              <mat-datepicker #fromPicker></mat-datepicker>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label><ng-container i18n>To Date</ng-container></mat-label>
-              <input matInput [matDatepicker]="toPicker" [(ngModel)]="filters.dateTo" (dateChange)="loadRestocks()">
-              <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
-              <mat-datepicker #toPicker></mat-datepicker>
-            </mat-form-field>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Data Table -->
-      <mat-card>
-        <div class="overflow-x-auto">
-          <table mat-table [dataSource]="restocks.value()?.data || []" class="w-full">
-            
-            <!-- Invoice Number Column -->
-            <ng-container matColumnDef="invoiceNumber">
-              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Invoice #</ng-container></th>
-              <td mat-cell *matCellDef="let restock">{{ restock.invoiceNumber }}</td>
-            </ng-container>
-
-            <!-- Date Column -->
-            <ng-container matColumnDef="date">
-              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Date</ng-container></th>
-              <td mat-cell *matCellDef="let restock">
-                {{ restock.invoiceDate | date:'shortDate' }}
-              </td>
-            </ng-container>
-
-            <!-- Supplier Column -->
-            <ng-container matColumnDef="supplier">
-              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Supplier</ng-container></th>
-              <td mat-cell *matCellDef="let restock">{{ restock.supplier?.name || 'N/A' }}</td>
-            </ng-container>
-
-            <!-- Items Count Column -->
-            <ng-container matColumnDef="items">
-              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Items</ng-container></th>
-              <td mat-cell *matCellDef="let restock">{{ restock.items?.length || 0 }}</td>
-            </ng-container>
-
-            <!-- Total Column -->
-            <ng-container matColumnDef="total">
-              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Total</ng-container></th>
-              <td mat-cell *matCellDef="let restock">
-                <span class="font-medium">{{ restock.total | currency:currency():'symbol':'1.2-2' }}</span>
-              </td>
-            </ng-container>
-
-            <!-- Status Column -->
-            <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
-              <td mat-cell *matCellDef="let restock">
-                <span
-                  [class]="getStatusClass(restock.status)"
-                  class="px-2 py-1 rounded-full text-xs font-medium"
-                >
-                  {{ restock.status | titlecase }}
-                </span>
-              </td>
-            </ng-container>
-
-            <!-- Actions Column -->
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef><ng-container i18n>Actions</ng-container></th>
-              <td mat-cell *matCellDef="let restock">
-                <button mat-icon-button [matMenuTriggerFor]="menu">
-                  <mat-icon>more_vert</mat-icon>
-                </button>
-                <mat-menu #menu="matMenu">
-                  <button mat-menu-item (click)="viewDetails(restock._id)">
-                    <mat-icon>visibility</mat-icon>
-                    <span><ng-container i18n>View Details</ng-container></span>
-                  </button>
-                  <button mat-menu-item (click)="editRestock(restock._id)">
-                    <mat-icon>edit</mat-icon>
-                    <span><ng-container i18n>Edit</ng-container></span>
-                  </button>
-                  <button mat-menu-item (click)="deleteRestock(restock._id)" class="text-red-600">
-                    <mat-icon>delete</mat-icon>
-                    <span><ng-container i18n>Delete</ng-container></span>
-                  </button>
-                </mat-menu>
-              </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          </table>
-        </div>
-
-        <!-- Pagination -->
-        @if (restocks.value()?.pagination) {
-          <mat-paginator
-            [length]="restocks.value()!.pagination.total"
-            [pageSize]="restocks.value()!.pagination.limit"
-            [pageIndex]="restocks.value()!.pagination.page - 1"
-            [pageSizeOptions]="[5, 10, 25, 50]"
-            (page)="onPageChange($event)"
-            showFirstLastButtons
-          ></mat-paginator>
-        }
-      </mat-card>
-
-      <!-- Empty State -->
-      @if (restocks.value()?.data && restocks.value()!.data.length === 0) {
-        <div class="text-center py-12">
-          <mat-icon class="text-gray-400 text-6xl mb-4">inventory_2</mat-icon>
-          <h3 class="text-lg font-medium text-gray-900 mb-2"><ng-container i18n>No restock records found</ng-container></h3>
-          <p class="text-gray-500 mb-4"><ng-container i18n>Start by adding your first stock entry</ng-container></p>
-          <button mat-raised-button color="primary" [routerLink]="['./add']">
-            <ng-container i18n>Add Stock</ng-container>
-          </button>
-        </div>
-      }
+  @if (restocks.value()?.data && restocks.value()!.data.length === 0) {
+    <div class="flex flex-col items-center gap-2 rounded-3xl border border-outline-variant/60 bg-surface-container-lowest p-10 text-center">
+      <mat-icon class="!h-12 !w-12 !text-5xl !leading-none text-on-surface-variant">inventory_2</mat-icon>
+      <p class="m-0 font-medium"><ng-container i18n>No stock-ins found.</ng-container></p>
+      <p class="m-0 text-sm text-on-surface-variant"><ng-container i18n>Add stock you have already received, or place an order with a supplier.</ng-container></p>
+      <button matButton="filled" [routerLink]="['./add']"><ng-container i18n>Add stock</ng-container></button>
     </div>
+  } @else {
+    <mat-card appearance="outlined" class="overflow-x-auto">
+      <table mat-table [dataSource]="restocks.value()?.data || []" class="w-full min-w-[720px]">
+        <ng-container matColumnDef="invoiceNumber">
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Invoice</ng-container></th>
+          <td mat-cell *matCellDef="let restock"><div class="font-semibold">{{ restock.invoiceNumber }}</div><div class="text-xs text-on-surface-variant">{{ restock.invoiceDate | date:'mediumDate' }}</div></td>
+        </ng-container>
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Date</ng-container></th>
+          <td mat-cell *matCellDef="let restock" class="whitespace-nowrap text-sm">{{ restock.invoiceDate | date:'shortDate' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="supplier">
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Supplier</ng-container></th>
+          <td mat-cell *matCellDef="let restock">{{ restock.supplier?.name || '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="items">
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Items</ng-container></th>
+          <td mat-cell *matCellDef="let restock" class="tabular-nums">{{ restock.items?.length || 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="total">
+          <th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Total</ng-container></th>
+          <td mat-cell *matCellDef="let restock" class="whitespace-nowrap text-right font-medium tabular-nums">{{ restock.total | currency:currency():'symbol':'1.2-2' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
+          <td mat-cell *matCellDef="let restock"><span [class]="getStatusClass(restock.status)" class="whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium">{{ restock.status | titlecase }}</span></td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="!w-14"></th>
+          <td mat-cell *matCellDef="let restock">
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Actions" i18n-aria-label><mat-icon>more_vert</mat-icon></button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="viewDetails(restock._id)"><mat-icon>visibility</mat-icon><span><ng-container i18n>View details</ng-container></span></button>
+              <button mat-menu-item (click)="editRestock(restock._id)"><mat-icon>edit</mat-icon><span><ng-container i18n>Edit</ng-container></span></button>
+              <button mat-menu-item (click)="deleteRestock(restock._id)"><mat-icon>delete</mat-icon><span><ng-container i18n>Delete</ng-container></span></button>
+            </mat-menu>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="cursor-pointer hover:bg-surface-container-low" (click)="viewDetails(row._id)"></tr>
+      </table>
+      @if (restocks.value()?.pagination) {
+        <mat-paginator [length]="restocks.value()!.pagination.total" [pageSize]="restocks.value()!.pagination.limit" [pageIndex]="restocks.value()!.pagination.page - 1" [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)" showFirstLastButtons></mat-paginator>
+      }
+    </mat-card>
+  }
+</div>

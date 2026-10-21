@@ -1,3 +1,4 @@
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -27,7 +28,7 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 @Component({
   selector: 'app-reconciliation-details',
   standalone: true,
-  imports: [TrPipe, 
+  imports: [PageHeaderComponent, TrPipe, 
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -50,48 +51,41 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
     RouterModule,
   ],
   template: `
-    <div class="p-6 max-w-7xl mx-auto">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900"><ng-container i18n>Reconciliation Details</ng-container></h1>
-          @if (reconciliation()) {
-            <p class="text-gray-600 mt-1">{{ reconciliation()!.name }}</p>
-          }
-        </div>
-        <div class="flex space-x-4">
-          <button mat-button [routerLink]="['../..']" class="text-gray-600">
+    <app-page-header title="Reconciliation Details" i18n-title [subtitle]="reconciliation()?.name ?? ''">
+      <ng-container actions>
+          <button matButton [routerLink]="['../..']">
             <mat-icon>arrow_back</mat-icon>
             <ng-container i18n>Back to List</ng-container>
           </button>
           @if (reconciliation() && reconciliation()!.status !== 'completed') {
-            <button mat-raised-button color="primary" [routerLink]="['../count']">
+            <button matButton="filled" [routerLink]="['../count']">
               <mat-icon>edit</mat-icon>
               <ng-container i18n>Continue Editing</ng-container>
             </button>
           }
-        </div>
-      </div>
+        </ng-container>
+    </app-page-header>
+    <div class="mx-auto max-w-7xl p-4 pb-16 md:p-6">
 
       @if (reconciliation()) {
         <!-- Status and Basic Info -->
-        <mat-card class="mb-6">
+        <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60 mb-6">
           <mat-card-content class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-2"><ng-container i18n>Status</ng-container></h3>
+                <h3 class="text-sm font-medium text-on-surface-variant mb-2"><ng-container i18n>Status</ng-container></h3>
                 <span [class]="getStatusClass(reconciliation()!.status)" class="px-3 py-2 rounded-full text-sm font-medium">
                   {{ reconciliation()!.status | titlecase }}
                 </span>
               </div>
               <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-2"><ng-container i18n>Type</ng-container></h3>
+                <h3 class="text-sm font-medium text-on-surface-variant mb-2"><ng-container i18n>Type</ng-container></h3>
                 <span class="bg-blue-100 text-blue-800 px-3 py-2 rounded-full text-sm font-medium">
                   {{ getTypeDisplay(reconciliation()!.type) }}
                 </span>
               </div>
               <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-2"><ng-container i18n>Created</ng-container></h3>
+                <h3 class="text-sm font-medium text-on-surface-variant mb-2"><ng-container i18n>Created</ng-container></h3>
                 <p class="text-sm text-gray-900">{{ reconciliation()!.createdAt | date:'medium' }}</p>
               </div>
             </div>
@@ -99,7 +93,7 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
             @if (reconciliation()!.description) {
               <mat-divider class="my-4"></mat-divider>
               <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-2"><ng-container i18n>Description</ng-container></h3>
+                <h3 class="text-sm font-medium text-on-surface-variant mb-2"><ng-container i18n>Description</ng-container></h3>
                 <p class="text-sm text-gray-900">{{ reconciliation()!.description }}</p>
               </div>
             }
@@ -108,49 +102,49 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
         <!-- Summary Statistics -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <mat-card class="p-4">
+          <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60 p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600"><ng-container i18n>Total Products</ng-container></p>
+                <p class="text-sm text-on-surface-variant"><ng-container i18n>Total Products</ng-container></p>
                 <p class="text-3xl font-bold text-blue-600">{{ reconciliation()!.totalProducts }}</p>
               </div>
               <mat-icon class="text-blue-500 text-3xl">inventory</mat-icon>
             </div>
           </mat-card>
 
-          <mat-card class="p-4">
+          <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60 p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600"><ng-container i18n>Products Counted</ng-container></p>
+                <p class="text-sm text-on-surface-variant"><ng-container i18n>Products Counted</ng-container></p>
                 <p class="text-3xl font-bold text-green-600">{{ reconciliation()!.countedProducts }}</p>
-                <p class="text-xs text-gray-500"><ng-container i18n>{{ getCompletionPercentage() }}% Complete</ng-container></p>
+                <p class="text-xs text-on-surface-variant"><ng-container i18n>{{ getCompletionPercentage() }}% Complete</ng-container></p>
               </div>
               <mat-icon class="text-green-500 text-3xl">check_circle</mat-icon>
             </div>
           </mat-card>
 
-          <mat-card class="p-4">
+          <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60 p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600"><ng-container i18n>Discrepancies</ng-container></p>
+                <p class="text-sm text-on-surface-variant"><ng-container i18n>Discrepancies</ng-container></p>
                 <p class="text-3xl font-bold text-orange-600">{{ reconciliation()!.discrepancyCount }}</p>
-                <p class="text-xs text-gray-500"><ng-container i18n>{{ getDiscrepancyPercentage() }}% of counted items</ng-container></p>
+                <p class="text-xs text-on-surface-variant"><ng-container i18n>{{ getDiscrepancyPercentage() }}% of counted items</ng-container></p>
               </div>
               <mat-icon class="text-orange-500 text-3xl">warning</mat-icon>
             </div>
           </mat-card>
 
-          <mat-card class="p-4">
+          <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60 p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600"><ng-container i18n>Financial Impact</ng-container></p>
+                <p class="text-sm text-on-surface-variant"><ng-container i18n>Financial Impact</ng-container></p>
                 <p class="text-3xl font-bold" 
                    [class.text-red-600]="reconciliation()!.totalVarianceValue < 0"
                    [class.text-green-600]="reconciliation()!.totalVarianceValue > 0"
-                   [class.text-gray-600]="reconciliation()!.totalVarianceValue === 0">
+                   [class.text-on-surface-variant]="reconciliation()!.totalVarianceValue === 0">
                   {{ reconciliation()!.totalVarianceValue | currency:currency():'symbol':'1.2-2' }}
                 </p>
-                <p class="text-xs text-gray-500" 
+                <p class="text-xs text-on-surface-variant" 
                    [class.text-red-500]="reconciliation()!.totalVarianceValue < 0"
                    [class.text-green-500]="reconciliation()!.totalVarianceValue > 0">
                   {{ reconciliation()!.totalVarianceValue > 0 ? ('Inventory Gain' | tr) : reconciliation()!.totalVarianceValue < 0 ? ('Inventory Loss' | tr) : ('No Impact' | tr) }}
@@ -163,7 +157,7 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
         <!-- Timeline -->
         @if (reconciliation()!.status === 'completed') {
-          <mat-card class="mb-6">
+          <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60 mb-6">
             <mat-card-header>
               <mat-card-title><ng-container i18n>Reconciliation Timeline</ng-container></mat-card-title>
             </mat-card-header>
@@ -178,9 +172,9 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
                   </div>
                   <div class="ml-4">
                     <p class="text-sm font-medium text-gray-900"><ng-container i18n>Reconciliation Started</ng-container></p>
-                    <p class="text-xs text-gray-500">{{ reconciliation()!.startDate | date:'medium' }}</p>
+                    <p class="text-xs text-on-surface-variant">{{ reconciliation()!.startDate | date:'medium' }}</p>
                     @if (reconciliation()!.createdBy) {
-                      <p class="text-xs text-gray-500"><ng-container i18n>by User {{ reconciliation()!.createdBy }}</ng-container></p>
+                      <p class="text-xs text-on-surface-variant"><ng-container i18n>by User {{ reconciliation()!.createdBy }}</ng-container></p>
                     }
                   </div>
                 </div>
@@ -193,9 +187,9 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
                     </div>
                     <div class="ml-4">
                       <p class="text-sm font-medium text-gray-900"><ng-container i18n>Reconciliation Completed</ng-container></p>
-                      <p class="text-xs text-gray-500">{{ reconciliation()!.completedDate | date:'medium' }}</p>
+                      <p class="text-xs text-on-surface-variant">{{ reconciliation()!.completedDate | date:'medium' }}</p>
                       @if (reconciliation()!.completedBy) {
-                        <p class="text-xs text-gray-500"><ng-container i18n>by User {{ reconciliation()!.completedBy }}</ng-container></p>
+                        <p class="text-xs text-on-surface-variant"><ng-container i18n>by User {{ reconciliation()!.completedBy }}</ng-container></p>
                       }
                     </div>
                   </div>
@@ -206,7 +200,7 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
         }
 
         <!-- Items Detail -->
-        <mat-card>
+        <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60">
           <mat-card-header>
             <mat-card-title><ng-container i18n>Items Detail</ng-container></mat-card-title>
             <mat-card-subtitle><ng-container i18n>{{ reconciliation()!.items.length }} items total</ng-container></mat-card-subtitle>
@@ -244,7 +238,7 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
                         <div>
                           <div class="font-medium">{{ item.productName }}</div>
                           @if (item.productSku) {
-                            <div class="text-sm text-gray-500"><ng-container i18n>SKU: {{ item.productSku }}</ng-container></div>
+                            <div class="text-sm text-on-surface-variant"><ng-container i18n>SKU: {{ item.productSku }}</ng-container></div>
                           }
                         </div>
                       </td>
@@ -278,7 +272,7 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
                           <div 
                             [class.text-red-600]="item.variance < 0"
                             [class.text-green-600]="item.variance > 0"
-                            [class.text-gray-600]="item.variance === 0"
+                            [class.text-on-surface-variant]="item.variance === 0"
                             class="font-medium"
                           >
                             {{ item.variance > 0 ? '+' : '' }}{{ item.variance || 0 }}
@@ -301,11 +295,11 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
                       <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Reason</ng-container></th>
                       <td mat-cell *matCellDef="let item" class="py-4">
                         @if (item.reason) {
-                          <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm">
+                          <span class="bg-surface-container-high text-gray-800 px-2 py-1 rounded text-sm">
                             {{ getReasonDisplay(item.reason) }}
                           </span>
                           @if (item.reasonNote) {
-                            <div class="text-xs text-gray-500 mt-1">{{ item.reasonNote }}</div>
+                            <div class="text-xs text-on-surface-variant mt-1">{{ item.reasonNote }}</div>
                           }
                         } @else if (item.variance !== 0) {
                           <span class="text-gray-400 text-sm"><ng-container i18n>No reason specified</ng-container></span>
@@ -331,7 +325,7 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
                           <div>
                             <div class="text-sm"><ng-container i18n>User {{ item.countedBy }}</ng-container></div>
                             @if (item.countedAt) {
-                              <div class="text-xs text-gray-500">{{ item.countedAt | date:'short' }}</div>
+                              <div class="text-xs text-on-surface-variant">{{ item.countedAt | date:'short' }}</div>
                             }
                           </div>
                         } @else {
@@ -361,7 +355,7 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
                           <div>
                             <div class="font-medium">{{ item.productName }}</div>
                             @if (item.productSku) {
-                              <div class="text-sm text-gray-500"><ng-container i18n>SKU: {{ item.productSku }}</ng-container></div>
+                              <div class="text-sm text-on-surface-variant"><ng-container i18n>SKU: {{ item.productSku }}</ng-container></div>
                             }
                           </div>
                         </td>
@@ -411,11 +405,11 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
                         <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Reason</ng-container></th>
                         <td mat-cell *matCellDef="let item" class="py-4">
                           @if (item.reason) {
-                            <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm">
+                            <span class="bg-surface-container-high text-gray-800 px-2 py-1 rounded text-sm">
                               {{ getReasonDisplay(item.reason) }}
                             </span>
                             @if (item.reasonNote) {
-                              <div class="text-xs text-gray-500 mt-1">{{ item.reasonNote }}</div>
+                              <div class="text-xs text-on-surface-variant mt-1">{{ item.reasonNote }}</div>
                             }
                           } @else {
                             <span class="text-gray-400 text-sm"><ng-container i18n>No reason specified</ng-container></span>
@@ -441,7 +435,7 @@ import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
                   <div class="text-center py-12">
                     <mat-icon class="text-green-500 text-6xl mb-4">check_circle</mat-icon>
                     <h3 class="text-lg font-medium text-gray-900 mb-2"><ng-container i18n>No Discrepancies Found</ng-container></h3>
-                    <p class="text-gray-500"><ng-container i18n>All counted items matched the system quantities perfectly</ng-container></p>
+                    <p class="text-on-surface-variant"><ng-container i18n>All counted items matched the system quantities perfectly</ng-container></p>
                   </div>
                 }
               </div>

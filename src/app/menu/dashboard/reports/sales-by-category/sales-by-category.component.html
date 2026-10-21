@@ -1,79 +1,92 @@
-<div class="p-4 bg-gray-50 min-h-screen">
-    <!-- Header Section -->
-    <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-lg shadow-sm">
-        <date-range-selector />
+<app-report-page title="Sales by category" i18n-title subtitle="Which categories sell the most, and which earn the most." i18n-subtitle [exportDisabled]="!rows().length" (export)="exportData($event)">
+  <ng-container filters>
+    <date-range-selector />
+    <app-employee-selector />
+  </ng-container>
 
-        <app-employee-selector />
+  @if (res.isLoading()) { <mat-progress-bar mode="indeterminate" /> }
+
+  @if (failed()) {
+    <div class="flex flex-col items-center gap-2 rounded-3xl border border-red-200 bg-red-50 p-8 text-center text-red-900" role="alert">
+      <mat-icon class="!h-10 !w-10 !text-4xl !leading-none text-red-600">error</mat-icon>
+      <p class="m-0 font-semibold"><ng-container i18n>Could not load this report.</ng-container></p>
+      <button matButton="filled" (click)="res.reload()"><ng-container i18n>Try again</ng-container></button>
+    </div>
+  } @else if (res.hasValue() && !rows().length) {
+    <mat-card appearance="outlined"><mat-card-content class="flex flex-col items-center gap-2 !p-10 text-center">
+      <mat-icon class="!h-12 !w-12 !text-5xl !leading-none text-on-surface-variant">category</mat-icon>
+      <p class="m-0 font-medium"><ng-container i18n>No sales in this period.</ng-container></p>
+      <p class="m-0 text-sm text-on-surface-variant"><ng-container i18n>Try another date range or employee.</ng-container></p>
+    </mat-card-content></mat-card>
+  } @else if (rows().length) {
+    <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <app-report-kpi class="col-span-2 lg:col-span-1" label="Net sales" i18n-label icon="payments" [hint]="top() ? (top()!.category + ' · ' + (top()!.share | percent:'1.0-0')) : ''">{{ totals().net | currency: currency() }}</app-report-kpi>
+      <app-report-kpi label="Items sold" i18n-label icon="shopping_basket">{{ totals().items | number:'1.0-0' }}</app-report-kpi>
+      <app-report-kpi label="Gross profit" i18n-label icon="trending_up" [tone]="totals().profit < 0 ? 'text-red-700' : ''">{{ totals().profit | currency: currency() }}</app-report-kpi>
+      <app-report-kpi class="col-span-2 lg:col-span-1" label="Margin" i18n-label icon="percent">{{ totals().margin | percent:'1.0-1' }}</app-report-kpi>
     </div>
 
+    <!-- Desktop and tablet -->
+    <mat-card appearance="outlined" class="overflow-x-auto max-md:!hidden">
+      <table mat-table matSort [matSortActive]="table.sortKey()" [matSortDirection]="table.sortDir()" (matSortChange)="table.onSort($event)" [dataSource]="table.rows()" class="w-full min-w-[720px]">
+        <ng-container matColumnDef="category">
+          <th mat-header-cell mat-sort-header *matHeaderCellDef><ng-container i18n>Category</ng-container></th>
+          <td mat-cell *matCellDef="let r">
+            <div class="font-medium">{{ r.category }}</div>
+            <div class="mt-1 h-1.5 w-40 max-w-full overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" [style.width.%]="r.share * 100"></div></div>
+          </td>
+          <td mat-footer-cell *matFooterCellDef class="font-semibold"><ng-container i18n>Total</ng-container></td>
+        </ng-container>
+        <ng-container matColumnDef="itemsSold">
+          <th mat-header-cell mat-sort-header arrowPosition="before" *matHeaderCellDef class="!text-right"><ng-container i18n>Items sold</ng-container></th>
+          <td mat-cell *matCellDef="let r" class="text-right tabular-nums">{{ r.itemsSold | number:'1.0-0' }}</td>
+          <td mat-footer-cell *matFooterCellDef class="text-right font-semibold tabular-nums">{{ totals().items | number:'1.0-0' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="netSales">
+          <th mat-header-cell mat-sort-header arrowPosition="before" *matHeaderCellDef class="!text-right"><ng-container i18n>Net sales</ng-container></th>
+          <td mat-cell *matCellDef="let r" class="text-right tabular-nums">{{ r.netSales | currency: currency() }}<div class="text-xs text-on-surface-variant">{{ r.share | percent:'1.0-1' }}</div></td>
+          <td mat-footer-cell *matFooterCellDef class="text-right font-semibold tabular-nums">{{ totals().net | currency: currency() }}</td>
+        </ng-container>
+        <ng-container matColumnDef="costOfGoods">
+          <th mat-header-cell mat-sort-header arrowPosition="before" *matHeaderCellDef class="!text-right"><ng-container i18n>Cost of goods</ng-container></th>
+          <td mat-cell *matCellDef="let r" class="text-right tabular-nums">{{ r.costOfGoods | currency: currency() }}</td>
+          <td mat-footer-cell *matFooterCellDef class="text-right font-semibold tabular-nums">{{ totals().cost | currency: currency() }}</td>
+        </ng-container>
+        <ng-container matColumnDef="grossProfit">
+          <th mat-header-cell mat-sort-header arrowPosition="before" *matHeaderCellDef class="!text-right"><ng-container i18n>Gross profit</ng-container></th>
+          <td mat-cell *matCellDef="let r" class="text-right tabular-nums" [class.text-red-700]="r.grossProfit < 0">{{ r.grossProfit | currency: currency() }}</td>
+          <td mat-footer-cell *matFooterCellDef class="text-right font-semibold tabular-nums">{{ totals().profit | currency: currency() }}</td>
+        </ng-container>
+        <ng-container matColumnDef="margin">
+          <th mat-header-cell mat-sort-header arrowPosition="before" *matHeaderCellDef class="!text-right"><ng-container i18n>Margin</ng-container></th>
+          <td mat-cell *matCellDef="let r" class="text-right tabular-nums">{{ r.margin | percent:'1.0-1' }}</td>
+          <td mat-footer-cell *matFooterCellDef class="text-right font-semibold tabular-nums">{{ totals().margin | percent:'1.0-1' }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let r; columns: columns"></tr>
+        <tr mat-footer-row *matFooterRowDef="columns"></tr>
+      </table>
+    </mat-card>
 
-    <div class="bg-white rounded-lg shadow-sm">
-        <div class="p-6 flex justify-between items-center border-b">
-            <h2 class="text-lg font-medium"><ng-container i18n>Sales by Category</ng-container></h2>
-            <button mat-flat-button color="primary" [matMenuTriggerFor]="exportMenu">
-                <mat-icon class="mr-2">file_download</mat-icon>
-                <ng-container i18n>Export Data</ng-container>
-            </button>
-            <mat-menu #exportMenu="matMenu">
-                <button mat-menu-item (click)="exportData('pdf')">
-                    <mat-icon>picture_as_pdf</mat-icon>
-                    <span><ng-container i18n>Export as PDF</ng-container></span>
-                </button>
-                <button mat-menu-item (click)="exportData('csv')">
-                    <mat-icon>description</mat-icon>
-                    <span><ng-container i18n>Export as CSV</ng-container></span>
-                </button>
-                <button mat-menu-item (click)="exportData('excel')">
-                    <mat-icon>table_chart</mat-icon>
-                    <span><ng-container i18n>Export as Excel</ng-container></span>
-                </button>
-            </mat-menu>
-        </div>
-        @if (dataSource.hasValue()) {
-        <div class="p-6">
-            <mat-table [dataSource]="dataSource.value()!" class="w-full !bg-white">
-                <ng-container matColumnDef="category">
-                    <mat-header-cell *matHeaderCellDef><ng-container i18n>Category</ng-container></mat-header-cell>
-                    <mat-cell *matCellDef="let element">{{element.category}}</mat-cell>
-                </ng-container>
-
-                <ng-container matColumnDef="itemsSold">
-                    <mat-header-cell *matHeaderCellDef><ng-container i18n>Items Sold</ng-container></mat-header-cell>
-                    <mat-cell *matCellDef="let element">{{element.itemsSold  }}</mat-cell>
-                </ng-container>
-
-                <ng-container matColumnDef="netSales">
-                    <mat-header-cell *matHeaderCellDef><ng-container i18n>Net Sales</ng-container></mat-header-cell>
-                    <mat-cell *matCellDef="let element">{{element.netSales | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
-                </ng-container>
-
-                <ng-container matColumnDef="costOfGoods">
-                    <mat-header-cell *matHeaderCellDef><ng-container i18n>Cost of Goods</ng-container></mat-header-cell>
-                    <mat-cell *matCellDef="let element">{{element.costOfGoods | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
-                </ng-container>
-
-                <ng-container matColumnDef="grossProfit">
-                    <mat-header-cell *matHeaderCellDef><ng-container i18n>Gross Profit</ng-container></mat-header-cell>
-                    <mat-cell *matCellDef="let element">{{element.grossProfit | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</mat-cell>
-                </ng-container>
-
-                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-            </mat-table>
-
-            <mat-paginator class="!bg-white" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
-                showFirstLastButtons aria-label="Select page" i18n-aria-label>
-            </mat-paginator>
-        </div>
-        } @else if (dataSource.isLoading()) {
-        <div class="flex items-center justify-center min-h-[300px]">
-          <mat-spinner diameter="40"></mat-spinner>
-        </div>
-        }  @else {
-        <app-no-record icon="inventory_2" title="No Category Found" i18n-title
-            message="There are no category to display for the selected period." i18n-message>
-        </app-no-record>
-        } 
+    <!-- Phone -->
+    <div class="flex flex-col gap-3 md:hidden">
+      @for (r of table.rows(); track r.category) {
+        <mat-card appearance="outlined"><mat-card-content class="!p-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0 font-semibold">{{ r.category }}</div>
+            <div class="shrink-0 text-right font-semibold tabular-nums">{{ r.netSales | currency: currency() }}</div>
+          </div>
+          <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" [style.width.%]="r.share * 100"></div></div>
+          <dl class="m-0 mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+            <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Share of sales</ng-container></dt><dd class="m-0 tabular-nums">{{ r.share | percent:'1.0-1' }}</dd></div>
+            <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Items sold</ng-container></dt><dd class="m-0 tabular-nums">{{ r.itemsSold | number:'1.0-0' }}</dd></div>
+            <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Gross profit</ng-container></dt><dd class="m-0 tabular-nums" [class.text-red-700]="r.grossProfit < 0">{{ r.grossProfit | currency: currency() }}</dd></div>
+            <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Margin</ng-container></dt><dd class="m-0 tabular-nums">{{ r.margin | percent:'1.0-1' }}</dd></div>
+          </dl>
+        </mat-card-content></mat-card>
+      }
     </div>
 
-</div>
+    <mat-paginator [length]="table.total()" [pageSize]="table.pageSize()" [pageIndex]="table.pageIndex()" [pageSizeOptions]="[10, 25, 50]" (page)="table.onPage($event)" showFirstLastButtons class="rounded-3xl" />
+  }
+</app-report-page>

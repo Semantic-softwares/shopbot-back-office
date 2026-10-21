@@ -1,256 +1,108 @@
-<div class="p-4 bg-gray-50 min-h-screen">
-  <!-- Header Section -->
-  <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm mb-6">
-    <div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center space-y-4 lg:space-y-0 lg:gap-4">
-      <div class="w-full lg:max-w-xs">
-        <date-range-selector  />
-      </div>
+<app-report-page title="Sales summary" i18n-title subtitle="How sales, discounts, refunds and profit are moving." i18n-subtitle [exportDisabled]="!rows().length" (export)="exportData($event)">
+  <ng-container filters>
+    <date-range-selector />
+    <period-range-selector />
+    <app-employee-selector />
+  </ng-container>
 
-      <div class="flex flex-col sm:flex-row gap-4 flex-end sm:flex-1">
-        <period-range-selector  />
-        <app-employee-selector  />
-      </div>
+  @if (summary.isLoading() || series.isLoading()) { <mat-progress-bar mode="indeterminate" /> }
+
+  @if (failed()) {
+    <div class="flex flex-col items-center gap-2 rounded-3xl border border-red-200 bg-red-50 p-8 text-center text-red-900" role="alert">
+      <mat-icon class="!h-10 !w-10 !text-4xl !leading-none text-red-600">error</mat-icon>
+      <p class="m-0 font-semibold"><ng-container i18n>Could not load this report.</ng-container></p>
+      <button matButton="filled" (click)="summary.reload(); series.reload()"><ng-container i18n>Try again</ng-container></button>
     </div>
-  </div>
+  } @else if (summary.hasValue()) {
+    <div class="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      @for (m of metrics; track m.key; let first = $first) {
+        <button type="button" class="text-left" [class.col-span-2]="first" [class.lg:col-span-1]="first" (click)="active.set(m.key)" [attr.aria-pressed]="active() === m.key">
+          <app-report-kpi [label]="m.label" [icon]="m.icon" [active]="active() === m.key" [clickable]="true" [tone]="m.key === 'refunds' || m.key === 'discounts' ? 'text-red-700' : ''" [hint]="share(m.key) ? (((share(m.key) / 100) | percent:'1.0-1') + ' ' + ('of gross sales' | tr)) : ''">{{ value(m.key) | currency: currency() }}</app-report-kpi>
+        </button>
+      }
+    </div>
 
-  <!-- Skeleton Loading -->
-  <div class="bg-white rounded-lg shadow-sm">
-    @if (summaryData.isLoading()) {
-      <div class="bg-white rounded-lg shadow-sm">
-        <!-- Mobile Grid Skeleton -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 p-4">
-          @for (item of [1,2,3,4,5]; track $index) {
-            <div class="!h-auto !min-h-[120px] !p-4 border rounded-lg animate-pulse">
-              <div class="text-center">
-                <div class="h-4 bg-gray-200 rounded w-16 mx-auto mb-3"></div>
-                <div class="h-6 bg-gray-200 rounded w-20 mx-auto mb-2"></div>
-                <div class="h-3 bg-gray-200 rounded w-12 mx-auto"></div>
-              </div>
-            </div>
-          }
+    <mat-card appearance="outlined">
+      <mat-card-content class="!p-4 sm:!p-5">
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <h3 class="m-0 text-base font-semibold">{{ activeLabel() }}</h3>
+          <span class="text-xs text-on-surface-variant"><ng-container i18n>Tap a number above to chart it</ng-container></span>
         </div>
-      </div>
-    } @else if (summaryData.hasValue()) {
-      <!-- Mobile: Summary Grid (No Tabs, No Interaction) -->
-      <div class="block md:hidden">
-        <div class="p-4">
-          <h2 class="text-lg font-medium mb-4"><ng-container i18n>Summary</ng-container></h2>
-          <div class="grid grid-cols-2 gap-4">
-            @for (item of summaryItems; track item) {
-              <div class="bg-gray-50 rounded-lg p-4 text-center border">
-                <h3 class="text-gray-600 font-medium mb-2 text-sm">{{item | titlecase}}</h3>
-                <p class="text-xl font-semibold mb-1">{{summaryData.value()[item].value | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</p>
-                <p class="text-xs text-gray-500">{{summaryData.value()[item].percentage | percent }}</p>
-              </div>
-            }
+        @if (rows().length) {
+          <div class="h-56 sm:h-72"><canvas #salesChart></canvas></div>
+        } @else if (!series.isLoading()) {
+          <div class="flex h-40 flex-col items-center justify-center gap-1 text-center text-on-surface-variant">
+            <mat-icon class="!h-10 !w-10 !text-4xl !leading-none">show_chart</mat-icon>
+            <p class="m-0 text-sm"><ng-container i18n>No sales in this period.</ng-container></p>
           </div>
-        </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    @if (rows().length) {
+      <mat-card appearance="outlined" class="overflow-x-auto max-md:!hidden">
+        <table mat-table matSort [matSortActive]="table.sortKey()" [matSortDirection]="table.sortDir()" (matSortChange)="table.onSort($event)" [dataSource]="table.rows()" class="w-full min-w-[900px]">
+        <ng-container matColumnDef="period">
+          <th mat-header-cell mat-sort-header *matHeaderCellDef><ng-container i18n>Period</ng-container></th>
+          <td mat-cell *matCellDef="let r" class="font-medium tabular-nums">{{ periodLabel(r.period) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="grossSales">
+          <th mat-header-cell mat-sort-header arrowPosition="before" *matHeaderCellDef class="!text-right"><ng-container i18n>Gross sales</ng-container></th>
+          <td mat-cell *matCellDef="let r" class="text-right tabular-nums">{{ r.grossSales | currency: currency() }}</td>
+        </ng-container>
+        <ng-container matColumnDef="refunds">
+          <th mat-header-cell mat-sort-header arrowPosition="before" *matHeaderCellDef class="!text-right"><ng-container i18n>Refunds</ng-container></th>
+          <td mat-cell *matCellDef="let r" class="text-right tabular-nums">{{ r.refunds | currency: currency() }}</td>
+        </ng-container>
+        <ng-container matColumnDef="discounts">
+          <th mat-header-cell mat-sort-header arrowPosition="before" *matHeaderCellDef class="!text-right"><ng-container i18n>Discounts</ng-container></th>
+          <td mat-cell *matCellDef="let r" class="text-right tabular-nums">{{ r.discounts | currency: currency() }}</td>
+        </ng-container>
+        <ng-container matColumnDef="netSales">
+          <th mat-header-cell mat-sort-header arrowPosition="before" *matHeaderCellDef class="!text-right"><ng-container i18n>Net sales</ng-container></th>
+          <td mat-cell *matCellDef="let r" class="text-right tabular-nums">{{ r.netSales | currency: currency() }}</td>
+        </ng-container>
+        <ng-container matColumnDef="costOfGoods">
+          <th mat-header-cell mat-sort-header arrowPosition="before" *matHeaderCellDef class="!text-right"><ng-container i18n>Cost of goods</ng-container></th>
+          <td mat-cell *matCellDef="let r" class="text-right tabular-nums">{{ r.costOfGoods | currency: currency() }}</td>
+        </ng-container>
+        <ng-container matColumnDef="grossProfit">
+          <th mat-header-cell mat-sort-header arrowPosition="before" *matHeaderCellDef class="!text-right"><ng-container i18n>Gross profit</ng-container></th>
+          <td mat-cell *matCellDef="let r" class="text-right tabular-nums" [class.text-red-700]="r.grossProfit < 0">{{ r.grossProfit | currency: currency() }}</td>
+        </ng-container>
+        <ng-container matColumnDef="margin">
+          <th mat-header-cell mat-sort-header arrowPosition="before" *matHeaderCellDef class="!text-right"><ng-container i18n>Margin</ng-container></th>
+          <td mat-cell *matCellDef="let r" class="text-right tabular-nums">{{ r.margin | percent:'1.0-1' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="taxes">
+          <th mat-header-cell mat-sort-header arrowPosition="before" *matHeaderCellDef class="!text-right"><ng-container i18n>Taxes</ng-container></th>
+          <td mat-cell *matCellDef="let r" class="text-right tabular-nums">{{ r.taxes | currency: currency() }}</td>
+        </ng-container>
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let r; columns: columns"></tr>
+        </table>
+      </mat-card>
+
+      <div class="flex flex-col gap-3 md:hidden">
+        @for (r of table.rows(); track r.period) {
+          <mat-card appearance="outlined"><mat-card-content class="!p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="font-semibold">{{ periodLabel(r.period) }}</div>
+              <div class="text-right font-semibold tabular-nums">{{ r.netSales | currency: currency() }}</div>
+            </div>
+            <dl class="m-0 mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+              <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Gross sales</ng-container></dt><dd class="m-0 tabular-nums">{{ r.grossSales | currency: currency() }}</dd></div>
+              <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Gross profit</ng-container></dt><dd class="m-0 tabular-nums" [class.text-red-700]="r.grossProfit < 0">{{ r.grossProfit | currency: currency() }}</dd></div>
+              <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Refunds</ng-container></dt><dd class="m-0 tabular-nums">{{ r.refunds | currency: currency() }}</dd></div>
+              <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Discounts</ng-container></dt><dd class="m-0 tabular-nums">{{ r.discounts | currency: currency() }}</dd></div>
+              <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Margin</ng-container></dt><dd class="m-0 tabular-nums">{{ r.margin | percent:'1.0-1' }}</dd></div>
+              <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Taxes</ng-container></dt><dd class="m-0 tabular-nums">{{ r.taxes | currency: currency() }}</dd></div>
+            </dl>
+          </mat-card-content></mat-card>
+        }
       </div>
 
-      <!-- Desktop: Tab Navigation with Chart -->
-      <div class="hidden md:block">
-        <nav mat-tab-nav-bar class="grid grid-cols-5" [tabPanel]="tabPanel">
-          @for (item of summaryItems; track item) {
-            <a mat-tab-link
-              (click)="onTabChange(item)"
-              [active]="activeLink === item"
-              class="!h-auto !min-h-[140px] !px-4 !py-6 border-b">
-              <div class="text-center">
-                <h3 class="text-gray-600 font-medium mb-2">{{item | titlecase}}</h3>
-                <p class="text-2xl font-semibold mb-1">{{summaryData.value()[item].value | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</p>
-                <p class="text-sm text-gray-500">{{summaryData.value()[item].percentage | percent }}</p>
-              </div>
-            </a>
-          }
-        </nav>
-
-        <!-- Chart Section (Desktop Only) -->
-        <mat-tab-nav-panel #tabPanel>
-          <div class="p-6">
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="font-medium">{{activeLink | titlecase}}</h3>
-            </div>
-            <div class="h-[300px]">
-              <canvas #salesChart></canvas>
-            </div>
-          </div>
-        </mat-tab-nav-panel>
-      </div>
+      <mat-paginator [length]="table.total()" [pageSize]="table.pageSize()" [pageIndex]="table.pageIndex()" [pageSizeOptions]="[10, 25, 50, 100]" (page)="table.onPage($event)" showFirstLastButtons class="rounded-3xl" />
     }
-  </div>
-
-
-  @if (dataSource.isLoading()) {
-    <!-- Table Section - Skeleton Loading -->
-    <div class="bg-white rounded-lg shadow-sm mt-6">
-      <div class="p-6 flex flex-wrap gap-4 justify-between items-center border-b">
-        <div class="h-6 bg-gray-200 rounded w-40 animate-pulse"></div>
-        <div class="flex items-center gap-4">
-          <div class="h-9 w-9 bg-gray-200 rounded-full animate-pulse"></div>
-          <div class="h-9 w-9 bg-gray-200 rounded-full animate-pulse"></div>
-          <div class="h-9 bg-gray-200 rounded w-32 animate-pulse"></div>
-        </div>
-      </div>
-
-      <div class="p-6">
-        @if (!isGridView) {
-          <!-- Table Header Skeleton -->
-          <div class="hidden md:block">
-            <div class="flex border-b py-4">
-              @for (col of [1,2,3,4,5]; track $index) {
-                <div class="flex-1 h-5 bg-gray-200 rounded mx-2 animate-pulse"></div>
-              }
-            </div>
-          </div>
-        } @else {
-          <!-- Grid Loading Skeleton -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            @for (card of [1,2,3,4,5,6]; track $index) {
-              <div class="bg-white rounded-lg shadow p-4 border animate-pulse">
-                <div class="space-y-3">
-                  @for (row of [1,2,3,4,5]; track $index) {
-                    <div class="flex justify-between items-center">
-                      <div class="h-4 bg-gray-200 rounded w-20"></div>
-                      <div class="h-4 bg-gray-200 rounded w-24"></div>
-                    </div>
-                  }
-                </div>
-              </div>
-            }
-          </div>
-        }
-
-        <!-- Table Rows Skeleton -->
-        @for (row of [1,2,3,4,5]; track $index) {
-          <div class="flex py-4 border-b">
-            @for (col of [1,2,3,4,5]; track $index) {
-              <div class="flex-1 h-4 bg-gray-100 rounded mx-2 animate-pulse"></div>
-            }
-          </div>
-        }
-
-        <!-- Paginator Skeleton -->
-        <div class="flex justify-end items-center mt-4">
-          <div class="h-8 bg-gray-200 rounded w-64 animate-pulse"></div>
-        </div>
-      </div>
-    </div>
-  } @else if (dataSource.hasValue()) {
-    <div class="bg-white rounded-lg shadow-sm mt-6">
-      <div class="p-4 sm:p-6 flex flex-wrap gap-4 justify-between items-center border-b">
-        <h2 class="text-lg font-medium"><ng-container i18n>Transaction Details</ng-container></h2>
-        <div class="flex items-center gap-2 sm:gap-4">
-          <mat-button-toggle-group class="hidden md:block" [value]="isGridView" (change)="toggleView($event)">
-            <mat-button-toggle [value]="true" aria-label="Grid view" i18n-aria-label>
-              <mat-icon class="!h-5 !w-5 text-sm">grid_view</mat-icon>
-            </mat-button-toggle>
-            <mat-button-toggle [value]="false" aria-label="List view" i18n-aria-label>
-              <mat-icon class="!h-5 !w-5 text-sm">list</mat-icon>
-            </mat-button-toggle>
-          </mat-button-toggle-group>
-          <button mat-flat-button color="primary" [matMenuTriggerFor]="exportMenu" class="min-w-[120px]">
-            <mat-icon class="mr-2">file_download</mat-icon>
-            <span class="hidden sm:inline"><ng-container i18n>Export Data</ng-container></span>
-            <span class="sm:hidden"><ng-container i18n>Export</ng-container></span>
-          </button>
-        </div>
-        <mat-menu #exportMenu="matMenu">
-          <button mat-menu-item (click)="exportData('pdf')">
-            <mat-icon>picture_as_pdf</mat-icon>
-            <span><ng-container i18n>Export as PDF</ng-container></span>
-          </button>
-          <button mat-menu-item (click)="exportData('csv')">
-            <mat-icon>description</mat-icon>
-            <span><ng-container i18n>Export as CSV</ng-container></span>
-          </button>
-          <button mat-menu-item (click)="exportData('excel')">
-            <mat-icon>table_chart</mat-icon>
-            <span><ng-container i18n>Export as Excel</ng-container></span>
-          </button>
-        </mat-menu>
-      </div>
-
-      <div class="p-6">
-        @if (!isGridView) {
-          <mat-table [dataSource]="dataSource.value()" class="w-full !bg-white hidden md:block">
-            @for (column of displayedColumns; track column) {
-              <ng-container [matColumnDef]="column">
-                <mat-header-cell *matHeaderCellDef>{{column | titlecase}}</mat-header-cell>
-                <mat-cell *matCellDef="let element">
-                  @switch (column) {
-                    @case ('grossSales') {
-                      {{element[column] | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}
-                    }
-                    @case ('refunds') {
-                      {{element[column] | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}
-                    }
-                    @case ('discounts') {
-                      {{element[column] | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}
-                    }
-                    @case ('taxes') {
-                      {{element[column] | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}
-                    }
-                    @case ('costOfGoods') {
-                      {{element[column] | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}
-                    }
-                    @case ('netSales') {
-                      {{element[column] | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}
-                    }
-                    @case ('grossProfit') {
-                      {{element[column] | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}
-                    }
-                    @case ('margin') {
-                      {{element[column] | percent:'1.0-2'}}
-                    }
-                    @default {
-                      {{element[column]}}
-                    }
-                  }
-                </mat-cell>
-              </ng-container>
-            }
-            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-          </mat-table>
-        } @else {
-          <!-- Grid View -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 transition-all duration-300">
-            @for (item of dataSource.value(); track $index) {
-              <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-4 sm:p-5 border">
-                <div class="space-y-3 sm:space-y-4">
-                  <div class="flex justify-between items-center pb-2 border-b">
-                    <span class="font-medium text-gray-600"><ng-container i18n>Period</ng-container></span>
-                    <span class="text-gray-900">{{item.period}}</span>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <span class="font-medium text-gray-600"><ng-container i18n>Gross Sales</ng-container></span>
-                    <span class="text-gray-900">{{item.grossSales | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <span class="font-medium text-gray-600"><ng-container i18n>Net Sales</ng-container></span>
-                    <span class="text-gray-900">{{item.netSales | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <span class="font-medium text-gray-600"><ng-container i18n>Gross Profit</ng-container></span>
-                    <span class="text-gray-900">{{item.grossProfit | currency: $safeNavigationMigration(storeStore.selectedStore()?.currency)}}</span>
-                  </div>
-                  <div class="flex justify-between items-center pt-2 border-t">
-                    <span class="font-medium text-gray-600"><ng-container i18n>Margin</ng-container></span>
-                    <span class="text-gray-900">{{item.margin | percent:'1.0-2'}}</span>
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
-        }
-
-        <!-- <mat-paginator class="!bg-white"
-        [pageSize]="pageSize"
-        [pageSizeOptions]="pageSizeOptions"
-        showFirstLastButtons
-        aria-label="Select page">
-      </mat-paginator> -->
-    </div>
-  </div>
-}
-</div>
+  }
+</app-report-page>

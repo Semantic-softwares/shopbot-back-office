@@ -1,3 +1,4 @@
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -20,7 +21,7 @@ import { AuthService } from '../../../../../shared/services/auth.service';
   selector: 'app-start-reconciliation',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
+PageHeaderComponent,     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
@@ -33,20 +34,17 @@ import { AuthService } from '../../../../../shared/services/auth.service';
     RouterModule
 ],
   template: `
-    <div class="p-6 max-w-2xl mx-auto">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900"><ng-container i18n>Start New Reconciliation</ng-container></h1>
-          <p class="text-gray-600 mt-1"><ng-container i18n>Initialize a new inventory reconciliation session</ng-container></p>
-        </div>
-        <button mat-button [routerLink]="['..']" class="text-gray-600">
+    <app-page-header title="Start New Reconciliation" i18n-title subtitle="Initialize a new inventory reconciliation session" i18n-subtitle>
+      <ng-container actions><button matButton [routerLink]="['..']" class="text-on-surface-variant">
           <mat-icon>arrow_back</mat-icon>
           <ng-container i18n>Back to List</ng-container>
         </button>
-      </div>
+      </ng-container>
+    </app-page-header>
+    <div class="mx-auto max-w-2xl p-4 pb-16 md:p-6">
 
       <form [formGroup]="reconciliationForm" (ngSubmit)="onSubmit()">
-        <mat-card class="mb-6">
+        <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60 mb-6">
           <mat-card-header>
             <mat-card-title><ng-container i18n>Reconciliation Details</ng-container></mat-card-title>
           </mat-card-header>
@@ -79,13 +77,13 @@ import { AuthService } from '../../../../../shared/services/auth.service';
         </mat-card>
 
         <!-- Information Card -->
-        <mat-card class="mb-6">
+        <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60 mb-6">
           <mat-card-content class="p-6">
             <div class="flex items-start space-x-4">
               <mat-icon class="text-blue-500 mt-1">info</mat-icon>
               <div>
                 <h3 class="font-semibold text-gray-900 mb-2"><ng-container i18n>What happens next?</ng-container></h3>
-                <ul class="text-sm text-gray-600 space-y-1">
+                <ul class="text-sm text-on-surface-variant space-y-1">
                   <li><ng-container i18n>• System will load all current products and their quantities</ng-container></li>
                   <li><ng-container i18n>• You'll be able to enter physical counts for each product</ng-container></li>
                   <li><ng-container i18n>• Discrepancies will be automatically calculated</ng-container></li>
@@ -101,7 +99,7 @@ import { AuthService } from '../../../../../shared/services/auth.service';
           <button type="button" mat-button [routerLink]="['..']"><ng-container i18n>Cancel</ng-container></button>
           <button
             type="submit"
-            mat-raised-button
+            matButton="filled"
             color="primary"
             [disabled]="reconciliationForm.invalid || isSubmitting()"
           >

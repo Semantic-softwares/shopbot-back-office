@@ -1,3 +1,5 @@
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -21,6 +23,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    PageHeaderComponent,
+    TrPipe,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,

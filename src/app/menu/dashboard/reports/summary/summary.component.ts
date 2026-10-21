@@ -1,296 +1,161 @@
-import {
-  Component,
-  OnInit,
-  ViewChild,
-  inject,
-  DestroyRef,
-  ElementRef,
-  effect,
-  ChangeDetectionStrategy
-} from '@angular/core';
-import { MatTableModule } from '@angular/material/table';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { CurrencyPipe, PercentPipe } from '@angular/common';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
-import { distinctUntilChanged, tap } from 'rxjs/operators';
-import { EmployeeSelectorComponent } from '../../../../shared/components/employee-selector/employee-selector.component';
 import { DateRangeSelectorComponent } from '../../../../shared/components/date-range-selector/date-range-selector.component';
+import { EmployeeSelectorComponent } from '../../../../shared/components/employee-selector/employee-selector.component';
 import { PeriodSelectorComponent } from '../../../../shared/components/period-range-selector/period-range-selector.component';
-import {
-  rxResource,
-  takeUntilDestroyed,
-  toSignal,
-} from '@angular/core/rxjs-interop';
-import { QueryParamService } from '../../../../shared/services/query-param.service';
-import { OrderService } from '../../../../shared/services/orders.service';
-import { StoreStore } from '../../../../shared/stores/store.store';
-import { ExportService } from '../../../../shared/services/export.service';
 import { ChartThemeService } from '../../../../shared/services/chart-theme.service';
+import { ExportService } from '../../../../shared/services/export.service';
+import { OrderService } from '../../../../shared/services/orders.service';
+import { QueryParamService } from '../../../../shared/services/query-param.service';
+import { ThemeService } from '../../../../shared/services/theme.service';
+import { TrPipe } from '../../../../shared/i18n/tr.pipe';
+import { StoreStore } from '../../../../shared/stores/store.store';
+import { ReportKpiComponent } from '../shared/report-kpi.component';
+import { ExportFormat, ReportPageComponent } from '../shared/report-page.component';
+import { ReportTable } from '../shared/report-table-state';
 
+type Metric = 'grossSales' | 'refunds' | 'discounts' | 'netSales' | 'grossProfit';
+interface SummaryRow { period: string; grossSales: number; refunds: number; discounts: number; netSales: number; costOfGoods: number; grossProfit: number; margin: number; taxes: number }
+
+/** Sales over time: five headline numbers (each one can be charted), the trend, and the period-by-period breakdown. */
 @Component({
   selector: 'shopbot-summary',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatTableModule,
-    MatTabsModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatPaginatorModule,
-    MatButtonModule,
-    MatIconModule,
-    MatMenuModule,
-    MatButtonToggleModule,
-    ReactiveFormsModule,
-    EmployeeSelectorComponent,
-    DateRangeSelectorComponent,
-    PeriodSelectorComponent,
-  ],
-  templateUrl: './summary.component.html',
+  imports: [CurrencyPipe, PercentPipe, MatButtonModule, MatCardModule, MatIconModule, MatPaginatorModule, MatProgressBarModule, MatSortModule, MatTableModule, DateRangeSelectorComponent, EmployeeSelectorComponent, PeriodSelectorComponent, ReportPageComponent, ReportKpiComponent, TrPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './summary.component.scss',
+  templateUrl: './summary.component.html',
 })
-export class SummaryComponent implements OnInit {
-  // Keeps Chart.js text/grid colours in step with the light/dark theme.
-  private readonly chartTheme = inject(ChartThemeService);
-  public isGridView = window.innerWidth < 768;
+export class SummaryComponent {
+  private readonly chartTheme = inject(ChartThemeService); // keeps Chart.js text and grid colours in step with the theme
+  private readonly theme = inject(ThemeService);
+  private readonly queryParams = inject(QueryParamService);
+  private readonly orderService = inject(OrderService);
+  private readonly exportService = inject(ExportService);
+  readonly storeStore = inject(StoreStore);
+  private readonly query = toSignal(this.queryParams.getAllParams$);
+  readonly currency = computed(() => this.storeStore.selectedStore()?.currency || 'USD');
 
-  toggleView(event: any) {
-    this.isGridView = event.value;
-  }
-  private destroyRef = inject(DestroyRef);
-  private queryParams = inject(QueryParamService);
-  private orderService = inject(OrderService);
-  public storeStore = inject(StoreStore);
-  private query = toSignal(this.queryParams.getAllParams$);
+  readonly metrics: { key: Metric; label: string; icon: string }[] = [
+    { key: 'netSales', label: $localize`Net sales`, icon: 'payments' },
+    { key: 'grossSales', label: $localize`Gross sales`, icon: 'point_of_sale' },
+    { key: 'grossProfit', label: $localize`Gross profit`, icon: 'trending_up' },
+    { key: 'discounts', label: $localize`Discounts`, icon: 'sell' },
+    { key: 'refunds', label: $localize`Refunds`, icon: 'undo' },
+  ];
+  readonly active = signal<Metric>('netSales');
+  readonly activeLabel = computed(() => this.metrics.find((m) => m.key === this.active())?.label ?? '');
 
- 
-  public summaryData = rxResource({
-    params: () => ({
-      storeId: this.storeStore.selectedStore()?._id,
-      query: this.query(),
-    }),
-    stream: ({ params }) =>
-      this.orderService.getSalesSummary(params.storeId!, params.query),
+  readonly summary = rxResource({
+    params: () => ({ storeId: this.storeStore.selectedStore()?._id, query: this.query() }),
+    stream: ({ params }) => this.orderService.getSalesSummary(params.storeId!, params.query),
+  });
+  readonly series = rxResource({
+    params: () => ({ storeId: this.storeStore.selectedStore()?._id, query: this.query() }),
+    stream: ({ params }) => this.orderService.getSalesSummaryByDate(params.storeId!, params.query),
   });
 
-  public dataSource = rxResource({
-    params: () => ({
-      storeId: this.storeStore.selectedStore()?._id,
-      query: this.query(),
-    }),
-    stream: ({ params }) =>
-      this.orderService.getSalesSummaryByDate(params.storeId!, params.query),
+  readonly rows = computed<SummaryRow[]>(() => {
+    const raw: any[] = this.series.hasValue() ? (this.series.value() ?? []) : [];
+    return raw.map((r) => ({
+      period: String(r.period ?? ''),
+      grossSales: Number(r.grossSales) || 0,
+      refunds: Number(r.refunds) || 0,
+      discounts: Number(r.discounts) || 0,
+      netSales: Number(r.netSales) || 0,
+      costOfGoods: Number(r.costOfGoods) || 0,
+      grossProfit: Number(r.grossProfit) || 0,
+      margin: Number(r.margin) || 0,
+      taxes: Number(r.taxes) || 0,
+    }));
   });
+  readonly table = new ReportTable<SummaryRow>(() => this.rows(), 'period');
+  readonly columns = ['period', 'grossSales', 'refunds', 'discounts', 'netSales', 'costOfGoods', 'grossProfit', 'margin', 'taxes'];
+  readonly failed = computed(() => !!this.summary.error() && !this.summary.hasValue());
+  readonly value = (m: Metric): number => (this.summary.hasValue() ? Number(this.summary.value()?.[m]?.value) || 0 : 0);
+  readonly share = (m: Metric): number => (this.summary.hasValue() ? Number(this.summary.value()?.[m]?.percentage) || 0 : 0);
 
-  valu = effect(() => {
-   if (this.dataSource.hasValue()) {
-    this.updateChart(this.queryParams.getAllParamsSnapshot['period'])
-   }
-     
-  })
+  private readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>('salesChart');
+  private chart: Chart<'line'> | null = null;
 
-  public displayedColumns: string[] = [
-    'period',
-    'grossSales',
-    'refunds',
-    'discounts',
-    'netSales',
-    'costOfGoods',
-    'grossProfit',
-    'margin',
-    'taxes',
-  ];
-
-  public summaryItems = [
-    'grossSales',
-    'refunds',
-    'discounts',
-    'netSales',
-    'grossProfit',
-  ] as const;
-
-  
-
-  activeLink = 'grossSales';
-  currentChart: Chart<'line'> | null = null;
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  pageSize = 10;
-  pageSizeOptions: number[] = [5, 10, 25, 100];
-
-  chartPeriods = [
-    { value: 'daily', label: $localize`Days` },
-    { value: 'weekly', label: $localize`Weeks` },
-    { value: 'monthly', label: $localize`Months` },
-    { value: 'yearly', label: $localize`Years` },
-  ];
-
-  @ViewChild('salesChart') canvas!: ElementRef<HTMLCanvasElement>;
-
-  ngOnInit() {
+  constructor() {
     Chart.register(...registerables);
-
-    // Handle query params changes
-    this.queryParams.getAllParams$
-      .pipe(takeUntilDestroyed(this.destroyRef), distinctUntilChanged())
-      .subscribe((params) => {
-        if (params['activeLink']) {
-          this.activeLink = params['activeLink'];
-        }
-      });
+    // Redraw whenever the data, the chosen number, the period, the currency or the theme changes.
+    effect(() => {
+      const el = this.canvas()?.nativeElement;
+      const rows = this.rows();
+      const metric = this.active();
+      const period = this.query()?.['period'] ?? 'daily';
+      const symbol = this.currency();
+      this.theme.isDark();
+      this.chart?.destroy();
+      this.chart = null;
+      if (!el || !rows.length) return;
+      this.chart = new Chart(el, this.config(rows, metric, period, symbol, el));
+    });
   }
 
-  private exportService = inject(ExportService);
+  readonly periodLabel = (period: string): string => this.label(period, this.query()?.['period'] ?? 'daily');
 
-  exportData(format: 'pdf' | 'csv' | 'excel'): void {
-    if (!this.dataSource.value()) return;
-    
-    const data = this.dataSource.value();
-    const filename = 'sales-summary';
-    switch (format) {
-      case 'pdf':
-        this.exportService.exportSummaryToPdf(data, filename, {from: this.query()!['start'], to: this.query()!['end']});
-        break;
-      case 'csv':
-        this.exportService.exportToCSV(data, filename);
-        break;
-      case 'excel':
-        this.exportService.exportToExcel(data, filename);
-        break;
-    }
+  private label(period: string, selected: string): string {
+    if (/^\d{4}-\d{2}$/.test(period) && selected === 'weekly') return $localize`Week ${period.split('-')[1]}, ${period.split('-')[0]}`;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(period)) return new Date(period).toLocaleString(undefined, { day: 'numeric', month: 'short' });
+    if (/^\d{4}-\d{2}$/.test(period)) return new Date(period + '-01').toLocaleString(undefined, { month: 'short', year: 'numeric' });
+    return period;
   }
 
-  onTabChange(tabName: string) {
-    this.activeLink = tabName;
-    // this.queryParams.add({ activeLink: tabName });
-    if (this.dataSource.value()) {
-      this.updateChart(this.queryParams.getAllParamsSnapshot['period']);
-    }
-  }
-
-  private getChartData(period: string): { labels: string[]; data: number[] } {
-    console.log(this.dataSource.hasValue())
-    if (!this.dataSource.hasValue()) {
-      return { labels: [], data: [] };
-    }
-
-    const data = this.dataSource.value();
-    console.log(data)
-    const sortedData = [...data].sort((a, b) => a.period.localeCompare(b.period));
-    
-    const formatPeriod = (datePeriod: string, selectedPeriod: string) => {
-      // Check if it's a weekly period (YYYY-WW format) and period is weekly
-      if (datePeriod.match(/^\d{4}-\d{2}$/) && selectedPeriod === 'weekly') {
-        const [year, week] = datePeriod.split('-');
-        return `Week ${week}, ${year}`;
-      }
-      // For daily periods (YYYY-MM-DD format)
-      if (datePeriod.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        const date = new Date(datePeriod);
-        return date.toLocaleString('default', { day: 'numeric', month: 'short' });
-      }
-      // For monthly periods (YYYY-MM format) or any YYYY-MM pattern when period is monthly
-      if (datePeriod.match(/^\d{4}-\d{2}$/) && selectedPeriod === 'monthly') {
-        const date = new Date(datePeriod + '-01');
-        return date.toLocaleString('default', { month: 'short', year: 'numeric' });
-      }
-      // Default case - just return the period as is
-      return datePeriod;
-    };
+  private config(rows: SummaryRow[], metric: Metric, period: string, symbol: string, el: HTMLCanvasElement): ChartConfiguration<'line'> {
+    const sorted = [...rows].sort((a, b) => a.period.localeCompare(b.period));
+    const style = getComputedStyle(document.documentElement);
+    const colour = style.getPropertyValue('--mat-sys-primary').trim() || '#4f46e5';
+    const ctx = el.getContext('2d')!;
+    const fill = ctx.createLinearGradient(0, 0, 0, el.height || 300);
+    fill.addColorStop(0, this.withAlpha(colour, 0.28));
+    fill.addColorStop(1, this.withAlpha(colour, 0));
+    const money = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 });
     return {
-      labels: sortedData.map(item => formatPeriod(item.period, period)),
-      data: sortedData.map(item => item[this.activeLink] || 0)
-    };
-  }
-
-
-  private updateChart(period: string) {
-    console.log(period, this.currentChart)
-    if (this.currentChart) {
-      this.currentChart.destroy();
-    }
-    console.log(this.canvas)
-    if (!this.canvas?.nativeElement) return;
-    
-    const ctx = this.canvas.nativeElement.getContext('2d');
-    if (!ctx) return;
-    
-    const chartData = this.getChartData(period);
-
-    const config: ChartConfiguration<'line'> = {
       type: 'line',
       data: {
-        labels: chartData.labels,
-        datasets: [
-          {
-            label: this.activeLink,
-            data: chartData.data,
-            borderColor: '#4CAF50',
-            borderWidth: 2,
-            fill: false,
-            tension: 0.4,
-            pointRadius: 1,
-          },
-        ],
+        labels: sorted.map((r) => this.label(r.period, period)),
+        datasets: [{ label: this.metrics.find((m) => m.key === metric)!.label, data: sorted.map((r) => r[metric]), borderColor: colour, backgroundColor: fill, borderWidth: 2, fill: true, tension: 0.35, pointRadius: sorted.length > 40 ? 0 : 3, pointHoverRadius: 5, pointBackgroundColor: colour }],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: {
-            display: true,
-            position: 'top',
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                let label = context.dataset.label || '';
-                if (label) {
-                  label += ': ';
-                }
-                if (context.parsed.y !== null) {
-                  label += new Intl.NumberFormat('en-US', { 
-                    style: 'currency', 
-                    currency: 'NGN'
-                  }).format(context.parsed.y);
-                }
-                return label;
-              }
-            }
-          }
+          legend: { display: false },
+          tooltip: { callbacks: { label: (c) => `${symbol} ${money.format(Number(c.parsed.y) || 0)}` } },
         },
         scales: {
-          x: {
-            grid: {
-              display: false,
-            },
-          },
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: '#e2e8f0', // Tailwind's gray-200
-              lineWidth: 0.5,
-            },
-          },
+          x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } },
+          y: { beginAtZero: true, ticks: { callback: (v) => new Intl.NumberFormat(undefined, { notation: 'compact' }).format(Number(v)) } },
         },
       },
     };
+  }
 
-    this.currentChart = new Chart(ctx, config);
+  /** Chart.js wants the colour as a string; token values come as `#rrggbb` or `rgb(...)`. */
+  private withAlpha(colour: string, alpha: number): string {
+    const hex = /^#([0-9a-f]{6})$/i.exec(colour);
+    if (hex) { const n = parseInt(hex[1], 16); return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`; }
+    const rgb = /^rgba?\(([^)]+)\)$/.exec(colour);
+    return rgb ? `rgba(${rgb[1].split(',').slice(0, 3).join(',')}, ${alpha})` : colour;
+  }
+
+  exportData(format: ExportFormat): void {
+    const data = this.series.value();
+    if (!data) return;
+    const range = { from: this.query()?.['start'], to: this.query()?.['end'] };
+    if (format === 'pdf') this.exportService.exportSummaryToPdf(data, 'sales-summary', range);
+    else if (format === 'csv') this.exportService.exportToCSV(data, 'sales-summary');
+    else this.exportService.exportToExcel(data, 'sales-summary');
   }
 }

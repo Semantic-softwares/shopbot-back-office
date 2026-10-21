@@ -1,3 +1,4 @@
+import { PwaUpdateService } from '../../services/pwa-update.service';
 import { Component, inject, input, output, signal, computed, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -43,6 +44,7 @@ import { TrPipe } from '../../i18n/tr.pipe';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ToolbarComponent implements OnInit, OnDestroy {
+  readonly pwaUpdate = inject(PwaUpdateService);
   private router = inject(Router);
   private authService = inject(AuthService);
   private socketService = inject(SocketService);

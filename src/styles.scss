@@ -63,3 +63,21 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   text-align: left;
   max-width: 320px;
 }
+
+/* A form field sized to sit inside a table row: same look as the others, 40px tall. */
+.compact-field {
+  --mat-form-field-container-height: 40px;
+  --mat-form-field-container-vertical-padding: 8px;
+  --mat-form-field-filled-with-label-container-padding-top: 8px;
+}
+
+/* Right-aligned numeric table headers that are also sortable: keep the label and arrow over the numbers. */
+th.mat-mdc-header-cell[class*="text-right"] .mat-sort-header-container { justify-content: flex-end; }
+/* With the arrow before the label the row is reversed, so "start" is the right-hand edge. */
+th.mat-mdc-header-cell[class*="text-right"] .mat-sort-header-container.mat-sort-header-position-before { justify-content: flex-start; }
+
+/* Material's cell rule beats Tailwind's plain `text-right`, so numeric cells drifted left under right-aligned headers.
+   Any header, cell or footer cell that asks for right alignment gets it. */
+th.mat-mdc-header-cell[class*="text-right"],
+td.mat-mdc-cell[class*="text-right"],
+td.mat-mdc-footer-cell[class*="text-right"] { text-align: right; }

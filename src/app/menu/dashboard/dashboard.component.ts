@@ -112,11 +112,7 @@ export class DashboardComponent {
       'erp.inventory.create',
       'erp.inventory.edit',
       'erp.suppliers.view',
-    ],
-    'Employees': [
-      'settings.staff.view',
-      'settings.staff.create',
-      'settings.staff.edit',
+      'erp.purchasing.view',
     ],
     'Customers': [
       'erp.products.view',
@@ -236,26 +232,10 @@ export class DashboardComponent {
       name:  'Inventory',
       children: [
         { icon: 'warehouse', label: $localize`Suppliers`, link: './inventory/suppliers', permission: 'view_company' },
-        { icon: 'inventory_2', label: $localize`Restock`, link: './inventory/restock', permission: 'view_company' },
+        { icon: 'shopping_bag', label: $localize`Purchase orders`, link: './inventory/purchasing', permission: 'view_company' },
+        { icon: 'inventory_2', label: $localize`Quick stock-in`, link: './inventory/restock', permission: 'view_company' },
         { icon: 'calculate', label: $localize`Reconciliations`, link: './inventory/reconciliations', permission: 'view_company' },
       ]
-    },
-    {
-      name: 'Employees',
-      children: [
-        {
-          icon: 'assignment_ind',
-          label: $localize`Employees`,
-          link: './employees/list',
-          permission: 'view_company',
-        },
-        {
-          icon: 'access_time',
-          label: $localize`Timecards`,
-          link: './employees/timecards/list',
-          permission: 'view_company',
-        },
-      ],
     },
     {
       name: 'Customers',

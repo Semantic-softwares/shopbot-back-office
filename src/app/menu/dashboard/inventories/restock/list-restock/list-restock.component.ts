@@ -1,3 +1,4 @@
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
@@ -37,6 +38,7 @@ import { Observable } from 'rxjs';
     MatPaginatorModule,
     RouterModule,
     FormsModule,
+    PageHeaderComponent,
   ],
   templateUrl: './list-restock.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -103,11 +105,12 @@ export class ListRestockComponent implements OnInit {
   }
 
   viewDetails(id: string): void {
-    this.router.navigate(['dashboard', 'inventory', 'restock', 'details', id]);
+    // There is no separate details page; the edit view shows everything on the record.
+    this.router.navigate(['/menu/erp/inventory/restock/edit', id]);
   }
 
   editRestock(id: string): void {
-    this.router.navigate(['dashboard', 'inventory', 'restock', 'edit', id]);
+    this.router.navigate(['/menu/erp/inventory/restock/edit', id]);
   }
 
   deleteRestock(id: string): void {
@@ -123,7 +126,7 @@ export class ListRestockComponent implements OnInit {
       case 'completed':
         return 'bg-green-100 text-green-800';
       case 'draft':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-amber-100 text-amber-900';
       case 'cancelled':
         return 'bg-red-100 text-red-800';
       default:

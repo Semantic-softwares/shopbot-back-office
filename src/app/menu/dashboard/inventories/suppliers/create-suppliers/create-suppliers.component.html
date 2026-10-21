@@ -1,17 +1,18 @@
-<mat-card class="max-w-4xl mx-auto">
-  <mat-card-header>
-    <mat-card-title>
-      @if (isEditMode()) {<ng-container i18n>Edit Supplier</ng-container>} @else {<ng-container i18n>Add New Supplier</ng-container>}
-    </mat-card-title>
-    <mat-card-subtitle>
-      @if (isEditMode()) {<ng-container i18n>Update supplier information</ng-container>} @else {<ng-container i18n>Create a new supplier for your store</ng-container>}
-    </mat-card-subtitle>
-  </mat-card-header>
+<app-page-header [title]="isEditMode() ? ('Edit supplier' | tr) : ('Add supplier' | tr)" [subtitle]="isEditMode() ? ('Update the details of this supplier.' | tr) : ('Add a business you buy stock from.' | tr)">
+  <ng-container actions>
+    <button matButton type="button" (click)="onCancel()" [disabled]="loading()"><ng-container i18n>Cancel</ng-container></button>
+    @if (loading()) {
+      <button matButton="filled" disabled><mat-spinner diameter="20"></mat-spinner> @if (isEditMode()) {<ng-container i18n>Updating...</ng-container>} @else {<ng-container i18n>Creating...</ng-container>}</button>
+    } @else {
+      <button matButton="filled" (click)="onSubmit()" [disabled]="supplierForm.invalid"><mat-icon>{{ isEditMode() ? 'save' : 'add' }}</mat-icon>@if (isEditMode()) {<ng-container i18n>Update supplier</ng-container>} @else {<ng-container i18n>Create supplier</ng-container>}</button>
+    }
+  </ng-container>
+</app-page-header>
 
-  <mat-card-content>
+<div class="mx-auto max-w-4xl p-4 pb-16 md:p-6">
     <!-- Error Message -->
     @if (error()) {
-      <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <div class="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4">
         <div class="flex">
           <mat-icon class="text-red-400 mr-2">error</mat-icon>
           <p class="text-sm text-red-800">{{ error() }}</p>
@@ -20,10 +21,10 @@
     }
 
     <!-- Form -->
-    <form [formGroup]="supplierForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <form [formGroup]="supplierForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
       <!-- Basic Information -->
-      <div class="mb-8">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4"><ng-container i18n>Basic Information</ng-container></h3>
+      <mat-card appearance="outlined"><mat-card-content class="!p-5">
+        <h3 class="m-0 mb-4 text-base font-semibold"><ng-container i18n>Basic Information</ng-container></h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Supplier Name -->
           <mat-form-field appearance="outline" class="md:col-span-2">
@@ -86,11 +87,11 @@
             <textarea matInput formControlName="description" rows="3" placeholder="Enter supplier description" i18n-placeholder></textarea>
           </mat-form-field>
         </div>
-      </div>
+      </mat-card-content></mat-card>
 
       <!-- Address Information -->
-      <div formGroupName="address" class="mb-8">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4"><ng-container i18n>Address Information</ng-container></h3>
+      <mat-card formGroupName="address" appearance="outlined"><mat-card-content class="!p-5">
+        <h3 class="m-0 mb-4 text-base font-semibold"><ng-container i18n>Address Information</ng-container></h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Street -->
           <mat-form-field appearance="outline" class="md:col-span-2">
@@ -123,11 +124,11 @@
             <input matInput formControlName="postalCode" placeholder="Enter postal code" i18n-placeholder>
           </mat-form-field>
         </div>
-      </div>
+      </mat-card-content></mat-card>
 
       <!-- Business Information -->
-      <div class="mb-8">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4"><ng-container i18n>Business Information</ng-container></h3>
+      <mat-card appearance="outlined"><mat-card-content class="!p-5">
+        <h3 class="m-0 mb-4 text-base font-semibold"><ng-container i18n>Business Information</ng-container></h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Tax ID -->
           <mat-form-field appearance="outline">
@@ -155,33 +156,16 @@
             <mat-checkbox formControlName="active"><ng-container i18n>Active Supplier</ng-container></mat-checkbox>
           </div>
         </div>
-      </div>
+      </mat-card-content></mat-card>
 
       <!-- Notes -->
-      <div class="mb-8">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4"><ng-container i18n>Additional Notes</ng-container></h3>
+      <mat-card appearance="outlined"><mat-card-content class="!p-5">
+        <h3 class="m-0 mb-4 text-base font-semibold"><ng-container i18n>Additional Notes</ng-container></h3>
         <mat-form-field appearance="outline" class="w-full">
           <mat-label><ng-container i18n>Notes</ng-container></mat-label>
           <textarea matInput formControlName="notes" rows="4" placeholder="Enter any additional notes about this supplier" i18n-placeholder></textarea>
         </mat-form-field>
-      </div>
+      </mat-card-content></mat-card>
     </form>
-  </mat-card-content>
 
-  <mat-card-actions align="end">
-    <button mat-button type="button" (click)="onCancel()" [disabled]="loading()">
-      <ng-container i18n>Cancel</ng-container>
-    </button>
-    @if (loading()) {
-      <button mat-raised-button color="primary" disabled>
-        <mat-spinner diameter="20"></mat-spinner>
-        @if (isEditMode()) {<ng-container i18n>Updating...</ng-container>} @else {<ng-container i18n>Creating...</ng-container>}
-      </button>
-    } @else {
-      <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="supplierForm.invalid">
-        <mat-icon>{{ isEditMode() ? 'save' : 'add' }}</mat-icon>
-        @if (isEditMode()) {<ng-container i18n>Update Supplier</ng-container>} @else {<ng-container i18n>Create Supplier</ng-container>}
-      </button>
-    }
-  </mat-card-actions>
-</mat-card>
+</div>

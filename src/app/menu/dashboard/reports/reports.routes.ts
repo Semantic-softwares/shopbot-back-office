@@ -15,6 +15,7 @@ export const DASHBOARD_REPORTS_ROUTES: Routes = [
         path: 'summary',
         loadComponent: () => import('./summary/summary.component').then(m => m.SummaryComponent)
       },
+      { path: 'sales', redirectTo: 'summary', pathMatch: 'full' },
       {
         path: 'sales-by-item',
         loadComponent: () =>

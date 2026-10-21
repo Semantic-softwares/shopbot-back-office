@@ -18,7 +18,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { SuppliersService } from '../../../../../shared/services/suppliers.service';
 import { Supplier } from '../../../../../shared/models/supplier.model';
 import { StoreStore } from '../../../../../shared/stores/store.store';
-import { NoRecordComponent } from '../../../../../shared/components/no-record/no-record.component';
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { ConfirmationDialogComponent } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { tap, of } from 'rxjs';
@@ -42,7 +42,7 @@ import { tap, of } from 'rxjs';
     MatSnackBarModule,
     MatDialogModule,
     MatChipsModule,
-    NoRecordComponent
+    PageHeaderComponent
 ],
   templateUrl: './list-suppliers.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -59,8 +59,11 @@ export class ListSuppliersComponent implements OnInit {
   dataSource!: MatTableDataSource<Supplier>;
   searchText: string = '';
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  // The table sits inside an @if, so these arrive after the data does: attach them whenever they appear.
+  private paginator?: MatPaginator;
+  private sort?: MatSort;
+  @ViewChild(MatPaginator) set paginatorRef(p: MatPaginator | undefined) { this.paginator = p; if (p && this.dataSource) this.dataSource.paginator = p; }
+  @ViewChild(MatSort) set sortRef(s: MatSort | undefined) { this.sort = s; if (s && this.dataSource) this.dataSource.sort = s; }
 
   public suppliers = rxResource({
     params: () => ({ storeId: this.storeStore.selectedStore()?._id }),
@@ -72,8 +75,8 @@ export class ListSuppliersComponent implements OnInit {
         tap((response) => {
           const suppliers = response.suppliers || [];
           this.dataSource = new MatTableDataSource(suppliers);
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
+          if (this.paginator) this.dataSource.paginator = this.paginator;
+          if (this.sort) this.dataSource.sort = this.sort;
         })
       );
     },
@@ -82,6 +85,10 @@ export class ListSuppliersComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {}
+
+  activeCount(): number {
+    return this.dataSource?.data.filter((s) => s.active).length ?? 0;
+  }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;

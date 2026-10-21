@@ -1,3 +1,4 @@
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -26,7 +27,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   selector: 'app-review-reconciliation',
   standalone: true,
   imports: [
-    CommonModule,
+PageHeaderComponent,     CommonModule,
     ReactiveFormsModule,
     FormsModule,
     MatCardModule,
@@ -47,68 +48,61 @@ import { toSignal } from '@angular/core/rxjs-interop';
     RouterModule,
   ],
   template: `
-    <div class="p-6 max-w-7xl mx-auto">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900"><ng-container i18n>Review Reconciliation</ng-container></h1>
-          @if (reconciliation()) {
-            <p class="text-gray-600 mt-1">{{ reconciliation()!.name }}</p>
-          }
-        </div>
-        <div class="flex space-x-4">
-          <button mat-button [routerLink]="['../count']" class="text-gray-600">
+    <app-page-header title="Review Reconciliation" i18n-title [subtitle]="reconciliation()?.name ?? ''">
+      <ng-container actions>
+          <button matButton [routerLink]="['../count']">
             <mat-icon>arrow_back</mat-icon>
             <ng-container i18n>Back to Count</ng-container>
           </button>
-          <button mat-button [routerLink]="['../..']" class="text-gray-600">
+          <button matButton [routerLink]="['../..']" class="text-on-surface-variant">
             <mat-icon>list</mat-icon>
             <ng-container i18n>Back to List</ng-container>
           </button>
-        </div>
-      </div>
+        </ng-container>
+    </app-page-header>
+    <div class="mx-auto max-w-7xl p-4 pb-16 md:p-6">
 
       @if (reconciliation()) {
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <mat-card class="p-4">
+          <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60 p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600"><ng-container i18n>Total Items</ng-container></p>
+                <p class="text-sm text-on-surface-variant"><ng-container i18n>Total Items</ng-container></p>
                 <p class="text-2xl font-bold text-blue-600">{{ reconciliation()!.totalProducts }}</p>
               </div>
               <mat-icon class="text-blue-500">inventory</mat-icon>
             </div>
           </mat-card>
 
-          <mat-card class="p-4">
+          <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60 p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600"><ng-container i18n>Items Counted</ng-container></p>
+                <p class="text-sm text-on-surface-variant"><ng-container i18n>Items Counted</ng-container></p>
                 <p class="text-2xl font-bold text-green-600">{{ reconciliation()!.countedProducts }}</p>
               </div>
               <mat-icon class="text-green-500">check_circle</mat-icon>
             </div>
           </mat-card>
 
-          <mat-card class="p-4">
+          <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60 p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600"><ng-container i18n>Discrepancies</ng-container></p>
+                <p class="text-sm text-on-surface-variant"><ng-container i18n>Discrepancies</ng-container></p>
                 <p class="text-2xl font-bold text-orange-600">{{ reconciliation()!.discrepancyCount }}</p>
               </div>
               <mat-icon class="text-orange-500">warning</mat-icon>
             </div>
           </mat-card>
 
-          <mat-card class="p-4">
+          <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60 p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600"><ng-container i18n>Value Impact</ng-container></p>
+                <p class="text-sm text-on-surface-variant"><ng-container i18n>Value Impact</ng-container></p>
                 <p class="text-2xl font-bold" 
                    [class.text-red-600]="reconciliation()!.totalVarianceValue < 0"
                    [class.text-green-600]="reconciliation()!.totalVarianceValue > 0"
-                   [class.text-gray-600]="reconciliation()!.totalVarianceValue === 0">
+                   [class.text-on-surface-variant]="reconciliation()!.totalVarianceValue === 0">
                   {{ reconciliation()!.totalVarianceValue | currency:currency():'symbol':'1.2-2' }}
                 </p>
               </div>
@@ -122,27 +116,27 @@ import { toSignal } from '@angular/core/rxjs-interop';
           <mat-tab label="Discrepancies Only ({{ discrepancyItems().length }})">
             <div class="pt-4">
               @if (discrepancyItems().length > 0) {
-                <mat-card>
+                <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60">
                   <div class="p-4">
                     <div class="flex justify-between items-center mb-4">
                       <h3 class="text-lg font-semibold"><ng-container i18n>Items with Discrepancies</ng-container></h3>
                       <div class="space-x-2">
                         <button 
-                          mat-button
+                          matButton
                           (click)="selectAllDiscrepancies()"
                           [disabled]="allDiscrepanciesSelected()"
                         >
                           <ng-container i18n>Select All</ng-container>
                         </button>
                         <button 
-                          mat-button
+                          matButton
                           (click)="deselectAllDiscrepancies()"
                           [disabled]="!anyDiscrepanciesSelected()"
                         >
                           <ng-container i18n>Deselect All</ng-container>
                         </button>
                         <button 
-                          mat-raised-button
+                          matButton="filled"
                           color="primary"
                           (click)="approveSelectedDiscrepancies()"
                           [disabled]="!anyDiscrepanciesSelected() || isProcessing()"
@@ -182,7 +176,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
                             <div>
                               <div class="font-medium">{{ item.productName }}</div>
                               @if (item.productSku) {
-                                <div class="text-sm text-gray-500"><ng-container i18n>SKU: {{ item.productSku }}</ng-container></div>
+                                <div class="text-sm text-on-surface-variant"><ng-container i18n>SKU: {{ item.productSku }}</ng-container></div>
                               }
                             </div>
                           </td>
@@ -232,14 +226,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
                           <th mat-header-cell *matHeaderCellDef class="font-semibold"><ng-container i18n>Reason</ng-container></th>
                           <td mat-cell *matCellDef="let item" class="py-4">
                             @if (item.reason) {
-                              <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm">
+                              <span class="bg-surface-container-high text-gray-800 px-2 py-1 rounded text-sm">
                                 {{ getReasonDisplay(item.reason) }}
                               </span>
                             } @else {
                               <span class="text-gray-400 text-sm"><ng-container i18n>No reason specified</ng-container></span>
                             }
                             @if (item.reasonNote) {
-                              <div class="text-xs text-gray-500 mt-1">{{ item.reasonNote }}</div>
+                              <div class="text-xs text-on-surface-variant mt-1">{{ item.reasonNote }}</div>
                             }
                           </td>
                         </ng-container>
@@ -264,7 +258,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
                 <div class="text-center py-12">
                   <mat-icon class="text-green-500 text-6xl mb-4">check_circle</mat-icon>
                   <h3 class="text-lg font-medium text-gray-900 mb-2"><ng-container i18n>No Discrepancies Found</ng-container></h3>
-                  <p class="text-gray-500"><ng-container i18n>All counted items match the system quantities</ng-container></p>
+                  <p class="text-on-surface-variant"><ng-container i18n>All counted items match the system quantities</ng-container></p>
                 </div>
               }
             </div>
@@ -272,7 +266,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
           <mat-tab label="All Items ({{ reconciliation()!.items.length }})">
             <div class="pt-4">
-              <mat-card>
+              <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60">
                 <div class="p-4">
                   <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold"><ng-container i18n>All Items</ng-container></h3>
@@ -297,7 +291,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
                           <div>
                             <div class="font-medium">{{ item.productName }}</div>
                             @if (item.productSku) {
-                              <div class="text-sm text-gray-500"><ng-container i18n>SKU: {{ item.productSku }}</ng-container></div>
+                              <div class="text-sm text-on-surface-variant"><ng-container i18n>SKU: {{ item.productSku }}</ng-container></div>
                             }
                           </div>
                         </td>
@@ -330,7 +324,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
                           <span 
                             [class.text-red-600]="item.variance < 0"
                             [class.text-green-600]="item.variance > 0"
-                            [class.text-gray-600]="item.variance === 0"
+                            [class.text-on-surface-variant]="item.variance === 0"
                             class="font-medium"
                           >
                             {{ item.variance || 0 }}
@@ -360,7 +354,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
         <!-- Action Buttons -->
         <div class="flex justify-between items-center">
-          <div class="text-sm text-gray-600">
+          <div class="text-sm text-on-surface-variant">
             @if (reconciliation()!.discrepancyCount > 0) {
               <ng-container i18n>{{ selectedDiscrepancyItems().length }} of {{ discrepancyItems().length }} discrepancies selected for approval</ng-container>
             } @else {
@@ -370,7 +364,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
           
           <div class="space-x-4">
             <button 
-              mat-button
+              matButton
               color="primary"
               [routerLink]="['../count']"
             >
@@ -380,7 +374,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
             
             @if (reconciliation()!.discrepancyCount === 0 || allDiscrepanciesApproved()) {
               <button 
-                mat-raised-button 
+                matButton="filled" 
                 color="primary"
                 (click)="completeReconciliation()"
                 [disabled]="isProcessing()"
@@ -392,7 +386,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
               </button>
             } @else {
               <button 
-                mat-raised-button 
+                matButton="filled" 
                 color="primary"
                 (click)="approveSelectedDiscrepancies()"
                 [disabled]="!anyDiscrepanciesSelected() || isProcessing()"

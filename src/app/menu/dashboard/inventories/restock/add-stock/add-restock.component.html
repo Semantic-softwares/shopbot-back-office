@@ -1,27 +1,18 @@
- <div class="p-6 max-w-4xl mx-auto">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">
-            @if (isEditMode()) {<ng-container i18n>Edit Stock Entry</ng-container>} @else {<ng-container i18n>Add Stock</ng-container>}
-          </h1>
-          <p class="text-gray-600 mt-1">
-            @if (isEditMode()) {<ng-container i18n>Update existing inventory record</ng-container>} @else {<ng-container i18n>Record new inventory received from suppliers</ng-container>}
-          </p>
-        </div>
-        <button mat-button (click)="goToRestock()" class="text-gray-600">
-          <mat-icon>arrow_back</mat-icon>
-          <ng-container i18n>Back to List</ng-container>
-        </button>
-      </div>
+<app-page-header [title]="isEditMode() ? ('Edit stock entry' | tr) : ('Add stock' | tr)" [subtitle]="isEditMode() ? ('Update this stock record.' | tr) : ('Stock that has already arrived. Stock is added as soon as you save. To order first and receive later, use Purchase orders.' | tr)">
+  <ng-container actions>
+    <button matButton (click)="goToRestock()"><mat-icon>arrow_back</mat-icon><ng-container i18n>Quick stock-in</ng-container></button>
+  </ng-container>
+</app-page-header>
 
+<div class="mx-auto max-w-6xl p-4 pb-16 md:p-6">
       <form [formGroup]="restockForm" (ngSubmit)="onSubmit()">
         <!-- Header Information -->
-        <mat-card class="mb-6">
-          <mat-card-header>
+        <mat-card appearance="outlined" class="mb-5 !rounded-3xl !border-outline-variant/60">
+          <mat-card-header class="!px-6 !pt-5">
             <mat-card-title><ng-container i18n>Restock Information</ng-container></mat-card-title>
           </mat-card-header>
-          <mat-card-content class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <mat-card-content class="!px-6 !pb-6 !pt-4">
+            <div class="grid grid-cols-1 items-start gap-x-6 gap-y-1 md:grid-cols-2">
               <mat-form-field appearance="outline">
                 <mat-label><ng-container i18n>Supplier *</ng-container></mat-label>
                 <mat-select formControlName="supplier" required>
@@ -58,11 +49,11 @@
         </mat-card>
 
         <!-- Products Section -->
-        <mat-card class="mb-6">
-          <mat-card-header>
+        <mat-card appearance="outlined" class="mb-5 !rounded-3xl !border-outline-variant/60">
+          <mat-card-header class="!px-6 !pt-5">
             <mat-card-title><ng-container i18n>Products</ng-container></mat-card-title>
           </mat-card-header>
-          <mat-card-content class="p-6">
+          <mat-card-content class="!px-6 !pb-6 !pt-4">
             <!-- Add Product Search -->
             <div class="mb-4">
               <mat-form-field appearance="outline" class="w-full">
@@ -91,7 +82,7 @@
                         }
                         <div>
                           <div class="font-medium">{{ product.name }}</div>
-                          <div class="text-sm text-gray-500">
+                          <div class="text-sm text-on-surface-variant">
                             <ng-container i18n>Current Qty: {{ product.qty || 0 }} | Cost: {{ product.costPrice | currency:currency():'symbol':'1.2-2' }}</ng-container>
                           </div>
                         </div>
@@ -105,78 +96,65 @@
             <!-- Products Table -->
             <div formArrayName="items">
               @if (itemsArray.length === 0) {
-                <div class="text-center py-8 text-gray-500">
+                <div class="text-center py-8 text-on-surface-variant">
                   <mat-icon class="text-4xl mb-2">search</mat-icon>
                   <p><ng-container i18n>Search and add products to restock</ng-container></p>
                 </div>
               } @else {
-                <div class="overflow-x-auto">
-                  <table class="w-full">
-                    <thead>
-                      <tr class="border-b border-gray-200">
-                        <th class="text-left py-2"><ng-container i18n>Product</ng-container></th>
-                        <th class="text-left py-2"><ng-container i18n>Quantity</ng-container></th>
-                        <th class="text-left py-2"><ng-container i18n>Cost Price</ng-container></th>
-                        <th class="text-left py-2"><ng-container i18n>Selling Price</ng-container></th>
-                        <th class="text-left py-2"><ng-container i18n>Expiry Date</ng-container></th>
-                        <th class="text-left py-2"><ng-container i18n>Total</ng-container></th>
-                        <th class="text-left py-2"><ng-container i18n>Actions</ng-container></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @for (item of itemsArray.controls; track $index) {
-                        <tr [formGroupName]="$index" class="border-b border-gray-100">
-                          <td class="py-3">
-                            <div class="flex items-center space-x-2">
-                              @if (item.value.product?.photos?.length > 0) {
-                                <img [src]="item.value.product.photos[0]" [alt]="item.value.product.name" class="w-10 h-10 rounded object-cover">
-                              }
-                              <div>
-                                <div class="font-medium">{{ item.value.product?.name }}</div>
-                                <div class="text-sm text-gray-500">{{ item.value.product?.sku }}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td class="py-3">
-                            <mat-form-field appearance="outline" class="w-20">
-                              <input matInput type="number" formControlName="quantity" min="1">
-                            </mat-form-field>
-                          </td>
-                          <td class="py-3">
-                            <mat-form-field appearance="outline" class="w-24">
-                              <input matInput type="number" formControlName="costPrice" min="0" step="0.01">
-                            </mat-form-field>
-                          </td>
-                          <td class="py-3">
-                            <mat-form-field appearance="outline" class="w-24">
-                              <input matInput type="number" formControlName="sellingPrice" min="0" step="0.01">
-                            </mat-form-field>
-                          </td>
-                          <td class="py-3">
-                            <mat-form-field appearance="outline" class="w-32">
-                              <input matInput [matDatepicker]="expiryPicker" formControlName="expiryDate">
-                              <mat-datepicker-toggle matIconSuffix [for]="expiryPicker"></mat-datepicker-toggle>
-                              <mat-datepicker #expiryPicker></mat-datepicker>
-                            </mat-form-field>
-                          </td>
-                          <td class="py-3">
-                            <span class="font-medium">
-                              {{ (item.value.quantity || 0) * (item.value.costPrice || 0) | currency:currency():'symbol':'1.2-2' }}
-                            </span>
-                          </td>
-                          <td class="py-3">
-                            <button
-                              type="button"
-                              mat-icon-button
-                              color="warn"
-                              (click)="removeItem($index)"
-                            >
-                              <mat-icon>delete</mat-icon>
-                            </button>
-                          </td>
-                        </tr>
-                      }
-                    </tbody>
+                <div class="-mx-4 overflow-x-auto">
+                  <table mat-table [dataSource]="rowsView()" class="w-full min-w-[820px]">
+                    <ng-container matColumnDef="product">
+                      <th mat-header-cell *matHeaderCellDef><ng-container i18n>Product</ng-container></th>
+                      <td mat-cell *matCellDef="let row">
+                        <div class="flex items-center gap-3 py-1">
+                          @if (row.value.product?.photos?.length > 0) {
+                            <img [src]="row.value.product.photos[0]" [alt]="row.value.product.name" class="h-10 w-10 rounded object-cover">
+                          }
+                          <div>
+                            <div class="font-medium">{{ row.value.product?.name }}</div>
+                            <div class="text-xs text-on-surface-variant">{{ row.value.product?.sku }}</div>
+                          </div>
+                        </div>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="quantity">
+                      <th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Quantity</ng-container></th>
+                      <td mat-cell *matCellDef="let row" class="!py-2 !text-right">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="compact-field w-24"><input matInput class="!text-right" type="number" [formControl]="$any(row.get('quantity'))" min="1" aria-label="Quantity" i18n-aria-label></mat-form-field>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="costPrice">
+                      <th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Cost Price</ng-container></th>
+                      <td mat-cell *matCellDef="let row" class="!py-2 !text-right">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="compact-field w-28"><input matInput class="!text-right" type="number" [formControl]="$any(row.get('costPrice'))" min="0" step="0.01" aria-label="Cost Price" i18n-aria-label></mat-form-field>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="sellingPrice">
+                      <th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Selling Price</ng-container></th>
+                      <td mat-cell *matCellDef="let row" class="!py-2 !text-right">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="compact-field w-28"><input matInput class="!text-right" type="number" [formControl]="$any(row.get('sellingPrice'))" min="0" step="0.01" aria-label="Selling Price" i18n-aria-label></mat-form-field>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="expiryDate">
+                      <th mat-header-cell *matHeaderCellDef><ng-container i18n>Expiry Date</ng-container></th>
+                      <td mat-cell *matCellDef="let row" class="!py-2">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="compact-field w-44">
+                          <input matInput [matDatepicker]="expiryPicker" [formControl]="$any(row.get('expiryDate'))" aria-label="Expiry Date" i18n-aria-label>
+                          <mat-datepicker-toggle matIconSuffix [for]="expiryPicker"></mat-datepicker-toggle>
+                          <mat-datepicker #expiryPicker></mat-datepicker>
+                        </mat-form-field>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="total">
+                      <th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Total</ng-container></th>
+                      <td mat-cell *matCellDef="let row" class="text-right font-medium tabular-nums">{{ (row.value.quantity || 0) * (row.value.costPrice || 0) | currency:currency():'symbol':'1.2-2' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="actions">
+                      <th mat-header-cell *matHeaderCellDef class="!w-14"></th>
+                      <td mat-cell *matCellDef="let row; let i = index"><button type="button" mat-icon-button (click)="removeItem(i)" aria-label="Remove" i18n-aria-label><mat-icon>delete</mat-icon></button></td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="itemColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: itemColumns"></tr>
                   </table>
                 </div>
               }
@@ -186,12 +164,12 @@
 
         <!-- Summary Section -->
         @if (itemsArray.length > 0) {
-          <mat-card class="mb-6">
-            <mat-card-header>
+          <mat-card appearance="outlined" class="mb-5 !rounded-3xl !border-outline-variant/60">
+            <mat-card-header class="!px-6 !pt-5">
               <mat-card-title><ng-container i18n>Summary</ng-container></mat-card-title>
             </mat-card-header>
-            <mat-card-content class="p-6">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <mat-card-content class="!px-6 !pb-6 !pt-4">
+              <div class="grid grid-cols-1 items-start gap-x-6 gap-y-1 md:grid-cols-3">
                 <mat-form-field appearance="outline">
                   <mat-label><ng-container i18n>Discount (%)</ng-container></mat-label>
                   <input matInput type="number" formControlName="discount" min="0" max="100" step="0.01">
@@ -222,7 +200,7 @@
                 </div>
               </div>
 
-              <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="mt-6 grid grid-cols-1 items-start gap-x-6 gap-y-1 md:grid-cols-2">
                 <mat-form-field appearance="outline">
                   <mat-label><ng-container i18n>Amount Paid</ng-container></mat-label>
                   <input matInput type="number" formControlName="amountPaid" min="0" step="0.01">

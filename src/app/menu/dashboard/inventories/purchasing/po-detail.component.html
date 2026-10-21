@@ -1,0 +1,162 @@
+<app-page-header [title]="order()?.number ?? ''" [subtitle]="order()?.supplierName ?? ''">
+  <ng-container actions>
+    <button matButton routerLink="/menu/erp/inventory/purchasing"><mat-icon>arrow_back</mat-icon><ng-container i18n>All orders</ng-container></button>
+    @if (order()) {
+      <button matButton="outlined" (click)="pdf()"><mat-icon>picture_as_pdf</mat-icon><ng-container i18n>PDF</ng-container></button>
+    }
+  </ng-container>
+</app-page-header>
+
+@if (res.isLoading() && !order()) { <mat-progress-bar mode="indeterminate" /> }
+@if (busy()) { <mat-progress-bar mode="indeterminate" /> }
+
+@if (failed()) {
+  <div class="m-6 flex flex-col items-center gap-2 rounded-3xl border border-red-200 bg-red-50 p-8 text-center text-red-900" role="alert">
+    <p class="m-0 font-semibold"><ng-container i18n>Could not load this order.</ng-container></p>
+    <button matButton="filled" (click)="reload()"><ng-container i18n>Try again</ng-container></button>
+  </div>
+} @else if (order(); as o) {
+  <div class="mx-auto flex max-w-5xl flex-col gap-5 p-4 pb-16 md:p-6">
+
+    <!-- Status and the next step -->
+    <mat-card appearance="outlined"><mat-card-content class="!p-5"><div class="flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-col gap-1">
+        <div class="flex items-center gap-2">
+          <span class="rounded-full px-3 py-1 text-sm font-medium" [class]="tone(o.status)">{{ statusLabel(o.status) }}</span>
+          @if (o.version > 1) { <span class="text-xs text-on-surface-variant"><ng-container i18n>revision {{ o.version }}</ng-container></span> }
+        </div>
+        <div class="text-2xl font-semibold tabular-nums">{{ o.total | currency: currencyOf(o) : 'symbol' : '1.2-2' }}</div>
+        <div class="text-xs text-on-surface-variant">
+          <ng-container i18n>Created {{ o.createdAt | date: 'mediumDate' }}</ng-container>
+          @if (o.expectedDate) { · <ng-container i18n>expected {{ o.expectedDate | date: 'mediumDate' }}</ng-container> }
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        @if (o.status === 'DRAFT' && canCreate()) { <button matButton="outlined" (click)="edit()"><mat-icon>edit</mat-icon><ng-container i18n>Edit</ng-container></button> }
+        @if (o.status === 'DRAFT' && canSend()) { <button matButton="filled" (click)="send()"><mat-icon>send</mat-icon><ng-container i18n>Send to supplier</ng-container></button> }
+        @if (['SENT', 'CONFIRMED'].includes(o.status) && canSend()) { <button matButton="outlined" (click)="send()"><mat-icon>forward_to_inbox</mat-icon>@if (o.needsResend) {<ng-container i18n>Send new revision</ng-container>} @else {<ng-container i18n>Send again</ng-container>}</button> }
+        @if (o.status === 'SENT' && canConfirm()) { <button matButton="outlined" (click)="confirm()"><mat-icon>verified</mat-icon><ng-container i18n>Supplier confirmed</ng-container></button> }
+        @if (waiting() && canReceive()) { <button matButton="filled" (click)="receive()"><mat-icon>inventory</mat-icon><ng-container i18n>Receive goods</ng-container></button> }
+      </div>
+    </div></mat-card-content></mat-card>
+
+    @if (o.needsResend) {
+      <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"><ng-container i18n>This order was amended after it was sent. The supplier has not seen revision {{ o.version }} yet.</ng-container></div>
+    }
+    @for (r of stuck(); track r._id) {
+      <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900" role="alert">
+        <span><ng-container i18n>Receipt {{ r.number }} did not finish posting. Some stock may not have been added yet.</ng-container></span>
+        @if (canResolve()) { <button matButton="filled" (click)="resume(r._id)"><ng-container i18n>Finish posting</ng-container></button> }
+      </div>
+    }
+    @if (o.confirmation) {
+      <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
+        <ng-container i18n>Confirmed by the supplier on {{ o.confirmation.at | date: 'mediumDate' }}</ng-container>@if (o.confirmation.reference) { · <ng-container i18n>reference {{ o.confirmation.reference }}</ng-container> }@if (o.confirmation.notes) { — {{ o.confirmation.notes }} }
+      </div>
+    }
+    @if (o.cancelReason) { <div class="rounded-2xl border border-outline-variant/60 bg-surface-container p-4 text-sm"><ng-container i18n>Reason:</ng-container> {{ o.cancelReason }}</div> }
+
+    <!-- Items -->
+    <mat-card appearance="outlined"><mat-card-content class="!p-5">
+      <h3 class="m-0 mb-3 text-base font-semibold"><ng-container i18n>Items</ng-container></h3>
+      <div class="-mx-4 overflow-x-auto">
+        <table mat-table [dataSource]="o.lines" class="w-full min-w-[720px]">
+          <ng-container matColumnDef="product"><th mat-header-cell *matHeaderCellDef><ng-container i18n>Product</ng-container></th><td mat-cell *matCellDef="let l"><div class="font-medium">{{ l.name }}</div><div class="text-xs text-on-surface-variant">{{ l.sku }}@if (l.supplierSku) { · <ng-container i18n>supplier code {{ l.supplierSku }}</ng-container> }@if (l.packSize > 1) { · {{ l.packSize }} {{ l.inventoryUnit }} <ng-container i18n>per</ng-container> {{ l.purchaseUnit }} }</div></td></ng-container>
+          <ng-container matColumnDef="ordered"><th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Ordered</ng-container></th><td mat-cell *matCellDef="let l" class="text-right tabular-nums">{{ l.quantity | number: '1.0-3' }} <span class="text-xs text-on-surface-variant">{{ l.purchaseUnit }}</span></td></ng-container>
+          <ng-container matColumnDef="accepted"><th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Accepted</ng-container></th><td mat-cell *matCellDef="let l" class="text-right tabular-nums">{{ l.accepted | number: '1.0-3' }}</td></ng-container>
+          <ng-container matColumnDef="rejected"><th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Rejected</ng-container></th><td mat-cell *matCellDef="let l" class="text-right tabular-nums" [class.text-red-700]="l.rejected > 0">{{ l.rejected | number: '1.0-3' }}</td></ng-container>
+          <ng-container matColumnDef="outstanding"><th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Outstanding</ng-container></th><td mat-cell *matCellDef="let l" class="text-right font-medium tabular-nums">{{ outstanding(l) | number: '1.0-3' }}@if (l.cancelled > 0) { <span class="block text-xs font-normal text-on-surface-variant"><ng-container i18n>{{ l.cancelled }} closed</ng-container></span> }</td></ng-container>
+          <ng-container matColumnDef="unitCost"><th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Unit cost</ng-container></th><td mat-cell *matCellDef="let l" class="text-right tabular-nums">{{ l.unitCost | currency: currencyOf(o) : 'symbol' : '1.2-2' }}</td></ng-container>
+          <ng-container matColumnDef="total"><th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Total</ng-container></th><td mat-cell *matCellDef="let l" class="text-right tabular-nums">{{ l.lineTotal | currency: currencyOf(o) : 'symbol' : '1.2-2' }}</td></ng-container>
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let l; columns: columns"></tr>
+        </table>
+      </div>
+      <div class="mt-3 ml-auto flex w-full max-w-xs flex-col gap-1 text-sm">
+        <div class="flex justify-between"><span><ng-container i18n>Subtotal</ng-container></span><span class="tabular-nums">{{ o.subtotal | currency: currencyOf(o) : 'symbol' : '1.2-2' }}</span></div>
+        @if (o.discount) { <div class="flex justify-between"><span><ng-container i18n>Discount</ng-container></span><span class="tabular-nums">−{{ o.discount | currency: currencyOf(o) : 'symbol' : '1.2-2' }}</span></div> }
+        @if (o.shipping) { <div class="flex justify-between"><span><ng-container i18n>Shipping</ng-container></span><span class="tabular-nums">{{ o.shipping | currency: currencyOf(o) : 'symbol' : '1.2-2' }}</span></div> }
+        @if (o.tax) { <div class="flex justify-between"><span><ng-container i18n>Tax</ng-container></span><span class="tabular-nums">{{ o.tax | currency: currencyOf(o) : 'symbol' : '1.2-2' }}</span></div> }
+        <div class="flex justify-between border-t border-outline-variant/60 pt-1 font-semibold"><span><ng-container i18n>Total</ng-container></span><span class="tabular-nums">{{ o.total | currency: currencyOf(o) : 'symbol' : '1.2-2' }}</span></div>
+      </div>
+      @if (o.deliveryInstructions || o.notes) {
+        <div class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+          @if (o.deliveryInstructions) { <div><div class="text-xs uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Delivery instructions</ng-container></div>{{ o.deliveryInstructions }}</div> }
+          @if (o.notes) { <div><div class="text-xs uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Notes</ng-container></div>{{ o.notes }}</div> }
+        </div>
+      }
+      @if (waiting() || o.status === 'PARTIALLY_RECEIVED') {
+        <div class="mt-4 flex flex-wrap gap-2 border-t border-outline-variant/40 pt-4">
+          @if (hasReceipts() && canResolve()) { <button matButton="outlined" (click)="close()"><mat-icon>do_not_disturb_on</mat-icon><ng-container i18n>Close remaining balance</ng-container></button> }
+          @if (!hasReceipts() && ['SENT', 'CONFIRMED'].includes(o.status) && canAmend()) { <button matButton="outlined" (click)="amend()"><mat-icon>edit_note</mat-icon><ng-container i18n>Amend</ng-container></button> }
+          @if (!hasReceipts() && canAmend()) { <button matButton (click)="cancel()"><mat-icon>cancel</mat-icon><ng-container i18n>Cancel order</ng-container></button> }
+        </div>
+      } @else if (o.status === 'DRAFT' && canCreate()) {
+        <div class="mt-4 flex gap-2 border-t border-outline-variant/40 pt-4"><button matButton (click)="cancel()"><mat-icon>cancel</mat-icon><ng-container i18n>Cancel order</ng-container></button></div>
+      }
+    </mat-card-content></mat-card>
+
+    <!-- Receipts -->
+    <mat-card appearance="outlined"><mat-card-content class="!p-5">
+      <h3 class="m-0 mb-3 text-base font-semibold"><ng-container i18n>Deliveries received</ng-container></h3>
+      @if (!o.receipts?.length) {
+        <p class="m-0 text-sm text-on-surface-variant"><ng-container i18n>Nothing has been received on this order yet.</ng-container></p>
+      } @else {
+        <div class="flex flex-col gap-3">
+          @for (r of o.receipts; track r._id) {
+            <div class="rounded-2xl border border-outline-variant/50 p-4">
+              <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
+                <div class="font-semibold">{{ r.number }}@if (r.state === 'posting') { <span class="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-900"><ng-container i18n>not finished</ng-container></span> }@if (r.overReceive) { <span class="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900"><ng-container i18n>over-received</ng-container></span> }</div>
+                <div class="text-xs text-on-surface-variant">{{ r.receivedAt | date: 'medium' }}@if (r.deliveryRef) { · <ng-container i18n>delivery note {{ r.deliveryRef }}</ng-container> }</div>
+              </div>
+              <ul class="mt-2 flex flex-col gap-1 text-sm">
+                @for (l of r.lines; track l.lineId) {
+                  <li class="flex flex-wrap justify-between gap-2"><span>{{ l.name }}</span><span class="tabular-nums text-on-surface-variant"><ng-container i18n>delivered {{ l.delivered }} · accepted {{ l.accepted }}</ng-container>@if (l.rejected > 0) { · <span class="text-red-700"><ng-container i18n>rejected {{ l.rejected }}</ng-container>@if (l.reason) { ({{ l.reason }}) }</span> }@if (l.packSize > 1 && l.accepted > 0) { · <ng-container i18n>+{{ l.stockQuantity }} in stock</ng-container> }</span></li>
+                }
+              </ul>
+              @if (r.notes) { <p class="m-0 mt-2 text-xs text-on-surface-variant">{{ r.notes }}</p> }
+            </div>
+          }
+        </div>
+      }
+    </mat-card-content></mat-card>
+
+    <!-- Invoices -->
+    @if (o.status !== 'DRAFT') {
+      <mat-card appearance="outlined"><mat-card-content class="!p-5">
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <h3 class="m-0 text-base font-semibold"><ng-container i18n>Supplier invoices</ng-container></h3>
+          @if (canCreate()) { <button matButton="outlined" (click)="invoice()"><mat-icon>add</mat-icon><ng-container i18n>Add reference</ng-container></button> }
+        </div>
+        @if (!o.invoices.length) { <p class="m-0 text-sm text-on-surface-variant"><ng-container i18n>No invoice details recorded. This is for reference only; it does not record any payment.</ng-container></p> }
+        @else {
+          <ul class="flex flex-col gap-2 text-sm">
+            @for (i of o.invoices; track i.at) {
+              <li class="flex flex-wrap justify-between gap-2"><span class="font-medium">{{ i.number }}@if (i.date) { <span class="font-normal text-on-surface-variant"> · {{ i.date | date: 'mediumDate' }}</span> }</span><span class="tabular-nums">@if (i.amount !== undefined && i.amount !== null) { {{ i.amount | currency: currencyOf(o) : 'symbol' : '1.2-2' }} }</span>@if (i.note) { <span class="w-full text-xs text-on-surface-variant">{{ i.note }}</span> }</li>
+            }
+          </ul>
+        }
+      </mat-card-content></mat-card>
+    }
+
+    <!-- History -->
+    <mat-card appearance="outlined"><mat-card-content class="!p-5">
+      <h3 class="m-0 mb-3 text-base font-semibold"><ng-container i18n>History</ng-container></h3>
+      @if (o.sends.length) {
+        <div class="mb-4">
+          <div class="mb-1 text-xs uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Emails to the supplier</ng-container></div>
+          <ul class="flex flex-col gap-1 text-sm">
+            @for (s of o.sends; track s.at) {
+              <li class="flex flex-wrap items-center gap-2"><mat-icon class="!h-5 !w-5 !text-base" [class]="s.ok ? 'text-green-600' : 'text-red-600'">{{ s.ok ? 'check_circle' : 'error' }}</mat-icon><span>{{ s.to }}</span><span class="text-xs text-on-surface-variant">{{ s.at | date: 'medium' }} · <ng-container i18n>revision {{ s.version }}</ng-container>@if (s.resend) { · <ng-container i18n>resent</ng-container> }@if (!s.ok) { · {{ s.error }} }</span></li>
+            }
+          </ul>
+        </div>
+      }
+      <ul class="flex flex-col gap-2 text-sm">
+        @for (e of o.events.slice().reverse(); track $index) {
+          <li class="flex flex-wrap justify-between gap-2"><span>{{ eventLabel(e.type) }}@if (e.note) { <span class="text-on-surface-variant"> — {{ e.note }}</span> }</span><span class="text-xs text-on-surface-variant">{{ e.at | date: 'medium' }}</span></li>
+        }
+      </ul>
+    </mat-card-content></mat-card>
+  </div>
+}

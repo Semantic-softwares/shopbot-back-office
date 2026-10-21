@@ -1,3 +1,6 @@
+import { MatTableModule } from '@angular/material/table';
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
@@ -22,7 +25,9 @@ import { Observable, of, startWith, map } from 'rxjs';
 @Component({
   selector: 'app-add-restock',
   standalone: true,
-  imports: [
+  imports: [MatTableModule, 
+    PageHeaderComponent,
+    TrPipe,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -101,7 +106,7 @@ export class RestockComponent implements OnInit {
   }
 
   goToRestock() {
-    this.router.navigate(['/menu/erp/inventories/restock']);
+    this.router.navigate(['/menu/erp/inventory/restock']);
   }
 
   ngOnInit(): void {
@@ -124,7 +129,7 @@ export class RestockComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading restock:', error);
-        this.router.navigate(['/menu/erp/inventories/restock']);
+        this.router.navigate(['/menu/erp/inventory/restock']);
       }
     });
   }
@@ -177,6 +182,10 @@ export class RestockComponent implements OnInit {
     // Trigger form value update
     this.formValue.set(this.restockForm.value);
   }
+
+  readonly itemColumns = ['product', 'quantity', 'costPrice', 'sellingPrice', 'expiryDate', 'total', 'actions'];
+  /** The item rows as the table wants them: a fresh array each time, the same form groups inside. */
+  rowsView = () => [...this.itemsArray.controls];
 
   get itemsArray(): FormArray {
     return this.restockForm.get('items') as FormArray;

@@ -2,14 +2,17 @@ import { Injectable, inject, ApplicationRef, signal } from '@angular/core';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { filter, first, interval, concat } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { ReleaseNotesService } from './release-notes.service';
+import { WhatsNewDialogComponent, WhatsNewResult } from '../components/whats-new-dialog/whats-new-dialog.component';
 
 /**
  * PWA Update Service
  * 
  * Handles checking for new app versions and prompting the user to update.
  * - Checks every 30 seconds after the app stabilizes
- * - Shows a snackbar when a new version is available
- * - Reloads the app when the user confirms
+ * - Shows a dialog listing what is new (and fixed) when a new version is available
+ * - Reloads the app when the user confirms; "Later" asks again in 30 minutes
  */
 @Injectable({
   providedIn: 'root',
@@ -18,6 +21,9 @@ export class PwaUpdateService {
   private swUpdate = inject(SwUpdate);
   private snackBar = inject(MatSnackBar);
   private appRef = inject(ApplicationRef);
+  private dialog = inject(MatDialog);
+  private notes = inject(ReleaseNotesService);
+  private prompt: MatDialogRef<WhatsNewDialogComponent, WhatsNewResult> | null = null;
 
   readonly updateAvailable = signal<boolean>(false);
 
@@ -28,6 +34,9 @@ export class PwaUpdateService {
     }
 
     console.log('🔄 PWA Update Service initialized');
+
+    // First run with release notes: remember where this install is, so only later releases are announced.
+    if (!this.notes.lastSeen()) this.notes.load().then((all) => this.notes.markSeen(all[0]?.id));
 
     // Listen for version ready events
     this.swUpdate.versionUpdates
@@ -72,21 +81,28 @@ export class PwaUpdateService {
     });
   }
 
-  private promptUpdate(): void {
-    const snackBarRef = this.snackBar.open(
-      $localize`🚀 A new version is available!`,
-      $localize`Update Now`,
-      {
-        duration: 0,
-        horizontalPosition: 'center',
-        verticalPosition: 'bottom',
-        panelClass: ['pwa-update-snackbar'],
+  /** Lists what is new since the last release this person saw, and lets them update now or later. */
+  private async promptUpdate(): Promise<void> {
+    if (this.prompt) return;
+    const all = await this.notes.load();
+    const releases = this.notes.unseen(all);
+    this.prompt = this.dialog.open(WhatsNewDialogComponent, { width: '560px', maxWidth: '95vw', autoFocus: 'first-tabbable', data: { releases, mode: 'update' } });
+    this.prompt.afterClosed().subscribe((choice) => {
+      this.prompt = null;
+      if (choice === 'update') {
+        this.notes.markSeen(all[0]?.id);
+        this.activateUpdate();
+      } else {
+        // Leave it for a while, then ask again; closing the dialog must not hide an update forever.
+        setTimeout(() => this.promptUpdate(), 30 * 60 * 1000);
       }
-    );
-
-    snackBarRef.onAction().subscribe(() => {
-      this.activateUpdate();
     });
+  }
+
+  /** The release history, opened from the user menu. Nothing is installed from here. */
+  async showWhatsNew(): Promise<void> {
+    const all = await this.notes.load();
+    this.dialog.open(WhatsNewDialogComponent, { width: '560px', maxWidth: '95vw', data: { releases: all.slice(0, 5), mode: 'browse' } });
   }
 
   async activateUpdate(): Promise<void> {

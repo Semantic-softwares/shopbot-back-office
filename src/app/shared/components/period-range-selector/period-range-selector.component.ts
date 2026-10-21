@@ -62,6 +62,8 @@ export class PeriodSelectorComponent implements OnInit {
 
     const params = this.queryParamsService.getAllParamsSnapshot;
     setTimeout(() => {
+      // The select shows `selectedPeriod`, not the form, so a period that came in with the link has to land here too.
+      this.selectedPeriod = params['period'] || this.selectedPeriod;
       this.periodSelector?.patchValue(
         { period: params['period'] || this.selectedPeriod },
         { emitEvent: true }

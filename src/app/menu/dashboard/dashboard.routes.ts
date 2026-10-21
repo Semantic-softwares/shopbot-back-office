@@ -28,10 +28,6 @@ export const DASHBOARD_ROUTES: Routes = [
                 loadChildren: () => import('./tables/tables.routes').then(m => m.DASHBOARD_TABLES_ROUTES)
             },
             {
-                path: 'employees',
-                loadChildren: () => import('./employees/employees.routes').then(m => m.DASHBOARD_EMPLOYEES_ROUTES)
-            },
-            {
                 path: 'customers',
                 loadChildren: () => import('./customers/customers.routes').then(m => m.DASHBOARD_CUSTOMERS_ROUTES)
             },

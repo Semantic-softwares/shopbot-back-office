@@ -1,3 +1,4 @@
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormGroup, FormBuilder, FormsModule } from '@angular/forms';
@@ -26,7 +27,7 @@ import { debounceTime } from 'rxjs/operators';
   selector: 'app-count-inventory',
   standalone: true,
   imports: [
-    CommonModule,
+PageHeaderComponent,     CommonModule,
     ReactiveFormsModule,
     FormsModule,
     MatCardModule,
@@ -46,23 +47,15 @@ import { debounceTime } from 'rxjs/operators';
     RouterModule,
   ],
   template: `
-    <div class="p-6 max-w-7xl mx-auto">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900"><ng-container i18n>Count Inventory</ng-container></h1>
-          @if (reconciliation()) {
-            <p class="text-gray-600 mt-1">{{ reconciliation()!.name }}</p>
-          }
-        </div>
-        <div class="flex space-x-4">
-          <button mat-button [routerLink]="['../..']" class="text-gray-600">
+    <app-page-header title="Count Inventory" i18n-title [subtitle]="reconciliation()?.name ?? ''">
+      <ng-container actions>
+          <button matButton [routerLink]="['../..']">
             <mat-icon>arrow_back</mat-icon>
             <ng-container i18n>Back to List</ng-container>
           </button>
           @if (reconciliation()) {
             <button 
-              mat-raised-button 
+              matButton="filled" 
               color="primary" 
               (click)="saveProgress()"
               [disabled]="isSaving()"
@@ -73,29 +66,30 @@ import { debounceTime } from 'rxjs/operators';
               <ng-container i18n>Save Progress</ng-container>
             </button>
           }
-        </div>
-      </div>
+        </ng-container>
+    </app-page-header>
+    <div class="mx-auto max-w-7xl p-4 pb-16 md:p-6">
 
       @if (reconciliation()) {
         <!-- Progress Card -->
-        <mat-card class="mb-6">
+        <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60 mb-6">
           <mat-card-content class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div class="text-center">
                 <div class="text-2xl font-bold text-blue-600">{{ reconciliation()!.totalProducts }}</div>
-                <div class="text-sm text-gray-600"><ng-container i18n>Total Products</ng-container></div>
+                <div class="text-sm text-on-surface-variant"><ng-container i18n>Total Products</ng-container></div>
               </div>
               <div class="text-center">
                 <div class="text-2xl font-bold text-green-600">{{ reconciliation()!.countedProducts }}</div>
-                <div class="text-sm text-gray-600"><ng-container i18n>Counted</ng-container></div>
+                <div class="text-sm text-on-surface-variant"><ng-container i18n>Counted</ng-container></div>
               </div>
               <div class="text-center">
                 <div class="text-2xl font-bold text-orange-600">{{ remainingProducts() }}</div>
-                <div class="text-sm text-gray-600"><ng-container i18n>Remaining</ng-container></div>
+                <div class="text-sm text-on-surface-variant"><ng-container i18n>Remaining</ng-container></div>
               </div>
               <div class="text-center">
                 <div class="text-2xl font-bold text-red-600">{{ reconciliation()!.discrepancyCount }}</div>
-                <div class="text-sm text-gray-600"><ng-container i18n>Discrepancies</ng-container></div>
+                <div class="text-sm text-on-surface-variant"><ng-container i18n>Discrepancies</ng-container></div>
               </div>
             </div>
             <mat-progress-bar 
@@ -103,14 +97,14 @@ import { debounceTime } from 'rxjs/operators';
               class="mt-4"
               color="primary">
             </mat-progress-bar>
-            <div class="text-center mt-2 text-sm text-gray-600">
+            <div class="text-center mt-2 text-sm text-on-surface-variant">
               <ng-container i18n>{{ progressPercentage() }}% Complete</ng-container>
             </div>
           </mat-card-content>
         </mat-card>
 
         <!-- Filter and Search -->
-        <mat-card class="mb-6">
+        <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60 mb-6">
           <mat-card-content class="p-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <mat-form-field appearance="outline">
@@ -141,7 +135,7 @@ import { debounceTime } from 'rxjs/operators';
         </mat-card>
 
         <!-- Items Table -->
-        <mat-card>
+        <mat-card appearance="outlined" class="!rounded-3xl !border-outline-variant/60">
           <div class="overflow-x-auto">
             <table mat-table [dataSource]="filteredItems()" class="w-full">
               
@@ -152,7 +146,7 @@ import { debounceTime } from 'rxjs/operators';
                   <div>
                     <div class="font-medium">{{ item.productName }}</div>
                     @if (item.productSku) {
-                      <div class="text-sm text-gray-500"><ng-container i18n>SKU: {{ item.productSku }}</ng-container></div>
+                      <div class="text-sm text-on-surface-variant"><ng-container i18n>SKU: {{ item.productSku }}</ng-container></div>
                     }
                   </div>
                 </td>
@@ -190,7 +184,7 @@ import { debounceTime } from 'rxjs/operators';
                   <span 
                     [class.text-red-600]="item.variance < 0"
                     [class.text-green-600]="item.variance > 0"
-                    [class.text-gray-600]="item.variance === 0"
+                    [class.text-on-surface-variant]="item.variance === 0"
                     class="font-medium"
                   >
                     {{ item.variance || 0 }}
@@ -205,7 +199,7 @@ import { debounceTime } from 'rxjs/operators';
                   <span 
                     [class.text-red-600]="item.varianceValue < 0"
                     [class.text-green-600]="item.varianceValue > 0"
-                    [class.text-gray-600]="item.varianceValue === 0"
+                    [class.text-on-surface-variant]="item.varianceValue === 0"
                     class="font-medium"
                   >
                     {{ item.varianceValue || 0 | currency:currency():'symbol':'1.2-2' }}
@@ -284,19 +278,19 @@ import { debounceTime } from 'rxjs/operators';
             <div class="text-center py-12">
               <mat-icon class="text-gray-400 text-6xl mb-4">inventory_2</mat-icon>
               <h3 class="text-lg font-medium text-gray-900 mb-2"><ng-container i18n>No items found</ng-container></h3>
-              <p class="text-gray-500"><ng-container i18n>Try adjusting your search or filter criteria</ng-container></p>
+              <p class="text-on-surface-variant"><ng-container i18n>Try adjusting your search or filter criteria</ng-container></p>
             </div>
           }
         </mat-card>
 
         <!-- Action Buttons -->
         <div class="flex justify-between items-center mt-6">
-          <div class="text-sm text-gray-600">
+          <div class="text-sm text-on-surface-variant">
             <ng-container i18n>{{ reconciliation()!.countedProducts }} of {{ reconciliation()!.totalProducts }} items counted</ng-container>
           </div>
           <div class="space-x-4">
             <button 
-              mat-button
+              matButton
               color="primary"
               (click)="saveProgress()"
               [disabled]="isSaving()"
@@ -304,7 +298,7 @@ import { debounceTime } from 'rxjs/operators';
               <ng-container i18n>Save Progress</ng-container>
             </button>
             <button 
-              mat-raised-button 
+              matButton="filled" 
               color="primary"
               (click)="proceedToReview()"
               [disabled]="!canProceedToReview()"

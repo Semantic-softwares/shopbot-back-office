@@ -1,3 +1,4 @@
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
@@ -38,6 +39,7 @@ import { Observable } from 'rxjs';
     MatChipsModule,
     RouterModule,
     FormsModule,
+    PageHeaderComponent,
   ],
   templateUrl: './list-reconciliation.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -65,7 +67,7 @@ export class ListReconciliationComponent implements OnInit {
   public selectedStore = computed(() => this.storeStore.selectedStore());
   public currency = computed(() => this.selectedStore()?.currency || 'NGN');
 
-  displayedColumns: string[] = ['name', 'status', 'actions'];
+  displayedColumns: string[] = ['name', 'date', 'type', 'progress', 'discrepancies', 'status', 'actions'];
 
   filters = {
     page: 1,

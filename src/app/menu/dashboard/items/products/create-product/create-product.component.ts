@@ -1,3 +1,4 @@
+import { ProductPurchasingComponent } from '../../../inventories/purchasing/product-purchasing.component';
 import { Component, OnInit, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, of, forkJoin, EMPTY } from 'rxjs';
@@ -50,6 +51,7 @@ interface ImagePreview {
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
+    ProductPurchasingComponent,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
@@ -125,6 +127,7 @@ export class CreateProductComponent implements OnInit {
       qty: [0, Validators.required],
       initialStock: ['', Validators.required],
       criticalStock: ['', Validators.required],
+      reorderTarget: [null],
       sku: [''],
       barcode: [''],
       quantity: [1, Validators.required],
@@ -278,6 +281,7 @@ export class CreateProductComponent implements OnInit {
           qty: product.qty,
           initialStock: product.initialStock,
           criticalStock: product.criticalStockLevel,
+          reorderTarget: product.reorderTarget ?? null,
           sku: product.sku,
           barcode: product.barcode,
           stockLevelAlert: product.stockLevelAlert,
@@ -335,7 +339,9 @@ export class CreateProductComponent implements OnInit {
     }
 
     this.isSubmitting.set(true);
-    const formValue = this.productForm.getRawValue();
+    const raw = this.productForm.getRawValue();
+    // The server's field is criticalStockLevel; the form's own name for it was never saved before.
+    const formValue = { ...raw, criticalStockLevel: raw.criticalStock, reorderTarget: raw.reorderTarget === '' ? null : raw.reorderTarget };
     const productId = this.productId();
 
     // Step 1: Save/Update product
