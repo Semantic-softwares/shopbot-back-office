@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";var p;z(()=>{p=[{path:``,loadComponent:()=>import(`./chunk-DH5RvFUw.js`).then(o=>o.Checkout)}]})();export{p as CHECKOUT_ROUTES};
