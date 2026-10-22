@@ -1,3 +1,8 @@
+import { ConfirmationDialogComponent } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { OfflineStore } from '../../../../../shared/offline/offline-store.service';
+import { OutboxSyncService } from '../../../../../shared/offline/outbox-sync.service';
+import { ConnectivityService } from '../../../../../shared/offline/connectivity.service';
+import { OutboxEntry } from '../../../../../shared/offline/offline.models';
 import { Component, inject, signal, computed, effect, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
@@ -81,6 +86,9 @@ export class ListReceiptsComponent {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   private exportService = inject(ExportService);
+  readonly offline = inject(OfflineStore);
+  readonly outbox = inject(OutboxSyncService);
+  readonly net = inject(ConnectivityService);
   public storeStore = inject(StoreStore);
 
   private query = toSignal(this.queryParams.getAllParams$);
@@ -135,13 +143,21 @@ export class ListReceiptsComponent {
   // whole page being swapped for a spinner.
   private lastData = signal<any>(null);
   private lastRefunds = signal<any>(null);
+  /** While online, quietly keep the newest orders' details on the device so they can be opened offline. */
+  private warmRecent = effect(() => {
+    const d = this.dataSource.hasValue() ? this.dataSource.value() : null;
+    if (!d?.orders?.length || !this.net.online()) return;
+    this.orderService.warmOrders(d.orders.slice(0, 25).map((o: any) => String(o._id)).filter(Boolean));
+  });
+
   private keepLast = effect(() => {
-    const d = this.dataSource.value();
+    // `value()` throws while a request is in error (offline), so only read it when there is one.
+    const d = this.dataSource.hasValue() ? this.dataSource.value() : null;
     if (d) this.lastData.set(d);
-    const r = this.refundsResource.value();
+    const r = this.refundsResource.hasValue() ? this.refundsResource.value() : null;
     if (r) this.lastRefunds.set(r);
   });
-  readonly data = computed(() => this.dataSource.value() ?? this.lastData());
+  readonly data = computed(() => (this.dataSource.hasValue() ? this.dataSource.value() : null) ?? this.lastData());
   readonly refreshing = computed(() => this.dataSource.isLoading() || this.refundsResource.isLoading());
 
   readonly summary = computed(() => this.data()?.data);
@@ -149,12 +165,14 @@ export class ListReceiptsComponent {
 
   readonly tabs = computed(() => {
     const d = this.summary();
+    // Sales still on this device count too, in the tab they belong to.
+    const local = (tab: ReceiptTab) => this.unsynced().filter((o) => this.inTab(o, tab)).length;
     return [
-      { value: 'all' as ReceiptTab, label: $localize`All`, count: d?.allReceipts ?? 0, icon: 'receipt_long', urgent: false },
-      { value: 'open' as ReceiptTab, label: $localize`Open`, count: d?.open ?? 0, icon: 'pending_actions', urgent: (d?.open ?? 0) > 0 },
-      { value: 'sales' as ReceiptTab, label: $localize`Paid`, count: d?.sales ?? 0, icon: 'paid', urgent: false },
+      { value: 'all' as ReceiptTab, label: $localize`All`, count: (d?.allReceipts ?? 0) + this.unsynced().length, icon: 'receipt_long', urgent: false },
+      { value: 'open' as ReceiptTab, label: $localize`Open`, count: (d?.open ?? 0) + local('open'), icon: 'pending_actions', urgent: (d?.open ?? 0) + local('open') > 0 },
+      { value: 'sales' as ReceiptTab, label: $localize`Paid`, count: (d?.sales ?? 0) + local('sales'), icon: 'paid', urgent: false },
       { value: 'refund' as ReceiptTab, label: $localize`Refunds`, count: d?.refund ?? 0, icon: 'currency_exchange', urgent: false },
-      { value: 'cancelled' as ReceiptTab, label: $localize`Cancelled`, count: d?.cancelled ?? 0, icon: 'block', urgent: false },
+      { value: 'cancelled' as ReceiptTab, label: $localize`Cancelled`, count: (d?.cancelled ?? 0) + local('cancelled'), icon: 'block', urgent: false },
     ];
   });
 
@@ -164,11 +182,57 @@ export class ListReceiptsComponent {
     return k && k.grossSales > 0 ? (k.refunds.amount / k.grossSales) * 100 : 0;
   });
 
+  // ---- orders still on this device (not accepted by the server yet) ------------------------------
+  /**
+   * Orders saved on this device that the server has not accepted yet, shaped like the server's receipt rows and marked
+   * `_unsynced`, so they sit in the same list. They follow the same period, employee and channel filters.
+   */
+  readonly unsynced = computed<any[]>(() => {
+    const store = this.storeStore.selectedStore()?._id;
+    const q: any = this.query() ?? {};
+    const from = q.start ? new Date(`${q.start}T00:00:00`).getTime() : -Infinity;
+    const to = q.end ? new Date(`${q.end}T23:59:59.999`).getTime() : Infinity;
+    return this.offline.outbox()
+      .filter((e) => e.store === store)
+      .map((e) => this.localRow(e))
+      .filter((r) => {
+        const t = new Date(r.date).getTime();
+        if (t < from || t > to) return false;
+        if (q.employee && q.employee !== 'all' && String(r.staffId) !== String(q.employee)) return false;
+        if (q.salesChannel && r.salesChannel !== q.salesChannel) return false;
+        return true;
+      });
+  });
+
+  private localRow(e: OutboxEntry): any {
+    const o: any = e.order;
+    return {
+      _id: e.id,
+      _unsynced: true,
+      _failed: e.status === 'failed',
+      _error: e.lastError,
+      receiptNo: o.reference,
+      date: o.createdAt,
+      ordertype: o.salesType?.name ?? o.type,
+      salesChannel: o.salesChannel,
+      category: o.category,
+      paymentStatus: o.paymentStatus,
+      type: o.payment,
+      total: o.total,
+      staffId: o.staff,
+      servedBy: { name: o.staffName ?? '' },
+      orderedBy: o.user ? { name: o.user.name } : undefined,
+      note: o.note,
+      refundedAmount: 0,
+    };
+  }
+
   // ---- sales rows: search, then sort ------------------------------------------------------------
   readonly rows = computed(() => {
     const term = this.search().trim().toLowerCase();
     const tab = this.activeTab();
-    let list: any[] = (this.data()?.orders ?? []).filter((o: any) => this.inTab(o, tab));
+    const waiting = new Set(this.offline.outbox().map((e) => e.id));
+    let list: any[] = [...this.unsynced(), ...(this.data()?.orders ?? []).filter((o: any) => !waiting.has(String(o._id)))].filter((o: any) => this.inTab(o, tab));
     if (term) {
       list = list.filter((o) =>
         [o.receiptNo, o.orderedBy?.name, o.servedBy?.name, o.type].some((v) => String(v ?? '').toLowerCase().includes(term)),
@@ -187,7 +251,7 @@ export class ListReceiptsComponent {
 
   readonly refundRows = computed(() => {
     const term = this.search().trim().toLowerCase();
-    const list: any[] = (this.refundsResource.value() ?? this.lastRefunds())?.data ?? [];
+    const list: any[] = ((this.refundsResource.hasValue() ? this.refundsResource.value() : null) ?? this.lastRefunds())?.data ?? [];
     if (!term) return list;
     return list.filter((r) =>
       [r.refundNumber, r.orderReference, r.createdBy?.name, refundReasonLabel(r.reasonCode)].some((v) => String(v ?? '').toLowerCase().includes(term)),
@@ -201,7 +265,7 @@ export class ListReceiptsComponent {
     return this.activeRows().slice(start, start + this.pageSize());
   });
   /** Only the very first load has nothing to show; after that the screen keeps what it has. */
-  readonly loading = computed(() => !this.data());
+  readonly loading = computed(() => !this.data() && !this.dataSource.error());
 
   readonly columns = ['select', 'receipt', 'date', 'status', 'payment', 'people', 'total', 'actions'];
   readonly refundColumns = ['ticket', 'date', 'items', 'method', 'by', 'amount', 'actions'];
@@ -271,6 +335,7 @@ export class ListReceiptsComponent {
 
   // ---- how a receipt looks ----------------------------------------------------------------------
   statusOf(order: any): ReceiptStatus {
+    if (order._unsynced) return order._failed ? { label: $localize`Sync failed`, tone: 'danger', rank: -2 } : { label: $localize`Not synced`, tone: 'open', rank: -1 };
     if (order.category === 'Cancel') return { label: $localize`Cancelled`, tone: 'muted', rank: 3 };
     if (order.paymentStatus !== 'Paid') return { label: $localize`Open`, tone: 'open', rank: 0 };
     if (order.refundStatus === 'Full') return { label: $localize`Refunded`, tone: 'danger', rank: 3 };
@@ -323,18 +388,26 @@ export class ListReceiptsComponent {
   }
 
   // ---- actions ---------------------------------------------------------------------------------
+  /** Throws away a sale that could not be sent. Always asks first: this is the only copy. */
+  discardLocal(row: any): void {
+    this.dialog
+      .open(ConfirmationDialogComponent, { width: '380px', data: { message: $localize`Discard receipt #${row.receiptNo}? It never reached the server and will be lost.` } })
+      .afterClosed()
+      .subscribe((yes) => { if (yes) void this.outbox.discard(row._id); });
+  }
+
   viewRecipesDetails(orderId: string) {
     this.router.navigate(['../', orderId, 'details'], { relativeTo: this.route });
   }
 
   /** A paid sale that still has something left to refund. */
   canRefund(order: any): boolean {
-    return order?.paymentStatus === 'Paid' && order?.category !== 'Cancel' && order?.refundStatus !== 'Full';
+    return !order?._unsynced && order?.paymentStatus === 'Paid' && order?.category !== 'Cancel' && order?.refundStatus !== 'Full';
   }
 
   /** An order nobody has paid for is cancelled (voided), not refunded. */
   canVoid(order: any): boolean {
-    return order?.paymentStatus !== 'Paid' && order?.category !== 'Cancel';
+    return !order?._unsynced && order?.paymentStatus !== 'Paid' && order?.category !== 'Cancel';
   }
 
   refundReceipt(order: any): void {
@@ -375,7 +448,7 @@ export class ListReceiptsComponent {
 
   /** A sale that took money is a financial record: it is refunded or voided, never deleted. */
   isPaid(order: any): boolean {
-    return order?.paymentStatus === 'Paid' || (order?.refundedAmount || 0) > 0;
+    return !!order?._unsynced || order?.paymentStatus === 'Paid' || (order?.refundedAmount || 0) > 0;
   }
 
   private deleteFailed(err: any): void {

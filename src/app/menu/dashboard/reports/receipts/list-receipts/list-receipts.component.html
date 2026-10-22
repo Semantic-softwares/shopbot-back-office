@@ -47,7 +47,7 @@
     </div>
   </header>
 
-  @if (!data()) {
+  @if (loading()) {
     <div class="flex items-center justify-center min-h-[300px]">
       <mat-spinner diameter="40"></mat-spinner>
     </div>
@@ -114,6 +114,24 @@
         </button>
       }
     </div>
+
+    <!-- Orders that are only on this device so far -->
+    @if (!isRefundTab() && (unsynced().length || net.offline())) {
+      <div class="mx-3 mt-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-sm md:mx-4"
+        [class]="offline.failed() ? 'border-red-200 bg-red-50 text-red-900' : 'border-amber-200 bg-amber-50 text-amber-900'" role="status">
+        <div class="flex min-w-0 items-center gap-2">
+          <mat-icon class="shrink-0">{{ net.offline() ? 'cloud_off' : 'sync' }}</mat-icon>
+          <span>
+            @if (net.offline()) { <strong><ng-container i18n>You are offline.</ng-container></strong>{{ ' ' }}}
+            @if (unsynced().length) { <ng-container i18n>{{ unsynced().length }} order(s) saved on this device have not reached the server yet. The totals above do not include them.</ng-container> }
+            @else { <ng-container i18n>Sales you make now are saved on this device and sent when you are back online.</ng-container> }
+          </span>
+        </div>
+        @if (unsynced().length) {
+          <button matButton="outlined" (click)="outbox.syncNow()" [disabled]="net.offline() || outbox.draining()"><mat-icon>sync</mat-icon><ng-container i18n>Sync now</ng-container></button>
+        }
+      </div>
+    }
 
     <!-- Find and narrow -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-3 px-3 pt-3 md:px-4">
@@ -241,6 +259,10 @@
                   <button mat-menu-item (click)="viewRecipesDetails(row._id)">
                     <mat-icon>visibility</mat-icon><span><ng-container i18n>View Receipt Details</ng-container></span>
                   </button>
+                  @if (row._unsynced) {
+                    <button mat-menu-item (click)="outbox.retry(row._id)" [disabled]="net.offline()"><mat-icon>sync</mat-icon><span><ng-container i18n>Sync now</ng-container></span></button>
+                    @if (row._failed) { <button mat-menu-item (click)="discardLocal(row)"><mat-icon>delete_forever</mat-icon><span><ng-container i18n>Discard this sale</ng-container></span></button> }
+                  }
                   @if (canRefund(row)) {
                     <button mat-menu-item (click)="refundReceipt(row)">
                       <mat-icon>currency_exchange</mat-icon><span><ng-container i18n>Refund</ng-container></span>
@@ -286,6 +308,10 @@
                   <button mat-menu-item (click)="viewRecipesDetails(row._id)">
                     <mat-icon>visibility</mat-icon><span><ng-container i18n>View Receipt Details</ng-container></span>
                   </button>
+                  @if (row._unsynced) {
+                    <button mat-menu-item (click)="outbox.retry(row._id)" [disabled]="net.offline()"><mat-icon>sync</mat-icon><span><ng-container i18n>Sync now</ng-container></span></button>
+                    @if (row._failed) { <button mat-menu-item (click)="discardLocal(row)"><mat-icon>delete_forever</mat-icon><span><ng-container i18n>Discard this sale</ng-container></span></button> }
+                  }
                   @if (canRefund(row)) {
                     <button mat-menu-item (click)="refundReceipt(row)"><mat-icon>currency_exchange</mat-icon><span><ng-container i18n>Refund</ng-container></span></button>
                   }

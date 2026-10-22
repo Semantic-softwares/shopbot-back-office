@@ -1,0 +1,116 @@
+<app-report-page title="Fiscal transactions" i18n-title subtitle="Every invoice and credit note reported to the tax authority, in the order it was issued." i18n-subtitle [exportDisabled]="!rows().length" (export)="exportData($event)">
+  <ng-container filters>
+    <date-range-selector />
+    <div>
+      <mat-form-field appearance="outline" class="compact-field">
+        <mat-label i18n>Type</mat-label>
+        <mat-select [value]="type()" (selectionChange)="type.set($event.value)" data-testid="fiscal-type-filter">
+          <mat-option value=""><ng-container i18n>All documents</ng-container></mat-option>
+          <mat-option value="INVOICE"><ng-container i18n>Invoices</ng-container></mat-option>
+          <mat-option value="CREDIT_NOTE"><ng-container i18n>Credit notes</ng-container></mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-form-field appearance="outline" class="compact-field">
+        <mat-label i18n>Status</mat-label>
+        <mat-select [value]="tag()" (selectionChange)="tag.set($event.value)" data-testid="fiscal-tag-filter">
+          <mat-option value=""><ng-container i18n>All statuses</ng-container></mat-option>
+          <mat-option value="FISCALIZED"><ng-container i18n>Fiscalized</ng-container></mat-option>
+          <mat-option value="NOT_YET_FISCALIZED">{{ notYetFiscalized }}</mat-option>
+          <mat-option value="NEEDS_ATTENTION"><ng-container i18n>Needs attention</ng-container></mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </ng-container>
+
+  @if (!active()) {
+    <mat-card appearance="outlined"><mat-card-content class="flex flex-col items-center gap-2 !p-10 text-center" data-testid="fiscal-inactive">
+      <mat-icon class="!h-12 !w-12 !text-5xl !leading-none text-on-surface-variant">receipt_long</mat-icon>
+      <p class="m-0 font-medium"><ng-container i18n>Tax reporting is not switched on for this store.</ng-container></p>
+      <p class="m-0 text-sm text-on-surface-variant"><ng-container i18n>Finish the e-invoicing setup in Settings to start reporting sales.</ng-container></p>
+    </mat-card-content></mat-card>
+  } @else {
+    @if (res.isLoading()) { <mat-progress-bar mode="indeterminate" /> }
+
+    @if (failed()) {
+      <div class="flex flex-col items-center gap-2 rounded-3xl border border-red-200 bg-red-50 p-8 text-center text-red-900" role="alert">
+        <mat-icon class="!h-10 !w-10 !text-4xl !leading-none text-red-600">error</mat-icon>
+        <p class="m-0 font-semibold"><ng-container i18n>Could not load this report.</ng-container></p>
+        <p class="m-0 text-sm"><ng-container i18n>Only the store owner can open the fiscal transactions.</ng-container></p>
+        <button matButton="filled" (click)="res.reload()"><ng-container i18n>Try again</ng-container></button>
+      </div>
+    } @else if (res.hasValue() && !rows().length) {
+      <mat-card appearance="outlined"><mat-card-content class="flex flex-col items-center gap-2 !p-10 text-center">
+        <mat-icon class="!h-12 !w-12 !text-5xl !leading-none text-on-surface-variant">receipt_long</mat-icon>
+        <p class="m-0 font-medium"><ng-container i18n>No documents in this period.</ng-container></p>
+        <p class="m-0 text-sm text-on-surface-variant"><ng-container i18n>Try another date range or filter.</ng-container></p>
+      </mat-card-content></mat-card>
+    } @else if (rows().length) {
+      <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <app-report-kpi label="Documents" i18n-label icon="receipt_long">{{ counts().all | number:'1.0-0' }}</app-report-kpi>
+        <app-report-kpi label="Fiscalized" i18n-label icon="verified">{{ counts().fiscalized | number:'1.0-0' }}</app-report-kpi>
+        <app-report-kpi label="Not Yet Fiscalized" i18n-label icon="schedule">{{ counts().waiting | number:'1.0-0' }}</app-report-kpi>
+        <app-report-kpi label="Needs attention" i18n-label icon="error" tone="text-red-700">{{ counts().attention | number:'1.0-0' }}</app-report-kpi>
+      </div>
+
+      <mat-card appearance="outlined" class="overflow-x-auto max-md:!hidden">
+        <table mat-table matSort [matSortActive]="table.sortKey()" [matSortDirection]="table.sortDir()" (matSortChange)="table.onSort($event)" [dataSource]="table.rows()" class="w-full min-w-[960px]" data-testid="fiscal-table">
+          <ng-container matColumnDef="counter">
+            <th mat-header-cell mat-sort-header arrowPosition="before" *matHeaderCellDef class="!text-right"><ng-container i18n>Counter</ng-container></th>
+            <td mat-cell *matCellDef="let r" class="text-right tabular-nums">{{ r.counter }}</td>
+          </ng-container>
+          <ng-container matColumnDef="invoiceNumber">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef><ng-container i18n>Invoice number</ng-container></th>
+            <td mat-cell *matCellDef="let r" class="font-mono text-sm">{{ r.invoiceNumber }}<div class="text-xs text-on-surface-variant">{{ r.orderReference }}</div></td>
+          </ng-container>
+          <ng-container matColumnDef="documentType">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef><ng-container i18n>Type</ng-container></th>
+            <td mat-cell *matCellDef="let r">{{ typeLabel(r.documentType) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="irn">
+            <th mat-header-cell *matHeaderCellDef>IRN</th>
+            <td mat-cell *matCellDef="let r" class="font-mono text-xs" [title]="r.irn || ''">{{ short(r.irn) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="previousInvoiceHash">
+            <th mat-header-cell *matHeaderCellDef><ng-container i18n>Previous invoice hash</ng-container></th>
+            <td mat-cell *matCellDef="let r" class="font-mono text-xs" [title]="r.previousInvoiceHash || ''">{{ short(r.previousInvoiceHash) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="tag">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef><ng-container i18n>Status</ng-container></th>
+            <td mat-cell *matCellDef="let r"><div class="font-medium">{{ tagLabel(r.tag) }}</div><div class="text-xs text-on-surface-variant">{{ r.detail }}</div></td>
+          </ng-container>
+          <ng-container matColumnDef="issuedAt">
+            <th mat-header-cell mat-sort-header *matHeaderCellDef><ng-container i18n>Issued</ng-container></th>
+            <td mat-cell *matCellDef="let r">{{ r.issuedAt | date:'medium' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="total">
+            <th mat-header-cell mat-sort-header arrowPosition="before" *matHeaderCellDef class="!text-right"><ng-container i18n>Total</ng-container></th>
+            <td mat-cell *matCellDef="let r" class="text-right tabular-nums">{{ r.total | currency: r.currency || currency() }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let r; columns: columns"></tr>
+        </table>
+      </mat-card>
+
+      <div class="flex flex-col gap-3 md:hidden">
+        @for (r of table.rows(); track r.invoiceNumber) {
+          <mat-card appearance="outlined"><mat-card-content class="!p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0"><div class="font-semibold">#{{ r.counter }} · {{ typeLabel(r.documentType) }}</div><div class="break-all font-mono text-xs text-on-surface-variant">{{ r.invoiceNumber }}</div></div>
+              <div class="shrink-0 text-right font-semibold tabular-nums">{{ r.total | currency: r.currency || currency() }}</div>
+            </div>
+            <dl class="m-0 mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+              <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Status</ng-container></dt><dd class="m-0">{{ tagLabel(r.tag) }}</dd></div>
+              <div><dt class="text-xs text-on-surface-variant"><ng-container i18n>Issued</ng-container></dt><dd class="m-0">{{ r.issuedAt | date:'short' }}</dd></div>
+              <div class="col-span-2"><dt class="text-xs text-on-surface-variant">IRN</dt><dd class="m-0 break-all font-mono text-xs">{{ r.irn || '—' }}</dd></div>
+              <div class="col-span-2"><dt class="text-xs text-on-surface-variant"><ng-container i18n>Previous invoice hash</ng-container></dt><dd class="m-0 break-all font-mono text-xs">{{ r.previousInvoiceHash || '—' }}</dd></div>
+            </dl>
+          </mat-card-content></mat-card>
+        }
+      </div>
+
+      <mat-paginator [length]="table.total()" [pageSize]="table.pageSize()" [pageIndex]="table.pageIndex()" [pageSizeOptions]="[10, 25, 50]" (page)="table.onPage($event)" showFirstLastButtons class="rounded-3xl" />
+    }
+  }
+</app-report-page>

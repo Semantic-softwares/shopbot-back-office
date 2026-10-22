@@ -1,3 +1,5 @@
+import { OfflineStore } from '../offline/offline-store.service';
+import { cachedFetch } from '../offline/cached-fetch';
 import {
   patchState,
   signalStore,
@@ -41,8 +43,8 @@ export const CategoryStore = signalStore(
   withMethods(
     (
       store,
-      categoryService = inject(CategoryService)
-    ) => {
+      categoryService = inject(CategoryService),
+      offline = inject(OfflineStore)    ) => {
     
      function selectCategory(category: Category): void {
         patchState(store, { selectedCategory: category });
@@ -99,7 +101,7 @@ export const CategoryStore = signalStore(
             })
           ),
           switchMap((storeId) =>
-            categoryService.getStoreMenus(storeId).pipe(
+            cachedFetch(offline, `menus:${storeId}`, categoryService.getStoreMenus(storeId)).pipe(
               tapResponse({
                 next(response) {
                   selectCategory(response[0]);

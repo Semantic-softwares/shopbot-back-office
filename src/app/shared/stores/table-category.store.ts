@@ -1,3 +1,5 @@
+import { OfflineStore } from '../offline/offline-store.service';
+import { cachedFetch } from '../offline/cached-fetch';
 import {
     patchState,
     signalStore,
@@ -37,8 +39,8 @@ import { StoreStore } from "./store.store";
     })),
 
     withMethods((store, 
-      tableCategoryService = inject(TableCategoryService)
-    ) => {
+      tableCategoryService = inject(TableCategoryService),
+      offline = inject(OfflineStore)    ) => {
       const selectTableCategory = (tableCategory: TableCategory): void => {
         patchState(store, { selectedTableCategory: tableCategory });
       };
@@ -79,7 +81,7 @@ import { StoreStore } from "./store.store";
             })
           ),
           switchMap((storeId) =>
-            tableCategoryService.getStoreTableCategories(storeId).pipe(
+            cachedFetch(offline, `table-categories:${storeId}`, tableCategoryService.getStoreTableCategories(storeId)).pipe(
               tapResponse({
                 next(tables) {
                   

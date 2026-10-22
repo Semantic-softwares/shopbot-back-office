@@ -31,9 +31,14 @@ export const roleResolver: ResolveFn<Role | null> = () => {
 
       // No role on record comes back as a 404 — land with no permissions instead of cancelling navigation.
       return role$.pipe(
-        catchError(() => {
-          roleService.clearAccess();
-          return of(null);
+        catchError((error) => {
+          // Only "this person has no role here" removes access. If the server simply could not be reached (offline, or it
+          // is having a problem) the access saved on this device stays, so a POS opened without a connection still works.
+          if (error?.status === 404 || error?.status === 403) {
+            roleService.clearAccess();
+            return of(null);
+          }
+          return of(roleService.role());
         })
       );
     })

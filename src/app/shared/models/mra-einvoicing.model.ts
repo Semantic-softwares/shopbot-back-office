@@ -1,6 +1,8 @@
 /** What a screen needs to decide whether to offer e-invoicing at all (any country). */
 export interface FiscalisationOverview {
   supported: boolean;
+  /** True only when the authority is reporting this store's sales right now (set up, tested, switched on). */
+  active?: boolean;
   country: string | null;
   authority: { code: string; name: string; country: string } | null;
 }

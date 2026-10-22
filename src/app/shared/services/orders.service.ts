@@ -2,6 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { OfflineStore } from '../offline/offline-store.service';
+import { cachedFetch } from '../offline/cached-fetch';
 
 
 @Injectable({
@@ -9,6 +11,7 @@ import { environment } from '../../../environments/environment';
 })
 export class OrderService {
   public http = inject(HttpClient);
+  private offline = inject(OfflineStore);
   
   public getTopSellingProducts(storeId:string, queryParams: any): Observable<any[]> {
     const params = new URLSearchParams(queryParams).toString();
@@ -42,7 +45,8 @@ export class OrderService {
 
    public getSalesReceipts(storeId:string, queryParams: any): Observable<any> {
     const params = new URLSearchParams(queryParams).toString();
-    return this.http.get<any>(`${environment.apiUrl}/orders/store/${storeId}/receipts/selling?${params}`);
+    // The last list seen for this period stays readable with no connection.
+    return cachedFetch(this.offline, `receipts:${storeId}:${params}`, this.http.get<any>(`${environment.apiUrl}/orders/store/${storeId}/receipts/selling?${params}`));
   }
 
   public deleteOrder(orderId: string): Observable<any> {
@@ -50,7 +54,13 @@ export class OrderService {
   }
 
   public getOrder(orderId: string): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}/orders/${orderId}`);
+    // An order opened once (or warmed in the background from the receipts list) can be opened again offline.
+    return cachedFetch(this.offline, `order:${orderId}`, this.http.get<any>(`${environment.apiUrl}/orders/${orderId}`));
+  }
+
+  /** Quietly fetches orders so they can be opened with no connection. Failures are ignored. */
+  public warmOrders(orderIds: string[]): void {
+    for (const id of orderIds) this.getOrder(id).subscribe({ error: () => undefined });
   }
 
   /** Claim a table's self-order as this staff member's — "open request, first to claim wins." */

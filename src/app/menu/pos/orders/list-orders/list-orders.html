@@ -103,7 +103,7 @@
         }
 
         <!-- Error State -->
-        @if (ordersResource.error() && !ordersResource.isLoading()) {
+        @if (failed() && !ordersResource.isLoading()) {
         <app-no-record icon="error_outline" title="Failed to Load Orders" i18n-title [message]="ordersResource.error()">
             <button mat-flat-button color="primary" (click)="reloadData()">
                 <ng-container i18n>Retry</ng-container>
@@ -112,14 +112,14 @@
         }
 
         <!-- Empty State -->
-        @if (!ordersResource.isLoading() && !ordersResource.error() && filteredOrders().length === 0) {
+        @if (!ordersResource.isLoading() && !failed() && filteredOrders().length === 0) {
         <app-no-record icon="receipt_long" title="No Orders Found" i18n-title
             message="No orders match your current filters. Try adjusting your search criteria." i18n-message>
         </app-no-record>
         }
 
         <!-- Table View Content -->
-        @if (!ordersResource.isLoading() && !ordersResource.error() && filteredOrders().length > 0 && viewMode() === 'table') {
+        @if (!ordersResource.isLoading() && !failed() && filteredOrders().length > 0 && viewMode() === 'table') {
         <div class="overflow-x-auto hidden md:block">
             <table mat-table [dataSource]="filteredOrders()" class="w-full">
                 <!-- Reference Column -->
@@ -129,6 +129,9 @@
                         <div class="flex flex-col">
                             <div class="flex items-center gap-1">
                                 <span class="font-medium">#{{ order.reference }}</span>
+                                @if (order._unsynced) {
+                                <span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-900/40 dark:text-amber-100" data-testid="unsynced-badge">{{ order._failed ? ('Sync failed' | tr) : ('Not synced' | tr) }}</span>
+                                }
                                 @if (order.note) {
                                 <mat-icon
                                     class="!text-base !w-4 !h-4 text-amber-600"
@@ -213,10 +216,12 @@
                                 <mat-icon>visibility</mat-icon>
                                 <span><ng-container i18n>View</ng-container></span>
                             </button>
-                            <button mat-menu-item (click)="printOrder(order)">
+                            @if (!order._unsynced) {
+                              <button mat-menu-item (click)="printOrder(order)">
                                 <mat-icon>print</mat-icon>
                                 <span><ng-container i18n>Print</ng-container></span>
                             </button>
+                            }
                             @if (canCompleteOrder(order)) {
                                 <button mat-menu-item (click)="completeOrder(order)">
                                     <mat-icon>task_alt</mat-icon>
@@ -262,7 +267,7 @@
         }
 
         <!-- Grid View Content -->
-        @if (!ordersResource.isLoading() && !ordersResource.error() && filteredOrders().length > 0 && viewMode() === 'grid') {
+        @if (!ordersResource.isLoading() && !failed() && filteredOrders().length > 0 && viewMode() === 'grid') {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 pb-24 md:pb-4">
         @for (order of filteredOrders(); track order._id) {
         <mat-card appearance="outlined" class="cursor-pointer hover:shadow-lg transition-shadow">
@@ -290,10 +295,12 @@
                             <mat-icon>visibility</mat-icon>
                             <span><ng-container i18n>View</ng-container></span>
                         </button>
-                        <button mat-menu-item (click)="printOrder(order)">
+                        @if (!order._unsynced) {
+                          <button mat-menu-item (click)="printOrder(order)">
                             <mat-icon>print</mat-icon>
                             <span><ng-container i18n>Print</ng-container></span>
                         </button>
+                        }
                         @if (canCompleteOrder(order)) {
                             <button mat-menu-item (click)="completeOrder(order)">
                                 <mat-icon>task_alt</mat-icon>

@@ -6,12 +6,15 @@ import { environment } from '../../../environments/environment';
 import { StoreStore } from '../stores/store.store';
 import { SessionStorageService } from './session-storage.service';
 import { AuthService } from './auth.service';
+import { OfflineStore } from '../offline/offline-store.service';
+import { cachedFetch } from '../offline/cached-fetch';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SubscriptionService {
   private http = inject(HttpClient);
+  private offline = inject(OfflineStore);
   private storeStore = inject(StoreStore);
   private sessionStorage = inject(SessionStorageService);
   private authService = inject(AuthService);
@@ -491,9 +494,12 @@ export class SubscriptionService {
       params = params.set('storeId', storeId);
     }
 
-    return this.http.get<SubscriptionWithModules>(`${this.billingApiUrl}/current`, {
-      params,
-    }).pipe(
+    // Remembered on the device: with no connection the module chooser still knows which modules the store has.
+    return cachedFetch(
+      this.offline,
+      `subscription-modules:${storeId ?? 'none'}`,
+      this.http.get<SubscriptionWithModules>(`${this.billingApiUrl}/current`, { params }),
+    ).pipe(
       tap((data) => this._subscriptionWithModules.set(data)),
     );
   }

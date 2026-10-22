@@ -22,6 +22,19 @@ import {
   PaginatedRoomsResponse
 } from '../models/room.model';
 
+/** The reservation that stops a room being booked for the dates asked. */
+export interface RoomBlocker {
+  roomId: string;
+  reservationId: string;
+  confirmationNumber: string;
+  status: string;
+  checkInDate: string;
+  checkOutDate: string;
+  guestName: string;
+  /** Reserved or confirmed, but its dates are over and nobody checked in: marking it no-show frees the room. */
+  neverArrived?: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -243,6 +256,16 @@ export class RoomsService {
       .pipe(
         map(response => response.data || [])
       );
+  }
+
+  /**
+   * Same as getAvailableRooms, plus which reservation blocks each room that is not free (confirmation number, guest, dates).
+   */
+  getAvailableRoomsWithBlockers(params: { storeId: string; checkInDate: string; checkOutDate: string }): Observable<{ data: any[]; unavailable: RoomBlocker[] }> {
+    const httpParams = new HttpParams().set('checkIn', params.checkInDate).set('checkOut', params.checkOutDate);
+    return this.http
+      .get<{ success: boolean; data: any[]; unavailable?: RoomBlocker[] }>(`${this.baseUrl}/rooms/${params.storeId}/availability`, { params: httpParams })
+      .pipe(map((r) => ({ data: r.data || [], unavailable: r.unavailable || [] })));
   }
 
   /**

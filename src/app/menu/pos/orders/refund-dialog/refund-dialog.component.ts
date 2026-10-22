@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -19,6 +19,7 @@ import {
   Refundable,
   StockAction,
 } from '../../../../shared/models/refund.model';
+import { ValidationErrorsDialogComponent, ValidationErrorsDialogData } from '../../../../shared/components/validation-errors-dialog/validation-errors-dialog.component';
 import { TrPipe } from '../../../../shared/i18n/tr.pipe';
 
 export interface RefundDialogData {
@@ -63,6 +64,7 @@ const money = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
 })
 export class RefundDialogComponent implements OnInit {
   private data = inject<RefundDialogData>(MAT_DIALOG_DATA);
+  private dialog = inject(MatDialog);
   private dialogRef = inject(MatDialogRef<RefundDialogComponent, Refund | undefined>);
   private refundService = inject(RefundService);
   private storeStore = inject(StoreStore);
@@ -114,11 +116,28 @@ export class RefundDialogComponent implements OnInit {
   /** Single methods that can take the whole refund on their own. */
   public singleTenders = computed(() => (this.info()?.tenders ?? []).filter((t) => t.remaining + 0.005 >= this.total() && this.total() > 0));
 
-  public canSubmit = computed(() => {
-    if (this.submitting() || !this.info() || !this.reason() || this.total() <= 0) return false;
-    if (this.mode() === 'amount' && this.total() > this.info()!.remainingAmount + 0.005) return false;
-    return !this.showPin() || this.pin().trim().length > 0;
+  /** "Other" says nothing on its own, and the tax authority wants the real reason on the credit note. */
+  public noteRequired = computed(() => this.reason() === 'OTHER');
+
+  /** What still stops the refund, in plain words; shown in a dialog instead of leaving the button dead. */
+  public problems = computed<{ path: string; title: string; detail: string }[]>(() => {
+    const out: { path: string; title: string; detail: string }[] = [];
+    const info = this.info();
+    if (!info) return out;
+    if (this.total() <= 0) {
+      out.push(this.mode() === 'amount'
+        ? { path: 'amount', title: $localize`Amount`, detail: $localize`Enter how much to give back.` }
+        : { path: 'items', title: $localize`Items`, detail: $localize`Choose at least one item to refund.` });
+    } else if (this.mode() === 'amount' && this.total() > info.remainingAmount + 0.005) {
+      out.push({ path: 'amount', title: $localize`Amount`, detail: $localize`You can give back at most what is left of this sale.` });
+    }
+    if (!this.reason()) out.push({ path: 'reason', title: $localize`Reason`, detail: $localize`Say why this sale is being refunded.` });
+    if (this.noteRequired() && !this.note().trim()) out.push({ path: 'note', title: $localize`Note`, detail: $localize`Describe the reason, since “Other” does not say what happened.` });
+    if (this.showPin() && !this.pin().trim()) out.push({ path: 'pin', title: $localize`Manager PIN`, detail: $localize`A manager must enter their PIN to approve this refund.` });
+    return out;
   });
+
+  public canSubmit = computed(() => !this.submitting() && !!this.info() && this.problems().length === 0);
 
   ngOnInit(): void {
     this.refundService.refundable(this.data.orderId).subscribe({
@@ -164,7 +183,17 @@ export class RefundDialogComponent implements OnInit {
 
   public submit(): void {
     const info = this.info();
-    if (!info || !this.canSubmit()) return;
+    if (!info || this.submitting()) return;
+    if (this.problems().length) {
+      const labels: Record<string, { title: string; detail: string }> = {};
+      for (const p of this.problems()) labels[p.path] = { title: p.title, detail: p.detail };
+      this.dialog.open(ValidationErrorsDialogComponent, {
+        data: { invalidControls: this.problems().map((p) => p.path), labels, title: $localize`Form Validation Errors`, message: $localize`Please fix the following errors before submitting:` } as ValidationErrorsDialogData,
+        width: '500px',
+        maxWidth: '90vw',
+      });
+      return;
+    }
 
     const body: CreateRefundRequest = {
       reasonCode: this.reason() as RefundReasonCode,

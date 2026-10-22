@@ -24,6 +24,7 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
 import { NoRecordComponent } from '../../../../shared/components/no-record/no-record.component';
 import { CartService } from '../../../../shared/services/cart.service';
 import { OrdersService } from '../../../../shared/services/order.service';
+import { OfflineStore } from '../../../../shared/offline/offline-store.service';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { PrintJobService } from '../../../../shared/services/print-job.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
@@ -172,8 +173,28 @@ export class ListOrders {
   });
 
   // Computed filtered orders for client-side search
+  readonly offline = inject(OfflineStore);
+
+  /** Sales saved on this device that the server has not accepted yet. They sit at the top of the first page. */
+  private unsyncedOrders = computed<any[]>(() => {
+    const p = this.filterParams();
+    if (p.skip || p.status || p.payment) return [];
+    const from = p.startDate ? new Date(p.startDate).getTime() : -Infinity;
+    const to = p.endDate ? new Date(p.endDate).getTime() : Infinity;
+    return this.offline.outbox()
+      .filter((e) => e.store === p.storeId && (!p.staff || String(e.order.staff) === String(p.staff)))
+      .filter((e) => { const t = new Date(e.order.createdAt ?? Date.now()).getTime(); return t >= from && t <= to; })
+      .map((e) => ({ ...e.order, _id: e.id, _unsynced: true, _failed: e.status === 'failed', user: e.order.user }));
+  });
+
+  /** Whether the list could not be loaded and there is nothing to show instead (no saved copy, no local sales). */
+  failed = computed(() => !!this.ordersResource.error() && !this.ordersResource.hasValue() && this.unsyncedOrders().length === 0);
+
   filteredOrders = computed(() => {
-    const orders = this.ordersResource.value() || [];
+    // `value()` throws while a request is in error (offline with nothing saved), so only read it when there is one.
+    const server: any[] = this.ordersResource.hasValue() ? (this.ordersResource.value() || []) : [];
+    const waiting = new Set(this.unsyncedOrders().map((o) => String(o._id)));
+    const orders = [...this.unsyncedOrders(), ...server.filter((o) => !waiting.has(String(o._id)))];
     const query = this.searchQuery().toLowerCase();
 
     if (!query) return orders;
@@ -309,6 +330,7 @@ export class ListOrders {
 
   /** Only a still-open order (a table tab, typically) can be checked out from here. */
   public canCompleteOrder(order: Order): boolean {
+    if ((order as any)._unsynced) return false;
     return order.category === OrderCategoryType.PROCESSING;
   }
 
@@ -383,11 +405,13 @@ export class ListOrders {
 
   /** A paid sale that still has something left to refund. */
   public canRefundOrder(order: Order): boolean {
+    if ((order as any)._unsynced) return false;
     return order.paymentStatus === 'Paid' && order.category !== OrderCategoryType.CANCEL && order.refundStatus !== 'Full';
   }
 
   /** An order nobody has paid for can be cancelled; a paid one is refunded instead. */
   public canVoidOrder(order: Order): boolean {
+    if ((order as any)._unsynced) return false;
     return order.paymentStatus !== 'Paid' && order.category !== OrderCategoryType.CANCEL;
   }
 
@@ -433,6 +457,7 @@ export class ListOrders {
 
   /** Completed + paid orders are final — no in-place edits once a sale is closed out. */
   public canEditOrder(order: Order): boolean {
+    if ((order as any)._unsynced) return false;
     return !(order.category === 'Complete' && order.paymentStatus === 'Paid');
   }
 

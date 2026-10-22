@@ -539,7 +539,26 @@ export const OrderStore = signalStore(
       )
     );
 
+    /** A sale just rung up on this device. It is in the list straight away (marked not yet synced) and becomes the selected order. */
+    const addLocalOrder = (order: Order) => {
+      patchState(store, {
+        orders: [...store.orders().filter((o) => o._id !== order._id), { ...order, synced: false }],
+        selectedOrder: { ...order, synced: false },
+      });
+    };
+
+    /** The server accepted a locally saved order: replace the local copy with the server's, keeping the selection if it was this one. */
+    const applySyncedOrder = (order: Order) => {
+      const selected = store.selectedOrder();
+      patchState(store, {
+        orders: store.orders().some((o) => o._id === order._id) ? store.orders().map((o) => (o._id === order._id ? order : o)) : [...store.orders(), order],
+        ...(selected?._id === order._id ? { selectedOrder: order } : {}),
+      });
+    };
+
     return {
+      addLocalOrder,
+      applySyncedOrder,
       getOrders$,
       getOnlineOrders,
       _selectOrder,

@@ -1,3 +1,5 @@
+import { OfflineStore } from '../offline/offline-store.service';
+import { cachedFetch } from '../offline/cached-fetch';
 import {
   patchState,
   signalStore,
@@ -146,8 +148,8 @@ export const ProductsStore = signalStore(
     (
       store,
       // syncService = inject(SyncService),
-      productService = inject(ProductService)
-      // viewService = inject(ViewService),
+      productService = inject(ProductService),
+      offline = inject(OfflineStore)      // viewService = inject(ViewService),
       // eventBusService = inject(EventBusService)
     ) => {
       const getStoreProducts = rxMethod<string>(
@@ -160,7 +162,7 @@ export const ProductsStore = signalStore(
             })
           ),
           switchMap((storeId) =>
-            productService.getStoreProducts(storeId).pipe(
+            cachedFetch(offline, `products:${storeId}`, productService.getStoreProducts(storeId)).pipe(
               tapResponse({
                 next(response) {
                   patchState(store, {
@@ -170,6 +172,7 @@ export const ProductsStore = signalStore(
                   });
                 },
                 error(error) {
+                  // Nothing saved either: the list stays empty. (A saved copy would have been shown instead of an error.)
                   patchState(store, {
                     isLoading: false,
                     error,

@@ -20,7 +20,11 @@ import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.compon
 import { RolesService } from '../../shared/services/roles.service';
 import { TrPipe } from '../../shared/i18n/tr.pipe';
 
+import { FiscalisationService } from '../../shared/services/fiscalisation.service';
+
 interface NavItem {
+  /** Hidden unless the store's tax authority is switched on. */
+  requiresFiscal?: boolean;
   icon: string;
   label: string;
   link: string;
@@ -54,6 +58,7 @@ interface NavSection {
 })
 export class DashboardComponent {
   private router = inject(Router);
+  private fiscalisation = inject(FiscalisationService);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
   private rolesService = inject(RolesService);
@@ -174,6 +179,13 @@ export class DashboardComponent {
           link: './reports/receipts',
           permission: 'manage_home',
         },
+        {
+          icon: 'receipt_long',
+          label: $localize`Fiscal transactions`,
+          link: './reports/fiscal-transactions',
+          permission: 'manage_home',
+          requiresFiscal: true,
+        },
       ],
     },
     {
@@ -253,13 +265,18 @@ export class DashboardComponent {
 
   // Computed signal for filtered nav items based on permissions
   public navItems = computed(() => {
+    // A fiscal entry only appears for a store whose tax authority is switched on, whoever is looking.
+    const fiscalOn = this.fiscalisation.active();
+    const offered = this.allNavItems
+      .map((section) => ({ ...section, children: section.children.filter((item) => !item.requiresFiscal || fiscalOn) }));
+
     if (this.rolesService.isAdmin()) {
       // Admin can see all items
-      return this.allNavItems;
+      return offered;
     }
 
     // Filter sections based on user permissions
-    return this.allNavItems
+    return offered
       .map(section => ({
         ...section,
         children: section.children.filter(item => 

@@ -1,3 +1,10 @@
+import { catchError, of, throwError } from 'rxjs';
+import { FiscalisationService } from '../../../../../shared/services/fiscalisation.service';
+import { FiscalTag, NOT_YET_FISCALIZED_TEXT } from '../../../../../shared/models/fiscal.model';
+import { StoreStore } from '../../../../../shared/stores/store.store';
+import { OfflineStore } from '../../../../../shared/offline/offline-store.service';
+import { OutboxSyncService } from '../../../../../shared/offline/outbox-sync.service';
+import { ConnectivityService } from '../../../../../shared/offline/connectivity.service';
 import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -58,6 +65,11 @@ export class ReceiptsDetailsComponent {
   private dialog = inject(MatDialog);
   private refundService = inject(RefundService);
   private printJobService = inject(PrintJobService);
+  readonly fiscalisation = inject(FiscalisationService);
+  private readonly storeStore = inject(StoreStore);
+  readonly offline = inject(OfflineStore);
+  readonly outbox = inject(OutboxSyncService);
+  readonly net = inject(ConnectivityService);
 
   exporting = signal(false);
   claiming = signal(false);
@@ -184,8 +196,50 @@ export class ReceiptsDetailsComponent {
     params: () => ({
       id: this.route.snapshot.paramMap.get('id')
     }),
-    stream: ({ params }) => this.orderService.getOrder(params.id!)
+    stream: ({ params }) => {
+      const id = params.id!;
+      // A sale that is only on this device (not synced yet) has no copy on the server: show the saved one.
+      const local = this.offline.get(id);
+      if (local) return of(this.localOrder(local.order));
+      return this.orderService.getOrder(id).pipe(
+        catchError((error) => {
+          const saved = this.offline.get(id);
+          return saved ? of(this.localOrder(saved.order)) : throwError(() => error);
+        }),
+      );
+    },
   });
+
+  /** True while this receipt exists only on this device. */
+  readonly isUnsynced = computed(() => !!this.offline.get(this.route.snapshot.paramMap.get('id') ?? ''));
+
+  private localOrder(order: any): any {
+    return { ...order, createdAt: order.createdAt ?? new Date().toISOString(), _unsynced: true };
+  }
+
+  /**
+   * The tax authority's document for this sale (tag and QR), for stores whose authority is switched on. A sale that is
+   * still only on this device has none yet and shows the "Not Yet Fiscalized" tag until it syncs and is issued.
+   */
+  fiscalResource = rxResource({
+    params: () => ({ id: this.route.snapshot.paramMap.get('id'), storeId: this.storeStore.selectedStore()?._id, active: this.fiscalisation.active(), unsynced: this.isUnsynced() }),
+    stream: ({ params }) => (params.active && !params.unsynced && params.id && params.storeId ? this.fiscalisation.orderView(params.storeId, params.id) : of(null)),
+  });
+  readonly fiscalView = computed(() => (this.fiscalResource.hasValue() ? this.fiscalResource.value() : null));
+  /** Whether to show the fiscal panel at all: only when the store's authority is on and the sale is paid. */
+  readonly showFiscal = computed(() => this.fiscalisation.active() && (this.orderResource.value() as any)?.paymentStatus === 'Paid');
+  readonly fiscalTag = computed<FiscalTag>(() => this.fiscalView()?.tag ?? 'NOT_YET_FISCALIZED');
+  readonly notYetFiscalized = NOT_YET_FISCALIZED_TEXT;
+
+  /** The QR (or the tag) for a customer copy. The invoice reference number is never printed here. */
+  private fiscalPrintHtml(): string {
+    if (!this.showFiscal()) return '';
+    const view = this.fiscalView();
+    if (view?.tag === 'FISCALIZED' && view.qrCodePng) {
+      return `<div style="text-align:center;margin:12px 0"><div style="font-weight:bold;font-size:11px">${this.fiscalisation.authorityName()} e-Invoice</div><img alt="e-Invoice QR code" style="width:150px;height:150px;margin-top:6px" src="data:image/png;base64,${view.qrCodePng}"></div>`;
+    }
+    return `<div style="text-align:center;margin:12px 0;font-weight:bold;font-size:12px">${NOT_YET_FISCALIZED_TEXT}</div>`;
+  }
 
   /** The refund tickets raised against this sale (the sale itself is never rewritten). */
   refundsResource = rxResource({
@@ -735,6 +789,8 @@ export class ReceiptsDetailsComponent {
 
         ${commissionSection}
 
+        ${this.fiscalPrintHtml()}
+
         <!-- Footer -->
         <div class="footer">
           <div class="footer-message">THANK YOU FOR YOUR BUSINESS!</div>
@@ -1226,6 +1282,8 @@ export class ReceiptsDetailsComponent {
           <h4>Payment Status: ${order.paymentStatus}</h4>
           <p>Payment Method: ${this.paymentText(order, currency)} | Order Date: ${formatDateTime(order.createdAt)}</p>
         </div>
+
+        ${this.fiscalPrintHtml()}
 
         <!-- Footer -->
         <div class="footer">

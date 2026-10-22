@@ -16,6 +16,21 @@
       }
     </p>
 
+    @if (inf.fiscal; as fiscal) {
+      <div class="mb-3 flex items-start gap-2 rounded-lg bg-surface-container px-3 py-2 text-sm" data-testid="refund-fiscal">
+        <mat-icon class="!h-5 !w-5 !text-xl !leading-none text-on-surface-variant">receipt_long</mat-icon>
+        <div>
+          @if (fiscal.originalInvoiceNumber) {
+            <div><ng-container i18n>The credit note refers to invoice</ng-container>&ngsp;<span class="font-mono">{{ fiscal.originalInvoiceNumber }}</span></div>
+          }
+          <div class="text-on-surface-variant">
+            @if (fiscal.fiscalState === 'FISCALIZED') { <ng-container i18n>Fiscalized</ng-container> } @else if (fiscal.fiscalState === 'NEEDS_ATTENTION') { <ng-container i18n>Needs attention</ng-container> } @else { Not Yet Fiscalized }
+            · {{ fiscal.detail }}
+          </div>
+        </div>
+      </div>
+    }
+
     <mat-button-toggle-group class="mb-3 w-full" [value]="mode()" (change)="mode.set($event.value)" hideSingleSelectionIndicator>
       <mat-button-toggle value="items" class="flex-1"><ng-container i18n>Items</ng-container></mat-button-toggle>
       <mat-button-toggle value="amount" class="flex-1"><ng-container i18n>An amount</ng-container></mat-button-toggle>
@@ -100,7 +115,7 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label><ng-container i18n>Note (optional)</ng-container></mat-label>
+      <mat-label>@if (noteRequired()) { <ng-container i18n>Note (required)</ng-container> } @else { <ng-container i18n>Note (optional)</ng-container> }</mat-label>
       <textarea matInput rows="2" maxlength="500" [ngModel]="note()" (ngModelChange)="note.set($event)"></textarea>
     </mat-form-field>
 
@@ -123,7 +138,7 @@
 <mat-dialog-actions align="end" class="!px-6 !pb-4">
   <button matButton (click)="close()" [disabled]="submitting()"><ng-container i18n>Cancel</ng-container></button>
   @if (info() && !loadError()) {
-    <button matButton="filled" color="primary" [disabled]="!canSubmit()" (click)="submit()">
+    <button matButton="filled" color="primary" [disabled]="submitting()" (click)="submit()" data-testid="refund-submit">
       @if (submitting()) { <mat-spinner diameter="18" class="mr-2 inline-block"></mat-spinner> }
       <ng-container i18n>Refund {{ total() | currency: currency() : 'symbol' : '1.0-2' }}</ng-container>
     </button>

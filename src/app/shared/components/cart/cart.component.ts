@@ -1,3 +1,6 @@
+import { OfflineStore } from '../../offline/offline-store.service';
+import { OutboxSyncService } from '../../offline/outbox-sync.service';
+import { ConnectivityService } from '../../offline/connectivity.service';
 import {
   Component,
   input,
@@ -107,6 +110,9 @@ export class CartComponent implements OnDestroy {
   private readonly cartService = inject(CartService);
   public readonly tableStore = inject(TableStore);
   public readonly guestService = inject(GuestService);
+  private readonly offline = inject(OfflineStore);
+  private readonly outbox = inject(OutboxSyncService);
+  private readonly net = inject(ConnectivityService);
   private readonly subscriptionService = inject(SubscriptionService);
   public readonly saleTypeStore = inject(SalesTypeStore);
   private readonly dialog = inject(MatDialog);
@@ -687,7 +693,7 @@ export class CartComponent implements OnDestroy {
       });
   }
 
-  private processCheckout(payment?: PaymentDialogResult): void {
+  private async processCheckout(payment?: PaymentDialogResult): Promise<void> {
   // Only derive the sale type from tableStore for a brand-new sale. During an
   // edit, editOrder()/onEditOrder() already set the correct sale type before
   // navigating here — tableStore is never populated on that path, so redoing
@@ -796,16 +802,28 @@ export class CartComponent implements OnDestroy {
 
     console.log('Updating order with payload:', updates);
 
-    this.orderStore.updateOrder$({
-      orderId: selectedOrder._id,
-      updates,
-    });
+    const waiting = this.offline.get(selectedOrder._id);
+    if (waiting) {
+      // Not on the server yet: the change goes into the saved copy, which is what will be sent.
+      const merged = { ...waiting.order, ...updates } as any;
+      await this.offline.updateOrder(selectedOrder._id, merged);
+      this.orderStore.addLocalOrder(merged);
+      void this.outbox.drain(true);
+    } else if (this.net.offline()) {
+      this.snackBar.open($localize`You are offline. Changes to an order that is already saved need a connection.`, $localize`Close`, { duration: 5000 });
+      return;
+    } else {
+      this.orderStore.updateOrder$({
+        orderId: selectedOrder._id,
+        updates,
+      });
+    }
     
     this.saleTypeStore.stopEditing();
     this.snackBar.open($localize`Order updated successfully`, $localize`Close`, { duration: 2000 });
   } else {
     // Create new order
-    this.orderStore.syncOrder$({
+    const newOrder = {
       _id: objectId(),
       cart: selectedCart,
       store: selectedStore,
@@ -828,16 +846,23 @@ export class CartComponent implements OnDestroy {
       note: selectedCart.note,
       orderInstruction: selectedCart.note,
       createdAt: new Date(),
-      synced: true,
+      // Not on the server yet: it stays false until the server confirms it (see OutboxSyncService).
+      synced: false,
       category: isPaid
         ? OrderCategoryType.COMPLETE
         : OrderCategoryType.PROCESSING,
       settled: isPaid,
       reference: generateReference(),
       staff: this.selectedUser?._id,
+      // Only for showing the sale on this device before it syncs; the server ignores it.
+      staffName: this.selectedUser?.name,
       storeId: selectedStore._id,
-    });
-    this.snackBar.open($localize`Order Created`, $localize`Print`, { duration: 2000 });
+    } as any;
+    // The sale is saved on this device first, so it is safe even with no connection; the outbox sends it to the server.
+    await this.offline.enqueue(newOrder, selectedStore._id);
+    this.orderStore.addLocalOrder(newOrder);
+    void this.outbox.drain();
+    this.snackBar.open(this.net.online() ? $localize`Order Created` : $localize`Saved on this device. It will sync when you are back online.`, $localize`Print`, { duration: this.net.online() ? 2000 : 5000 });
   }
 
   // Handle table sync after order creation/update

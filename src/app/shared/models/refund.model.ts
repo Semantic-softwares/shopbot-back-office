@@ -78,6 +78,8 @@ export interface Refundable {
   mayVoid: boolean;
   approvalLimit: number | null;
   reasons: RefundReasonCode[];
+  /** The sale's tax-authority document, when the store reports sales. Null otherwise. */
+  fiscal?: { originalInvoiceNumber: string | null; fiscalState: 'FISCALIZED' | 'NOT_YET_FISCALIZED' | 'NEEDS_ATTENTION'; detail: string } | null;
 }
 
 export interface CreateRefundRequest {

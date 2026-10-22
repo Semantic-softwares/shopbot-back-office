@@ -1,3 +1,5 @@
+import { OfflineStore } from '../offline/offline-store.service';
+import { cachedFetch } from '../offline/cached-fetch';
 import {
   patchState,
   signalStore,
@@ -94,8 +96,8 @@ export const TableStore = signalStore(
   withMethods(
     (
       store,
-      tableService = inject(TableService)
-    ) => {
+      tableService = inject(TableService),
+      offline = inject(OfflineStore)    ) => {
       function selectTable(tableId: string): void {
         const selected =
           store.tables().find((table) => table._id === tableId) || null;
@@ -185,7 +187,7 @@ export const TableStore = signalStore(
             })
           ),
           switchMap((storeId) =>
-            tableService.getStoreTables(storeId).pipe(
+            cachedFetch(offline, `tables:${storeId}`, tableService.getStoreTables(storeId)).pipe(
               tapResponse({
                 next(tables) {
                   patchState(store, {

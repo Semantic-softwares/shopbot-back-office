@@ -4,10 +4,13 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CreateRefundRequest, Refund, Refundable } from '../models/refund.model';
 import { Order } from '../models/order.model';
+import { OfflineStore } from '../offline/offline-store.service';
+import { cachedFetch } from '../offline/cached-fetch';
 
 @Injectable({ providedIn: 'root' })
 export class RefundService {
   private http = inject(HttpClient);
+  private offline = inject(OfflineStore);
   private base = environment.apiUrl;
 
   /** What can still be refunded on this sale, and whether the signed-in person may do it alone. */
@@ -20,7 +23,7 @@ export class RefundService {
   }
 
   public listForOrder(orderId: string): Observable<Refund[]> {
-    return this.http.get<Refund[]>(`${this.base}/orders/${orderId}/refunds`);
+    return cachedFetch(this.offline, `order-refunds:${orderId}`, this.http.get<Refund[]>(`${this.base}/orders/${orderId}/refunds`));
   }
 
   public listForStore(
@@ -29,9 +32,10 @@ export class RefundService {
   ): Observable<{ data: Refund[]; total: number; page: number; limit: number }> {
     let params = new HttpParams();
     for (const [k, v] of Object.entries(opts)) if (v !== undefined && v !== null) params = params.set(k, String(v));
-    return this.http.get<{ data: Refund[]; total: number; page: number; limit: number }>(
-      `${this.base}/refunds/store/${storeId}`,
-      { params },
+    return cachedFetch(
+      this.offline,
+      `store-refunds:${storeId}:${params.toString()}`,
+      this.http.get<{ data: Refund[]; total: number; page: number; limit: number }>(`${this.base}/refunds/store/${storeId}`, { params }),
     );
   }
 

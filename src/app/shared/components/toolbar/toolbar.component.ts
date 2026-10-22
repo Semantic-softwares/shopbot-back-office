@@ -1,3 +1,4 @@
+import { SyncStatusComponent } from '../sync-status/sync-status.component';
 import { PwaUpdateService } from '../../services/pwa-update.service';
 import { Component, inject, input, output, signal, computed, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -26,7 +27,7 @@ import { TrPipe } from '../../i18n/tr.pipe';
 @Component({
   selector: 'app-toolbar',
   standalone: true,
-  imports: [TrPipe, 
+  imports: [TrPipe, SyncStatusComponent, 
     CommonModule,
     MatToolbarModule,
     MatIconModule,

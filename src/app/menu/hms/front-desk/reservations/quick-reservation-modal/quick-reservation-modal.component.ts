@@ -15,11 +15,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatChipsModule } from '@angular/material/chips';
 import { Router } from '@angular/router';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
-import { RoomsService } from '../../../../../shared/services/rooms.service';
+import { RoomsService, RoomBlocker } from '../../../../../shared/services/rooms.service';
 import { RateInventoryService, StayRates, AvailabilityCheck, RateInventoryRecord, RatePlan } from '../../../../../shared/services/rate-inventory.service';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { RolesService } from '../../../../../shared/services/roles.service';
-import { of, forkJoin, map, switchMap, catchError } from 'rxjs';
+import { of, forkJoin, map, switchMap, catchError, tap } from 'rxjs';
 
 interface AvailableRoom {
   id?: string;
@@ -281,6 +281,7 @@ export class QuickReservationModalComponent implements OnInit {
     const allRooms = (this.allRoomsResource.value() || []) as any[];
     const checking = this.checkingAvailability();
     const failed = this.availabilityFailed();
+    const rangeOk = this.rangeValid();
     const availableRooms = (this.availableRoomsResource.hasValue() ? this.availableRoomsResource.value() : this.lastAvailable()) || [];
     const availableIds = new Set(availableRooms.map((r: any) => r._id || r.id));
     const selectedType = this.roomTypeValue();
@@ -311,15 +312,20 @@ export class QuickReservationModalComponent implements OnInit {
       const id = room._id || room.id;
       const inAvailableList = availableIds.has(id);
       const isDirty = room.housekeepingStatus === 'dirty' && !this.isBackdated(); // today's cleaning state means nothing for a past stay
-      const isBookable = !checking && !failed && inAvailableList && !isDirty;
+      const isBookable = rangeOk && !checking && !failed && inAvailableList && !isDirty;
 
       let unavailableReason: string | null = null;
-      if (checking) {
+      if (!rangeOk) {
+        unavailableReason = $localize`Choose the dates first`;
+      } else if (checking) {
         unavailableReason = $localize`Checking…`;
       } else if (failed) {
         unavailableReason = $localize`Could not check`;
       } else if (!inAvailableList) {
-        if (room.status === 'occupied') unavailableReason = $localize`Occupied`;
+        const blocker = this.blockers().get(String(id));
+        // A reservation in the way is the real reason, and it beats the room's state today ("Occupied" says nothing about another night).
+        if (blocker) unavailableReason = this.describeBlocker(blocker);
+        else if (room.status === 'occupied') unavailableReason = $localize`Occupied`;
         else if (room.status === 'maintenance') unavailableReason = $localize`Maintenance`;
         else if (room.status === 'out_of_order') unavailableReason = $localize`Out of Order`;
         else if (room.status === 'cleaning') unavailableReason = $localize`Cleaning`;
@@ -652,19 +658,43 @@ export class QuickReservationModalComponent implements OnInit {
   });
 
 
+  /** Both dates chosen and the check-out after the check-in. Until then nothing is asked of the server. */
+  public readonly rangeValid = computed(() => {
+    const a = this.checkIn(), b = this.checkOut();
+    if (!a || !b) return false;
+    const start = new Date(a), end = new Date(b);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return false;
+    start.setHours(0, 0, 0, 0); end.setHours(0, 0, 0, 0);
+    return end > start;
+  });
+
   private getAvailableRooms(params: { checkIn: Date; checkOut: Date; storeId: string }) {
+    // A half-picked range (only a check-in so far) used to be sent as 1970-01-01, which answered for the wrong nights.
+    if (!params.checkIn || !params.checkOut || !params.storeId) return of<AvailableRoom[]>([]);
     const checkInDate = this.formatLocalDate(params.checkIn);
     const checkOutDate = this.formatLocalDate(params.checkOut);
-    
-    if (!checkInDate || !checkOutDate || !params.storeId) {
-      return of<AvailableRoom[]>([]);
-    }
+    if (checkOutDate <= checkInDate) return of<AvailableRoom[]>([]);
 
-    return this.roomsService.getAvailableRooms({
+    return this.roomsService.getAvailableRoomsWithBlockers({
       storeId: params.storeId,
       checkInDate,
       checkOutDate,
-    });
+    }).pipe(
+      tap((r) => this.blockers.set(new Map(r.unavailable.map((b) => [b.roomId, b])))),
+      map((r) => r.data as AvailableRoom[]),
+    );
+  }
+
+  /** The reservation in the way of each room that is not free for the chosen dates. */
+  private readonly blockers = signal<Map<string, RoomBlocker>>(new Map());
+
+  private describeBlocker(b: RoomBlocker): string {
+    const status = b.status === 'checked_in' ? $localize`checked in` : b.status === 'confirmed' ? $localize`confirmed` : b.status === 'reserved' ? $localize`reserved` : b.status === 'checked_out' ? $localize`checked out` : b.status;
+    const day = (d: string) => new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', timeZone: 'UTC' });
+    const who = b.guestName ? `${b.guestName} · ` : '';
+    const base = $localize`Booked — ${b.confirmationNumber}, ${who}${status}, ${day(b.checkInDate)} to ${day(b.checkOutDate)}`;
+    // A booking that never arrived keeps the room blocked until someone marks it no-show: say so.
+    return b.neverArrived ? `${base} · ${$localize`never arrived, mark it no-show to free the room`}` : base;
   }
 
   private minDateValidator(control: any) {

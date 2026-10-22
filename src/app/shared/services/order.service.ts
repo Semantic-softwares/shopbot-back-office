@@ -1,8 +1,12 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { OfflineStore } from '../offline/offline-store.service';
+import { cachedFetch } from '../offline/cached-fetch';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Order, StatusParams } from '../models';
+
+export interface SyncResult { syncedOrders: Order[]; failed: { id: string; error: string }[] }
 
 @Injectable({providedIn: 'root'})
 export class OrdersService {
@@ -12,6 +16,8 @@ export class OrdersService {
   private orders$ = new BehaviorSubject<any>(null);
   selectedOrders = this.orders$.asObservable();
   
+  private offline = inject(OfflineStore);
+
   constructor(private _httpClient: HttpClient) {}
 
   getOrders(query: any): Observable<any[]> {
@@ -71,11 +77,25 @@ export class OrdersService {
     if (params.endDate) queryParams.append('endDate', params.endDate);
     if (params.salesChannel) queryParams.append('salesChannel', params.salesChannel);
     
-    return this._httpClient.get<Order[]>(`${this.hostServer}/orders/store/${storeId}/orders?${queryParams.toString()}`);
+    // The last list seen stays readable with no connection.
+    return cachedFetch(this.offline, `store-orders:${storeId}:${queryParams.toString()}`, this._httpClient.get<Order[]>(`${this.hostServer}/orders/store/${storeId}/orders?${queryParams.toString()}`));
+  }
+
+  /**
+   * Sends orders to the server. The server answers `{ syncedOrders, failed }`: the orders it saved and the ones it could not.
+   * (An older server answered with the saved orders only, so that shape is understood too.)
+   */
+  public syncOrdersDetailed(orders: Order[]): Observable<SyncResult> {
+    return this._httpClient.post<any>(`${this.hostServer}/orders/sync`, { orders }).pipe(
+      map((res) => ({
+        syncedOrders: (Array.isArray(res) ? res : res?.syncedOrders ?? []) as Order[],
+        failed: (Array.isArray(res?.failed) ? res.failed : []) as { id: string; error: string }[],
+      })),
+    );
   }
 
   public syncOrders(orders: Order[]): Observable<Order[]> {
-    return this._httpClient.post<Order[]>(`${this.hostServer}/orders/sync`, { orders });
+    return this.syncOrdersDetailed(orders).pipe(map((r) => r.syncedOrders));
   }
 
   public createOrder(order: Partial<Order>): Observable<Order> {
