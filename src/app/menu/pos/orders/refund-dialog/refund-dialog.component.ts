@@ -117,7 +117,7 @@ export class RefundDialogComponent implements OnInit {
   public singleTenders = computed(() => (this.info()?.tenders ?? []).filter((t) => t.remaining + 0.005 >= this.total() && this.total() > 0));
 
   /** "Other" says nothing on its own, and the tax authority wants the real reason on the credit note. */
-  public noteRequired = computed(() => this.reason() === 'OTHER');
+  public noteRequired = computed(() => this.reason() === 'OTHER' && this.info()?.noteRequiredForOther === true);
 
   /** What still stops the refund, in plain words; shown in a dialog instead of leaving the button dead. */
   public problems = computed<{ path: string; title: string; detail: string }[]>(() => {

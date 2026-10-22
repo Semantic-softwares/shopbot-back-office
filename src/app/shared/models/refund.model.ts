@@ -79,6 +79,8 @@ export interface Refundable {
   approvalLimit: number | null;
   reasons: RefundReasonCode[];
   /** The sale's tax-authority document, when the store reports sales. Null otherwise. */
+  /** True only when the store's sales are reported to a tax authority: "Other" then needs a note. */
+  noteRequiredForOther?: boolean;
   fiscal?: { originalInvoiceNumber: string | null; fiscalState: 'FISCALIZED' | 'NOT_YET_FISCALIZED' | 'NEEDS_ATTENTION'; detail: string } | null;
 }
 
