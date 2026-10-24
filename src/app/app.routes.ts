@@ -5,6 +5,7 @@ import { roleResolver } from './shared/resolvers/role.resolver';
 import { subscriptionResolver } from './shared/resolvers/subscription.resolver';
 import { subscriptionActiveGuard } from './shared/guards/subscription-active.guard';
 import { storeSelectedGuard } from './shared/guards/store-selected.guard';
+import { platformAdminGuard } from './shared/guards/platform-admin.guard';
 
 export const routes: Routes = [
     {
@@ -63,11 +64,30 @@ export const routes: Routes = [
             }
         ]
     },
+    // A locked account lands here (outside the app shell): pay, check again, or sign out.
+    {
+        path: 'account-locked',
+        loadComponent: () => import('./pages/account-locked/account-locked.page').then(m => m.AccountLockedPage),
+        canActivate: [authGuard, storeSelectedGuard],
+    },
+    // Paystack returns here after a payment.
+    {
+        path: 'billing-callback',
+        loadComponent: () => import('./pages/billing/owner/billing-callback.page').then(m => m.BillingCallbackPage),
+        canActivate: [authGuard],
+    },
     {
         path: 'menu',
         loadChildren: () => import('./menu/menu.route').then(m => m.MENU_ROUTES),
         canActivate: [authGuard, storeSelectedGuard, subscriptionActiveGuard],
         resolve: { role: roleResolver, subscription: subscriptionResolver }
+    },
+    // The platform super-admin area (all stores' subscriptions, invoices, plans). Only platform admins get past the guard; the server
+    // re-checks on every call. It has no store context and no subscription guard of its own.
+    {
+        path: 'super-admin',
+        loadChildren: () => import('./menu/super-admin/super-admin.routes').then(m => m.SUPER_ADMIN_ROUTES),
+        canActivate: [authGuard, platformAdminGuard],
     },
     // The travel-partner booking portal: its own sign-in and session, separate from staff. Public sign-in pages; the rest is
     // behind partnerPortalGuard inside the route file.

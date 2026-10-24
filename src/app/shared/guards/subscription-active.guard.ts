@@ -1,10 +1,11 @@
 import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { SubscriptionService } from '../services/subscription.service';
-import { map, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { map, catchError, switchMap } from 'rxjs/operators';
+import { Observable, from, of } from 'rxjs';
+import { BillingStateService } from '../billing/billing-state.service';
 
-export const subscriptionActiveGuard: CanActivateFn = (route, state) => {
+const legacyGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const subscriptionService = inject(SubscriptionService);
 
@@ -54,4 +55,23 @@ function evaluateSubscription(subscription: any, router: Router): boolean {
 
   // Allow trial and active subscriptions
   return subscription.status === 'TRIAL' || subscription.status === 'ACTIVE';
+}
+
+/**
+ * Stores billed by the platform are checked against their live subscription (a locked account goes to the paywall, which can take a
+ * payment). Any other store, or a failure to find out, falls back to the old check, which itself lets people through on a server error.
+ */
+export const subscriptionActiveGuard: CanActivateFn = (route, state) => {
+  const router = inject(Router);
+  const billing = inject(BillingStateService);
+  return from(billing.load().then((a) => a, () => null)).pipe(
+    switchMap((account) => {
+      if (account?.subscription.billingVersion === 2) return of(account.subscription.blocked ? router.createUrlTree(['/account-locked']) : true);
+      return toObservable(legacyGuard(route, state));
+    }),
+  );
+};
+
+function toObservable(result: ReturnType<CanActivateFn>) {
+  return result instanceof Observable ? result : from(Promise.resolve(result as any));
 }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { BillingStateService } from '../../billing/billing-state.service';
 import { SubscriptionService } from '../../services/subscription.service';
 
 @Component({
@@ -14,6 +15,7 @@ import { SubscriptionService } from '../../services/subscription.service';
 })
 export class SubscriptionExpiringBannerComponent {
   private router = inject(Router);
+  private billing = inject(BillingStateService);
   private subscriptionService = inject(SubscriptionService);
 
   private dismissedBanner = signal(false);
@@ -36,7 +38,7 @@ export class SubscriptionExpiringBannerComponent {
   });
 
   showBanner = computed(() => {
-    return !this.dismissedBanner() && this.daysUntilRenewal() !== null;
+    return !this.dismissedBanner() && !this.billing.isPlatformBilled() && this.daysUntilRenewal() !== null;
   });
 
   bannerClass = computed(() => {

@@ -1,8 +1,11 @@
 import { Component, inject, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { BillingStateService } from '../../billing/billing-state.service';
 import { FeatureGatingService } from '../../services/feature-gating.service';
 
 @Component({
@@ -14,6 +17,7 @@ import { FeatureGatingService } from '../../services/feature-gating.service';
 })
 export class TrialWarningBannerComponent {
   private router = inject(Router);
+  private billing = inject(BillingStateService);
   private featureGatingService = inject(FeatureGatingService);
 
   private dismissedBanner = signal(false);
@@ -21,8 +25,11 @@ export class TrialWarningBannerComponent {
   isTrialActive = this.featureGatingService.isTrialActive;
   trialDaysRemaining = this.featureGatingService.trialDaysRemaining;
 
+  /** The platform admin area is about other stores' subscriptions, so this store's trial notice stays out of it. */
+  private readonly url = toSignal(this.router.events.pipe(filter((e) => e instanceof NavigationEnd), map(() => this.router.url)), { initialValue: this.router.url });
+
   showBanner = computed(() => {
-    return !this.dismissedBanner() && this.isTrialActive();
+    return !this.dismissedBanner() && this.isTrialActive() && !this.url().startsWith('/super-admin') && !this.billing.isPlatformBilled();
   });
 
   bannerClass = computed(() => {

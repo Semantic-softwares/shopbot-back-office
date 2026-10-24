@@ -22,3 +22,4 @@ export * from './estate.model';
 export * from './landing-page.model';
 export * from './mra-einvoicing.model';
 export * from './fiscal.model';
+export * from './platform-billing.model';

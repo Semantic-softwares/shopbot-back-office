@@ -1,5 +1,8 @@
 import { SyncStatusComponent } from '../sync-status/sync-status.component';
 import { PwaUpdateService } from '../../services/pwa-update.service';
+import { catchError, of } from 'rxjs';
+import { RouterLink } from '@angular/router';
+import { PlatformBillingService } from '../../services/platform-billing.service';
 import { Component, inject, input, output, signal, computed, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -27,7 +30,7 @@ import { TrPipe } from '../../i18n/tr.pipe';
 @Component({
   selector: 'app-toolbar',
   standalone: true,
-  imports: [TrPipe, SyncStatusComponent, 
+  imports: [TrPipe, SyncStatusComponent, RouterLink, 
     CommonModule,
     MatToolbarModule,
     MatIconModule,
@@ -54,6 +57,8 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   private storeStore = inject(StoreStore);
   private rolesService = inject(RolesService);
   private snackBar = inject(MatSnackBar);
+  /** Only a hint for showing the menu entry; the server checks the admin list again on every call. */
+  protected readonly isPlatformAdmin = toSignal(inject(PlatformBillingService).isPlatformAdmin().pipe(catchError(() => of(false))), { initialValue: false });
 
   private socketSub?: Subscription;
 

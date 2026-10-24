@@ -143,6 +143,12 @@
             <mat-icon>new_releases</mat-icon>
             <span><ng-container i18n>What's new</ng-container></span>
           </button>
+          @if (isPlatformAdmin()) {
+            <a mat-menu-item routerLink="/super-admin" data-testid="menu-super-admin">
+              <mat-icon>admin_panel_settings</mat-icon>
+              <span><ng-container i18n>Super admin</ng-container></span>
+            </a>
+          }
           <mat-divider></mat-divider>
           <button mat-menu-item (click)="logout()">
             <mat-icon>logout</mat-icon>

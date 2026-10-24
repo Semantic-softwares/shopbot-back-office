@@ -25,17 +25,13 @@ import { StoreService } from '../../shared/services/store.service';
 import { UserService } from '../../shared/services/user.service';
 import { SubscriptionService } from '../../shared/services/subscription.service';
 import { User } from '../../shared/models';
-import { ModuleKey, BillingCycle } from '../../shared/models';
+import { ModuleKey } from '../../shared/models';
 
 interface ModuleCardDef {
-  id: 'PMS' | 'EMS' | 'POS_ERP';
+  id: ModuleKey;
   label: string;
-  shortLabel: string;
   description: string;
   icon: string;
-  includedModules: ModuleKey[];
-  monthly: number;
-  yearly: number;
 }
 
 @Component({
@@ -76,116 +72,26 @@ export class SignupComponent {
 
   // ── Module selection ──────────────────────────────────────────────────────
 
-  private readonly moduleCards: ModuleCardDef[] = [
-    {
-      id: 'PMS',
-      label: $localize`Property Management`,
-      shortLabel: 'PMS',
-      description: $localize`Hotel reservations, room management, housekeeping, guest tracking`,
-      icon: 'hotel',
-      includedModules: ['PMS'],
-      monthly: 100,
-      yearly: 1000,
-    },
-    {
-      id: 'EMS',
-      label: $localize`Estate Management`,
-      shortLabel: 'EMS',
-      description: $localize`Lease management, tenants, property invoicing, unit tracking`,
-      icon: 'apartment',
-      includedModules: ['EMS'],
-      monthly: 100,
-      yearly: 1000,
-    },
-    {
-      id: 'POS_ERP',
-      label: $localize`POS + ERP Bundle`,
-      shortLabel: 'POS / ERP',
-      description: $localize`Add point of sale, stock management, suppliers, receipts, and inventory workflows to your PMS setup.`,
-      icon: 'inventory_2',
-      includedModules: ['POS', 'ERP'],
-      monthly: 0,
-      yearly: 0,
-    },
+  /** Every module is included in every plan, so the choice here is only what to switch on first; it can change at any time. */
+  readonly availableModules: ModuleCardDef[] = [
+    { id: 'PMS', label: $localize`Hotel (HMS)`, description: $localize`Reservations, rooms, housekeeping and guest tracking`, icon: 'hotel' },
+    { id: 'POS', label: $localize`Point of sale`, description: $localize`Sell at the counter, restaurant or bar, online or offline`, icon: 'point_of_sale' },
+    { id: 'ERP', label: $localize`ERP and inventory`, description: $localize`Stock, suppliers, purchasing, receipts and reports`, icon: 'inventory_2' },
+    { id: 'EMS', label: $localize`Estates (EMS)`, description: $localize`Leases, tenants, units and property invoicing`, icon: 'apartment' },
   ];
 
-  readonly selectedModules = signal<ModuleKey[]>([]);
-  readonly billingCycle = signal<BillingCycle>('MONTHLY');
-  readonly hasPmsSelected = computed(() => this.selectedModules().includes('PMS'));
-
-  readonly availableModules = computed(() =>
-    this.moduleCards.filter((card) => card.id !== 'POS_ERP' || this.hasPmsSelected()),
-  );
-
-  readonly monthlyTotal = computed(() =>
-    this.moduleCards.reduce((sum, card) => {
-      return sum + (this.isModuleCardSelected(card) ? card.monthly : 0);
-    }, 0),
-  );
-
-  readonly yearlyTotal = computed(() =>
-    this.moduleCards.reduce((sum, card) => {
-      return sum + (this.isModuleCardSelected(card) ? card.yearly : 0);
-    }, 0),
-  );
-
-  readonly displayTotal = computed(() =>
-    this.billingCycle() === 'MONTHLY' ? this.monthlyTotal() : this.yearlyTotal(),
-  );
-
-  readonly yearlySaving = computed(() => this.monthlyTotal() * 12 - this.yearlyTotal());
-
+  readonly selectedModules = signal<ModuleKey[]>(['PMS', 'POS', 'ERP']);
   readonly selectedModuleCountLabel = computed(() => {
-    const count = this.moduleCards.filter((card) => this.isModuleCardSelected(card)).length;
-    return `${count} module${count === 1 ? '' : 's'} selected`;
+    const count = this.selectedModules().length;
+    return count === 1 ? $localize`1 module selected` : $localize`${count} modules selected`;
   });
 
   isModuleSelected(key: ModuleKey): boolean {
     return this.selectedModules().includes(key);
   }
 
-  isModuleCardSelected(card: ModuleCardDef): boolean {
-    const selected = this.selectedModules();
-    return card.includedModules.every((moduleKey) => selected.includes(moduleKey));
-  }
-
-  isRecommendedCard(card: ModuleCardDef): boolean {
-    return card.id === 'POS_ERP' && this.hasPmsSelected();
-  }
-
-  toggleModule(card: ModuleCardDef): void {
-    const current = this.selectedModules();
-
-    if (card.id === 'PMS') {
-      if (current.includes('PMS')) {
-        this.selectedModules.set(
-          current.filter((key) => key !== 'PMS' && key !== 'POS' && key !== 'ERP'),
-        );
-        return;
-      }
-
-      this.selectedModules.set([...current, 'PMS']);
-      return;
-    }
-
-    const isSelected = card.includedModules.every((moduleKey) => current.includes(moduleKey));
-    if (isSelected) {
-      this.selectedModules.set(
-        current.filter((key) => !card.includedModules.includes(key)),
-      );
-    } else {
-      const next = [...current];
-      for (const moduleKey of card.includedModules) {
-        if (!next.includes(moduleKey)) {
-          next.push(moduleKey);
-        }
-      }
-      this.selectedModules.set(next);
-    }
-  }
-
-  setBillingCycle(cycle: BillingCycle): void {
-    this.billingCycle.set(cycle);
+  toggleModule(key: ModuleKey): void {
+    this.selectedModules.update((cur) => (cur.includes(key) ? cur.filter((k) => k !== key) : [...cur, key]));
   }
 
   // ── Static data ───────────────────────────────────────────────────────────
@@ -382,7 +288,7 @@ export class SignupComponent {
               storeId: store._id,
               billingEmail: this.storeForm.get('billingEmail')?.value ?? '',
               modules: this.selectedModules(),
-              billingCycle: this.billingCycle(),
+              billingCycle: 'MONTHLY',
             })
             .pipe(map(() => store)),
         ),

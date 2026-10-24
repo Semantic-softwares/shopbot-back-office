@@ -2,6 +2,7 @@ import { Component, OnInit, effect, inject, ChangeDetectionStrategy } from '@ang
 import { RouterOutlet } from '@angular/router';
 import { NgProgressbar } from 'ngx-progressbar';
 import { NgProgressRouter } from 'ngx-progressbar/router';
+import { SubscriptionBannerComponent } from './shared/components/subscription-banner/subscription-banner.component';
 import { TrialWarningBannerComponent } from './shared/components/trial-warning-banner/trial-warning-banner.component';
 import { SubscriptionExpiringBannerComponent } from './shared/components/subscription-expiring-banner/subscription-expiring-banner.component';
 import { PwaInstallPromptComponent } from './shared/components/pwa-install-prompt/pwa-install-prompt.component';
@@ -15,7 +16,7 @@ import { ThemeService } from './shared/services/theme.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NgProgressbar, NgProgressRouter, TrialWarningBannerComponent, SubscriptionExpiringBannerComponent, PwaInstallPromptComponent, IncomingTableOrderAlertComponent],
+  imports: [RouterOutlet, NgProgressbar, NgProgressRouter, TrialWarningBannerComponent, SubscriptionBannerComponent, SubscriptionExpiringBannerComponent, PwaInstallPromptComponent, IncomingTableOrderAlertComponent],
   templateUrl: './app.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.component.scss'

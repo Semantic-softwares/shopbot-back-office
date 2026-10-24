@@ -28,6 +28,8 @@ export class OutboxSyncService {
   readonly draining = signal(false);
   /** The server refused the saved sign-in: the orders wait until the person signs in again. */
   readonly needsSignIn = signal(false);
+  /** The server refused the queue because the subscription is locked. The orders wait; they are not lost. */
+  readonly accountLocked = signal(false);
 
   constructor() {
     this.net.watch(() => this.store.waiting() > 0);
@@ -79,6 +81,7 @@ export class OutboxSyncService {
       const saved = result.syncedOrders.find((o) => String(o._id) === entry.id);
       if (saved) {
         this.needsSignIn.set(false);
+        this.accountLocked.set(false);
         this.orderStore.applySyncedOrder(saved);
         await this.store.remove(entry.id);
         return true;
@@ -89,6 +92,12 @@ export class OutboxSyncService {
     } catch (error) {
       const status = error instanceof HttpErrorResponse ? error.status : 0;
       const message = error instanceof HttpErrorResponse ? (error.error?.message ?? error.message) : String(error);
+      if (status === 403 && error instanceof HttpErrorResponse && error.error?.errorCode === 'SUBSCRIPTION_EXPIRED') {
+        // The account is locked, not signed out. The sale stays queued and goes through as soon as the subscription is paid.
+        this.accountLocked.set(true);
+        await this.store.patch(entry.id, { status: 'pending', lastError: 'Account locked. It will send once the subscription is paid.', nextTryAt: Date.now() + 60_000, attempts: entry.attempts });
+        return false;
+      }
       if (status === 401 || status === 403) {
         this.needsSignIn.set(true);
         await this.store.patch(entry.id, { status: 'pending', lastError: 'Sign in again to send this order.', nextTryAt: 0, attempts: entry.attempts });
