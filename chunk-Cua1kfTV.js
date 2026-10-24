@@ -1,1 +1,0 @@
-import{c as z}from"./chunk-RykAvsdd.js";var e;z(()=>{e=[{path:``,loadComponent:()=>import(`./chunk-DUqul9EF.js`).then(o=>o.InventoryCalendarComponent)}]})();export{e as INVENTORY_ROUTES};
