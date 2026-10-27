@@ -1,1 +1,0 @@
-import{c as z}from"./chunk-RykAvsdd.js";var p;z(()=>{p=[{path:``,loadComponent:()=>import(`./chunk-BhHT5e1l.js`).then(o=>o.Tables)}]})();export{p as TABLES_ROUTES};

@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";var n;z(()=>{n=[{path:``,loadComponent:()=>import(`./chunk-CeK7cAfD.js`).then(o=>o.StorefrontShellComponent)},{path:`t/:qrToken`,loadComponent:()=>import(`./chunk-CeK7cAfD.js`).then(o=>o.StorefrontShellComponent)}]})();export{n as STOREFRONT_ROUTES};
