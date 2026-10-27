@@ -128,12 +128,10 @@
             <span><ng-container i18n>Menu</ng-container></span>
           </button>
 
-          @if (hasMultipleStores()) {
-            <button mat-menu-item [matMenuTriggerFor]="storeMenu" [disabled]="switchingStore()">
-              <mat-icon>storefront</mat-icon>
-              <span>@if (selectedStore()?.name) {<ng-container>{{ selectedStore()?.name }}</ng-container>} @else {<ng-container i18n>Select company</ng-container>}</span>
-            </button>
-          }
+          <button mat-menu-item [matMenuTriggerFor]="storeMenu" [disabled]="switchingStore()" data-testid="menu-stores">
+            <mat-icon>storefront</mat-icon>
+            <span>@if (selectedStore()?.name) {<ng-container>{{ selectedStore()?.name }}</ng-container>} @else {<ng-container i18n>Select company</ng-container>}</span>
+          </button>
 
           <!-- <button mat-menu-item (click)="goToSettings()">
             <mat-icon>settings</mat-icon>
@@ -162,11 +160,17 @@
               mat-menu-item
               (click)="switchStore(store)"
               [class.bg-blue-50]="store._id === selectedStore()?._id"
+              [attr.data-testid]="'switch-store-' + store._id"
             >
               <mat-icon>{{ store._id === selectedStore()?._id ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
               <span>{{ store.name }}</span>
             </button>
           }
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="openAddStore()" data-testid="add-store">
+            <mat-icon>add_business</mat-icon>
+            <span><ng-container i18n>Add a new store</ng-container></span>
+          </button>
         </mat-menu>
       </div>
     </mat-toolbar>

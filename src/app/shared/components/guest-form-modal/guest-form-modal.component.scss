@@ -1,0 +1,8 @@
+.guest-actions { gap: 8px; padding: 12px 24px 20px; border-top: 1px solid var(--mat-sys-outline-variant); }
+.guest-actions__save { min-width: 148px; }
+.guest-actions__save .guest-actions__spinner { margin-right: 8px; }
+:host ::ng-deep .guest-actions__spinner circle { stroke: currentColor; }
+@media (max-width: 480px) {
+  .guest-actions { flex-direction: column-reverse; align-items: stretch; padding: 12px 16px 16px; }
+  .guest-actions button { width: 100%; }
+}

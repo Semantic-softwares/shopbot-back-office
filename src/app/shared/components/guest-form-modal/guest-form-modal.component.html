@@ -16,7 +16,7 @@
     }
   }
   
-  <mat-dialog-content class="max-h-[70vh] overflow-y-auto">
+  <mat-dialog-content class="max-h-[70vh] overflow-y-auto !pt-3">
     <!-- Guest Search Section -->
     @if (!isEditing()) {
       <div class="mb-6 pb-6 border-b border-gray-200">
@@ -45,7 +45,7 @@
                 placeholder="Enter first name" i18n-placeholder
                 required
               />
-              @if (guestForm.get('firstName')?.hasError('required') && guestForm.get('firstName')?.touched) {
+              @if ((guestForm.get('firstName')?.hasError('required') || guestForm.get('firstName')?.hasError('blank')) && guestForm.get('firstName')?.touched) {
                 <mat-error><ng-container i18n>First name is required</ng-container></mat-error>
               }
               @if (guestForm.get('firstName')?.hasError('minlength') && guestForm.get('firstName')?.touched) {
@@ -62,7 +62,7 @@
                 placeholder="Enter last name" i18n-placeholder
                 required
               />
-              @if (guestForm.get('lastName')?.hasError('required') && guestForm.get('lastName')?.touched) {
+              @if ((guestForm.get('lastName')?.hasError('required') || guestForm.get('lastName')?.hasError('blank')) && guestForm.get('lastName')?.touched) {
                 <mat-error><ng-container i18n>Last name is required</ng-container></mat-error>
               }
               @if (guestForm.get('lastName')?.hasError('minlength') && guestForm.get('lastName')?.touched) {
@@ -77,11 +77,17 @@
                 matInput 
                 formControlName="dateOfBirth" 
                 [matDatepicker]="dateOfBirthPicker"
+                [max]="today"
                 placeholder="Select date of birth" i18n-placeholder
+                required
                 readonly
+                (click)="dateOfBirthPicker.open()"
               />
               <mat-datepicker-toggle matIconSuffix [for]="dateOfBirthPicker"></mat-datepicker-toggle>
               <mat-datepicker #dateOfBirthPicker></mat-datepicker>
+              @if (guestForm.get('dateOfBirth')?.hasError('required') && guestForm.get('dateOfBirth')?.touched) {
+                <mat-error><ng-container i18n>Date of birth is required</ng-container></mat-error>
+              }
             </mat-form-field>
 
             <!-- Nationality -->
@@ -106,7 +112,7 @@
                 placeholder="Enter company name" i18n-placeholder
                 required
               />
-              @if (guestForm.get('companyName')?.hasError('required') && guestForm.get('companyName')?.touched) {
+              @if ((guestForm.get('companyName')?.hasError('required') || guestForm.get('companyName')?.hasError('blank')) && guestForm.get('companyName')?.touched) {
                 <mat-error><ng-container i18n>Company name is required</ng-container></mat-error>
               }
               @if (guestForm.get('companyName')?.hasError('minlength') && guestForm.get('companyName')?.touched) {
@@ -133,7 +139,7 @@
                 placeholder="Enter first name" i18n-placeholder
                 required
               />
-              @if (guestForm.get('contactPersonFirstName')?.hasError('required') && guestForm.get('contactPersonFirstName')?.touched) {
+              @if ((guestForm.get('contactPersonFirstName')?.hasError('required') || guestForm.get('contactPersonFirstName')?.hasError('blank')) && guestForm.get('contactPersonFirstName')?.touched) {
                 <mat-error><ng-container i18n>First name is required</ng-container></mat-error>
               }
               @if (guestForm.get('contactPersonFirstName')?.hasError('minlength') && guestForm.get('contactPersonFirstName')?.touched) {
@@ -150,7 +156,7 @@
                 placeholder="Enter last name" i18n-placeholder
                 required
               />
-              @if (guestForm.get('contactPersonLastName')?.hasError('required') && guestForm.get('contactPersonLastName')?.touched) {
+              @if ((guestForm.get('contactPersonLastName')?.hasError('required') || guestForm.get('contactPersonLastName')?.hasError('blank')) && guestForm.get('contactPersonLastName')?.touched) {
                 <mat-error><ng-container i18n>Last name is required</ng-container></mat-error>
               }
               @if (guestForm.get('contactPersonLastName')?.hasError('minlength') && guestForm.get('contactPersonLastName')?.touched) {
@@ -201,7 +207,12 @@
                 matInput 
                 formControlName="phone" 
                 placeholder="Enter phone number" i18n-placeholder
+                type="tel"
+                [required]="!isChildGuest()"
               />
+              @if (guestForm.get('phone')?.hasError('required') && guestForm.get('phone')?.touched) {
+                <mat-error><ng-container i18n>Phone number is required</ng-container></mat-error>
+              }
             </mat-form-field>
           </div>
         </div>
@@ -408,27 +419,26 @@
     </form>
   </mat-dialog-content>
 
-  <mat-dialog-actions align="end" class="pt-4">
-    <button mat-button (click)="onCancel()"><ng-container i18n>Cancel</ng-container></button>
-    <button 
-      mat-raised-button 
+  <mat-dialog-actions align="end" class="guest-actions">
+    <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isSaving()" data-testid="guest-cancel"><ng-container i18n>Cancel</ng-container></button>
+    <button
+      mat-flat-button
       color="primary"
+      type="button"
+      class="guest-actions__save"
       (click)="onSubmit()"
-      [disabled]="isSaving() || guestForm.invalid"
+      [disabled]="isSaving()"
+      data-testid="guest-save"
     >
       @if (isSaving()) {
-        <mat-icon class="animate-spin mr-2">refresh</mat-icon>
+        <mat-progress-spinner mode="indeterminate" [diameter]="18" class="guest-actions__spinner"></mat-progress-spinner>
       } @else {
-        @if (isEditing()) {
-          <mat-icon class="mr-2">edit_outline</mat-icon>
-        } @else {
-          <mat-icon class="mr-2">person_add</mat-icon>
-        }
+        <mat-icon>{{ isEditing() ? 'check' : 'person_add' }}</mat-icon>
       }
-      @if (isEditing()) {
-        <ng-container i18n>Update Guest</ng-container>
-      } @else {
-        <ng-container i18n>Create Guest</ng-container>
-      }
+      <span>
+        @if (isSaving()) { <ng-container i18n>Saving…</ng-container> }
+        @else if (isEditing()) { <ng-container i18n>Update Guest</ng-container> }
+        @else { <ng-container i18n>Create Guest</ng-container> }
+      </span>
     </button>
   </mat-dialog-actions>

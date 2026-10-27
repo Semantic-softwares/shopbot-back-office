@@ -26,13 +26,7 @@ import { UserService } from '../../shared/services/user.service';
 import { SubscriptionService } from '../../shared/services/subscription.service';
 import { User } from '../../shared/models';
 import { ModuleKey } from '../../shared/models';
-
-interface ModuleCardDef {
-  id: ModuleKey;
-  label: string;
-  description: string;
-  icon: string;
-}
+import { MODULE_OPTIONS, ModuleOption } from '../../shared/billing/module-options';
 
 @Component({
   selector: 'app-signup',
@@ -72,13 +66,7 @@ export class SignupComponent {
 
   // ── Module selection ──────────────────────────────────────────────────────
 
-  /** Every module is included in every plan, so the choice here is only what to switch on first; it can change at any time. */
-  readonly availableModules: ModuleCardDef[] = [
-    { id: 'PMS', label: $localize`Hotel (HMS)`, description: $localize`Reservations, rooms, housekeeping and guest tracking`, icon: 'hotel' },
-    { id: 'POS', label: $localize`Point of sale`, description: $localize`Sell at the counter, restaurant or bar, online or offline`, icon: 'point_of_sale' },
-    { id: 'ERP', label: $localize`ERP and inventory`, description: $localize`Stock, suppliers, purchasing, receipts and reports`, icon: 'inventory_2' },
-    { id: 'EMS', label: $localize`Estates (EMS)`, description: $localize`Leases, tenants, units and property invoicing`, icon: 'apartment' },
-  ];
+  readonly availableModules: ModuleOption[] = MODULE_OPTIONS;
 
   readonly selectedModules = signal<ModuleKey[]>(['PMS', 'POS', 'ERP']);
   readonly selectedModuleCountLabel = computed(() => {

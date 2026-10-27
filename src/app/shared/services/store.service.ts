@@ -72,6 +72,11 @@ export class StoreService {
     return this._httpClient.get<Store>(`${this.hostServer}/stores/${storeId}`)
   }
 
+  /** Adds a store to the signed-in person's own account (they become its owner). */
+  addMyStore(store: Record<string, unknown>): Observable<Store> {
+    return this._httpClient.post<Store>(`${this.hostServer}/stores/mine`, store);
+  }
+
   addStore(store: Store): Observable<any> {
     return this._httpClient.post(`${this.hostServer}/stores/web`, store);
   }

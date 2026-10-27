@@ -12,6 +12,9 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { MembershipsService } from '../../services/memberships.service';
+import { AddStoreDialogComponent } from '../add-store-dialog/add-store-dialog.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -57,6 +60,8 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   private storeStore = inject(StoreStore);
   private rolesService = inject(RolesService);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
+  private membershipsService = inject(MembershipsService);
   /** Only a hint for showing the menu entry; the server checks the admin list again on every call. */
   protected readonly isPlatformAdmin = toSignal(inject(PlatformBillingService).isPlatformAdmin().pipe(catchError(() => of(false))), { initialValue: false });
 
@@ -83,7 +88,6 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   // merchant with exactly one store — nothing to switch to. ──────────────
   protected readonly stores = this.storeStore.stores;
   protected readonly selectedStore = this.storeStore.selectedStore;
-  protected readonly hasMultipleStores = computed(() => this.stores().length > 1);
   protected readonly switchingStore = signal(false);
 
   protected switchStore(store: Store): void {
@@ -118,6 +122,32 @@ export class ToolbarComponent implements OnInit, OnDestroy {
         });
       },
     });
+  }
+
+  /**
+   * Opens the "Add a store" dialog. The new store belongs to the signed-in person, so once it exists the list of stores is read again
+   * from the server (the one source of truth for what this person can open) and the app moves into it.
+   */
+  protected openAddStore(): void {
+    this.dialog
+      .open(AddStoreDialogComponent, { width: '680px', maxWidth: '94vw', autoFocus: 'first-tabbable' })
+      .afterClosed()
+      .subscribe((created: Store | undefined) => {
+        if (!created?._id) return;
+        this.membershipsService.getMine().subscribe({
+          next: (memberships) => {
+            const stores = memberships.map((m) => m.store).filter((s): s is Store => typeof s === 'object' && s !== null);
+            this.storeStore.setSelectedStores(stores);
+            const fresh = stores.find((s) => s._id === created._id) ?? created;
+            this.switchStore(fresh);
+          },
+          error: () => {
+            // The store exists; only the refresh failed. Add it to what we know and move into it anyway.
+            this.storeStore.setSelectedStores([...this.stores(), created]);
+            this.switchStore(created);
+          },
+        });
+      });
   }
 
   toggleDuty(): void {

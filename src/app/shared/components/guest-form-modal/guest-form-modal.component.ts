@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -14,12 +14,18 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerToggle } from '@angular/material/datepicker';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subject, takeUntil } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Subject, firstValueFrom, takeUntil } from 'rxjs';
 import { GuestService } from '../../services/guest.service';
 import { LocationService, Country, Nationality } from '../../services/location.service';
 import { Guest } from '../../models/reservation.model';
 import { StoreStore } from '../../stores/store.store';
 import { GuestSearchComponent } from '../guest-search/guest-search.component';
+import { ValidationErrorsDialogComponent, ValidationErrorsDialogData } from '../validation-errors-dialog/validation-errors-dialog.component';
+
+/** Text that is only spaces is as good as empty: the server would store a nameless guest. */
+const notBlank = (c: AbstractControl): ValidationErrors | null => (typeof c.value === 'string' && c.value.length > 0 && !c.value.trim() ? { blank: true } : null);
 
 @Component({
   selector: 'app-guest-form-modal',
@@ -49,6 +55,7 @@ export class GuestFormModalComponent implements OnInit, OnDestroy {
   private dialogRef = inject(MatDialogRef<GuestFormModalComponent>);
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
   private guestService = inject(GuestService);
   private storeStore = inject(StoreStore);
   private locationService = inject(LocationService);
@@ -63,6 +70,7 @@ export class GuestFormModalComponent implements OnInit, OnDestroy {
   ageGrade = signal<'adult' | 'child'>('adult');
   isEditing = signal<boolean>(false);
   editingGuestId = signal<string | null>(null);
+  readonly today = new Date();
   isChildGuest = computed(() => this.ageGrade() === 'child');
 
   // Form
@@ -157,11 +165,14 @@ export class GuestFormModalComponent implements OnInit, OnDestroy {
     const companyNameControl = this.guestForm.get('companyName');
     const contactFirstControl = this.guestForm.get('contactPersonFirstName');
     const contactLastControl = this.guestForm.get('contactPersonLastName');
+    const dobControl = this.guestForm.get('dateOfBirth');
 
     if (isChildGuest || guestType === 'individual') {
       // Individual validations (includes child guests)
-      firstNameControl?.setValidators([Validators.required, Validators.minLength(2)]);
-      lastNameControl?.setValidators([Validators.required, Validators.minLength(2)]);
+      firstNameControl?.setValidators([Validators.required, notBlank, Validators.minLength(2)]);
+      lastNameControl?.setValidators([Validators.required, notBlank, Validators.minLength(2)]);
+      // The server refuses an individual guest, adult or child, without a date of birth.
+      dobControl?.setValidators([Validators.required]);
       
       // Email and phone are only required for adult guests
       if (isChildGuest) {
@@ -179,15 +190,17 @@ export class GuestFormModalComponent implements OnInit, OnDestroy {
       // Corporate validations
       firstNameControl?.clearValidators();
       lastNameControl?.clearValidators();
+      dobControl?.clearValidators();
       emailControl?.setValidators([Validators.required, Validators.email]);
       phoneControl?.setValidators([Validators.required]);
-      companyNameControl?.setValidators([Validators.required, Validators.minLength(2)]);
-      contactFirstControl?.setValidators([Validators.required, Validators.minLength(2)]);
-      contactLastControl?.setValidators([Validators.required, Validators.minLength(2)]);
+      companyNameControl?.setValidators([Validators.required, notBlank, Validators.minLength(2)]);
+      contactFirstControl?.setValidators([Validators.required, notBlank, Validators.minLength(2)]);
+      contactLastControl?.setValidators([Validators.required, notBlank, Validators.minLength(2)]);
     }
 
     firstNameControl?.updateValueAndValidity();
     lastNameControl?.updateValueAndValidity();
+    dobControl?.updateValueAndValidity();
     emailControl?.updateValueAndValidity();
     phoneControl?.updateValueAndValidity();
     companyNameControl?.updateValueAndValidity();
@@ -260,41 +273,96 @@ export class GuestFormModalComponent implements OnInit, OnDestroy {
   }
 
   async onSubmit() {
+    if (this.isSaving()) return;
+    // An invalid form is never sent. The fields are marked and the person is told, in plain words, what to fix.
     if (this.guestForm.invalid) {
       this.markFormGroupTouched(this.guestForm);
-      this.showError('Please fill in all required fields correctly');
+      this.showValidationDialog();
       return;
     }
 
     this.isSaving.set(true);
     try {
-      const formValue = this.guestForm.value;
-      const guestData = this.prepareGuestData(formValue);
+      const guestData = this.prepareGuestData(this.guestForm.getRawValue());
 
       let result;
       if (this.isEditing()) {
-        // Update existing guest
         const guestId = this.editingGuestId();
         if (!guestId) {
-          this.showError('Guest ID is missing');
+          this.showError($localize`Guest ID is missing`);
           return;
         }
-        result = await this.guestService.updateGuest(guestId, guestData).toPromise();
-        this.showSuccess('Guest updated successfully');
+        result = await firstValueFrom(this.guestService.updateGuest(guestId, guestData));
+        this.showSuccess($localize`Guest updated successfully`);
       } else {
-        // Create new guest
-        result = await this.guestService.createGuest(guestData).toPromise();
-        this.showSuccess('Guest created successfully');
+        result = await firstValueFrom(this.guestService.createGuest(guestData));
+        this.showSuccess($localize`Guest created successfully`);
       }
-      
+
       // Return the guest to the parent component
       this.dialogRef.close(result);
     } catch (error) {
       console.error('Error saving guest:', error);
-      this.showError(this.isEditing() ? 'Failed to update guest' : 'Failed to create guest');
+      this.showServerErrors(error);
     } finally {
       this.isSaving.set(false);
     }
+  }
+
+  private readonly fieldLabels: Record<string, string> = {
+    firstName: $localize`First name`,
+    lastName: $localize`Last name`,
+    dateOfBirth: $localize`Date of birth`,
+    email: $localize`Email`,
+    phone: $localize`Phone`,
+    companyName: $localize`Company name`,
+    contactPersonFirstName: $localize`Contact person first name`,
+    contactPersonLastName: $localize`Contact person last name`,
+    guestType: $localize`Guest type`,
+  };
+
+  /** What is wrong with one field, as a sentence the person can act on. */
+  private problemWith(key: string): string {
+    const errors = this.guestForm.get(key)?.errors ?? {};
+    if (errors['required'] || errors['blank']) return $localize`This is required.`;
+    if (errors['email']) return $localize`Enter a valid email address, like name@example.com.`;
+    if (errors['minlength']) return $localize`Use at least ${errors['minlength'].requiredLength} characters.`;
+    return $localize`This value is not valid.`;
+  }
+
+  private showValidationDialog(): void {
+    const invalid = Object.keys(this.guestForm.controls).filter((k) => this.guestForm.get(k)?.invalid);
+    const labels: NonNullable<ValidationErrorsDialogData['labels']> = {};
+    for (const key of invalid) labels[key] = { title: this.fieldLabels[key] ?? key, detail: this.problemWith(key) };
+    this.dialog.open(ValidationErrorsDialogComponent, {
+      data: { invalidControls: invalid, labels, title: $localize`Check the guest details`, message: $localize`Please fix the following before saving:` } as ValidationErrorsDialogData,
+      width: '480px',
+      maxWidth: '92vw',
+      autoFocus: false,
+    });
+  }
+
+  /** The server refused the guest (a duplicate, a rule we do not check here): show its reasons in the same dialog, not a vanishing toast. */
+  private showServerErrors(error: unknown): void {
+    const body = error instanceof HttpErrorResponse ? error.error : null;
+    const raw = body?.message ?? body?.error;
+    const reasons: string[] = (Array.isArray(raw) ? raw : raw ? [raw] : []).map(String);
+    if (error instanceof HttpErrorResponse && error.status === 0) {
+      this.showError($localize`No connection. Check your internet and try again.`);
+      return;
+    }
+    if (!reasons.length) {
+      this.showError(this.isEditing() ? $localize`Failed to update guest` : $localize`Failed to create guest`);
+      return;
+    }
+    const labels: NonNullable<ValidationErrorsDialogData['labels']> = {};
+    for (const r of reasons) labels[r] = { title: r };
+    this.dialog.open(ValidationErrorsDialogComponent, {
+      data: { invalidControls: reasons, labels, title: this.isEditing() ? $localize`Could not update the guest` : $localize`Could not create the guest`, message: $localize`The server did not accept these details:` } as ValidationErrorsDialogData,
+      width: '480px',
+      maxWidth: '92vw',
+      autoFocus: false,
+    });
   }
 
   private prepareGuestData(formValue: any): Partial<Guest> {
