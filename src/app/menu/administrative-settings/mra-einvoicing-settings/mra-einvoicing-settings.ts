@@ -121,7 +121,7 @@ export class MraEinvoicingSettings implements OnInit, OnDestroy {
     legalName: ['', Validators.required],
     tradingName: [''],
     tan: ['', [Validators.required, Validators.pattern(/^\s*\d{8}\s*$/)]],
-    brn: ['', Validators.required],
+    brn: [''],
     businessAddr: ['', Validators.required],
     businessPhone: [''],
     businessEmail: [''],

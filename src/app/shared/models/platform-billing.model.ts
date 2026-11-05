@@ -196,11 +196,11 @@ export interface AdminStoreRow {
 
 export interface AdminStoreDetail {
   store: { _id: string; name: string; storeNumber?: string; storeType?: string; createdAt: string; email: string | null; currencyCode?: string };
-  owner: { name?: string; email?: string; phoneNumber?: string } | null;
+  owner: { _id?: string; name?: string; email?: string; phoneNumber?: string } | null;
   subscription: Record<string, any> | null;
   context: SubscriptionContextV2;
   invoices: InvoiceV2[];
-  members: Array<{ id: string; name?: string; email?: string; role?: string; status: string }>;
+  members: Array<{ id: string; merchantId: string | null; isOwner: boolean; name?: string; email?: string; role?: string; status: string }>;
   modules: string[];
   upgradeRequest: { _id: string; requestedPlanKey: string; note?: string; createdAt: string } | null;
   audit: AuditRow[];

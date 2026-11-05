@@ -1,6 +1,6 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,7 +22,7 @@ import { TrPipe } from '../../../../shared/i18n/tr.pipe';
 import { SubStatus } from '../../../../shared/models/platform-billing.model';
 import { PlatformBillingService } from '../../../../shared/services/platform-billing.service';
 import { ReportKpiComponent } from '../../../dashboard/reports/shared/report-kpi.component';
-import { ReasonDialogComponent } from '../../dialogs/admin-dialogs';
+import { ChangeOwnerDialogComponent, ReasonDialogComponent } from '../../dialogs/admin-dialogs';
 
 const MODULES = [
   { key: 'POS', label: $localize`Point of sale`, icon: 'point_of_sale' },
@@ -69,7 +69,8 @@ const LOCKING: SubStatus[] = ['SUSPENDED', 'CANCELLED', 'EXPIRED'];
         <mat-tab label="Overview" i18n-label>
           <div class="grid gap-4 py-4 lg:grid-cols-2">
             <mat-card appearance="outlined"><mat-card-content class="!p-4">
-              <h3 class="m-0 mb-2 text-sm font-semibold" i18n>Owner</h3>
+              <div class="mb-2 flex items-center justify-between gap-2"><h3 class="m-0 text-sm font-semibold" i18n>Owner</h3>
+                <button mat-stroked-button class="!h-8 !text-xs" [disabled]="busy()" (click)="changeOwner()" data-testid="change-owner"><mat-icon class="!text-base">swap_horiz</mat-icon><span i18n>Change owner</span></button></div>
               @if (d.owner) { <div class="font-medium">{{ d.owner.name }}</div><a class="text-sm text-primary" [href]="'mailto:' + d.owner.email">{{ d.owner.email }}</a><div class="text-sm text-on-surface-variant">{{ d.owner.phoneNumber }}</div> } @else { <span class="text-sm text-on-surface-variant" i18n>No owner on record.</span> }
               <h3 class="m-0 mb-1 mt-4 text-sm font-semibold" i18n>Modules on</h3>
               <div class="flex flex-wrap gap-2">@for (m of d.modules; track m) { <span class="rounded-full bg-surface-container-high px-2 py-0.5 text-xs font-medium">{{ moduleLabel(m) }}</span> } @empty { <span class="text-sm text-on-surface-variant" i18n>None.</span> }</div>
@@ -156,8 +157,10 @@ export class StoreDetailPage {
   private readonly dialog = inject(MatDialog);
   private readonly snack = inject(MatSnackBar);
 
-  readonly storeId = this.route.snapshot.paramMap.get('storeId')!;
-  readonly res = rxResource({ stream: () => this.api.adminStore(this.storeId) });
+  // Read from the live route (not a one-time snapshot) so going from one store straight to another reloads the page for the new store.
+  private readonly routeParams = toSignal(this.route.paramMap, { initialValue: this.route.snapshot.paramMap });
+  get storeId(): string { return this.routeParams().get('storeId')!; }
+  readonly res = rxResource({ params: () => this.routeParams().get('storeId')!, stream: ({ params }) => this.api.adminStore(params) });
   readonly plansRes = rxResource({ stream: () => this.api.adminPlans() });
   readonly plans = computed(() => (this.plansRes.hasValue() ? this.plansRes.value().filter((p) => p.status === 'ACTIVE') : []));
 
@@ -259,6 +262,17 @@ export class StoreDetailPage {
   saveModules(): void {
     void this.act(this.api.adminSetModules(this.storeId, this.chosen()), $localize`Modules saved`);
   }
+  /** Hands the store to someone on its own team. Only active members are offered; the server checks this again. */
+  async changeOwner(): Promise<void> {
+    if (!this.res.hasValue()) return;
+    const d = this.res.value();
+    const ownerId = d.owner?._id;
+    const candidates = d.members.filter((m) => m.status === 'ACTIVE' && !!m.merchantId && m.merchantId !== ownerId).map((m) => ({ merchantId: m.merchantId!, name: m.name, email: m.email, role: m.role }));
+    const result = await firstValueFrom(this.dialog.open(ChangeOwnerDialogComponent, { data: { storeName: d.store.name, currentOwner: d.owner?.name || d.owner?.email, candidates }, width: '480px', maxWidth: '92vw' }).afterClosed());
+    if (!result) return;
+    await this.act(this.api.adminChangeOwner(this.storeId, result.merchantId, result.reason), $localize`Owner changed`);
+  }
+
   startTrial(): void {
     void this.act(this.api.adminStartTrial(this.storeId), $localize`Trial started`);
   }

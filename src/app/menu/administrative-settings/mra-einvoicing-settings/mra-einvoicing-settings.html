@@ -57,8 +57,8 @@
                   </mat-form-field>
                   <mat-form-field appearance="outline"><mat-label><ng-container i18n>Business Registration Number (BRN)</ng-container></mat-label>
                     <input matInput formControlName="brn" placeholder="C12345678" autocomplete="off" />
-                    <mat-hint><ng-container i18n>A letter followed by digits.</ng-container></mat-hint>
-                    @if (businessForm.controls.brn.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> } @else { <mat-error><ng-container i18n>Required</ng-container></mat-error> }
+                    <mat-hint><ng-container i18n>A letter followed by digits. Leave empty if you are an individual with no BRN.</ng-container></mat-hint>
+                    @if (businessForm.controls.brn.errors?.['server']; as e) { <mat-error>{{ e }}</mat-error> }
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="sm:col-span-2"><mat-label><ng-container i18n>Business address</ng-container></mat-label>
                     <input matInput formControlName="businessAddr" autocomplete="off" />
@@ -205,7 +205,7 @@
 
             <dl class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
               <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500"><ng-container i18n>TAN</ng-container></dt><dd class="font-medium text-gray-900">{{ o.business.tan }}</dd></div>
-              <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500"><ng-container i18n>BRN</ng-container></dt><dd class="font-medium text-gray-900">{{ o.business.brn }}</dd></div>
+              <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500"><ng-container i18n>BRN</ng-container></dt><dd class="font-medium text-gray-900">{{ o.business.brn || '—' }}</dd></div>
               <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500"><ng-container i18n>Environment</ng-container></dt><dd class="font-medium text-gray-900">{{ o.environment }}</dd></div>
               <div class="rounded-lg bg-gray-50 border border-gray-200 p-3"><dt class="text-xs text-gray-500"><ng-container i18n>MRA mode</ng-container></dt><dd class="font-medium text-gray-900">{{ modeLabel(o.ebsMode) }}</dd></div>
               @if (o.placeOfBusiness.ebsMraId) {

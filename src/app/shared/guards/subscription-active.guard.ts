@@ -1,4 +1,4 @@
-import { inject } from '@angular/core';
+import { EnvironmentInjector, inject, runInInjectionContext } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { SubscriptionService } from '../services/subscription.service';
 import { map, catchError, switchMap } from 'rxjs/operators';
@@ -64,10 +64,13 @@ function evaluateSubscription(subscription: any, router: Router): boolean {
 export const subscriptionActiveGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const billing = inject(BillingStateService);
+  // The old check calls inject(), which only works inside an injection context. It runs later (after the request below), so it is
+  // re-entered into this guard's context explicitly instead of being called from the async callback.
+  const injector = inject(EnvironmentInjector);
   return from(billing.load().then((a) => a, () => null)).pipe(
     switchMap((account) => {
       if (account?.subscription.billingVersion === 2) return of(account.subscription.blocked ? router.createUrlTree(['/account-locked']) : true);
-      return toObservable(legacyGuard(route, state));
+      return toObservable(runInInjectionContext(injector, () => legacyGuard(route, state)));
     }),
   );
 };

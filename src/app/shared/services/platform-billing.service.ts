@@ -84,6 +84,9 @@ export class PlatformBillingService {
   adminSetStatus(storeId: string, status: SubStatus, reason?: string): Observable<any> {
     return this.http.post(`${this.api}/billing/admin/stores/${storeId}/subscription/status`, { status, reason });
   }
+  adminChangeOwner(storeId: string, merchantId: string, reason?: string): Observable<{ owner: { _id: string; name?: string; email?: string }; previousOwner: { _id: string; name?: string; email?: string } | null }> {
+    return this.http.post<{ owner: { _id: string; name?: string; email?: string }; previousOwner: { _id: string; name?: string; email?: string } | null }>(`${this.api}/billing/admin/stores/${storeId}/owner`, { merchantId, reason });
+  }
   adminStartTrial(storeId: string): Observable<any> {
     return this.http.post(`${this.api}/billing/admin/stores/${storeId}/subscription/start`, {});
   }

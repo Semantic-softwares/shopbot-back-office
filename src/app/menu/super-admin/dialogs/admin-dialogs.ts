@@ -112,3 +112,37 @@ export class PlanDialogComponent {
     this.ref.close(rest);
   }
 }
+
+export interface OwnerCandidate { merchantId: string; name?: string; email?: string; role?: string }
+
+/** Picks the new owner of a store from its own active team. The reason goes into the audit log. */
+@Component({
+  selector: 'app-change-owner-dialog',
+  imports: [FormsModule, MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `
+    <h2 mat-dialog-title i18n>Change the owner</h2>
+    <mat-dialog-content>
+      <p class="mt-0 text-sm text-on-surface-variant"><span i18n>The new owner takes over</span>&nbsp;<b>{{ data.storeName }}</b>. <span i18n>{{ data.currentOwner || 'The current owner' }} stays on the team with their current role.</span></p>
+      @if (!data.candidates.length) {
+        <p class="rounded-xl bg-surface-container p-3 text-sm" role="alert" data-testid="owner-no-candidates" i18n>There is nobody else on this store's team yet. Ask the owner to invite and activate someone first, then come back.</p>
+      } @else {
+        <mat-form-field appearance="outline" class="w-full"><mat-label i18n>New owner</mat-label>
+          <mat-select [ngModel]="merchantId()" (ngModelChange)="merchantId.set($event)" data-testid="owner-select">
+            @for (c of data.candidates; track c.merchantId) { <mat-option [value]="c.merchantId">{{ c.name || c.email }}<span class="text-xs text-on-surface-variant"> · {{ c.email }}@if (c.role) { · {{ c.role }} }</span></mat-option> }
+          </mat-select></mat-form-field>
+        <mat-form-field appearance="outline" class="w-full"><mat-label i18n>Reason</mat-label><textarea matInput rows="3" maxlength="500" [ngModel]="reason()" (ngModelChange)="reason.set($event)" data-testid="owner-reason"></textarea><mat-hint i18n>Kept in the audit log</mat-hint></mat-form-field>
+      }
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close i18n>Cancel</button>
+      <button mat-flat-button color="primary" [disabled]="!merchantId() || reason().trim().length < 3" (click)="ref.close({ merchantId: merchantId(), reason: reason().trim() })" data-testid="owner-confirm" i18n>Change owner</button>
+    </mat-dialog-actions>
+  `,
+})
+export class ChangeOwnerDialogComponent {
+  readonly data = inject<{ storeName: string; currentOwner?: string; candidates: OwnerCandidate[] }>(MAT_DIALOG_DATA);
+  readonly ref = inject(MatDialogRef<ChangeOwnerDialogComponent>);
+  readonly merchantId = signal('');
+  readonly reason = signal('');
+}
