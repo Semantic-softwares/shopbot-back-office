@@ -32,6 +32,21 @@ import { OutboxSyncService } from '../../offline/outbox-sync.service';
           @else if (offline.waiting()) { <ng-container i18n>Saved sales are being sent to the server.</ng-container> }
           @else { <ng-container i18n>Some sales could not be sent. Open them to retry or discard.</ng-container> }
         </div>
+        @for (event of offline.registerEvents(); track event.id) {
+          <div class="max-w-64 border-t border-outline-variant px-4 py-2 text-sm" data-testid="pending-register-event">
+            <div class="font-medium"><ng-container i18n>Register</ng-container></div>
+            <div class="text-on-surface-variant">{{ event.summary }}</div>
+            @if (event.status === 'failed') {
+              <div class="mt-1 text-error">{{ event.lastError }}</div>
+              <div class="mt-1 flex gap-2">
+                <button matButton (click)="outbox.retryRegisterEvent(event.id); $event.stopPropagation()"><ng-container i18n>Retry</ng-container></button>
+                <button matButton (click)="outbox.discardRegisterEvent(event.id); $event.stopPropagation()"><ng-container i18n>Discard</ng-container></button>
+              </div>
+            } @else {
+              <div class="text-on-surface-variant"><ng-container i18n>Waiting to be recorded</ng-container></div>
+            }
+          </div>
+        }
         @for (refund of offline.refunds(); track refund.id) {
           <div class="max-w-64 border-t border-outline-variant px-4 py-2 text-sm" data-testid="pending-refund">
             <div class="font-medium"><ng-container i18n>Refund</ng-container> #{{ refund.reference }}</div>

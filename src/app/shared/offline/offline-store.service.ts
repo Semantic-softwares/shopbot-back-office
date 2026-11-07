@@ -1,6 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { OfflineDb } from './offline-db';
-import { OutboxEntry, ReferenceEntry, RefundOutboxEntry } from './offline.models';
+import { OutboxEntry, ReferenceEntry, RefundOutboxEntry, RegisterEventEntry } from './offline.models';
 import { CreateRefundRequest } from '../models/refund.model';
 import { Order } from '../models/order.model';
 
@@ -20,11 +20,14 @@ export class OfflineStore {
   /** Orders waiting to reach the server, oldest first. Newest state is in memory; IndexedDB is the durable copy. */
   readonly outbox = computed(() => [...this.entries()].sort((a, b) => a.createdAt.localeCompare(b.createdAt)));
   private readonly refundEntries = signal<RefundOutboxEntry[]>([]);
+  private readonly registerEntries = signal<RegisterEventEntry[]>([]);
+  /** What was done at the register while offline, oldest first. */
+  readonly registerEvents = computed(() => [...this.registerEntries()].sort((a, b) => a.seq - b.seq));
   /** Refunds made with no connection, oldest first. */
   readonly refunds = computed(() => [...this.refundEntries()].sort((a, b) => a.createdAt.localeCompare(b.createdAt)));
   // Refunds count with the sales: the toolbar light, the retry timer and "Sync now" all cover both.
-  readonly waiting = computed(() => this.entries().filter((e) => e.status !== 'failed').length + this.refundEntries().filter((e) => e.status !== 'failed').length);
-  readonly failed = computed(() => this.entries().filter((e) => e.status === 'failed').length + this.refundEntries().filter((e) => e.status === 'failed').length);
+  readonly waiting = computed(() => this.entries().filter((e) => e.status !== 'failed').length + this.refundEntries().filter((e) => e.status !== 'failed').length + this.registerEntries().filter((e) => e.status !== 'failed').length);
+  readonly failed = computed(() => this.entries().filter((e) => e.status === 'failed').length + this.refundEntries().filter((e) => e.status === 'failed').length + this.registerEntries().filter((e) => e.status === 'failed').length);
   readonly ready = signal(false);
 
   constructor() {
@@ -41,6 +44,8 @@ export class OfflineStore {
   async reload(): Promise<void> {
     if (!OfflineDb.supported()) return;
     try {
+      const registerEvents = await this.db.getAll<RegisterEventEntry>('registerEvents');
+      this.registerEntries.set(registerEvents.map((e) => (e.status === 'syncing' && !this.inFlight.has(e.id) ? { ...e, status: 'pending' as const } : e)));
       const refunds = await this.db.getAll<RefundOutboxEntry>('refunds');
       this.refundEntries.set(refunds.map((e) => (e.status === 'syncing' && !this.inFlight.has(e.id) ? { ...e, status: 'pending' as const } : e)));
       const all = await this.db.getAll<OutboxEntry>('outbox');
@@ -125,6 +130,35 @@ export class OfflineStore {
   async removeRefund(id: string): Promise<void> {
     if (OfflineDb.supported()) await this.db.delete('refunds', id);
     this.refundEntries.update((all) => all.filter((e) => e.id !== id));
+    this.announce();
+  }
+
+  // ---- register events made with no connection ----------------------------------------------------------------------
+
+  getRegisterEvent(id: string): RegisterEventEntry | undefined { return this.registerEntries().find((e) => e.id === id); }
+  registerEventsFor(sessionKey: string): RegisterEventEntry[] { return this.registerEvents().filter((e) => e.sessionKey === sessionKey); }
+
+  /** Saves a register event on the device. Resolves once it is durably stored. */
+  async enqueueRegisterEvent(input: { id: string; store: string; kind: RegisterEventEntry['kind']; sessionKey: string; body: any; summary: string }): Promise<RegisterEventEntry> {
+    const entry: RegisterEventEntry = { ...input, seq: Date.now() * 1000 + (this.registerEntries().length % 1000), status: 'pending', attempts: 0, createdAt: new Date().toISOString(), nextTryAt: 0 };
+    await this.saveRegisterEvent(entry);
+    return entry;
+  }
+
+  async saveRegisterEvent(entry: RegisterEventEntry): Promise<void> {
+    if (OfflineDb.supported()) await this.db.put('registerEvents', entry);
+    this.registerEntries.update((all) => [...all.filter((e) => e.id !== entry.id), entry]);
+    this.announce();
+  }
+
+  async patchRegisterEvent(id: string, change: Partial<RegisterEventEntry>): Promise<void> {
+    const current = this.getRegisterEvent(id);
+    if (current) await this.saveRegisterEvent({ ...current, ...change });
+  }
+
+  async removeRegisterEvent(id: string): Promise<void> {
+    if (OfflineDb.supported()) await this.db.delete('registerEvents', id);
+    this.registerEntries.update((all) => all.filter((e) => e.id !== id));
     this.announce();
   }
 

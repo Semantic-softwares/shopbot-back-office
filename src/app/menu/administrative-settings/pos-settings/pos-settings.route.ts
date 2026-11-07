@@ -18,6 +18,13 @@ export const POS_SETTINGS_ROUTES: Routes = [
             (m) => m.ReceiptSettings
           ),
       },
+      {
+        path: 'register',
+        loadComponent: () =>
+          import('./register-settings/register-settings').then(
+            (m) => m.RegisterSettingsPage
+          ),
+      },
      {
         path: 'printers',
         loadChildren: () =>

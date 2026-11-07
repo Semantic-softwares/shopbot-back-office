@@ -20,11 +20,14 @@ import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.compon
 import { RolesService } from '../../shared/services/roles.service';
 import { TrPipe } from '../../shared/i18n/tr.pipe';
 
+import { RegisterContextService } from '../../shared/register/register-context.service';
 import { FiscalisationService } from '../../shared/services/fiscalisation.service';
 
 interface NavItem {
   /** Hidden unless the store's tax authority is switched on. */
   requiresFiscal?: boolean;
+  /** Hidden unless register management is switched on for the store. */
+  requiresRegisters?: boolean;
   icon: string;
   label: string;
   link: string;
@@ -59,6 +62,7 @@ interface NavSection {
 export class DashboardComponent {
   private router = inject(Router);
   private fiscalisation = inject(FiscalisationService);
+  private registerContext = inject(RegisterContextService);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
   private rolesService = inject(RolesService);
@@ -121,6 +125,12 @@ export class DashboardComponent {
     ],
     'Customers': [
       'erp.products.view',
+    ],
+    'Sales': [
+      'pos.register.view',
+      'pos.register.view_reports',
+      'pos.register.manage',
+      'pos.register.reconcile',
     ],
     'Accounting': [
       'erp.accounting.view',
@@ -190,6 +200,12 @@ export class DashboardComponent {
           permission: 'manage_home',
           requiresFiscal: true,
         },
+        {
+          icon: 'summarize',
+          label: $localize`Tax Report`,
+          link: './reports/tax-report',
+          permission: 'view_company',
+        },
       ],
     },
     {
@@ -254,10 +270,18 @@ export class DashboardComponent {
       ]
     },
     {
+      name: 'Sales',
+      children: [
+        { icon: 'point_of_sale', label: $localize`Register sessions`, link: './sales/sessions', permission: 'view_company', requiresRegisters: true },
+        { icon: 'swap_vert', label: $localize`Cash movements`, link: './sales/movements', permission: 'view_company', requiresRegisters: true },
+        { icon: 'balance', label: $localize`Cash reconciliation`, link: './sales/reconciliation', permission: 'view_company', requiresRegisters: true },
+        { icon: 'assessment', label: $localize`Register reports`, link: './sales/reports', permission: 'view_company', requiresRegisters: true },
+      ],
+    },
+    {
       name: 'Accounting',
       children: [
         { icon: 'percent', label: $localize`Tax Management`, link: './accounting/tax-management', permission: 'view_company' },
-        { icon: 'summarize', label: $localize`Tax Report`, link: './accounting/tax-report', permission: 'view_company' },
       ],
     },
     {
@@ -278,8 +302,9 @@ export class DashboardComponent {
   public navItems = computed(() => {
     // A fiscal entry only appears for a store whose tax authority is switched on, whoever is looking.
     const fiscalOn = this.fiscalisation.active();
+    const registersOn = this.registerContext.enabled();
     const offered = this.allNavItems
-      .map((section) => ({ ...section, children: section.children.filter((item) => !item.requiresFiscal || fiscalOn) }));
+      .map((section) => ({ ...section, children: section.children.filter((item) => (!item.requiresFiscal || fiscalOn) && (!item.requiresRegisters || registersOn)) }));
 
     if (this.rolesService.isAdmin()) {
       // Admin can see all items

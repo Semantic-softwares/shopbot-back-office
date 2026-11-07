@@ -37,6 +37,10 @@ export const DASHBOARD_REPORTS_ROUTES: Routes = [
           import('./sales-by-payment/sales-by-payment.component').then((m) => m.SalesByPaymentComponent),
       },
       {
+        path: 'tax-report',
+        loadComponent: () => import('./tax-report/tax-report.component').then((m) => m.TaxReportComponent),
+      },
+      {
         path: 'fiscal-transactions',
         loadComponent: () =>
           import('./fiscal-transactions/fiscal-transactions.component').then((m) => m.FiscalTransactionsComponent),

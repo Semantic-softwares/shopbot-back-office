@@ -38,4 +38,29 @@ export interface RefundOutboxEntry {
   nextTryAt: number;
 }
 
+/**
+ * Something a cashier did at the register while the device had no connection, kept until the server has it. Each carries its own id
+ * (`id`), which the server uses to recognise a repeat, so sending it twice can never record it twice.
+ *  - open: the register was opened here; `sessionKey` is the id this device made for the session.
+ *  - movement: cash in or out of the drawer.
+ *  - close: the closing count.
+ */
+export interface RegisterEventEntry {
+  id: string;
+  store: string;
+  kind: 'open' | 'movement' | 'close';
+  /** Monotonic on this device: events are sent in the order they were made. */
+  seq: number;
+  /** The id this device knows the session by: the server's id, or the one it made when it opened the register offline. */
+  sessionKey: string;
+  body: any;
+  /** For the "waiting" list, in words. */
+  summary: string;
+  status: OutboxStatus;
+  attempts: number;
+  lastError?: string;
+  createdAt: string;
+  nextTryAt: number;
+}
+
 export interface ReferenceEntry<T = unknown> { key: string; value: T; fetchedAt: number }

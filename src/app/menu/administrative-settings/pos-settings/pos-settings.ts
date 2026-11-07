@@ -16,5 +16,6 @@ export class PosSettings {
   readonly navLinks = [
     { path: 'receipt', label: 'Receipt', icon: 'receipt_long' },
     { path: 'printers', label: 'Printer', icon: 'print' },
+    { path: 'register', label: $localize`Registers`, icon: 'point_of_sale' },
   ];
 }

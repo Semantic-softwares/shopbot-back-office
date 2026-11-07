@@ -36,6 +36,10 @@ export const DASHBOARD_ROUTES: Routes = [
                 loadChildren: () => import('./inventories/inventories.routes').then(m => m.DASHBOARD_INVENTORIES_ROUTES)
             },
             {
+                path: 'sales',
+                loadChildren: () => import('./sales/sales.routes').then(m => m.DASHBOARD_SALES_ROUTES)
+            },
+            {
                 path: 'accounting',
                 loadChildren: () => import('./accounting/accounting.routes').then(m => m.DASHBOARD_ACCOUNTING_ROUTES)
             },

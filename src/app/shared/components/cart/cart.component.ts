@@ -1,4 +1,7 @@
 import { OfflineStore } from '../../offline/offline-store.service';
+import { RegisterContextService } from '../../register/register-context.service';
+import { OpenRegisterDialogComponent } from '../../register/components/open-register-dialog.component';
+import { PinSwitchDialogComponent } from '../../register/components/pin-switch-dialog.component';
 import { OutboxSyncService } from '../../offline/outbox-sync.service';
 import { ConnectivityService } from '../../offline/connectivity.service';
 import {
@@ -121,6 +124,8 @@ export class CartComponent implements OnDestroy {
   private readonly snackBar = inject(MatSnackBar);
   private readonly orderStore = inject(OrderStore);
   private readonly pendingSales = inject(PendingSalesService);
+  // Register management (opt-in per store): off for a store that does not use it, and then nothing below changes.
+  private readonly register = inject(RegisterContextService);
   private selectedUser = this.accountService.currentUserValue;
   public cartSummary = signal<CartSummary | null>(null);
   // Selected buyer state
@@ -649,7 +654,30 @@ export class CartComponent implements OnDestroy {
     this.cartSummary.set(summary);
   }
 
+  /**
+   * With register management on, a sale that takes payment belongs to an open register. Asks the cashier to open one (or tells them the
+   * register is being closed) and returns true when the sale must not go ahead. Always false for a store that does not use registers.
+   */
+  private blockedByRegister(): boolean {
+    // A shared terminal with nobody switched in: the cashier signs in with their PIN first.
+    if (this.register.needsOperator()) {
+      this.snackBar.open($localize`Sign in with your PIN to take this payment.`, $localize`Close`, { duration: 4000 });
+      this.dialog.open(PinSwitchDialogComponent, { width: '420px', maxWidth: '96vw', maxHeight: '92vh' });
+      return true;
+    }
+    if (!this.register.enabled() || this.register.hasSession()) return false;
+    if (this.register.closing()) {
+      this.snackBar.open($localize`This register is being closed. Finish or cancel the close to take sales.`, $localize`Close`, { duration: 5000 });
+    } else {
+      this.snackBar.open($localize`Open a register to take this payment.`, $localize`Close`, { duration: 4000 });
+      this.dialog.open(OpenRegisterDialogComponent, { width: '520px', maxWidth: '96vw', maxHeight: '92vh' });
+    }
+    return true;
+  }
+
   public onCheckout(): void {
+    // A quick sale is always paid, so it cannot start without an open register (a tab can still be opened and paid later).
+    if (!this.displayedTable() && !this.selectedGuest() && this.blockedByRegister()) return;
     // Open payment dialog before proceeding with checkout
     const dialogData: PaymentDialogData = {
       totalAmount: this.cartSummary()?.totalCost || 0,
@@ -766,6 +794,9 @@ export class CartComponent implements OnDestroy {
   const paymentName = payment?.paymentMethod?.name
     ?? selectedCart.paymentMethod?.name;
   const isPaid = !!paymentName;
+  if (isPaid && this.blockedByRegister()) return;
+  // Which drawer this sale belongs to (null unless the store uses registers and one is open); the server checks all of it.
+  const registerContext = this.register.stamp();
   
   // CHECK EDITING STATE BEFORE any operations that might reset it
   const isEditingOrder = this.saleTypeStore.isEditing();
@@ -808,11 +839,13 @@ export class CartComponent implements OnDestroy {
       note: selectedCart?.note,
       vendorCommissionAmount: 0,
       orderInstruction: selectedCart?.note,
-      staff: this.selectedUser?._id,
+      // On a shared terminal the sale is by whoever switched in; otherwise by the signed-in account, as always.
+      staff: this.register.operatorId() ?? this.selectedUser?._id,
       category: isPaid
         ? OrderCategoryType.COMPLETE
         : OrderCategoryType.PROCESSING,
       settled: isPaid,
+      ...(registerContext ? { registerContext } : {}),
     };
 
     console.log('Updating order with payload:', updates);
@@ -868,10 +901,11 @@ export class CartComponent implements OnDestroy {
         : OrderCategoryType.PROCESSING,
       settled: isPaid,
       reference: generateReference(),
-      staff: this.selectedUser?._id,
+      staff: this.register.operatorId() ?? this.selectedUser?._id,
       // Only for showing the sale on this device before it syncs; the server ignores it.
-      staffName: this.selectedUser?.name,
+      staffName: this.register.operatorName() ?? this.selectedUser?.name,
       storeId: selectedStore._id,
+      ...(registerContext ? { registerContext } : {}),
     } as any;
     // The sale is saved on this device first, so it is safe even with no connection; the outbox sends it to the server.
     await this.offline.enqueue(newOrder, selectedStore._id);

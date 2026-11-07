@@ -1,4 +1,5 @@
 import { SyncStatusComponent } from '../sync-status/sync-status.component';
+import { RegisterStatusComponent } from '../../register/components/register-status.component';
 import { PwaUpdateService } from '../../services/pwa-update.service';
 import { catchError, of } from 'rxjs';
 import { RouterLink } from '@angular/router';
@@ -33,7 +34,7 @@ import { TrPipe } from '../../i18n/tr.pipe';
 @Component({
   selector: 'app-toolbar',
   standalone: true,
-  imports: [TrPipe, SyncStatusComponent, RouterLink, 
+  imports: [TrPipe, SyncStatusComponent, RegisterStatusComponent, RouterLink, 
     CommonModule,
     MatToolbarModule,
     MatIconModule,

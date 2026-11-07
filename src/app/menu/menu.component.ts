@@ -64,6 +64,8 @@ export class MenuComponent implements OnInit, OnDestroy {
     'erp.suppliers.delete',
     'erp.purchasing.view',
     'erp.accounting.view',
+    'pos.register.view',
+    'pos.register.view_reports',
     'erp.accounting.manage',
   ];
 

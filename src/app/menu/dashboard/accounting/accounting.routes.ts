@@ -6,8 +6,6 @@ export const DASHBOARD_ACCOUNTING_ROUTES: Routes = [
     path: 'tax-management',
     loadComponent: () => import('./tax-management/tax-management.component').then((m) => m.TaxManagementComponent),
   },
-  {
-    path: 'tax-report',
-    loadComponent: () => import('./tax-report/tax-report.component').then((m) => m.TaxReportComponent),
-  },
+  // The report moved to the Reports module; the old address keeps working.
+  { path: 'tax-report', redirectTo: '/menu/erp/reports/tax-report' },
 ];
