@@ -1,1 +1,0 @@
-import{c as z}from"./chunk-RykAvsdd.js";var n;z(()=>{n=[{path:``,loadComponent:()=>import(`./chunk-EyMdELe1.js`).then(o=>o.LedgerComponent),children:[{path:``,loadComponent:()=>import(`./chunk-BJpegc65.js`).then(o=>o.LedgerListComponent)}]}]})();export{n as LEDGER_ROUTES};

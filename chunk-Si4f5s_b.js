@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";var n;z(()=>{n=[{path:``,loadComponent:()=>import(`./chunk-CaK4gc0r.js`).then(o=>o.OwnerBillingPage)}]})();export{n as BILLING_ROUTES};
