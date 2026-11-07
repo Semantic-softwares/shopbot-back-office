@@ -418,8 +418,17 @@
                   </td>
                 </ng-container>
 
-                <tr mat-header-row *matHeaderRowDef="['product', 'options', 'quantity', 'price', 'subtotal']"></tr>
-                <tr mat-row *matRowDef="let row; columns: ['product', 'options', 'quantity', 'price', 'subtotal'];"></tr>
+                <!-- Tax (only for sales priced by tax management) -->
+                <ng-container matColumnDef="tax">
+                  <th mat-header-cell *matHeaderCellDef class="text-right"><ng-container i18n>Tax</ng-container></th>
+                  <td mat-cell *matCellDef="let item" class="text-right">
+                    <div class="font-medium" data-testid="line-tax-amount">{{ item.taxLine?.taxAmount ?? 0 | currency: currency() }}</div>
+                    <div class="text-xs text-gray-500">{{ lineTaxMarker(item) }}</div>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="itemColumns()"></tr>
+                <tr mat-row *matRowDef="let row; columns: itemColumns();"></tr>
               </table>
             </div>
           </mat-card-content>
@@ -490,6 +499,17 @@
                 <div class="flex justify-between text-sm">
                   <span class="text-gray-600"><ng-container i18n>Discount:</ng-container></span>
                   <span class="font-medium text-green-600">-{{ order.discount | currency: currency() }}</span>
+                </div>
+              }
+              @if (orderTax(); as tax) {
+                <div class="border-t border-gray-200 pt-3 space-y-1" data-testid="order-tax-summary">
+                  <div class="flex justify-between text-sm"><span class="text-gray-600"><ng-container i18n>Net taxable amount:</ng-container></span><span class="font-medium">{{ tax.net | currency: currency() }}</span></div>
+                  @for (row of tax.rows; track $index) {
+                    <div class="flex justify-between text-sm"><span class="text-gray-600">{{ row.label }} {{ row.rate }}%:</span><span class="font-medium">{{ row.amount | currency: currency() }}</span></div>
+                  }
+                  @if (tax.included > 0) { <div class="flex justify-between text-xs text-gray-500"><span><ng-container i18n>of which included in prices</ng-container></span><span>{{ tax.included | currency: currency() }}</span></div> }
+                  @if (tax.added > 0) { <div class="flex justify-between text-xs text-gray-500"><span><ng-container i18n>of which added at checkout</ng-container></span><span>{{ tax.added | currency: currency() }}</span></div> }
+                  <div class="flex justify-between text-sm"><span class="text-gray-700 font-medium"><ng-container i18n>Total VAT:</ng-container></span><span class="font-semibold" data-testid="order-total-vat">{{ tax.total | currency: currency() }}</span></div>
                 </div>
               }
 

@@ -63,7 +63,7 @@
           <div class="flex justify-between items-start mb-1">
             <div class="flex-1 pr-2">
               <div class="font-semibold">{{ product.name }}</div>
-              <div class="text-xs text-gray-600"><ng-container i18n>{{ product.quantity }} x {{ product.price | currency:currency():'symbol':'1.2-2' }}</ng-container></div>
+              <div class="text-xs text-gray-600"><ng-container i18n>{{ product.quantity }} x {{ product.price | currency:currency():'symbol':'1.2-2' }}</ng-container>@if (lineTaxMarker(product); as marker) { <span data-testid="bill-line-tax"> · {{ marker }}</span> }</div>
             </div>
             <div class="font-semibold whitespace-nowrap">{{ getItemTotal(product) | currency:currency():'symbol':'1.2-2' }}</div>
           </div>
@@ -102,7 +102,15 @@
         </div>
       }
       
-      @if (order().tax && order().tax! > 0) {
+      @if (tax(); as t) {
+        <div data-testid="bill-tax-summary">
+          <div class="flex justify-between mb-1.5"><span><ng-container i18n>Net taxable amount:</ng-container></span><span>{{ t.net | currency:currency():'symbol':'1.2-2' }}</span></div>
+          @for (row of t.rows; track $index) {
+            <div class="flex justify-between mb-1.5"><span>{{ row.label }} {{ row.rate }}%:</span><span>{{ row.amount | currency:currency():'symbol':'1.2-2' }}</span></div>
+          }
+          <div class="flex justify-between mb-1.5"><span><ng-container i18n>Total VAT:</ng-container></span><span>{{ t.total | currency:currency():'symbol':'1.2-2' }}</span></div>
+        </div>
+      } @else if (!isTaxEngineOrder() && order().tax && order().tax! > 0) {
         <div class="flex justify-between mb-1.5">
           <span><ng-container i18n>Tax:</ng-container></span>
           <span>{{ order().tax | currency:currency():'symbol':'1.2-2' }}</span>

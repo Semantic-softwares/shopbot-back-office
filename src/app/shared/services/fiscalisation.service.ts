@@ -5,6 +5,8 @@ import { environment } from '../../../environments/environment';
 import { FiscalisationOverview } from '../models/mra-einvoicing.model';
 import { FiscalOrderView, FiscalTransactionPage, FiscalTransactionQuery } from '../models/fiscal.model';
 import { StoreStore } from '../stores/store.store';
+import { OfflineStore } from '../offline/offline-store.service';
+import { cachedFetch } from '../offline/cached-fetch';
 
 /**
  * The country-neutral window onto a store's tax authority. Everything fiscal in the app (the order tag and QR, the
@@ -15,6 +17,7 @@ import { StoreStore } from '../stores/store.store';
 export class FiscalisationService {
   private readonly http = inject(HttpClient);
   private readonly storeStore = inject(StoreStore);
+  private readonly offline = inject(OfflineStore);
   private readonly api = environment.apiUrl;
 
   readonly overview = signal<FiscalisationOverview | null>(null);
@@ -27,7 +30,8 @@ export class FiscalisationService {
       const storeId = this.storeStore.selectedStore()?._id;
       this.overview.set(null);
       if (!storeId) return;
-      this.http.get<FiscalisationOverview>(`${this.api}/revenue-authority/stores/${storeId}`).pipe(catchError(() => of(null))).subscribe((o) => {
+      // Remembered on the device, so the fiscal screens (and the counters on them) are still there with no connection.
+      cachedFetch(this.offline, `fiscal-overview:${storeId}`, this.http.get<FiscalisationOverview>(`${this.api}/revenue-authority/stores/${storeId}`)).pipe(catchError(() => of(null))).subscribe((o) => {
         // A late answer for a store the user already switched away from must not apply.
         if (this.storeStore.selectedStore()?._id === storeId) this.overview.set(o);
       });
@@ -45,6 +49,7 @@ export class FiscalisationService {
   transactions(storeId: string, query: FiscalTransactionQuery): Observable<FiscalTransactionPage> {
     let params = new HttpParams();
     for (const [k, v] of Object.entries(query)) if (v !== undefined && v !== '') params = params.set(k, String(v));
-    return this.http.get<FiscalTransactionPage>(`${this.api}/revenue-authority/stores/${storeId}/transactions`, { params });
+    // The last report seen for this period stays readable offline.
+    return cachedFetch(this.offline, `fiscal-transactions:${storeId}:${params.toString()}`, this.http.get<FiscalTransactionPage>(`${this.api}/revenue-authority/stores/${storeId}/transactions`, { params }));
   }
 }

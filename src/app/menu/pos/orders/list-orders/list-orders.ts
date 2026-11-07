@@ -425,7 +425,7 @@ export class ListOrders {
     ref.afterClosed().subscribe((refund: Refund | undefined) => {
       if (!refund) return;
       this.snackBar.open(
-        $localize`Refund ${refund.refundNumber} of ${this.formatMoney(refund.total)} recorded`,
+        refund.pendingSync ? $localize`Refund saved on this device. It will be recorded when you are back online.` : $localize`Refund ${refund.refundNumber} of ${this.formatMoney(refund.total)} recorded`,
         $localize`Close`,
         { duration: 5000 },
       );

@@ -44,6 +44,8 @@ export interface Refund {
   approvedBy?: string;
   status: 'completed';
   createdAt: string;
+  /** Made with no connection: kept on this device and sent when it is back (no number or credit note yet). */
+  pendingSync?: boolean;
 }
 
 export interface RefundableLine {
@@ -92,4 +94,6 @@ export interface CreateRefundRequest {
   tenders?: RefundTender[];
   approverPin?: string;
   idempotencyKey?: string;
+  /** When the refund was made, when it is made offline and recorded later. */
+  requestedAt?: string;
 }

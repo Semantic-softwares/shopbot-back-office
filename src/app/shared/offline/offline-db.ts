@@ -3,9 +3,10 @@
  * IndexedDB is the one browser store that is big, survives a reload and is available offline.
  */
 export const OFFLINE_DB_NAME = 'shopbot-offline';
-const VERSION = 1;
-export type OfflineTable = 'outbox' | 'reference';
-const KEY_PATH: Record<OfflineTable, string> = { outbox: 'id', reference: 'key' };
+// Version 2 adds the `refunds` table (refunds made with no connection). Upgrading only creates what is missing; nothing is touched.
+const VERSION = 2;
+export type OfflineTable = 'outbox' | 'reference' | 'refunds';
+const KEY_PATH: Record<OfflineTable, string> = { outbox: 'id', reference: 'key', refunds: 'id' };
 
 export class OfflineDb {
   private opening: Promise<IDBDatabase> | null = null;

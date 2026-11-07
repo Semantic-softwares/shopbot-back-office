@@ -416,7 +416,7 @@ export class ListReceiptsComponent {
       .afterClosed()
       .subscribe((refund: Refund | undefined) => {
         if (!refund) return;
-        this.snackBar.open($localize`Refund ${refund.refundNumber} recorded`, $localize`Close`, { duration: 5000 });
+        this.snackBar.open(refund.pendingSync ? $localize`Refund saved on this device. It will be recorded when you are back online.` : $localize`Refund ${refund.refundNumber} recorded`, $localize`Close`, { duration: 5000 });
         this.dataSource.reload();
       });
   }

@@ -36,9 +36,13 @@ export interface Store {
     updateProgress: StoreUpdateProgress;
     staffs: Employee[];
     tax?: number;
+    // Opt-in tax management. Absent or taxesEnabled=false: the store keeps the legacy single `tax` rate above.
+    taxSettings?: StoreTaxSettings;
     posSettings?: {
       requireOrdersPaymentBeforeCheckout?: boolean;
       useBarcodeScanner?: boolean;
+      /** A refund above this amount needs a manager's PIN. */
+      refundApprovalLimit?: number;
       receiptSettings?: {
         showNote?: boolean;
         showTax?: boolean;
@@ -260,3 +264,12 @@ export interface ChannexIntegration {
   };
 }
   
+export interface StoreTaxSettings {
+  taxesEnabled?: boolean;
+  defaultPricingMode?: 'inclusive' | 'exclusive';
+  defaultTaxId?: string | null;
+  taxRegistrationNumber?: string;
+  roundingMode?: 'per_line';
+  version?: number;
+  enabledAt?: string | null;
+}

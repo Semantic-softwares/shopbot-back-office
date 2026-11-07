@@ -18,6 +18,8 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { MraActivity, MraAuditEntry, MraOwnerView, MraStatus, MraTestDriveStatus, MraTestUserKind, MraView } from '../../../shared/models';
 import { MraEinvoicingService } from '../../../shared/services/mra-einvoicing.service';
 import { StoreStore } from '../../../shared/stores/store.store';
+import { TaxConfigService } from '../../../shared/tax/tax-config.service';
+import { RouterLink } from '@angular/router';
 import { TrPipe } from '../../../shared/i18n/tr.pipe';
 
 const MRA_PORTAL_URL = 'https://www.mra.mu';
@@ -63,7 +65,7 @@ type Mode = 'status' | 'wizard';
 @Component({
   selector: 'app-mra-einvoicing-settings',
   standalone: true,
-  imports: [TrPipe, 
+  imports: [TrPipe, RouterLink, 
     DatePipe,
     ReactiveFormsModule,
     MatButtonModule,
@@ -84,6 +86,7 @@ export class MraEinvoicingSettings implements OnInit, OnDestroy {
   private snackBar = inject(MatSnackBar);
   private service = inject(MraEinvoicingService);
   private storeStore = inject(StoreStore);
+  protected readonly taxConfig = inject(TaxConfigService);
 
   readonly portalUrl = MRA_PORTAL_URL;
   readonly firstTimeSteps = FIRST_TIME_STEPS;

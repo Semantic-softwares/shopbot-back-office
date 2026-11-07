@@ -2,10 +2,10 @@
   <div class="space-y-1.5">
     <!-- Only the lines that change the amount are worth a row: a Subtotal that equals the Total, or a
          "Discount $0", is noise. -->
-    @if (cartTotals().deliveryFee > 0 || cartTotals().discount > 0 || storeStore.selectedStore()?.tax! > 0) {
+    @if (cartTotals().deliveryFee > 0 || cartTotals().discount > 0 || (cartTotals().engine ? cartTotals().engine!.addedTax > 0 : storeStore.selectedStore()?.tax! > 0)) {
     <div class="flex justify-between text-sm">
       <span class="text-on-surface-variant"><ng-container i18n>Subtotal</ng-container></span>
-      <span class="font-medium">{{ cartTotals().subtotal | currency:  currency() : 'symbol' : '1.0-0' }}</span>
+      <span class="font-medium">{{ cartTotals().subtotal | currency:  currency() : 'symbol' : (cartTotals().engine ? '1.0-2' : '1.0-0') }}</span>
     </div>
     }
     @if (cartTotals().deliveryFee > 0) {
@@ -20,7 +20,36 @@
       <span class="font-medium">{{ cartTotals().discount | currency:  currency() : 'symbol' : '1.0-0' }}</span>
     </div>
     }
-    @if (storeStore.selectedStore()?.tax! > 0) {
+    @if (cartTotals().engine; as eng) {
+      <!-- Priced by the tax engine: each line has its own tax. Normal checkout stays short; the detail is one tap away. -->
+      @if (eng.addedTax > 0) {
+        <div class="flex justify-between text-sm" data-testid="tax-added">
+          <span class="text-on-surface-variant"><ng-container i18n>VAT added</ng-container></span>
+          <span class="font-medium">{{ eng.addedTax | currency: currency() : 'symbol' : '1.0-2' }}</span>
+        </div>
+      }
+      @if (eng.includedTax > 0) {
+        <div class="flex justify-between text-sm" data-testid="tax-included">
+          <span class="text-on-surface-variant"><ng-container i18n>VAT included in prices</ng-container></span>
+          <span class="font-medium">{{ eng.includedTax | currency: currency() : 'symbol' : '1.0-2' }}</span>
+        </div>
+      }
+      @if (eng.taxBreakdown.length) {
+        <details class="text-xs text-on-surface-variant" data-testid="tax-details">
+          <summary class="cursor-pointer select-none"><ng-container i18n>Tax details</ng-container></summary>
+          <div class="mt-1 space-y-1">
+            <div class="flex justify-between"><span><ng-container i18n>Net taxable amount</ng-container></span><span>{{ eng.taxableAmount | currency: currency() : 'symbol' : '1.0-2' }}</span></div>
+            @for (row of eng.taxBreakdown; track $index) {
+              <div class="flex justify-between">
+                <span>{{ row.name }} {{ row.rate }}%</span>
+                <span>{{ row.taxAmount | currency: currency() : 'symbol' : '1.0-2' }}</span>
+              </div>
+            }
+            <div class="flex justify-between font-medium"><span><ng-container i18n>Total VAT</ng-container></span><span>{{ eng.totalTax | currency: currency() : 'symbol' : '1.0-2' }}</span></div>
+          </div>
+        </details>
+      }
+    } @else if (storeStore.selectedStore()?.tax! > 0) {
       <div class="flex justify-between text-sm">
         <span class="text-on-surface-variant"><ng-container i18n>Tax ({{ storeStore.selectedStore()?.tax  }}%)</ng-container></span>
         <span class="font-medium">{{ cartTotals().tax |  currency: currency() : 'symbol' : '1.0-0' }}</span>
@@ -28,7 +57,7 @@
     }
     <div class="flex justify-between text-lg font-bold pt-2 border-t border-outline-variant">
       <span><ng-container i18n>Total</ng-container></span>
-      <span class="primary-text">{{ cartTotals().totalCost | currency: currency() : 'symbol' : '1.0-0' }}</span>
+      <span class="primary-text">{{ cartTotals().totalCost | currency: currency() : 'symbol' : (cartTotals().engine ? '1.0-2' : '1.0-0') }}</span>
     </div>
   </div>
 

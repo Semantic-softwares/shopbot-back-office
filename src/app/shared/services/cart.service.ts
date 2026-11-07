@@ -7,6 +7,9 @@ import {  Option } from "../models/product.model";
 import { Store } from "../models";
 import { environment } from "../../../environments/environment";
 import { CartStore } from "../stores/cart.store";
+import { calculateTax, fromMinor, toMinor, TaxLineInput } from "../tax/tax-engine";
+import { currencyExponent } from "../tax/currency";
+import { TaxConfigService } from "../tax/tax-config.service";
 
 @Injectable({
   providedIn: "root",
@@ -14,6 +17,7 @@ import { CartStore } from "../stores/cart.store";
 export class CartService {
   private readonly _httpClient = inject(HttpClient);
   private readonly cartStore = inject(CartStore);
+  private readonly taxConfig = inject(TaxConfigService);
   private hostServer = environment.apiUrl;
 
   public getStoreCartsRestructured(storeId: string): Observable<Cart[]> {
@@ -54,6 +58,11 @@ export class CartService {
     
       // Calculate subtotal before tax and discount
       const subtotal = totalBaseCost + totalVariantCost;
+
+      // A store that uses tax management prices each line on its own (inclusive or exclusive, its own tax); the legacy single
+      // rate below is only used by every other store, and by a cart that does not carry a tax snapshot on every line.
+      const engineSummary = this.engineSummary(cart, store, totalBaseCost, totalVariantCost);
+      if (engineSummary) return engineSummary;
     
       // Handle discount based on its type (amount or percentage)
       let discountAmount = 0;
@@ -103,6 +112,61 @@ export class CartService {
     }
   }
   
+
+  /** Per-line tax pricing, or null when this sale is not priced by the tax engine. */
+  private engineSummary(cart: Cart, store: Store, totalBaseCost: number, totalVariantCost: number): CartSummary | null {
+    const sold = cart.products.filter((p) => (Number(p.quantity) || 0) > 0);
+    if (!this.taxConfig.enabled() || !sold.length || !sold.every((p) => !!p.taxLine)) return null;
+
+    const exponent = currencyExponent(store?.currencyCode);
+    const lines: TaxLineInput[] = cart.products.map((product, index) => ({
+      key: String(index),
+      unitMinor: toMinor(product.price + this.getTotalForSelectedOptions(product.options ?? []), exponent),
+      quantity: Number(product.quantity) || 0,
+      mode: product.taxLine?.pricingMode ?? 'exclusive',
+      taxes: (product.taxLine?.taxes ?? []).map((t, i) => ({ ...t, priority: i })),
+    }));
+    const subtotalMinor = lines.reduce((sum, l) => sum + l.unitMinor * l.quantity, 0);
+
+    let discountMinor = 0;
+    if (cart.discount) {
+      if (cart.discount.discountType === 'Percentage') discountMinor = Math.round((subtotalMinor * cart.discount.value) / 100);
+      else if (cart.discount.discountType === 'Amount') discountMinor = toMinor(cart.discount.value, exponent);
+    }
+    const result = calculateTax({ lines, orderDiscountMinor: discountMinor });
+    const s = result.summary;
+    const deliveryFee = cart.delivery ? +cart.delivery : 0;
+    const major = (minor: number) => fromMinor(minor, exponent);
+
+    return {
+      totalBaseCost,
+      totalVariantCost,
+      subtotal: major(s.subtotal),
+      discount: major(s.discountTotal),
+      tax: major(s.totalTax),
+      deliveryFee,
+      totalCost: major(s.total) + deliveryFee,
+      engine: {
+        lines: result.lines.map((l) => ({
+          pricingMode: l.pricingMode,
+          enteredAmount: major(l.enteredAmount),
+          discountAllocated: major(l.discountAllocated),
+          taxableAmount: major(l.taxableAmount),
+          taxAmount: major(l.taxAmount),
+          total: major(l.total),
+          taxes: l.taxes,
+        })),
+        taxableAmount: major(s.taxableAmount),
+        totalTax: major(s.totalTax),
+        includedTax: major(s.includedTax),
+        addedTax: major(s.addedTax),
+        zeroRatedSales: major(s.zeroRatedSales),
+        exemptSales: major(s.exemptSales),
+        taxBreakdown: s.taxBreakdown.map((r) => ({ ...r, taxableAmount: major(r.taxableAmount), taxAmount: major(r.taxAmount) })),
+        taxConfigVersion: this.taxConfig.version(),
+      },
+    };
+  }
 
   public getTotalForSelectedOptions(variants: Option[]): number {
     if (variants && variants.length > 0) {

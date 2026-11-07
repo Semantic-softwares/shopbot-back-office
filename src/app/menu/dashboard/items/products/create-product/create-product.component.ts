@@ -32,6 +32,9 @@ import { PageHeaderComponent } from '../../../../../shared/components/page-heade
 import { NoRecordComponent } from '../../../../../shared/components/no-record/no-record.component';
 import { environment } from '../../../../../../environments/environment';
 import { ValidationErrorsDialogComponent } from '../../../../../shared/components/validation-errors-dialog/validation-errors-dialog.component';
+import { TaxConfigService } from '../../../../../shared/tax/tax-config.service';
+import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
+import { calculateTax, fromMinor, resolvePricingMode, toMinor } from '../../../../../shared/tax/tax-engine';
 
 interface ProductUnit {
   value: string;
@@ -64,6 +67,7 @@ interface ImagePreview {
     RouterModule,
     NoRecordComponent,
     PageHeaderComponent,
+    TrPipe,
   ],
 })
 export class CreateProductComponent implements OnInit {
@@ -75,6 +79,7 @@ export class CreateProductComponent implements OnInit {
   public storeStore = inject(StoreStore);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
+  public taxConfig = inject(TaxConfigService);
   public isSubmitting = signal(false);
   public categories = rxResource({
     params: () => ({
@@ -109,6 +114,24 @@ export class CreateProductComponent implements OnInit {
 
   private price = signal<number>(0);
   private costPrice = signal<number>(0);
+
+  // Tax management (only shown for a store that has set it up). What the product had when it was loaded, so a save that did
+  // not touch the tax does not send it (and does not count as a tax change).
+  private initialTax = { taxId: null as string | null, pricingMode: 'inherit' };
+  private taxChoice = signal({ taxId: null as string | null, pricingMode: 'inherit' });
+  /** Live example of what the chosen tax and pricing mode mean for this price, so it is clear whether the price includes tax. */
+  public taxExample = computed(() => {
+    const price = this.price();
+    if (!this.taxConfig.enabled() || !price) return null;
+    const choice = this.taxChoice();
+    const tax = this.taxConfig.taxes().find((t) => t._id === choice.taxId) ?? this.taxConfig.defaultTax();
+    if (!tax) return null;
+    const mode = resolvePricingMode(choice.pricingMode, this.taxConfig.defaultPricingMode());
+    const line = calculateTax({
+      lines: [{ key: 'p', unitMinor: toMinor(price), quantity: 1, mode, taxes: [{ name: tax.name, kind: tax.kind, rate: tax.rate, compound: tax.compound }] }],
+    }).lines[0];
+    return { mode, taxName: tax.name, rate: tax.rate, net: fromMinor(line.taxableAmount), tax: fromMinor(line.taxAmount), total: fromMinor(line.total) };
+  });
   profit = computed(() => this.price() - this.costPrice());
 
   selectedImages: ImagePreview[] = [];
@@ -140,7 +163,9 @@ export class CreateProductComponent implements OnInit {
       // *out* (e.g. a chef's-choice special that needs a verbal explanation).
       availableForSelfOrder: [true],
       options: [[]], // Add variants form control
+      taxSettings: this.fb.group({ taxId: [null as string | null], pricingMode: ['inherit'] }),
     });
+    this.productForm.get('taxSettings')?.valueChanges.subscribe((v) => this.taxChoice.set({ taxId: v.taxId ?? null, pricingMode: v.pricingMode ?? 'inherit' }));
 
     // Subscribe to price changes
     this.productForm.get('price')?.valueChanges.subscribe((value) => {
@@ -288,7 +313,9 @@ export class CreateProductComponent implements OnInit {
           inStock: product.activate,
           photos: product.photos || [],
           availableForSelfOrder: product.availableForSelfOrder ?? true,
+          taxSettings: { taxId: product.tax?.taxIds?.[0] ?? null, pricingMode: product.tax?.pricingMode ?? 'inherit' },
         });
+        this.initialTax = { taxId: product.tax?.taxIds?.[0] ?? null, pricingMode: product.tax?.pricingMode ?? 'inherit' };
 
         if (product.photos?.length) {
           this.selectedImages = product.photos.map((photo) => ({
@@ -341,7 +368,12 @@ export class CreateProductComponent implements OnInit {
     this.isSubmitting.set(true);
     const raw = this.productForm.getRawValue();
     // The server's field is criticalStockLevel; the form's own name for it was never saved before.
-    const formValue = { ...raw, criticalStockLevel: raw.criticalStock, reorderTarget: raw.reorderTarget === '' ? null : raw.reorderTarget };
+    const { taxSettings, ...rest } = raw;
+    const formValue: any = { ...rest, criticalStockLevel: raw.criticalStock, reorderTarget: raw.reorderTarget === '' ? null : raw.reorderTarget };
+    // Only a store that uses tax management sends a tax, and only when it was changed.
+    if (this.taxConfig.enabled() && (taxSettings.taxId !== this.initialTax.taxId || taxSettings.pricingMode !== this.initialTax.pricingMode)) {
+      formValue.tax = { taxIds: taxSettings.taxId ? [taxSettings.taxId] : [], pricingMode: taxSettings.pricingMode };
+    }
     const productId = this.productId();
 
     // Step 1: Save/Update product

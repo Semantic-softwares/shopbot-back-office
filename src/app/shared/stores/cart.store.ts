@@ -6,7 +6,8 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { computed } from '@angular/core';
+import { computed, inject } from '@angular/core';
+import { TaxConfigService } from '../tax/tax-config.service';
 import { Cart, CartSummary } from '../models/cart.model';
 import { Product } from '../models/product.model';
 import { Discount, PaymentMethod, User } from '../models';
@@ -55,7 +56,7 @@ export const CartStore = signalStore(
     }),
   })),
 
-  withMethods((store) => ({
+  withMethods((store, taxConfig = inject(TaxConfigService)) => ({
     async loadAll(): Promise<void> {
       patchState(store, { isLoading: true });
     },
@@ -160,6 +161,9 @@ export const CartStore = signalStore(
     },
 
     addToCart(cartId: string, product: Product, isEditing = false): void {
+      // A store that uses tax management snapshots the product's tax rules onto the line as it goes into the sale;
+      // any other store gets the product back untouched.
+      product = taxConfig.stamp(product);
       const currentSelectedCart = store.selectedCart();
       patchState(store, (state) => {
         const updatedCarts = state.carts.map((cart) => {
@@ -256,6 +260,23 @@ export const CartStore = signalStore(
           selectedCart: updatedSelectedCart,
         };
       });
+    },
+
+    /**
+     * Re-reads the tax rules for every line of the selected cart when they were taken from an older tax configuration.
+     * Returns true when anything was refreshed, so the caller can show the new totals before the sale is saved.
+     */
+    refreshTax(): boolean {
+      const cart = store.selectedCart();
+      if (!cart || !taxConfig.enabled()) return false;
+      const stale = cart.products.some((p) => p.taxLine && p.taxLine.configVersion !== taxConfig.version());
+      if (!stale) return false;
+      const products = cart.products.map((p) => (p.taxLine ? taxConfig.stamp(p) : p));
+      patchState(store, (state) => ({
+        carts: state.carts.map((c) => (c._id === cart._id ? { ...c, products } : c)),
+        selectedCart: { ...cart, products },
+      }));
+      return true;
     },
 
     removeFromCart(cartId: string, productId: string): void {

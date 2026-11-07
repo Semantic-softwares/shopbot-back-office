@@ -95,6 +95,8 @@ export interface Order {
   serviceFee?: number;
   orderInstruction?: string;
   tax?: number;
+  /** Tax snapshot of a sale priced by tax management; absent on every older order. */
+  taxSummary?: any;
   shippingFee?: number;
   driverTip?: number;
   /**

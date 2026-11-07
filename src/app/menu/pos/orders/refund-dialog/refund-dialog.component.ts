@@ -12,6 +12,8 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { StoreStore } from '../../../../shared/stores/store.store';
 import { RefundService } from '../../../../shared/services/refund.service';
+import { OfflineStore } from '../../../../shared/offline/offline-store.service';
+import { ConnectivityService } from '../../../../shared/offline/connectivity.service';
 import {
   CreateRefundRequest,
   Refund,
@@ -68,6 +70,8 @@ export class RefundDialogComponent implements OnInit {
   private dialogRef = inject(MatDialogRef<RefundDialogComponent, Refund | undefined>);
   private refundService = inject(RefundService);
   private storeStore = inject(StoreStore);
+  private offlineStore = inject(OfflineStore);
+  private net = inject(ConnectivityService);
 
   /** One key per dialog, reused on every retry, so a double click or a timeout retry cannot refund twice. */
   private idempotencyKey = crypto.randomUUID();
@@ -91,12 +95,23 @@ export class RefundDialogComponent implements OnInit {
   public pin = signal('');
   /** Set after the server asks for a second approver, so the PIN box appears. */
   public approvalRequested = signal(false);
+  /** No connection: the screen is worked out from this device's copy of the sale, and the refund is saved here and sent later. */
+  public offline = signal(false);
 
   public currency = computed(() => this.storeStore.selectedStore()?.currency || '₦');
   public reasons = computed(() => (this.info()?.reasons ?? []).map((code) => ({ code, label: refundReasonLabel(code) })));
   public reasonLabel = refundReasonLabel;
 
-  public showPin = computed(() => this.approvalRequested() || (this.info() ? !this.info()!.mayRefund : false));
+  /** Whether the server would ask for a manager's PIN: no permission, or an amount above the store's limit. */
+  private needsApproval = computed(() => {
+    const info = this.info();
+    if (!info) return false;
+    const limit = info.approvalLimit;
+    return this.approvalRequested() || !info.mayRefund || (typeof limit === 'number' && limit > 0 && this.total() > limit);
+  });
+
+  // A PIN cannot be checked without the server, so offline there is no box for it (see `problems`).
+  public showPin = computed(() => !this.offline() && (this.approvalRequested() || (this.info() ? !this.info()!.mayRefund : false)));
 
   /** What the chosen items are worth as a share of the sale, in the same way the server works it out. */
   public total = computed(() => {
@@ -133,6 +148,9 @@ export class RefundDialogComponent implements OnInit {
     }
     if (!this.reason()) out.push({ path: 'reason', title: $localize`Reason`, detail: $localize`Say why this sale is being refunded.` });
     if (this.noteRequired() && !this.note().trim()) out.push({ path: 'note', title: $localize`Note`, detail: $localize`Describe the reason, since “Other” does not say what happened.` });
+    if (this.offline() && this.needsApproval()) {
+      out.push({ path: 'approval', title: $localize`Manager approval`, detail: $localize`This refund needs a manager's PIN, which can only be checked online. Reconnect to approve it.` });
+    }
     if (this.showPin() && !this.pin().trim()) out.push({ path: 'pin', title: $localize`Manager PIN`, detail: $localize`A manager must enter their PIN to approve this refund.` });
     return out;
   });
@@ -140,20 +158,75 @@ export class RefundDialogComponent implements OnInit {
   public canSubmit = computed(() => !this.submitting() && !!this.info() && this.problems().length === 0);
 
   ngOnInit(): void {
+    if (this.net.offline()) {
+      void this.loadOffline();
+      return;
+    }
     this.refundService.refundable(this.data.orderId).subscribe({
-      next: (info) => {
-        this.info.set(info);
-        this.loading.set(false);
-        if (!info.paid) this.loadError.set($localize`This order has not been paid. Void it instead.`);
-        else if (info.voided) this.loadError.set($localize`This order was cancelled, so there is nothing to refund.`);
-        else if (info.remainingAmount <= 0) this.loadError.set($localize`This order has already been fully refunded.`);
-        else if (!info.lines.some((l) => l.refundableQuantity > 0)) this.mode.set('amount');
-      },
+      next: (info) => this.show(info),
       error: (err) => {
-        this.loading.set(false);
-        this.loadError.set(err?.error?.message || $localize`Could not load this order.`);
+        // The server cannot be reached (status 0): carry on from this device's copy of the sale.
+        if (!err?.status) void this.loadOffline();
+        else {
+          this.loading.set(false);
+          this.loadError.set(err?.error?.message || $localize`Could not load this order.`);
+        }
       },
     });
+  }
+
+  private show(info: Refundable): void {
+    this.info.set(info);
+    this.loading.set(false);
+    if (!info.paid) this.loadError.set($localize`This order has not been paid. Void it instead.`);
+    else if (info.voided) this.loadError.set($localize`This order was cancelled, so there is nothing to refund.`);
+    else if (info.remainingAmount <= 0) this.loadError.set($localize`This order has already been fully refunded.`);
+    else if (!info.lines.some((l) => l.refundableQuantity > 0)) this.mode.set('amount');
+  }
+
+  private async loadOffline(): Promise<void> {
+    const info = await this.refundService.refundableOffline(this.data.orderId);
+    if (!info) {
+      this.loading.set(false);
+      this.loadError.set($localize`There is no connection, and this sale is not saved on this device. Open it once while you are online to refund it offline.`);
+      return;
+    }
+    this.offline.set(true);
+    this.show(info);
+  }
+
+  /** Keeps the refund on this device; the server records it (and issues the credit note) when the connection is back. */
+  private async saveOffline(body: CreateRefundRequest, info: Refundable): Promise<void> {
+    const storeId = this.storeStore.selectedStore()?._id ?? '';
+    const estimate = this.total();
+    body.requestedAt = new Date().toISOString();
+    const summary = body.lines
+      ? body.lines.map((l) => `${l.quantity} × ${info.lines.find((x) => x.lineId === l.lineId)?.name ?? ''}`).join(', ')
+      : $localize`Amount refund`;
+    try {
+      await this.offlineStore.enqueueRefund({ store: storeId, orderId: this.data.orderId, reference: info.reference, body, estimate, summary });
+    } catch {
+      this.submitting.set(false);
+      this.error.set($localize`This device could not save the refund. Please try again.`);
+      return;
+    }
+    const saved: Refund = {
+      _id: String(body.idempotencyKey),
+      refundNumber: $localize`pending`,
+      order: this.data.orderId,
+      store: storeId,
+      orderReference: info.reference,
+      kind: body.lines ? 'items' : 'amount',
+      lines: [],
+      total: estimate,
+      tenders: [],
+      reasonCode: body.reasonCode,
+      note: body.note,
+      status: 'completed',
+      createdAt: new Date().toISOString(),
+      pendingSync: true,
+    };
+    this.dialogRef.close(saved);
   }
 
   public setQty(lineId: string, qty: number, max: number): void {
@@ -212,9 +285,18 @@ export class RefundDialogComponent implements OnInit {
 
     this.submitting.set(true);
     this.error.set(null);
+    if (this.offline()) {
+      void this.saveOffline(body, info);
+      return;
+    }
     this.refundService.create(this.data.orderId, body).subscribe({
       next: (res) => this.dialogRef.close(res.refund),
       error: (err) => {
+        // The connection dropped while sending. The request may or may not have arrived: saving it with the same key is safe either way.
+        if (!err?.status && !this.needsApproval()) {
+          void this.saveOffline(body, info);
+          return;
+        }
         this.submitting.set(false);
         if (err?.status === 403 && err?.error?.code === 'APPROVAL_REQUIRED') {
           this.approvalRequested.set(true);

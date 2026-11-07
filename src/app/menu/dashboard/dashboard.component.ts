@@ -122,6 +122,10 @@ export class DashboardComponent {
     'Customers': [
       'erp.products.view',
     ],
+    'Accounting': [
+      'erp.accounting.view',
+      'erp.accounting.manage',
+    ],
     'Settings': [
       'settings.store.view',
       'settings.store.edit',
@@ -248,6 +252,13 @@ export class DashboardComponent {
         { icon: 'inventory_2', label: $localize`Quick stock-in`, link: './inventory/restock', permission: 'view_company' },
         { icon: 'calculate', label: $localize`Reconciliations`, link: './inventory/reconciliations', permission: 'view_company' },
       ]
+    },
+    {
+      name: 'Accounting',
+      children: [
+        { icon: 'percent', label: $localize`Tax Management`, link: './accounting/tax-management', permission: 'view_company' },
+        { icon: 'summarize', label: $localize`Tax Report`, link: './accounting/tax-report', permission: 'view_company' },
+      ],
     },
     {
       name: 'Customers',

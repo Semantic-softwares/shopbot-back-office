@@ -693,6 +693,15 @@ export class CartComponent implements OnDestroy {
       });
   }
 
+  /**
+   * The cart as it is saved with the order. Line tax snapshots only go with a sale that was priced by the tax engine; for any
+   * other sale they are left out so the server stores it as the legacy order it is.
+   */
+  private orderCart<T extends { products: any[] }>(cart: T): T {
+    if (this.cartSummary()?.engine) return cart;
+    return { ...cart, products: cart.products.map(({ taxLine, ...rest }) => rest) };
+  }
+
   private async processCheckout(payment?: PaymentDialogResult): Promise<void> {
   // Only derive the sale type from tableStore for a brand-new sale. During an
   // edit, editOrder()/onEditOrder() already set the correct sale type before
@@ -737,6 +746,12 @@ export class CartComponent implements OnDestroy {
     return;
   }
 
+  // Tax rules changed since an item was added: re-read them and let the cashier see the new totals before the sale is saved.
+  if (this.net.online() && this.cartStore.refreshTax()) {
+    this.snackBar.open($localize`Tax settings changed. The totals were updated, please check them and pay again.`, $localize`Close`, { duration: 6000 });
+    return;
+  }
+
   // Payment method is optional - can always be updated later
   this.cartStore.updateCartSummary(this.cartSummary()!);
 
@@ -769,7 +784,7 @@ export class CartComponent implements OnDestroy {
 
     // Update cart summary before sending
     const updatedCart = {
-      ...selectedCart,
+      ...this.orderCart(selectedCart),
       cartSummary: this.cartSummary() ?? undefined,
     };
 
@@ -825,7 +840,7 @@ export class CartComponent implements OnDestroy {
     // Create new order
     const newOrder = {
       _id: objectId(),
-      cart: selectedCart,
+      cart: this.orderCart(selectedCart),
       store: selectedStore,
       user: this.selectedCustomer() ?? undefined,
       table: selectedTable ?? undefined,

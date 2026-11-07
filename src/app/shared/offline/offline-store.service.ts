@@ -1,6 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { OfflineDb } from './offline-db';
-import { OutboxEntry, ReferenceEntry } from './offline.models';
+import { OutboxEntry, ReferenceEntry, RefundOutboxEntry } from './offline.models';
+import { CreateRefundRequest } from '../models/refund.model';
 import { Order } from '../models/order.model';
 
 const CHANNEL = 'shopbot-offline';
@@ -18,8 +19,12 @@ export class OfflineStore {
 
   /** Orders waiting to reach the server, oldest first. Newest state is in memory; IndexedDB is the durable copy. */
   readonly outbox = computed(() => [...this.entries()].sort((a, b) => a.createdAt.localeCompare(b.createdAt)));
-  readonly waiting = computed(() => this.entries().filter((e) => e.status !== 'failed').length);
-  readonly failed = computed(() => this.entries().filter((e) => e.status === 'failed').length);
+  private readonly refundEntries = signal<RefundOutboxEntry[]>([]);
+  /** Refunds made with no connection, oldest first. */
+  readonly refunds = computed(() => [...this.refundEntries()].sort((a, b) => a.createdAt.localeCompare(b.createdAt)));
+  // Refunds count with the sales: the toolbar light, the retry timer and "Sync now" all cover both.
+  readonly waiting = computed(() => this.entries().filter((e) => e.status !== 'failed').length + this.refundEntries().filter((e) => e.status !== 'failed').length);
+  readonly failed = computed(() => this.entries().filter((e) => e.status === 'failed').length + this.refundEntries().filter((e) => e.status === 'failed').length);
   readonly ready = signal(false);
 
   constructor() {
@@ -36,6 +41,8 @@ export class OfflineStore {
   async reload(): Promise<void> {
     if (!OfflineDb.supported()) return;
     try {
+      const refunds = await this.db.getAll<RefundOutboxEntry>('refunds');
+      this.refundEntries.set(refunds.map((e) => (e.status === 'syncing' && !this.inFlight.has(e.id) ? { ...e, status: 'pending' as const } : e)));
       const all = await this.db.getAll<OutboxEntry>('outbox');
       // A tab that closed while an order was being sent leaves it "syncing": it is simply waiting again.
       this.entries.set(all.map((e) => (e.status === 'syncing' && !this.inFlight.has(e.id) ? { ...e, status: 'pending' as const } : e)));
@@ -77,6 +84,47 @@ export class OfflineStore {
   async remove(id: string): Promise<void> {
     if (OfflineDb.supported()) await this.db.delete('outbox', id);
     this.entries.update((all) => all.filter((e) => e.id !== id));
+    this.announce();
+  }
+
+  // ---- refunds made with no connection ----------------------------------------------------------------------------
+
+  getRefund(id: string): RefundOutboxEntry | undefined { return this.refundEntries().find((e) => e.id === id); }
+  refundsFor(orderId: string): RefundOutboxEntry[] { return this.refunds().filter((e) => e.orderId === orderId); }
+
+  /** Saves a refund on the device. Resolves once it is durably stored. */
+  async enqueueRefund(input: { store: string; orderId: string; reference?: string; body: CreateRefundRequest; estimate: number; summary: string }): Promise<RefundOutboxEntry> {
+    const entry: RefundOutboxEntry = {
+      id: String(input.body.idempotencyKey),
+      store: input.store,
+      orderId: input.orderId,
+      reference: input.reference,
+      body: input.body,
+      estimate: input.estimate,
+      summary: input.summary,
+      status: 'pending',
+      attempts: 0,
+      createdAt: new Date().toISOString(),
+      nextTryAt: 0,
+    };
+    await this.saveRefund(entry);
+    return entry;
+  }
+
+  async saveRefund(entry: RefundOutboxEntry): Promise<void> {
+    if (OfflineDb.supported()) await this.db.put('refunds', entry);
+    this.refundEntries.update((all) => [...all.filter((e) => e.id !== entry.id), entry]);
+    this.announce();
+  }
+
+  async patchRefund(id: string, change: Partial<RefundOutboxEntry>): Promise<void> {
+    const current = this.getRefund(id);
+    if (current) await this.saveRefund({ ...current, ...change });
+  }
+
+  async removeRefund(id: string): Promise<void> {
+    if (OfflineDb.supported()) await this.db.delete('refunds', id);
+    this.refundEntries.update((all) => all.filter((e) => e.id !== id));
     this.announce();
   }
 

@@ -1,4 +1,5 @@
 import { Order } from '../models/order.model';
+import { CreateRefundRequest } from '../models/refund.model';
 
 /** `pending`: waiting for its turn or for the network. `syncing`: being sent right now. `failed`: given up, needs a person. */
 export type OutboxStatus = 'pending' | 'syncing' | 'failed';
@@ -13,6 +14,27 @@ export interface OutboxEntry {
   lastError?: string;
   createdAt: string;
   /** Not before this time (backoff). */
+  nextTryAt: number;
+}
+
+/**
+ * A refund made with no connection, kept on the device until the server records it. `id` is the refund's idempotency key, so
+ * sending it twice can never refund twice. Everything the server decides (the exact amount, the credit note) happens when it
+ * arrives; `estimate` is only what the cashier was shown.
+ */
+export interface RefundOutboxEntry {
+  id: string;
+  store: string;
+  orderId: string;
+  reference?: string;
+  body: CreateRefundRequest;
+  estimate: number;
+  /** For the "waiting" list: what was refunded, in words. */
+  summary: string;
+  status: OutboxStatus;
+  attempts: number;
+  lastError?: string;
+  createdAt: string;
   nextTryAt: number;
 }
 

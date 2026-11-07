@@ -35,6 +35,8 @@ export const MENU_ROUTES: Routes = [
         'erp.suppliers.edit',
         'erp.suppliers.delete',
         'erp.purchasing.view',
+        'erp.accounting.view',
+        'erp.accounting.manage',
       ],
       permissionMode: 'any',
     },

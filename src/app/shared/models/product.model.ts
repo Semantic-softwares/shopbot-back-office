@@ -38,8 +38,42 @@ export interface Product {
   qty?: number;
   station?: Station | string | any;
   expiryDate?: Date;
+  // Tax management (opt-in per store): which taxes apply and whether the price includes them.
+  tax?: ProductTaxSettings;
+  // Immutable tax snapshot taken when the item went into a sale (cart line / order line), see shared/tax.
+  taxLine?: TaxLine;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface ProductTaxSettings {
+  taxIds?: string[];
+  pricingMode?: 'inherit' | 'inclusive' | 'exclusive';
+}
+
+/** The tax rules in force when a line was priced, and (once calculated) its amounts in major units. */
+export interface TaxLine {
+  pricingMode: 'inclusive' | 'exclusive';
+  taxes: TaxLineRule[];
+  /** Store tax config version the rules came from. */
+  configVersion?: number;
+  enteredAmount?: number;
+  discountAllocated?: number;
+  taxableAmount?: number;
+  taxAmount?: number;
+  total?: number;
+}
+
+export interface TaxLineRule {
+  taxId?: string;
+  name: string;
+  code?: string;
+  mraTaxCode?: string | null;
+  kind: 'standard' | 'zero_rated' | 'exempt';
+  rate: number;
+  compound?: boolean;
+  taxableAmount?: number;
+  taxAmount?: number;
 }
 
 export interface Option {

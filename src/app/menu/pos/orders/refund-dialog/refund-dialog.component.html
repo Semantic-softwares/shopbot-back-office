@@ -9,6 +9,12 @@
   } @else if (loadError()) {
     <p class="py-6 text-center text-on-surface-variant">{{ loadError() }}</p>
   } @else if (info(); as inf) {
+    @if (offline()) {
+      <div class="mb-3 flex items-start gap-2 rounded-lg bg-surface-container px-3 py-2 text-sm" data-testid="refund-offline">
+        <mat-icon class="!h-5 !w-5 !text-xl !leading-none text-on-surface-variant">cloud_off</mat-icon>
+        <div><ng-container i18n>No connection. The refund is saved on this device and recorded when you are back online; the credit note is issued then.</ng-container></div>
+      </div>
+    }
     <p class="mb-3 text-sm text-on-surface-variant">
       <ng-container i18n>Paid</ng-container> {{ inf.total | currency: currency() : 'symbol' : '1.0-2' }}
       @if (inf.refundedAmount > 0) {

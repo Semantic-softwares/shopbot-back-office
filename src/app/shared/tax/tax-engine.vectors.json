@@ -1,0 +1,89 @@
+[
+  {
+    "name": "inclusive product: 115 with 15% VAT",
+    "lines": [{ "key": "a", "unit": 115, "quantity": 1, "mode": "inclusive", "taxes": [{ "name": "VAT", "kind": "standard", "rate": 15 }] }],
+    "expect": { "lines": [{ "taxable": 100, "tax": 15, "total": 115 }], "summary": { "subtotal": 115, "totalTax": 15, "includedTax": 15, "addedTax": 0, "total": 115 } }
+  },
+  {
+    "name": "exclusive product: 100 with 15% VAT",
+    "lines": [{ "key": "a", "unit": 100, "quantity": 1, "mode": "exclusive", "taxes": [{ "name": "VAT", "kind": "standard", "rate": 15 }] }],
+    "expect": { "lines": [{ "taxable": 100, "tax": 15, "total": 115 }], "summary": { "subtotal": 100, "totalTax": 15, "includedTax": 0, "addedTax": 15, "total": 115 } }
+  },
+  {
+    "name": "mixed inclusive and exclusive in one cart",
+    "lines": [
+      { "key": "burger", "unit": 115, "quantity": 1, "mode": "inclusive", "taxes": [{ "name": "VAT", "kind": "standard", "rate": 15 }] },
+      { "key": "drink", "unit": 100, "quantity": 1, "mode": "exclusive", "taxes": [{ "name": "VAT", "kind": "standard", "rate": 15 }] }
+    ],
+    "expect": {
+      "lines": [{ "taxable": 100, "tax": 15, "total": 115 }, { "taxable": 100, "tax": 15, "total": 115 }],
+      "summary": { "subtotal": 215, "taxableAmount": 200, "totalTax": 30, "includedTax": 15, "addedTax": 15, "total": 230 }
+    }
+  },
+  {
+    "name": "quantity 3 of an inclusive product",
+    "lines": [{ "key": "a", "unit": 115, "quantity": 3, "mode": "inclusive", "taxes": [{ "name": "VAT", "kind": "standard", "rate": 15 }] }],
+    "expect": { "lines": [{ "taxable": 300, "tax": 45, "total": 345 }], "summary": { "subtotal": 345, "totalTax": 45, "total": 345 } }
+  },
+  {
+    "name": "zero-rated product keeps its own kind",
+    "lines": [{ "key": "a", "unit": 100, "quantity": 1, "mode": "exclusive", "taxes": [{ "name": "Zero rated VAT", "kind": "zero_rated", "rate": 0 }] }],
+    "expect": { "lines": [{ "taxable": 100, "tax": 0, "total": 100 }], "summary": { "totalTax": 0, "zeroRatedSales": 100, "exemptSales": 0, "total": 100 } }
+  },
+  {
+    "name": "exempt product is distinct from zero-rated",
+    "lines": [{ "key": "a", "unit": 100, "quantity": 1, "mode": "inclusive", "taxes": [{ "name": "VAT Exempt", "kind": "exempt", "rate": 0 }] }],
+    "expect": { "lines": [{ "taxable": 100, "tax": 0, "total": 100 }], "summary": { "totalTax": 0, "zeroRatedSales": 0, "exemptSales": 100, "total": 100 } }
+  },
+  {
+    "name": "order-level discount shared in proportion before tax",
+    "orderDiscount": 23,
+    "lines": [
+      { "key": "burger", "unit": 115, "quantity": 1, "mode": "inclusive", "taxes": [{ "name": "VAT", "kind": "standard", "rate": 15 }] },
+      { "key": "drink", "unit": 100, "quantity": 1, "mode": "exclusive", "taxes": [{ "name": "VAT", "kind": "standard", "rate": 15 }] }
+    ],
+    "expect": {
+      "lines": [{ "taxable": 89.3, "tax": 13.4, "total": 102.7 }, { "taxable": 89.3, "tax": 13.4, "total": 102.7 }],
+      "summary": { "subtotal": 215, "discountTotal": 23, "taxableAmount": 178.6, "totalTax": 26.8, "total": 205.4 }
+    }
+  },
+  {
+    "name": "item-level discount",
+    "lines": [{ "key": "a", "unit": 100, "quantity": 1, "mode": "exclusive", "lineDiscount": 10, "taxes": [{ "name": "VAT", "kind": "standard", "rate": 15 }] }],
+    "expect": { "lines": [{ "taxable": 90, "tax": 13.5, "total": 103.5 }], "summary": { "subtotal": 100, "discountTotal": 10, "totalTax": 13.5, "total": 103.5 } }
+  },
+  {
+    "name": "inclusive rounding: 10.00 at 15%",
+    "lines": [{ "key": "a", "unit": 10, "quantity": 1, "mode": "inclusive", "taxes": [{ "name": "VAT", "kind": "standard", "rate": 15 }] }],
+    "expect": { "lines": [{ "taxable": 8.7, "tax": 1.3, "total": 10 }], "summary": { "totalTax": 1.3, "total": 10 } }
+  },
+  {
+    "name": "zero-decimal currency",
+    "exponent": 0,
+    "lines": [{ "key": "a", "unit": 1180, "quantity": 1, "mode": "inclusive", "taxes": [{ "name": "VAT", "kind": "standard", "rate": 18 }] }],
+    "expect": { "lines": [{ "taxable": 1000, "tax": 180, "total": 1180 }], "summary": { "totalTax": 180, "total": 1180 } }
+  },
+  {
+    "name": "two independent taxes",
+    "lines": [{ "key": "a", "unit": 100, "quantity": 1, "mode": "exclusive", "taxes": [{ "name": "A", "kind": "standard", "rate": 10, "priority": 1 }, { "name": "B", "kind": "standard", "rate": 5, "priority": 2 }] }],
+    "expect": { "lines": [{ "taxable": 100, "tax": 15, "total": 115, "taxes": [10, 5] }], "summary": { "totalTax": 15, "total": 115 } }
+  },
+  {
+    "name": "compound tax is charged on the amount including the first tax",
+    "lines": [{ "key": "a", "unit": 100, "quantity": 1, "mode": "exclusive", "taxes": [{ "name": "A", "kind": "standard", "rate": 10, "priority": 1 }, { "name": "B", "kind": "standard", "rate": 5, "compound": true, "priority": 2 }] }],
+    "expect": { "lines": [{ "taxable": 100, "tax": 15.5, "total": 115.5, "taxes": [10, 5.5] }], "summary": { "totalTax": 15.5, "total": 115.5 } }
+  },
+  {
+    "name": "no taxes: the amount is untouched",
+    "lines": [{ "key": "a", "unit": 42.5, "quantity": 2, "mode": "exclusive", "taxes": [] }],
+    "expect": { "lines": [{ "taxable": 85, "tax": 0, "total": 85 }], "summary": { "subtotal": 85, "totalTax": 0, "total": 85 } }
+  },
+  {
+    "name": "large order adds up to the cent",
+    "lines": [
+      { "key": "a", "unit": 1234567.89, "quantity": 7, "mode": "inclusive", "taxes": [{ "name": "VAT", "kind": "standard", "rate": 15 }] },
+      { "key": "b", "unit": 99999.99, "quantity": 13, "mode": "exclusive", "taxes": [{ "name": "VAT", "kind": "standard", "rate": 15 }] }
+    ],
+    "expect": { "lines": [{ "taxable": 7514761.07, "tax": 1127214.16, "total": 8641975.23 }, { "taxable": 1299999.87, "tax": 194999.98, "total": 1494999.85 }], "summary": { "total": 10136975.08 } }
+  }
+]

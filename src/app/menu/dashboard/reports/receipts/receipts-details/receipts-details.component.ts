@@ -1,4 +1,5 @@
 import { catchError, of, throwError } from 'rxjs';
+import { lineTaxMarker, showTaxOnReceipt, taxDisplay } from '../../../../../shared/tax/tax-display';
 import { FiscalisationService } from '../../../../../shared/services/fiscalisation.service';
 import { FiscalTag, NOT_YET_FISCALIZED_TEXT } from '../../../../../shared/models/fiscal.model';
 import { StoreStore } from '../../../../../shared/stores/store.store';
@@ -272,7 +273,7 @@ export class ReceiptsDetailsComponent {
       .afterClosed()
       .subscribe((refund: Refund | undefined) => {
         if (!refund) return;
-        this.snackBar.open($localize`Refund ${refund.refundNumber} recorded`, $localize`Close`, { duration: 5000 });
+        this.snackBar.open(refund.pendingSync ? $localize`Refund saved on this device. It will be recorded when you are back online.` : $localize`Refund ${refund.refundNumber} recorded`, $localize`Close`, { duration: 5000 });
         this.orderResource.reload();
         this.refundsResource.reload();
       });
@@ -315,6 +316,15 @@ export class ReceiptsDetailsComponent {
     const store = this.storeService.getStoreLocally;
     return store?.currencyCode || 'NGN';
   });
+
+  /** Tax of a sale priced by tax management (null for any older order: those render exactly as they always did). */
+  readonly orderTax = computed(() => taxDisplay(this.orderResource.value() as any));
+  readonly itemColumns = computed(() => (this.orderTax() ? ['product', 'options', 'quantity', 'price', 'tax', 'subtotal'] : ['product', 'options', 'quantity', 'price', 'subtotal']));
+  readonly lineTaxMarker = lineTaxMarker;
+  /** Printed receipts and invoices only show tax when the store's "Display tax breakdown on receipts" is on. */
+  private get printTax() {
+    return showTaxOnReceipt(this.storeStore.selectedStore());
+  }
 
   getProductSubtotal(item: any): number {
     const base = (item.price || 0) * (item.quantity || 0);
@@ -426,6 +436,8 @@ export class ReceiptsDetailsComponent {
   }
 
   private generatePrintableReceipt(order: any, currency: string): string {
+    const printTax = this.printTax;
+    const tax = taxDisplay(order);
     const formatCurrency = (amount: number) => {
       try {
         return new Intl.NumberFormat('en-US', {
@@ -502,7 +514,7 @@ export class ReceiptsDetailsComponent {
             <span class="product-price">${formatCurrency(subtotal)}</span>
           </div>
           ${optionsHTML}
-          <div class="product-unit-price">@ ${formatCurrency(item.price)} each</div>
+          <div class="product-unit-price">@ ${formatCurrency(item.price)} each${printTax && lineTaxMarker(item) ? ` · ${lineTaxMarker(item)}` : ''}</div>
         </div>
       `;
     }).join('') || '';
@@ -775,6 +787,11 @@ export class ReceiptsDetailsComponent {
             <span>-${formatCurrency(order.discount)}</span>
           </div>
           ` : ''}
+          ${printTax && tax ? `
+          <div class="total-line"><span>Net taxable amount:</span><span>${formatCurrency(tax.net)}</span></div>
+          ${tax.rows.map((r) => `<div class="total-line"><span>${r.label} ${r.rate}%:</span><span>${formatCurrency(r.amount)}</span></div>`).join('')}
+          <div class="total-line"><span>Total VAT:</span><span>${formatCurrency(tax.total)}</span></div>
+          ` : ''}
           <div class="total-line grand">
             <span>TOTAL:</span>
             <span>${formatCurrency(order.total)}</span>
@@ -802,6 +819,8 @@ export class ReceiptsDetailsComponent {
   }
 
   private generatePrintableInvoice(order: any, currency: string): string {
+    const printTax = this.printTax;
+    const tax = taxDisplay(order);
     const formatCurrency = (amount: number) => {
       try {
         return new Intl.NumberFormat('en-US', {
@@ -885,7 +904,7 @@ export class ReceiptsDetailsComponent {
       return `
         <tr>
           <td style="text-align: center;">${index + 1}</td>
-          <td>${item.name}${optionsText}</td>
+          <td>${item.name}${optionsText}${printTax && lineTaxMarker(item) ? `<br><small>${lineTaxMarker(item)}</small>` : ''}</td>
           <td style="text-align: center;">${item.quantity}</td>
           <td style="text-align: right;">${formatCurrency(item.price)}</td>
           <td style="text-align: right;"><strong>${formatCurrency(subtotal)}</strong></td>
@@ -1261,6 +1280,11 @@ export class ReceiptsDetailsComponent {
               <td>Discount</td>
               <td>-${formatCurrency(order.discount)}</td>
             </tr>
+            ` : ''}
+            ${printTax && tax ? `
+            <tr><td>Net taxable amount</td><td>${formatCurrency(tax.net)}</td></tr>
+            ${tax.rows.map((r) => `<tr><td>${r.label} ${r.rate}%</td><td>${formatCurrency(r.amount)}</td></tr>`).join('')}
+            <tr><td>Total VAT</td><td>${formatCurrency(tax.total)}</td></tr>
             ` : ''}
             <tr class="grand-total">
               <td>TOTAL DUE</td>

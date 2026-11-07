@@ -2,10 +2,11 @@ import { Injectable, effect, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { OrdersService } from '../services/order.service';
+import { RefundService } from '../services/refund.service';
 import { OrderStore } from '../stores/order.store';
 import { ConnectivityService } from './connectivity.service';
 import { OfflineStore } from './offline-store.service';
-import { OutboxEntry } from './offline.models';
+import { OutboxEntry, RefundOutboxEntry } from './offline.models';
 
 const MAX_ATTEMPTS = 6;
 const LOCK = 'shopbot-outbox-drain';
@@ -24,6 +25,7 @@ export class OutboxSyncService {
   private readonly net = inject(ConnectivityService);
   private readonly orders = inject(OrdersService);
   private readonly orderStore = inject(OrderStore);
+  private readonly refunds = inject(RefundService);
 
   readonly draining = signal(false);
   /** The server refused the saved sign-in: the orders wait until the person signs in again. */
@@ -64,8 +66,9 @@ export class OutboxSyncService {
         // authority invoices are issued in the order the sales were made.
         if (!force && entry.nextTryAt > Date.now()) break;
         const keepGoing = await this.send(entry);
-        if (!keepGoing) break;
+        if (!keepGoing) return;
       }
+      await this.runRefunds(force);
     } finally {
       this.draining.set(false);
     }
@@ -118,6 +121,70 @@ export class OutboxSyncService {
     } finally {
       this.store.markInFlight(entry.id, false);
     }
+  }
+
+  /**
+   * Sends the refunds made with no connection, oldest first, once every sale ahead of them is on the server (a refund needs its
+   * sale to exist). The server decides the amount and issues the credit note; the idempotency key means a retry never refunds twice.
+   */
+  private async runRefunds(force: boolean): Promise<void> {
+    for (const entry of this.store.refunds()) {
+      if (entry.status === 'failed') continue;
+      if (this.store.has(entry.orderId)) continue; // its sale is still waiting to be sent
+      if (!force && entry.nextTryAt > Date.now()) break;
+      if (!(await this.sendRefund(entry))) break;
+    }
+  }
+
+  private async sendRefund(entry: RefundOutboxEntry): Promise<boolean> {
+    const attempt = entry.attempts + 1;
+    this.store.markInFlight(entry.id, true);
+    await this.store.patchRefund(entry.id, { status: 'syncing', attempts: attempt });
+    try {
+      await firstValueFrom(this.refunds.create(entry.orderId, { ...entry.body, idempotencyKey: entry.id }));
+      this.needsSignIn.set(false);
+      this.accountLocked.set(false);
+      await this.store.removeRefund(entry.id);
+      return true;
+    } catch (error) {
+      const status = error instanceof HttpErrorResponse ? error.status : 0;
+      const message = error instanceof HttpErrorResponse ? (error.error?.message ?? error.message) : String(error);
+      if (status === 403 && error instanceof HttpErrorResponse && error.error?.errorCode === 'SUBSCRIPTION_EXPIRED') {
+        this.accountLocked.set(true);
+        await this.store.patchRefund(entry.id, { status: 'pending', lastError: 'Account locked. It will send once the subscription is paid.', nextTryAt: Date.now() + 60_000, attempts: entry.attempts });
+        return false;
+      }
+      if (status === 401 || (status === 403 && error instanceof HttpErrorResponse && error.error?.code !== 'APPROVAL_REQUIRED')) {
+        this.needsSignIn.set(true);
+        await this.store.patchRefund(entry.id, { status: 'pending', lastError: 'Sign in again to send this refund.', nextTryAt: 0, attempts: entry.attempts });
+        return false;
+      }
+      if (status === 0) {
+        await this.store.patchRefund(entry.id, { status: 'pending', attempts: entry.attempts, nextTryAt: 0, lastError: 'No connection.' });
+        return false;
+      }
+      if (status >= 500 || status === 408 || status === 429) {
+        const exhausted = attempt >= MAX_ATTEMPTS;
+        await this.store.patchRefund(entry.id, exhausted ? { status: 'failed', lastError: String(message).slice(0, 300) } : { status: 'pending', lastError: String(message).slice(0, 300), nextTryAt: Date.now() + backoffMs(attempt) });
+        return false;
+      }
+      // The server read it and refused it (already refunded, needs a manager, sale changed…): a person has to look at it.
+      await this.store.patchRefund(entry.id, { status: 'failed', lastError: String(message).slice(0, 300) });
+      return true;
+    } finally {
+      this.store.markInFlight(entry.id, false);
+    }
+  }
+
+  /** Puts a failed refund back in the queue. */
+  async retryRefund(id: string): Promise<void> {
+    await this.store.patchRefund(id, { status: 'pending', attempts: 0, nextTryAt: 0, lastError: undefined });
+    void this.drain(true);
+  }
+
+  /** Throws a saved refund away. Only ever called after the person confirms. */
+  async discardRefund(id: string): Promise<void> {
+    await this.store.removeRefund(id);
   }
 
   private async retryLater(id: string, attempts: number, error: string): Promise<void> {

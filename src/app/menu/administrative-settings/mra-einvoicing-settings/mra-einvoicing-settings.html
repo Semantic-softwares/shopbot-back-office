@@ -21,6 +21,14 @@
         </mat-card-content>
       </mat-card>
     } @else if (owner(); as o) {
+      <!-- Invoices for a store that has not set up tax management use its single tax rate; per-product tax needs it. -->
+      @if (!taxConfig.enabled()) {
+        <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900" data-testid="mra-tax-notice">
+          <ng-container i18n>Tax management is not set up for this store, so invoices sent to MRA use the store's single tax rate. Set it up so each product carries its own tax and MRA tax code.</ng-container>
+          <a class="underline font-medium ml-1" routerLink="/menu/admin/tax-settings" i18n>Set it up</a>
+        </div>
+      }
+
       <!-- ============ WIZARD ============ -->
       @if (mode() === 'wizard') {
         <mat-card appearance="outlined">

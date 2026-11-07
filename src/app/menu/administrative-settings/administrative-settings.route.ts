@@ -71,6 +71,13 @@ export const ADMINISTRATIVE_SETTINGS_ROUTES: Routes = [
           ),
       },
       {
+        path: 'tax-settings',
+        loadComponent: () =>
+          import('./tax-settings/tax-settings').then(
+            (m) => m.TaxSettingsPage,
+          ),
+      },
+      {
         path: 'kitchen-stations',
         loadComponent: () =>
           import('./kitchen-stations-settings/kitchen-stations-settings').then(

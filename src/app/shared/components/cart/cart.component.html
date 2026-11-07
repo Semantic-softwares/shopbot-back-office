@@ -95,6 +95,14 @@
                         <p class="text-xs text-gray-500 mt-0.5">
                             {{ product.price | currency: currency() : 'symbol' : '1.0-0' }}
                             <ng-container i18n>each</ng-container>
+                            <!-- Tax management only: whether this line's price already holds its VAT, or the VAT is added on top. -->
+                            @if (cartSummary()?.engine && product.taxLine?.taxes?.length) {
+                              <span class="ml-1 text-[11px] text-gray-400" data-testid="line-tax">
+                                @if (product.taxLine!.taxes[0].kind !== 'standard') { <ng-container i18n>· {{ product.taxLine!.taxes[0].name }}</ng-container> }
+                                @else if (product.taxLine?.pricingMode === 'inclusive') { <ng-container i18n>· {{ product.taxLine!.taxes[0].name }} included</ng-container> }
+                                @else { <ng-container i18n>· +{{ product.taxLine!.taxes[0].name }} {{ product.taxLine!.taxes[0].rate }}%</ng-container> }
+                              </span>
+                            }
                         </p>
 
                         <!-- Selected Options -->

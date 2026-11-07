@@ -12,6 +12,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { Order } from '../../models';
 import { StoreStore } from '../../stores/store.store';
+import { lineTaxMarker, showTaxOnReceipt, taxDisplay } from '../../tax/tax-display';
 import { PrintJobService } from '../../services/print-job.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -41,6 +42,11 @@ export class BillModalComponent {
   public printJobService = inject(PrintJobService);
   public data = inject<BillModalData>(MAT_DIALOG_DATA);
   public order = signal(this.data.orderData);
+  /** Tax of a sale priced by tax management, shown on the bill only when the store's "Display tax breakdown on receipts" is on. */
+  public tax = computed(() => (showTaxOnReceipt(this.storeStore.selectedStore()) ? taxDisplay(this.order() as any) : null));
+  /** A sale priced by tax management never gets the legacy single Tax row (it has a breakdown, or the store hides tax). */
+  public isTaxEngineOrder = computed(() => !!(this.order() as any)?.taxSummary);
+  public lineTaxMarker = (item: any) => (showTaxOnReceipt(this.storeStore.selectedStore()) ? lineTaxMarker(item) : '');
   public snackBar = inject(MatSnackBar);
   public isPrinting = signal(false);
 

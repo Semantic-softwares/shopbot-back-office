@@ -27,11 +27,26 @@ import { OutboxSyncService } from '../../offline/outbox-sync.service';
       </button>
       <mat-menu #menu="matMenu">
         <div class="max-w-64 px-4 py-2 text-sm text-on-surface-variant">
-          @if (net.offline()) { <ng-container i18n>No connection. Sales are saved on this device and sent when you are back online.</ng-container> }
+          @if (net.offline()) { <ng-container i18n>No connection. Sales and refunds are saved on this device and sent when you are back online.</ng-container> }
           @else if (outbox.needsSignIn()) { <ng-container i18n>Sign in again to send the saved sales.</ng-container> }
           @else if (offline.waiting()) { <ng-container i18n>Saved sales are being sent to the server.</ng-container> }
           @else { <ng-container i18n>Some sales could not be sent. Open them to retry or discard.</ng-container> }
         </div>
+        @for (refund of offline.refunds(); track refund.id) {
+          <div class="max-w-64 border-t border-outline-variant px-4 py-2 text-sm" data-testid="pending-refund">
+            <div class="font-medium"><ng-container i18n>Refund</ng-container> #{{ refund.reference }}</div>
+            <div class="text-on-surface-variant">{{ refund.summary }}</div>
+            @if (refund.status === 'failed') {
+              <div class="mt-1 text-error">{{ refund.lastError }}</div>
+              <div class="mt-1 flex gap-2">
+                <button matButton (click)="outbox.retryRefund(refund.id); $event.stopPropagation()"><ng-container i18n>Retry</ng-container></button>
+                <button matButton (click)="outbox.discardRefund(refund.id); $event.stopPropagation()"><ng-container i18n>Discard</ng-container></button>
+              </div>
+            } @else {
+              <div class="text-on-surface-variant"><ng-container i18n>Waiting to be recorded</ng-container></div>
+            }
+          </div>
+        }
         <button mat-menu-item (click)="outbox.syncNow()" [disabled]="net.offline() || outbox.draining()"><mat-icon>sync</mat-icon><span><ng-container i18n>Sync now</ng-container></span></button>
         <button mat-menu-item (click)="openReceipts()"><mat-icon>receipt_long</mat-icon><span><ng-container i18n>View unsynced receipts</ng-container></span></button>
       </mat-menu>

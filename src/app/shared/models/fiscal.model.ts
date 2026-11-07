@@ -44,6 +44,8 @@ export interface FiscalTransaction {
   total: number | null;
   currency: string | null;
   orderReference: string | null;
+  /** Saved on this device and not yet numbered by the server: `counter` is the number it is expected to get, not a final one. */
+  provisional?: boolean;
 }
 
 export interface FiscalTransactionPage {

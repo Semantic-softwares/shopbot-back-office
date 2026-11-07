@@ -17,6 +17,7 @@ import { FiscalisationService } from '../../../../shared/services/fiscalisation.
 import { QueryParamService } from '../../../../shared/services/query-param.service';
 import { ExportColumn, ReportExportService } from '../../../../shared/services/report-export.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
+import { OfflineStore } from '../../../../shared/offline/offline-store.service';
 import { ReportKpiComponent } from '../shared/report-kpi.component';
 import { ExportFormat, ReportPageComponent } from '../shared/report-page.component';
 import { ReportTable } from '../shared/report-table-state';
@@ -38,6 +39,7 @@ export class FiscalTransactionsComponent {
   private readonly queryParams = inject(QueryParamService);
   private readonly fiscalisation = inject(FiscalisationService);
   private readonly exporter = inject(ReportExportService);
+  private readonly offlineStore = inject(OfflineStore);
   readonly storeStore = inject(StoreStore);
   private readonly query = toSignal(this.queryParams.getAllParams$);
   readonly short = short;
@@ -56,7 +58,29 @@ export class FiscalTransactionsComponent {
         : of({ rows: [], total: 0, page: 1, limit: 0 }),
   });
 
-  readonly rows = computed<FiscalTransaction[]>(() => (this.res.hasValue() ? this.res.value().rows : []));
+  /**
+   * Sales and refunds saved on this device that the server has not recorded yet. They have no counter: it is given, in order,
+   * when they reach the server. Shown at the end so the owner sees them waiting rather than missing.
+   */
+  private readonly waitingHere = computed<FiscalTransaction[]>(() => {
+    if (!this.active()) return [];
+    const note = $localize`Saved on this device. The server confirms its counter when it syncs.`;
+    const sales = this.offlineStore.outbox()
+      .filter((e) => e.order?.paymentStatus === 'Paid')
+      .map((e): FiscalTransaction => ({ counter: null, invoiceNumber: '—', documentType: 'INVOICE', irn: null, previousInvoiceHash: null, tag: 'NOT_YET_FISCALIZED', detail: note, issuedAt: e.order.createdAt ? new Date(e.order.createdAt).toISOString() : null, fiscalizedAt: null, total: e.order.total ?? null, currency: null, orderReference: e.order.reference ?? null, provisional: true }));
+    const refunds = this.offlineStore.refunds()
+      .map((e): FiscalTransaction => ({ counter: null, invoiceNumber: '—', documentType: 'CREDIT_NOTE', irn: null, previousInvoiceHash: null, tag: 'NOT_YET_FISCALIZED', detail: note, issuedAt: e.body.requestedAt ?? e.createdAt, fiscalizedAt: null, total: e.estimate, currency: null, orderReference: e.reference ?? null, provisional: true }));
+    // The number each is expected to get: the next ones after the highest the server has given, in the order they were made.
+    // Another till syncing first can shift them, which is why they are shown as "expected" and never exported as final.
+    const known = (this.res.hasValue() ? this.res.value().rows : []).reduce((max, r) => Math.max(max, r.counter ?? 0), 0);
+    return [...sales, ...refunds]
+      .sort((x, y) => String(x.issuedAt).localeCompare(String(y.issuedAt)))
+      .map((r, i) => ({ ...r, counter: known + i + 1 }))
+      .filter((r) => !this.type() || r.documentType === this.type())
+      .filter((r) => !this.tag() || r.tag === this.tag());
+  });
+
+  readonly rows = computed<FiscalTransaction[]>(() => [...(this.res.hasValue() ? this.res.value().rows : []), ...this.waitingHere()]);
   readonly table = new ReportTable<FiscalTransaction>(() => this.rows(), 'counter');
   readonly columns = ['counter', 'invoiceNumber', 'documentType', 'irn', 'previousInvoiceHash', 'tag', 'issuedAt', 'total'];
   readonly failed = computed(() => !!this.res.error() && !this.res.hasValue());
@@ -105,7 +129,8 @@ export class FiscalTransactionsComponent {
       currency: this.currency(),
       subtitle: from && to ? `${from} – ${to}` : undefined,
       columns,
-      rows: [...this.rows()].sort((a, b) => (a.counter ?? 0) - (b.counter ?? 0)),
+      // Only what the server has numbered: an expected number is not a fiscal record.
+      rows: this.rows().filter((r) => !r.provisional).sort((a, b) => (a.counter ?? 0) - (b.counter ?? 0)),
       filename: 'fiscal-transactions',
       landscape: true,
       statusLabel: (v) => (v === 'CREDIT_NOTE' || v === 'INVOICE' ? this.typeLabel(String(v)) : this.tagLabel(v as FiscalTag)),

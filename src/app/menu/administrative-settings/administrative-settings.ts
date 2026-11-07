@@ -37,6 +37,7 @@ export class AdministrativeSettings {
     { path: 'delivery', label: $localize`Delivery`, icon: 'local_shipping', iconColor: 'text-teal-600', module: 'POS' as ModuleKey },
     { path: 'operational-orders', label: $localize`Operational Orders`, icon: 'schedule', iconColor: 'text-cyan-600', module: 'POS' as ModuleKey },
     { path: 'kitchen-stations', label: $localize`Kitchen Stations`, icon: 'soup_kitchen', iconColor: 'text-red-600', module: 'KDS' as ModuleKey },
+    { path: 'tax-settings', label: $localize`Tax`, icon: 'percent', iconColor: 'text-emerald-600', module: null },
     { path: 'mra-einvoicing', label: $localize`MRA e-Invoicing`, icon: 'receipt_long', iconColor: 'text-indigo-600', module: null, requiresTaxAuthority: true },
     { path: 'team', label: $localize`Team`, icon: 'people', iconColor: 'text-purple-600', module: null },
     { path: 'billing', label: $localize`Billing`, icon: 'payment', iconColor: 'text-yellow-600', module: null },
