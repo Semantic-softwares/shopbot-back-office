@@ -28,14 +28,18 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  const title = payload.notification?.title || 'New table order';
+  const ready = payload.data?.type === 'order_ready';
+  const title = payload.notification?.title || (ready ? 'Order ready to pick up' : 'New table order');
   const body = payload.notification?.body || '';
 
   self.registration.showNotification(title, {
     body,
     icon: '/icons/icon-192x192.png',
     data: payload.data,
-    tag: payload.data?.orderId ? `table-order-${payload.data.orderId}` : undefined,
+    // An order-ready alert must not replace (or be replaced by) the table-order alert for the same order.
+    tag: payload.data?.orderId ? `${ready ? 'order-ready' : 'table-order'}-${payload.data.orderId}` : undefined,
+    // Food going cold: ask for attention until the waiter taps it.
+    requireInteraction: ready,
   });
 });
 

@@ -70,12 +70,22 @@ export class FirebasePushService {
           body,
           icon: '/icons/icon-192x192.png',
           data: payload.data,
-          tag: payload.data?.['orderId'] ? `table-order-${payload.data['orderId']}` : undefined,
+          tag: payload.data?.['orderId'] ? `${payload.data?.['type'] === 'order_ready' ? 'order-ready' : 'table-order'}-${payload.data['orderId']}` : undefined,
         });
 
         // Also raise the in-app toast + looping sound. The socket normally
         // gets there first and this dedupes by orderId, but when the socket is
         // down this push becomes the only thing that surfaces the order.
+        if (payload.data?.['type'] === 'order_ready') {
+          this.socketService.pushOrderReadyAlert({
+            orderId: payload.data['orderId'],
+            tableName: payload.data['tableName'] || '',
+            stationName: payload.data['stationName'] || '',
+            itemsLabel: payload.data['itemsLabel'] || '',
+            fullyPrepared: payload.data['fullyPrepared'] === 'true',
+            readyAt: new Date().toISOString(),
+          });
+        }
         if (payload.data?.['type'] === 'table_new_order') {
           this.socketService.pushTableOrderAlert({
             orderId: payload.data['orderId'],

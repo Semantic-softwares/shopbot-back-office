@@ -8,6 +8,7 @@ import { SubscriptionExpiringBannerComponent } from './shared/components/subscri
 import { PwaInstallPromptComponent } from './shared/components/pwa-install-prompt/pwa-install-prompt.component';
 import { PwaUpdateService } from './shared/services/pwa-update.service';
 import { PwaInstallService } from './shared/services/pwa-install.service';
+import { OrderReadyAlertComponent } from './shared/components/order-ready-alert/order-ready-alert.component';
 import { IncomingTableOrderAlertComponent } from './shared/components/incoming-table-order-alert/incoming-table-order-alert.component';
 import { SocketService } from './shared/services/socket.service';
 import { SessionStorageService } from './shared/services/session-storage.service';
@@ -16,7 +17,7 @@ import { ThemeService } from './shared/services/theme.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NgProgressbar, NgProgressRouter, TrialWarningBannerComponent, SubscriptionBannerComponent, SubscriptionExpiringBannerComponent, PwaInstallPromptComponent, IncomingTableOrderAlertComponent],
+  imports: [RouterOutlet, NgProgressbar, NgProgressRouter, TrialWarningBannerComponent, SubscriptionBannerComponent, SubscriptionExpiringBannerComponent, PwaInstallPromptComponent, IncomingTableOrderAlertComponent, OrderReadyAlertComponent],
   templateUrl: './app.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.component.scss'

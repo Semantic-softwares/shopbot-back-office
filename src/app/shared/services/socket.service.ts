@@ -33,6 +33,13 @@ export class SocketService {
   private tableNewOrderSubject = new Subject<any>();
   readonly tableNewOrder$ = this.tableNewOrderSubject.asObservable();
 
+  /**
+   * The kitchen marked food ready for an order THIS employee placed (the server sends it to their own room only). The waiter's
+   * "go and pick it up" alert; same dual transport as table orders: the socket, and an FCM push (see FirebasePushService).
+   */
+  private orderReadySubject = new Subject<any>();
+  readonly orderReady$ = this.orderReadySubject.asObservable();
+
   /** A table order was claimed by someone (possibly this staff member) — dismiss any matching pending alert. */
   private tableOrderClaimedSubject = new Subject<any>();
   readonly tableOrderClaimed$ = this.tableOrderClaimedSubject.asObservable();
@@ -294,6 +301,11 @@ export class SocketService {
       this.tableNewOrderSubject.next(data);
     });
 
+    socket.on('order:ready', (data: any) => {
+      console.log('✅ [GLOBAL SOCKET] order:ready EVENT RECEIVED', data);
+      this.orderReadySubject.next(data);
+    });
+
     socket.on('table:orderClaimed', (data: any) => {
       console.log('✅ [GLOBAL SOCKET] table:orderClaimed EVENT RECEIVED', data);
       this.tableOrderClaimedSubject.next(data);
@@ -315,8 +327,20 @@ export class SocketService {
     this.tableNewOrderSubject.next(data);
   }
 
-  /** Start (or keep playing) the continuous incoming-order alert sound. Idempotent. */
-  playAlertLoop(): void {
+  /** Same bus for a "your order is ready" push that arrived while the tab was focused. */
+  pushOrderReadyAlert(data: any): void {
+    this.orderReadySubject.next(data);
+  }
+
+  /**
+   * Who currently wants the loop. Several alert queues share one sound (incoming table orders, orders ready to pick up), so it plays
+   * while ANY of them has something pending and stops only when the last one is cleared.
+   */
+  private readonly alertLoopSources = new Set<string>();
+
+  /** Start (or keep playing) the continuous alert sound for `source`. Idempotent. */
+  playAlertLoop(source = 'table-order'): void {
+    this.alertLoopSources.add(source);
     this.alertLoopWanted = true;
     try {
       if (!this.alertLoopAudio) {
@@ -360,8 +384,10 @@ export class SocketService {
   /** Whether a caller currently wants the loop playing — guards the gesture retry above. */
   private alertLoopWanted = false;
 
-  /** Stop the continuous incoming-order alert sound — call once no alerts remain pending. */
-  stopAlertLoop(): void {
+  /** `source` no longer needs the loop; the sound stops once no source does. */
+  stopAlertLoop(source = 'table-order'): void {
+    this.alertLoopSources.delete(source);
+    if (this.alertLoopSources.size > 0) return;
     this.alertLoopWanted = false;
     this.alertLoopAudio?.pause();
     if (this.alertLoopAudio) {
