@@ -46,6 +46,10 @@ export const DASHBOARD_REPORTS_ROUTES: Routes = [
           import('./fiscal-transactions/fiscal-transactions.component').then((m) => m.FiscalTransactionsComponent),
       },
       {
+        path: 'blink-payments',
+        loadComponent: () => import('./blink-payments/blink-payments.component').then((m) => m.BlinkPaymentsComponent),
+      },
+      {
         path: 'receipts',
         loadChildren: () =>
           import('./receipts/receipts.routing').then((m) => m.DASHBOARD_RECEIPTS_ROUTES),

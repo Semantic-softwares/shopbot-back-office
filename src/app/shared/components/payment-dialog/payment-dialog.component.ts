@@ -26,6 +26,10 @@ import {
   suggestedAmount,
 } from './payment-split';
 import { TrPipe } from '../../i18n/tr.pipe';
+import { BlinkContextService } from '../../blink/blink-context.service';
+import { BlinkPaymentPanelComponent } from '../../blink/blink-payment-panel.component';
+import { BlinkPaid } from '../../blink/blink.models';
+import { buildPayment } from './payment-split';
 
 export interface PaymentDialogData {
   totalAmount: number;
@@ -64,7 +68,8 @@ export interface PaymentDialogResult {
     MatFormFieldModule,
     MatInputModule,
     MatTooltipModule,
-    FormsModule
+    FormsModule,
+    BlinkPaymentPanelComponent,
   ],
   templateUrl: './payment-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -74,11 +79,23 @@ export class PaymentDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<PaymentDialogComponent>);
   readonly data = inject<PaymentDialogData>(MAT_DIALOG_DATA);
 
-  paymentMethods = [
+  readonly blink = inject(BlinkContextService);
+
+  private readonly baseMethods = [
     { id: 'POS', name: 'POS Terminal', icon: 'credit_card' },
     { id: 'Transfer', name: 'Transfer', icon: 'swap_horizontal_circle' },
     { id: 'Cash', name: 'Cash', icon: 'payments' }
   ];
+
+  /** Blink is offered only to a Mauritius store that switched it on. */
+  readonly methodList = computed(() => (this.blink.enabled() ? [...this.baseMethods, { id: 'Blink', name: 'Blink', icon: 'bolt' }] : this.baseMethods));
+  get paymentMethods() {
+    return this.methodList();
+  }
+
+  /** A Blink payment is waiting for the customer: nothing else in the dialog may change meanwhile. */
+  readonly blinkBusy = signal(false);
+  readonly selectedIsBlink = computed(() => this.selectedPaymentMethod() === 'Blink');
 
   /** Tenders taken so far. A single-method sale is just a list of one. */
   readonly payments = signal<OrderPayment[]>([]);
@@ -165,6 +182,15 @@ export class PaymentDialogComponent {
     // Seed with what's still owed, so the ordinary single-payment sale stays
     // one tap and only an over-tender needs typing.
     this.enteredAmount.set(String(suggestedAmount(this.total(), this.payments())));
+  }
+
+  /** Blink confirmed a payment: it becomes an ordinary tender, carrying the proof the server will check when the sale is saved. */
+  onBlinkPaid(paid: BlinkPaid): void {
+    const row = buildPayment('Blink', paid.amount, this.total(), this.payments());
+    if (!row) return;
+    this.payments.set([...this.payments(), { ...row, reference: paid.reference, attemptId: paid.attemptId }]);
+    this.selectedPaymentMethod.set('');
+    this.enteredAmount.set('');
   }
 
   addSelectedPayment(): void {

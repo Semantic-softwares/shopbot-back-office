@@ -92,6 +92,12 @@ export class RefundDialogComponent implements OnInit {
   public note = signal('');
   /** '' = the original payment methods in proportion; otherwise one method */
   public tender = signal('');
+  /** Blink has no refund call: the money is returned through Blink by the merchant and its reference is recorded here. */
+  public blinkRef = signal('');
+  public involvesBlink = computed(() => {
+    const isBlink = (m: string) => m.trim().toLowerCase() === 'blink';
+    return this.tender() ? isBlink(this.tender()) : (this.info()?.tenders ?? []).some((t) => isBlink(t.method) && t.remaining > 0);
+  });
   public pin = signal('');
   /** Set after the server asks for a second approver, so the PIN box appears. */
   public approvalRequested = signal(false);
@@ -151,6 +157,7 @@ export class RefundDialogComponent implements OnInit {
     if (this.offline() && this.needsApproval()) {
       out.push({ path: 'approval', title: $localize`Manager approval`, detail: $localize`This refund needs a manager's PIN, which can only be checked online. Reconnect to approve it.` });
     }
+    if (this.involvesBlink() && this.blinkRef().trim().length < 3) out.push({ path: 'blink', title: $localize`Blink refund reference`, detail: $localize`Blink payments are refunded outside Shopbot. Return the money through Blink, then enter its reference.` });
     if (this.showPin() && !this.pin().trim()) out.push({ path: 'pin', title: $localize`Manager PIN`, detail: $localize`A manager must enter their PIN to approve this refund.` });
     return out;
   });
@@ -282,6 +289,7 @@ export class RefundDialogComponent implements OnInit {
       body.amount = this.total();
     }
     if (this.tender()) body.tenders = [{ method: this.tender(), amount: this.total() }];
+    if (this.involvesBlink()) body.externalReference = this.blinkRef().trim();
 
     this.submitting.set(true);
     this.error.set(null);

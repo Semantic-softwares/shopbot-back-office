@@ -16,6 +16,9 @@ export interface OrderPayment {
   amount: number;
   tendered: number;
   change: number;
+  /** A payment taken through a provider (Blink): the provider's transaction id, and the server's record of the payment. */
+  reference?: string;
+  attemptId?: string;
 }
 
 export interface ShippingDetails {

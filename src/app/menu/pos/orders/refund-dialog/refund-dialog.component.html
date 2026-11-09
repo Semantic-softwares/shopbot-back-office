@@ -135,6 +135,16 @@
       <p class="mb-3 text-sm text-on-surface-variant"><ng-container i18n>Money goes back to</ng-container> {{ inf.tenders[0].method }}.</p>
     }
 
+    @if (involvesBlink()) {
+      <div class="mb-3 rounded-lg bg-surface-container p-3" data-testid="blink-refund-note">
+        <p class="m-0 mb-2 text-sm"><ng-container i18n>Part of this sale was paid through Blink. Shopbot cannot send that money back: return it through Blink, then enter the reference so the refund is recorded as made outside Shopbot.</ng-container></p>
+        <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+          <mat-label><ng-container i18n>Blink refund reference</ng-container></mat-label>
+          <input matInput maxlength="80" autocomplete="off" [ngModel]="blinkRef()" (ngModelChange)="blinkRef.set($event)" data-testid="blink-refund-reference" />
+        </mat-form-field>
+      </div>
+    }
+
     @if (error()) {
       <p class="mt-2 rounded-lg bg-error-container px-3 py-2 text-sm text-on-error-container" role="alert">{{ error() }}</p>
     }

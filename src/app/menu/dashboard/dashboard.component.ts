@@ -20,6 +20,7 @@ import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.compon
 import { RolesService } from '../../shared/services/roles.service';
 import { TrPipe } from '../../shared/i18n/tr.pipe';
 
+import { BlinkContextService } from '../../shared/blink/blink-context.service';
 import { RegisterContextService } from '../../shared/register/register-context.service';
 import { FiscalisationService } from '../../shared/services/fiscalisation.service';
 
@@ -28,6 +29,8 @@ interface NavItem {
   requiresFiscal?: boolean;
   /** Hidden unless register management is switched on for the store. */
   requiresRegisters?: boolean;
+  /** Hidden unless Blink payments are switched on for the store (Mauritius stores only). */
+  requiresBlink?: boolean;
   icon: string;
   label: string;
   link: string;
@@ -63,6 +66,7 @@ export class DashboardComponent {
   private router = inject(Router);
   private fiscalisation = inject(FiscalisationService);
   private registerContext = inject(RegisterContextService);
+  private blinkContext = inject(BlinkContextService);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
   private rolesService = inject(RolesService);
@@ -194,6 +198,13 @@ export class DashboardComponent {
           permission: 'manage_home',
         },
         {
+          icon: 'bolt',
+          label: $localize`Blink payments`,
+          link: './reports/blink-payments',
+          permission: 'manage_home',
+          requiresBlink: true,
+        },
+        {
           icon: 'receipt_long',
           label: $localize`Fiscal transactions`,
           link: './reports/fiscal-transactions',
@@ -303,8 +314,9 @@ export class DashboardComponent {
     // A fiscal entry only appears for a store whose tax authority is switched on, whoever is looking.
     const fiscalOn = this.fiscalisation.active();
     const registersOn = this.registerContext.enabled();
+    const blinkOn = this.blinkContext.enabled();
     const offered = this.allNavItems
-      .map((section) => ({ ...section, children: section.children.filter((item) => (!item.requiresFiscal || fiscalOn) && (!item.requiresRegisters || registersOn)) }));
+      .map((section) => ({ ...section, children: section.children.filter((item) => (!item.requiresFiscal || fiscalOn) && (!item.requiresRegisters || registersOn) && (!item.requiresBlink || blinkOn)) }));
 
     if (this.rolesService.isAdmin()) {
       // Admin can see all items

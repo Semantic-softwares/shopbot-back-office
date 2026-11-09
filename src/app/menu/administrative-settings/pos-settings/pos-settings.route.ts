@@ -25,6 +25,13 @@ export const POS_SETTINGS_ROUTES: Routes = [
             (m) => m.RegisterSettingsPage
           ),
       },
+      {
+        path: 'blink',
+        loadComponent: () =>
+          import('./blink-settings/blink-settings').then(
+            (m) => m.BlinkSettingsPage
+          ),
+      },
      {
         path: 'printers',
         loadChildren: () =>

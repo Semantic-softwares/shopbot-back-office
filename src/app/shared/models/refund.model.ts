@@ -25,6 +25,9 @@ export interface RefundLine {
 export interface RefundTender {
   method: string;
   amount: number;
+  /** Returned outside Shopbot (Blink): `reference` is the return's reference. */
+  external?: boolean;
+  reference?: string;
 }
 
 /** A refund ticket: its own document, linked to the original sale, which is never rewritten. */
@@ -92,6 +95,8 @@ export interface CreateRefundRequest {
   reasonCode: RefundReasonCode;
   note?: string;
   tenders?: RefundTender[];
+  /** Required when the refund includes a Blink tender: the reference of the return made through Blink. */
+  externalReference?: string;
   approverPin?: string;
   idempotencyKey?: string;
   /** When the refund was made, when it is made offline and recorded later. */
