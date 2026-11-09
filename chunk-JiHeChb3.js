@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";var l;var r=z(()=>{"use strict";l=n=>{let e=String(n??``).replace(/[\s()-]/g,``).replace(/^\+?230/,``);return/^5\d{7}$/.test(e)?e:null}});export{r as n,l as t};

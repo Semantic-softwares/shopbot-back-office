@@ -1,1 +1,0 @@
-import{c as z}from"./chunk-RykAvsdd.js";var p;z(()=>{p=[{path:``,loadComponent:()=>import(`./chunk-Ctgn4j6O.js`).then(o=>o.ListWebhooks)}]})();export{p as CHANNEL_MANAGER_WEBHOOKS_ROUTES};
