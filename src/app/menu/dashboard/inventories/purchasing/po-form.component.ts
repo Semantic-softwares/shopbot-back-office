@@ -23,9 +23,9 @@ import { ProductService } from '../../../../shared/services/product.service';
 import { SuppliersService } from '../../../../shared/services/suppliers.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
 
-interface Line { product: string; name: string; sku?: string; unit?: string; quantity: number; unitCost: number }
+interface Line { product: string; name: string; sku?: string; unit?: string; quantity: number | null; unitCost: number | null }
 const ymd = (d: Date | null): string | null => (d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : null);
-const cents = (n: number) => Math.round((Number(n) || 0) * 100);
+const cents = (n: number | null) => Math.round((Number(n) || 0) * 100);
 
 /**
  * Create a purchase order by hand, edit a draft, or amend one that was already sent (the amend route asks for a reason and the
@@ -76,7 +76,7 @@ const cents = (n: number) => Math.round((Number(n) || 0) * 100);
         <h3 class="m-0 mb-3 text-base font-semibold"><ng-container i18n>Items</ng-container></h3>
         <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
           <mat-icon matPrefix class="ml-3 text-on-surface-variant">add_shopping_cart</mat-icon>
-          <input matInput placeholder="Search a product to add" i18n-placeholder [matAutocomplete]="auto" [ngModel]="query()" (ngModelChange)="onQuery($event)" [disabled]="!supplier()" autocomplete="off" />
+          <input matInput placeholder="Search or scan a barcode to add a product" i18n-placeholder [matAutocomplete]="auto" [ngModel]="query()" (ngModelChange)="onQuery($event)" (keydown.enter)="onEnter($event)" [disabled]="!supplier()" autocomplete="off" data-testid="po-search" />
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="add($event.option.value)" [displayWith]="blank">
             @for (p of results(); track p._id) { <mat-option [value]="p">{{ p.name }} <span class="text-xs text-on-surface-variant">{{ p.sku }}</span></mat-option> }
           </mat-autocomplete>
@@ -85,18 +85,18 @@ const cents = (n: number) => Math.round((Number(n) || 0) * 100);
 
         @if (lines().length) {
           <div class="-mx-4 mt-4 overflow-x-auto">
-            <table mat-table [dataSource]="lines()" class="w-full min-w-[640px]">
+            <table mat-table [dataSource]="lines()" [trackBy]="trackLine" class="w-full min-w-[640px]">
               <ng-container matColumnDef="product">
                 <th mat-header-cell *matHeaderCellDef><ng-container i18n>Product</ng-container></th>
                 <td mat-cell *matCellDef="let l"><div class="font-medium">{{ l.name }}</div><div class="text-xs text-on-surface-variant">{{ l.sku }}@if (l.unit) { · {{ l.unit }} }</div></td>
               </ng-container>
               <ng-container matColumnDef="quantity">
                 <th mat-header-cell *matHeaderCellDef><ng-container i18n>Quantity</ng-container></th>
-                <td mat-cell *matCellDef="let l; let i = index"><mat-form-field appearance="outline" subscriptSizing="dynamic" class="compact-field w-28"><input matInput type="number" min="0" step="any" class="!text-right tabular-nums" [ngModel]="l.quantity" (ngModelChange)="setLine(i, { quantity: +$event })" aria-label="Quantity" i18n-aria-label /></mat-form-field></td>
+                <td mat-cell *matCellDef="let l; let i = index"><mat-form-field appearance="outline" subscriptSizing="dynamic" class="compact-field w-28"><input matInput type="number" min="0" step="any" class="!text-right tabular-nums" [ngModel]="l.quantity" (ngModelChange)="setLine(i, { quantity: num($event) })" aria-label="Quantity" i18n-aria-label /></mat-form-field></td>
               </ng-container>
               <ng-container matColumnDef="cost">
                 <th mat-header-cell *matHeaderCellDef><ng-container i18n>Unit cost</ng-container></th>
-                <td mat-cell *matCellDef="let l; let i = index"><mat-form-field appearance="outline" subscriptSizing="dynamic" class="compact-field w-28"><input matInput type="number" min="0" step="0.01" class="!text-right tabular-nums" [ngModel]="l.unitCost" (ngModelChange)="setLine(i, { unitCost: +$event })" aria-label="Unit cost" i18n-aria-label /></mat-form-field></td>
+                <td mat-cell *matCellDef="let l; let i = index"><mat-form-field appearance="outline" subscriptSizing="dynamic" class="compact-field w-28"><input matInput type="number" min="0" step="0.01" class="!text-right tabular-nums" [ngModel]="l.unitCost" (ngModelChange)="setLine(i, { unitCost: num($event) })" aria-label="Unit cost" i18n-aria-label /></mat-form-field></td>
               </ng-container>
               <ng-container matColumnDef="total">
                 <th mat-header-cell *matHeaderCellDef class="!text-right"><ng-container i18n>Line total</ng-container></th>
@@ -165,9 +165,17 @@ export class PoFormComponent {
   readonly error = signal('');
   readonly query = signal('');
   readonly results = signal<any[]>([]);
+  /** An emptied number box stays empty while the user retypes (it used to snap back to 0 under the cursor). */
+  readonly num = (v: unknown) => (v === null || v === '' || v === undefined ? null : +(v as number));
   readonly blank = () => '';
+  /** Keeps a row (and the field being typed in) alive while its numbers change; without it every keystroke rebuilt the row and the field lost focus. */
+  readonly trackLine = (_: number, l: Line) => l.product;
   readonly columns = ['product', 'quantity', 'cost', 'total', 'remove'];
   private readonly typed = new Subject<string>();
+  /** A scanner types a whole code in a few ms; a pause after typing means the code is complete. */
+  private readonly idle = new Subject<string>();
+  /** Codes being looked up right now, so Enter and the end-of-typing pause cannot add the same scan twice. */
+  private readonly scanning = new Set<string>();
 
   private readonly suppliersRes = rxResource({ params: () => this.storeId(), stream: ({ params }) => (params ? this.suppliersApi.getSuppliersByStore(params) : of([])) });
   readonly suppliers = computed(() => (this.suppliersRes.hasValue() ? this.suppliersRes.value() : []));
@@ -190,10 +198,42 @@ export class PoFormComponent {
       this.tax.set(o.tax);
       this.lines.set(o.lines.map((l) => ({ product: l.product, name: l.name, sku: l.sku, unit: l.purchaseUnit, quantity: l.quantity, unitCost: l.unitCost })));
     });
+    this.idle.pipe(debounceTime(150)).subscribe((q) => { if (q.trim().length >= 4 && q.trim() === this.query().trim()) this.scan(q.trim(), true); });
     this.typed.pipe(debounceTime(250), distinctUntilChanged(), switchMap((q) => (q.trim().length >= 2 && this.storeId() ? this.products.searchForAutocomplete(this.storeId(), q.trim(), this.lines().map((l) => l.product)) : of([])))).subscribe((r) => this.results.set(r as any[]));
   }
 
-  onQuery(v: unknown) { if (typeof v === 'string') { this.query.set(v); this.typed.next(v); } }
+  onQuery(v: unknown) { if (typeof v === 'string') { this.query.set(v); this.typed.next(v); this.idle.next(v); } }
+
+  /** Enter in the search box: scanners end each code with Enter. */
+  onEnter(e: Event) {
+    e.preventDefault();
+    const code = this.query().trim();
+    if (code) this.scan(code, false);
+  }
+
+  /** Adds the product whose barcode (or SKU) is exactly this code; a repeat scan adds one more. Text that is not a code does nothing, so typing a name is safe. */
+  private scan(code: string, quiet: boolean) {
+    if (!this.supplier() || !this.storeId() || this.scanning.has(code)) return;
+    this.scanning.add(code);
+    this.products.searchForAutocomplete(this.storeId(), code, []).subscribe({
+      error: () => this.scanning.delete(code),
+      complete: () => this.scanning.delete(code),
+      next: (found) => {
+        const c = code.toLowerCase();
+        const hit = (found as any[]).find((p) => (p.barcode ?? '').toLowerCase() === c || (p.sku ?? '').toLowerCase() === c);
+        if (hit) {
+          if (this.lines().some((l) => l.product === hit._id)) {
+            this.lines.update((ls) => ls.map((l) => (l.product === hit._id ? { ...l, quantity: (Number(l.quantity) || 0) + 1 } : l)));
+            this.query.set('');
+            this.results.set([]);
+          } else this.add(hit);
+        } else if (!quiet && !(found as any[]).length) {
+          this.snack.open($localize`No product with barcode ${code}`, $localize`Close`, { duration: 3000 });
+          this.query.set('');
+        }
+      },
+    });
+  }
 
   /** Adds a product at this supplier's agreed cost when one is saved for it, otherwise the product's own cost. */
   add(p: any) {

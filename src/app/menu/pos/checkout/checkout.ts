@@ -87,25 +87,49 @@ export class Checkout implements OnInit {
   public searchFilter: string = "";
   @ViewChild("searchComponent") searchComponent!: SearchComponent;
 
-  public searchProduct(enteredFilter: string): void {
-    if (this.storeStore.selectedStore()?.posSettings?.useBarcodeScanner) {
-      const product = this.productStore.searchByBarcode(enteredFilter);
-      const cart = this.cartStore.selectedCart();
-      let foundProduct = null;
-      let isEditing = false;
+  /** A scanner types a whole code in a few milliseconds; this pause tells a scan from a person typing. */
+  private static readonly SCAN_IDLE_MS = 150;
+  private scanTimer: ReturnType<typeof setTimeout> | null = null;
+  public scanMessage = signal('');
+  private scanMessageTimer: ReturnType<typeof setTimeout> | null = null;
 
-      if (cart && product) {
-        foundProduct = cart.products.find(
-          (cartItem) => cartItem._id === product._id
-        );
-        isEditing = !!foundProduct;
-        console.log('Barcode scan found product:', product.name, 'Editing:', isEditing);
+  public searchProduct(enteredFilter: string): void {
+    // Typing always filters the grid by name, description or barcode, scanner mode or not.
+    this.productStore.updateSearchQuery(enteredFilter);
+
+    if (this.scanTimer) clearTimeout(this.scanTimer);
+    if (!this.scannerOn() || !enteredFilter) return;
+    // Scanners without an Enter suffix: act once the typing stops. Never on a partial code,
+    // so a barcode that starts another barcode (1234 / 12345) cannot add the wrong item.
+    this.scanTimer = setTimeout(() => this.submitScan(true), Checkout.SCAN_IDLE_MS);
+  }
+
+  /** Enter key in the search box: scanners end every code with Enter. */
+  public onSearchEnter(): void {
+    if (this.scannerOn()) this.submitScan(false);
+  }
+
+  private scannerOn(): boolean {
+    return !!this.storeStore.selectedStore()?.posSettings?.useBarcodeScanner;
+  }
+
+  private submitScan(quiet: boolean): void {
+    if (this.scanTimer) clearTimeout(this.scanTimer);
+    const code = (this.searchComponent?.filter() ?? '').trim();
+    if (!code) return;
+    const product = this.productStore.searchByBarcode(code);
+    if (product) {
+      // Same as tapping the product: a repeat scan adds one more, it never resets the line.
+      this.addToCart({ product, isEditing: false });
+    } else if (!quiet) {
+      // Enter on something that is not a barcode (a name being typed) just keeps the filter.
+      const anyMatch = this.productStore.filterProductCount() > 0;
+      if (!anyMatch) {
+        this.scanMessage.set($localize`No product with barcode ${code}`);
+        if (this.scanMessageTimer) clearTimeout(this.scanMessageTimer);
+        this.scanMessageTimer = setTimeout(() => this.scanMessage.set(''), 3000);
+        this.searchComponent.clearFilter();
       }
-      if (product) {
-        this.addToCart({ product, isEditing });
-      }
-    } else {
-      this.productStore.updateSearchQuery(enteredFilter);
     }
   }
 

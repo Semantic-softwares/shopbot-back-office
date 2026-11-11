@@ -62,8 +62,10 @@
                   matInput
                   #searchInput
                   [matAutocomplete]="auto"
-                  placeholder="Search by product name or barcode" i18n-placeholder
+                  placeholder="Search by product name or scan a barcode" i18n-placeholder
+                  data-testid="restock-search"
                   (input)="onSearchInputChange($event)"
+                  (keydown.enter)="onSearchEnter($event)"
                 >
                 <mat-autocomplete 
                   #auto="matAutocomplete" 

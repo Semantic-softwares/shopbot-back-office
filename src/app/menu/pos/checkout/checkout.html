@@ -13,8 +13,12 @@
             (filterChange)="searchProduct($event)"
             [showRightIcon]="true"
             (rightTap)="clearSearch()"
+            (keydown.enter)="onSearchEnter()"
             searchText="Search by barcode or product">
           </app-search>
+          @if (scanMessage()) {
+            <p class="text-xs mt-1 px-1" style="color: var(--mat-sys-error)" role="status" data-testid="scan-message">{{ scanMessage() }}</p>
+          }
         </div>
         <!-- A setting, not a per-sale action: an icon toggle instead of a labelled switch that cost ~170px -->
         <button matIconButton class="!hidden md:!inline-flex shrink-0" type="button"

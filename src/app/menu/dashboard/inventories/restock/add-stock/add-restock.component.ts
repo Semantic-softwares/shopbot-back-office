@@ -15,12 +15,13 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { RestockService, Restock } from '../../../../../shared/services/restock.service';
 import { ProductService } from '../../../../../shared/services/product.service';
 import { SuppliersService } from '../../suppliers/services/suppliers.service';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
-import { Observable, of, startWith, map } from 'rxjs';
+import { Observable, of, startWith, map, finalize } from 'rxjs';
 
 @Component({
   selector: 'app-add-restock',
@@ -48,6 +49,10 @@ import { Observable, of, startWith, map } from 'rxjs';
 })
 export class RestockComponent implements OnInit {
   public storeStore = inject(StoreStore);
+  private snack = inject(MatSnackBar);
+  private scanTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Codes being looked up right now, so Enter and the end-of-typing pause cannot add the same scan twice. */
+  private scanning = new Set<string>();
   public isSubmitting = signal(false);
   public isEditMode = signal(false);
   public restockId = signal<string | null>(null);
@@ -197,9 +202,46 @@ export class RestockComponent implements OnInit {
     this.restockForm.patchValue({ invoiceNumber });
   }
 
+  /** Enter in the search box: scanners end each code with Enter. */
+  onSearchEnter(event: Event): void {
+    event.preventDefault();
+    const input = event.target as HTMLInputElement;
+    const code = input.value.trim();
+    if (code) this.scan(code, input, false);
+  }
+
+  /** Adds the product whose barcode (or SKU) is exactly this code; a repeat scan adds one more. Typing a name never adds anything. */
+  private scan(code: string, input: HTMLInputElement, quiet: boolean): void {
+    if (this.scanning.has(code)) return;
+    this.scanning.add(code);
+    this.productService.searchForAutocomplete(this.storeStore.selectedStore()?._id || '', code, []).pipe(finalize(() => this.scanning.delete(code))).subscribe((found) => {
+      const c = code.toLowerCase();
+      const hit = found.find((p: any) => (p.barcode ?? '').toLowerCase() === c || (p.sku ?? '').toLowerCase() === c);
+      if (hit) {
+        const existing = this.itemsArray.controls.find((g) => g.value.product?._id === hit._id);
+        if (existing) {
+          existing.get('quantity')!.setValue((Number(existing.get('quantity')!.value) || 0) + 1);
+          this.formValue.set(this.restockForm.value);
+        } else {
+          this.addProductToRestock(hit);
+        }
+        input.value = '';
+        this.filteredProducts$ = of([]);
+      } else if (!quiet && found.length === 0) {
+        this.snack.open($localize`No product with barcode ${code}`, $localize`Close`, { duration: 3000 });
+        input.value = '';
+        this.filteredProducts$ = of([]);
+      }
+    });
+  }
+
   onSearchInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const query = input.value;
+
+    // A scanner types a whole code in a few ms; a pause after typing means the code is complete.
+    if (this.scanTimer) clearTimeout(this.scanTimer);
+    if (query.trim().length >= 4) this.scanTimer = setTimeout(() => { if (input.value.trim() === query.trim()) this.scan(query.trim(), input, true); }, 150);
     
     if (query.length < 2) {
       this.filteredProducts$ = of([]);
@@ -239,7 +281,7 @@ export class RestockComponent implements OnInit {
     this.formValue.set(this.restockForm.value);
     
     // Clear search input
-    const searchInput = document.querySelector('input[matInput]') as HTMLInputElement;
+    const searchInput = document.querySelector('input[data-testid="restock-search"]') as HTMLInputElement;
     if (searchInput) {
       searchInput.value = '';
     }
