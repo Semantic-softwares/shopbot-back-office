@@ -205,7 +205,7 @@ export class Checkout implements OnInit {
 
   incrementQuantity(product: Product): void {
     // Check stock limit
-    if (product.qty !== undefined) {
+    if (product.qty !== undefined && (product.inventoryTracking ?? 'direct') === 'direct') {
       const currentQty = this.getCartQuantity(product._id!);
       if (currentQty >= product.qty) return;
     }

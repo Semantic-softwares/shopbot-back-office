@@ -27,6 +27,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
+import { InventoryService } from '../../inventory/inventory.service';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import {
   Product,
   Option,
@@ -119,6 +122,7 @@ export class CartComponent implements OnDestroy {
   private readonly subscriptionService = inject(SubscriptionService);
   public readonly saleTypeStore = inject(SalesTypeStore);
   private readonly dialog = inject(MatDialog);
+  private readonly inventoryApi = inject(InventoryService);
   private readonly breakpointObserver = inject(BreakpointObserver);
   @Optional() private readonly bottomSheetRef = inject(MatBottomSheetRef<CartComponent>, { optional: true });
   private readonly snackBar = inject(MatSnackBar);
@@ -725,6 +729,25 @@ export class CartComponent implements OnDestroy {
    * The cart as it is saved with the order. Line tax snapshots only go with a sale that was priced by the tax engine; for any
    * other sale they are left out so the server stores it as the legacy order it is.
    */
+  /**
+   * Asks the server whether the ingredients or components for this sale are in stock. With the default policy it only warns; a store
+   * set to "stop the sale" refuses unless the person may override. A failed or offline check never stops a sale.
+   */
+  private async stockAllowsSale(cart: { products: any[] }): Promise<boolean> {
+    const storeId = this.storeStore.selectedStore()?._id;
+    if (!storeId || this.net.offline()) return true;
+    try {
+      const lines = (cart.products ?? []).map((p: any) => ({ productId: String(p.productId ?? p._id ?? ''), quantity: Number(p.quantity ?? 1) })).filter((l) => l.productId);
+      if (!lines.length) return true;
+      const r = await this.inventoryApi.checkSale(storeId, lines);
+      if (!r.shortages.length) return true;
+      const list = r.shortages.map((s) => `${s.name} (${s.available} ${s.unit} left, ${s.needed} ${s.unit} needed)`).join(', ');
+      if (r.policy === 'allow') { this.snackBar.open($localize`Low stock for this sale: ${list}. The sale will go through.`, $localize`Close`, { duration: 6000 }); return true; }
+      if (!r.canOverride) { this.snackBar.open($localize`Not enough stock: ${list}. Ask a manager to approve this sale.`, $localize`Close`, { duration: 8000 }); return false; }
+      return !!(await firstValueFrom(this.dialog.open(ConfirmationDialogComponent, { data: { title: $localize`Not enough stock`, message: $localize`Not enough stock: ${list}. Sell anyway? The shortfall will be recorded.`, confirmText: $localize`Sell anyway` } }).afterClosed()));
+    } catch { return true; }
+  }
+
   private orderCart<T extends { products: any[] }>(cart: T): T {
     if (this.cartSummary()?.engine) return cart;
     return { ...cart, products: cart.products.map(({ taxLine, ...rest }) => rest) };
@@ -870,6 +893,8 @@ export class CartComponent implements OnDestroy {
     this.saleTypeStore.stopEditing();
     this.snackBar.open($localize`Order updated successfully`, $localize`Close`, { duration: 2000 });
   } else {
+    // Stock pre-check for products that use up ingredients or components (never blocks offline or on an error).
+    if (!(await this.stockAllowsSale(selectedCart))) return;
     // Create new order
     const newOrder = {
       _id: objectId(),

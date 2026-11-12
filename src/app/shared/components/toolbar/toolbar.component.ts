@@ -370,6 +370,10 @@ export class ToolbarComponent implements OnInit, OnDestroy {
           this.router.navigate(['/menu/hms/front-desk/reservations']);
         }
         break;
+      case 'low_stock':
+        // Opens the inventory item that ran low.
+        this.router.navigate(notification.referenceId ? ['/menu/erp/inventory/items', notification.referenceId] : ['/menu/erp/inventory/items']);
+        break;
       case 'maintenance_invoice_generated':
         if (notification.referenceId) {
           this.router.navigate(['/menu/ems/accounting/invoices', notification.referenceId]);
@@ -395,6 +399,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
       availability_updated: 'event_available',
       rate_updated: 'attach_money',
       maintenance_invoice_generated: 'receipt_long',
+      low_stock: 'inventory_2',
       system: 'info',
     };
     return icons[eventType] || 'notifications';

@@ -245,6 +245,7 @@
         </mat-card-content>
       </mat-card>
       @if (isEditMode() && productId()) { <app-product-purchasing [productId]="productId()!" /> }
+      @if (isEditMode() && productId()) { <app-product-inventory [productId]="productId()!" [productName]="productForm.get('name')?.value ?? ''" /> }
       <mat-card appearance="outlined">
         <mat-card-header class="!pb-2">
           <mat-card-title class="!text-base !font-medium"><ng-container i18n>Identifiers</ng-container></mat-card-title>

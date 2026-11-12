@@ -36,6 +36,8 @@ export interface Product {
   reorderTarget?: number;
   stockLevelAlert?: boolean;
   qty?: number;
+  /** How a sale affects stock: its own qty ('direct', the default), ingredient/component use ('bom'), or nothing ('none'). */
+  inventoryTracking?: 'none' | 'direct' | 'bom';
   station?: Station | string | any;
   expiryDate?: Date;
   // Tax management (opt-in per store): which taxes apply and whether the price includes them.

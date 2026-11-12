@@ -274,7 +274,11 @@ export class DashboardComponent {
     {
       name:  'Inventory',
       children: [
-        { icon: 'warehouse', label: $localize`Suppliers`, link: './inventory/suppliers', permission: 'view_company' },
+        { icon: 'inventory', label: $localize`Inventory items`, link: './inventory/items', permission: 'view_company' },
+        { icon: 'warehouse', label: $localize`Locations`, link: './inventory/locations', permission: 'view_company' },
+        { icon: 'fact_check', label: $localize`Stocktakes`, link: './inventory/stocktakes', permission: 'view_company' },
+        { icon: 'query_stats', label: $localize`Inventory reports`, link: './inventory/reports', permission: 'view_company' },
+        { icon: 'local_shipping', label: $localize`Suppliers`, link: './inventory/suppliers', permission: 'view_company' },
         { icon: 'shopping_bag', label: $localize`Purchase orders`, link: './inventory/purchasing', permission: 'view_company' },
         { icon: 'inventory_2', label: $localize`Quick stock-in`, link: './inventory/restock', permission: 'view_company' },
         { icon: 'calculate', label: $localize`Reconciliations`, link: './inventory/reconciliations', permission: 'view_company' },

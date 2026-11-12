@@ -77,7 +77,8 @@ export class ProductCardComponent {
 
   isLowStock = computed(() => {
     const prod = this.product();
-    return prod.active && prod.qty !== undefined && prod.qty <= 5;
+    // Only a product counted by its own stock can be "low"; one that uses ingredients is tracked in Inventory instead.
+    return prod.active && (prod.inventoryTracking ?? 'direct') === 'direct' && prod.qty !== undefined && prod.qty <= 5;
   });
 
   /** Tap anywhere on the card: same action as its primary button. Out-of-stock cards ignore taps. */

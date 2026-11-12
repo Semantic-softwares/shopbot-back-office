@@ -1,3 +1,4 @@
+import { ProductInventoryComponent } from '../../../inventories/stock/product-inventory.component';
 import { ProductPurchasingComponent } from '../../../inventories/purchasing/product-purchasing.component';
 import { Component, OnInit, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -56,6 +57,7 @@ interface ImagePreview {
   imports: [
     CommonModule,
     ProductPurchasingComponent,
+    ProductInventoryComponent,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
