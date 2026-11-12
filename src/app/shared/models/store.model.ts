@@ -4,6 +4,8 @@ import { LandingPageSettings } from "./landing-page.model";
 
 export interface Store {
     _id: string;
+    /** The store's timezone, an IANA name such as "Indian/Mauritius". Unset until the owner chooses one. */
+    timezone?: string;
     storeType?: 'restaurant' | 'hotel' | 'real_estate';
     propertyType?: 'hotel' | 'hostel' | 'apartment' | 'guesthouse' | 'resort' | 'motel' | 'villa' | 'boutique_hotel' | 'bed_and_breakfast' | 'lodge';
     storeNumber?: string;
@@ -208,6 +210,11 @@ export interface HotelSettings {
     guestFeedbackRequest: boolean;
     smsNotifications: boolean;
     pushNotifications: boolean;
+    /** Email the hotel when a guest about to check out still has unpaid room orders (kitchen / POS). On unless false. */
+    unpaidRoomOrdersAlert?: boolean;
+    /** Local hour (0-23) of the evening-before and the morning-of reminders. */
+    unpaidRoomOrdersEveHour?: number;
+    unpaidRoomOrdersMorningHour?: number;
   };
 }
 

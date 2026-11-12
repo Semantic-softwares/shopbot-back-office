@@ -27,6 +27,7 @@ import { StationsService } from '../../../../../shared/services/station.service'
 import { Product } from '../../../../../shared/models';
 import { MatDialog } from '@angular/material/dialog';
 import { CategoryDialogComponent } from '../../categories/category-dialog/category-dialog.component';
+import { groups } from '../../../../../shared/category-tree';
 import { AddVariantsListComponent } from '../modals/add-variants-list/add-variants-list.component';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { NoRecordComponent } from '../../../../../shared/components/no-record/no-record.component';
@@ -88,6 +89,9 @@ export class CreateProductComponent implements OnInit {
     stream: ({ params }) =>
       this.categoryService.getStoreMenus(params.storeId!),
   });
+
+  /** Categories with their sub-categories, for the grouped picker. */
+  public readonly categoryGroups = computed(() => groups(this.categories.hasValue() ? this.categories.value() : []));
 
   public stations = rxResource({
     params: () => ({
@@ -191,17 +195,20 @@ export class CreateProductComponent implements OnInit {
     // }
   }
 
-  openCategoryModal(event: Event) {
+  /** Opens the category dialog from the picker. As a sub-category it starts under the category the product is already in. */
+  openCategoryModal(event: Event, asSub = false) {
     // Prevent select from closing
     event.stopPropagation();
+    const all = this.categories.hasValue() ? this.categories.value() : [];
+    const current = all.find((c) => c._id === this.productForm.value.menu);
+    const parent = asSub ? (current?.parent ?? current?._id) : undefined;
     const dialogRef = this.dialog.open(CategoryDialogComponent, {
       width: '500px',
-      data: { isEdit: false },
+      data: { isEdit: false, all, parent, asSub },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        console.log('Category created:', result);
         this.productForm.patchValue({ menu: result._id });
         this.categories.reload();
       }

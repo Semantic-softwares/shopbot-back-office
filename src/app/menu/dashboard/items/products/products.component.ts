@@ -25,6 +25,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NoRecordComponent } from "../../../../shared/components/no-record/no-record.component";
 import { Product, Station } from '../../../../shared/models';
 import { CategoryService } from '../../../../shared/services/category.service';
+import { flatTree, idsUnder, pathLabel } from '../../../../shared/category-tree';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin } from 'rxjs';
@@ -103,6 +104,14 @@ export class ProductsComponent {
       this.categoryService.getStoreMenus(params.storeId!)
   });
 
+  private readonly allCategories = computed(() => (this.categories.hasValue() ? this.categories.value() : []));
+  /** The filter list: each category followed, indented, by its sub-categories. */
+  public readonly categoryRows = computed(() => flatTree(this.allCategories()));
+  /** "Drinks › Whisky" for a product in a sub-category, the plain name otherwise. */
+  public categoryPath(menu: any): string {
+    return menu?._id ? pathLabel(this.allCategories(), menu._id) || menu.name || '' : '';
+  }
+
   public stations = rxResource({
     params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
@@ -139,10 +148,12 @@ export class ProductsComponent {
     public filteredProducts = computed(() => {
     const term = this.searchTerm().toLowerCase();
     const categoryId = this.selectedCategory();
-    
+    // Choosing a category also shows the products of its sub-categories.
+    const ids = categoryId === 'all' ? [] : idsUnder(this.allCategories(), categoryId);
+
     return this.dataSource.value()?.filter((product: Product) => {
       const matchesSearch = product.name.toLowerCase().includes(term);
-      const matchesCategory = categoryId === 'all' || product?.menu?._id === categoryId;
+      const matchesCategory = categoryId === 'all' || ids.includes(product?.menu?._id) || product?.menu?._id === categoryId;
       return matchesSearch && matchesCategory;
     }) ?? [];
   });

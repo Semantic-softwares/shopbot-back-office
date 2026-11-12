@@ -193,16 +193,12 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Check-in Date</ng-container></label>
                 <div class="text-lg font-semibold text-gray-900">{{ formatDate(reservation()!.checkInDate) }}</div>
-                @if (reservation()!.expectedCheckInTime) {
-                  <div class="text-sm text-gray-600"><ng-container i18n>Expected: {{ reservation()!.expectedCheckInTime }}</ng-container></div>
-                }
+                <div class="text-sm text-gray-600" data-testid="stay-expectedCheckInTime"><ng-container i18n>Expected: {{ reservation()!.expectedCheckInTime || hotelCheckIn() }}</ng-container></div>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Check-out Date</ng-container></label>
                 <div class="text-lg font-semibold text-gray-900">{{ formatDate(reservation()!.checkOutDate) }}</div>
-                @if (reservation()!.expectedCheckOutTime) {
-                  <div class="text-sm text-gray-600"><ng-container i18n>Expected: {{ reservation()!.expectedCheckOutTime }}</ng-container></div>
-                }
+                <div class="text-sm text-gray-600" data-testid="stay-expectedCheckOutTime"><ng-container i18n>Expected: {{ reservation()!.expectedCheckOutTime || hotelCheckOut() }}</ng-container></div>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1"><ng-container i18n>Number of Nights</ng-container></label>

@@ -34,8 +34,8 @@
         @if (categoryStore.isLoading()) {
           <mat-spinner diameter="20"></mat-spinner>
         } @else {
-          <mat-chip-listbox aria-label="Select a category" i18n-aria-label class="flex-nowrap">
-            @for (category of categoryStore.categories(); track category._id) {
+          <mat-chip-listbox aria-label="Select a category" i18n-aria-label class="flex-nowrap" data-testid="pos-categories">
+            @for (category of categoryStore.topLevel(); track category._id) {
               <mat-chip-option
                 [selected]="categoryStore.selectedCategory()?._id === category._id"
                 [disabled]="category.activate === false"
@@ -46,6 +46,27 @@
           </mat-chip-listbox>
         }
       </div>
+
+      <!-- Sub-categories of the selected category, right below it and styled the same way -->
+      @if (!categoryStore.isLoading() && categoryStore.visibleSubs().length > 0) {
+        <div class="mt-2 pt-2 -mx-3 px-3 border-t border-outline-variant flex items-center gap-3 overflow-x-auto scrollbar-hide" data-testid="pos-subcategories">
+          <mat-chip-listbox aria-label="Select a sub-category" i18n-aria-label class="flex-nowrap">
+            <mat-chip-option
+              [selected]="!categoryStore.selectedSub()"
+              (click)="selectSub(null)">
+              <ng-container i18n>All</ng-container>
+            </mat-chip-option>
+            @for (sub of categoryStore.visibleSubs(); track sub._id) {
+              <mat-chip-option
+                [selected]="categoryStore.selectedSub()?._id === sub._id"
+                [disabled]="sub.activate === false"
+                (click)="selectSub(sub)">
+                {{ sub.name }}
+              </mat-chip-option>
+            }
+          </mat-chip-listbox>
+        </div>
+      }
     </div>
 
     <!-- Products Grid: as many ~150px+ columns as fit, instead of a fixed count per breakpoint -->

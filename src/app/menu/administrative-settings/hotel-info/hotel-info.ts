@@ -2,6 +2,7 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, inject, OnInit, signal
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { TimezoneSelectComponent } from '../../../shared/components/timezone-select/timezone-select.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -29,7 +30,8 @@ declare const google: any;
 @Component({
   selector: 'app-hotel-info',
   standalone: true,
-  imports: [TrPipe, 
+  imports: [TrPipe,
+    TimezoneSelectComponent, 
     ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
@@ -123,34 +125,6 @@ export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
   selectedErpResetTargets = signal<string[]>([]);
   
   hotelInfoForm!: FormGroup;
-
-  timezoneOptions = [
-    { value: 'UTC-12', label: $localize`(GMT-12:00) International Date Line West` },
-    { value: 'UTC-11', label: $localize`(GMT-11:00) Midway Island, Samoa` },
-    { value: 'UTC-10', label: $localize`(GMT-10:00) Hawaii` },
-    { value: 'UTC-9', label: $localize`(GMT-09:00) Alaska` },
-    { value: 'UTC-8', label: $localize`(GMT-08:00) Pacific Time (US & Canada)` },
-    { value: 'UTC-7', label: $localize`(GMT-07:00) Mountain Time (US & Canada)` },
-    { value: 'UTC-6', label: $localize`(GMT-06:00) Central Time (US & Canada)` },
-    { value: 'UTC-5', label: $localize`(GMT-05:00) Eastern Time (US & Canada)` },
-    { value: 'UTC-4', label: $localize`(GMT-04:00) Atlantic Time (Canada)` },
-    { value: 'UTC-3', label: $localize`(GMT-03:00) Buenos Aires, Georgetown` },
-    { value: 'UTC-2', label: $localize`(GMT-02:00) Mid-Atlantic` },
-    { value: 'UTC-1', label: $localize`(GMT-01:00) Azores, Cape Verde Islands` },
-    { value: 'UTC+0', label: $localize`(GMT+00:00) Greenwich Mean Time` },
-    { value: 'UTC+1', label: $localize`(GMT+01:00) Amsterdam, Berlin, Rome` },
-    { value: 'UTC+2', label: $localize`(GMT+02:00) Cairo, Athens, Istanbul` },
-    { value: 'UTC+3', label: $localize`(GMT+03:00) Moscow, Kuwait, Riyadh` },
-    { value: 'UTC+4', label: $localize`(GMT+04:00) Abu Dhabi, Muscat` },
-    { value: 'UTC+5', label: $localize`(GMT+05:00) Islamabad, Karachi` },
-    { value: 'UTC+6', label: $localize`(GMT+06:00) Almaty, Dhaka` },
-    { value: 'UTC+7', label: $localize`(GMT+07:00) Bangkok, Hanoi, Jakarta` },
-    { value: 'UTC+8', label: $localize`(GMT+08:00) Beijing, Perth, Singapore` },
-    { value: 'UTC+9', label: $localize`(GMT+09:00) Tokyo, Seoul, Osaka` },
-    { value: 'UTC+10', label: $localize`(GMT+10:00) Eastern Australia, Guam` },
-    { value: 'UTC+11', label: $localize`(GMT+11:00) Magadan, Solomon Islands` },
-    { value: 'UTC+12', label: $localize`(GMT+12:00) Auckland, Wellington` }
-  ];
 
   ngAfterViewInit(): void {
     this.waitForPlacesThenInit();
@@ -343,7 +317,8 @@ export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
         email: ['', [Validators.required, Validators.email]],
         website: ['']
       }),
-      timezone: ['UTC+0', Validators.required],
+      // The store's timezone (empty until one is chosen). Not required: an older store without one can still save its other details.
+      timezone: [''],
       checkInTime: ['15:00', Validators.required],
       checkOutTime: ['11:00', Validators.required]
     });
@@ -376,6 +351,10 @@ export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
           email: store.contactInfo?.email || '',
           website: store.contactInfo?.placeName || ''
         },
+        // What the store chose; a hotel that only has the old fixed-offset setting shows that; "UTC+0" alone is just the old default.
+        timezone: store.timezone || (store.hotelSettings?.operationalSettings?.timezone && store.hotelSettings.operationalSettings.timezone !== 'UTC+0' ? store.hotelSettings.operationalSettings.timezone : ''),
+        checkInTime: store.hotelSettings?.operationalSettings?.checkInTime || '15:00',
+        checkOutTime: store.hotelSettings?.operationalSettings?.checkOutTime || '11:00',
       });
 
       const coordinates = store.location?.coordinates;
@@ -401,6 +380,11 @@ export class HotelInfo implements OnInit, AfterViewInit, OnDestroy {
 
       const storeUpdatePayload = {
         name: formValue.hotelName,
+        // Only sent once there is a choice, so saving the other details never wipes or invents one.
+        ...(formValue.timezone ? { timezone: formValue.timezone } : {}),
+        // Set one field at a time so the rest of the hotel's settings are never overwritten.
+        'hotelSettings.operationalSettings.checkInTime': formValue.checkInTime,
+        'hotelSettings.operationalSettings.checkOutTime': formValue.checkOutTime,
         contactInfo: {
           ...currentStore.contactInfo,
           phone: formValue.contactInfo.phone,

@@ -56,7 +56,7 @@
   <!-- KPI strip: the period at a glance. Open orders and refunds are buttons, because they are the two numbers
        somebody will want to act on. -->
   @if (kpis(); as k) {
-    <section class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4" aria-label="Key figures" i18n-aria-label>
+    <section class="grid grid-cols-2 lg:grid-cols-6 gap-3 mb-4" aria-label="Key figures" i18n-aria-label>
       <div class="col-span-2 lg:col-span-1 rounded-2xl bg-primary-container text-on-primary-container p-4">
         <p class="text-xs font-medium uppercase tracking-wide opacity-80"><ng-container i18n>Net sales</ng-container></p>
         <p class="mt-1 text-2xl md:text-3xl font-bold tabular-nums">{{ k.netSales | currency: currency() : 'symbol' : '1.0-0' }}</p>
@@ -69,9 +69,21 @@
         <p class="mt-1 text-xs text-on-surface-variant"><ng-container i18n>{{ summary()?.sales }} paid receipts</ng-container></p>
       </div>
 
-      <button type="button" (click)="onTabChange('refund')"
+      <button type="button" (click)="onTabChange('discount')" data-testid="kpi-discounts"
         class="text-left rounded-2xl border p-4 transition-colors hover:bg-surface-container"
-        [class.border-outline-variant]="k.refunds.amount === 0" [class.border-orange-300]="k.refunds.amount > 0">
+        [class.border-outline-variant]="(k.discounts?.amount ?? 0) === 0" [class.border-violet-300]="(k.discounts?.amount ?? 0) > 0"
+        [class.ring-2]="activeTab() === 'discount'" [class.ring-primary]="activeTab() === 'discount'" [attr.aria-pressed]="activeTab() === 'discount'">
+        <p class="text-xs font-medium uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Discounts</ng-container></p>
+        <p class="mt-1 text-xl md:text-2xl font-semibold tabular-nums">{{ (k.discounts?.amount ?? 0) | currency: currency() : 'symbol' : '1.0-0' }}</p>
+        <p class="mt-1 text-xs text-on-surface-variant">
+          <ng-container i18n>{{ k.discounts?.count ?? 0 }} receipts · {{ discountRate() | number: '1.0-1' }}% of sales</ng-container>
+        </p>
+      </button>
+
+      <button type="button" (click)="onTabChange('refund')" data-testid="kpi-refunds"
+        class="text-left rounded-2xl border p-4 transition-colors hover:bg-surface-container"
+        [class.border-outline-variant]="k.refunds.amount === 0" [class.border-orange-300]="k.refunds.amount > 0"
+        [class.ring-2]="activeTab() === 'refund'" [class.ring-primary]="activeTab() === 'refund'" [attr.aria-pressed]="activeTab() === 'refund'">
         <p class="text-xs font-medium uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Refunds</ng-container></p>
         <p class="mt-1 text-xl md:text-2xl font-semibold tabular-nums" [class.text-orange-700]="k.refunds.amount > 0">{{ k.refunds.amount | currency: currency() : 'symbol' : '1.0-0' }}</p>
         <p class="mt-1 text-xs text-on-surface-variant">
@@ -79,9 +91,10 @@
         </p>
       </button>
 
-      <button type="button" (click)="onTabChange('open')"
+      <button type="button" (click)="onTabChange('open')" data-testid="kpi-open"
         class="text-left rounded-2xl border p-4 transition-colors hover:bg-surface-container"
-        [class.border-outline-variant]="k.open.count === 0" [class.border-amber-400]="k.open.count > 0" [class.bg-amber-50]="k.open.count > 0">
+        [class.border-outline-variant]="k.open.count === 0" [class.border-amber-400]="k.open.count > 0" [class.bg-amber-50]="k.open.count > 0"
+        [class.ring-2]="activeTab() === 'open'" [class.ring-primary]="activeTab() === 'open'" [attr.aria-pressed]="activeTab() === 'open'">
         <p class="text-xs font-medium uppercase tracking-wide text-on-surface-variant"><ng-container i18n>Still open</ng-container></p>
         <p class="mt-1 text-xl md:text-2xl font-semibold tabular-nums">{{ k.open.amount | currency: currency() : 'symbol' : '1.0-0' }}</p>
         <p class="mt-1 text-xs text-on-surface-variant"><ng-container i18n>{{ k.open.count }} unpaid orders</ng-container></p>
@@ -134,7 +147,7 @@
     }
 
     <!-- Find and narrow -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-3 px-3 pt-3 md:px-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-3 gap-y-4 px-3 pt-4 md:px-4">
       <mat-form-field appearance="outline" subscriptSizing="dynamic" class="sm:col-span-2 xl:col-span-1">
         <mat-icon matPrefix class="mr-2">search</mat-icon>
         <input matInput type="search" [ngModel]="search()" (ngModelChange)="onSearch($event)"
@@ -173,6 +186,9 @@
             <p class="text-sm"><ng-container i18n>Refund tickets appear here as soon as a sale is refunded.</ng-container></p>
           } @else if (activeTab() === 'open') {
             <p class="font-medium"><ng-container i18n>Nothing is waiting to be paid</ng-container></p>
+          } @else if (activeTab() === 'discount') {
+            <p class="font-medium"><ng-container i18n>No discounts in this period</ng-container></p>
+            <p class="text-sm"><ng-container i18n>Paid receipts that had a discount appear here.</ng-container></p>
           } @else {
             <p class="font-medium"><ng-container i18n>No receipts for the selected filters.</ng-container></p>
           }
@@ -200,7 +216,7 @@
                 <button type="button" class="text-left" (click)="viewRecipesDetails(row._id)">
                   <span class="flex items-center gap-1 font-semibold">
                     #{{ row.receiptNo }}
-                    @if (row.note) { <mat-icon class="!h-4 !w-4 !text-[16px] !leading-none text-amber-600" [matTooltip]="row.note">sticky_note_2</mat-icon> }
+                    @if (receiptTip(row); as tip) { <mat-icon class="!h-4 !w-4 !text-[16px] !leading-none text-amber-600" [matTooltip]="tip" matTooltipClass="tc-tip" [attr.aria-label]="tip" tabindex="0" data-testid="note-tip">sticky_note_2</mat-icon> }
                   </span>
                   <span class="text-xs text-on-surface-variant">{{ channelLabel(row.salesChannel) }} · {{ row.ordertype | titlecase }}</span>
                 </button>
@@ -245,6 +261,9 @@
                 <span class="block font-semibold tabular-nums" [class.line-through]="row.category === 'Cancel'" [class.opacity-60]="row.category === 'Cancel'">
                   {{ row.total | currency: currency() : 'symbol' : '1.2-2' }}
                 </span>
+                @if (row.discount > 0) {
+                  <span class="block text-xs tabular-nums text-violet-700" data-testid="row-discount">−{{ row.discount | currency: currency() : 'symbol' : '1.2-2' }} <ng-container i18n>discount</ng-container></span>
+                }
                 @if (row.refundedAmount > 0) {
                   <span class="text-xs tabular-nums text-orange-700">−{{ row.refundedAmount | currency: currency() : 'symbol' : '1.2-2' }} <ng-container i18n>refunded</ng-container></span>
                 }
@@ -295,7 +314,7 @@
                 <button type="button" class="flex-1 min-w-0 text-left" (click)="viewRecipesDetails(row._id)">
                   <span class="flex items-center gap-1 font-semibold">
                     #{{ row.receiptNo }}
-                    @if (row.note) { <mat-icon class="!h-4 !w-4 !text-[16px] !leading-none text-amber-600">sticky_note_2</mat-icon> }
+                    @if (receiptTip(row)) { <mat-icon class="!h-4 !w-4 !text-[16px] !leading-none text-amber-600">sticky_note_2</mat-icon> }
                   </span>
                   <span class="block text-xs text-on-surface-variant">{{ row.date | date: 'MMM d, h:mm a' }}</span>
                 </button>
@@ -328,8 +347,14 @@
                 @if (row.paymentStatus === 'Paid') { · {{ row.type }} }
                 @if (row.servedBy?.name) { · {{ row.servedBy.name }} }
               </p>
+              @if (row.discount > 0) {
+                <p class="mt-1 text-xs tabular-nums text-violet-700">−{{ row.discount | currency: currency() : 'symbol' : '1.2-2' }} <ng-container i18n>discount</ng-container></p>
+              }
               @if (row.refundedAmount > 0) {
                 <p class="mt-1 text-xs tabular-nums text-orange-700">−{{ row.refundedAmount | currency: currency() : 'symbol' : '1.2-2' }} <ng-container i18n>refunded</ng-container></p>
+              }
+              @if (receiptTip(row); as tip) {
+                <p class="mt-2 flex gap-1 whitespace-pre-line text-xs italic text-on-surface-variant" data-testid="note-inline"><mat-icon class="!h-4 !w-4 !text-[16px] !leading-none shrink-0 text-amber-600">sticky_note_2</mat-icon>{{ tip }}</p>
               }
             </div>
           }
@@ -344,7 +369,9 @@
               <th mat-header-cell *matHeaderCellDef><ng-container i18n>Refund ticket</ng-container></th>
               <td mat-cell *matCellDef="let r" class="relative">
                 <span class="absolute inset-y-0 left-0 w-1 bg-orange-400"></span>
-                <span class="block font-semibold">{{ r.refundNumber }}</span>
+                <span class="flex items-center gap-1 font-semibold">{{ r.refundNumber }}
+                  @if (refundTip(r); as tip) { <mat-icon class="!h-4 !w-4 !text-[16px] !leading-none text-amber-600" [matTooltip]="tip" matTooltipClass="tc-tip" [attr.aria-label]="tip" tabindex="0" data-testid="refund-note-tip">sticky_note_2</mat-icon> }
+                </span>
                 <button type="button" class="text-xs text-primary hover:underline" (click)="viewRecipesDetails(r.order)"><ng-container i18n>Sale</ng-container> #{{ r.orderReference }}</button>
               </td>
             </ng-container>
@@ -410,6 +437,9 @@
               </div>
               <p class="mt-2 text-sm">{{ refundSummary(r) }}</p>
               <p class="mt-1 text-xs text-on-surface-variant">{{ reasonLabel(r.reasonCode) }} · {{ refundMethods(r) }} @if (r.createdBy?.name) { · {{ r.createdBy.name }} }</p>
+              @if (r.note) {
+                <p class="mt-2 flex gap-1 whitespace-pre-line text-xs italic text-on-surface-variant" data-testid="refund-note-inline"><mat-icon class="!h-4 !w-4 !text-[16px] !leading-none shrink-0 text-amber-600">sticky_note_2</mat-icon>{{ r.note }}</p>
+              }
             </div>
           }
         </div>

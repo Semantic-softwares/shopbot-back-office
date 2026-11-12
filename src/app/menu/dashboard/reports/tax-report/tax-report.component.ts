@@ -2,11 +2,14 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, u
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { ReportExportService } from '../../../../shared/services/report-export.service';
+import { ExportFormat, ReportPageComponent } from '../shared/report-page.component';
+import { ReportKpiComponent } from '../shared/report-kpi.component';
 import { AccountingTaxService } from '../../../../shared/services/accounting-tax.service';
 import { Tax, TaxReport } from '../../../../shared/models/tax.model';
 import { StoreStore } from '../../../../shared/stores/store.store';
@@ -19,75 +22,80 @@ const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart
  */
 @Component({
   selector: 'app-tax-report',
-  imports: [CurrencyPipe, FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatProgressSpinnerModule, MatSelectModule, PageHeaderComponent],
+  imports: [CurrencyPipe, FormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatInputModule, MatProgressSpinnerModule, MatSelectModule, ReportPageComponent, ReportKpiComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-page-header title="Tax Report" i18n-title subtitle="Tax collected on your sales" i18n-subtitle></app-page-header>
+    <app-report-page title="Tax Report" i18n-title subtitle="Tax collected on your sales" i18n-subtitle [exportDisabled]="!report()" (export)="exportData($event)">
+      <ng-container filters>
+        <div><mat-form-field appearance="outline"><mat-label i18n>From</mat-label><input matInput type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" data-testid="report-from" /></mat-form-field></div>
+        <div><mat-form-field appearance="outline"><mat-label i18n>To</mat-label><input matInput type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" data-testid="report-to" /></mat-form-field></div>
+        <div>
+          <mat-form-field appearance="outline">
+            <mat-label i18n>Tax</mat-label>
+            <mat-select [ngModel]="taxId()" (ngModelChange)="taxId.set($event)" data-testid="report-tax">
+              <mat-option value="" i18n>All taxes</mat-option>
+              @for (t of taxes(); track t._id) { <mat-option [value]="t._id">{{ t.name }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="flex items-start"><button matButton="filled" class="!h-14 w-full" (click)="run()" data-testid="report-run" i18n>Show report</button></div>
+      </ng-container>
 
-    <div class="flex flex-wrap items-start gap-3 mb-4">
-      <mat-form-field appearance="outline"><mat-label i18n>From</mat-label><input matInput type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" data-testid="report-from" /></mat-form-field>
-      <mat-form-field appearance="outline"><mat-label i18n>To</mat-label><input matInput type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" data-testid="report-to" /></mat-form-field>
-      <mat-form-field appearance="outline" class="w-56">
-        <mat-label i18n>Tax</mat-label>
-        <mat-select [ngModel]="taxId()" (ngModelChange)="taxId.set($event)" data-testid="report-tax">
-          <mat-option value="" i18n>All taxes</mat-option>
-          @for (t of taxes(); track t._id) { <mat-option [value]="t._id">{{ t.name }}</mat-option> }
-        </mat-select>
-      </mat-form-field>
-      <button mat-flat-button color="primary" class="!mt-2" (click)="run()" data-testid="report-run" i18n>Show report</button>
-    </div>
+      @if (loading()) {
+        <div class="flex justify-center py-16"><mat-spinner diameter="32"></mat-spinner></div>
+      } @else if (error()) {
+        <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900" role="alert">{{ error() }}</div>
+      } @else if (report(); as r) {
+        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4" data-testid="report-kpis">
+          <app-report-kpi label="Total sales" i18n-label icon="payments">{{ r.sales | currency: r.currencyCode : 'symbol' : '1.2-2' }}</app-report-kpi>
+          <app-report-kpi label="Net taxable sales" i18n-label icon="receipt_long">{{ r.taxableAmount | currency: r.currencyCode : 'symbol' : '1.2-2' }}</app-report-kpi>
+          <app-report-kpi label="VAT collected" i18n-label icon="percent" data-testid="kpi-tax">{{ r.totalTax | currency: r.currencyCode : 'symbol' : '1.2-2' }}</app-report-kpi>
+          <app-report-kpi label="VAT after refunds" i18n-label icon="undo">{{ r.netTax | currency: r.currencyCode : 'symbol' : '1.2-2' }}</app-report-kpi>
+          <app-report-kpi label="Zero-rated sales" i18n-label>{{ r.zeroRatedSales | currency: r.currencyCode : 'symbol' : '1.2-2' }}</app-report-kpi>
+          <app-report-kpi label="Exempt sales" i18n-label>{{ r.exemptSales | currency: r.currencyCode : 'symbol' : '1.2-2' }}</app-report-kpi>
+          <app-report-kpi label="VAT included in prices" i18n-label>{{ r.includedTax | currency: r.currencyCode : 'symbol' : '1.2-2' }}</app-report-kpi>
+          <app-report-kpi label="VAT added at checkout" i18n-label>{{ r.addedTax | currency: r.currencyCode : 'symbol' : '1.2-2' }}</app-report-kpi>
+        </div>
 
-    @if (loading()) {
-      <div class="flex justify-center py-16"><mat-spinner diameter="32"></mat-spinner></div>
-    } @else if (error()) {
-      <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">{{ error() }}</div>
-    } @else if (report(); as r) {
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4" data-testid="report-kpis">
-        <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500" i18n>Total sales</div><div class="text-lg font-semibold tabular-nums">{{ r.sales | currency: r.currencyCode : 'symbol' : '1.2-2' }}</div></div>
-        <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500" i18n>Net taxable sales</div><div class="text-lg font-semibold tabular-nums">{{ r.taxableAmount | currency: r.currencyCode : 'symbol' : '1.2-2' }}</div></div>
-        <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500" i18n>VAT collected</div><div class="text-lg font-semibold tabular-nums" data-testid="kpi-tax">{{ r.totalTax | currency: r.currencyCode : 'symbol' : '1.2-2' }}</div></div>
-        <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500" i18n>VAT after refunds</div><div class="text-lg font-semibold tabular-nums">{{ r.netTax | currency: r.currencyCode : 'symbol' : '1.2-2' }}</div></div>
-        <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500" i18n>Zero-rated sales</div><div class="text-lg font-semibold tabular-nums">{{ r.zeroRatedSales | currency: r.currencyCode : 'symbol' : '1.2-2' }}</div></div>
-        <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500" i18n>Exempt sales</div><div class="text-lg font-semibold tabular-nums">{{ r.exemptSales | currency: r.currencyCode : 'symbol' : '1.2-2' }}</div></div>
-        <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500" i18n>VAT included in prices</div><div class="text-lg font-semibold tabular-nums">{{ r.includedTax | currency: r.currencyCode : 'symbol' : '1.2-2' }}</div></div>
-        <div class="rounded-lg border border-gray-200 p-3"><div class="text-xs text-gray-500" i18n>VAT added at checkout</div><div class="text-lg font-semibold tabular-nums">{{ r.addedTax | currency: r.currencyCode : 'symbol' : '1.2-2' }}</div></div>
-      </div>
+        <mat-card appearance="outlined" class="overflow-x-auto">
+          <table class="w-full min-w-[520px] text-sm" data-testid="report-by-tax">
+            <thead><tr class="bg-surface-container text-left text-on-surface-variant"><th class="px-4 py-3 font-medium" i18n>Tax</th><th class="px-4 py-3 text-right font-medium" i18n>Rate</th><th class="px-4 py-3 text-right font-medium" i18n>Taxable amount</th><th class="px-4 py-3 text-right font-medium" i18n>Tax</th></tr></thead>
+            <tbody>
+              @for (row of r.byTax; track $index) {
+                <tr class="border-t border-outline-variant/60">
+                  <td class="px-4 py-3">{{ row.name }}
+                    @if (row.kind === 'zero_rated') { <span class="ml-1 text-xs text-on-surface-variant" i18n>(zero-rated)</span> }
+                    @if (row.kind === 'exempt') { <span class="ml-1 text-xs text-on-surface-variant" i18n>(exempt)</span> }
+                  </td>
+                  <td class="px-4 py-3 text-right tabular-nums">{{ row.rate }}%</td>
+                  <td class="px-4 py-3 text-right tabular-nums">{{ row.taxableAmount | currency: r.currencyCode : 'symbol' : '1.2-2' }}</td>
+                  <td class="px-4 py-3 text-right tabular-nums">{{ row.taxAmount | currency: r.currencyCode : 'symbol' : '1.2-2' }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="4" class="px-4 py-8 text-center text-on-surface-variant" i18n>No taxed sales in this period.</td></tr>
+              }
+            </tbody>
+          </table>
+        </mat-card>
 
-      <div class="rounded-lg border border-gray-200 bg-white overflow-x-auto mb-4">
-        <table class="w-full text-sm" data-testid="report-by-tax">
-          <thead><tr class="bg-gray-50 text-left"><th class="p-3" i18n>Tax</th><th class="p-3 text-right" i18n>Rate</th><th class="p-3 text-right" i18n>Taxable amount</th><th class="p-3 text-right" i18n>Tax</th></tr></thead>
-          <tbody>
-            @for (row of r.byTax; track $index) {
-              <tr class="border-t border-gray-100">
-                <td class="p-3">{{ row.name }}
-                  @if (row.kind === 'zero_rated') { <span class="ml-1 text-xs text-gray-500" i18n>(zero-rated)</span> }
-                  @if (row.kind === 'exempt') { <span class="ml-1 text-xs text-gray-500" i18n>(exempt)</span> }
-                </td>
-                <td class="p-3 text-right tabular-nums">{{ row.rate }}%</td>
-                <td class="p-3 text-right tabular-nums">{{ row.taxableAmount | currency: r.currencyCode : 'symbol' : '1.2-2' }}</td>
-                <td class="p-3 text-right tabular-nums">{{ row.taxAmount | currency: r.currencyCode : 'symbol' : '1.2-2' }}</td>
-              </tr>
-            } @empty {
-              <tr><td colspan="4" class="p-6 text-center text-gray-500" i18n>No taxed sales in this period.</td></tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
-      <p class="text-sm text-gray-600" data-testid="report-refunds">
-        <ng-container i18n>Refund adjustments: {{ r.refunds.count }} refund(s), {{ r.refunds.taxReversed | currency: r.currencyCode : 'symbol' : '1.2-2' }} of VAT reversed.</ng-container>
-      </p>
-      @if (r.legacyOrders > 0) {
-        <p class="mt-2 text-sm text-gray-500" data-testid="report-legacy">
-          <ng-container i18n>{{ r.legacyOrders }} sale(s) in this period were made before tax management was set up. They are not included here and were not changed.</ng-container>
-        </p>
+        <div class="flex flex-col gap-1 px-1">
+          <p class="m-0 text-sm text-on-surface-variant" data-testid="report-refunds">
+            <ng-container i18n>Refund adjustments: {{ r.refunds.count }} refund(s), {{ r.refunds.taxReversed | currency: r.currencyCode : 'symbol' : '1.2-2' }} of VAT reversed.</ng-container>
+          </p>
+          @if (r.legacyOrders > 0) {
+            <p class="m-0 text-sm text-on-surface-variant" data-testid="report-legacy">
+              <ng-container i18n>{{ r.legacyOrders }} sale(s) in this period were made before tax management was set up. They are not included here and were not changed.</ng-container>
+            </p>
+          }
+        </div>
       }
-    }
+    </app-report-page>
   `,
 })
 export class TaxReportComponent {
   private readonly api = inject(AccountingTaxService);
   private readonly storeStore = inject(StoreStore);
+  private readonly exporter = inject(ReportExportService);
 
   protected readonly from = signal(ymd(new Date(new Date().getFullYear(), new Date().getMonth(), 1)));
   protected readonly to = signal(ymd(new Date()));
@@ -106,6 +114,46 @@ export class TaxReportComponent {
         this.api.view(id).subscribe((v) => this.taxes.set(v.taxes));
         this.run();
       });
+    });
+  }
+
+  /** Exports what is on screen: one row per tax and a total row, with the headline figures on the Excel info sheet. */
+  protected exportData(format: ExportFormat): void {
+    const r = this.report();
+    if (!r) return;
+    const tax = this.taxes().find((t) => t._id === this.taxId());
+    const rows: Array<Record<string, any>> = r.byTax.map((t) => ({
+      tax: t.name + (t.kind === 'zero_rated' ? ' (zero-rated)' : t.kind === 'exempt' ? ' (exempt)' : ''),
+      rate: t.rate,
+      taxable: t.taxableAmount,
+      amount: t.taxAmount,
+    }));
+    rows.push({ tax: $localize`Total`, rate: '', taxable: r.byTax.reduce((s, t) => s + t.taxableAmount, 0), amount: r.totalTax });
+    this.exporter.export(format === 'excel' ? 'xlsx' : format, {
+      title: $localize`Tax Report`,
+      storeName: this.storeStore.selectedStore()?.name ?? '',
+      currency: r.currencyCode,
+      subtitle: `${this.from()} → ${this.to()}${tax ? ' · ' + tax.name : ''}`,
+      info: [
+        [$localize`Total sales`, String(r.sales)],
+        [$localize`Net taxable sales`, String(r.taxableAmount)],
+        [$localize`VAT collected`, String(r.totalTax)],
+        [$localize`VAT after refunds`, String(r.netTax)],
+        [$localize`Zero-rated sales`, String(r.zeroRatedSales)],
+        [$localize`Exempt sales`, String(r.exemptSales)],
+        [$localize`VAT included in prices`, String(r.includedTax)],
+        [$localize`VAT added at checkout`, String(r.addedTax)],
+        [$localize`Refunds`, `${r.refunds.count} · ${r.refunds.taxReversed}`],
+      ],
+      columns: [
+        { key: 'tax', label: $localize`Tax`, type: 'text' },
+        { key: 'rate', label: $localize`Rate (%)`, type: 'number' },
+        { key: 'taxable', label: $localize`Taxable amount`, type: 'currency' },
+        { key: 'amount', label: $localize`Tax`, type: 'currency' },
+      ],
+      rows,
+      filename: `tax-report-${this.from()}-${this.to()}`,
+      landscape: false,
     });
   }
 

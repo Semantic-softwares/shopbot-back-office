@@ -1,3 +1,4 @@
+import { ActivatedRoute } from '@angular/router';
 import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { CurrencyPipe, PercentPipe } from '@angular/common';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
@@ -41,6 +42,7 @@ export class SummaryComponent {
   private readonly exportService = inject(ExportService);
   readonly storeStore = inject(StoreStore);
   private readonly query = toSignal(this.queryParams.getAllParams$);
+  private readonly route = inject(ActivatedRoute);
   readonly currency = computed(() => this.storeStore.selectedStore()?.currency || 'USD');
 
   readonly metrics: { key: Metric; label: string; icon: string }[] = [
@@ -50,15 +52,27 @@ export class SummaryComponent {
     { key: 'discounts', label: $localize`Discounts`, icon: 'sell' },
     { key: 'refunds', label: $localize`Refunds`, icon: 'undo' },
   ];
-  readonly active = signal<Metric>('netSales');
+  /** Opens on the figure the user came for (the dashboard links here with ?metric=grossProfit); net sales otherwise. */
+  readonly active = signal<Metric>(this.initialMetric());
   readonly activeLabel = computed(() => this.metrics.find((m) => m.key === this.active())?.label ?? '');
 
+  private initialMetric(): Metric {
+    const wanted = this.route.snapshot.queryParamMap.get('metric');
+    return this.metrics.some((m) => m.key === wanted) ? (wanted as Metric) : 'netSales';
+  }
+
+  private withoutMetric(query: Record<string, any> | undefined): Record<string, any> {
+    const { metric, ...rest } = query ?? {};
+    return rest;
+  }
+
   readonly summary = rxResource({
-    params: () => ({ storeId: this.storeStore.selectedStore()?._id, query: this.query() }),
+    // `metric` only picks the charted figure here; it is not a filter, so it is not sent to the server.
+    params: () => ({ storeId: this.storeStore.selectedStore()?._id, query: this.withoutMetric(this.query()) }),
     stream: ({ params }) => this.orderService.getSalesSummary(params.storeId!, params.query),
   });
   readonly series = rxResource({
-    params: () => ({ storeId: this.storeStore.selectedStore()?._id, query: this.query() }),
+    params: () => ({ storeId: this.storeStore.selectedStore()?._id, query: this.withoutMetric(this.query()) }),
     stream: ({ params }) => this.orderService.getSalesSummaryByDate(params.storeId!, params.query),
   });
 

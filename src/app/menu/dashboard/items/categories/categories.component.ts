@@ -1,8 +1,6 @@
-import { Component, inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
-import { MatTableModule, MatTable } from '@angular/material/table';
-import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
-import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -13,7 +11,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
@@ -21,9 +18,9 @@ import { CategoryDialogComponent } from './category-dialog/category-dialog.compo
 import { rxResource } from '@angular/core/rxjs-interop';
 import { CategoryService } from '../../../../shared/services/category.service';
 import { StoreStore } from '../../../../shared/stores/store.store';
-import { tap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 import { Category } from '../../../../shared/models';
+import { flatTree } from '../../../../shared/category-tree';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NoRecordComponent } from '../../../../shared/components/no-record/no-record.component';
 
@@ -35,8 +32,6 @@ import { NoRecordComponent } from '../../../../shared/components/no-record/no-re
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
@@ -54,80 +49,85 @@ import { NoRecordComponent } from '../../../../shared/components/no-record/no-re
 })
 export class CategoriesComponent {
   displayedColumns: string[] = ['drag', 'name', 'color', 'icon', 'items', 'actions'];
-  dataSource!: MatTableDataSource<any>;
-  searchText: string = '';
+  readonly search = signal('');
+  /** Top-level categories whose sub-categories are folded away. */
+  readonly collapsed = signal<ReadonlySet<string>>(new Set());
   private dialog: MatDialog = inject(MatDialog);
-  private router = inject(Router);
   private categoryService = inject(CategoryService);
   private storeStore = inject(StoreStore);
   private snackBar = inject(MatSnackBar);
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
   public categories = rxResource({
     params: () => ({
       storeId: this.storeStore.selectedStore()?._id,
     }),
-    stream: ({ params }) =>
-      this.categoryService.getStoreMenus(params.storeId!).pipe(
-        tap((categories) => {
-          this.dataSource = new MatTableDataSource(categories);
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-        })
-      ),
+    stream: ({ params }) => this.categoryService.getStoreMenus(params.storeId!),
+  });
+
+  /** What the table shows: each category with its sub-categories under it, narrowed by the search and the folded groups. */
+  readonly rows = computed(() => {
+    const all = this.categories.hasValue() ? this.categories.value() : [];
+    const q = this.search().trim().toLowerCase();
+    const tree = flatTree(all);
+    const byId = new Map(all.map((c) => [c._id, c]));
+    const matches = (c: Category) => (c.name ?? '').toLowerCase().includes(q);
+    if (q) {
+      // A sub-category that matches shows under its parent; a parent that matches shows all of its sub-categories.
+      return tree.filter(({ category: c, depth }) => {
+        if (depth === 1) return matches(c) || matches(byId.get(c.parent!) ?? c);
+        return matches(c) || all.some((k) => k.parent === c._id && matches(k));
+      });
+    }
+    const folded = this.collapsed();
+    return tree.filter(({ category: c, depth }) => depth === 0 || !folded.has(c.parent!));
   });
 
   applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.search.set((event.target as HTMLInputElement).value);
+  }
+
+  toggle(category: Category) {
+    this.collapsed.update((set) => {
+      const next = new Set(set);
+      if (!next.delete(category._id!)) next.add(category._id!);
+      return next;
+    });
   }
 
   addCategory() {
-    const dialogRef = this.dialog.open(CategoryDialogComponent, {
-      width: '500px',
-      data: { isEdit: false }
-    });
+    this.openDialog({ isEdit: false });
+  }
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.categories.reload();
-        // Handle create logic here
-      }
-    });
+  /** The dialog opens with the parent already chosen. */
+  addSubCategory(parent: Category) {
+    this.openDialog({ isEdit: false, parent: parent._id });
   }
 
   onEditCategory(category: any) {
-    const dialogRef = this.dialog.open(CategoryDialogComponent, {
-      width: '500px',
-      data: { 
-        isEdit: true,
-        category: category
-      }
-    });
+    this.openDialog({ isEdit: true, category });
+  }
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-       this.categories.reload();
-      }
+  private openDialog(data: any) {
+    const dialogRef = this.dialog.open(CategoryDialogComponent, { width: '500px', data: { ...data, all: this.categories.hasValue() ? this.categories.value() : [] } });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) this.categories.reload();
     });
   }
 
   deleteCategory(category: Category) {
+    if ((category.childCount ?? 0) > 0) {
+      this.snackBar.open($localize`${category.name} has sub-categories. Move or delete them first.`, $localize`Close`, { duration: 5000 });
+      return;
+    }
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '350px',
-      data: { message: `Are you sure you want to delete ${category.name}?` }
+      data: { message: $localize`Are you sure you want to delete ${category.name}?` }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        console.log('Category to delete:', category);
-        // Handle delete logic here
         this.categoryService.deleteMenu(category._id!).subscribe({
-          next: () => {
-            console.log('Category deleted successfully');
-            // Optionally, refresh the categories list
-            this.categories.reload();
-          }
+          next: () => this.categories.reload(),
+          error: (e) => this.snackBar.open(e?.error?.message || $localize`Could not delete the category.`, $localize`Close`, { duration: 5000 }),
         });
       }
     });
@@ -137,40 +137,35 @@ export class CategoriesComponent {
     this.categories.reload();
   }
 
+  /** Sorting happens among siblings only: top-level among top-level, a sub-category among its own parent's. */
   onDrop(event: CdkDragDrop<any[]>) {
-    if (event.previousIndex === event.currentIndex) {
+    if (event.previousIndex === event.currentIndex) return;
+    const shown = this.rows();
+    const moved = shown[event.previousIndex]?.category;
+    const target = shown[event.currentIndex]?.category;
+    if (!moved || !target) return;
+    const level = (c: Category) => c.parent ?? null;
+    if (level(moved) !== level(target)) {
+      this.snackBar.open($localize`Drag a category within its own level.`, $localize`Close`, { duration: 3000 });
       return;
     }
+    const all = this.categories.value() ?? [];
+    const siblings = all.filter((c) => level(c) === level(moved));
+    const at = siblings.findIndex((c) => c._id === target._id);
+    const reordered = siblings.filter((c) => c._id !== moved._id);
+    reordered.splice(at, 0, moved);
 
-    // Get the current data source
-    const items = this.dataSource.data;
-    const draggedItem = items[event.previousIndex];
-
-    // Move item in array
-    items.splice(event.previousIndex, 1);
-    items.splice(event.currentIndex, 0, draggedItem);
-
-    // Update dataSource immediately for instant UI feedback
-    this.dataSource.data = [...items];
-
-    // Update positions for all items
-    const updateRequests = items.map((item, index) => {
-      item.position = index;
-      return this.categoryService.updateMenu(item._id!, { position: index });
+    const changed = reordered.map((c, index) => ({ c, index })).filter(({ c, index }) => c.position !== index);
+    const positions = new Map(reordered.map((c, index) => [c._id, index]));
+    // Instant feedback: the list in its new order, then saved.
+    this.categories.set(all.map((c) => (positions.has(c._id) ? { ...c, position: positions.get(c._id) } : c)).sort((a, b) => (a.position ?? 0) - (b.position ?? 0)));
+    if (!changed.length) return;
+    forkJoin(changed.map(({ c, index }) => this.categoryService.updateMenu(c._id!, { position: index }))).subscribe({
+      next: () => this.snackBar.open($localize`Categories sorted successfully`, $localize`Close`, { duration: 3000 }),
+      error: () => {
+        this.snackBar.open($localize`Failed to sort categories`, $localize`Close`, { duration: 3000 });
+        this.categories.reload();
+      },
     });
-
-    // Execute all update requests concurrently
-    if (updateRequests.length > 0) {
-      forkJoin(updateRequests).subscribe({
-        next: () => {
-          this.snackBar.open($localize`Categories sorted successfully`, $localize`Close`, { duration: 3000 });
-        },
-        error: () => {
-          this.snackBar.open($localize`Failed to sort categories`, $localize`Close`, { duration: 3000 });
-          // Reload to reset
-          this.categories.reload();
-        }
-      });
-    }
   }
 }

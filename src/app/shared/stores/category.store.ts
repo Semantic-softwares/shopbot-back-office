@@ -17,10 +17,14 @@ import { pipe, tap, switchMap } from "rxjs";
 import { _Category } from "../classes/category.class";
 import { CategoryService } from "../services/category.service";
 import { StoreStore } from "./store.store";
+import { childrenOf, topLevel } from "../category-tree";
 
 type CategoryState = {
   categories: Category[];
+  /** The top-level category chosen in the first row. */
   selectedCategory: Category | null;
+  /** The sub-category chosen in the second row; null means "all of the selected category". */
+  selectedSub: Category | null;
   isLoading: boolean;
   error: unknown;
 };
@@ -28,6 +32,7 @@ type CategoryState = {
 const initialState: CategoryState = {
   categories: [],
   selectedCategory: null,
+  selectedSub: null,
   isLoading: false,
   error: null,
 };
@@ -36,8 +41,19 @@ export const CategoryStore = signalStore(
   { providedIn: "root" },
   withState(initialState),
 
-  withComputed(({ categories }) => ({
+  withComputed(({ categories, selectedCategory, selectedSub }) => ({
     categoryCount: computed(() => categories().length),
+    /** First row of the POS: categories without a parent. */
+    topLevel: computed(() => topLevel(categories())),
+    /** Second row of the POS: the sub-categories of the selected category (none when it has none). */
+    visibleSubs: computed(() => childrenOf(categories(), selectedCategory()?._id)),
+    /** Category ids whose products the POS grid shows: the chosen sub-category, or the selected category and all its sub-categories. */
+    selectedIds: computed(() => {
+      if (selectedSub()) return [selectedSub()!._id!];
+      const id = selectedCategory()?._id;
+      // An inactive sub-category stays out of its parent's "all" view, like an inactive category stays off the POS.
+      return id ? [id, ...childrenOf(categories(), id).filter((c) => c.activate !== false).map((c) => c._id!)] : [];
+    }),
   })),
 
   withMethods(
@@ -47,7 +63,12 @@ export const CategoryStore = signalStore(
       offline = inject(OfflineStore)    ) => {
     
      function selectCategory(category: Category): void {
-        patchState(store, { selectedCategory: category });
+        // Choosing a (top-level) category clears the sub-category: the grid goes back to "all of it".
+        patchState(store, { selectedCategory: category, selectedSub: null });
+      };
+
+      function selectSub(sub: Category | null): void {
+        patchState(store, { selectedSub: sub });
       };
 
       function createCategory(category: Category): void {
@@ -104,7 +125,7 @@ export const CategoryStore = signalStore(
             cachedFetch(offline, `menus:${storeId}`, categoryService.getStoreMenus(storeId)).pipe(
               tapResponse({
                 next(response) {
-                  selectCategory(response[0]);
+                  selectCategory(topLevel(response)[0] ?? response[0]);
                   patchState(store, {
                     isLoading: false,
                     error: response,
@@ -137,10 +158,16 @@ export const CategoryStore = signalStore(
               tapResponse({
                 next(response) {
                   const selectedId = store.selectedCategory()?._id;
-                  const stillThere = response.find((category) => category._id === selectedId);
+                  const tops = topLevel(response);
+                  const stillThere = tops.find((category) => category._id === selectedId);
+                  const selected = stillThere ?? tops[0] ?? null;
+                  // Keep the chosen sub-category only while it still exists under the (same) selected category.
+                  const subId = store.selectedSub()?._id;
+                  const sub = stillThere && subId ? childrenOf(response, selected?._id).find((c) => c._id === subId) ?? null : null;
                   patchState(store, {
                     categories: response,
-                    selectedCategory: stillThere ?? response[0] ?? null,
+                    selectedCategory: selected,
+                    selectedSub: sub,
                   });
                 },
                 error(error) {
@@ -248,6 +275,7 @@ export const CategoryStore = signalStore(
         updateCategory,
         deleteCategory,
         selectCategory,
+        selectSub,
         createCategory$,
         getCategories$,
         refreshCategories$,

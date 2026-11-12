@@ -51,8 +51,8 @@
                 <mat-label><ng-container i18n>Category</ng-container></mat-label>
                 <mat-select [value]="group.choice" (selectionChange)="setChoice(group.key, $event.value)">
                   <mat-option value="new"><ng-container i18n>Create new category</ng-container></mat-option>
-                  @for (menu of data.menus; track menu._id) {
-                    <mat-option [value]="menu._id">{{ menu.name }}</mat-option>
+                  @for (row of menuRows; track row.category._id) {
+                    <mat-option [value]="row.category._id" [class.pl-6]="row.depth === 1">{{ row.category.name }}</mat-option>
                   }
                 </mat-select>
               </mat-form-field>

@@ -4,6 +4,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { StoreService } from '../../../shared/services/store.service';
@@ -19,6 +21,8 @@ import { SubscriptionService } from '../../../shared/services/subscription.servi
     MatButtonModule,
     MatIconModule,
     MatSlideToggleModule,
+    MatFormFieldModule,
+    MatSelectModule,
     MatProgressSpinnerModule,
   ],
   templateUrl: './notifications-settings.html',
@@ -40,6 +44,22 @@ export class NotificationsSettings implements OnInit {
   readonly hasPms = computed<boolean>(() => this.activeModuleKeys().includes('PMS'));
   readonly hasEms = computed<boolean>(() => this.activeModuleKeys().includes('EMS'));
   
+  /** Hours of the day for the reminder pickers: 00:00 to 23:00. */
+  readonly hours = Array.from({ length: 24 }, (_, h) => ({ value: h, label: `${String(h).padStart(2, '0')}:00` }));
+
+  /** The two owner emails; both on unless the store switched them off. Saved as soon as a switch is flipped. */
+  readonly ownerEmails = computed(() => {
+    const r = (this.storeStore.selectedStore() as any)?.emailReports;
+    return { registerClosed: r?.registerClosed !== false, weeklySummary: r?.weeklySummary !== false };
+  });
+
+  setOwnerEmail(key: 'registerClosed' | 'weeklySummary', on: boolean): void {
+    const store = this.storeStore.selectedStore();
+    if (!store) return;
+    this.saving.set(true);
+    this.persistStoreUpdate(store._id, { emailReports: { ...this.ownerEmails(), [key]: on } });
+  }
+
   notificationSettingsForm!: FormGroup;
   emsNotificationSettingsForm!: FormGroup;
 
@@ -58,6 +78,9 @@ export class NotificationsSettings implements OnInit {
       guestFeedbackRequest: [false],
       smsNotifications: [false],
       pushNotifications: [true],
+      unpaidRoomOrdersAlert: [true],
+      unpaidRoomOrdersEveHour: [17],
+      unpaidRoomOrdersMorningHour: [8],
     });
 
     this.emsNotificationSettingsForm = this.fb.group({

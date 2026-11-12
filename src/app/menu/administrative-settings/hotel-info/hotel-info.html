@@ -87,6 +87,24 @@
             </mat-form-field>
           </div>
         </mat-card-content>
+        <mat-card-content class="!pt-0">
+          <app-timezone-select formControlName="timezone" />
+          <!-- The hotel's standard times: shown on every guest's folio and in confirmations unless a reservation has its own -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            <mat-form-field appearance="outline">
+              <mat-label><ng-container i18n>Standard check-in time</ng-container></mat-label>
+              <input matInput type="time" formControlName="checkInTime" data-testid="check-in-time">
+              <mat-hint><ng-container i18n>Guests can arrive from this time</ng-container></mat-hint>
+              @if (hotelInfoForm.get('checkInTime')?.hasError('required')) { <mat-error><ng-container i18n>Check-in time is required</ng-container></mat-error> }
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label><ng-container i18n>Standard check-out time</ng-container></mat-label>
+              <input matInput type="time" formControlName="checkOutTime" data-testid="check-out-time">
+              <mat-hint><ng-container i18n>Guests should leave by this time</ng-container></mat-hint>
+              @if (hotelInfoForm.get('checkOutTime')?.hasError('required')) { <mat-error><ng-container i18n>Check-out time is required</ng-container></mat-error> }
+            </mat-form-field>
+          </div>
+        </mat-card-content>
       </mat-card>
 
       <!-- Branding Card -->

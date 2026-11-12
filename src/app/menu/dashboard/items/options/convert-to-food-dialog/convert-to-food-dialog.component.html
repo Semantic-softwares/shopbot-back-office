@@ -16,8 +16,8 @@
           <mat-label><ng-container i18n>Menu</ng-container></mat-label>
           <mat-select formControlName="menuId">
             @if (menus.hasValue() && menus.value()) {
-              @for (menu of menus.value(); track menu._id) {
-                <mat-option [value]="menu._id">{{ menu.name }}</mat-option>
+              @for (row of menuRows(); track row.category._id) {
+                <mat-option [value]="row.category._id" [class.pl-6]="row.depth === 1">{{ row.category.name }}</mat-option>
               }
             }
           </mat-select>

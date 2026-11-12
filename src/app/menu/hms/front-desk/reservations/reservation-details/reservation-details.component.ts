@@ -64,6 +64,10 @@ export class ReservationDetailsComponent implements OnInit {
   private reservationService = inject(ReservationService);
   public storeStore = inject(StoreStore);
   private snackBar = inject(MatSnackBar);
+
+  /** The hotel's standard times (Settings > Hotel profile), shown when the reservation has none of its own. */
+  readonly hotelCheckIn = computed(() => (this.storeStore.selectedStore() as any)?.hotelSettings?.operationalSettings?.checkInTime || '15:00');
+  readonly hotelCheckOut = computed(() => (this.storeStore.selectedStore() as any)?.hotelSettings?.operationalSettings?.checkOutTime || '11:00');
   private dialog = inject(MatDialog);
 
   // State signals

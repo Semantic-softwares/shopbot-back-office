@@ -1,5 +1,31 @@
 <div class="p-4 space-y-8">
 
+  <!-- Owner emails: for every store, whatever modules it has -->
+  <section>
+    <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+      <mat-icon class="text-blue-600">mail</mat-icon>
+      <ng-container i18n>Emails to the owner and Super Admins</ng-container>
+    </h2>
+    <mat-card appearance="outlined" class="max-w-2xl">
+      <mat-card-content class="pt-4 space-y-6">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <label class="text-sm font-medium text-gray-700"><ng-container i18n>Register closed</ng-container></label>
+            <p class="text-xs text-gray-500"><ng-container i18n>Email the owner and every Super Admin the cash count and any difference each time a register is closed</ng-container></p>
+          </div>
+          <mat-slide-toggle [checked]="ownerEmails().registerClosed" (change)="setOwnerEmail('registerClosed', $event.checked)" color="primary" data-testid="owner-register-closed-toggle"></mat-slide-toggle>
+        </div>
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <label class="text-sm font-medium text-gray-700"><ng-container i18n>Weekly sales summary</ng-container></label>
+            <p class="text-xs text-gray-500"><ng-container i18n>Every Monday morning, store time: last week's sales, best sellers and register closes</ng-container></p>
+          </div>
+          <mat-slide-toggle [checked]="ownerEmails().weeklySummary" (change)="setOwnerEmail('weeklySummary', $event.checked)" color="primary" data-testid="owner-weekly-summary-toggle"></mat-slide-toggle>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
   <!-- PMS (Hotel) Notifications -->
   @if (hasPms()) {
     <section>
@@ -66,6 +92,41 @@
                   <mat-slide-toggle formControlName="guestFeedbackRequest" color="primary"></mat-slide-toggle>
                 </div>
               </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Hotel team alerts: not sent to guests, sent to the hotel -->
+          <mat-card appearance="outlined">
+            <mat-card-header>
+              <mat-icon mat-card-avatar class="text-amber-600 !flex !items-center !justify-center">notifications_active</mat-icon>
+              <mat-card-title><ng-container i18n>Hotel Team Alerts</ng-container></mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="pt-4 space-y-6">
+              <div class="flex items-center justify-between gap-4">
+                <div>
+                  <label class="text-sm font-medium text-gray-700"><ng-container i18n>Unpaid room orders</ng-container></label>
+                  <p class="text-xs text-gray-500"><ng-container i18n>Email the hotel when a guest about to check out still owes the kitchen or POS</ng-container></p>
+                </div>
+                <mat-slide-toggle formControlName="unpaidRoomOrdersAlert" color="primary" data-testid="unpaid-alert-toggle"></mat-slide-toggle>
+              </div>
+
+              @if (notificationSettingsForm.value.unpaidRoomOrdersAlert) {
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label><ng-container i18n>Evening before check-out</ng-container></mat-label>
+                    <mat-select formControlName="unpaidRoomOrdersEveHour" data-testid="unpaid-eve-hour">
+                      @for (h of hours; track h.value) { <mat-option [value]="h.value">{{ h.label }}</mat-option> }
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label><ng-container i18n>Morning of check-out</ng-container></mat-label>
+                    <mat-select formControlName="unpaidRoomOrdersMorningHour" data-testid="unpaid-morning-hour">
+                      @for (h of hours; track h.value) { <mat-option [value]="h.value">{{ h.label }}</mat-option> }
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <p class="text-xs text-gray-500"><ng-container i18n>Sent to the hotel's contact email, in the hotel's own time zone. Nothing is sent when nobody owes anything.</ng-container></p>
+              }
             </mat-card-content>
           </mat-card>
 
@@ -329,18 +390,6 @@
         </div>
       </form>
     </section>
-  }
-
-  <!-- No modules message -->
-  @if (!hasPms() && !hasEms()) {
-    <div class="flex flex-col items-center justify-center py-16 text-center">
-      <mat-icon class="text-gray-300 !text-6xl mb-4">notifications_off</mat-icon>
-      <h3 class="text-lg font-semibold text-gray-600 mb-2"><ng-container i18n>No Notification Modules Active</ng-container></h3>
-      <p class="text-sm text-gray-500 max-w-md">
-        <ng-container i18n>Notification settings are available for the Hotel Management (PMS) and Estate Management (EMS) modules.
-        Subscribe to one of these modules to configure notifications.</ng-container>
-      </p>
-    </div>
   }
 
 </div>

@@ -21,15 +21,26 @@
 <div class="flex flex-col gap-4">
 <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
             <mat-label><ng-container i18n>Category</ng-container></mat-label>
-            <mat-select formControlName="menu">
-              @for (category of categories.value(); track category) {
-                <mat-option [value]="category._id">
-                  {{category.name}}
-                </mat-option>
+            <mat-select formControlName="menu" data-testid="product-category">
+              @for (g of categoryGroups(); track g.parent._id) {
+                @if (g.children.length) {
+                  <mat-optgroup [label]="g.parent.name">
+                    <mat-option [value]="g.parent._id"><ng-container i18n>No sub-category</ng-container></mat-option>
+                    @for (sub of g.children; track sub._id) {
+                      <mat-option [value]="sub._id">{{ sub.name }}</mat-option>
+                    }
+                  </mat-optgroup>
+                } @else {
+                  <mat-option [value]="g.parent._id">{{ g.parent.name }}</mat-option>
+                }
               }
-              <mat-option (click)="openCategoryModal($event)" class="!text-primary">
+              <mat-option (click)="openCategoryModal($event)" class="!text-primary" data-testid="new-category">
                 <mat-icon class="align-middle mr-2">add</mat-icon>
                 <ng-container i18n>Add New Category</ng-container>
+              </mat-option>
+              <mat-option (click)="openCategoryModal($event, true)" class="!text-primary" data-testid="new-sub-category">
+                <mat-icon class="align-middle mr-2">subdirectory_arrow_right</mat-icon>
+                <ng-container i18n>Add New Sub-category</ng-container>
               </mat-option>
             </mat-select>
           </mat-form-field>

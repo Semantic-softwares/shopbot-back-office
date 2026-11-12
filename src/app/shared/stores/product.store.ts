@@ -46,7 +46,8 @@ export const ProductsStore = signalStore(
 
     // Update filteredProducts to use search and category filters
     const filteredProducts = computed(() => {
-      const selectedCategory = categoryStore.selectedCategory();
+      // The POS grid shows the chosen sub-category, or the selected category together with all its sub-categories.
+      const selectedIds = categoryStore.selectedIds();
       const searchQuery = store.searchQuery()!.toLowerCase();
       // If there's a search query, filter based on the search query, ignoring category
       if (searchQuery!.length > 0) {
@@ -61,8 +62,8 @@ export const ProductsStore = signalStore(
       }
 
       // If no search query, filter by selected category (using menu._id)
-      return selectedCategory
-        ? store.products().filter((product) => product?.menu?._id === selectedCategory?._id)
+      return selectedIds.length
+        ? store.products().filter((product) => selectedIds.includes(product?.menu?._id ?? (product?.menu as any)))
         : [];
     });
 

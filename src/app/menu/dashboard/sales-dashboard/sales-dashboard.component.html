@@ -36,6 +36,7 @@
     <!-- KPI row -->
     <div class="kpi-grid">
       @for (kpi of kpis(); track kpi.label) {
+        <a class="kpi-link" [routerLink]="kpi.link" [queryParams]="kpi.params" [attr.aria-label]="kpi.label + ': ' + kpi.value + '. ' + kpi.linkLabel" [matTooltip]="kpi.linkLabel" [attr.data-testid]="'kpi-link-' + kpi.label">
         <mat-card appearance="outlined" class="kpi-card {{ kpi.accent }}">
           <div class="kpi-card__body">
             <div class="kpi-card__info">
@@ -56,6 +57,7 @@
             </div>
           </div>
         </mat-card>
+        </a>
       }
     </div>
 
@@ -74,7 +76,7 @@
           <div class="chart-card__header">
             <div>
               <h3 class="chart-card__title"><ng-container i18n>Sales trend</ng-container></h3>
-              <p class="chart-card__meta"><ng-container i18n>Gross vs. net sales over time</ng-container></p>
+              <p class="chart-card__meta" data-testid="trend-note">{{ trendNote() }}</p>
             </div>
             <mat-button-toggle-group hideSingleSelectionIndicator class="period-toggle" [value]="period()" (change)="setPeriod($event.value)" aria-label="Group sales by" i18n-aria-label>
               @for (option of periodOptions; track option.value) {

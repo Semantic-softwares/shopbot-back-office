@@ -38,8 +38,8 @@ import { Refund } from '../../../../../shared/models/refund.model';
 import { RefundService } from '../../../../../shared/services/refund.service';
 import { PrintJobService } from '../../../../../shared/services/print-job.service';
 
-export type ReceiptTab = 'all' | 'open' | 'sales' | 'refund' | 'cancelled';
-export type ReceiptSort = 'attention' | 'newest' | 'oldest' | 'total';
+export type ReceiptTab = 'all' | 'open' | 'sales' | 'discount' | 'refund' | 'cancelled';
+export type ReceiptSort = 'attention' | 'newest' | 'oldest' | 'total' | 'discount';
 type Tone = 'open' | 'paid' | 'danger' | 'muted' | 'warn';
 
 /** Where a receipt stands, in words and colour: the one badge every row leads with. */
@@ -127,13 +127,14 @@ export class ListReceiptsComponent {
   public refundsResource = rxResource({
     params: () => {
       const q = this.dataQuery();
-      return { storeId: this.storeStore.selectedStore()?._id, start: q['start'], end: q['end'] };
+      return { storeId: this.storeStore.selectedStore()?._id, start: q['start'], end: q['end'], employee: q['employee'] };
     },
     stream: ({ params }) =>
       params.storeId
         ? this.refundService.listForStore(params.storeId, {
             from: params.start ? new Date(`${params.start}T00:00:00`).toISOString() : undefined,
             to: params.end ? new Date(`${params.end}T23:59:59.999`).toISOString() : undefined,
+            employee: params.employee && params.employee !== 'all' ? params.employee : undefined,
             limit: 200,
           })
         : of(null),
@@ -171,9 +172,16 @@ export class ListReceiptsComponent {
       { value: 'all' as ReceiptTab, label: $localize`All`, count: (d?.allReceipts ?? 0) + this.unsynced().length, icon: 'receipt_long', urgent: false },
       { value: 'open' as ReceiptTab, label: $localize`Open`, count: (d?.open ?? 0) + local('open'), icon: 'pending_actions', urgent: (d?.open ?? 0) + local('open') > 0 },
       { value: 'sales' as ReceiptTab, label: $localize`Paid`, count: (d?.sales ?? 0) + local('sales'), icon: 'paid', urgent: false },
+      { value: 'discount' as ReceiptTab, label: $localize`Discounts`, count: (d?.discount ?? 0) + local('discount'), icon: 'sell', urgent: false },
       { value: 'refund' as ReceiptTab, label: $localize`Refunds`, count: d?.refund ?? 0, icon: 'currency_exchange', urgent: false },
       { value: 'cancelled' as ReceiptTab, label: $localize`Cancelled`, count: (d?.cancelled ?? 0) + local('cancelled'), icon: 'block', urgent: false },
     ];
+  });
+
+  /** Discounts as a share of gross sales, for the Discounts tile. */
+  readonly discountRate = computed(() => {
+    const k = this.kpis();
+    return k && k.grossSales > 0 ? ((k.discounts?.amount ?? 0) / k.grossSales) * 100 : 0;
   });
 
   /** Refunds as a share of gross sales, for the Refunds tile. */
@@ -224,6 +232,7 @@ export class ListReceiptsComponent {
       orderedBy: o.user ? { name: o.user.name } : undefined,
       note: o.note,
       refundedAmount: 0,
+      discount: o.discount || 0,
     };
   }
 
@@ -243,6 +252,7 @@ export class ListReceiptsComponent {
       case 'newest': return [...list].sort(byDate);
       case 'oldest': return [...list].sort((a, b) => -byDate(a, b));
       case 'total': return [...list].sort((a, b) => (b.total || 0) - (a.total || 0));
+      case 'discount': return [...list].sort((a, b) => (b.discount || 0) - (a.discount || 0) || byDate(a, b));
       // Needs attention first: open orders, then sales that were partly refunded, then settled ones, then the
       // cancelled and fully refunded; newest first inside each group.
       default: return [...list].sort((a, b) => this.statusOf(a).rank - this.statusOf(b).rank || byDate(a, b));
@@ -257,6 +267,29 @@ export class ListReceiptsComponent {
       [r.refundNumber, r.orderReference, r.createdBy?.name, refundReasonLabel(r.reasonCode)].some((v) => String(v ?? '').toLowerCase().includes(term)),
     );
   });
+
+  /** Every refund ticket of the period, by the sale it belongs to, so a sale can show what its refunds were noted as. */
+  private readonly refundsByOrder = computed(() => {
+    const list: Refund[] = ((this.refundsResource.hasValue() ? this.refundsResource.value() : null) ?? this.lastRefunds())?.data ?? [];
+    const map = new Map<string, Refund[]>();
+    for (const r of list) map.set(String(r.order), [...(map.get(String(r.order)) ?? []), r]);
+    return map;
+  });
+
+  /** What to read without opening the receipt: the sale's own note and the notes on its refunds, one per line. Empty when there is none. */
+  receiptTip(row: any): string {
+    const lines: string[] = [];
+    if (row?.note) lines.push(row.note);
+    for (const r of this.refundsByOrder().get(String(row?._id)) ?? []) {
+      if (r.note) lines.push(`${r.refundNumber} · ${this.reasonLabel(r.reasonCode)}: ${r.note}`);
+    }
+    return lines.join('\n');
+  }
+
+  /** The reason and the note on a refund ticket. Empty when there is no note. */
+  refundTip(refund: Refund): string {
+    return refund.note ? `${this.reasonLabel(refund.reasonCode)}\n${refund.note}` : '';
+  }
 
   readonly isRefundTab = computed(() => this.activeTab() === 'refund');
   readonly activeRows = computed(() => (this.isRefundTab() ? this.refundRows() : this.rows()));
@@ -291,6 +324,7 @@ export class ListReceiptsComponent {
     { value: 'newest', label: $localize`Newest first` },
     { value: 'oldest', label: $localize`Oldest first` },
     { value: 'total', label: $localize`Highest total` },
+    { value: 'discount', label: $localize`Highest discount` },
   ];
 
   selectedSalesChannel = computed(() => this.query()?.['salesChannel'] || '');
@@ -329,6 +363,8 @@ export class ListReceiptsComponent {
       case 'open': return order.paymentStatus !== 'Paid' && !cancelled;
       case 'sales': return order.paymentStatus === 'Paid' && !cancelled;
       case 'cancelled': return cancelled;
+      // The receipts the Discounts figure adds up: paid sales that had something taken off.
+      case 'discount': return order.paymentStatus === 'Paid' && !cancelled && (order.discount || 0) > 0;
       default: return true;
     }
   }
@@ -569,11 +605,13 @@ export class ListReceiptsComponent {
           'Ordered By': item.orderedBy?.name || 'N/A',
           'Served By': item.servedBy?.name || 'N/A',
           'Grand Total': item.total || 0,
+          'Discount': item.discount || 0,
           'Refunded': item.refundedAmount || 0,
         }));
         excelData.push({
           'Receipt No': '', 'Date': '', 'Status': '', 'Order Type': '', 'Payment Type': '', 'Ordered By': 'Grand Total', 'Served By': '',
           'Grand Total': data.reduce((sum: number, item: any) => sum + (item.total || 0), 0),
+          'Discount': data.reduce((sum: number, item: any) => sum + (item.discount || 0), 0),
           'Refunded': data.reduce((sum: number, item: any) => sum + (item.refundedAmount || 0), 0),
         });
         this.exportService.exportToExcel(excelData, filename);

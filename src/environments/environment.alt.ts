@@ -1,0 +1,30 @@
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:3100',
+  socketUrl: 'http://localhost:3100',
+  subscriptionApiUrl: 'http://localhost:3100/subscriptions',
+  usageApiUrl: 'http://localhost:3100/usage',
+  appUrl: 'http://localhost:4300',
+  // Standalone storefront app (shopbot-storefront). Points at the live store
+  // even in dev, matching the server's table QR links (STOREFRONT_URL default).
+  storefrontUrl: 'https://store.shopbot.africa',
+  paymentReturnUrl: 'http://localhost:4300/#/pricing/payment-callback',
+  webhookUrl: 'https://comprisable-glumpy-mildred.ngrok-free.dev/webhooks/paystack',
+  // Firebase Web Push (staff on-duty table-order alerts).
+  firebaseConfig: {
+    apiKey: 'AIzaSyALKWXDUQHGAf2nwjQ1eDN-zOApIlRiM4k',
+    authDomain: 'foodie-6d808.firebaseapp.com',
+    projectId: 'foodie-6d808',
+    storageBucket: 'foodie-6d808.firebasestorage.app',
+    messagingSenderId: '883466824651',
+    appId: '1:883466824651:web:373261f8a1907bfe84a44e',
+  },
+  vapidKey: 'BGR6An1ArcSr33uyiWUSoMszE0SJC0b1FyEYzINtKAVAQ9mEar5r8Z0vkR4fSfy4Mb4qbke35IGyrBK7kNJ-ct0',
+  // Same key loaded in index.html. The app's original key here
+  // (AIzaSyAIDzv-...) turned out to be invalid — confirmed via a direct
+  // Geocoding API call returning "The provided API key is invalid." — which
+  // is why both the Places Autocomplete and the delivery map broke. Reusing
+  // the storefront's working key instead.
+  googleMapsApiKey: 'AIzaSyDj2Iq9H0urXYeg-ZNuD4i19jmjZv6rk74',
+};
+

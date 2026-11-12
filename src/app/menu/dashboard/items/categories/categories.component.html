@@ -1,9 +1,9 @@
-<app-page-header title="Categories" i18n-title subtitle="Manage your menu categories" i18n-subtitle>
+<app-page-header title="Categories" i18n-title subtitle="Manage your menu categories and sub-categories" i18n-subtitle>
   <button matButton (click)="reloadCategories()" actions title="Reload categories" i18n-title matTooltip="Reload" i18n-matTooltip>
     <mat-icon>refresh</mat-icon>
     <ng-container i18n>Refresh</ng-container>
   </button>
-  <button matButton="filled" color="primary" (click)="addCategory()" actions><ng-container i18n>+ ADD CATEGORY</ng-container></button>
+  <button matButton="filled" color="primary" (click)="addCategory()" actions data-testid="add-category"><ng-container i18n>+ ADD CATEGORY</ng-container></button>
 </app-page-header>
 
 <mat-card class="py-4" appearance="outlined">
@@ -11,68 +11,95 @@
     <div class="filters mb-4">
       <mat-form-field appearance="outline">
         <mat-label><ng-container i18n>Search</ng-container></mat-label>
-        <input matInput (keyup)="applyFilter($event)" [(ngModel)]="searchText" placeholder="Search categories" i18n-placeholder>
+        <input matInput (input)="applyFilter($event)" [ngModel]="search()" placeholder="Search categories" i18n-placeholder>
       </mat-form-field>
     </div>
     @if (categories.isLoading()) {
       <div class="flex items-center justify-center min-h-[300px]">
         <mat-spinner diameter="40"></mat-spinner>
       </div>
-    
+
     } @else if (categories.hasValue() && categories.value().length === 0) {
-      <app-no-record 
-        icon="category" 
-        title="No Categories" i18n-title 
+      <app-no-record
+        icon="category"
+        title="No Categories" i18n-title
         message="No categories found matching your criteria." i18n-message>
       </app-no-record>
     } @else if (categories.hasValue()) {
-      <div class="table-container !bg-white">
-        <table mat-table [dataSource]="dataSource" matSort  cdkDropList (cdkDropListDropped)="onDrop($event)">
+      <div class="table-container overflow-x-auto">
+        <table mat-table [dataSource]="rows()" cdkDropList (cdkDropListDropped)="onDrop($event)" class="w-full min-w-[640px]" data-testid="categories-table">
         <ng-container matColumnDef="drag">
           <th mat-header-cell *matHeaderCellDef class="w-12"></th>
-          <td mat-cell *matCellDef="let element" class="cursor-move">
+          <td mat-cell *matCellDef="let row" class="cursor-move">
             <mat-icon class="drag-handle text-gray-400">drag_indicator</mat-icon>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header><ng-container i18n>Name</ng-container></th>
-          <td mat-cell *matCellDef="let element">{{element.name}}</td>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Name</ng-container></th>
+          <td mat-cell *matCellDef="let row">
+            <div class="flex items-center gap-1" [class.pl-8]="row.depth === 1">
+              @if (row.depth === 0 && row.category.childCount > 0) {
+                <button type="button" mat-icon-button class="!h-8 !w-8 !p-0" (click)="toggle(row.category)" [attr.aria-expanded]="!collapsed().has(row.category._id)" aria-label="Show or hide sub-categories" i18n-aria-label>
+                  <mat-icon>{{ collapsed().has(row.category._id) ? 'chevron_right' : 'expand_more' }}</mat-icon>
+                </button>
+              } @else if (row.depth === 1) {
+                <mat-icon class="!h-5 !w-5 !text-base text-on-surface-variant">subdirectory_arrow_right</mat-icon>
+              } @else {
+                <span class="inline-block w-8"></span>
+              }
+              <span [class.font-medium]="row.depth === 0" data-testid="category-name">{{ row.category.name }}</span>
+              @if (row.depth === 0 && row.category.childCount > 0) {
+                <span class="ml-2 rounded-full bg-surface-container px-2 py-0.5 text-xs text-on-surface-variant">{{ row.category.childCount }} <ng-container i18n>sub-categories</ng-container></span>
+              }
+            </div>
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="color">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header><ng-container i18n>Color</ng-container></th>
-          <td mat-cell *matCellDef="let element">
-            <div class="color-preview" [style.background-color]="element.color">
-              {{element.color}}
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Color</ng-container></th>
+          <td mat-cell *matCellDef="let row">
+            <div class="color-preview" [style.background-color]="row.category.color">
+              {{row.category.color}}
             </div>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="icon">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header><ng-container i18n>Icon</ng-container></th>
-          <td mat-cell *matCellDef="let element">
-            <mat-icon>{{element?.icon}}</mat-icon>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Icon</ng-container></th>
+          <td mat-cell *matCellDef="let row">
+            <mat-icon>{{row.category?.icon}}</mat-icon>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="items">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header><ng-container i18n>Items</ng-container></th>
-          <td mat-cell *matCellDef="let element">{{element.items}}</td>
+          <th mat-header-cell *matHeaderCellDef><ng-container i18n>Items</ng-container></th>
+          <td mat-cell *matCellDef="let row">
+            {{row.category.items}}
+            @if (row.depth === 0 && row.category.totalItems > row.category.items) {
+              <span class="ml-1 text-xs text-on-surface-variant">+{{ row.category.totalItems - row.category.items }} <ng-container i18n>in sub-categories</ng-container></span>
+            }
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef class="w-20"><ng-container i18n>Actions</ng-container></th>
-          <td mat-cell *matCellDef="let category">
+          <td mat-cell *matCellDef="let row">
             <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Category actions" i18n-aria-label>
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #menu="matMenu">
-              <button mat-menu-item (click)="onEditCategory(category)">
+              <button mat-menu-item (click)="onEditCategory(row.category)">
                 <mat-icon>edit</mat-icon>
                 <span><ng-container i18n>Edit</ng-container></span>
               </button>
-              <button mat-menu-item (click)="deleteCategory(category)">
+              @if (row.depth === 0) {
+                <button mat-menu-item (click)="addSubCategory(row.category)" data-testid="add-sub-category">
+                  <mat-icon>subdirectory_arrow_right</mat-icon>
+                  <span><ng-container i18n>Add sub-category</ng-container></span>
+                </button>
+              }
+              <button mat-menu-item (click)="deleteCategory(row.category)">
                 <mat-icon>delete</mat-icon>
                 <span><ng-container i18n>Delete</ng-container></span>
               </button>
@@ -83,9 +110,6 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" cdkDrag [cdkDragData]="row"></tr>
       </table>
-
-      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of categories" i18n-aria-label>
-      </mat-paginator>
     </div>
   }
   </mat-card-content>

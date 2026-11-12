@@ -7,6 +7,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { forkJoin, of, catchError } from 'rxjs';
 import { NgxEchartsDirective } from 'ngx-echarts';
@@ -30,6 +31,11 @@ interface Kpi {
   delta: number | null;
   /** Refunds/discounts going up is bad news, not good. */
   higherIsBetter: boolean;
+  /** Where tapping the figure goes: the receipts behind it (or the report that shows it), for the same dates, period and employee. */
+  link: string[];
+  params: Record<string, string | undefined>;
+  /** What the destination shows, for screen readers and the tooltip. */
+  linkLabel: string;
 }
 
 const COLORS = {
@@ -80,6 +86,7 @@ function parseIsoDate(value: string): Date {
     MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     NgxEchartsDirective,
     PageHeaderComponent,
     DateRangeSelectorComponent,
@@ -143,7 +150,8 @@ export class SalesDashboardComponent {
       return forkJoin({
         summary: this.orderService.getSalesSummary(storeId, current),
         previousSummary: safe(this.orderService.getSalesSummary(storeId, previous), null),
-        trend: safe(this.orderService.getSalesSummaryByDate(storeId, { ...current, period }), [] as any[]),
+        // The trend looks further back than the page's dates when grouped by week or month, so there is more than one point to read.
+        trend: safe(this.orderService.getSalesSummaryByDate(storeId, { ...current, start: this.trendStart(range.start, range.end, period), end: this.trendEnd(range.end, period), period }), [] as any[]),
         products: safe(this.orderService.getTopSellingProducts(storeId, current), [] as any[]),
         categories: safe(this.orderService.getTopSellingCategories(storeId, current), [] as any[]),
         employees: safe(this.orderService.getSalesByEmployees(storeId, current), [] as any[]),
@@ -151,6 +159,49 @@ export class SalesDashboardComponent {
         receipts: safe(this.orderService.getSalesReceipts(storeId, current), { data: { allReceipts: 0, sales: 0, refund: 0 }, orders: [] } as any),
       });
     },
+  });
+
+  /** How far back the trend reaches: 12 months when grouped by month, 12 weeks by week, never less than the chosen dates. */
+  private trendStart(start: string, end: string, period: Period): string {
+    const last = parseIsoDate(end);
+    let wanted: Date;
+    if (period === 'monthly') wanted = new Date(last.getFullYear(), last.getMonth() - 11, 1);
+    else if (period === 'weekly') { wanted = new Date(last); wanted.setDate(wanted.getDate() - 12 * 7 + 1); }
+    else return start;
+    const chosen = parseIsoDate(start);
+    return toIsoDate(wanted < chosen ? wanted : chosen);
+  }
+
+  /** Months with no sales are not returned; grouped by month they are shown as zero, so the axis has every month and the line does not skip over a quiet one. */
+  private withEmptyMonths(rows: any[]): any[] {
+    const r = this.range();
+    if (this.period() !== 'monthly' || !r) return rows;
+    const byMonth = new Map(rows.map((x) => [String(x.period), x]));
+    const first = parseIsoDate(this.trendStart(r.start, r.end, 'monthly'));
+    const last = parseIsoDate(r.end);
+    const out: any[] = [];
+    for (let d = new Date(first.getFullYear(), first.getMonth(), 1); d <= last; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      out.push(byMonth.get(key) ?? { period: key, grossSales: 0, netSales: 0 });
+    }
+    return out;
+  }
+
+  /** Grouped by month, the last month is counted to its last day, so every bar is a whole month and not "up to the chosen day". */
+  private trendEnd(end: string, period: Period): string {
+    if (period !== 'monthly') return end;
+    const d = parseIsoDate(end);
+    return toIsoDate(new Date(d.getFullYear(), d.getMonth() + 1, 0));
+  }
+
+  /** What the trend card says it covers, so a wider-than-page window is never a surprise. */
+  protected readonly trendNote = computed(() => {
+    const r = this.range();
+    const p = this.period();
+    if (r && p !== 'daily' && this.trendStart(r.start, r.end, p) !== r.start) {
+      return p === 'monthly' ? $localize`Gross vs. net sales, last 12 months` : $localize`Gross vs. net sales, last 12 weeks`;
+    }
+    return $localize`Gross vs. net sales over time`;
   });
 
   protected readonly loading = computed(() => this.resource.isLoading() && !this.resource.hasValue());
@@ -207,7 +258,7 @@ export class SalesDashboardComponent {
     }
     if (/^\d{4}-\d{2}$/.test(raw)) {
       const [y, m] = raw.split('-').map(Number);
-      return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
+      return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
     }
     return raw;
   }
@@ -252,20 +303,25 @@ export class SalesDashboardComponent {
     const margin = net > 0 ? (profit / net) * 100 : 0;
     const avgTicket = transactions > 0 ? net / transactions : 0;
 
+    // Every figure opens what it is made of, for the dates, period and employee on this page.
+    const base = { ...this.receiptsQueryParams(), period: this.period(), employee: String(this.query()['employee'] ?? 'all') };
+    const receipts = (type: 'sales' | 'refund' | 'discount') => ({ link: ['../reports/receipts', 'list'], params: { ...base, type } });
+
     return [
-      { label: $localize`Net sales`, value: this.money(net), icon: 'payments', accent: 'kpi--azure', note: 'vs previous period', delta: this.percentChange(net, prev('netSales')), higherIsBetter: true },
-      { label: $localize`Gross sales`, value: this.money(gross), icon: 'point_of_sale', accent: 'kpi--sky', note: 'vs previous period', delta: this.percentChange(gross, prev('grossSales')), higherIsBetter: true },
-      { label: $localize`Gross profit`, value: this.money(profit), icon: 'trending_up', accent: 'kpi--green', note: `${margin.toFixed(1)}% margin`, delta: this.percentChange(profit, prev('grossProfit')), higherIsBetter: true },
-      { label: $localize`Transactions`, value: transactions.toLocaleString(), icon: 'receipt_long', accent: 'kpi--violet', note: `${this.money(avgTicket)} avg. ticket`, delta: null, higherIsBetter: true },
-      { label: $localize`Refunds`, value: this.money(refunds), icon: 'undo', accent: 'kpi--red', note: `${refundCount} refunded receipt${refundCount === 1 ? '' : 's'}`, delta: this.percentChange(refunds, prev('refunds')), higherIsBetter: false },
-      { label: $localize`Discounts`, value: this.money(discounts), icon: 'sell', accent: 'kpi--amber', note: 'vs previous period', delta: this.percentChange(discounts, prev('discounts')), higherIsBetter: false },
+      { label: $localize`Net sales`, value: this.money(net), icon: 'payments', accent: 'kpi--azure', note: 'vs previous period', delta: this.percentChange(net, prev('netSales')), higherIsBetter: true, ...receipts('sales'), linkLabel: $localize`View paid receipts` },
+      { label: $localize`Gross sales`, value: this.money(gross), icon: 'point_of_sale', accent: 'kpi--sky', note: 'vs previous period', delta: this.percentChange(gross, prev('grossSales')), higherIsBetter: true, ...receipts('sales'), linkLabel: $localize`View paid receipts` },
+      // Profit is not on a receipt, so it opens the sales summary with the profit line already charted.
+      { label: $localize`Gross profit`, value: this.money(profit), icon: 'trending_up', accent: 'kpi--green', note: `${margin.toFixed(1)}% margin`, delta: this.percentChange(profit, prev('grossProfit')), higherIsBetter: true, link: ['../reports/summary'], params: { ...base, metric: 'grossProfit' }, linkLabel: $localize`View the sales summary` },
+      { label: $localize`Transactions`, value: transactions.toLocaleString(), icon: 'receipt_long', accent: 'kpi--violet', note: `${this.money(avgTicket)} avg. ticket`, delta: null, higherIsBetter: true, ...receipts('sales'), linkLabel: $localize`View paid receipts` },
+      { label: $localize`Refunds`, value: this.money(refunds), icon: 'undo', accent: 'kpi--red', note: `${refundCount} refunded receipt${refundCount === 1 ? '' : 's'}`, delta: this.percentChange(refunds, prev('refunds')), higherIsBetter: false, ...receipts('refund'), linkLabel: $localize`View refunds` },
+      { label: $localize`Discounts`, value: this.money(discounts), icon: 'sell', accent: 'kpi--amber', note: 'vs previous period', delta: this.percentChange(discounts, prev('discounts')), higherIsBetter: false, ...receipts('discount'), linkLabel: $localize`View discounted receipts` },
     ];
   });
 
   // ── Charts ─────────────────────────────────────────────────────────────────
 
   protected readonly trendChart = computed((): EChartsOption => {
-    const rows = [...(this.data()?.trend ?? [])].sort((a, b) => String(a.period).localeCompare(String(b.period)));
+    const rows = this.withEmptyMonths([...(this.data()?.trend ?? [])].sort((a, b) => String(a.period).localeCompare(String(b.period))));
     const labels = rows.map((r) => this.formatPeriodLabel(String(r.period)));
     const area = (color: string) => ({
       color: {
@@ -285,7 +341,7 @@ export class SalesDashboardComponent {
         { name: 'Gross sales', type: 'bar', barMaxWidth: 28, data: rows.map((r) => r.grossSales ?? 0), itemStyle: { color: '#b9d5f7', borderRadius: [4, 4, 0, 0] } },
         // Periods with no sales aren't returned, so a curve through a few sparse
         // points would invent values in the gaps — only smooth dense series.
-        { name: 'Net sales', type: 'line', smooth: rows.length > 8, symbol: 'circle', symbolSize: 7, showSymbol: rows.length <= 31, data: rows.map((r) => r.netSales ?? 0), itemStyle: { color: COLORS.primary }, lineStyle: { width: 3 }, areaStyle: area(COLORS.primary) },
+        { name: 'Net sales', type: 'line', smooth: rows.length > 8 && this.period() !== 'monthly', symbol: 'circle', symbolSize: 7, showSymbol: rows.length <= 31, data: rows.map((r) => r.netSales ?? 0), itemStyle: { color: COLORS.primary }, lineStyle: { width: 3 }, areaStyle: area(COLORS.primary) },
       ],
     };
   });

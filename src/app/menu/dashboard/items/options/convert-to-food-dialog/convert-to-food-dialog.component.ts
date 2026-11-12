@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { CurrencyMaskModule } from 'ng2-currency-mask';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { CategoryService } from '../../../../../shared/services/category.service';
+import { flatTree } from '../../../../../shared/category-tree';
 import { ProductService } from '../../../../../shared/services/product.service';
 import { StoreStore } from '../../../../../shared/stores/store.store';
 import { OptionItem } from '../../../../../shared/models';
@@ -52,6 +53,9 @@ export class ConvertToFoodDialogComponent implements OnInit {
     }),
     stream: ({ params }) => this.categoryService.getStoreMenus(params.storeId!),
   });
+
+  /** Categories with their sub-categories indented beneath. */
+  menuRows = computed(() => flatTree(this.menus.hasValue() ? this.menus.value() : []));
 
   ngOnInit() {
     this.initializeForm();

@@ -138,6 +138,11 @@ export class Checkout implements OnInit {
     this.categoryStore.selectCategory(item);
   }
 
+  /** `null` is the "All" chip: every product under the selected category. */
+  public selectSub(item: Category | null): void {
+    this.categoryStore.selectSub(item);
+  }
+
   public clearSearch(): void {
     this.productStore.clearSearchQuery();
   }

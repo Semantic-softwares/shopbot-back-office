@@ -35,7 +35,7 @@ const STEP_META: Record<AuditStep['key'], { icon: string; title: string; hint: s
   report_pack: { icon: 'summarize', title: $localize`Report pack`, hint: $localize`The day's figures are saved for the morning` },
 };
 const ORDER: AuditStep['key'][] = ['pre_checks', 'no_shows', 'post_room_tax', 'sync_orders', 'reconcile_payments', 'trial_balance', 'report_pack'];
-const RESERVATION_CODES = new Set(['OVERDUE_DEPARTURES', 'ARRIVALS_NOT_CHECKED_IN', 'STALE_ARRIVALS', 'ZERO_RATE_ROOMS', 'NOSHOW_FAILED', 'DEPARTED_WITH_BALANCE']);
+const RESERVATION_CODES = new Set(['OVERDUE_DEPARTURES', 'ARRIVALS_NOT_CHECKED_IN', 'STALE_ARRIVALS', 'ZERO_RATE_ROOMS', 'NOSHOW_FAILED', 'DEPARTED_WITH_BALANCE', 'UNPAID_ROOM_ORDERS']);
 
 @Component({
   selector: 'app-night-audit',

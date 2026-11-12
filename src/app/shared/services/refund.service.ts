@@ -54,7 +54,7 @@ export class RefundService {
 
   public listForStore(
     storeId: string,
-    opts: { from?: string; to?: string; page?: number; limit?: number } = {},
+    opts: { from?: string; to?: string; page?: number; limit?: number; employee?: string } = {},
   ): Observable<{ data: Refund[]; total: number; page: number; limit: number }> {
     let params = new HttpParams();
     for (const [k, v] of Object.entries(opts)) if (v !== undefined && v !== null) params = params.set(k, String(v));

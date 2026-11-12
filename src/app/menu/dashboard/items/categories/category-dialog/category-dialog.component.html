@@ -1,6 +1,6 @@
 <div class="p-6">
   <h2 mat-dialog-title class="text-xl font-bold mb-4">
-    @if (data.isEdit) {<ng-container i18n>Edit Category</ng-container>} @else {<ng-container i18n>Create New Category</ng-container>}
+    @if (data.isEdit) {<ng-container i18n>Edit Category</ng-container>} @else if (data.asSub || data.parent) {<ng-container i18n>Create New Sub-category</ng-container>} @else {<ng-container i18n>Create New Category</ng-container>}
   </h2>
 
   <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
@@ -10,6 +10,36 @@
         <input matInput formControlName="name" placeholder="Enter category name" i18n-placeholder>
       </mat-form-field>
 
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label><ng-container i18n>Parent category</ng-container></mat-label>
+        <mat-select formControlName="parent" data-testid="category-parent">
+          @if (!data.asSub) { <mat-option [value]="null"><ng-container i18n>None (top-level category)</ng-container></mat-option> }
+          @for (p of parentOptions(); track p._id) { <mat-option [value]="p._id">{{ p.name }}</mat-option> }
+        </mat-select>
+        @if (hasChildren) {
+          <mat-hint><ng-container i18n>This category has sub-categories, so it stays top-level.</ng-container></mat-hint>
+        } @else {
+          <mat-hint><ng-container i18n>Choose one to make this a sub-category, for example Whisky under Drinks.</ng-container></mat-hint>
+        }
+      </mat-form-field>
+
+      @if (!categoryForm.controls.parent.value && !data.asSub) {
+        <div>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label><ng-container i18n>Add sub-categories</ng-container></mat-label>
+            <input matInput [(ngModel)]="subDraft" [ngModelOptions]="{standalone: true}" (keydown.enter)="addSubName($event)" (keydown.comma)="addSubName($event)" (blur)="addSubName()" placeholder="Type a name and press Enter" i18n-placeholder data-testid="sub-names" />
+            <mat-hint><ng-container i18n>Optional. For example Whisky, Soft Drinks, Beers.</ng-container></mat-hint>
+          </mat-form-field>
+          @if (subNames().length) {
+            <mat-chip-set class="mt-2" aria-label="Sub-categories to create" i18n-aria-label>
+              @for (n of subNames(); track n) {
+                <mat-chip (removed)="removeSubName(n)" [attr.data-testid]="'sub-chip'">{{ n }}<button matChipRemove aria-label="Remove" i18n-aria-label><mat-icon>cancel</mat-icon></button></mat-chip>
+              }
+            </mat-chip-set>
+          }
+        </div>
+      }
 
       <mat-form-field appearance="outline" class="w-full">
         <mat-label><ng-container i18n>Color picker</ng-container></mat-label>

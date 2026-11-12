@@ -12,6 +12,7 @@ import { firstValueFrom } from 'rxjs';
 import { ProductService } from '../../../../../shared/services/product.service';
 import { CategoryService } from '../../../../../shared/services/category.service';
 import { Category } from '../../../../../shared/models/category.model';
+import { flatTree } from '../../../../../shared/category-tree';
 import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 
 interface ImportRow {
@@ -68,6 +69,8 @@ export class ImportProductsDialogComponent {
   protected rows = signal<ImportRow[]>([]);
   protected invalidCount = signal(0);
   protected groups = signal<CategoryGroup[]>([]);
+  /** Categories with their sub-categories indented beneath, for the pickers. */
+  protected readonly menuRows = flatTree(this.data.menus ?? []);
   protected progress = signal(0);
   protected result = signal<{ created: number; skipped: string[]; failed: string[] } | null>(null);
 

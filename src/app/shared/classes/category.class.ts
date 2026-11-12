@@ -9,6 +9,7 @@ export class _Category {
     icon: string;
     items: number;
     store?: string;
+    parent?: string | null;
     foods?:  Product[] |  string[]
   
     constructor(data: Partial<_Category>) {
@@ -19,6 +20,7 @@ export class _Category {
       this.icon = data.icon || 'lunch_dining'; // Default color is black
       this.items = data.items || 0;
       this.store = data.store || '';
+      this.parent = data.parent || null;
       this.foods = data.foods || []
     }
   }
