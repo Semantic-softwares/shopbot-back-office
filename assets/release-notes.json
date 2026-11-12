@@ -1,6 +1,54 @@
 {
   "releases": [
     {
+      "id": "2026.11.12.2",
+      "date": "2026-11-12",
+      "title": {
+        "en": "Inventory items, bills of materials and low-stock alerts",
+        "fr": "Articles d’inventaire, nomenclatures et alertes de stock bas",
+        "it": "Articoli di inventario, distinte base e avvisi di scorta bassa",
+        "rw": "Ibintu byo mu bubiko, urutonde rw’ibigize n’imiburo y’ububiko buke"
+      },
+      "items": [
+        {
+          "type": "new",
+          "text": {
+            "en": "Inventory: keep track of ingredients, components and materials in grams, litres, pieces and more, by location (main store, kitchen, warehouse). Add, remove, record wastage, adjust, transfer and do stocktakes; every change is recorded.",
+            "fr": "Inventaire : suivez ingrédients, composants et matières en grammes, litres, pièces et plus, par emplacement (magasin, cuisine, entrepôt). Ajoutez, retirez, enregistrez les pertes, ajustez, transférez et faites des inventaires physiques ; chaque changement est enregistré.",
+            "it": "Inventario: tieni traccia di ingredienti, componenti e materiali in grammi, litri, pezzi e altro, per ubicazione (negozio, cucina, magazzino). Aggiungi, rimuovi, registra scarti, rettifica, trasferisci e fai inventari fisici; ogni modifica viene registrata.",
+            "rw": "Ububiko: kurikirana ibirungo, ibigize n’ibikoresho mu migarama, litiro, ibice n’ibindi, ahantu hatandukanye (iduka, igikoni, ububiko bunini). Ongeramo, kuramo, andika igihombo, hindura, wimure kandi ubare ububiko; buri gihindutse kirandikwa."
+          }
+        },
+        {
+          "type": "new",
+          "text": {
+            "en": "Bill of materials: tell a product what it uses (for example a grilled fish uses 250 g of fish and 20 ml of oil). Each sale takes those items from stock automatically, once, and cancelling before it is made puts them back.",
+            "fr": "Nomenclature : indiquez à un produit ce qu’il consomme (par exemple un poisson grillé consomme 250 g de poisson et 20 ml d’huile). Chaque vente prélève ces articles automatiquement, une seule fois, et une annulation avant la préparation les remet en stock.",
+            "it": "Distinta base: indica a un prodotto cosa usa (per esempio un pesce alla griglia usa 250 g di pesce e 20 ml di olio). Ogni vendita preleva automaticamente quegli articoli, una sola volta, e l’annullamento prima della preparazione li rimette in scorta.",
+            "rw": "Urutonde rw’ibigize: bwira igicuruzwa ibyo gikoresha (urugero ifi yokeje ikoresha 250 g by’ifi na 20 ml y’amavuta). Buri gurisha rifata ibyo mu bubiko ubwaryo, rimwe gusa, kandi guhagarika mbere yo gutegura biribisubizamo."
+          }
+        },
+        {
+          "type": "new",
+          "text": {
+            "en": "Low-stock alerts: set a level per item and location. Administrators get one in-app, push and email alert when it is reached, and another only after it has been restocked.",
+            "fr": "Alertes de stock bas : définissez un niveau par article et emplacement. Les administrateurs reçoivent une alerte dans l’application, par notification push et par e-mail à l’atteinte du niveau, et une autre seulement après un réapprovisionnement.",
+            "it": "Avvisi di scorta bassa: imposta un livello per articolo e ubicazione. Gli amministratori ricevono un avviso in app, push ed e-mail quando viene raggiunto, e un altro solo dopo il rifornimento.",
+            "rw": "Imiburo y’ububiko buke: shyiraho urugero kuri buri gicuruzwa n’ahantu. Abayobozi bahabwa umuburo umwe mu rubuga, wa push na imeri iyo rugezweho, undi nyuma yo kongeramo ububiko gusa."
+          }
+        },
+        {
+          "type": "improved",
+          "text": {
+            "en": "Six new inventory reports (summary, movements, component use, low stock, bills of materials, manual adjustments) with export, and the POS warns before a sale that would run short.",
+            "fr": "Six nouveaux rapports d’inventaire (résumé, mouvements, consommation des composants, stock bas, nomenclatures, ajustements manuels) avec export, et le point de vente avertit avant une vente qui manquerait de stock.",
+            "it": "Sei nuovi report di inventario (riepilogo, movimenti, uso dei componenti, scorta bassa, distinte base, rettifiche manuali) con esportazione, e il punto vendita avvisa prima di una vendita che andrebbe a corto.",
+            "rw": "Raporo esheshatu nshya z’ububiko (incamake, ukwimuka, ikoreshwa ry’ibigize, ububiko buke, urutonde rw’ibigize, ihindura ry’intoki) zishobora gusohorwa, kandi aho bagurishiriza hakuburira mbere y’igurisha ryabura ububiko."
+          }
+        }
+      ]
+    },
+    {
       "id": "2026.11.12",
       "date": "2026-11-12",
       "title": {
