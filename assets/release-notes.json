@@ -1,6 +1,72 @@
 {
   "releases": [
     {
+      "id": "2026.11.12",
+      "date": "2026-11-12",
+      "title": {
+        "en": "Sub-categories, owner emails, hotel check-in and check-out times",
+        "fr": "Sous-catégories, e-mails au propriétaire, heures d’arrivée et de départ de l’hôtel",
+        "it": "Sottocategorie, e-mail al titolare, orari di check-in e check-out dell’hotel",
+        "rw": "Ibyiciro bito, imeri ku mutunzi, amasaha yo kwinjira no gusohoka muri hoteli"
+      },
+      "items": [
+        {
+          "type": "new",
+          "text": {
+            "en": "Sub-categories: a category such as Drinks can now have sub-categories (Whisky, Soft Drinks, Beers). On the POS, tapping a category shows its sub-categories in a second row. Add them from the Categories page or while creating a product.",
+            "fr": "Sous-catégories : une catégorie comme Boissons peut avoir des sous-catégories (Whisky, Sodas, Bières). Au point de vente, toucher une catégorie affiche ses sous-catégories sur une seconde ligne. Ajoutez-les depuis la page Catégories ou à la création d’un produit.",
+            "it": "Sottocategorie: una categoria come Bevande può avere sottocategorie (Whisky, Bibite, Birre). Nel punto vendita, toccando una categoria compaiono le sottocategorie in una seconda riga. Aggiungile dalla pagina Categorie o creando un prodotto.",
+            "rw": "Ibyiciro bito: icyiciro nka Ibinyobwa gishobora kugira ibyiciro bito (Whisky, Ibinyobwa bidasembuye, Byeri). Aho bagurishiriza, gukora ku cyiciro bigaragaza ibyiciro byacyo bito mu murongo wa kabiri.Ubyongere kuri paji y’Ibyiciro cyangwa mu gihe urema igicuruzwa."
+          }
+        },
+        {
+          "type": "new",
+          "text": {
+            "en": "Business owner and every Super Admin now get an email when a register session is closed, with the totals and any cash difference, and a sales summary every Monday morning in the store’s time zone. Each can be turned off in Settings → Notifications.",
+            "fr": "Le propriétaire et chaque Super Admin reçoivent un e-mail à la clôture d’une session de caisse, avec les totaux et l’écart de caisse éventuel, et un récapitulatif des ventes chaque lundi matin dans le fuseau horaire du magasin. Chacun se désactive dans Paramètres → Notifications.",
+            "it": "Il titolare e ogni Super Admin ricevono un’e-mail alla chiusura di una sessione di cassa, con i totali e l’eventuale differenza di cassa, e un riepilogo vendite ogni lunedì mattina nel fuso orario del negozio. Ognuna si disattiva in Impostazioni → Notifiche.",
+            "rw": "Nyir’ubucuruzi na buri Super Admin bahabwa imeri iyo isaha y’ikayi rya kasho ifunzwe, irimo ibyo yinjije n’itandukaniro rya kasho niba ririho, hamwe n’incamake y’ibigurishijwe buri wa mbere mu gitondo hakurikijwe isaha y’iduka. Zose zirazimywa muri Igenamiterere → Imenyesha."
+          }
+        },
+        {
+          "type": "new",
+          "text": {
+            "en": "Hotels can set their standard check-in and check-out times in Settings → Hotel profile. They appear as the expected times on guest folios and in confirmation emails and PDFs.",
+            "fr": "Les hôtels peuvent définir leurs heures standard d’arrivée et de départ dans Paramètres → Profil de l’hôtel. Elles s’affichent comme heures prévues sur les folios des clients, dans les e-mails de confirmation et les PDF.",
+            "it": "Gli hotel possono impostare gli orari standard di check-in e check-out in Impostazioni → Profilo hotel. Compaiono come orari previsti nei folio degli ospiti, nelle e-mail di conferma e nei PDF.",
+            "rw": "Hoteli zishobora gushyiraho amasaha asanzwe yo kwinjira no gusohoka muri Igenamiterere → Umwirondoro wa hoteli. Agaragara nk’amasaha ateganyijwe kuri folio y’abashyitsi, mu mimeri yo kwemeza no muri PDF."
+          }
+        },
+        {
+          "type": "new",
+          "text": {
+            "en": "Set the store’s time zone in Settings; daily figures, reports and emails follow it. Unpaid room orders now trigger reminders, and the night audit warns about them.",
+            "fr": "Définissez le fuseau horaire du magasin dans Paramètres ; chiffres du jour, rapports et e-mails le suivent. Les commandes de chambre impayées déclenchent des rappels et l’audit de nuit les signale.",
+            "it": "Imposta il fuso orario del negozio in Impostazioni; cifre giornaliere, report ed e-mail lo seguono. Gli ordini camera non pagati generano promemoria e l’audit notturno li segnala.",
+            "rw": "Shyiraho isaha y’iduka muri Igenamiterere; imibare y’umunsi, raporo n’imeri biyikurikiza. Komande z’ibyumba zitishyuwe zitera kwibutsa kandi igenzura rya nijoro riraziburira."
+          }
+        },
+        {
+          "type": "improved",
+          "text": {
+            "en": "Receipts show discounts, the sales dashboard has clearer links and trend, and the employee filter lists only employees who made sales.",
+            "fr": "Les reçus affichent les remises, le tableau de bord des ventes a des liens et une tendance plus clairs, et le filtre employé ne liste que les employés ayant vendu.",
+            "it": "Le ricevute mostrano gli sconti, la dashboard vendite ha collegamenti e andamento più chiari e il filtro dipendenti elenca solo chi ha venduto.",
+            "rw": "Inyemezabwishyu zigaragaza ibyagabanijwe, ikibaho cy’ibigurishijwe gifite amahuza n’icyerekezo byumvikana neza, kandi akayunguruzo k’abakozi kerekana gusa abagurishije."
+          }
+        },
+        {
+          "type": "improved",
+          "text": {
+            "en": "POS search works with the barcode scanner turned on, scanning is more reliable, and you can search by barcode in purchase orders and quick stock-in.",
+            "fr": "La recherche du point de vente fonctionne avec le lecteur de codes-barres activé, le scan est plus fiable, et on peut chercher par code-barres dans les bons de commande et l’entrée rapide en stock.",
+            "it": "La ricerca del punto vendita funziona con il lettore di codici a barre attivo, la scansione è più affidabile e si può cercare per codice a barre negli ordini d’acquisto e nel carico rapido.",
+            "rw": "Gushakisha aho bagurishiriza bikora igihe scanner ya barcode ifunguye, gusikana birizewe kurushaho, kandi ushobora gushakisha ukoresheje barcode muri komande z’ibyaguzwe no kwinjiza ibicuruzwa vuba."
+          }
+        }
+      ]
+    },
+    {
       "id": "2026.10.22",
       "date": "2026-10-22",
       "title": {

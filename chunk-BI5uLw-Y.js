@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";var o;z(()=>{o=[{path:``,redirectTo:`tax-management`,pathMatch:`full`},{path:`tax-management`,loadComponent:()=>import(`./chunk-2QvTolqS.js`).then(t=>t.TaxManagementComponent)},{path:`tax-report`,redirectTo:`/menu/erp/reports/tax-report`}]})();export{o as DASHBOARD_ACCOUNTING_ROUTES};
