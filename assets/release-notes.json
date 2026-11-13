@@ -1,6 +1,36 @@
 {
   "releases": [
     {
+      "id": "2026.11.13.3",
+      "date": "2026-11-13",
+      "title": {
+        "en": "Sequential order numbers offline, and receipts ready offline",
+        "fr": "Numéros de commande séquentiels hors ligne et reçus disponibles hors ligne",
+        "it": "Numeri d’ordine sequenziali offline e ricevute disponibili offline",
+        "rw": "Nimero z’ibicuruzwa zikurikirana nta murandasi, n’inyemezabwishyu ziboneka nta murandasi"
+      },
+      "items": [
+        {
+          "type": "improved",
+          "text": {
+            "en": "Sales made offline now get proper sequential order numbers (ORD-000003, ORD-000004 …) on the till itself, instead of a long temporary number.",
+            "fr": "Les ventes faites hors ligne reçoivent désormais de vrais numéros de commande séquentiels (ORD-000003, ORD-000004 …) directement sur la caisse, au lieu d’un long numéro temporaire.",
+            "it": "Le vendite fatte offline ora ricevono veri numeri d’ordine sequenziali (ORD-000003, ORD-000004 …) direttamente in cassa, invece di un lungo numero temporaneo.",
+            "rw": "Ibyagurishijwe nta murandasi ubu bibona nimero nyazo zikurikirana (ORD-000003, ORD-000004 …) kuri kasho ubwayo, aho kuba nimero ndende y’agateganyo."
+          }
+        },
+        {
+          "type": "new",
+          "text": {
+            "en": "This month’s receipts are now saved on the device in the background, with their refunds and e-invoice details, so you can open any receipt even with no connection.",
+            "fr": "Les reçus du mois sont désormais enregistrés sur l’appareil en arrière-plan, avec leurs remboursements et détails de facture électronique, pour ouvrir n’importe quel reçu même sans connexion.",
+            "it": "Le ricevute del mese vengono ora salvate sul dispositivo in background, con rimborsi e dettagli della fattura elettronica, così puoi aprire qualsiasi ricevuta anche senza connessione.",
+            "rw": "Inyemezabwishyu z’ukwezi ubu zibikwa kuri iki gikoresho inyuma, hamwe n’izasubijwe n’amakuru y’inyemezabuguzi ya elegitoronike, ku buryo ushobora gufungura iyo ari yo yose nta murandasi."
+          }
+        }
+      ]
+    },
+    {
       "id": "2026.11.13.2",
       "date": "2026-11-13",
       "title": {

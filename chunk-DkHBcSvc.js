@@ -1,1 +1,0 @@
-import{c as z}from"./chunk-RykAvsdd.js";var n;z(()=>{n=[{path:``,loadComponent:()=>import(`./chunk-C-BgGERq.js`).then(o=>o.StorefrontShellComponent)},{path:`t/:qrToken`,loadComponent:()=>import(`./chunk-C-BgGERq.js`).then(o=>o.StorefrontShellComponent)}]})();export{n as STOREFRONT_ROUTES};

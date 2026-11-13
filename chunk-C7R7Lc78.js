@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";import{Xt as __,_n as dw}from"./chunk-Bq7UxBjW.js";import{a as m$1,t as b}from"./chunk-Dxu8oRZS.js";var m;var f=z(()=>{"use strict";m$1();__();m=class n{transform(e,r=2){return e==null?null:b(e,r)}static ɵfac=function(r){return new(r||n)};static ɵpipe=dw({name:`minor`,type:n,pure:!0})}});export{m as n,f as t};
