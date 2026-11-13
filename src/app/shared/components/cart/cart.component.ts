@@ -76,7 +76,8 @@ import {
 } from '../payment-dialog/payment-dialog.component';
 import { TableStore } from '../../stores/table.store';
 import { SalesTypeStore } from '../../stores/sale-type.store';
-import { objectId, generateReference } from '../../constants/identity.constant';
+import { OrderNumberService } from '../../offline/order-number.service';
+import { objectId } from '../../constants/identity.constant';
 import { CartSummary } from '../../../shared/models/cart.model';
 import { AuthService } from '../../services/auth.service';
 import { OrderStore } from '../../stores/order.store';
@@ -117,6 +118,7 @@ export class CartComponent implements OnDestroy {
   public readonly tableStore = inject(TableStore);
   public readonly guestService = inject(GuestService);
   private readonly offline = inject(OfflineStore);
+  private readonly orderNumbers = inject(OrderNumberService);
   private readonly outbox = inject(OutboxSyncService);
   private readonly net = inject(ConnectivityService);
   private readonly subscriptionService = inject(SubscriptionService);
@@ -925,7 +927,7 @@ export class CartComponent implements OnDestroy {
         ? OrderCategoryType.COMPLETE
         : OrderCategoryType.PROCESSING,
       settled: isPaid,
-      reference: generateReference(),
+      reference: await this.orderNumbers.next(selectedStore._id),
       staff: this.register.operatorId() ?? this.selectedUser?._id,
       // Only for showing the sale on this device before it syncs; the server ignores it.
       staffName: this.register.operatorName() ?? this.selectedUser?.name,

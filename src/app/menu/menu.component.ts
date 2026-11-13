@@ -1,3 +1,4 @@
+import { OrderWarmupService } from '../shared/offline/order-warmup.service';
 import { Component, inject, OnInit, OnDestroy, effect, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { Router } from '@angular/router';
@@ -35,6 +36,7 @@ export class MenuComponent implements OnInit, OnDestroy {
   private storeStore = inject(StoreStore);
   private rolesService = inject(RolesService);
   private subscriptionService = inject(SubscriptionService);
+  private readonly warmup = inject(OrderWarmupService);
 
   readonly subscriptionLoading = signal(true);
   private readonly subscriptionDetails = this.subscriptionService.subscriptionWithModules;
@@ -179,6 +181,8 @@ export class MenuComponent implements OnInit, OnDestroy {
   });
 
   constructor() {
+    // Keep recent receipts on the device so they can be opened with no connection.
+    this.warmup.start();
     // Connect socket when store changes (only if not already connected)
     effect(() => {
       const store = this.storeStore.selectedStore();

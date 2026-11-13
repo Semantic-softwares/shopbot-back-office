@@ -3,6 +3,7 @@ import { OfflineStore } from '../../../../../shared/offline/offline-store.servic
 import { OutboxSyncService } from '../../../../../shared/offline/outbox-sync.service';
 import { ConnectivityService } from '../../../../../shared/offline/connectivity.service';
 import { pendingRefundTicket } from '../../../../../shared/offline/refund-offline';
+import { OrderWarmupService } from '../../../../../shared/offline/order-warmup.service';
 import { OutboxEntry } from '../../../../../shared/offline/offline.models';
 import { Component, inject, signal, computed, effect, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -80,6 +81,7 @@ export interface ReceiptStatus {
 export class ListReceiptsComponent {
   private queryParams = inject(QueryParamService);
   private orderService = inject(OrderService);
+  private warmup = inject(OrderWarmupService);
   private refundService = inject(RefundService);
   private printJobService = inject(PrintJobService);
   private router = inject(Router);
@@ -149,7 +151,7 @@ export class ListReceiptsComponent {
   private warmRecent = effect(() => {
     const d = this.dataSource.hasValue() ? this.dataSource.value() : null;
     if (!d?.orders?.length || !this.net.online()) return;
-    this.orderService.warmOrders(d.orders.slice(0, 25).map((o: any) => String(o._id)).filter(Boolean));
+    void this.warmup.warm(String(this.storeStore.selectedStore()?._id ?? ''), d.orders.map((o: any) => String(o._id)));
   });
 
   /** When what was waiting on this device has been sent, fetch again so the server's own receipts and credit notes replace the waiting rows. */

@@ -40,7 +40,8 @@ export class FiscalisationService {
 
   /** The tag and QR for one order, or null when it has no fiscal document (or nothing is switched on). */
   orderView(storeId: string, orderId: string): Observable<FiscalOrderView | null> {
-    return this.http.get<{ view: FiscalOrderView | null }>(`${this.api}/revenue-authority/stores/${storeId}/orders/${orderId}/fiscal`).pipe(
+    // Remembered on the device so a receipt opened offline still shows its tag and QR.
+    return cachedFetch(this.offline, `fiscal-order:${orderId}`, this.http.get<{ view: FiscalOrderView | null }>(`${this.api}/revenue-authority/stores/${storeId}/orders/${orderId}/fiscal`)).pipe(
       map((r) => r.view ?? null),
       catchError(() => of(null)),
     );
