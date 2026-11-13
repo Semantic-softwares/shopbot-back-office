@@ -277,23 +277,23 @@
         </mat-card>
 
         <!-- Refunds: one ticket per refund, newest first -->
-        @if (refunds().length > 0 || order.refundedAmount) {
+        @if (refunds().length > 0 || refundedSoFar()) {
         <mat-card appearance="outlined">
           <mat-card-header>
             <mat-card-title><ng-container i18n>Refunds</ng-container></mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <p class="mb-3 mt-2 text-sm text-gray-600">
-              <ng-container i18n>Refunded so far <strong>{{ order.refundedAmount | currency: currency() : 'symbol' : '1.2-2' }}</strong> of {{ order.total | currency: currency() : 'symbol' : '1.2-2' }}</ng-container>
+              <ng-container i18n>Refunded so far <strong>{{ refundedSoFar() | currency: currency() : 'symbol' : '1.2-2' }}</strong> of {{ order.total | currency: currency() : 'symbol' : '1.2-2' }}</ng-container>
             </p>
             <ul class="divide-y divide-outline-variant">
               @for (refund of refunds(); track refund._id) {
                 <li class="py-3">
                   <div class="flex items-baseline justify-between gap-3">
-                    <span class="font-semibold">{{ refund.refundNumber }}</span>
+                    <span class="font-semibold">@if (refund.pendingSync) { <ng-container i18n>Waiting to sync</ng-container> } @else { {{ refund.refundNumber }} }</span>
                     <span class="flex items-center gap-2">
                       <span class="font-semibold tabular-nums">{{ refund.total | currency: currency() : 'symbol' : '1.2-2' }}</span>
-                      <button mat-icon-button type="button" (click)="printRefund(refund)"
+                      <button mat-icon-button type="button" [disabled]="refund.pendingSync" (click)="printRefund(refund)"
                         [attr.aria-label]="'Print receipt' | tr" [matTooltip]="'Print receipt' | tr">
                         <mat-icon>print</mat-icon>
                       </button>
@@ -303,7 +303,9 @@
                     {{ refund.createdAt | date: 'medium' }} · {{ reasonLabel(refund.reasonCode) }}
                     @if (refund.approvedBy) { · <ng-container i18n>manager approved</ng-container> }
                   </p>
-                  @if (refund.lines.length) {
+                  @if (refund.summary) {
+                    <p class="mt-1 text-sm">{{ refund.summary }}</p>
+                  } @else if (refund.lines.length) {
                     <p class="mt-1 text-sm">
                       @for (line of refund.lines; track line.lineId; let last = $last) {
                         <span>{{ line.quantity }} × {{ line.name }}{{ last ? '' : ', ' }}</span>

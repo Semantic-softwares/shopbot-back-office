@@ -49,6 +49,10 @@ export interface Refund {
   createdAt: string;
   /** Made with no connection: kept on this device and sent when it is back (no number or credit note yet). */
   pendingSync?: boolean;
+  /** For a refund still on this device: what was refunded, in words (its lines are only known to the server). */
+  summary?: string;
+  /** The key the device made when the refund was saved: how a waiting refund is matched to its recorded ticket. */
+  idempotencyKey?: string;
 }
 
 export interface RefundableLine {

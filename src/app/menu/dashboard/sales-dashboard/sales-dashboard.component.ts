@@ -12,6 +12,7 @@ import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { forkJoin, of, catchError } from 'rxjs';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import type { EChartsOption } from 'echarts';
+import { ConnectivityService } from '../../../shared/offline/connectivity.service';
 import { OrderService } from '../../../shared/services/orders.service';
 import { QueryParamService } from '../../../shared/services/query-param.service';
 import { StoreStore } from '../../../shared/stores/store.store';
@@ -104,6 +105,7 @@ export class SalesDashboardComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly storeStore = inject(StoreStore);
+  protected readonly net = inject(ConnectivityService);
 
   private readonly query = toSignal(this.queryParams.getAllParams$, { initialValue: {} as Record<string, any> });
 

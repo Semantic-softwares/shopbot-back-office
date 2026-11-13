@@ -6,7 +6,7 @@ import { StoreStore } from '../../../../../shared/stores/store.store';
 import { OfflineStore } from '../../../../../shared/offline/offline-store.service';
 import { OutboxSyncService } from '../../../../../shared/offline/outbox-sync.service';
 import { ConnectivityService } from '../../../../../shared/offline/connectivity.service';
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, effect, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -29,6 +29,7 @@ import { MatListModule } from "@angular/material/list";
 import { TrPipe } from '../../../../../shared/i18n/tr.pipe';
 import { RefundService } from '../../../../../shared/services/refund.service';
 import { PrintJobService } from '../../../../../shared/services/print-job.service';
+import { pendingRefundTicket } from '../../../../../shared/offline/refund-offline';
 import { Refund } from '../../../../../shared/models/refund.model';
 import { RefundDialogComponent, refundReasonLabel } from '../../../../pos/orders/refund-dialog/refund-dialog.component';
 import { VoidDialogComponent } from '../../../../pos/orders/void-dialog/void-dialog.component';
@@ -247,8 +248,31 @@ export class ReceiptsDetailsComponent {
     params: () => ({ id: this.route.snapshot.paramMap.get('id') }),
     stream: ({ params }) => this.refundService.listForOrder(params.id!),
   });
-  refunds = computed<Refund[]>(() => (this.refundsResource.hasValue() ? this.refundsResource.value() : []));
+  /** Refunds made on this device that the server has not recorded yet are listed first, marked as waiting. */
+  refunds = computed<Refund[]>(() => {
+    const recorded = this.refundsResource.hasValue() ? this.refundsResource.value() : [];
+    const keys = new Set(recorded.map((r) => r.idempotencyKey).filter(Boolean));
+    return [
+      ...this.offline.refundsFor(this.route.snapshot.paramMap.get('id') ?? '').filter((e) => !keys.has(e.id)).map((e) => pendingRefundTicket(e)).reverse(),
+      ...recorded,
+    ];
+  });
   reasonLabel = refundReasonLabel;
+  private lastWaiting = 0;
+  /** When what was waiting on this device has been sent, fetch again so the recorded refund replaces the waiting one. */
+  private refreshAfterSync = effect(() => {
+    const waiting = this.offline.waiting();
+    if (this.lastWaiting > 0 && waiting === 0) {
+      this.orderResource.reload();
+      this.refundsResource.reload();
+    }
+    this.lastWaiting = waiting;
+  });
+  /** What has been refunded on this sale, counting refunds still waiting on this device. */
+  refundedSoFar = computed(() => {
+    const o: any = this.orderResource.hasValue() ? this.orderResource.value() : null;
+    return (o?.refundedAmount || 0) + this.refunds().filter((r) => r.pendingSync).reduce((sum, r) => sum + r.total, 0);
+  });
 
   canRefund = computed(() => {
     const o: any = this.orderResource.value();
@@ -281,6 +305,7 @@ export class ReceiptsDetailsComponent {
 
   /** Prints (or reprints) the refund's receipt, with the credit note's QR for stores that report sales. */
   printRefund(refund: Refund): void {
+    if (refund.pendingSync) return;
     const sending = this.snackBar.open($localize`Sending to printer...`, '', { duration: 0 });
     this.printJobService.printRefund(refund._id).subscribe({
       next: (response) => {

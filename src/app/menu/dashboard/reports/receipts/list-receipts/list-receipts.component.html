@@ -369,7 +369,7 @@
               <th mat-header-cell *matHeaderCellDef><ng-container i18n>Refund ticket</ng-container></th>
               <td mat-cell *matCellDef="let r" class="relative">
                 <span class="absolute inset-y-0 left-0 w-1 bg-orange-400"></span>
-                <span class="flex items-center gap-1 font-semibold">{{ r.refundNumber }}
+                <span class="flex items-center gap-1 font-semibold">@if (r.pendingSync) { <mat-icon class="!h-4 !w-4 !text-[16px] !leading-none text-amber-600" [matTooltip]="'Saved on this device. It gets its CRN number when it syncs.' | tr">cloud_off</mat-icon><ng-container i18n>Waiting to sync</ng-container> } @else { {{ r.refundNumber }} }
                   @if (refundTip(r); as tip) { <mat-icon class="!h-4 !w-4 !text-[16px] !leading-none text-amber-600" [matTooltip]="tip" matTooltipClass="tc-tip" [attr.aria-label]="tip" tabindex="0" data-testid="refund-note-tip">sticky_note_2</mat-icon> }
                 </span>
                 <button type="button" class="text-xs text-primary hover:underline" (click)="viewRecipesDetails(r.order)"><ng-container i18n>Sale</ng-container> #{{ r.orderReference }}</button>
@@ -410,7 +410,7 @@
                 <button mat-icon-button [matMenuTriggerFor]="refundMenu" [attr.aria-label]="'Refund actions' | tr"><mat-icon>more_vert</mat-icon></button>
                 <mat-menu #refundMenu="matMenu">
                   <button mat-menu-item (click)="viewRecipesDetails(r.order)"><mat-icon>visibility</mat-icon><span><ng-container i18n>View Receipt Details</ng-container></span></button>
-                  <button mat-menu-item (click)="printRefund(r)"><mat-icon>print</mat-icon><span><ng-container i18n>Print receipt</ng-container></span></button>
+                  <button mat-menu-item [disabled]="r.pendingSync" (click)="printRefund(r)"><mat-icon>print</mat-icon><span><ng-container i18n>Print receipt</ng-container></span></button>
                 </mat-menu>
               </td>
             </ng-container>
@@ -424,7 +424,7 @@
             <div class="rounded-xl border border-outline-variant border-l-4 border-l-orange-400 p-3">
               <div class="flex items-start gap-2">
                 <div class="flex-1 min-w-0">
-                  <p class="font-semibold">{{ r.refundNumber }}</p>
+                  <p class="font-semibold">@if (r.pendingSync) { <ng-container i18n>Waiting to sync</ng-container> } @else { {{ r.refundNumber }} }</p>
                   <button type="button" class="text-xs text-primary" (click)="viewRecipesDetails(r.order)"><ng-container i18n>Sale</ng-container> #{{ r.orderReference }}</button>
                   <p class="text-xs text-on-surface-variant">{{ r.createdAt | date: 'MMM d, h:mm a' }}</p>
                 </div>
@@ -432,7 +432,7 @@
                 <button mat-icon-button class="-mr-2 -mt-1 shrink-0" [matMenuTriggerFor]="cardRefundMenu" [attr.aria-label]="'Refund actions' | tr"><mat-icon>more_vert</mat-icon></button>
                 <mat-menu #cardRefundMenu="matMenu">
                   <button mat-menu-item (click)="viewRecipesDetails(r.order)"><mat-icon>visibility</mat-icon><span><ng-container i18n>View Receipt Details</ng-container></span></button>
-                  <button mat-menu-item (click)="printRefund(r)"><mat-icon>print</mat-icon><span><ng-container i18n>Print receipt</ng-container></span></button>
+                  <button mat-menu-item [disabled]="r.pendingSync" (click)="printRefund(r)"><mat-icon>print</mat-icon><span><ng-container i18n>Print receipt</ng-container></span></button>
                 </mat-menu>
               </div>
               <p class="mt-2 text-sm">{{ refundSummary(r) }}</p>

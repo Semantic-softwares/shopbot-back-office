@@ -2,6 +2,7 @@ import { ConfirmationDialogComponent } from '../../../../../shared/components/co
 import { OfflineStore } from '../../../../../shared/offline/offline-store.service';
 import { OutboxSyncService } from '../../../../../shared/offline/outbox-sync.service';
 import { ConnectivityService } from '../../../../../shared/offline/connectivity.service';
+import { pendingRefundTicket } from '../../../../../shared/offline/refund-offline';
 import { OutboxEntry } from '../../../../../shared/offline/offline.models';
 import { Component, inject, signal, computed, effect, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -151,6 +152,17 @@ export class ListReceiptsComponent {
     this.orderService.warmOrders(d.orders.slice(0, 25).map((o: any) => String(o._id)).filter(Boolean));
   });
 
+  /** When what was waiting on this device has been sent, fetch again so the server's own receipts and credit notes replace the waiting rows. */
+  private lastWaiting = 0;
+  private refreshAfterSync = effect(() => {
+    const waiting = this.offline.waiting();
+    if (this.lastWaiting > 0 && waiting === 0 && this.net.online()) {
+      this.dataSource.reload();
+      this.refundsResource.reload();
+    }
+    this.lastWaiting = waiting;
+  });
+
   private keepLast = effect(() => {
     // `value()` throws while a request is in error (offline), so only read it when there is one.
     const d = this.dataSource.hasValue() ? this.dataSource.value() : null;
@@ -173,7 +185,7 @@ export class ListReceiptsComponent {
       { value: 'open' as ReceiptTab, label: $localize`Open`, count: (d?.open ?? 0) + local('open'), icon: 'pending_actions', urgent: (d?.open ?? 0) + local('open') > 0 },
       { value: 'sales' as ReceiptTab, label: $localize`Paid`, count: (d?.sales ?? 0) + local('sales'), icon: 'paid', urgent: false },
       { value: 'discount' as ReceiptTab, label: $localize`Discounts`, count: (d?.discount ?? 0) + local('discount'), icon: 'sell', urgent: false },
-      { value: 'refund' as ReceiptTab, label: $localize`Refunds`, count: d?.refund ?? 0, icon: 'currency_exchange', urgent: false },
+      { value: 'refund' as ReceiptTab, label: $localize`Refunds`, count: (d?.refund ?? 0) + this.pendingRefunds().length, icon: 'currency_exchange', urgent: false },
       { value: 'cancelled' as ReceiptTab, label: $localize`Cancelled`, count: (d?.cancelled ?? 0) + local('cancelled'), icon: 'block', urgent: false },
     ];
   });
@@ -241,7 +253,11 @@ export class ListReceiptsComponent {
     const term = this.search().trim().toLowerCase();
     const tab = this.activeTab();
     const waiting = new Set(this.offline.outbox().map((e) => e.id));
-    let list: any[] = [...this.unsynced(), ...(this.data()?.orders ?? []).filter((o: any) => !waiting.has(String(o._id)))].filter((o: any) => this.inTab(o, tab));
+    // A refund still on this device already counts against its sale, so the row shows it as refunded.
+    const pendingFor = new Map<string, number>();
+    for (const r of this.pendingRefunds()) pendingFor.set(r.order, (pendingFor.get(r.order) ?? 0) + r.total);
+    const withPending = (o: any) => (pendingFor.has(String(o._id)) ? { ...o, refundedAmount: (o.refundedAmount || 0) + pendingFor.get(String(o._id))! } : o);
+    let list: any[] = [...this.unsynced(), ...(this.data()?.orders ?? []).filter((o: any) => !waiting.has(String(o._id))).map(withPending)].filter((o: any) => this.inTab(o, tab));
     if (term) {
       list = list.filter((o) =>
         [o.receiptNo, o.orderedBy?.name, o.servedBy?.name, o.type].some((v) => String(v ?? '').toLowerCase().includes(term)),
@@ -259,9 +275,30 @@ export class ListReceiptsComponent {
     }
   });
 
+  /**
+   * Refunds made on this device that the server has not recorded yet, shaped like refund tickets. They follow the same period
+   * as the rest of the list and drop out by themselves once they sync (the server's own ticket takes their place).
+   */
+  readonly pendingRefunds = computed<Refund[]>(() => {
+    const store = this.storeStore.selectedStore()?._id;
+    const q: any = this.query() ?? {};
+    const from = q.start ? new Date(`${q.start}T00:00:00`).getTime() : -Infinity;
+    const to = q.end ? new Date(`${q.end}T23:59:59.999`).getTime() : Infinity;
+    // The server may already hold a refund the device is still waiting to hear back about: then only the recorded one is shown.
+    const recorded = new Set((((this.refundsResource.hasValue() ? this.refundsResource.value() : null) ?? this.lastRefunds())?.data ?? []).map((r: Refund) => r.idempotencyKey).filter(Boolean));
+    return this.offline.refunds()
+      .filter((e) => e.store === store && !recorded.has(e.id))
+      .map((e) => pendingRefundTicket(e))
+      .filter((r) => {
+        const t = new Date(r.createdAt).getTime();
+        return t >= from && t <= to;
+      })
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  });
+
   readonly refundRows = computed(() => {
     const term = this.search().trim().toLowerCase();
-    const list: any[] = ((this.refundsResource.hasValue() ? this.refundsResource.value() : null) ?? this.lastRefunds())?.data ?? [];
+    const list: any[] = [...this.pendingRefunds(), ...(((this.refundsResource.hasValue() ? this.refundsResource.value() : null) ?? this.lastRefunds())?.data ?? [])];
     if (!term) return list;
     return list.filter((r) =>
       [r.refundNumber, r.orderReference, r.createdBy?.name, refundReasonLabel(r.reasonCode)].some((v) => String(v ?? '').toLowerCase().includes(term)),
@@ -416,6 +453,7 @@ export class ListReceiptsComponent {
 
   /** "1 × Burger, 2 × Fries", or what kind of refund it was when no items were chosen. */
   refundSummary(refund: Refund): string {
+    if (refund.summary) return refund.summary;
     return refund.lines?.length ? refund.lines.map((l) => `${l.quantity} × ${l.name}`).join(', ') : $localize`Amount refund (no items)`;
   }
 
@@ -469,6 +507,7 @@ export class ListReceiptsComponent {
   }
 
   printRefund(refund: Refund): void {
+    if (refund.pendingSync) return;
     const sending = this.snackBar.open($localize`Sending to printer...`, '', { duration: 0 });
     this.printJobService.printRefund(refund._id).subscribe({
       next: (response) => {

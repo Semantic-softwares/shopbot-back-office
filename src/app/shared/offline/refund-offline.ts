@@ -88,3 +88,27 @@ export function buildLocalRefundable(input: LocalRefundableInput): Refundable {
     fiscal: null,
   };
 }
+
+
+/** A refund made offline, shaped like the server's refund ticket so reports can list it beside the recorded ones. */
+export function pendingRefundTicket(entry: RefundOutboxEntry, createdByName?: string): Refund {
+  return {
+    _id: entry.id,
+    refundNumber: '',
+    order: entry.orderId,
+    store: entry.store,
+    orderReference: entry.reference,
+    kind: entry.body.lines ? 'items' : 'amount',
+    lines: [],
+    total: entry.estimate,
+    tenders: [],
+    reasonCode: entry.body.reasonCode,
+    note: entry.body.note,
+    createdBy: createdByName as any,
+    status: 'completed',
+    createdAt: entry.body.requestedAt ?? entry.createdAt,
+    pendingSync: true,
+    summary: entry.summary,
+    idempotencyKey: entry.id,
+  };
+}

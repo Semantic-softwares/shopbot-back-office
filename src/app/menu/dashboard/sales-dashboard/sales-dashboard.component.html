@@ -11,6 +11,13 @@
     </ng-container>
   </app-page-header>
 
+  @if (net.offline() && !loading() && !error()) {
+    <div class="mb-3 flex items-center gap-2 rounded-lg px-3 py-2 text-sm bg-[var(--mat-sys-secondary-container)] text-[var(--mat-sys-on-secondary-container)]" role="status" data-testid="dashboard-offline">
+      <mat-icon>cloud_off</mat-icon>
+      <span><ng-container i18n>No connection. These are the last figures saved on this device; sales made since are not included until you are back online.</ng-container></span>
+    </div>
+  }
+
   @if (loading()) {
     <div class="state-panel">
       <mat-spinner diameter="36"></mat-spinner>
