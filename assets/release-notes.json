@@ -1,6 +1,36 @@
 {
   "releases": [
     {
+      "id": "2026.11.13.2",
+      "date": "2026-11-13",
+      "title": {
+        "en": "Offline refunds in receipts, and an offline dashboard",
+        "fr": "Remboursements hors ligne dans les reçus, et tableau de bord hors ligne",
+        "it": "Rimborsi offline nelle ricevute e dashboard offline",
+        "rw": "Gusubiza amafaranga nta murandasi mu nyemezabwishyu, na dashboard idakenera murandasi"
+      },
+      "items": [
+        {
+          "type": "fixed",
+          "text": {
+            "en": "A refund made offline now appears at once in Receipts (Refunds tab and receipt details) as “Waiting to sync”, and the sale shows it as refunded. When the connection is back it becomes its CRN credit note.",
+            "fr": "Un remboursement fait hors ligne apparaît aussitôt dans les Reçus (onglet Remboursements et détails du reçu) comme « En attente de synchronisation », et la vente le montre comme remboursé. Au retour de la connexion, il devient sa note de crédit CRN.",
+            "it": "Un rimborso fatto offline ora compare subito nelle Ricevute (scheda Rimborsi e dettagli) come «In attesa di sincronizzazione», e la vendita lo mostra come rimborsato. Al ritorno della connessione diventa la sua nota di credito CRN.",
+            "rw": "Gusubiza amafaranga nta murandasi ubu bigaragara ako kanya mu Nyemezabwishyu (Gusubiza amafaranga n’ibisobanuro) nka «Itegereje guhuzwa», kandi igurisha riyerekana nk’iryasubijwe. Murandasi igarutse bihinduka inyandiko ya CRN."
+          }
+        },
+        {
+          "type": "improved",
+          "text": {
+            "en": "The ERP dashboard and the sales reports now open with no connection, showing the last figures saved on this device.",
+            "fr": "Le tableau de bord ERP et les rapports de ventes s’ouvrent désormais sans connexion et affichent les derniers chiffres enregistrés sur l’appareil.",
+            "it": "La dashboard ERP e i report di vendita ora si aprono senza connessione, mostrando gli ultimi dati salvati sul dispositivo.",
+            "rw": "Dashboard ya ERP n’raporo z’igurisha ubu bifunguka nta murandasi, byerekana imibare iheruka yabitswe kuri iki gikoresho."
+          }
+        }
+      ]
+    },
+    {
       "id": "2026.11.13.1",
       "date": "2026-11-13",
       "title": {
