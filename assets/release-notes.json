@@ -1,6 +1,36 @@
 {
   "releases": [
     {
+      "id": "2026.11.13.1",
+      "date": "2026-11-13",
+      "title": {
+        "en": "Sequential order and invoice numbers",
+        "fr": "Numéros de commande et de facture séquentiels",
+        "it": "Numeri di ordine e fattura sequenziali",
+        "rw": "Nimero z’ibicuruzwa n’inyemezabuguzi zikurikirana"
+      },
+      "items": [
+        {
+          "type": "new",
+          "text": {
+            "en": "Order numbers are now short and in order (ORD-000001, ORD-000002 …) instead of long random numbers. Each store counts on its own. A sale made offline gets its final number when it syncs.",
+            "fr": "Les numéros de commande sont désormais courts et dans l’ordre (ORD-000001, ORD-000002 …) au lieu de longs numéros aléatoires. Chaque magasin compte séparément. Une vente faite hors ligne reçoit son numéro définitif à la synchronisation.",
+            "it": "I numeri d’ordine ora sono brevi e in sequenza (ORD-000001, ORD-000002 …) invece di lunghi numeri casuali. Ogni negozio conta per conto suo. Una vendita fatta offline riceve il numero definitivo alla sincronizzazione.",
+            "rw": "Nimero z’ibicuruzwa ubu ni ngufi kandi zikurikirana (ORD-000001, ORD-000002 …) aho kuba ndende z’uko zihuriranye. Buri duka rirabara ukwaryo. Igurisha ryakozwe nta murandasi ribona nimero ya nyuma iyo rihuje."
+          }
+        },
+        {
+          "type": "improved",
+          "text": {
+            "en": "MRA invoices are numbered one after another (INV-…-000001) and credit notes start with CRN (CRN-…-000001), with no gaps and no repeats. Refunds in MRA stores use the credit note number, and receipts print the invoice or credit note number, never the IRN.",
+            "fr": "Les factures MRA sont numérotées l’une après l’autre (INV-…-000001) et les notes de crédit commencent par CRN (CRN-…-000001), sans trou ni doublon. Les remboursements des magasins MRA utilisent le numéro de la note de crédit, et les reçus impriment le numéro de facture ou de note de crédit, jamais l’IRN.",
+            "it": "Le fatture MRA sono numerate una dopo l’altra (INV-…-000001) e le note di credito iniziano con CRN (CRN-…-000001), senza salti né duplicati. I rimborsi nei negozi MRA usano il numero della nota di credito e le ricevute stampano il numero di fattura o nota di credito, mai l’IRN.",
+            "rw": "Inyemezabuguzi za MRA zibarwa zikurikirana (INV-…-000001) naho inyandiko zo kugabanya zitangirana na CRN (CRN-…-000001), nta cyuho nta n’isubiramo. Gusubiza amafaranga mu maduka ya MRA bikoresha nimero ya CRN, kandi inyemezabwishyu zisohora nimero y’inyemezabuguzi cyangwa CRN, ntizisohora IRN."
+          }
+        }
+      ]
+    },
+    {
       "id": "2026.11.12.2",
       "date": "2026-11-12",
       "title": {
