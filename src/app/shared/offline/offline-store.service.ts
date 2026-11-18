@@ -98,7 +98,7 @@ export class OfflineStore {
   refundsFor(orderId: string): RefundOutboxEntry[] { return this.refunds().filter((e) => e.orderId === orderId); }
 
   /** Saves a refund on the device. Resolves once it is durably stored. */
-  async enqueueRefund(input: { store: string; orderId: string; reference?: string; body: CreateRefundRequest; estimate: number; summary: string }): Promise<RefundOutboxEntry> {
+  async enqueueRefund(input: { store: string; orderId: string; reference?: string; body: CreateRefundRequest; estimate: number; summary: string; fiscal?: { counter: number; number: string } }): Promise<RefundOutboxEntry> {
     const entry: RefundOutboxEntry = {
       id: String(input.body.idempotencyKey),
       store: input.store,
@@ -107,6 +107,7 @@ export class OfflineStore {
       body: input.body,
       estimate: input.estimate,
       summary: input.summary,
+      ...(input.fiscal ? { fiscal: input.fiscal } : {}),
       status: 'pending',
       attempts: 0,
       createdAt: new Date().toISOString(),

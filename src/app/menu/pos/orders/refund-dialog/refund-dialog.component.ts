@@ -1,3 +1,5 @@
+import { FiscalisationService } from '../../../../shared/services/fiscalisation.service';
+import { FiscalNumberService } from '../../../../shared/offline/fiscal-number.service';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -71,6 +73,8 @@ export class RefundDialogComponent implements OnInit {
   private refundService = inject(RefundService);
   private storeStore = inject(StoreStore);
   private offlineStore = inject(OfflineStore);
+  private fiscalNumbers = inject(FiscalNumberService);
+  private fiscalisation = inject(FiscalisationService);
   private net = inject(ConnectivityService);
 
   /** One key per dialog, reused on every retry, so a double click or a timeout retry cannot refund twice. */
@@ -138,7 +142,7 @@ export class RefundDialogComponent implements OnInit {
   public singleTenders = computed(() => (this.info()?.tenders ?? []).filter((t) => t.remaining + 0.005 >= this.total() && this.total() > 0));
 
   /** "Other" says nothing on its own, and the tax authority wants the real reason on the credit note. */
-  public noteRequired = computed(() => this.reason() === 'OTHER' && this.info()?.noteRequiredForOther === true);
+  public noteRequired = computed(() => this.info()?.noteRequired === true || (this.reason() === 'OTHER' && this.info()?.noteRequiredForOther === true));
 
   /** What still stops the refund, in plain words; shown in a dialog instead of leaving the button dead. */
   public problems = computed<{ path: string; title: string; detail: string }[]>(() => {
@@ -153,7 +157,7 @@ export class RefundDialogComponent implements OnInit {
       out.push({ path: 'amount', title: $localize`Amount`, detail: $localize`You can give back at most what is left of this sale.` });
     }
     if (!this.reason()) out.push({ path: 'reason', title: $localize`Reason`, detail: $localize`Say why this sale is being refunded.` });
-    if (this.noteRequired() && !this.note().trim()) out.push({ path: 'note', title: $localize`Note`, detail: $localize`Describe the reason, since “Other” does not say what happened.` });
+    if (this.noteRequired() && !this.note().trim()) out.push({ path: 'note', title: $localize`Note`, detail: $localize`A credit note must say why it was issued. Describe what happened.` });
     if (this.offline() && this.needsApproval()) {
       out.push({ path: 'approval', title: $localize`Manager approval`, detail: $localize`This refund needs a manager's PIN, which can only be checked online. Reconnect to approve it.` });
     }
@@ -165,7 +169,8 @@ export class RefundDialogComponent implements OnInit {
   public canSubmit = computed(() => !this.submitting() && !!this.info() && this.problems().length === 0);
 
   ngOnInit(): void {
-    if (this.net.offline()) {
+    // A sale still waiting on this device is unknown to the server, so its refund is saved here too and sent behind the sale.
+    if (this.net.offline() || this.offlineStore.has(this.data.orderId)) {
       void this.loadOffline();
       return;
     }
@@ -210,8 +215,11 @@ export class RefundDialogComponent implements OnInit {
     const summary = body.lines
       ? body.lines.map((l) => `${l.quantity} × ${info.lines.find((x) => x.lineId === l.lineId)?.name ?? ''}`).join(', ')
       : $localize`Amount refund`;
+    // A store that reports to a tax authority: the credit note's number and counter are given now (see FiscalNumberService).
+    const fiscal = await this.fiscalNumbers.take(storeId, 'CRN');
+    if (fiscal) body.fiscalProposal = { counter: fiscal.counter, sequence: fiscal.sequence };
     try {
-      await this.offlineStore.enqueueRefund({ store: storeId, orderId: this.data.orderId, reference: info.reference, body, estimate, summary });
+      await this.offlineStore.enqueueRefund({ store: storeId, orderId: this.data.orderId, reference: info.reference, body, estimate, summary, ...(fiscal ? { fiscal: { counter: fiscal.counter, number: fiscal.number } } : {}) });
     } catch {
       this.submitting.set(false);
       this.error.set($localize`This device could not save the refund. Please try again.`);
@@ -219,7 +227,7 @@ export class RefundDialogComponent implements OnInit {
     }
     const saved: Refund = {
       _id: String(body.idempotencyKey),
-      refundNumber: $localize`pending`,
+      refundNumber: fiscal?.number ?? '',
       order: this.data.orderId,
       store: storeId,
       orderReference: info.reference,
@@ -293,7 +301,8 @@ export class RefundDialogComponent implements OnInit {
 
     this.submitting.set(true);
     this.error.set(null);
-    if (this.offline()) {
+    // Also when this till still has documents waiting to be sent: a credit note must be issued behind them, in the order they were made.
+    if (this.offline() || (this.fiscalisation.active() && this.offlineStore.waiting() > 0)) {
       void this.saveOffline(body, info);
       return;
     }

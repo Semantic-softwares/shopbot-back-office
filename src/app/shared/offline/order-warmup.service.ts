@@ -35,18 +35,24 @@ export class OrderWarmupService {
     });
   }
 
-  /** This month's receipts list (the page's own default view) and the receipts in it. */
+  /**
+   * The last three months' receipts lists (each month is the page's own default view of that month) and the receipts in them, so
+   * almost any sale a customer brings back for a refund is already on the device. Fully refunded and cancelled ones are skipped.
+   */
   async warmRecent(storeId: string): Promise<void> {
     if (this.running) return;
     this.running = true;
     try {
       const now = new Date();
       const pad = (n: number) => String(n).padStart(2, '0');
-      const last = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-      const start = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-01`;
-      const end = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(last)}`;
-      const list: any = await firstValueFrom(this.orders.getSalesReceipts(storeId, { start, end, employee: 'all' }).pipe(catchError(() => of(null))));
-      await this.warm(storeId, (list?.orders ?? []).map((o: any) => String(o._id)));
+      for (let back = 0; back < 3 && this.net.online(); back++) {
+        const first = new Date(now.getFullYear(), now.getMonth() - back, 1);
+        const lastDay = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+        const ym = `${first.getFullYear()}-${pad(first.getMonth() + 1)}`;
+        const list: any = await firstValueFrom(this.orders.getSalesReceipts(storeId, { start: `${ym}-01`, end: `${ym}-${pad(lastDay)}`, employee: 'all' }).pipe(catchError(() => of(null))));
+        const open = (list?.orders ?? []).filter((o: any) => o.category !== 'Cancel' && o.refundStatus !== 'Full');
+        await this.warm(storeId, open.map((o: any) => String(o._id)));
+      }
     } catch { /* best effort */ } finally {
       this.running = false;
     }
@@ -64,8 +70,12 @@ export class OrderWarmupService {
           const hasRefunds = await this.offline.getReference(`order-refunds:${id}`);
           if (!hit || !hasRefunds || Date.now() - hit.fetchedAt > FRESH_MS) {
             await firstValueFrom(this.orders.getOrder(id).pipe(catchError(() => of(null))), { defaultValue: null });
-            await firstValueFrom(this.refunds.listForOrder(id).pipe(catchError(() => of([]))), { defaultValue: [] });
-            if (this.fiscal.active()) await firstValueFrom(this.fiscal.orderView(storeId, id), { defaultValue: null });
+            const tickets = await firstValueFrom(this.refunds.listForOrder(id).pipe(catchError(() => of([]))), { defaultValue: [] });
+            if (this.fiscal.active()) {
+              await firstValueFrom(this.fiscal.orderView(storeId, id), { defaultValue: null });
+              // Each credit note has its own receipt, with its own tag and QR.
+              for (const t of tickets) await firstValueFrom(this.fiscal.orderView(storeId, t._id), { defaultValue: null });
+            }
           }
         } catch { /* skip this one */ } finally { this.inQueue.delete(id); }
       }

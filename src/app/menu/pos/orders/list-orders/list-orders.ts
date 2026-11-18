@@ -405,7 +405,9 @@ export class ListOrders {
 
   /** A paid sale that still has something left to refund. */
   public canRefundOrder(order: Order): boolean {
-    if ((order as any)._unsynced) return false;
+    // A sale still waiting on this device can be refunded: the refund waits behind it and is sent once the sale is on the server.
+    // One the server refused (needs a person) cannot.
+    if ((order as any)._unsynced && (order as any)._failed) return false;
     return order.paymentStatus === 'Paid' && order.category !== OrderCategoryType.CANCEL && order.refundStatus !== 'Full';
   }
 

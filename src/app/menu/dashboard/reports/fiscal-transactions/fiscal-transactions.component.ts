@@ -1,3 +1,4 @@
+import { ConnectivityService } from '../../../../shared/offline/connectivity.service';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
@@ -40,6 +41,7 @@ export class FiscalTransactionsComponent {
   private readonly fiscalisation = inject(FiscalisationService);
   private readonly exporter = inject(ReportExportService);
   private readonly offlineStore = inject(OfflineStore);
+  readonly net = inject(ConnectivityService);
   readonly storeStore = inject(StoreStore);
   private readonly query = toSignal(this.queryParams.getAllParams$);
   readonly short = short;
@@ -59,23 +61,19 @@ export class FiscalTransactionsComponent {
   });
 
   /**
-   * Sales and refunds saved on this device that the server has not recorded yet. They have no counter: it is given, in order,
-   * when they reach the server. Shown at the end so the owner sees them waiting rather than missing.
+   * Sales and refunds saved on this device that the server has not recorded yet. Each already has its counter and invoice or credit
+   * note number (given on this device when it was made), and keeps them when it syncs. Shown at the end, as "Not Yet Fiscalized".
    */
   private readonly waitingHere = computed<FiscalTransaction[]>(() => {
     if (!this.active()) return [];
-    const note = $localize`Saved on this device. The server confirms its counter when it syncs.`;
+    const note = $localize`Saved on this device. It is sent to the tax authority when the connection is back.`;
     const sales = this.offlineStore.outbox()
       .filter((e) => e.order?.paymentStatus === 'Paid')
-      .map((e): FiscalTransaction => ({ counter: null, invoiceNumber: '—', documentType: 'INVOICE', irn: null, previousInvoiceHash: null, tag: 'NOT_YET_FISCALIZED', detail: note, issuedAt: e.order.createdAt ? new Date(e.order.createdAt).toISOString() : null, fiscalizedAt: null, total: e.order.total ?? null, currency: null, orderReference: e.order.reference ?? null, provisional: true }));
+      .map((e): FiscalTransaction => ({ counter: (e.order as any).fiscalLocal?.counter ?? null, invoiceNumber: (e.order as any).fiscalLocal?.number ?? '—', documentType: 'INVOICE', irn: null, previousInvoiceHash: null, tag: 'NOT_YET_FISCALIZED', detail: note, issuedAt: e.order.createdAt ? new Date(e.order.createdAt).toISOString() : null, fiscalizedAt: null, total: e.order.total ?? null, currency: null, orderReference: e.order.reference ?? null, provisional: true }));
     const refunds = this.offlineStore.refunds()
-      .map((e): FiscalTransaction => ({ counter: null, invoiceNumber: '—', documentType: 'CREDIT_NOTE', irn: null, previousInvoiceHash: null, tag: 'NOT_YET_FISCALIZED', detail: note, issuedAt: e.body.requestedAt ?? e.createdAt, fiscalizedAt: null, total: e.estimate, currency: null, orderReference: e.reference ?? null, provisional: true }));
-    // The number each is expected to get: the next ones after the highest the server has given, in the order they were made.
-    // Another till syncing first can shift them, which is why they are shown as "expected" and never exported as final.
-    const known = (this.res.hasValue() ? this.res.value().rows : []).reduce((max, r) => Math.max(max, r.counter ?? 0), 0);
+      .map((e): FiscalTransaction => ({ counter: e.fiscal?.counter ?? null, invoiceNumber: e.fiscal?.number ?? '—', documentType: 'CREDIT_NOTE', irn: null, previousInvoiceHash: null, tag: 'NOT_YET_FISCALIZED', detail: note, issuedAt: e.body.requestedAt ?? e.createdAt, fiscalizedAt: null, total: e.estimate, currency: null, orderReference: e.reference ?? null, provisional: true }));
     return [...sales, ...refunds]
-      .sort((x, y) => String(x.issuedAt).localeCompare(String(y.issuedAt)))
-      .map((r, i) => ({ ...r, counter: known + i + 1 }))
+      .sort((x, y) => (x.counter ?? Infinity) - (y.counter ?? Infinity) || String(x.issuedAt).localeCompare(String(y.issuedAt)))
       .filter((r) => !this.type() || r.documentType === this.type())
       .filter((r) => !this.tag() || r.tag === this.tag());
   });
@@ -83,7 +81,8 @@ export class FiscalTransactionsComponent {
   readonly rows = computed<FiscalTransaction[]>(() => [...(this.res.hasValue() ? this.res.value().rows : []), ...this.waitingHere()]);
   readonly table = new ReportTable<FiscalTransaction>(() => this.rows(), 'counter');
   readonly columns = ['counter', 'invoiceNumber', 'documentType', 'irn', 'previousInvoiceHash', 'tag', 'issuedAt', 'total'];
-  readonly failed = computed(() => !!this.res.error() && !this.res.hasValue());
+  // With no connection and nothing saved yet the report cannot load, but documents waiting on this device can still be shown.
+  readonly failed = computed(() => !!this.res.error() && !this.res.hasValue() && this.waitingHere().length === 0);
 
   readonly counts = computed(() => {
     const r = this.rows();

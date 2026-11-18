@@ -76,6 +76,7 @@ import {
 } from '../payment-dialog/payment-dialog.component';
 import { TableStore } from '../../stores/table.store';
 import { SalesTypeStore } from '../../stores/sale-type.store';
+import { FiscalNumberService } from '../../offline/fiscal-number.service';
 import { OrderNumberService } from '../../offline/order-number.service';
 import { objectId } from '../../constants/identity.constant';
 import { CartSummary } from '../../../shared/models/cart.model';
@@ -119,6 +120,7 @@ export class CartComponent implements OnDestroy {
   public readonly guestService = inject(GuestService);
   private readonly offline = inject(OfflineStore);
   private readonly orderNumbers = inject(OrderNumberService);
+  private readonly fiscalNumbers = inject(FiscalNumberService);
   private readonly outbox = inject(OutboxSyncService);
   private readonly net = inject(ConnectivityService);
   private readonly subscriptionService = inject(SubscriptionService);
@@ -897,6 +899,9 @@ export class CartComponent implements OnDestroy {
   } else {
     // Stock pre-check for products that use up ingredients or components (never blocks offline or on an error).
     if (!(await this.stockAllowsSale(selectedCart))) return;
+    // A store that reports to a tax authority: the invoice number and counter are given now, here, so the customer's copy and
+    // every screen show the final ones even with no connection. The server keeps them when it issues the invoice.
+    const fiscal = isPaid ? await this.fiscalNumbers.take(selectedStore._id, 'INV') : null;
     // Create new order
     const newOrder = {
       _id: objectId(),
@@ -928,6 +933,7 @@ export class CartComponent implements OnDestroy {
         : OrderCategoryType.PROCESSING,
       settled: isPaid,
       reference: await this.orderNumbers.next(selectedStore._id),
+      ...(fiscal ? { fiscalProposal: { counter: fiscal.counter, sequence: fiscal.sequence }, fiscalLocal: { counter: fiscal.counter, number: fiscal.number } } : {}),
       staff: this.register.operatorId() ?? this.selectedUser?._id,
       // Only for showing the sale on this device before it syncs; the server ignores it.
       staffName: this.register.operatorName() ?? this.selectedUser?.name,

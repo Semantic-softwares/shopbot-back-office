@@ -90,6 +90,8 @@ export interface Refundable {
   /** The sale's tax-authority document, when the store reports sales. Null otherwise. */
   /** True only when the store's sales are reported to a tax authority: "Other" then needs a note. */
   noteRequiredForOther?: boolean;
+  /** A credit note must say why: the note is required, whatever reason is chosen (a store that reports to a tax authority). */
+  noteRequired?: boolean;
   fiscal?: { originalInvoiceNumber: string | null; fiscalState: 'FISCALIZED' | 'NOT_YET_FISCALIZED' | 'NEEDS_ATTENTION'; detail: string } | null;
 }
 
@@ -105,4 +107,6 @@ export interface CreateRefundRequest {
   idempotencyKey?: string;
   /** When the refund was made, when it is made offline and recorded later. */
   requestedAt?: string;
+  /** The counter and credit note number this device already showed for it (a store that reports to a tax authority). */
+  fiscalProposal?: { counter: number; sequence: number };
 }

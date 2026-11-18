@@ -30,7 +30,8 @@ export class RefundService {
    * seen the sale (it must be opened once while online).
    */
   public async refundableOffline(orderId: string): Promise<Refundable | null> {
-    const order = (await this.offline.getReference<any>(`order:${orderId}`))?.value;
+    // A sale made on this device that has not synced yet is not on the server (or in the cache): its saved copy is the sale.
+    const order = this.offline.get(orderId)?.order ?? (await this.offline.getReference<any>(`order:${orderId}`))?.value;
     if (!order?._id) return null;
     const refunds = (await this.offline.getReference<Refund[]>(`order-refunds:${orderId}`))?.value ?? [];
     return buildLocalRefundable({

@@ -290,9 +290,13 @@
               @for (refund of refunds(); track refund._id) {
                 <li class="py-3">
                   <div class="flex items-baseline justify-between gap-3">
-                    <span class="font-semibold">@if (refund.pendingSync) { <ng-container i18n>Waiting to sync</ng-container> } @else { {{ refund.refundNumber }} }</span>
+                    <span class="font-semibold">@if (refund.pendingSync && !refund.refundNumber) { <ng-container i18n>Waiting to sync</ng-container> } @else { {{ refund.refundNumber }} }</span>
                     <span class="flex items-center gap-2">
                       <span class="font-semibold tabular-nums">{{ refund.total | currency: currency() : 'symbol' : '1.2-2' }}</span>
+                      <button mat-icon-button type="button" (click)="openCreditNote(refund)" data-testid="open-credit-note"
+                        [attr.aria-label]="'View credit note receipt' | tr" [matTooltip]="'View credit note receipt' | tr">
+                        <mat-icon>receipt_long</mat-icon>
+                      </button>
                       <button mat-icon-button type="button" [disabled]="refund.pendingSync" (click)="printRefund(refund)"
                         [attr.aria-label]="'Print receipt' | tr" [matTooltip]="'Print receipt' | tr">
                         <mat-icon>print</mat-icon>
@@ -467,6 +471,9 @@
                     <div class="text-xs text-on-surface-variant"><ng-container i18n>Invoice</ng-container>&ngsp;<span class="font-mono">{{ view.invoiceNumber }}</span>@if (view.counter) { · #{{ view.counter }} }</div>
                   }
                 } @else if (isUnsynced()) {
+                  @if (order.fiscalLocal?.number) {
+                    <div class="text-xs text-on-surface-variant" data-testid="fiscal-local-number"><ng-container i18n>Invoice</ng-container>&ngsp;<span class="font-mono">{{ order.fiscalLocal.number }}</span> · #{{ order.fiscalLocal.counter }}</div>
+                  }
                   <p class="m-0 text-sm text-on-surface-variant"><ng-container i18n>This sale is not synced yet. It is reported as soon as it reaches the server.</ng-container></p>
                 } @else if (!fiscalResource.isLoading()) {
                   <p class="m-0 text-sm text-on-surface-variant"><ng-container i18n>Waiting to be reported.</ng-container></p>

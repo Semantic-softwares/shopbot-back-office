@@ -31,6 +31,8 @@ export interface RefundOutboxEntry {
   estimate: number;
   /** For the "waiting" list: what was refunded, in words. */
   summary: string;
+  /** The credit note number and counter already shown for it (a store that reports to a tax authority). */
+  fiscal?: { counter: number; number: string };
   status: OutboxStatus;
   attempts: number;
   lastError?: string;

@@ -1,3 +1,5 @@
+import { OrderNumberService } from '../shared/offline/order-number.service';
+import { FiscalNumberService } from '../shared/offline/fiscal-number.service';
 import { OrderWarmupService } from '../shared/offline/order-warmup.service';
 import { Component, inject, OnInit, OnDestroy, effect, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 
@@ -37,6 +39,8 @@ export class MenuComponent implements OnInit, OnDestroy {
   private rolesService = inject(RolesService);
   private subscriptionService = inject(SubscriptionService);
   private readonly warmup = inject(OrderWarmupService);
+  private readonly fiscalNumbers = inject(FiscalNumberService);
+  private readonly orderNumbers = inject(OrderNumberService);
 
   readonly subscriptionLoading = signal(true);
   private readonly subscriptionDetails = this.subscriptionService.subscriptionWithModules;
@@ -183,6 +187,8 @@ export class MenuComponent implements OnInit, OnDestroy {
   constructor() {
     // Keep recent receipts on the device so they can be opened with no connection.
     this.warmup.start();
+    this.fiscalNumbers.start();
+    this.orderNumbers.start();
     // Connect socket when store changes (only if not already connected)
     effect(() => {
       const store = this.storeStore.selectedStore();

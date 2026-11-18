@@ -1,6 +1,6 @@
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, firstValueFrom, map, Observable, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { FiscalisationOverview } from '../models/mra-einvoicing.model';
 import { FiscalOrderView, FiscalTransactionPage, FiscalTransactionQuery } from '../models/fiscal.model';
@@ -45,6 +45,33 @@ export class FiscalisationService {
       map((r) => r.view ?? null),
       catchError(() => of(null)),
     );
+  }
+
+  /**
+   * The tag and invoice number of many orders at once (the receipts list). Each one is also saved on the device under the same key
+   * the receipt page reads, so both stay readable with no connection.
+   */
+  async viewsFor(storeId: string, ids: string[], online: boolean): Promise<Record<string, FiscalOrderView>> {
+    const out: Record<string, FiscalOrderView> = {};
+    // What this device already has.
+    await Promise.all(ids.map(async (id) => {
+      const hit = await this.offline.getReference<{ view: FiscalOrderView | null }>(`fiscal-order:${id}`);
+      if (hit?.value?.view) out[id] = hit.value.view;
+    }));
+    if (!online) return out;
+    // Then what the server has, in batches (the server answers at most 200 at a time).
+    const missing = ids.filter((id) => !out[id] || out[id].tag !== 'FISCALIZED');
+    for (let i = 0; i < missing.length; i += 100) {
+      const batch = missing.slice(i, i + 100);
+      try {
+        const res = await firstValueFrom(this.http.get<{ views: Record<string, FiscalOrderView> }>(`${this.api}/revenue-authority/stores/${storeId}/orders/fiscal`, { params: { ids: batch.join(',') } }));
+        for (const [id, view] of Object.entries(res.views ?? {})) {
+          out[id] = view;
+          void this.offline.setReference(`fiscal-order:${id}`, { view });
+        }
+      } catch { /* what is saved on the device stays */ }
+    }
+    return out;
   }
 
   transactions(storeId: string, query: FiscalTransactionQuery): Observable<FiscalTransactionPage> {

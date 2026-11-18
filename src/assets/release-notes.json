@@ -1,6 +1,54 @@
 {
   "releases": [
     {
+      "id": "2026.11.18.1",
+      "date": "2026-11-18",
+      "title": {
+        "en": "Credit notes and invoice numbers offline, and Scan to Pay fixed",
+        "fr": "Notes de crédit et numéros de facture hors ligne, et Scan to Pay corrigé",
+        "it": "Note di credito e numeri di fattura offline, e Scan to Pay corretto",
+        "rw": "Inyandiko zo kugabanya n’inimero z’inyemezabuguzi nta murandasi, na Scan to Pay yakosowe"
+      },
+      "items": [
+        {
+          "type": "new",
+          "text": {
+            "en": "E-invoicing stores: every sale gets its invoice number and counter the moment it is made, even offline, and they do not change when it syncs. The invoice number is on the receipt list, receipt details and the printed receipt.",
+            "fr": "Magasins en facturation électronique : chaque vente reçoit son numéro de facture et son compteur dès qu’elle est faite, même hors ligne, et ils ne changent pas à la synchronisation. Le numéro de facture figure dans la liste des reçus, le détail du reçu et le reçu imprimé.",
+            "it": "Negozi con fatturazione elettronica: ogni vendita riceve numero di fattura e contatore nel momento in cui viene fatta, anche offline, e non cambiano alla sincronizzazione. Il numero di fattura è nell’elenco ricevute, nel dettaglio e nella ricevuta stampata.",
+            "rw": "Amaduka akoresha inyemezabuguzi ya elegitoronike: buri gurisha ribona nimero y’inyemezabuguzi n’ikibara ako kanya, nubwo nta murandasi, kandi ntibihinduka iyo bihuje. Nimero y’inyemezabuguzi iboneka ku rutonde rw’inyemezabwishyu, ku bisobanuro no ku nyemezabwishyu icapye."
+          }
+        },
+        {
+          "type": "new",
+          "text": {
+            "en": "You can now issue a credit note offline, even for a sale that was itself made offline. Each credit note has its own receipt inside its order, titled CREDIT NOTE, with its CRN number and its QR code once accepted. A reason and a note are now required.",
+            "fr": "Vous pouvez désormais émettre une note de crédit hors ligne, même pour une vente faite hors ligne. Chaque note de crédit a son propre reçu dans sa commande, intitulé NOTE DE CRÉDIT, avec son numéro CRN et son code QR une fois acceptée. Un motif et une note sont désormais obligatoires.",
+            "it": "Ora puoi emettere una nota di credito offline, anche per una vendita fatta offline. Ogni nota di credito ha la propria ricevuta nell’ordine, intitolata NOTA DI CREDITO, con il numero CRN e il codice QR una volta accettata. Motivo e nota sono ora obbligatori.",
+            "rw": "Ubu ushobora gutanga inyandiko yo kugabanya nta murandasi, ndetse no ku igurisha ryakozwe nta murandasi. Buri nyandiko ifite inyemezabwishyu yayo mu itegeko, yitwa INYANDIKO YO KUGABANYA, n’inimero ya CRN na QR code iyo yemewe. Impamvu n’inyandiko ubu birategekwa."
+          }
+        },
+        {
+          "type": "fixed",
+          "text": {
+            "en": "Blink Scan to Pay: the payment is now confirmed on screen as soon as the customer has paid, like Push to Phone.",
+            "fr": "Blink Scan to Pay : le paiement est désormais confirmé à l’écran dès que le client a payé, comme avec Push to Phone.",
+            "it": "Blink Scan to Pay: il pagamento ora viene confermato a schermo appena il cliente ha pagato, come con Push to Phone.",
+            "rw": "Blink Scan to Pay: kwishyura ubu bihita byemezwa kuri ecran umukiriya amaze kwishyura, nka Push to Phone."
+          }
+        },
+        {
+          "type": "improved",
+          "text": {
+            "en": "The fiscal report is kept up to date on the device and says so when you are offline. Offline sales always get a proper sequential order number.",
+            "fr": "Le rapport fiscal est tenu à jour sur l’appareil et l’indique hors ligne. Les ventes hors ligne reçoivent toujours un vrai numéro de commande séquentiel.",
+            "it": "Il report fiscale viene tenuto aggiornato sul dispositivo e lo indica quando sei offline. Le vendite offline ricevono sempre un vero numero d’ordine sequenziale.",
+            "rw": "Raporo y’imisoro ihora ivugururwa kuri iki gikoresho kandi irabigaragaza nta murandasi. Ibyagurishijwe nta murandasi buri gihe bibona nimero nyayo ikurikirana."
+          }
+        }
+      ]
+    },
+    {
       "id": "2026.11.13.3",
       "date": "2026-11-13",
       "title": {

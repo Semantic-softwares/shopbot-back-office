@@ -1,3 +1,4 @@
+import { CreditNoteReceiptDialogComponent, CreditNoteReceiptData } from '../../../../../shared/components/credit-note-receipt/credit-note-receipt-dialog.component';
 import { catchError, of, throwError } from 'rxjs';
 import { lineTaxMarker, showTaxOnReceipt, taxDisplay } from '../../../../../shared/tax/tax-display';
 import { FiscalisationService } from '../../../../../shared/services/fiscalisation.service';
@@ -237,10 +238,13 @@ export class ReceiptsDetailsComponent {
   private fiscalPrintHtml(): string {
     if (!this.showFiscal()) return '';
     const view = this.fiscalView();
+    // The invoice number is on the customer's receipt too (a sale made offline already has it). The IRN never is.
+    const number = view?.invoiceNumber || (this.orderResource.value() as any)?.fiscalLocal?.number;
+    const numberLine = number ? `<div style="font-weight:bold;font-size:12px;margin-top:4px">Invoice No. ${number}</div>` : '';
     if (view?.tag === 'FISCALIZED' && view.qrCodePng) {
-      return `<div style="text-align:center;margin:12px 0"><div style="font-weight:bold;font-size:11px">${this.fiscalisation.authorityName()} e-Invoice</div><img alt="e-Invoice QR code" style="width:150px;height:150px;margin-top:6px" src="data:image/png;base64,${view.qrCodePng}"></div>`;
+      return `<div style="text-align:center;margin:12px 0"><div style="font-weight:bold;font-size:11px">${this.fiscalisation.authorityName()} e-Invoice</div>${numberLine}<img alt="e-Invoice QR code" style="width:150px;height:150px;margin-top:6px" src="data:image/png;base64,${view.qrCodePng}"></div>`;
     }
-    return `<div style="text-align:center;margin:12px 0;font-weight:bold;font-size:12px">${NOT_YET_FISCALIZED_TEXT}</div>`;
+    return `<div style="text-align:center;margin:12px 0;font-weight:bold;font-size:12px">${numberLine}${NOT_YET_FISCALIZED_TEXT}</div>`;
   }
 
   /** The refund tickets raised against this sale (the sale itself is never rewritten). */
@@ -301,6 +305,25 @@ export class ReceiptsDetailsComponent {
         this.orderResource.reload();
         this.refundsResource.reload();
       });
+  }
+
+  /** The credit note's own receipt, inside this order. Opens offline and for a credit note still waiting on this device. */
+  openCreditNote(refund: Refund): void {
+    const order: any = this.orderResource.hasValue() ? this.orderResource.value() : null;
+    const store = this.storeStore.selectedStore();
+    this.dialog.open(CreditNoteReceiptDialogComponent, {
+      width: '440px',
+      maxWidth: '96vw',
+      maxHeight: '92vh',
+      data: {
+        refund,
+        storeId: store?._id ?? '',
+        storeName: store?.name ?? '',
+        currency: store?.currency ?? '',
+        orderReference: order?.reference ?? refund.orderReference,
+        originalInvoiceNumber: this.fiscalView()?.invoiceNumber || order?.fiscalLocal?.number,
+      } as CreditNoteReceiptData,
+    });
   }
 
   /** Prints (or reprints) the refund's receipt, with the credit note's QR for stores that report sales. */

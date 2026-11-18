@@ -85,6 +85,7 @@ export function buildLocalRefundable(input: LocalRefundableInput): Refundable {
     approvalLimit: input.approvalLimit,
     reasons: REFUND_REASON_CODES,
     noteRequiredForOther: input.noteRequiredForOther,
+    noteRequired: input.noteRequiredForOther,
     fiscal: null,
   };
 }
@@ -94,7 +95,7 @@ export function buildLocalRefundable(input: LocalRefundableInput): Refundable {
 export function pendingRefundTicket(entry: RefundOutboxEntry, createdByName?: string): Refund {
   return {
     _id: entry.id,
-    refundNumber: '',
+    refundNumber: entry.fiscal?.number ?? '',
     order: entry.orderId,
     store: entry.store,
     orderReference: entry.reference,

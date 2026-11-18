@@ -16,6 +16,8 @@ export interface FiscalOrderView {
   /** The authority's own state in plain words, e.g. "Waiting to be sent". */
   detail: string;
   invoiceNumber?: string;
+  /** For a credit note: the invoice number it credits. */
+  refersTo?: string;
   counter?: number;
   /** Base64 PNG exactly as issued by the authority. */
   qrCodePng?: string;
@@ -44,6 +46,8 @@ export interface FiscalTransaction {
   total: number | null;
   currency: string | null;
   orderReference: string | null;
+  /** The numbers were changed because another document took them first (an offline till had shown different ones). */
+  renumbered?: boolean;
   /** Saved on this device and not yet numbered by the server: `counter` is the number it is expected to get, not a final one. */
   provisional?: boolean;
 }

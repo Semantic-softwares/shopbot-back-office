@@ -1,3 +1,5 @@
+import { FiscalisationService } from '../../../../../shared/services/fiscalisation.service';
+import { FiscalOrderView } from '../../../../../shared/models/fiscal.model';
 import { ConfirmationDialogComponent } from '../../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { OfflineStore } from '../../../../../shared/offline/offline-store.service';
 import { OutboxSyncService } from '../../../../../shared/offline/outbox-sync.service';
@@ -165,6 +167,27 @@ export class ListReceiptsComponent {
     this.lastWaiting = waiting;
   });
 
+  // ---- e-invoice numbers (stores that report to a tax authority) ----------------------------------------------------
+  readonly fiscalisation = inject(FiscalisationService);
+  private readonly views = signal<Record<string, FiscalOrderView>>({});
+  /** The invoice number of every receipt in the list, as saved on this device or read from the server; kept for use offline. */
+  private loadViews = effect(() => {
+    const store = this.storeStore.selectedStore()?._id;
+    const online = this.net.online();
+    const ids = (this.dataSource.hasValue() ? (this.dataSource.value()?.orders ?? []) : []).map((o: any) => String(o._id)).filter(Boolean);
+    if (!store || !this.fiscalisation.active() || !ids.length) return;
+    void this.fiscalisation.viewsFor(store, ids, online).then((v) => this.views.update((all) => ({ ...all, ...v })));
+  });
+
+  /** What to print under a receipt's number: its invoice number, and whether the tax authority has accepted it. */
+  invoiceOf(row: any): { number: string; fiscalized: boolean } | null {
+    if (!this.fiscalisation.active()) return null;
+    const local = row?.fiscalLocal?.number;
+    if (row?._unsynced) return local ? { number: local, fiscalized: false } : null;
+    const view = this.views()[String(row?._id)];
+    return view?.invoiceNumber ? { number: view.invoiceNumber, fiscalized: view.tag === 'FISCALIZED' } : null;
+  }
+
   private keepLast = effect(() => {
     // `value()` throws while a request is in error (offline), so only read it when there is one.
     const d = this.dataSource.hasValue() ? this.dataSource.value() : null;
@@ -246,6 +269,7 @@ export class ListReceiptsComponent {
       orderedBy: o.user ? { name: o.user.name } : undefined,
       note: o.note,
       refundedAmount: 0,
+      fiscalLocal: o.fiscalLocal,
       discount: o.discount || 0,
     };
   }
@@ -259,7 +283,7 @@ export class ListReceiptsComponent {
     const pendingFor = new Map<string, number>();
     for (const r of this.pendingRefunds()) pendingFor.set(r.order, (pendingFor.get(r.order) ?? 0) + r.total);
     const withPending = (o: any) => (pendingFor.has(String(o._id)) ? { ...o, refundedAmount: (o.refundedAmount || 0) + pendingFor.get(String(o._id))! } : o);
-    let list: any[] = [...this.unsynced(), ...(this.data()?.orders ?? []).filter((o: any) => !waiting.has(String(o._id))).map(withPending)].filter((o: any) => this.inTab(o, tab));
+    let list: any[] = [...this.unsynced().map(withPending), ...(this.data()?.orders ?? []).filter((o: any) => !waiting.has(String(o._id))).map(withPending)].filter((o: any) => this.inTab(o, tab));
     if (term) {
       list = list.filter((o) =>
         [o.receiptNo, o.orderedBy?.name, o.servedBy?.name, o.type].some((v) => String(v ?? '').toLowerCase().includes(term)),
@@ -478,7 +502,7 @@ export class ListReceiptsComponent {
 
   /** A paid sale that still has something left to refund. */
   canRefund(order: any): boolean {
-    return !order?._unsynced && order?.paymentStatus === 'Paid' && order?.category !== 'Cancel' && order?.refundStatus !== 'Full';
+    return !(order?._unsynced && order?._failed) && order?.paymentStatus === 'Paid' && order?.category !== 'Cancel' && order?.refundStatus !== 'Full';
   }
 
   /** An order nobody has paid for is cancelled (voided), not refunded. */

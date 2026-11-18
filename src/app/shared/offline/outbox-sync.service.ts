@@ -66,15 +66,29 @@ export class OutboxSyncService {
       await this.store.reload();
       // A register opened offline is sent FIRST: the sales made against it name the session this device made, and the server must know it.
       if (!(await this.runRegisterEvents(['open'], force))) return;
-      for (const entry of this.store.outbox()) {
-        if (entry.status === 'failed') continue; // needs a person; it does not hold up the sales behind it
-        // Sales go oldest first. One that is waiting out a retry delay holds the later ones back too, so the tax
-        // authority invoices are issued in the order the sales were made.
-        if (!force && entry.nextTryAt > Date.now()) break;
-        const keepGoing = await this.send(entry);
-        if (!keepGoing) return;
+      // Sales and refunds go in ONE list, oldest first, so the tax authority's documents are issued in the order they were made on
+      // this device (their counters and numbers were given then). A refund waits for its own sale; one that is waiting out a retry
+      // delay holds back everything after it.
+      type Job = { at: string; sale?: OutboxEntry; refund?: RefundOutboxEntry };
+      const jobs: Job[] = [
+        ...this.store.outbox().map((sale): Job => ({ at: sale.createdAt, sale })),
+        ...this.store.refunds().map((refund): Job => ({ at: refund.createdAt, refund })),
+      ].sort((a, b) => a.at.localeCompare(b.at));
+      for (const job of jobs) {
+        if (job.sale) {
+          const entry = job.sale;
+          if (entry.status === 'failed') continue; // needs a person; it does not hold up the sales behind it
+          if (!force && entry.nextTryAt > Date.now()) break;
+          const keepGoing = await this.send(entry);
+          if (!keepGoing) return;
+        } else if (job.refund) {
+          const entry = job.refund;
+          if (entry.status === 'failed') continue;
+          if (this.store.has(entry.orderId)) continue; // its sale is still waiting to be sent
+          if (!force && entry.nextTryAt > Date.now()) break;
+          if (!(await this.sendRefund(entry))) break;
+        }
       }
-      await this.runRefunds(force);
       // After the sales and refunds: the cash movements, then what this till still has waiting, then the closing count.
       if (!(await this.runRegisterEvents(['movement'], force))) return;
       await this.sendHeartbeats();
@@ -131,19 +145,6 @@ export class OutboxSyncService {
       return true;
     } finally {
       this.store.markInFlight(entry.id, false);
-    }
-  }
-
-  /**
-   * Sends the refunds made with no connection, oldest first, once every sale ahead of them is on the server (a refund needs its
-   * sale to exist). The server decides the amount and issues the credit note; the idempotency key means a retry never refunds twice.
-   */
-  private async runRefunds(force: boolean): Promise<void> {
-    for (const entry of this.store.refunds()) {
-      if (entry.status === 'failed') continue;
-      if (this.store.has(entry.orderId)) continue; // its sale is still waiting to be sent
-      if (!force && entry.nextTryAt > Date.now()) break;
-      if (!(await this.sendRefund(entry))) break;
     }
   }
 
