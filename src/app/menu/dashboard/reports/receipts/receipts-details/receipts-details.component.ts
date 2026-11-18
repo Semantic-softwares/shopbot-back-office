@@ -1,6 +1,6 @@
 import { CreditNoteReceiptDialogComponent, CreditNoteReceiptData } from '../../../../../shared/components/credit-note-receipt/credit-note-receipt-dialog.component';
 import { catchError, of, throwError } from 'rxjs';
-import { lineTaxMarker, showTaxOnReceipt, taxDisplay } from '../../../../../shared/tax/tax-display';
+import { creditNoteTax, lineTaxMarker, orderTaxDisplay, showTaxOnReceipt, taxDisplay } from '../../../../../shared/tax/tax-display';
 import { FiscalisationService } from '../../../../../shared/services/fiscalisation.service';
 import { FiscalTag, NOT_YET_FISCALIZED_TEXT } from '../../../../../shared/models/fiscal.model';
 import { StoreStore } from '../../../../../shared/stores/store.store';
@@ -322,6 +322,8 @@ export class ReceiptsDetailsComponent {
         currency: store?.currency ?? '',
         orderReference: order?.reference ?? refund.orderReference,
         originalInvoiceNumber: this.fiscalView()?.invoiceNumber || order?.fiscalLocal?.number,
+        // The credit note's VAT: its share of the sale's own VAT (worked out on this device when the sale is still waiting to sync).
+        tax: showTaxOnReceipt(store) ? creditNoteTax(this.orderTax(), Number(order?.total) || 0, refund.total, (refund as any).taxTotal) : null,
       } as CreditNoteReceiptData,
     });
   }
@@ -366,7 +368,7 @@ export class ReceiptsDetailsComponent {
   });
 
   /** Tax of a sale priced by tax management (null for any older order: those render exactly as they always did). */
-  readonly orderTax = computed(() => taxDisplay(this.orderResource.value() as any));
+  readonly orderTax = computed(() => orderTaxDisplay(this.orderResource.value() as any, this.storeStore.selectedStore()?.currencyCode));
   readonly itemColumns = computed(() => (this.orderTax() ? ['product', 'options', 'quantity', 'price', 'tax', 'subtotal'] : ['product', 'options', 'quantity', 'price', 'subtotal']));
   readonly lineTaxMarker = lineTaxMarker;
   /** Printed receipts and invoices only show tax when the store's "Display tax breakdown on receipts" is on. */

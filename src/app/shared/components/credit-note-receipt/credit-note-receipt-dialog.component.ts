@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { Refund } from '../../models/refund.model';
+import { TaxDisplay } from '../../tax/tax-display';
 import { NOT_YET_FISCALIZED_TEXT } from '../../models/fiscal.model';
 import { FiscalisationService } from '../../services/fiscalisation.service';
 import { refundReasonLabel } from '../../../menu/pos/orders/refund-dialog/refund-dialog.component';
@@ -19,6 +20,8 @@ export interface CreditNoteReceiptData {
   orderReference?: string;
   /** The invoice it credits, when the store reports to a tax authority. */
   originalInvoiceNumber?: string;
+  /** The VAT this credit note carries (net taxable, each rate, total), or null when the store shows none. */
+  tax?: TaxDisplay | null;
 }
 
 /**
@@ -47,6 +50,14 @@ export interface CreditNoteReceiptData {
         <p class="m-0 text-xs opacity-70">{{ reason() }}</p>
         @if (data.refund.note) { <p class="m-0 text-xs italic opacity-70">{{ data.refund.note }}</p> }
         @if (methods()) { <div class="mt-1 flex justify-between"><span i18n>Refunded via</span><span>{{ methods() }}</span></div> }
+        @if (data.tax; as tax) {
+          <hr class="my-2 border-dashed" />
+          <div class="flex justify-between" data-testid="cn-net"><span i18n>Net taxable amount</span><span>{{ tax.net | currency: data.currency : 'symbol' : '1.2-2' }}</span></div>
+          @for (row of tax.rows; track row.label + row.rate) {
+            <div class="flex justify-between" data-testid="cn-tax-row"><span>{{ row.label }} {{ row.rate }}%</span><span>{{ row.amount | currency: data.currency : 'symbol' : '1.2-2' }}</span></div>
+          }
+          <div class="flex justify-between font-bold" data-testid="cn-vat"><span i18n>Total VAT</span><span>{{ tax.total | currency: data.currency : 'symbol' : '1.2-2' }}</span></div>
+        }
         <hr class="my-2 border-dashed" />
         <div class="flex justify-between text-base font-bold"><span i18n>TOTAL CREDITED</span><span data-testid="cn-total">{{ data.refund.total | currency: data.currency : 'symbol' : '1.2-2' }}</span></div>
         @if (fiscal()) {

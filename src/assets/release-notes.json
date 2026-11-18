@@ -1,6 +1,36 @@
 {
   "releases": [
     {
+      "id": "2026.11.18.2",
+      "date": "2026-11-18",
+      "title": {
+        "en": "VAT details offline and on credit notes",
+        "fr": "Détails de TVA hors ligne et sur les notes de crédit",
+        "it": "Dettagli IVA offline e sulle note di credito",
+        "rw": "Ibisobanuro bya TVA nta murandasi no ku nyandiko zo kugabanya"
+      },
+      "items": [
+        {
+          "type": "fixed",
+          "text": {
+            "en": "A sale made offline now shows its VAT details (net taxable amount, VAT per rate, total VAT) in the receipt details and printed copy straight away, not only after it syncs.",
+            "fr": "Une vente faite hors ligne affiche désormais ses détails de TVA (montant net imposable, TVA par taux, TVA totale) dans le détail du reçu et la copie imprimée, sans attendre la synchronisation.",
+            "it": "Una vendita fatta offline ora mostra subito i dettagli IVA (imponibile, IVA per aliquota, IVA totale) nel dettaglio della ricevuta e nella copia stampata, non solo dopo la sincronizzazione.",
+            "rw": "Igurisha ryakozwe nta murandasi ubu ryerekana ako kanya ibisobanuro bya TVA (amafaranga asoreshwa, TVA kuri buri gipimo, TVA yose) ku bisobanuro by’inyemezabwishyu no ku icapye, si nyuma yo guhuza gusa."
+          }
+        },
+        {
+          "type": "improved",
+          "text": {
+            "en": "The credit note receipt now shows its VAT details (net taxable amount, VAT per rate, total VAT), online and offline.",
+            "fr": "Le reçu de la note de crédit affiche désormais ses détails de TVA (montant net imposable, TVA par taux, TVA totale), en ligne et hors ligne.",
+            "it": "La ricevuta della nota di credito ora mostra i dettagli IVA (imponibile, IVA per aliquota, IVA totale), online e offline.",
+            "rw": "Inyemezabwishyu y’inyandiko yo kugabanya ubu yerekana ibisobanuro bya TVA (amafaranga asoreshwa, TVA kuri buri gipimo, TVA yose), hamwe n’nta murandasi."
+          }
+        }
+      ]
+    },
+    {
       "id": "2026.11.18.1",
       "date": "2026-11-18",
       "title": {

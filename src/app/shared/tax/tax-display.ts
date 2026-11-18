@@ -1,3 +1,4 @@
+import { priceOrderFromSnapshots } from './order-tax';
 /**
  * What the tax work shows on a sale, in one place. Only sales priced by the tax engine have a `taxSummary` and per-line
  * `taxLine` snapshots; every older sale has neither and is rendered exactly as it always was.
@@ -36,6 +37,34 @@ export function taxDisplay(order?: { taxSummary?: any } | null): TaxDisplay | nu
     included: Number(s.includedTax) || 0,
     added: Number(s.addedTax) || 0,
   };
+}
+
+/**
+ * The tax of any order: the server's own summary when it has priced the sale, or, for a sale still waiting on this device (the
+ * server prices tax when the sale syncs), worked out here from the tax snapshots each line carries, with the same engine, so
+ * the receipt shows its VAT offline exactly as it will once synced.
+ */
+export function orderTaxDisplay(order: any, currencyCode?: string | null): TaxDisplay | null {
+  const stored = taxDisplay(order);
+  if (stored) return stored;
+  const products = order?.cart?.products;
+  if (!Array.isArray(products) || !products.length) return null;
+  try {
+    const outcome = priceOrderFromSnapshots({ discount: order.discount, shippingFee: order.shippingFee, serviceFee: order.serviceFee, driverTip: order.driverTip, total: order.total }, products, currencyCode);
+    return outcome.kind === 'snapshot' ? taxDisplay({ taxSummary: (outcome.patch as any).taxSummary }) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The share of an order's tax that one credit note carries: the credit note's part of the sale's total (the way the credit note itself is worked out). */
+export function creditNoteTax(orderTax: TaxDisplay | null, orderTotal: number, creditTotal: number, recordedTax?: number | null): TaxDisplay | null {
+  if (!orderTax || !(orderTotal > 0) || !(creditTotal > 0)) return null;
+  const share = Math.min(creditTotal / orderTotal, 1);
+  const round = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
+  const rows = orderTax.rows.map((r) => ({ ...r, taxable: round(r.taxable * share), amount: round(r.amount * share) }));
+  const total = typeof recordedTax === 'number' ? round(recordedTax) : round(rows.reduce((sum, r) => sum + r.amount, 0));
+  return { net: round(orderTax.net * share), rows, total, included: round(orderTax.included * share), added: round(orderTax.added * share) };
 }
 
 /** Short mark for one line: whether its price already holds the tax or the tax is added on top. Empty for an older line. */
