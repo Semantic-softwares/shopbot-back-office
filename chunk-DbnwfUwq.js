@@ -1,0 +1,1 @@
+import{c as z}from"./chunk-RykAvsdd.js";function e(t){return Math.floor(t).toString(16)}var o;var a;var n=z(()=>{"use strict";o=()=>e(Date.now()/1e3)+` `.repeat(16).replace(/./g,()=>e(Math.random()*16));a=()=>`ORD-${Date.now()}`});export{n,o as r,a as t};
